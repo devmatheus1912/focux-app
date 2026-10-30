@@ -22,6 +22,7 @@ class SuaSemanaRow extends StatelessWidget {
     this.status,
     this.previsto,
     this.feitoExtra,
+    this.feitosNoDia = const [],
     this.acao,
     this.onAbrir,
   });
@@ -38,6 +39,9 @@ class SuaSemanaRow extends StatelessWidget {
 
   /// Treino feito num dia de descanso: aparece no dia em que aconteceu.
   final String? feitoExtra;
+
+  /// Outra sessão feita neste dia: o previsto fica, sem marcar como feito.
+  final List<String> feitosNoDia;
 
   /// Só na linha de hoje: o que fazer agora, sem repetir a Hoje num cartão.
   final Widget? acao;
@@ -74,16 +78,18 @@ class SuaSemanaRow extends StatelessWidget {
       false => s.treinosSemanaNaoFeito,
       null => null,
     };
+    final outros = semanaFeitosTexto(s, feitosNoDia, hoje: hoje);
     return Semantics(
       label:
           '$diaNome, $texto'
           '${hoje ? ', ${s.treinosSuaSemanaHoje}' : ''}'
           '${marca == null ? '' : ', $marca'}'
-          '${feitoExtra == null ? '' : ', ${s.treinosSemanaExtra}'}',
+          '${feitoExtra == null ? '' : ', ${s.treinosSemanaExtra}'}'
+      '${outros == null ? '' : ', $outros'}',
       button: onAbrir != null,
       excludeSemantics: acao == null,
       child: Container(
-        constraints: BoxConstraints(minHeight: descanso ? 40 : 48),
+        constraints: const BoxConstraints(minHeight: 48),
         alignment: Alignment.center,
         padding: const EdgeInsets.symmetric(
           horizontal: TokensStrip.s3,
@@ -132,18 +138,7 @@ class SuaSemanaRow extends StatelessWidget {
                     ),
                     const SizedBox(width: TokensStrip.s1),
                   ],
-                  if (status != null) ...[
-                    Icon(
-                      status! ? Icons.check_circle_rounded : Icons.remove_rounded,
-                      size: 18,
-                      color:
-                          status!
-                              ? EagleTokens.good
-                              : theme.colorScheme.onSurfaceVariant,
-                    ),
-                    const SizedBox(width: TokensStrip.s2),
-                  ],
-                  if (hoje)
+                  if (hoje) ...[
                     Text(
                       s.treinosSuaSemanaHoje,
                       style: theme.textTheme.bodySmall?.copyWith(
@@ -151,15 +146,45 @@ class SuaSemanaRow extends StatelessWidget {
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                  if (onAbrir != null)
-                    Icon(
-                      Icons.chevron_right_rounded,
-                      size: 20,
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
+                    const SizedBox(width: TokensStrip.s1),
+                  ],
+                  // Colunas fixas: status e seta alinham em todas as linhas.
+                  SizedBox(
+                    width: 22,
+                    child: status == null
+                        ? null
+                        : Icon(
+                            status! ? Icons.check_circle_rounded : Icons.remove_rounded,
+                            size: 18,
+                            color:
+                                status!
+                                    ? EagleTokens.good
+                                    : theme.colorScheme.onSurfaceVariant,
+                          ),
+                  ),
+                  SizedBox(
+                    width: 20,
+                    child: onAbrir == null
+                        ? null
+                        : Icon(
+                            Icons.chevron_right_rounded,
+                            size: 20,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                  ),
                 ],
               ),
             ),
+            if (outros != null)
+              Padding(
+                padding: const EdgeInsets.only(left: 44, top: TokensStrip.s1),
+                child: Text(
+                  outros,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
             if (acao != null) ...[
               const SizedBox(height: TokensStrip.s2),
               acao!,
@@ -169,6 +194,15 @@ class SuaSemanaRow extends StatelessWidget {
       ),
     );
   }
+}
+
+/// "Feito hoje: A · Peito", até dois nomes e "+N". Nulo sem nada feito.
+String? semanaFeitosTexto(S s, List<String> nomes, {required bool hoje}) {
+  if (nomes.isEmpty) return null;
+  final vistos = nomes.take(2).join(' · ');
+  final resto = nomes.length - 2;
+  final texto = resto > 0 ? '$vistos ${s.treinosFeitosMais(resto)}' : vistos;
+  return hoje ? s.treinosFeitoHoje(texto) : s.treinosFeitoNoDia(texto);
 }
 
 /// A ficha (validade) e a lista de segunda a domingo, sempre aberta.
@@ -195,12 +229,26 @@ class SuaSemanaBloco extends StatelessWidget {
 
   /// Dia com treino que já passou: feito ou não feito; hoje só quando feito.
   /// Sessão feita em outro dia da semana também conta (faltar não pula a letra).
-  bool? _statusDoDia(DiaDaSemana dia, Map<int, ({String nome, int treinoId})> feitos) {
-    if (feitos.containsKey(dia.dia)) return true;
-    if (!dia.segueSequencia && dia.sessoes.every((x) => x.nome.trim().isEmpty)) return null;
-    if (dia.dia >= hoje.weekday) return null;
-    final ids = feitos.values.map((f) => f.treinoId).toSet();
-    return dia.sessoes.any((x) => ids.contains(x.treinoId));
+  bool? _statusDoDia(DiaDaSemana dia, Map<int, List<FeitoDoDia>> feitos) {
+    final semPrevisto = dia.sessoes.every((x) => x.nome.trim().isEmpty);
+    if (semPrevisto && feitos.containsKey(dia.dia)) return true;
+    if (_descanso(dia)) return null;
+    final ids = {
+      for (final doDia in feitos.values)
+        for (final f in doDia) f.treinoId,
+    };
+    if (dia.sessoes.any((x) => ids.contains(x.treinoId))) return true;
+    return dia.dia < hoje.weekday ? false : null;
+  }
+
+  /// Sessões feitas no dia que não são a prevista para ele.
+  List<String> _outrosDoDia(DiaDaSemana dia, Map<int, List<FeitoDoDia>> feitos) {
+    if (dia.sessoes.every((x) => x.nome.trim().isEmpty)) return const [];
+    final previstos = dia.sessoes.map((x) => x.treinoId).toSet();
+    return [
+      for (final f in feitos[dia.dia] ?? const <FeitoDoDia>[])
+        if (!previstos.contains(f.treinoId)) f.nome,
+    ];
   }
 
   bool _descanso(DiaDaSemana dia) =>
@@ -239,19 +287,24 @@ class SuaSemanaBloco extends StatelessWidget {
               ? s.treinosSuaSemanaAte(dataCurta(rotina.vigencia.fim!))
               : s.treinosSuaSemana,
           linhas: [
-            for (final (i, dia) in dias.indexed)
+            for (final (i, dia) in dias.indexed) ...[
+              if (i > 0) const Divider(height: 1, indent: TokensStrip.s3, endIndent: TokensStrip.s3),
               SuaSemanaRow(
                 diaNome: nomes[i],
                 dia: dia,
                 hoje: dia.dia == hoje.weekday,
                 status: _statusDoDia(dia, feitos),
                 previsto: previstos[dia.dia],
-                feitoExtra: _descanso(dia) ? feitos[dia.dia]?.nome : null,
+                feitoExtra: _descanso(dia)
+                    ? feitos[dia.dia]?.map((f) => f.nome).join(' · ')
+                    : null,
+                feitosNoDia: _outrosDoDia(dia, feitos),
                 acao: dia.dia == hoje.weekday ? acaoDeHoje : null,
                 onAbrir: dia.sessoes.isEmpty || dia.sessoes.first.treinoId == null
                     ? null
                     : onAbrirSessao?.call(dia.sessoes.first.treinoId!),
               ),
+            ],
           ],
         ),
       ],

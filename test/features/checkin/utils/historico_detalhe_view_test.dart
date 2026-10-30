@@ -68,7 +68,6 @@ void main() {
     expect(v.volumeKg, 20 * 28 + 30 * 12);
     expect(v.comparacao, isNull);
     expect(v.recordes, isEmpty);
-    expect(v.notas, [(exercicio: 'Remada', nota: 'Pegada neutra')]);
   });
 
   test('evolução do servidor manda no volume, séries e comparação', () {
@@ -124,12 +123,11 @@ void main() {
 
     expect(
       historicoExercicioDetalhe(_s, v.exercicios.first),
-      '20 kg · 3 de 3 séries · RPE 8 · +2,5 kg vs anterior',
+      'Melhor série: 10 × 20 kg · 3 de 3 séries · RPE 8 · +2,5 kg vs anterior',
     );
-    expect(v.exercicios.first.cargas, [20, 20, 20]);
     expect(
       historicoExercicioDetalhe(_s, v.exercicios.last),
-      '30 kg · 1 de 4 séries',
+      'Melhor série: 12 × 30 kg · 1 de 4 séries',
     );
   });
 

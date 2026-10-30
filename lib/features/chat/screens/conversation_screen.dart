@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io' show File;
 import 'dart:math' show Random;
 import '../../../core/utils/friendly_error.dart';
+import '../providers/chat_rascunho_provider.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -160,6 +161,9 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     }
     _ctrl.addListener(_handleComposerChange);
     _scroll.addListener(_handleScroll);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _aplicarRascunho(ref.read(chatAlunoRascunhoProvider));
+    });
     _loadHistorico();
     unawaited(_loadBloqueio());
     if (_alunoId != null) {
@@ -425,8 +429,19 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
         : msg.remetente == 'PERSONAL';
   }
 
+  void _aplicarRascunho(String? texto) {
+    final t = texto?.trim() ?? '';
+    if (t.isEmpty || widget.mode != ConversationMode.aluno) return;
+    _ctrl.text = t;
+    _ctrl.selection = TextSelection.collapsed(offset: t.length);
+    Future.microtask(() {
+      if (mounted) ref.read(chatAlunoRascunhoProvider.notifier).value = null;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    ref.listen<String?>(chatAlunoRascunhoProvider, (_, t) => _aplicarRascunho(t));
     final chrome = ShellChrome.of(context);
     final isDark = chrome.isDark;
     final primary = Theme.of(context).colorScheme.primary;

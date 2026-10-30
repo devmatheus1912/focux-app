@@ -5,17 +5,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/api/offline_queued_ack.dart';
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_choice_strip.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_form_chrome.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_quick_chips.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
@@ -34,7 +37,7 @@ import '../utils/agenda_slots.dart';
 import '../widgets/agenda_form_sheets.dart';
 import '../widgets/agenda_help_sheet.dart';
 import '../widgets/agenda_slot_picker_sheet.dart';
-import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../l10n/app_localizations.dart';
 
 class NovoAgendamentoScreen extends ConsumerStatefulWidget {
   const NovoAgendamentoScreen({super.key, this.seedDay, this.args});
@@ -58,6 +61,10 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
   DateTime? _inicio;
   late int _duracao;
   bool _saving = false;
+
+  /// Semanas de repetição; 0 = uma vez só.
+  var _semanas = 0;
+  var _datasOcupadas = const <DateTime>[];
 
   DateTime? get _fim => _inicio?.add(Duration(minutes: _duracao));
 
@@ -133,6 +140,7 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
       _duracao = pick.duracaoMin;
       _ultimaDuracao = pick.duracaoMin;
     });
+    await _atualizarRepeticao();
   }
 
   /// Horário recusado (local ou servidor): reabre a grade com o motivo. Do
@@ -183,30 +191,32 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
       await _repick(localError);
       return;
     }
-    final ok = await showFxConfirmSheet(
-      context,
-      title: agendaNovoConfirmTitle(),
-      message: agendaNovoConfirmMessage(
-        alunoNome: _alunoSelecionado?.nome ?? '',
-        inicio: inicio,
-        fim: fim,
-      ),
-      confirmLabel: agendaNovoTileLabel(),
-    );
-    if (!ok || !mounted) return;
     setState(() => _saving = true);
+    final s = S.of(context);
     try {
-      await ref
-          .read(agendaRepositoryProvider)
-          .criar(
-            alunoId,
-            inicio,
-            fim,
-            _titulo.text.isEmpty ? null : _titulo.text,
-          );
-      invalidateAgendaCaches(ref);
-      AnalyticsService.instance.track(ProductEvents.agendaCreated);
-      if (mounted) safePopOrGo(context, '/agenda');
+      final titulo = _titulo.text.trim();
+      final repo = ref.read(agendaRepositoryProvider);
+      if (_semanas > 0) {
+        final datas = agendaDatasRepetidas(inicio, _semanas);
+        final resultado = await repo.criarLote(alunoId, [
+          for (final d in datas)
+            (inicio: d, fim: d.add(Duration(minutes: _duracao))),
+        ], titulo);
+        invalidateAgendaCaches(ref);
+        AnalyticsService.instance.track(ProductEvents.agendaCreated);
+        if (!mounted) return;
+        FeedbackHelper.showSuccess(
+          context,
+          s.agendaLoteResultado(resultado.criados, resultado.pulados),
+        );
+      } else {
+        await repo.criar(alunoId, inicio, fim, titulo.isEmpty ? null : titulo);
+        invalidateAgendaCaches(ref);
+        AnalyticsService.instance.track(ProductEvents.agendaCreated);
+        if (!mounted) return;
+        FeedbackHelper.showSuccess(context, s.agendaAgendado);
+      }
+      safePopOrGo(context, '/agenda');
     } on OfflineQueuedException {
       if (mounted) leaveWithQueuedNotice(context, '/agenda');
     } catch (e) {
@@ -224,6 +234,24 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
       return;
     }
     if (mounted) setState(() => _saving = false);
+  }
+
+  Future<void> _atualizarRepeticao() async {
+    final inicio = _inicio;
+    if (inicio == null || _semanas == 0) {
+      setState(() => _datasOcupadas = const []);
+      return;
+    }
+    final ocupadas = <DateTime>[];
+    for (final d in agendaDatasRepetidas(inicio, _semanas)) {
+      try {
+        final mes = await _loadMonth(agendaMonthOf(d));
+        if (agendaSlotConflict(d, _duracao, mes) != null) ocupadas.add(d);
+      } catch (_) {
+        // Sem a prévia, o servidor ainda pula o que estiver ocupado.
+      }
+    }
+    if (mounted) setState(() => _datasOcupadas = ocupadas);
   }
 
   String _horarioLabel() {
@@ -244,15 +272,13 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
         onCancel: _cancel,
         child: FxShellScaffold(
           useMesh: true,
-          appBar: FxShellAppBar(
-            title: 'Novo agendamento',
-            subtitle: 'AGENDA',
-            leadingWidth: 92,
-            leading: FxTonalButton(label: 'Cancelar', onPressed: _cancel, compact: true),
-          ),
+          appBar: FxShellAppBar(title: 'Novo agendamento', onBack: _cancel),
           bottomNavigationBar: FxFormStickyBar(
             child: FxLiquidPrimaryButton(
-              label: agendaNovoTileLabel(),
+              label: agendaNovoBotaoLabel(
+                alunoNome: _alunoSelecionado?.nome,
+                inicio: _inicio,
+              ),
               loading: _saving,
               loadingLabel: 'Agendando…',
               onPressed: _saving ? null : _salvar,
@@ -307,17 +333,6 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
                       _showAlunoSheet(alunos);
                     },
                   ),
-                  AlunoInsetFormField(
-                    controller: _titulo,
-                    label: 'Título (opcional)',
-                    icon: Icons.title_outlined,
-                    hint: 'Avaliação, retorno, foco da sessão…',
-                    textCapitalization: TextCapitalization.sentences,
-                    inputFormatters: [
-                      LengthLimitingTextInputFormatter(agendaTituloMax),
-                    ],
-                    showDivider: false,
-                  ),
                 ],
               ),
               const SizedBox(height: TokensStrip.s3),
@@ -335,8 +350,75 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
                             : agendaDuracaoLabel(_duracao),
                     value: _horarioLabel(),
                     picker: true,
-                    showDivider: false,
                     onTap: _pickHorario,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: TokensStrip.s2,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          S.of(context).agendaRepetir,
+                          style: FocuxHubTypography.cardTitle(
+                            color: ShellChrome.of(context).ink,
+                          ),
+                        ),
+                        const SizedBox(height: TokensStrip.s2),
+                        FxChoiceStrip<int>(
+                          itens: [
+                            for (final n in agendaRepeticoesSemanas)
+                              FxChoiceItem(
+                                value: n,
+                                label:
+                                    n == 0
+                                        ? S.of(context).agendaRepetirNunca
+                                        : S.of(context).agendaRepetirSemanas(n),
+                              ),
+                          ],
+                          selecionado: _semanas,
+                          onSelecionar: (n) {
+                            setState(() => _semanas = n);
+                            _atualizarRepeticao();
+                          },
+                        ),
+                        if (_datasOcupadas.isNotEmpty) ...[
+                          const SizedBox(height: TokensStrip.s2),
+                          Text(
+                            S.of(context).agendaRepetirOcupadas(
+                              _datasOcupadas.map(agendaDayShortLabel).join(' · '),
+                            ),
+                            style: FocuxHubTypography.bodyMuted(
+                              color: ShellChrome.of(context).mute,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: TokensStrip.s3),
+              FxSettingsGroup(
+                header: S.of(context).agendaTituloGrupo,
+                children: [
+                  FxQuickChips<String>(
+                    itens: const ['Avaliação', 'Retorno', 'Treino'],
+                    selecionado: _titulo.text.trim(),
+                    onSelecionar: (t) => _titulo.text = t,
+                  ),
+                  AlunoInsetFormField(
+                    controller: _titulo,
+                    label: 'Título (opcional)',
+                    icon: Icons.title_outlined,
+                    hint: 'Avaliação, retorno, foco da sessão…',
+                    textCapitalization: TextCapitalization.sentences,
+                    inputFormatters: [
+                      LengthLimitingTextInputFormatter(agendaTituloMax),
+                    ],
+                    rotuloVisivel: true,
+                    showDivider: false,
                   ),
                 ],
               ),

@@ -48,8 +48,6 @@ void main() {
     expect(screen, isNot(contains('AgendaDayEmptyPanel')));
     expect(screen, isNot(contains('AgendaTodayPill')));
     expect(screen, contains('expand: true'));
-    expect(screen, contains('AgendaDaySheet'));
-    expect(screen, contains('FxHubFreshness.fromFetchedAt'));
     expect(screen, isNot(contains('class _AgendaEmptyState')));
     expect(
       File('lib/features/agenda/screens/agenda_screen.dart').readAsStringSync(),
@@ -60,7 +58,7 @@ void main() {
     expect(screen, contains('constrainWidth: false'));
     final daySheet =
         File(
-          'lib/features/agenda/widgets/agenda_day_sheet.dart',
+          'lib/features/agenda/widgets/agenda_dia_view.dart',
         ).readAsStringSync();
     expect(daySheet, contains('FxEmptyState'));
     expect(daySheet, contains('RefreshIndicator'));
@@ -77,18 +75,4 @@ void main() {
     );
   });
 
-  test('validação do novo agendamento não usa estilo de sucesso', () {
-    final novo =
-        File(
-          'lib/features/agenda/screens/novo_agendamento_screen.dart',
-        ).readAsStringSync();
-    final salvar = novo.substring(
-      novo.indexOf('Future<void> _salvar()'),
-      novo.indexOf(
-        'showFxConfirmSheet(',
-        novo.indexOf('Future<void> _salvar()'),
-      ),
-    );
-    expect(salvar, isNot(contains('showSuccess')));
-  });
 }

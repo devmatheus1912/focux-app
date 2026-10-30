@@ -19,19 +19,18 @@ Future<void> _dispatchTreinoDetailAction({
         ProductEvents.treinoDetailAddTapped,
         props: {'source': 'menu', 'id': treinoId},
       );
-      final added = await context.push<bool>(
+      await context.push(
         '/treinos/$treinoId/exercicios/add',
-        extra: TreinoRouteExtra(alunoId: alunoId).toExtra(),
+        extra: TreinoRouteExtra(alunoId: alunoId, modeloId: modeloId).toExtra(),
       );
-      if (added == true) {
-        ref.invalidate(treinoProvider(treinoId));
-      }
       break;
     case 'sugerir':
       await openSugerirExercicios(
         context: context,
         ref: ref,
         treinoId: treinoId,
+        alunoId: alunoId,
+        modeloId: modeloId,
         nomeDaSessao: treino.nome,
         alreadyInTreinoIds: treino.exercicios
             .map((item) => item.exercicio.id)
@@ -85,9 +84,7 @@ Future<void> _dispatchTreinoDetailAction({
       if (nome == null || !context.mounted) break;
       try {
         await repo.renomearTreino(treinoId, nome);
-        ref.invalidate(treinoProvider(treinoId));
-        if (alunoId != null) ref.invalidate(alunoRotinaProvider(alunoId));
-        if (modeloId != null) ref.invalidate(fichaModeloProvider(modeloId));
+        sessaoMudou(ref, treinoId, alunoId: alunoId, modeloId: modeloId);
         invalidateTreinosCaches(ref);
       } catch (e) {
         if (context.mounted) FeedbackHelper.showApiFailure(context, e);

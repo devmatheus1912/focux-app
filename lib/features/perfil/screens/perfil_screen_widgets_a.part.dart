@@ -10,7 +10,6 @@ class _PerfilBody extends StatefulWidget {
   final VoidCallback onEditPerfil;
   final Future<void> Function() onLogout;
   final VoidCallback onOpenLandingEditor;
-  final VoidCallback onOpenPublicLink;
 
   const _PerfilBody({
     required this.perfil,
@@ -22,7 +21,6 @@ class _PerfilBody extends StatefulWidget {
     required this.onEditPerfil,
     required this.onLogout,
     required this.onOpenLandingEditor,
-    required this.onOpenPublicLink,
   });
 
   @override
@@ -59,7 +57,6 @@ class _PerfilBodyState extends State<_PerfilBody> {
     final onEditPerfil = widget.onEditPerfil;
     final onLogout = widget.onLogout;
     final onOpenLandingEditor = widget.onOpenLandingEditor;
-    final onOpenPublicLink = widget.onOpenPublicLink;
     final chrome = ShellChrome.of(context);
     final isDark = chrome.isDark;
     final ink = chrome.ink;
@@ -119,7 +116,7 @@ class _PerfilBodyState extends State<_PerfilBody> {
                     ),
                     FxHelpTip(
                       'Sua página',
-                      'Marca, link público e personalização da sua landing.',
+                      'Código, página pública, marca e personalização da sua landing.',
                       icon: 'spark',
                     ),
                     FxHelpTip(
@@ -214,7 +211,7 @@ class _PerfilBodyState extends State<_PerfilBody> {
                                 ? 'Perfil completo'
                                 : 'Perfil $profileScore% completo',
                             textAlign: TextAlign.center,
-                            style: FxSettingsLayout.rowMetric(color: mute),
+                            style: FxSettingsLayout.subhead(color: mute),
                           ),
                           const SizedBox(height: TokensStrip.s3),
                         ],
@@ -256,16 +253,25 @@ class _PerfilBodyState extends State<_PerfilBody> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           FxStaggerItem(
+                            index: 2,
+                            child: _PerfilAcessoAlunos(
+                              perfil: perfil,
+                              mute: mute,
+                              line: line,
+                            ),
+                          ),
+                          const SizedBox(
+                            height: PerfilLayout.sectionGapPrimary,
+                          ),
+                          FxStaggerItem(
                             index: 3,
                             child: PerfilMarcaVitrineSection(
                               profileComplete: profileComplete,
                               children: [
                                 _PerfilVitrineTiles(
-                                  slug: perfil.slug,
                                   mute: mute,
                                   line: line,
                                   onOpenEditor: onOpenLandingEditor,
-                                  onOpenPublicLink: onOpenPublicLink,
                                 ),
                               ],
                             ),

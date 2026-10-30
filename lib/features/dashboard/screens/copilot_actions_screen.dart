@@ -12,15 +12,16 @@ import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/utils/friendly_error.dart';
-import '../../../core/widgets/fx_confirm_sheet.dart';
+import '../../../core/widgets/fx_grouped_action_sheet.dart';
+import '../../../core/widgets/fx_status_pill.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../../core/widgets/fx_action_chip.dart';
 import '../../alunos/widgets/aluno_form_choices.dart';
+import '../../ia/providers/ia_copilot_providers.dart';
 import '../data/command_center_data.dart';
 import '../providers/dashboard_provider.dart';
 import '../utils/copilot_actions_display.dart';
@@ -98,18 +99,18 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
     final contagem = ref.watch(iaActionsContagemProvider(_query)).value;
 
     return fxScreenA11yScope(
-      label: 'Tarefas IA',
+      label: 'Tarefas',
       child: FxShellScaffold(
         useMesh: true,
         constrainWidth: false,
         appBar: FxShellAppBar(
-          title: 'Tarefas IA',
+          title: 'Tarefas',
           subtitle:
-              FxHubFreshness.fromFetchedAt(_fetchedAt) ?? 'Centro de Comando',
+              FxHubFreshness.fromFetchedAt(_fetchedAt),
           onBack: () => safePopOrGo(context, '/ia/copiloto'),
           actions: [
             FxHelpIconButton(
-              tooltip: 'Como funcionam as tarefas IA',
+              tooltip: 'Como funcionam as tarefas',
               onTap: _abrirAjuda,
             ),
           ],
@@ -142,16 +143,18 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
                     isDark: dark,
                     onSelect: _selecionarStatus,
                   ),
-                  const SizedBox(height: TokensStrip.s2),
-                  TextField(
-                    controller: _search,
-                    textInputAction: TextInputAction.search,
-                    onChanged: _onSearchChanged,
-                    onSubmitted: _onSearchSubmitted,
-                    onTapOutside:
-                        (_) => FocusManager.instance.primaryFocus?.unfocus(),
-                    decoration: FxInputDeco.build(context, 'Buscar tarefa'),
-                  ),
+                  if (_query.isNotEmpty || _totalNaLista(contagem) > 10) ...[
+                    const SizedBox(height: TokensStrip.s2),
+                    TextField(
+                      controller: _search,
+                      textInputAction: TextInputAction.search,
+                      onChanged: _onSearchChanged,
+                      onSubmitted: _onSearchSubmitted,
+                      onTapOutside:
+                          (_) => FocusManager.instance.primaryFocus?.unfocus(),
+                      decoration: FxInputDeco.build(context, 'Buscar tarefa'),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -173,15 +176,6 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
                   ];
                   final hasNext =
                       _extra.isEmpty ? page.hasNext : _extraHasNext;
-                  final copilot =
-                      actions
-                          .where((action) => action.tipo == 'IA_COPILOTO')
-                          .toList();
-                  final radar =
-                      actions
-                          .where((action) => action.tipo != 'IA_COPILOTO')
-                          .toList();
-
                   if (actions.isEmpty) {
                     return RefreshIndicator(
                       onRefresh: _refresh,
@@ -221,62 +215,27 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
                         120,
                       ),
                       children: [
-                        if (copilot.isNotEmpty) ...[
-                          _SectionHeader(
-                            title: 'Copiloto',
-                            detail: copilotActionsSectionDetail(
-                              _status,
-                              copilot.length,
-                            ),
-                            ink: ink,
-                            mute: mute,
+                        Container(
+                          decoration: fxListCardDecoration(context),
+                          child: Column(
+                            children: [
+                              for (final (i, action)
+                                  in copilotActionsOrdenadas(actions).indexed) ...[
+                                if (i > 0) const Divider(height: 1),
+                                _TarefaRow(
+                                  action: action,
+                                  concluida:
+                                      _status == copilotActionsStatusConcluido,
+                                  ink: ink,
+                                  mute: mute,
+                                  onOpen: () => _openAction(context, action),
+                                  onMais: () => _abrirAcoes(action),
+                                ),
+                              ],
+                            ],
                           ),
-                          const SizedBox(height: 8),
-                          for (final entry in copilot.asMap().entries) ...[
-                            _CopilotTaskCard(
-                              action: entry.value,
-                              status: _status,
-                              highlighted:
-                                  _status == copilotActionsStatusAberto &&
-                                  entry.key == 0,
-                              ink: ink,
-                              mute: mute,
-                              brand: brand,
-                              onOpen: () => _openAction(context, entry.value),
-                              onComplete: () => _complete(entry.value),
-                              onSnooze: () => _snooze(entry.value),
-                              onReopen: () => _reopen(entry.value),
-                            ),
-                            const SizedBox(height: 8),
-                          ],
-                        ],
-                        if (radar.isNotEmpty) ...[
-                          const SizedBox(height: 4),
-                          _SectionHeader(
-                            title: 'Sinais automáticos',
-                            detail:
-                                radar.length == 1
-                                    ? '1 sinal'
-                                    : '${radar.length} sinais',
-                            ink: ink,
-                            mute: mute,
-                          ),
-                          const SizedBox(height: 8),
-                          for (final action in radar) ...[
-                            _RadarSignalCard(
-                              action: action,
-                              status: _status,
-                              ink: ink,
-                              mute: mute,
-                              brand: brand,
-                              onOpen: () => _openAction(context, action),
-                              onComplete: () => _complete(action),
-                              onSnooze: () => _snooze(action),
-                              onReopen: () => _reopen(action),
-                            ),
-                            const SizedBox(height: 8),
-                          ],
-                        ],
+                        ),
+                        const SizedBox(height: TokensStrip.s2),
                         if (hasNext)
                           FxSatelliteListTile(
                             title: _loadingMore ? 'Carregando…' : 'Carregar mais',
@@ -299,6 +258,15 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
         ),
       ),
     );
+  }
+
+  int _totalNaLista(IaCommandActionsContagem? contagem) {
+    if (contagem == null) return 0;
+    return switch (_status) {
+      copilotActionsStatusAdiado => contagem.adiadas,
+      copilotActionsStatusConcluido => contagem.concluidas,
+      _ => contagem.abertas,
+    };
   }
 
   void _selecionarStatus(String picked) {
@@ -361,12 +329,12 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
       tips: const [
         FxHelpTip('Como calculamos', copilotActionsComoCalculamos),
         FxHelpTip(
-          'Copiloto',
-          'Tarefas que você salvou a partir de um insight. Revisar o aluno não conclui a tarefa.',
+          'O que aparece aqui',
+          'Tarefas salvas do Copiloto e alertas automáticos. Abrir o aluno não conclui a tarefa.',
         ),
         FxHelpTip(
-          'Sinais',
-          'Alertas automáticos do Radar. Concluir, adiar ou reabrir pede confirmação.',
+          'Adiar e concluir',
+          'Toque em "⋯". Por alguns segundos dá para desfazer.',
         ),
       ],
     );
@@ -382,71 +350,93 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
   }
 
   void _openAction(BuildContext context, FilaAcaoResumo action) {
-    if (action.acaoUrl.startsWith('/')) {
-      context.push(action.acaoUrl);
+    final destino = copilotActionsDestino(action);
+    if (destino.startsWith('/')) context.push(destino);
+  }
+
+  Future<void> _abrirAcoes(FilaAcaoResumo action) async {
+    final concluida = _status == copilotActionsStatusConcluido;
+    final escolha = await showFxGroupedActionSheet<String>(
+      context,
+      titulo: copilotActionsNome(action),
+      subtitulo: copilotActionsMotivo(action),
+      icone: Icons.checklist_rounded,
+      grupos: [
+        FxActionGroup<String>(null, [
+          if (concluida)
+            FxActionItem(
+              valor: 'reabrir',
+              rotulo: copilotActionsReabrirLabel(),
+              icone: Icons.undo_rounded,
+            )
+          else ...[
+            FxActionItem(
+              valor: 'adiar',
+              rotulo: copilotActionsAdiarLabel(),
+              icone: Icons.schedule_rounded,
+            ),
+            FxActionItem(
+              valor: 'concluir',
+              rotulo: copilotActionsConcluirLabel(),
+              icone: Icons.check_rounded,
+            ),
+          ],
+        ]),
+      ],
+    );
+    if (!mounted || escolha == null) return;
+    final repo = ref.read(dashboardRepositoryProvider);
+    switch (escolha) {
+      case 'concluir':
+        await _runAction(
+          () => repo.completeCommandAction(action.actionKey),
+          'Tarefa concluída',
+          undo: action,
+        );
+      case 'adiar':
+        await _runAction(
+          () => repo.snoozeCommandAction(action.actionKey, hours: 24),
+          'Tarefa adiada por 24h',
+          undo: action,
+        );
+      case 'reabrir':
+        await _runAction(
+          () => repo.reopenCommandAction(action.actionKey),
+          'Tarefa reaberta',
+        );
     }
   }
 
-  Future<void> _complete(FilaAcaoResumo action) async {
-    final ok = await showFxConfirmSheet(
-      context,
-      title: copilotActionsCompleteConfirmTitle(),
-      message: copilotActionsCompleteConfirmMessage(),
-      confirmLabel: copilotActionsConcluirLabel(),
-    );
-    if (!ok || !mounted) return;
-    await _runAction(
-      () => ref
-          .read(dashboardRepositoryProvider)
-          .completeCommandAction(action.actionKey),
-      'Tarefa concluída',
-    );
+  void _recarregar() {
+    ref.invalidate(iaActionsProvider(_queryKey));
+    ref.invalidate(iaActionsContagemProvider(_query));
+    ref.invalidate(dashboardHomeProvider);
+    ref.invalidate(commandCenterProvider);
+    ref.invalidate(copilotoTarefasAbertasProvider);
   }
 
-  Future<void> _snooze(FilaAcaoResumo action) async {
-    final ok = await showFxConfirmSheet(
-      context,
-      title: copilotActionsSnoozeConfirmTitle(),
-      message: copilotActionsSnoozeConfirmMessage(),
-      confirmLabel: copilotActionsAdiarLabel(),
-    );
-    if (!ok || !mounted) return;
-    await _runAction(
-      () => ref
-          .read(dashboardRepositoryProvider)
-          .snoozeCommandAction(action.actionKey, hours: 24),
-      'Tarefa adiada por 24h',
-    );
-  }
-
-  Future<void> _reopen(FilaAcaoResumo action) async {
-    final ok = await showFxConfirmSheet(
-      context,
-      title: copilotActionsReopenConfirmTitle(),
-      message: copilotActionsReopenConfirmMessage(),
-      confirmLabel: copilotActionsReabrirLabel(),
-    );
-    if (!ok || !mounted) return;
-    await _runAction(
-      () => ref
-          .read(dashboardRepositoryProvider)
-          .reopenCommandAction(action.actionKey),
-      'Tarefa reaberta',
-    );
-  }
-
+  /// Sem folha de confirmação: a ação vale na hora e [undo] oferece desfazer.
   Future<void> _runAction(
     Future<void> Function() action,
-    String successMessage,
-  ) async {
+    String successMessage, {
+    FilaAcaoResumo? undo,
+  }) async {
     try {
       await action();
       if (!mounted) return;
-      ref.invalidate(iaActionsProvider(_queryKey));
-      ref.invalidate(iaActionsContagemProvider(_query));
-      ref.invalidate(dashboardHomeProvider);
-      ref.invalidate(commandCenterProvider);
-      FeedbackHelper.showInfo(context, successMessage);
+      _recarregar();
+      if (undo == null) {
+        FeedbackHelper.showInfo(context, successMessage);
+        return;
+      }
+      final desfazer = await FeedbackHelper.showUndo(
+        context,
+        successMessage,
+        duration: const Duration(seconds: 6),
+      );
+      if (!desfazer || !mounted) return;
+      await ref.read(dashboardRepositoryProvider).reopenCommandAction(undo.actionKey);
+      if (mounted) _recarregar();
     } catch (e) {
       if (!mounted) return;
       FeedbackHelper.showApiFailure(

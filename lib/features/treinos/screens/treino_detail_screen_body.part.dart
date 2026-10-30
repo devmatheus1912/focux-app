@@ -112,6 +112,7 @@ Future<void> _openTreinoDetailMenu({
 
 class _TreinoDetailBody extends StatelessWidget {
   final Treino treino;
+  final bool salvando;
   final int treinoId;
   final int? alunoId;
   final String? alunoNome;
@@ -121,6 +122,7 @@ class _TreinoDetailBody extends StatelessWidget {
   final WidgetRef ref;
   const _TreinoDetailBody({
     required this.treino,
+    required this.salvando,
     required this.treinoId,
     required this.alunoId,
     required this.alunoNome,
@@ -135,8 +137,6 @@ class _TreinoDetailBody extends StatelessWidget {
     final repo = ref.read(treinoRepositoryProvider);
     final primary = Theme.of(context).colorScheme.primary;
     final chrome = ShellChrome.forBrightness(context, isDark);
-    final contextLabel = _workoutContextLabel(treino, alunoNome);
-    final displayName = _displayWorkoutName(treino.nome);
     final orderedExercises = [...treino.exercicios]
       ..sort((a, b) => a.ordem.compareTo(b.ordem));
     final s = S.of(context);
@@ -164,7 +164,7 @@ class _TreinoDetailBody extends StatelessWidget {
             ),
       );
       if (saved != true) return;
-      ref.invalidate(treinoProvider(treinoId));
+      sessaoMudou(ref, treinoId, alunoId: alunoId, modeloId: modeloId);
       if (context.mounted) {
         FeedbackHelper.showSuccess(context, 'Prescrição atualizada.');
       }
@@ -176,13 +176,15 @@ class _TreinoDetailBody extends StatelessWidget {
         ProductEvents.treinoDetailAddTapped,
         props: {'source': source, 'id': treinoId},
       );
-      final added = await context.push<bool>(
+      await context.push(
         '/treinos/$treinoId/exercicios/add',
-        extra: TreinoRouteExtra(alunoId: alunoId, bloco: destino).toExtra(),
+        extra:
+            TreinoRouteExtra(
+              alunoId: alunoId,
+              modeloId: modeloId,
+              bloco: destino,
+            ).toExtra(),
       );
-      if (added == true) {
-        ref.invalidate(treinoProvider(treinoId));
-      }
     }
 
     return Column(
@@ -207,13 +209,7 @@ class _TreinoDetailBody extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    FxHubHeader(
-                      title: displayName,
-                      subtitle:
-                          alunoId == null && modeloId == null
-                              ? contextLabel
-                              : null,
-                    ),
+                    EstadoDoSalvo(salvando: salvando),
                     if (alunoId != null)
                       FichaContextoDoTreino(
                         alunoId: alunoId!,
@@ -292,6 +288,7 @@ class _TreinoDetailBody extends StatelessWidget {
                 exercises: orderedExercises,
                 treinoId: treinoId,
                 alunoId: alunoId,
+                modeloId: modeloId,
                 isDark: isDark,
                 primary: primary,
                 repo: repo,
@@ -333,28 +330,19 @@ class _TreinoDetailBody extends StatelessWidget {
                             context: context,
                             ref: ref,
                             treinoId: treinoId,
+                            alunoId: alunoId,
+                            modeloId: modeloId,
                             nomeDaSessao: treino.nome,
                             alreadyInTreinoIds: const {},
                           ), compact: true),
                       ],
                     )
                     : alunoId != null || modeloId != null
-                    ? Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        FxLiquidPrimaryButton(
-                          label: 'Adicionar exercício',
-                          onPressed: () => openAdd(),
-                        ),
-                        const SizedBox(height: 8),
-                        MontarEmSequencia(
-                          treinoId: treinoId,
-                          alunoId: alunoId,
-                          alunoNome: alunoNome,
-                          modeloId: modeloId,
-                        ),
-                      ],
+                    ? MontarEmSequencia(
+                      treinoId: treinoId,
+                      alunoId: alunoId,
+                      alunoNome: alunoNome,
+                      modeloId: modeloId,
                     )
                     : FxLiquidPrimaryButton(
                       label: 'Adicionar exercício',

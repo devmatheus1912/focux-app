@@ -19,13 +19,11 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
-import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_hub_header.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../constants/treinos_layout.dart';
@@ -43,11 +41,11 @@ import '../widgets/ficha_contexto_treino.dart';
 import '../widgets/modelo_contexto_treino.dart';
 import '../widgets/treino_assign_sheet.dart';
 import '../widgets/montar_por_modelo.dart';
+import '../widgets/estado_do_salvo.dart';
 import '../widgets/treino_no_lugar.dart';
 import '../models/metodo_exercicio.dart';
 import '../utils/combinados.dart';
 import '../widgets/ficha_acoes.dart';
-import '../providers/ficha_modelos_provider.dart';
 import '../utils/divisao_catalogo.dart';
 import '../utils/semana_da_fila.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
@@ -111,17 +109,13 @@ class TreinoDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _TreinoDetailScreenState extends ConsumerState<TreinoDetailScreen> {
-  DateTime? _fetchedAt;
-
   @override
   Widget build(BuildContext context) {
     final treinoId = widget.treinoId;
     final alunoId = widget.alunoId;
     final alunoNome = widget.alunoNome;
     final treinoAsync = ref.watch(treinoProvider(treinoId));
-    if (treinoAsync.hasValue) {
-      _fetchedAt ??= DateTime.now();
-    }
+    final treinoCarregado = treinoAsync.asData?.value;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
 
@@ -136,8 +130,14 @@ class _TreinoDetailScreenState extends ConsumerState<TreinoDetailScreen> {
         child: FxShellScaffold(
           useMesh: true,
           appBar: FxShellAppBar(
-            title: 'Treino',
-            subtitle: FxHubFreshness.fromFetchedAt(_fetchedAt),
+            title:
+                treinoCarregado == null
+                    ? 'Treino'
+                    : _displayWorkoutName(treinoCarregado.nome),
+            subtitle:
+                treinoCarregado == null || alunoId != null || widget.modeloId != null
+                    ? null
+                    : _workoutContextLabel(treinoCarregado, alunoNome),
             onBack: () => _popTreinoDetail(context, alunoId: alunoId),
             actions: [
               FxHelpIconButton(
@@ -193,10 +193,6 @@ class _TreinoDetailScreenState extends ConsumerState<TreinoDetailScreen> {
                     alunoNome: alunoNome,
                     modeloId: widget.modeloId,
                     isDark: isDark,
-                    onFetched: (value) {
-                      if (_fetchedAt == value) return;
-                      setState(() => _fetchedAt = value);
-                    },
                   ),
                 ),
           ),
@@ -214,7 +210,6 @@ class _TreinoDetailFresh extends ConsumerStatefulWidget {
     required this.alunoNome,
     required this.modeloId,
     required this.isDark,
-    required this.onFetched,
   });
 
   final Treino treino;
@@ -223,7 +218,6 @@ class _TreinoDetailFresh extends ConsumerStatefulWidget {
   final String? alunoNome;
   final int? modeloId;
   final bool isDark;
-  final ValueChanged<DateTime> onFetched;
 
   @override
   ConsumerState<_TreinoDetailFresh> createState() => _TreinoDetailFreshState();
@@ -237,17 +231,18 @@ class _TreinoDetailFreshState extends ConsumerState<_TreinoDetailFresh> {
     );
     ref.invalidate(treinoProvider(widget.treinoId));
     await ref.read(treinoProvider(widget.treinoId).future);
-    if (!mounted) return;
-    widget.onFetched(DateTime.now());
   }
 
   @override
   Widget build(BuildContext context) {
-    final treino = ref
-        .watch(treinoProvider(widget.treinoId))
-        .maybeWhen(data: (value) => value, orElse: () => widget.treino);
+    final treinoAsync = ref.watch(treinoProvider(widget.treinoId));
+    final treino = treinoAsync.maybeWhen(
+      data: (value) => value,
+      orElse: () => widget.treino,
+    );
     return _TreinoDetailBody(
       treino: treino,
+      salvando: treinoAsync.isLoading,
       treinoId: widget.treinoId,
       alunoId: widget.alunoId,
       alunoNome: widget.alunoNome,

@@ -12,6 +12,7 @@ import '../../../core/widgets/fx_action_link.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
+import '../../agenda/utils/agenda_display.dart';
 import '../../treinos/utils/treino_atribuicao_prazo.dart';
 import '../../treinos/widgets/treino_prazo_badge.dart';
 import '../data/checkin_repository.dart';
@@ -217,6 +218,31 @@ class TreinoDepoisRow extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Link da sessão marcada, quando há uma nos próximos 7 dias.
+List<Widget> treinosProximaSessao(DateTime? inicio, DateTime hoje) => [
+  if (agendaProximaDaSemana(inicio, hoje) != null)
+    TreinosProximaSessaoLink(inicio!, hoje: hoje),
+];
+
+/// Sessão marcada nos próximos dias: leva à agenda.
+class TreinosProximaSessaoLink extends StatelessWidget {
+  const TreinosProximaSessaoLink(this.inicio, {super.key, required this.hoje});
+
+  final DateTime inicio;
+  final DateTime hoje;
+
+  @override
+  Widget build(BuildContext context) => Align(
+    alignment: Alignment.centerLeft,
+    child: FxActionLink(
+      label: S.of(context).treinosProximaSessao(
+        agendaAlunoDiaLabel(inicio, inicio, now: hoje),
+      ),
+      onTap: () => context.push('/agenda/aluno'),
+    ),
+  );
 }
 
 /// Execução concluída: "Hoje · 52 min". Toque abre o detalhe.

@@ -14,13 +14,7 @@ void main() {
     expect(screen, contains("safePopOrGo(context, '/dashboard/aluno')"));
     expect(screen, contains('ListView.builder'));
     expect(screen, contains('meusAgendamentosPagina'));
-    expect(screen, contains('FxHubFreshness.joinCount'));
-    expect(screen, contains('PopScope'));
-    expect(screen, contains('canPop: false'));
-    expect(screen, contains('FxKeyboardDismissScope.dismiss'));
-    expect(screen, contains('FxToggleChip'));
     expect(screen, contains('icalTokenAluno'));
-    expect(screen, contains('Confirmar presença'));
     expect(screen, contains('FxEmptyState'));
     expect(screen, contains('Nenhuma sessão marcada'));
     expect(screen, contains('friendlyError'));
@@ -30,7 +24,6 @@ void main() {
     expect(screen, contains('agendaAlunoEscopoProximas'));
     expect(screen, contains('agendaAlunoEscopoAnteriores'));
     expect(screen, contains('agendaAlunoPodeConfirmar'));
-    expect(screen, contains('FxActionChip'));
     expect(screen, contains('agendaAlunoAdicionarCalendario'));
     expect(screen, isNot(contains("'Exportar iCal'")));
     expect(screen, isNot(contains('agendaAlunoCountLabel(_loading ? 0')));
@@ -38,7 +31,6 @@ void main() {
     expect(screen, contains('agendaAlunoEscopoProximas'));
     expect(screen, contains('agendaAlunoEscopoAnteriores'));
     expect(screen, contains('agendaAlunoPodeConfirmar'));
-    expect(screen, contains('FxActionChip'));
     expect(screen, contains('agendaAlunoAdicionarCalendario'));
     expect(screen, isNot(contains("'Exportar iCal'")));
     expect(screen, isNot(contains('agendaAlunoCountLabel(_loading ? 0')));

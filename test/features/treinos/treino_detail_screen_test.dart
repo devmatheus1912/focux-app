@@ -74,7 +74,7 @@ void main() {
     expect(find.text('Template base'), findsOneWidget);
     expect(find.textContaining('4×8-12'), findsOneWidget);
     expect(find.textContaining('75s'), findsOneWidget);
-    expect(find.textContaining('Atualizado agora'), findsOneWidget);
+    expect(find.text('Tudo salvo'), findsOneWidget);
     expect(find.byTooltip('Como montar este treino'), findsOneWidget);
     expect(find.text('Adicionar exercício'), findsWidgets);
     expect(find.text('Supino reto'), findsOneWidget);

@@ -5,26 +5,6 @@ import 'agenda_status.dart';
 const agendaComoCalculamos =
     'O dia usa os horários do personal neste fuso. Lacunas são faixas livres entre atendimentos.';
 
-enum AgendaAlunoChip { todos, confirmar, confirmados }
-
-String agendaAlunoChipLabel(AgendaAlunoChip chip) => switch (chip) {
-  AgendaAlunoChip.todos => 'Todos',
-  AgendaAlunoChip.confirmar => 'A confirmar',
-  AgendaAlunoChip.confirmados => 'Confirmados',
-};
-
-String? agendaAlunoChipStatus(AgendaAlunoChip chip) => switch (chip) {
-  AgendaAlunoChip.todos => null,
-  AgendaAlunoChip.confirmar => 'AGENDADO',
-  AgendaAlunoChip.confirmados => 'CONFIRMADO',
-};
-
-String agendaAlunoCountLabel(int count) {
-  if (count <= 0) return 'Nenhum compromisso';
-  if (count == 1) return '1 compromisso';
-  return '$count compromissos';
-}
-
 const agendaAlunoEscopoProximas = 'proximas';
 const agendaAlunoEscopoAnteriores = 'anteriores';
 
@@ -45,6 +25,12 @@ String agendaAlunoDiaLabel(DateTime inicio, DateTime fim, {DateTime? now}) {
           ? '${agendaHm(inicio)}–${agendaHm(fim)}'
           : agendaHm(inicio);
   return '$quando · $hora';
+}
+
+/// Sessão nos próximos 7 dias; depois disso não vale ocupar a aba Treinos.
+DateTime? agendaProximaDaSemana(DateTime? inicio, DateTime agora) {
+  if (inicio == null || inicio.isBefore(agora)) return null;
+  return inicio.difference(agora).inDays < 7 ? inicio : null;
 }
 
 bool agendaAlunoJaPassou(Agendamento ag, {DateTime? now}) =>

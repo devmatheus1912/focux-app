@@ -119,13 +119,11 @@ void main() {
 
     expect(find.text('Treino A'), findsWidgets);
     expect(find.textContaining('Concluído · '), findsOneWidget);
-    expect(find.text('Concluído'), findsOneWidget);
     expect(find.text('48 min'), findsOneWidget);
     expect(find.text('Volume acima da sessão anterior'), findsOneWidget);
     expect(find.text('1,2 mil kg'), findsOneWidget);
     expect(find.text('4 de 7'), findsOneWidget);
     expect(find.text('1 de 2'), findsOneWidget);
-    expect(find.text('Notas'), findsOneWidget);
     expect(find.text('Recordes'), findsNothing);
     expect(find.text('Sinal'), findsNothing);
     expect(find.text('Treinar de novo'), findsOneWidget);
@@ -139,7 +137,6 @@ void main() {
     );
 
     expect(find.text('Exercícios'), findsWidgets);
-    expect(find.text('Notas'), findsNothing);
     expect(find.text('Recordes'), findsNothing);
   });
 

@@ -1,6 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../dashboard/data/command_center_data.dart';
+import '../../dashboard/providers/dashboard_provider.dart';
+import '../../dashboard/utils/copilot_actions_display.dart';
 import '../data/ia_repository.dart';
 import '../models/ia_copilot_insight.dart';
 import '../models/ia_copilot_proxima_acao.dart';
@@ -9,6 +12,14 @@ import '../models/ia_copiloto_home.dart';
 final iaCopilotoHomeProvider = FutureProvider<IaCopilotoHomeBundle>((ref) async {
   return IaRepository(ref.read(apiClientProvider)).copilotoHome();
 });
+
+/// Tarefas abertas da abertura do Copiloto, sem chamar a IA.
+final copilotoTarefasAbertasProvider =
+    FutureProvider.autoDispose<IaCommandActionsPage>((ref) {
+      return ref
+          .read(dashboardRepositoryProvider)
+          .getIaCommandActionsPage(status: copilotActionsStatusAberto);
+    });
 
 /// Parameters for the insights provider.
 /// Equality + hashCode ensure Riverpod dedupes by (alunoId, mode).

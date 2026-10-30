@@ -17,7 +17,8 @@ class HistoricoExercicioLinha {
     this.deltaCargaKg,
     this.rpe,
     this.dor = false,
-    this.cargas = const [],
+    this.series = const [],
+    this.orientacao,
   });
 
   final String nome;
@@ -31,14 +32,46 @@ class HistoricoExercicioLinha {
   final int? rpe;
   final bool dor;
 
-  /// Carga de cada série, para a sparkline.
-  final List<double> cargas;
+  /// Séries gravadas, na ordem em que foram feitas.
+  final List<HistoricoSerieLinha> series;
+
+  /// Fala do personal para este exercício; nula se vale para a sessão inteira.
+  final String? orientacao;
+
+  /// Maior carga; empate fica com mais repetições.
+  HistoricoSerieLinha? get melhorSerie {
+    HistoricoSerieLinha? melhor;
+    for (final s in series) {
+      if (melhor == null ||
+          (s.cargaKg ?? 0) > (melhor.cargaKg ?? 0) ||
+          ((s.cargaKg ?? 0) == (melhor.cargaKg ?? 0) && s.reps > melhor.reps)) {
+        melhor = s;
+      }
+    }
+    return melhor;
+  }
+}
+
+class HistoricoSerieLinha {
+  const HistoricoSerieLinha({
+    required this.numero,
+    required this.repeticoes,
+    this.cargaKg,
+    this.rpe,
+    this.dor = false,
+  });
+
+  final int numero;
+  final String? repeticoes;
+  final double? cargaKg;
+  final int? rpe;
+  final bool dor;
+
+  int get reps => _primeiroNumero(repeticoes) ?? 0;
 }
 
 typedef HistoricoRecordeLinha =
     ({String exercicio, String mensagem, double? cargaKg});
-
-typedef HistoricoNotaLinha = ({String exercicio, String nota});
 
 class HistoricoDetalheView {
   const HistoricoDetalheView({
@@ -48,7 +81,7 @@ class HistoricoDetalheView {
     required this.exerciciosFeitos,
     required this.exercicios,
     required this.recordes,
-    required this.notas,
+    this.orientacaoGeral,
     this.concluidoEm,
     this.duracao,
     this.volumeKg,
@@ -71,7 +104,9 @@ class HistoricoDetalheView {
   final ({String exercicio, double deltaKg})? destaque;
   final List<HistoricoExercicioLinha> exercicios;
   final List<HistoricoRecordeLinha> recordes;
-  final List<HistoricoNotaLinha> notas;
+
+  /// A mesma orientação em todos os exercícios: aparece uma vez, no fim.
+  final String? orientacaoGeral;
 
   int get exerciciosTotal => exercicios.length;
   bool get semSeries => concluida && seriesFeitas == 0;
@@ -85,7 +120,19 @@ HistoricoDetalheView buildHistoricoDetalheView(
 }) {
   final concluida =
       normalizeTreinoStatus(execucao.status) == treinoStatusConcluido;
-  final linhas = [for (final e in execucao.exercicios) _linha(e)];
+  final orientacoes = [
+    for (final e in execucao.exercicios)
+      if (_orientacao(e) case final o?) o,
+  ];
+  final geral =
+      orientacoes.length > 1 &&
+              orientacoes.length == execucao.exercicios.length &&
+              orientacoes.toSet().length == 1
+          ? orientacoes.first
+          : null;
+  final linhas = [
+    for (final e in execucao.exercicios) _linha(e, usarOrientacao: geral == null),
+  ];
   final seriesLocais = linhas.fold(0, (t, l) => t + l.seriesFeitas);
   final planejadasLocais = linhas.fold(
     0,
@@ -131,14 +178,11 @@ HistoricoDetalheView buildHistoricoDetalheView(
           cargaKg: null,
         ),
     ],
-    notas: [
-      for (final e in execucao.exercicios)
-        if (_nota(e) case final nota?) (exercicio: e.exercicioNome, nota: nota),
-    ],
+    orientacaoGeral: geral,
   );
 }
 
-HistoricoExercicioLinha _linha(ExecucaoExercicio e) {
+HistoricoExercicioLinha _linha(ExecucaoExercicio e, {required bool usarOrientacao}) {
   final feitas = e.seriesFeitas > 0 ? e.seriesFeitas : e.seriesDetalhes.length;
   final planejadas = (e.series ?? 0) > 0 ? e.series : null;
   final ultima = e.seriesDetalhes.isEmpty ? null : e.seriesDetalhes.last;
@@ -154,10 +198,17 @@ HistoricoExercicioLinha _linha(ExecucaoExercicio e) {
     deltaCargaKg: carga != null && anterior != null ? carga - anterior : null,
     rpe: e.rpe ?? ultima?.rpe,
     dor: e.dor || e.seriesDetalhes.any((s) => s.dor),
-    cargas: [
+    series: [
       for (final s in e.seriesDetalhes)
-        if (_positiva(s.cargaKg) case final c?) c,
+        HistoricoSerieLinha(
+          numero: s.numero,
+          repeticoes: s.repeticoes,
+          cargaKg: _positiva(s.cargaKg),
+          rpe: s.rpe,
+          dor: s.dor,
+        ),
     ],
+    orientacao: usarOrientacao ? _orientacao(e) : null,
   );
 }
 
@@ -181,12 +232,10 @@ HistoricoComparacao? _comparacao(String? sinal) => switch (sinal) {
   _ => null,
 };
 
-String? _nota(ExecucaoExercicio e) {
-  final partes = [
-    for (final t in [e.observacoes, e.feedback])
-      if (t != null && t.trim().isNotEmpty) t.trim(),
-  ];
-  return partes.isEmpty ? null : partes.join(' · ');
+/// `observacoes` vem da prescrição: é fala do personal, não nota do aluno.
+String? _orientacao(ExecucaoExercicio e) {
+  final texto = e.observacoes?.trim();
+  return texto == null || texto.isEmpty ? null : texto;
 }
 
 int? _primeiroNumero(String? raw) {

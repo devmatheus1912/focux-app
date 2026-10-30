@@ -9,6 +9,7 @@ import '../../exercicios/screens/widgets/template_split_picker.dart';
 import '../data/treino_repository.dart';
 import '../data/workout_builder_preset.dart';
 import '../providers/treinos_provider.dart';
+import 'treino_no_lugar.dart';
 import '../services/recent_exercise_usage_store.dart';
 import '../utils/divisao_catalogo.dart';
 import '../../../l10n/app_localizations.dart';
@@ -20,6 +21,8 @@ Future<void> openSugerirExercicios({
   required BuildContext context,
   required WidgetRef ref,
   required int treinoId,
+  int? alunoId,
+  int? modeloId,
   required String nomeDaSessao,
   required Set<int> alreadyInTreinoIds,
 }) async {
@@ -76,7 +79,7 @@ Future<void> openSugerirExercicios({
       },
     ),
   );
-  ref.invalidate(treinoProvider(treinoId));
+  sessaoMudou(ref, treinoId, alunoId: alunoId, modeloId: modeloId);
   ref.invalidate(treinoPickerHomeProvider(treinoId));
   if (completed == true && context.mounted) {
     FeedbackHelper.showSuccess(context, S.of(context).treinoSugeridosAdicionados);

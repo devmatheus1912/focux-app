@@ -60,6 +60,8 @@ void main() {
     expect(find.text('10:00'), findsNothing);
     expect(find.text('06:00'), findsNothing);
     expect(find.text('10:30'), findsOneWidget);
+    await tester.tap(find.text('Noite'));
+    await tester.pump();
     expect(find.text('22:30'), findsOneWidget);
   });
 
@@ -67,6 +69,8 @@ void main() {
     tester,
   ) async {
     await _pump(tester, _sheet());
+    await tester.tap(find.text('Tarde'));
+    await tester.pump();
 
     expect(find.text('Nathalia'), findsNWidgets(3));
     expect(
@@ -90,6 +94,8 @@ void main() {
     await _pump(tester, _sheet());
 
     await tester.tap(find.text('30 min'));
+    await tester.pump();
+    await tester.tap(find.text('Tarde'));
     await tester.pump();
 
     expect(find.text('Confirmar horário · 10:30–11:00'), findsOneWidget);
@@ -187,6 +193,8 @@ void main() {
     await tester.pump();
 
     expect(meses, [DateTime(2026, 11)]);
+    await tester.tap(find.text('Tarde'));
+    await tester.pump();
     expect(find.text('Nathalia'), findsNWidgets(3));
   });
 }

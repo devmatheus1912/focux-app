@@ -9,7 +9,6 @@ import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
-import '../../../core/widgets/fx_celebration_overlay.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
@@ -23,8 +22,10 @@ import '../../alunos/utils/aluno360_client_cache.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../../evolucao/utils/evolucao_home_client_cache.dart';
 import '../models/treino_previa.dart';
+import '../utils/checkin_resumo.dart';
 import '../providers/checkin_provider.dart';
 import '../utils/treino_previa_view.dart';
+import '../widgets/checkin_resumo_view.dart';
 import '../widgets/treino_previa_widgets.dart';
 
 /// Prescrição antes de treinar. Só o botão Iniciar abre sessão; ao iniciar a
@@ -71,11 +72,17 @@ class _TreinoPreviaScreenState extends ConsumerState<TreinoPreviaScreen> {
       Aluno360ClientCache.clear();
       invalidateAlunoDashboardHome(ref);
       if (!mounted) return;
-      await FxCelebrationOverlay.show(
+      await showCheckinResumo(
         context,
-        title: s.treinoJaFizSucessoTitulo,
-        subtitle: s.treinoJaFizSucessoSubtitulo,
-        icon: Icons.check_circle_rounded,
+        resumo: CheckinResumo(
+          treinoNome:
+              ref.read(treinoPreviaProvider(widget.treinoId)).value?.treinoNome ??
+              s.treinosHubTitulo,
+          seriesFeitas: 0,
+          seriesPlanejadas: 0,
+        ),
+        titulo: s.treinoJaFizSucessoTitulo,
+        mensagem: s.treinoJaFizSucessoSubtitulo,
       );
       if (mounted) _voltar();
     } catch (e) {

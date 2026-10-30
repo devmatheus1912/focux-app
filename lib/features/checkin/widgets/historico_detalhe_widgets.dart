@@ -7,9 +7,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../../core/widgets/fx_sparkline.dart';
 import '../../../core/widgets/fx_strip_card.dart';
-import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
@@ -54,7 +52,7 @@ class HistoricoDetalheSkeleton extends StatelessWidget {
   }
 }
 
-/// Status, duração e a comparação com a sessão anterior.
+/// Duração e comparação com a sessão anterior; sem nada a dizer, não aparece.
 class HistoricoResumoCard extends StatelessWidget {
   const HistoricoResumoCard({super.key, required this.view});
 
@@ -65,37 +63,27 @@ class HistoricoResumoCard extends StatelessWidget {
     final s = S.of(context);
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
+    final status = historicoDetalheStatus(s, view);
     final duracao = view.duracao;
-    final linhas =
-        [
-          historicoComparacaoTexto(s, view.comparacao),
-          historicoDestaqueTexto(s, view),
-        ].nonNulls;
+    final titulo = status ?? (duracao == null ? null : treinosDuracaoTexto(s, duracao));
+    final linhas = [
+      if (status != null && duracao != null) treinosDuracaoTexto(s, duracao),
+      historicoComparacaoTexto(s, view.comparacao),
+      historicoDestaqueTexto(s, view),
+    ].nonNulls.toList();
+    if (titulo == null && linhas.isEmpty) return const SizedBox.shrink();
     return FxStripCard(
       accent: primary,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Wrap(
-            spacing: TokensStrip.s2,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              Text(
-                historicoDetalheStatus(s, view),
-                style: FocuxHubTypography.sectionTitle(
-                  context,
-                  color: chrome.ink,
-                ),
-              ),
-              if (duracao != null)
-                Text(
-                  treinosDuracaoTexto(s, duracao),
-                  style: FocuxHubTypography.bodyMuted(color: chrome.mute),
-                ),
-            ],
-          ),
-          for (final linha in linhas) ...[
-            const SizedBox(height: TokensStrip.s1),
+          if (titulo != null)
+            Text(
+              titulo,
+              style: FocuxHubTypography.sectionTitle(context, color: chrome.ink),
+            ),
+          for (final (i, linha) in linhas.indexed) ...[
+            if (i > 0 || titulo != null) const SizedBox(height: TokensStrip.s1),
             Text(
               linha,
               style: FocuxHubTypography.bodyMuted(color: chrome.mute),
@@ -107,7 +95,7 @@ class HistoricoResumoCard extends StatelessWidget {
   }
 }
 
-/// Volume (só com carga), séries e exercícios feitos.
+/// Volume (só com carga), séries e exercícios feitos, em um cartão só.
 class HistoricoMetricas extends StatelessWidget {
   const HistoricoMetricas({super.key, required this.view});
 
@@ -116,38 +104,57 @@ class HistoricoMetricas extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = S.of(context);
-    final primary = Theme.of(context).colorScheme.primary;
-    final isDark = ShellChrome.of(context).isDark;
+    final chrome = ShellChrome.of(context);
     final volume = view.volumeKg;
-    Widget tile(String label, String valor) => Expanded(
-      child: OperationalMetricTile(
-        label: label,
-        value: valor,
-        color: primary,
-        isDark: isDark,
-        dense: true,
-        emphasis: OperationalMetricEmphasis.muted,
-      ),
-    );
-    final tiles = [
-      if (volume != null) tile(s.historicoVolume, historicoKgTexto(s, volume)),
-      tile(
+    final itens = [
+      if (volume != null) (s.historicoVolume, historicoKgTexto(s, volume)),
+      (
         s.historicoSeries,
         historicoNDeMTexto(s, view.seriesFeitas, view.seriesPlanejadas),
       ),
-      tile(
+      (
         s.historicoExercicios,
         historicoNDeMTexto(s, view.exerciciosFeitos, view.exerciciosTotal),
       ),
     ];
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        for (final (i, t) in tiles.indexed) ...[
-          if (i > 0) const SizedBox(width: TokensStrip.s2),
-          t,
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: TokensStrip.s3,
+        vertical: TokensStrip.s3,
+      ),
+      decoration: fxListCardDecoration(context),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (final (label, valor) in itens)
+            Expanded(
+              child: MergeSemantics(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                    ),
+                    const SizedBox(height: 2),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        valor,
+                        maxLines: 1,
+                        style: FocuxHubTypography.metric(
+                          color: chrome.ink,
+                          fontSize: 20,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
         ],
-      ],
+      ),
     );
   }
 }
@@ -172,36 +179,165 @@ class HistoricoSecao extends StatelessWidget {
   }
 }
 
-class HistoricoExercicioTile extends StatelessWidget {
+/// Linhas num grupo único, com divisor entre elas.
+class HistoricoGrupo extends StatelessWidget {
+  const HistoricoGrupo({super.key, required this.filhos});
+
+  final List<Widget> filhos;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: fxListCardDecoration(context),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (final (i, filho) in filhos.indexed) ...[
+            if (i > 0) const Divider(height: 1),
+            filho,
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Exercício: fechado mostra a melhor série; aberto, cada série e a orientação.
+class HistoricoExercicioTile extends StatefulWidget {
   const HistoricoExercicioTile({super.key, required this.linha});
 
   final HistoricoExercicioLinha linha;
 
   @override
+  State<HistoricoExercicioTile> createState() => _HistoricoExercicioTileState();
+}
+
+class _HistoricoExercicioTileState extends State<HistoricoExercicioTile> {
+  var _aberto = false;
+
+  @override
   Widget build(BuildContext context) {
     final s = S.of(context);
-    final primary = Theme.of(context).colorScheme.primary;
-    return FxSatelliteListTile(
-      title: linha.nome,
-      margin: const EdgeInsets.only(bottom: 2),
-      subtitle: Text(historicoExercicioDetalhe(s, linha)),
-      leading: FxIcon(
-        name: linha.feito ? 'circle-check' : 'target',
-        size: 18,
-        color: linha.feito ? EagleTokens.good : ShellChrome.of(context).mute,
-      ),
-      trailing:
-          linha.cargas.length >= 2
-              ? ExcludeSemantics(
-                child: FxSparkline(
-                  data: linha.cargas,
-                  color: primary,
-                  width: 44,
-                  height: 18,
-                  strokeWidth: 1.5,
+    final chrome = ShellChrome.of(context);
+    final linha = widget.linha;
+    final temDetalhe = linha.series.isNotEmpty || linha.orientacao != null;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Semantics(
+          button: temDetalhe,
+          expanded: temDetalhe ? _aberto : null,
+          label: '${linha.nome}. ${historicoExercicioDetalhe(s, linha)}',
+          hint: !temDetalhe
+              ? null
+              : _aberto
+              ? s.historicoFecharExercicio
+              : s.historicoAbrirExercicio,
+          excludeSemantics: true,
+          child: InkWell(
+            onTap: temDetalhe ? () => setState(() => _aberto = !_aberto) : null,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 56),
+              child: Padding(
+                padding: const EdgeInsets.all(TokensStrip.s3),
+                child: Row(
+                  children: [
+                    FxIcon(
+                      name: linha.feito ? 'circle-check' : 'target',
+                      size: 18,
+                      color: linha.feito ? EagleTokens.good : chrome.mute,
+                    ),
+                    const SizedBox(width: TokensStrip.s3),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            linha.nome,
+                            style: FocuxHubTypography.cardTitle(color: chrome.ink),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            historicoExercicioDetalhe(s, linha),
+                            style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (temDetalhe)
+                      Icon(
+                        _aberto
+                            ? Icons.expand_less_rounded
+                            : Icons.expand_more_rounded,
+                        size: 20,
+                        color: chrome.mute,
+                      ),
+                  ],
                 ),
-              )
-              : null,
+              ),
+            ),
+          ),
+        ),
+        if (_aberto)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              TokensStrip.s3 + 18 + TokensStrip.s3,
+              0,
+              TokensStrip.s3,
+              TokensStrip.s3,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (final serie in linha.series)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: TokensStrip.s1),
+                    child: Text(
+                      [
+                        s.historicoSerieLinha(
+                          serie.numero,
+                          historicoSerieTexto(s, serie),
+                        ),
+                        if (serie.rpe case final rpe?) s.historicoRpe(rpe),
+                        if (serie.dor) s.historicoDor,
+                      ].join(' · '),
+                      style: FocuxHubTypography.body(color: chrome.ink),
+                    ),
+                  ),
+                if (linha.orientacao case final texto?) ...[
+                  const SizedBox(height: TokensStrip.s1),
+                  HistoricoOrientacao(texto: texto),
+                ],
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+/// Fala do personal, com rótulo: nunca parece anotação do aluno.
+class HistoricoOrientacao extends StatelessWidget {
+  const HistoricoOrientacao({super.key, required this.texto});
+
+  final String texto;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          S.of(context).historicoOrientacao,
+          style: FocuxHubTypography.bodyMuted(
+            color: chrome.mute,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(texto, style: FocuxHubTypography.body(color: chrome.ink)),
+      ],
     );
   }
 }

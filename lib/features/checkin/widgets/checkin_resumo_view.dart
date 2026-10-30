@@ -29,6 +29,8 @@ final ValueNotifier<bool> checkinResumoAberto = ValueNotifier(false);
 Future<CheckinResumoAcao> showCheckinResumo(
   BuildContext context, {
   required CheckinResumo resumo,
+  String? titulo,
+  String? mensagem,
 }) async {
   HapticFeedback.mediumImpact();
   checkinResumoAberto.value = true;
@@ -40,7 +42,12 @@ Future<CheckinResumoAcao> showCheckinResumo(
         context,
         normal: const Duration(milliseconds: 280),
       ),
-      pageBuilder: (_, __, ___) => CheckinResumoView(resumo: resumo),
+      pageBuilder:
+          (_, __, ___) => CheckinResumoView(
+            resumo: resumo,
+            titulo: titulo,
+            mensagem: mensagem,
+          ),
       transitionsBuilder:
           (_, animation, __, child) => FadeTransition(
             opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
@@ -53,9 +60,18 @@ Future<CheckinResumoAcao> showCheckinResumo(
 }
 
 class CheckinResumoView extends StatelessWidget {
-  const CheckinResumoView({super.key, required this.resumo});
+  const CheckinResumoView({
+    super.key,
+    required this.resumo,
+    this.titulo,
+    this.mensagem,
+  });
 
   final CheckinResumo resumo;
+
+  /// Texto no lugar de "Treino concluído" e frase abaixo ("Já fiz").
+  final String? titulo;
+  final String? mensagem;
 
   bool get _celebra =>
       !resumo.parcial &&
@@ -124,14 +140,23 @@ class CheckinResumoView extends StatelessWidget {
                           ),
                           const SizedBox(height: TokensStrip.s1),
                           Text(
-                            resumo.parcial
-                                ? s.checkinResumoTituloParcial
-                                : s.checkinResumoTitulo,
+                            titulo ??
+                                (resumo.parcial
+                                    ? s.checkinResumoTituloParcial
+                                    : s.checkinResumoTitulo),
                             textAlign: TextAlign.center,
                             style: FocuxHubTypography.bodyMuted(
                               color: chrome.mute,
                             ),
                           ),
+                          if (mensagem case final frase?) ...[
+                            const SizedBox(height: TokensStrip.s4),
+                            Text(
+                              frase,
+                              textAlign: TextAlign.center,
+                              style: FocuxHubTypography.body(color: chrome.ink),
+                            ),
+                          ],
                           if (resumo.temNumeros) ...[
                             const SizedBox(height: TokensStrip.s6),
                             _Numeros(resumo: resumo),
@@ -216,15 +241,17 @@ class CheckinResumoView extends StatelessWidget {
                                 context,
                               ).pop(CheckinResumoAcao.concluir),
                         ),
-                        const SizedBox(height: TokensStrip.s2),
-                        FxTonalButton(
-                          label: s.checkinResumoDetalhes,
-                          expanded: true,
-                          onPressed:
-                              () => Navigator.of(
-                                context,
-                              ).pop(CheckinResumoAcao.detalhes),
-                        ),
+                        if (mensagem == null) ...[
+                          const SizedBox(height: TokensStrip.s2),
+                          FxTonalButton(
+                            label: s.checkinResumoDetalhes,
+                            expanded: true,
+                            onPressed:
+                                () => Navigator.of(
+                                  context,
+                                ).pop(CheckinResumoAcao.detalhes),
+                          ),
+                        ],
                       ],
                     ),
                   ),

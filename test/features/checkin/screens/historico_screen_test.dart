@@ -103,11 +103,11 @@ void main() {
     );
 
     expect(find.text('Histórico'), findsWidgets);
-    expect(find.text('Aqui fica o que você já fez.'), findsOneWidget);
+    expect(find.text('Aqui fica o que você já fez.'), findsNothing);
     expect(find.text('Começar'), findsNothing);
     expect(find.text('Esta semana · 2 treinos'), findsOneWidget);
     expect(find.text('Semana passada · 1 treino'), findsOneWidget);
-    expect(find.text('Hoje · 52 min'), findsNWidgets(2));
+    expect(find.text('52 min'), findsNWidgets(3));
     expect(find.text('Treino C'), findsOneWidget);
     expect(find.text('Carregar mais'), findsNothing);
     expect(find.text('Em andamento'), findsNothing);

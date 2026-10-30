@@ -3,8 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/router/safe_navigation.dart';
-import '../../../core/theme/focux_hub_typography.dart';
-import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/a11y_announce.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
@@ -17,7 +15,6 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../../dashboard/utils/aluno_ritmo_linha.dart';
-import '../../dashboard/widgets/aluno_ritmo_card.dart';
 import '../data/checkin_repository.dart';
 import '../providers/historico_provider.dart';
 import '../utils/historico_detalhe_view.dart';
@@ -92,23 +89,6 @@ class _HistoricoCheckinScreenState
         ),
         body: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                TokensStrip.s4,
-                TokensStrip.s4,
-                TokensStrip.s4,
-                0,
-              ),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  s.historicoIntro,
-                  style: FocuxHubTypography.bodyMuted(
-                    color: ShellChrome.of(context).mute,
-                  ),
-                ),
-              ),
-            ),
             if (ganho != null)
               Padding(
                 padding: const EdgeInsets.fromLTRB(
@@ -117,7 +97,7 @@ class _HistoricoCheckinScreenState
                   TokensStrip.s4,
                   0,
                 ),
-                child: AlunoRitmoCard(linha: ganho),
+                child: HistoricoGanhoCard(linha: ganho),
               ),
             if (fichas.isNotEmpty)
               HistoricoFiltroFichas(
@@ -167,9 +147,8 @@ class _HistoricoCheckinScreenState
             titulo: historicoSemanaCabecalho(s, semana),
             linhas: [
               for (final r in semana.sessoes)
-                TreinoRecenteRow(
+                HistoricoSessaoRow(
                   recente: r,
-                  hoje: now,
                   onTap: () => _abrir(r.execucao),
                 ),
             ],

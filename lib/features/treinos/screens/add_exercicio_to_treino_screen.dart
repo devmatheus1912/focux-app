@@ -60,17 +60,20 @@ import '../../anamnese/providers/anamnese_provider.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../widgets/exercise_library_panel.dart';
 import '../widgets/prescription_editor_sheet.dart';
+import '../widgets/treino_no_lugar.dart';
 
 part 'add_exercicio_to_treino_screen_actions.part.dart';
 
 class AddExercicioToTreinoScreen extends ConsumerStatefulWidget {
   final int treinoId;
   final int? alunoId;
+  final int? modeloId;
   final String bloco;
   const AddExercicioToTreinoScreen({
     super.key,
     required this.treinoId,
     this.alunoId,
+    this.modeloId,
     this.bloco = 'TRABALHO',
   });
 

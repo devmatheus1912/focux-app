@@ -34,12 +34,21 @@ extension IaCopilotScreenApply on _IaCopilotoScreenState {
     if (alunoId == null || apply == null || _aplicando) return;
 
     final spec = _toExecutarSpec(apply);
-    final confirmed = await showCopilotExecutarConfirmSheet(
-      context,
-      spec: spec,
-      primary: BrandPalette.softened(Theme.of(context).colorScheme.primary),
-    );
-    if (!confirmed || !mounted) return;
+    var parametros = spec.parametros;
+    if (spec.backendTipo == 'ENVIAR_PUSH') {
+      parametros = await showIaCopilotoMensagemSheet(
+        context,
+        mensagem: parametros ?? '',
+      );
+      if (parametros == null || !mounted) return;
+    } else {
+      final confirmed = await showCopilotExecutarConfirmSheet(
+        context,
+        spec: spec,
+        primary: BrandPalette.softened(Theme.of(context).colorScheme.primary),
+      );
+      if (!confirmed || !mounted) return;
+    }
 
     setState(() => _aplicando = true);
     await AnalyticsService.instance.track(
@@ -56,7 +65,7 @@ extension IaCopilotScreenApply on _IaCopilotoScreenState {
       ).executarAcaoCopiloto(
         alunoId: alunoId,
         tipoAcao: spec.backendTipo,
-        parametros: spec.parametros,
+        parametros: parametros,
       );
       if (!mounted) return;
       if (resp.ok) {
@@ -89,89 +98,75 @@ extension IaCopilotScreenApply on _IaCopilotoScreenState {
     context.push('/alunos/$alunoId/ia/progressao');
   }
 
-  Future<void> _abrirMenu({bool includeCreateTask = false}) async {
-    final dark = Theme.of(context).brightness == Brightness.dark;
-    final primary = Theme.of(context).colorScheme.primary;
-    final ink = dark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = dark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-
-    final action = await showFxHomeSheet<String>(
+  Future<void> _denunciar() async {
+    final insights = ref
+        .read(insightsProvider(InsightsQuery(alunoId: _selectedAlunoId, mode: _mode)))
+        .value;
+    await showDenunciarSheet(
       context,
-      builder: (ctx) {
-        return FxHomeSheetSurface(
-          isDark: dark,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              FxHomeSheetHandle(isDark: dark),
-              SizedBox(height: TokensStrip.s4),
-              FxHomeSheetHeader(
-                isDark: dark,
-                title: 'Ações das recomendações',
-                subtitle: 'Atualize, troque o aluno ou limpe este resultado.',
-                leading: Icon(Icons.tune_outlined, color: primary, size: 18),
-              ),
-              SizedBox(height: TokensStrip.s4),
-              if (includeCreateTask)
-                IaCopilotMenuAction(
-                  icon: Icons.assignment_turned_in_outlined,
-                  title: iaCopilotoCriarTarefaLabel(),
-                  subtitle: 'Salva no ${FocuxMicrocopy.commandCenter}.',
-                  ink: ink,
-                  mute: mute,
-                  onTap: () => Navigator.of(ctx).pop('criar'),
-                ),
-              IaCopilotMenuAction(
-                icon: Icons.person_search_outlined,
-                title: 'Trocar aluno',
-                subtitle: 'Gera novas recomendações para outro aluno.',
-                ink: ink,
-                mute: mute,
-                onTap: () => Navigator.of(ctx).pop('trocar'),
-              ),
-              IaCopilotMenuAction(
-                icon: Icons.refresh_rounded,
-                title: 'Atualizar insights',
-                subtitle: 'Recalcula as recomendações para este aluno.',
-                ink: ink,
-                mute: mute,
-                onTap: () => Navigator.of(ctx).pop('atualizar'),
-              ),
-              IaCopilotMenuAction(
-                icon: Icons.cleaning_services_outlined,
-                title: 'Limpar resultado',
-                subtitle: 'Volta para o estado inicial do Copiloto.',
-                ink: ink,
-                mute: mute,
-                onTap: () => Navigator.of(ctx).pop('limpar'),
-              ),
-            ],
-          ),
-        );
-      },
+      repo: ModeracaoRepository(ref.read(apiClientProvider)),
+      tipo: DenunciaTipo.iaResposta,
+      conteudo: (insights ?? const [])
+          .map((i) => '${i.titulo}: ${i.detalhe}')
+          .join('\n'),
     );
+  }
 
+  Future<void> _abrirMenu() async {
+    final s = S.of(context);
+    final action = await showFxGroupedActionSheet<String>(
+      context,
+      titulo: s.copilotoMenuTitulo,
+      subtitulo: _selectedAlunoNome,
+      icone: Icons.tune_outlined,
+      grupos: [
+        FxActionGroup<String>(null, [
+          if (_applySpec != null)
+            FxActionItem(
+              valor: 'criar',
+              rotulo: iaCopilotoCriarTarefaLabel(),
+              icone: Icons.assignment_turned_in_outlined,
+            ),
+          FxActionItem(
+            valor: 'progressao',
+            rotulo: s.copilotoProgressaoCarga,
+            icone: Icons.trending_up_rounded,
+          ),
+          FxActionItem(
+            valor: 'refazer',
+            rotulo: s.copilotoRefazer,
+            icone: Icons.refresh_rounded,
+          ),
+          FxActionItem(
+            valor: 'denunciar',
+            rotulo: S.of(context).moderacaoDenunciarIa,
+            icone: Icons.flag_outlined,
+          ),
+        ]),
+      ],
+    );
     if (!mounted || action == null) return;
     switch (action) {
       case 'criar':
         await _atribuir();
-        break;
-      case 'trocar':
-        await _selecionarAluno();
-        break;
-      case 'atualizar':
-        await _gerar();
-        break;
-      case 'limpar':
-        setState(() {
-          _gerado = false;
-          _proximaAcao = null;
-          _tarefaCriada = false;
-          _tarefaPersistida = false;
-          _aplicando = false;
-          _erro = null;
-        });
-        break;
+      case 'progressao':
+        _abrirProgressao();
+      case 'refazer':
+        await _gerar(refazer: true);
+      case 'denunciar':
+        await _denunciar();
     }
+  }
+
+  /// Volta à abertura para analisar outro aluno.
+  Future<void> _trocarAluno() async {
+    setState(() {
+      _gerado = false;
+      _proximaAcao = null;
+      _aplicando = false;
+      _erro = null;
+    });
+    await _selecionarAluno();
+    if (mounted && _selectedAlunoId != null) await _gerar();
   }
 }

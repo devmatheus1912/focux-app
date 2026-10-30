@@ -185,19 +185,23 @@ class FxSettingsTile extends StatelessWidget {
                         if (value.isNotEmpty && !locked) ...[
                           const SizedBox(width: TokensStrip.s2),
                           Flexible(
-                            child: Text(
-                              value,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.end,
-                              style:
-                                  numeric
-                                      ? FxSettingsLayout.rowMetric(
-                                        color: danger ? ink : mute,
-                                      )
-                                      : FxSettingsLayout.rowValue(
-                                        color: danger ? ink : mute,
-                                      ),
+                            // Align ocupa a vaga: o valor encosta na seta.
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: Text(
+                                value,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.end,
+                                style:
+                                    numeric
+                                        ? FxSettingsLayout.rowMetric(
+                                          color: danger ? ink : mute,
+                                        )
+                                        : FxSettingsLayout.rowValue(
+                                          color: danger ? ink : mute,
+                                        ),
+                              ),
                             ),
                           ),
                         ],

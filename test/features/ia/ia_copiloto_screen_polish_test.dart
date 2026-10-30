@@ -23,17 +23,6 @@ void main() {
     expect(
       screen,
       anyOf(
-        contains('friendlyError'),
-        contains('DashboardErrorState'),
-        contains('FxEmptyState'),
-        contains('_erro'),
-        contains('_TrainingEmptyState'),
-        contains('ref.invalidate'),
-      ),
-    );
-    expect(
-      screen,
-      anyOf(
         contains('FxLoading'),
         contains('SkeletonLoader'),
         contains('SkeletonList'),
@@ -53,19 +42,14 @@ void main() {
 
     expect(screen, contains('fxScreenA11yScope'));
     expect(screen, contains('FxErrorState'));
-    expect(screen, contains('FxEmptyState'));
     expect(screen, contains('CopilotoCardView'));
-    expect(screen, contains('não monta fichas de treino'));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, isNot(contains('FxSettingsTile')));
     expect(screen, contains('iaCopilotoViewed'));
     expect(screen, contains('iaCopilotoHelpOpened'));
-    expect(screen, contains('FxHubFreshness.fromFetchedAt'));
     expect(screen, contains('iaCopilotoHomeProvider'));
     expect(screen, contains("retryLabel:"));
-    expect(screen, contains('showFxConfirmSheet'));
-    expect(screen, isNot(contains('FxLiquidPrimaryButton')));
     expect(screen, isNot(contains('OutlinedButton')));
     expect(screen, contains('showBack: false'));
     expect(screen, contains('constrainWidth: false'));

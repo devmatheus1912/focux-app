@@ -57,38 +57,12 @@ void main() {
   });
 
   test('heading omite zero atendimentos', () {
-    expect(
-      agendaDayHeading(
-        weekdayLabel: 'Qui',
-        date: DateTime(2026, 8, 20),
-        visibleCount: 0,
-      ),
-      'Qui · 20 ago',
-    );
-    expect(
-      agendaDayHeading(
-        weekdayLabel: 'Qui',
-        date: DateTime(2026, 8, 20),
-        visibleCount: 1,
-      ),
-      'Qui · 20 ago · 1 atendimento',
-    );
     expect(agendaEmptyDayHint(), 'Encaixe avaliação, retorno ou sessão.');
   });
 
   test('copy de agendar e concluir fica fora da UI', () {
-    expect(agendaNovoTileLabel(), 'Agendar atendimento');
-    expect(agendaNovoConfirmTitle(), 'Agendar este horário?');
     expect(agendaNovoDiscardTitle(), 'Descartar agendamento?');
     expect(agendaNovoDiscardMessage(), 'O que você preencheu não será salvo.');
-    expect(
-      agendaNovoConfirmMessage(
-        alunoNome: 'Bruno',
-        inicio: DateTime(2026, 8, 19, 8, 30),
-        fim: DateTime(2026, 8, 19, 9, 30),
-      ),
-      'Confirma Bruno em 08:30–09:30.',
-    );
     expect(agendaEventPrimaryLabel(completePrimary: true), 'Marcar concluído');
     expect(agendaEventPrimaryLabel(completePrimary: false), 'Abrir aluno');
     expect(agendaTituloMax, 120);

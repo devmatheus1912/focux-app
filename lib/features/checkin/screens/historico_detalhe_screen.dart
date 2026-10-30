@@ -184,21 +184,6 @@ class _HistoricoDetalheScreenState
                   HistoricoResumoCard(view: v),
                   const SizedBox(height: TokensStrip.s3),
                   HistoricoMetricas(view: v),
-                  const SizedBox(height: TokensStrip.s4),
-                  HistoricoSecao(
-                    titulo: s.historicoExercicios,
-                    filhos: [
-                      if (v.exercicios.isEmpty)
-                        Text(
-                          s.historicoSemExercicios,
-                          style: FocuxHubTypography.bodyMuted(
-                            color: ShellChrome.of(context).mute,
-                          ),
-                        ),
-                      for (final l in v.exercicios)
-                        HistoricoExercicioTile(linha: l),
-                    ],
-                  ),
                   if (v.recordes.isNotEmpty) ...[
                     const SizedBox(height: TokensStrip.s4),
                     HistoricoSecao(
@@ -213,19 +198,29 @@ class _HistoricoDetalheScreenState
                       ],
                     ),
                   ],
-                  if (v.notas.isNotEmpty) ...[
-                    const SizedBox(height: TokensStrip.s4),
-                    HistoricoSecao(
-                      titulo: s.historicoNotas,
-                      filhos: [
-                        for (final n in v.notas)
-                          HistoricoInfoTile(
-                            titulo: n.exercicio,
-                            detalhe: n.nota,
-                            icone: 'article',
+                  const SizedBox(height: TokensStrip.s4),
+                  HistoricoSecao(
+                    titulo: s.historicoExercicios,
+                    filhos: [
+                      if (v.exercicios.isEmpty)
+                        Text(
+                          s.historicoSemExercicios,
+                          style: FocuxHubTypography.bodyMuted(
+                            color: ShellChrome.of(context).mute,
                           ),
-                      ],
-                    ),
+                        )
+                      else
+                        HistoricoGrupo(
+                          filhos: [
+                            for (final l in v.exercicios)
+                              HistoricoExercicioTile(linha: l),
+                          ],
+                        ),
+                    ],
+                  ),
+                  if (v.orientacaoGeral case final orientacao?) ...[
+                    const SizedBox(height: TokensStrip.s4),
+                    HistoricoOrientacao(texto: orientacao),
                   ],
                 ],
               ),

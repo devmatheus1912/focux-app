@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:focux_app/features/agenda/data/agenda_repository.dart';
 import 'package:focux_app/features/agenda/providers/agenda_provider.dart';
 import 'package:focux_app/features/agenda/screens/agenda_screen.dart';
@@ -73,6 +74,8 @@ Future<_FakeRepo> _pump(WidgetTester tester) async {
     ),
   );
   await _settle(tester);
+  await tester.tap(find.text('Mês'));
+  await _settle(tester);
   return repo;
 }
 
@@ -80,6 +83,7 @@ void main() {
   setUp(() {
     GoogleFonts.config.allowRuntimeFetching = false;
     AgendaWeekClientCache.clear();
+    SharedPreferences.setMockInitialValues({});
   });
 
   testWidgets('tocar no dia com ponto mostra o atendimento', (tester) async {
@@ -99,7 +103,7 @@ void main() {
     expect(find.text('Aluno Calendário'), findsOneWidget);
   });
 
-  testWidgets('dia vazio abre a folha com Dia livre e Agendar no dia', (
+  testWidgets('dia vazio abre a lista com Dia livre e Agendar no dia', (
     tester,
   ) async {
     await _pump(tester);
@@ -110,7 +114,6 @@ void main() {
 
     expect(find.textContaining('Agendar em'), findsNothing);
     expect(find.text('Dia livre'), findsNothing);
-    expect(find.byTooltip('Ir para hoje'), findsNothing);
 
     await tester.tap(
       find.bySemanticsLabel(
@@ -119,13 +122,9 @@ void main() {
     );
     await _settle(tester);
 
-    expect(find.byType(BottomSheet), findsOneWidget);
+    expect(find.byType(BottomSheet), findsNothing);
     expect(find.text('Dia livre'), findsWidgets);
     expect(find.text('Agendar em $rotulo'), findsOneWidget);
-    expect(
-      find.byTooltip('Ir para hoje'),
-      ehHoje ? findsNothing : findsOneWidget,
-    );
   });
 
   testWidgets('arrastar o calendário troca o mês e Hoje volta', (tester) async {
@@ -143,7 +142,7 @@ void main() {
     expect(find.text(agendaMonthLabel(proximo)), findsOneWidget);
     expect(repo.meses.last, '${proximo.year}-${proximo.month}');
 
-    await tester.tap(find.byTooltip('Ir para hoje'));
+    await tester.tap(find.text('Hoje'));
     await _settle(tester);
     expect(find.text(agendaMonthLabel(agendaMonthOf(hoje))), findsOneWidget);
   });

@@ -5,6 +5,7 @@ import 'package:flutter/painting.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../features/anamnese/data/anamnese_rascunho_store.dart';
 import '../../features/agenda/utils/agenda_week_client_cache.dart';
 import '../../features/alunos/data/aluno_copilot_ia_cache_store.dart';
 import '../../features/alunos/data/aluno_followup_store.dart';
@@ -59,6 +60,7 @@ class SessionInvalidator {
         CheckinSeriesPendentesStore.limpar,
         _clearSessionPrefs,
         MigracaoMagicaDraftCache.clear,
+        AnamneseRascunhoStore.limpar,
         AlunoFollowUpStore.clearAll,
         _clearHealthSession,
         _clearImageCaches,

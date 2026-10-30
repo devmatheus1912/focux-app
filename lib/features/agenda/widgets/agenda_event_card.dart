@@ -15,12 +15,16 @@ class AgendaEventCard extends StatelessWidget {
     required this.onTap,
     this.photoUrl,
     this.emphasized = false,
+    this.detalheExtra,
   });
 
   final Agendamento agendamento;
   final VoidCallback onTap;
   final String? photoUrl;
   final bool emphasized;
+
+  /// Quanto falta, no próximo atendimento.
+  final String? detalheExtra;
 
   @override
   Widget build(BuildContext context) {
@@ -31,9 +35,13 @@ class AgendaEventCard extends StatelessWidget {
       titulo: agendamento.titulo,
     );
     final note = agendaEventSessionNote(agendamento.titulo);
-    final status = agendaStatusLabel(agendamento.status);
+    final atendimento = agendamento.statusAtendimento?.trim() ?? '';
+    final status = agendaStatusLabel(
+      atendimento.isEmpty ? agendamento.status : atendimento,
+    );
     final time = agendaHm(agendamento.inicio);
     final subtitle = [
+      if (detalheExtra case final extra?) extra,
       status,
       if (note != null && note.isNotEmpty) note,
     ].join(' · ');

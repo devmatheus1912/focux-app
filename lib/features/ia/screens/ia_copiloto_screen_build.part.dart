@@ -9,9 +9,9 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
     final wash = primary.withValues(alpha: dark ? 0.16 : 0.10);
     final ink = chrome.ink;
     final mute = chrome.mute;
-    final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
     final homeAsync = ref.watch(iaCopilotoHomeProvider);
     final home = homeAsync.value;
+    final tarefas = ref.watch(copilotoTarefasAbertasProvider).value;
     final planoFromHome = home?.planoFeatures;
     if (planoFromHome != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -59,7 +59,7 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
           safeArea: false,
           appBar: FxShellAppBar(
             title: 'Copiloto',
-            subtitle: freshnessLabel ?? 'IA FOCUX',
+            subtitle: _gerado ? _selectedAlunoNome : null,
             showBack: false,
             actions: [
               FxHelpIconButton(
@@ -71,13 +71,15 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                   showIaCopilotoHelpSheet(context);
                 },
               ),
-              SizedBox(width: FxHelpChrome.gap),
-              IaCopilotHeaderStatus(
-                dark: dark,
-                brand: brand,
-                ink: ink,
-                quotaLabel: quotaLabel,
-              ),
+              if (quotaLabel != null) ...[
+                SizedBox(width: FxHelpChrome.gap),
+                IaCopilotHeaderStatus(
+                  dark: dark,
+                  brand: brand,
+                  ink: ink,
+                  quotaLabel: quotaLabel,
+                ),
+              ],
             ],
           ),
           body: SafeArea(
@@ -122,35 +124,22 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                                 () => ref.invalidate(iaCopilotoHomeProvider),
                           ),
                         )
-                      else
+                      else if (!_gerando)
                         Semantics(
-                          hint: _howItWorksPreview,
+                          hint: iaCopilotoComoCalculamos,
                           child: CopilotoCardView(
-                            card: copilotoCard(
-                              alunoNome: _selectedAlunoNome,
-                              modo: _mode,
+                            prioridades: copilotoPrioridades(
+                              tarefas?.itens ?? const [],
+                              {
+                                for (final a in home?.alunosResumo ?? const <IaCopilotoAlunoResumo>[])
+                                  a.id: a.nome,
+                              },
                             ),
-                            modo: _mode,
-                            onModo: (modo) {
-                              final index = _modes.indexOf(modo);
-                              if (index < 0 || index == _modeIdx) return;
-                              AnalyticsService.instance.track(
-                                ProductEvents.iaCopilotoModeChanged,
-                                props: {'from': _mode, 'to': modo},
-                              );
-                              setState(() => _modeIdx = index);
-                            },
-                            onAction: () {
-                              final card = copilotoCard(
-                                alunoNome: _selectedAlunoNome,
-                                modo: _mode,
-                              );
-                              if (card.escolherAluno) {
-                                _selecionarAluno();
-                                return;
-                              }
-                              _gerar();
-                            },
+                            tarefasAbertas: tarefas?.totalItens ?? 0,
+                            alunoNome: _selectedAlunoNome,
+                            onAnalisar: _analisar,
+                            onAnalisarSelecionado: _gerar,
+                            onEscolherAluno: _trocarAluno,
                             onVerTarefas:
                                 () => context.push(
                                   '/dashboard/command-center/copiloto',
@@ -159,7 +148,7 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                         ),
                     ],
 
-                    if (_gerando || _gerado)
+                    if (_gerando)
                       Padding(
                         padding: const EdgeInsets.fromLTRB(
                           FxSettingsLayout.pageInset,
@@ -169,7 +158,7 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                         ),
                         child: IaCopilotGenerationStatus(
                           gerando: _gerando,
-                          gerado: _gerado,
+                          gerado: false,
                           elapsedMs: _geracaoMs,
                           ink: ink,
                           mute: mute,
@@ -194,7 +183,7 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                           onRetry:
                               _erroSugereUpgrade(_erro!)
                                   ? _mostrarUpgradePorErro
-                                  : _gerar,
+                                  : () => _gerar(refazer: true),
                           retryLabel:
                               _erroSugereUpgrade(_erro!)
                                   ? 'Fazer upgrade'
@@ -213,18 +202,39 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                           FxSettingsLayout.pageInset,
                           TokensStrip.s3,
                         ),
-                        child: Text(
-                          [
-                            if (freshnessLabel != null &&
-                                freshnessLabel.trim().isNotEmpty)
-                              freshnessLabel,
-                            _resultNote,
-                          ].where((s) => s.trim().isNotEmpty).join(' · '),
-                          style: TextStyle(
-                            color: mute,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    _selectedAlunoNome ?? '',
+                                    style: FocuxHubTypography.pageTitle(
+                                      context,
+                                      color: ink,
+                                    ),
+                                  ),
+                                  if (_proximaAcao?.motivo case final motivo?
+                                      when motivo.trim().isNotEmpty) ...[
+                                    const SizedBox(height: TokensStrip.s1),
+                                    Text(
+                                      motivo.trim(),
+                                      style: FocuxHubTypography.bodyMuted(
+                                        color: mute,
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: TokensStrip.s2),
+                            FxTonalButton(
+                              label: S.of(context).copilotoTrocar,
+                              compact: true,
+                              onPressed: _trocarAluno,
+                            ),
+                          ],
                         ),
                       ),
                       Consumer(
@@ -289,7 +299,7 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                                         'Adicione mais treinos e check-ins para que a IA gere recomendações personalizadas.',
                                     action: FxEmptyAction(
                                       label: 'Gerar novamente',
-                                      onTap: _gerar,
+                                      onTap: () => _gerar(refazer: true),
                                     ),
                                   ),
                                 );
@@ -305,21 +315,15 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                                   crossAxisAlignment:
                                       CrossAxisAlignment.stretch,
                                   children: [
-                                    DashboardSectionHeader(
-                                      title: 'Insights · $_modeDisplay',
-                                    ),
-                                    const SizedBox(height: TokensStrip.s2),
-                                    Text(
-                                      degraded
-                                          ? 'A IA respondeu fora do formato ideal. Mantivemos as recomendações para revisão manual.'
-                                          : '${insights.length} recomendações geradas',
-                                      style: TextStyle(
-                                        color: mute,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
+                                    if (degraded) ...[
+                                      Text(
+                                        'A IA respondeu fora do formato ideal. Mantivemos as recomendações para revisão manual.',
+                                        style: FocuxHubTypography.bodyMuted(
+                                          color: mute,
+                                        ),
                                       ),
-                                    ),
-                                    const SizedBox(height: TokensStrip.s3),
+                                      const SizedBox(height: TokensStrip.s3),
+                                    ],
                                     for (final e in insights.asMap().entries)
                                       IaCopilotInsightItem(
                                         index: e.key,
@@ -330,22 +334,6 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                                       ),
                                     const SizedBox(height: TokensStrip.s2),
                                     const IaSafetyDisclaimer(compact: true),
-                                    Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: FxTonalButton(label: S.of(context).moderacaoDenunciarIa, icon: Icons.flag_outlined, onPressed: () => showDenunciarSheet(
-                                          context,
-                                          repo: ModeracaoRepository(
-                                            ref.read(apiClientProvider),
-                                          ),
-                                          tipo: DenunciaTipo.iaResposta,
-                                          conteudo: insights
-                                              .map(
-                                                (i) =>
-                                                    '${i.titulo}: ${i.detalhe}',
-                                              )
-                                              .join('\n'),
-                                        ), compact: true),
-                                    ),
                                   ],
                                 ),
                               );
@@ -353,51 +341,6 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                           );
                         },
                       ),
-                      if (_tarefaCriada && _proximaAcao != null)
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(
-                            FxSettingsLayout.pageInset,
-                            12,
-                            FxSettingsLayout.pageInset,
-                            0,
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              DashboardSectionHeader(
-                                title:
-                                    _tarefaPersistida
-                                        ? 'Tarefa salva no ${FocuxMicrocopy.commandCenter}'
-                                        : 'Tarefa criada, verifique a lista',
-                              ),
-                              const SizedBox(height: TokensStrip.s3),
-                              FxSatelliteListTile(
-                                title: _proximaAcao!.displayText,
-                                subtitle: Text(_proximaAcao!.statusLabel),
-                                accent: brand,
-                                onTap:
-                                    () => context.push(
-                                      '/dashboard/command-center/copiloto',
-                                    ),
-                              ),
-                              FxSatelliteListTile(
-                                title: iaCopilotoVerTarefaLabel(),
-                                onTap:
-                                    () => context.push(
-                                      '/dashboard/command-center/copiloto',
-                                    ),
-                              ),
-                              if (_selectedAlunoId != null)
-                                FxSatelliteListTile(
-                                  title: iaCopilotoAbrirAlunoLabel(),
-                                  onTap:
-                                      () => context.push(
-                                        '/alunos/$_selectedAlunoId',
-                                      ),
-                                ),
-                            ],
-                          ),
-                        ),
                     ],
                   ],
                 ),
@@ -412,10 +355,7 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                       brand: brand,
                       primaryLabel: _resultPrimaryLabel,
                       onPrimary: _resultPrimaryAction,
-                      onMore:
-                          () => _abrirMenu(
-                            includeCreateTask: _resultUsesApplyOrProgressao,
-                          ),
+                      onMore: _abrirMenu,
                     ),
                   ),
               ],

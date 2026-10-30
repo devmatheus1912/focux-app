@@ -133,11 +133,21 @@ Widget? acaoDeHoje(
   final principal =
       destaque.tipo == TreinosDestaqueTipo.proximo ||
       destaque.tipo == TreinosDestaqueTipo.emAndamento;
+  // Treino de hoje feito: o botão já diz qual é o próximo.
+  final maisUm =
+      destaque.tipo == TreinosDestaqueTipo.concluidoHoje &&
+      !destaque.proximoEhDescanso &&
+      proximoNome != null &&
+      proximoNome.trim().isNotEmpty;
   return _BotaoDeHoje(
-    detalhe: destaque.tipo == TreinosDestaqueTipo.emAndamento
+    detalhe: maisUm
+        ? null
+        : destaque.tipo == TreinosDestaqueTipo.emAndamento
         ? '${texto.titulo} · ${texto.detalhe}'
         : texto.detalhe,
-    rotulo: texto.cta ?? s.treinosHojeVerboVer,
+    rotulo: maisUm
+        ? s.treinosFazerMaisUmNome(proximoNome.trim())
+        : texto.cta ?? s.treinosHojeVerboVer,
     principal: principal,
     onPressed: texto.cta != null ? aoFazer : (aoAbrir ?? () {}),
   );
@@ -151,7 +161,7 @@ class _BotaoDeHoje extends StatelessWidget {
     required this.onPressed,
   });
 
-  final String detalhe;
+  final String? detalhe;
   final String rotulo;
   final bool principal;
   final VoidCallback onPressed;
@@ -163,16 +173,18 @@ class _BotaoDeHoje extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 44),
-          child: Text(
-            detalhe,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+        if (detalhe case final texto?) ...[
+          Padding(
+            padding: const EdgeInsets.only(left: 44),
+            child: Text(
+              texto,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
             ),
           ),
-        ),
-        const SizedBox(height: TokensStrip.s2),
+          const SizedBox(height: TokensStrip.s2),
+        ],
         if (principal)
           FxLiquidPrimaryButton(label: rotulo, onPressed: onPressed)
         else

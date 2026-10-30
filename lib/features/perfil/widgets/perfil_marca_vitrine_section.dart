@@ -21,7 +21,7 @@ class PerfilMarcaVitrineSection extends StatelessWidget {
       child: FxSettingsGroup(
         header: 'Sua página',
         caption:
-            profileComplete ? null : 'Link público e identidade da marca.',
+            profileComplete ? null : 'Página pública e identidade da marca.',
         children: children,
       ),
     );

@@ -24,6 +24,28 @@ List<DateTime> agendaSlotsDoDia(DateTime day) => [
       DateTime(day.year, day.month, day.day, hour, minute),
 ];
 
+enum AgendaPeriodo { manha, tarde, noite }
+
+AgendaPeriodo agendaPeriodoDe(DateTime slot) => switch (slot.hour) {
+  < 12 => AgendaPeriodo.manha,
+  < 18 => AgendaPeriodo.tarde,
+  _ => AgendaPeriodo.noite,
+};
+
+const agendaRepeticoesSemanas = [0, 4, 8, 12];
+
+/// O mesmo horário por [semanas] semanas, a partir de [inicio].
+List<DateTime> agendaDatasRepetidas(DateTime inicio, int semanas) => [
+  for (var i = 0; i < (semanas < 1 ? 1 : semanas); i++)
+    DateTime(
+      inicio.year,
+      inicio.month,
+      inicio.day + i * 7,
+      inicio.hour,
+      inicio.minute,
+    ),
+];
+
 DateTime agendaDayStart(DateTime d) => DateTime(d.year, d.month, d.day);
 
 bool agendaDayIsPast(DateTime day, {DateTime? now}) =>

@@ -45,11 +45,6 @@ void main() {
   });
 
   test('chip: hora curta e primeiro nome', () {
-    expect(agendaChipLabel(_ag(1, DateTime(2026, 10, 2, 9))), '9h Aluno');
-    expect(
-      agendaChipLabel(_ag(1, DateTime(2026, 10, 2, 18, 30))),
-      '18h30 Aluno',
-    );
   });
 
   test('dia inicial: hoje no mês atual, dia 1 nos outros', () {

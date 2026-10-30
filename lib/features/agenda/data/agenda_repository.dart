@@ -48,6 +48,13 @@ List<Agendamento> _parseAgendamentos(dynamic raw) =>
         .map((e) => Agendamento.fromJson(e as Map<String, dynamic>))
         .toList();
 
+class AgendaLoteResultado {
+  const AgendaLoteResultado({required this.criados, required this.pulados});
+
+  final int criados;
+  final int pulados;
+}
+
 class AgendaRepository {
   final Dio _dio;
   AgendaRepository(ApiClient c) : _dio = c.dio;
@@ -92,6 +99,44 @@ class AgendaRepository {
     final r = await _dio.put(
       '/api/agenda/$id/status',
       queryParameters: {'status': status},
+    );
+    throwIfQueuedOffline(r);
+    return Agendamento.fromJson(r.data as Map<String, dynamic>);
+  }
+
+  /// Mesmo horário em várias semanas; ocupado ou passado volta em [pulados].
+  Future<AgendaLoteResultado> criarLote(
+    int alunoId,
+    List<({DateTime inicio, DateTime fim})> horarios,
+    String? titulo,
+  ) async {
+    final r = await _dio.post(
+      '/api/agenda/lote',
+      data: {
+        'alunoId': alunoId,
+        'horarios': [
+          for (final h in horarios)
+            {
+              'inicio': h.inicio.toIso8601String(),
+              'fim': h.fim.toIso8601String(),
+            },
+        ],
+        if (titulo != null && titulo.isNotEmpty) 'titulo': titulo,
+      },
+    );
+    throwIfQueuedOffline(r);
+    final data = r.data as Map<String, dynamic>;
+    return AgendaLoteResultado(
+      criados: (data['criados'] as List<dynamic>? ?? const []).length,
+      pulados: (data['pulados'] as List<dynamic>? ?? const []).length,
+    );
+  }
+
+  /// `PRESENTE` ou `FALTA`, depois da sessão.
+  Future<Agendamento> registrarPresenca(int id, String status) async {
+    final r = await _dio.patch(
+      '/api/agenda/$id/status-atendimento',
+      data: {'statusAtendimento': status},
     );
     throwIfQueuedOffline(r);
     return Agendamento.fromJson(r.data as Map<String, dynamic>);

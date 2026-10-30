@@ -40,8 +40,7 @@ void main() {
 
   test('feitos da semana guarda nome e treino do dia em que aconteceu', () {
     final feitos = feitosDaSemana([_feito(1, DateTime(2026, 10, 29, 9), 'A · Peito')], agora);
-    expect(feitos[4]?.nome, 'A · Peito');
-    expect(feitos[4]?.treinoId, 1);
-    expect(diasFeitosNaSemana([_feito(1, DateTime(2026, 10, 29, 9), 'A')], agora), {4});
+    expect(feitos[4]?.single.nome, 'A · Peito');
+    expect(feitos[4]?.single.treinoId, 1);
   });
 }

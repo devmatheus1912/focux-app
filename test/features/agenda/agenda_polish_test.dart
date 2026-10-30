@@ -25,14 +25,11 @@ void main() {
     expect(screen, contains('AgendaMonthGrid'));
     expect(screen, isNot(contains('AgendaMonthBar')));
     expect(screen, isNot(contains('AgendaTodayPill')));
-    expect(screen, contains('onToday:'));
     expect(screen, contains('agendaVisibleByDay'));
     expect(screen, isNot(contains('AgendaWeekBar')));
     expect(screen, contains('showAgendaHelpSheet'));
     expect(screen, contains('agendaEventTitle'));
-    expect(screen, contains('AgendaHubHeader'));
     expect(screen, isNot(contains('AgendaNextBanner')));
-    expect(screen, contains('AgendaDaySheet'));
     expect(screen, contains('DashboardLayout.bottomDockClearance'));
     expect(
       screen,
@@ -54,10 +51,10 @@ void main() {
     expect(screen, contains('constrainWidth: false'));
     expect(
       File(
-        'lib/features/agenda/widgets/agenda_day_sheet.dart',
+        'lib/features/agenda/widgets/agenda_dia_view.dart',
       ).readAsStringSync(),
       allOf(
-        contains('FxHomeSheetSurface'),
+        contains('FxEmptyState'),
         contains('FxSatelliteListTile'),
       ),
     );
@@ -69,7 +66,7 @@ void main() {
     );
     expect(
       File(
-        'lib/features/agenda/widgets/agenda_day_sheet.dart',
+        'lib/features/agenda/widgets/agenda_dia_view.dart',
       ).readAsStringSync(),
       allOf(contains('FxEmptyState'), isNot(contains('FxEmptyAction'))),
     );

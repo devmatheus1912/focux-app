@@ -249,8 +249,6 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
       _gerado = false;
       _erro = null;
       _proximaAcao = null;
-      _tarefaCriada = false;
-      _tarefaPersistida = false;
       _aplicando = false;
     });
   }
@@ -264,30 +262,41 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
     return ('$first$second').toUpperCase();
   }
 
-  Future<void> _gerar() async {
+  Future<void> _analisar(int alunoId, String nome) {
+    setState(() {
+      _selectedAlunoId = alunoId;
+      _selectedAlunoNome = nome;
+    });
+    return _gerar();
+  }
+
+  /// Análise já feita nesta sessão volta sem gastar cota; [refazer] pede outra.
+  Future<void> _gerar({bool refazer = false}) async {
     if (_selectedAlunoId == null) {
       await _selecionarAluno();
       if (_selectedAlunoId == null) return;
     }
     if (!mounted) return;
+    final guardada = ref.read(
+      insightsProvider(InsightsQuery(alunoId: _selectedAlunoId, mode: _mode)),
+    );
+    final acaoGuardada = ref.read(proximaAcaoProvider(_selectedAlunoId!));
+    if (!refazer && guardada.hasValue && acaoGuardada.hasValue) {
+      setState(() {
+        _proximaAcao = acaoGuardada.value;
+        _gerado = true;
+        _erro = null;
+      });
+      return;
+    }
     if (!await IaQuotaUpgrade.guardBeforeRequest(context, ref)) return;
     if (!mounted) return;
-    final card = copilotoCard(alunoNome: _selectedAlunoNome, modo: _mode);
-    final ok = await showFxConfirmSheet(
-      context,
-      title: copilotoConfirmarTitulo(card.botao),
-      message: iaCopilotoGerarConfirmMessage(),
-      confirmLabel: card.botao,
-    );
-    if (!ok || !mounted) return;
 
     setState(() {
       _gerando = true;
       _gerado = false;
       _erro = null;
       _geracaoMs = 0;
-      _tarefaCriada = false;
-      _tarefaPersistida = false;
       _aplicando = false;
     });
     final stopwatch = Stopwatch()..start();
@@ -298,6 +307,7 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
       );
       final query = InsightsQuery(alunoId: _selectedAlunoId, mode: _mode);
       ref.invalidate(insightsProvider(query));
+      ref.invalidate(proximaAcaoProvider(_selectedAlunoId!));
       await ref.read(insightsProvider(query).future);
       _proximaAcao = await ref.read(
         proximaAcaoProvider(_selectedAlunoId!).future,
@@ -309,7 +319,6 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
           _gerando = false;
           _gerado = true;
           _geracaoMs = stopwatch.elapsedMilliseconds;
-          _fetchedAt = DateTime.now();
         });
       }
     } catch (e) {
@@ -377,14 +386,6 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
         motivo,
       );
       if (draft == null) return;
-      if (!mounted) return;
-      final confirmar = await showFxConfirmSheet(
-        context,
-        title: iaCopilotoCriarTarefaConfirmTitle(),
-        message: iaCopilotoCriarTarefaConfirmMessage(),
-        confirmLabel: iaCopilotoCriarTarefaLabel(),
-      );
-      if (!confirmar || !mounted) return;
       final acao = await repo.salvarAcaoCopiloto(
         alunoId: _selectedAlunoId!,
         acao: draft.acao,
@@ -392,7 +393,7 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
         modo: _mode,
         source: 'COPILOT',
         recommendationId:
-            'COPILOT_${_modeDisplay.toUpperCase()}_STUDENT_${_selectedAlunoId!}',
+            'COPILOT_TREINO_STUDENT_${_selectedAlunoId!}',
         createdFromInsight: true,
       );
       final actionKey = acao.actionKey ?? '';
@@ -408,18 +409,13 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
         }
       }
       if (!mounted) return;
-      setState(() {
-        _proximaAcao = acao;
-        _tarefaCriada = true;
-        _tarefaPersistida = persisted;
-      });
+      setState(() => _proximaAcao = acao);
       ref.invalidate(dashboardHomeProvider);
       ref.invalidate(commandCenterProvider);
+      ref.invalidate(copilotoTarefasAbertasProvider);
       FeedbackHelper.showSuccess(
         context,
-        persisted
-            ? 'Tarefa salva no ${FocuxMicrocopy.commandCenter}.'
-            : 'Tarefa criada. Confirme no ${FocuxMicrocopy.commandCenter}.',
+        persisted ? S.of(context).copilotoTarefaSalva : S.of(context).copilotoTarefaConfirme,
       );
     } catch (_) {
       if (!mounted) return;

@@ -44,6 +44,7 @@ import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_cached_network_image.dart';
 import 'package:focux_app/core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/fx_settings_group.dart';
+import 'package:focux_app/l10n/app_localizations.dart';
 import 'package:focux_app/core/widgets/fx_settings_tile.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
@@ -218,20 +219,6 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
             onLogout: _logout,
             onOpenLandingEditor:
                 () => openLandingEditorOrUpgrade(context, ref),
-            onOpenPublicLink: () {
-              final slug = perfil.slug?.trim();
-              if (slug == null || slug.isEmpty) {
-                openLandingEditorOrUpgrade(context, ref);
-                return;
-              }
-              final features = ref.read(planoFeaturesProvider).value;
-              // Free: página pública fica 403/indisponível — vende upgrade no app.
-              if (features?.landingCompleta != true) {
-                openLandingEditorOrUpgrade(context, ref);
-                return;
-              }
-              showPerfilPublicLinkSheet(context, slug: slug);
-            },
           );
         },
       ),

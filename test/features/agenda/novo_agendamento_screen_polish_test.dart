@@ -11,8 +11,6 @@ void main() {
     expect(screen, contains('FxFormStickyBar'));
     expect(screen, contains('FxFormPopGuard'));
     expect(screen, contains('agendaNovoDiscardTitle'));
-    expect(screen, contains("label: 'Cancelar'"));
-    expect(screen, contains('label: agendaNovoTileLabel()'));
     expect(screen, isNot(contains('ElevatedButton')));
     expect(screen, contains('AlunoInsetFormField'));
     expect(screen, contains('Selecione quem será atendido'));

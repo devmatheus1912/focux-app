@@ -8,6 +8,7 @@ import 'package:focux_app/features/dashboard/utils/dashboard_home_client_cache.d
 import 'package:focux_app/features/perfil/data/perfil_repository.dart';
 import 'package:focux_app/features/perfil/providers/perfil_provider.dart';
 import 'package:focux_app/features/perfil/screens/perfil_screen.dart';
+import 'package:focux_app/l10n/app_localizations.dart';
 
 void main() {
   testWidgets('perfil personal renders compact hub for the coach', (
@@ -25,7 +26,12 @@ void main() {
         overrides: [
           perfilProvider.overrideWith((ref) async => _perfilFixture),
         ],
-        child: const MaterialApp(home: PerfilScreen()),
+        child: const MaterialApp(
+          locale: Locale('pt'),
+          localizationsDelegates: S.localizationsDelegates,
+          supportedLocales: S.supportedLocales,
+          home: PerfilScreen(),
+        ),
       ),
     );
 
@@ -37,14 +43,14 @@ void main() {
     expect(find.text('Prontidão comercial'), findsNothing);
     expect(find.text('Sua página'), findsOneWidget);
     expect(find.text('Vitrine'), findsNothing);
-    expect(find.text('Link público'), findsOneWidget);
+    expect(find.text('Seu código'), findsOneWidget);
     // O que falta vira cartão abaixo da identidade (fixture sem foto/telefone).
     expect(find.textContaining('% completo'), findsOneWidget);
     expect(find.textContaining('passos para fechar'), findsOneWidget);
     expect(find.text('Completar'), findsNothing);
     expect(find.text('Ver ao vivo'), findsNothing);
     expect(find.text('Migração Focux'), findsNothing);
-    expect(find.textContaining('alunos'), findsNothing);
+    expect(find.text('Acesso dos alunos'), findsOneWidget);
 
     await tester.scrollUntilVisible(
       find.text('Aparência'),
@@ -95,14 +101,19 @@ void main() {
         overrides: [
           perfilProvider.overrideWith((ref) async => _perfilCompletoFixture),
         ],
-        child: const MaterialApp(home: PerfilScreen()),
+        child: const MaterialApp(
+          locale: Locale('pt'),
+          localizationsDelegates: S.localizationsDelegates,
+          supportedLocales: S.supportedLocales,
+          home: PerfilScreen(),
+        ),
       ),
     );
 
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 800));
 
-    expect(find.textContaining('alunos'), findsNothing);
+    expect(find.text('Acesso dos alunos'), findsOneWidget);
     expect(find.text('Cadastro completo'), findsNothing);
     expect(find.text('Completar'), findsNothing);
     expect(find.text('Perfil completo'), findsOneWidget);
@@ -119,7 +130,7 @@ void main() {
     expect(find.text('Hoje'), findsNothing);
     expect(find.text('Meus alunos'), findsNothing);
     expect(find.text('Copiloto IA'), findsNothing);
-    expect(find.text('Link público'), findsOneWidget);
+    expect(find.text('Seu código'), findsOneWidget);
     expect(find.text('Ferramentas de desenvolvimento'), findsNothing);
     expect(find.byType(FxLiquidPrimaryButton), findsNothing);
   });
@@ -139,7 +150,12 @@ void main() {
         overrides: [
           perfilProvider.overrideWith((ref) async => _perfilCompletoFixture),
         ],
-        child: const MaterialApp(home: PerfilScreen()),
+        child: const MaterialApp(
+          locale: Locale('pt'),
+          localizationsDelegates: S.localizationsDelegates,
+          supportedLocales: S.supportedLocales,
+          home: PerfilScreen(),
+        ),
       ),
     );
     await tester.pump();
@@ -172,7 +188,11 @@ void main() {
         child: Consumer(
           builder: (context, ref, _) {
             container = ProviderScope.containerOf(context);
-            return const MaterialApp(home: PerfilScreen());
+            return const MaterialApp(
+          locale: Locale('pt'),
+          localizationsDelegates: S.localizationsDelegates,
+          supportedLocales: S.supportedLocales,
+          home: PerfilScreen());
           },
         ),
       ),

@@ -5,12 +5,21 @@ const copilotInsightFallback =
 
 String copilotInsightTitulo(Map<String, dynamic> insight, int index) {
   final raw = (insight['titulo'] ?? insight['title'] ?? '').toString().trim();
-  if (raw.isEmpty ||
-      RegExp(r'^insight\s+\d+$', caseSensitive: false).hasMatch(raw)) {
-    return 'Recomendação ${index + 1}';
+  if (raw.isNotEmpty &&
+      !RegExp(r'^insight\s+\d+$', caseSensitive: false).hasMatch(raw)) {
+    return raw;
   }
-  return raw;
+  return switch (copilotInsightTipo(insight).toUpperCase()) {
+    'RISCO' => 'Ponto de atenção',
+    'ENGAJAMENTO' => 'Engajamento',
+    'OPORTUNIDADE' => 'Oportunidade',
+    _ => 'Recomendação ${index + 1}',
+  };
 }
+
+/// O que fazer; vazio quando a IA só trouxe o diagnóstico.
+String copilotInsightRecomendacao(Map<String, dynamic> insight) =>
+    (insight['recomendacao'] ?? insight['recomendação'] ?? '').toString().trim();
 
 String copilotInsightTipo(Map<String, dynamic> insight) {
   final direct =

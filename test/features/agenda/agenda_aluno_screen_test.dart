@@ -142,12 +142,11 @@ void main() {
     final adapter = await _pump(tester);
 
     expect(adapter.escopos, containsAll(['proximas', 'anteriores']));
-    expect(find.text('Próximas'), findsOneWidget);
+    expect(find.text('Próxima sessão'), findsOneWidget);
     expect(find.text('Anteriores'), findsOneWidget);
     expect(find.text('Amanhã · 08:30–09:30'), findsOneWidget);
-    expect(find.text('4 compromissos'), findsNothing);
-    expect(find.textContaining('4 compromissos'), findsOneWidget);
-    expect(find.byTooltip('Adicionar ao calendário'), findsOneWidget);
+    expect(find.text('Não vou conseguir ir'), findsOneWidget);
+    expect(find.byType(TextField), findsNothing);
 
     expect(find.text('Treino antigo'), findsNothing);
     await tester.tap(find.text('Ver anteriores'));
@@ -155,7 +154,7 @@ void main() {
 
     expect(find.text('Treino antigo'), findsOneWidget);
     expect(find.text('Compareceu'), findsOneWidget);
-    expect(find.text('Confirmar'), findsOneWidget);
+    expect(find.text('Confirmar presença'), findsOneWidget);
   });
 
   testWidgets('confirmar atualiza a sessão sem recarregar a lista', (
@@ -164,15 +163,11 @@ void main() {
     final adapter = await _pump(tester);
     final chamadas = adapter.escopos.length;
 
-    await tester.tap(find.text('Confirmar'));
-    await _settle(tester);
-    expect(find.text('Confirmar presença?'), findsOneWidget);
-
-    await tester.tap(find.text('Confirmar').last);
+    await tester.tap(find.text('Confirmar presença'));
     await _settle(tester);
 
-    expect(find.text('Avaliação'), findsOneWidget);
-    expect(find.text('Confirmado'), findsNWidgets(2));
+    expect(find.textContaining('Confirmada'), findsOneWidget);
+    expect(find.text('Confirmar presença'), findsNothing);
     expect(adapter.escopos.length, chamadas);
   });
 }

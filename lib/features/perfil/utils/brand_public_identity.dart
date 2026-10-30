@@ -25,15 +25,15 @@ String suggestSlugFromNome(String nome) {
 
 String? validateBrandSlug(String raw) {
   final s = raw.trim().toLowerCase();
-  if (s.isEmpty) return 'Informe o link público.';
+  if (s.isEmpty) return 'Informe seu código.';
   if (s.contains('@') ||
       s.contains('privaterelay') ||
       s.contains('appleid')) {
-    return 'Use um link de marca, não o e-mail.';
+    return 'Use um código de marca, não o e-mail.';
   }
   if (!RegExp(r'^[a-z0-9]+(?:-[a-z0-9]+)*$').hasMatch(s)) {
     return 'Só letras minúsculas, números e hífen.';
   }
-  if (s.length > 80) return 'Link muito longo (máx. 80).';
+  if (s.length > 80) return 'Código muito longo (máx. 80).';
   return null;
 }

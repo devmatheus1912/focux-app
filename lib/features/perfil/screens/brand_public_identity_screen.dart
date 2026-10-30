@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../core/config/env.dart';
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -15,6 +15,7 @@ import '../../../core/widgets/fx_tela_carregando.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../../l10n/app_localizations.dart';
 import '../data/perfil_repository.dart';
 import '../providers/perfil_provider.dart';
 import '../utils/brand_public_identity.dart';
@@ -56,9 +57,7 @@ class _BrandPublicIdentityScreenState
         slug == 'personal' ||
         RegExp(r'^personal-\d+$').hasMatch(slug);
     _slugCtrl = TextEditingController(
-      text: editable && badSlug
-          ? suggestSlugFromNome(showNome)
-          : (editable ? '' : slug),
+      text: editable && badSlug ? suggestSlugFromNome(showNome) : slug,
     );
     _nomeCtrl.addListener(_onNomeChanged);
   }
@@ -94,8 +93,8 @@ class _BrandPublicIdentityScreenState
       );
       ref.invalidate(perfilProvider);
       if (!mounted) return;
-      FeedbackHelper.showSuccess(context, 'Link público pronto.');
-      context.go('/dashboard/personal');
+      FeedbackHelper.showSuccess(context, S.of(context).perfilCodigoPronto);
+      safePopOrGo(context, '/dashboard/personal');
     } catch (e) {
       if (!mounted) return;
       FeedbackHelper.showError(context, friendlyError(e));
@@ -112,20 +111,20 @@ class _BrandPublicIdentityScreenState
 
     if (widget.perfil == null && async.isLoading) {
       return fxScreenA11yScope(
-        label: 'Nome e link público',
+        label: 'Nome e código',
         child: const FxShellScaffold(
           useMesh: true,
-          appBar: FxShellAppBar(title: 'Seu link público'),
+          appBar: FxShellAppBar(title: 'Seu código'),
           body: FxTelaCarregando(),
         ),
       );
     }
     if (widget.perfil == null && async.hasError) {
       return fxScreenA11yScope(
-        label: 'Nome e link público',
+        label: 'Nome e código',
         child: FxShellScaffold(
           useMesh: true,
-          appBar: const FxShellAppBar(title: 'Seu link público'),
+          appBar: const FxShellAppBar(title: 'Seu código'),
           body: FxErrorState(
             chromeOnDark: chrome.isDark,
             primary: primary,
@@ -158,13 +157,13 @@ class _BrandPublicIdentityScreenState
         : Env.landingPageDisplayLabel(_slugCtrl.text.trim().toLowerCase());
 
     return fxScreenA11yScope(
-      label: 'Nome e link público',
+      label: 'Nome e código',
       child: FxKeyboardDismissScope(
         child: FxShellScaffold(
           useMesh: true,
           appBar: const FxShellAppBar(
-            title: 'Seu link público',
-            subtitle: 'Como alunos e leads te encontram',
+            title: 'Seu código',
+            subtitle: 'Seus alunos usam para entrar',
           ),
           body: Form(
             key: _formKey,
@@ -172,8 +171,7 @@ class _BrandPublicIdentityScreenState
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
               children: [
                 Text(
-                  'Na Apple, se você ocultou o e-mail, o link saía feio. '
-                  'Defina seu nome e um endereço de marca.',
+                  S.of(context).perfilCodigoEscolhaTexto,
                   style: TextStyle(
                     color: EagleTokens.textSecondary,
                     height: 1.35,
@@ -207,7 +205,7 @@ class _BrandPublicIdentityScreenState
                   autocorrect: false,
                   decoration: FxInputDeco.build(
                     context,
-                    'Link público',
+                    S.of(context).perfilSeuCodigo,
                     hint: 'matheus-oliveira',
                   ).copyWith(prefixText: 'focuxpersonal.com/p/'),
                   validator: (v) => validateBrandSlug(v ?? ''),

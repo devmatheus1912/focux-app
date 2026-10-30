@@ -13,8 +13,6 @@ void main() {
     expect(screen, anyOf(contains('FxLoading'), contains('SkeletonLoader'), contains('SkeletonList'), contains('DashboardShimmer'), contains('Shimmer'), contains('IaCopilotInsightsLoading'), contains('_loading')));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, isNot(contains('FxSettingsGroup')));
-    expect(screen, contains('FxActionChip'));
-    expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('AlunoSegmentedChoice'));
     expect(screen, isNot(contains('showFxInsetPickerSheet')));
     expect(screen, contains('FxHelpIconButton'));
@@ -23,8 +21,6 @@ void main() {
     expect(screen, contains('FxContentWidthLimiter'));
     expect(screen, contains('BrandPalette.softened'));
     expect(screen, isNot(contains('BrandPalette.accent')));
-    expect(screen, contains('_CopilotTaskCard'));
-    expect(screen, contains('_RadarSignalCard'));
     expect(screen, contains('Buscar tarefa'));
     expect(screen, contains('Carregar mais'));
     expect(screen, contains('onTapOutside'));

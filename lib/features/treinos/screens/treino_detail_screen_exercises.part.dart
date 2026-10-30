@@ -7,6 +7,7 @@ class _TreinoListaUnica extends StatefulWidget {
   final List<TreinoExercicioItem> exercises;
   final int treinoId;
   final int? alunoId;
+  final int? modeloId;
   final bool isDark;
   final Color primary;
   final TreinoRepository repo;
@@ -20,6 +21,7 @@ class _TreinoListaUnica extends StatefulWidget {
     required this.exercises,
     required this.treinoId,
     required this.alunoId,
+    required this.modeloId,
     required this.isDark,
     required this.primary,
     required this.repo,
@@ -48,6 +50,13 @@ class _TreinoListaUnicaState extends State<_TreinoListaUnica> {
     _linhas = linhasDoTreino(widget.exercises);
   }
 
+  void _mudou() => sessaoMudou(
+    widget.ref,
+    widget.treinoId,
+    alunoId: widget.alunoId,
+    modeloId: widget.modeloId,
+  );
+
   /// Grava o bloco novo (quando mudou) e a ordem global. Em falha, volta ao
   /// que o servidor tinha.
   Future<void> _gravar(MovimentoDeTreino movimento) async {
@@ -66,7 +75,7 @@ class _TreinoListaUnicaState extends State<_TreinoListaUnica> {
         widget.treinoId,
         movimento.idsEmOrdem,
       );
-      widget.ref.invalidate(treinoProvider(widget.treinoId));
+      _mudou();
     } catch (error) {
       if (!mounted) return;
       setState(() => _linhas = linhasDoTreino(widget.exercises));
@@ -142,7 +151,7 @@ class _TreinoListaUnicaState extends State<_TreinoListaUnica> {
     HapticFeedback.mediumImpact();
     try {
       await widget.repo.removerExercicio(widget.treinoId, te.id);
-      widget.ref.invalidate(treinoProvider(widget.treinoId));
+      _mudou();
     } catch (e) {
       if (mounted) {
         FeedbackHelper.showApiFailure(
@@ -187,7 +196,7 @@ class _TreinoListaUnicaState extends State<_TreinoListaUnica> {
           descansoSegundos: te.descansoSegundos,
         );
       }
-      widget.ref.invalidate(treinoProvider(widget.treinoId));
+      _mudou();
     } catch (e) {
       if (mounted) {
         FeedbackHelper.showApiFailure(
@@ -202,7 +211,7 @@ class _TreinoListaUnicaState extends State<_TreinoListaUnica> {
   Future<void> _duplicar(TreinoExercicioItem te) async {
     try {
       await widget.repo.duplicarExercicio(widget.treinoId, te.id);
-      widget.ref.invalidate(treinoProvider(widget.treinoId));
+      _mudou();
     } catch (error) {
       if (mounted) {
         FeedbackHelper.showApiFailure(
@@ -235,7 +244,7 @@ class _TreinoListaUnicaState extends State<_TreinoListaUnica> {
                     'novoId': novo.id,
                   },
                 );
-                widget.ref.invalidate(treinoProvider(widget.treinoId));
+                _mudou();
               } catch (error) {
                 if (mounted) {
                   FeedbackHelper.showApiFailure(
@@ -258,7 +267,7 @@ class _TreinoListaUnicaState extends State<_TreinoListaUnica> {
                   te,
                   criado.id,
                 );
-                widget.ref.invalidate(treinoProvider(widget.treinoId));
+                _mudou();
               } catch (error) {
                 if (mounted) {
                   FeedbackHelper.showApiFailure(
@@ -282,7 +291,7 @@ class _TreinoListaUnicaState extends State<_TreinoListaUnica> {
   Future<void> _gravarCombinados(List<Combinado> combinados) async {
     try {
       await widget.repo.gravarCombinados(widget.treinoId, combinados);
-      widget.ref.invalidate(treinoProvider(widget.treinoId));
+      _mudou();
     } catch (error) {
       if (mounted) FeedbackHelper.showError(context, friendlyError(error));
     }

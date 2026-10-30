@@ -20,12 +20,6 @@ void main() {
     expect(copilotActionsStatusLabel(copilotActionsStatusAdiado), 'Adiadas');
     expect(copilotActionsStatusLabel(copilotActionsStatusConcluido), 'Concluídas');
     expect(copilotActionsEmptyTitle(copilotActionsStatusAberto), contains('aberta'));
-    expect(copilotActionsCompleteConfirmTitle(), contains('Concluir'));
-    expect(copilotActionsSnoozeConfirmMessage(), contains('adiadas'));
-    expect(copilotActionsOpenAlunoLabel(false), 'Revisar aluno');
-    expect(copilotActionsOpenAlunoLabel(true), 'Ver aluno');
-    expect(copilotActionsSectionDetail(copilotActionsStatusAberto, 2), '2 abertas');
-    expect(copilotActionsComoCalculamos, contains('Radar'));
-    expect(copilotActionsComoCalculamos, contains('pagina'));
+    expect(copilotActionsComoCalculamos, contains('alertas'));
   });
 }

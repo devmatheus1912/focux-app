@@ -9,11 +9,24 @@ String? historicoDetalheSubtitulo(S s, HistoricoDetalheView v) {
   return quando == null ? null : s.historicoDetalheConcluidoEm(quando);
 }
 
-String historicoDetalheStatus(S s, HistoricoDetalheView v) {
+/// Só quando há o que dizer: "Concluído" já está no subtítulo.
+String? historicoDetalheStatus(S s, HistoricoDetalheView v) {
   if (!v.concluida) return s.historicoDetalheEmAndamento;
-  return v.semSeries
-      ? s.historicoDetalheConcluidoSemSeries
-      : s.historicoDetalheConcluido;
+  return v.semSeries ? s.historicoDetalheConcluidoSemSeries : null;
+}
+
+String historicoMesCurto(int mes) => const [
+  'jan', 'fev', 'mar', 'abr', 'mai', 'jun',
+  'jul', 'ago', 'set', 'out', 'nov', 'dez',
+][mes - 1];
+
+/// "10 × 40 kg"; sem carga, só as repetições.
+String historicoSerieTexto(S s, HistoricoSerieLinha l) {
+  final carga = l.cargaKg;
+  final reps = l.repeticoes?.trim();
+  if (carga == null) return reps == null || reps.isEmpty ? '-' : reps;
+  if (reps == null || reps.isEmpty) return historicoKgTexto(s, carga);
+  return s.historicoSerieRepsCarga(reps, historicoKgTexto(s, carga));
 }
 
 String? historicoComparacaoTexto(S s, HistoricoComparacao? c) => switch (c) {
@@ -51,12 +64,15 @@ String historicoDeltaKg(S s, double delta) {
   return '$sinal${s.historicoKg(_decimal(delta))}';
 }
 
-/// "20 kg · 3 de 4 séries · RPE 8 · Dor · +2,5 kg vs anterior".
+/// "Melhor série: 10 × 20 kg · 3 de 4 séries · Dor · +2,5 kg vs anterior".
 String historicoExercicioDetalhe(S s, HistoricoExercicioLinha l) {
   final planejadas = l.seriesPlanejadas;
   final delta = l.deltaCargaKg;
   return [
-    if (l.cargaKg case final c?) historicoKgTexto(s, c),
+    if (l.melhorSerie case final m?)
+      s.historicoMelhorSerie(historicoSerieTexto(s, m))
+    else if (l.cargaKg case final c?)
+      historicoKgTexto(s, c),
     if (l.seriesFeitas == 0)
       s.historicoSemSeries
     else if (planejadas != null)

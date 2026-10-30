@@ -187,7 +187,7 @@ void main() {
     expect(find.text('Depois'), findsNothing);
     expect(find.text('Iniciar'), findsNothing);
     expect(find.text('Últimos treinos'), findsOneWidget);
-    expect(find.textContaining('Nenhum exercício completo'), findsOneWidget);
+    expect(find.textContaining('Registrado sem séries'), findsOneWidget);
     expect(find.text('Ver histórico'), findsOneWidget);
     expect(find.text('Iniciar treino'), findsNothing);
   });

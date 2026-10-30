@@ -1,67 +1,49 @@
+import '../../dashboard/data/command_center_data.dart';
+import '../../dashboard/utils/copilot_actions_display.dart';
+
 const iaCopilotoComoCalculamos =
     'A IA só gera quando você pede. Nada entra no aluno sem revisão.';
 
-String iaCopilotoGerarLabel(String modeDisplay) => 'Gerar $modeDisplay';
-
-String iaCopilotoGerarConfirmTitle(String modeDisplay) =>
-    'Gerar $modeDisplay com IA?';
-
-String iaCopilotoGerarConfirmMessage() =>
-    'Consome cota de IA. Nada é aplicado no aluno automaticamente.';
-
 String iaCopilotoCriarTarefaLabel() => 'Criar tarefa';
 
-String iaCopilotoCriarTarefaConfirmTitle() => 'Salvar tarefa no Copiloto?';
-
-String iaCopilotoCriarTarefaConfirmMessage() =>
-    'A tarefa entra na lista do Copiloto. Você pode revisar depois.';
-
-String iaCopilotoMaisAcoesLabel() => 'Mais ações';
-
-String iaCopilotoVerTarefaLabel() => 'Ver tarefa';
-
-String iaCopilotoAbrirAlunoLabel() => 'Abrir aluno';
-
-String iaCopilotoRevisarProgressaoLabel() => 'Revisar progressão';
-
-/// Card da abertura do Copiloto, antes de existir um resultado.
-class CopilotoCard {
-  const CopilotoCard({
-    required this.titulo,
-    required this.frase,
-    required this.botao,
-    required this.escolherAluno,
+/// Aluno em destaque na abertura do Copiloto.
+class CopilotoPrioridade {
+  const CopilotoPrioridade({
+    required this.alunoId,
+    required this.nome,
+    required this.motivo,
   });
 
-  final String titulo;
-  final String frase;
-  final String botao;
-  final bool escolherAluno;
+  final int alunoId;
+  final String nome;
+  final String motivo;
 }
 
-CopilotoCard copilotoCard({required String? alunoNome, required String modo}) {
-  final nome = alunoNome?.trim() ?? '';
-  if (nome.isEmpty) {
-    return const CopilotoCard(
-      titulo: 'Escolha o aluno',
-      frase: 'Gera um treino. Nada entra sem a sua revisão.',
-      botao: 'Escolher aluno',
-      escolherAluno: true,
+/// Tarefas abertas viram no máximo [limite] alunos, sem repetir, urgentes antes.
+List<CopilotoPrioridade> copilotoPrioridades(
+  List<FilaAcaoResumo> abertas,
+  Map<int, String> nomes, {
+  int limite = 5,
+}) {
+  final ordenadas = copilotActionsOrdenadas(abertas);
+  final vistos = <int>{};
+  final out = <CopilotoPrioridade>[];
+  for (final a in ordenadas) {
+    final id = a.alunoId;
+    if (id == null || !vistos.add(id)) continue;
+    final nome = nomes[id];
+    if (nome == null || nome.trim().isEmpty) continue;
+    out.add(
+      CopilotoPrioridade(
+        alunoId: id,
+        nome: nome.trim(),
+        motivo: copilotActionsMotivo(a),
+      ),
     );
+    if (out.length == limite) break;
   }
-  final progressao = modo == 'Progressão';
-  return CopilotoCard(
-    titulo: nome,
-    frase:
-        progressao
-            ? 'Gera a progressão de $nome. Nada entra sem a sua revisão.'
-            : 'Gera um treino para $nome. Nada entra sem a sua revisão.',
-    botao: progressao ? 'Gerar progressão' : 'Gerar treino',
-    escolherAluno: false,
-  );
+  return out;
 }
-
-String copilotoConfirmarTitulo(String botao) => '$botao com IA?';
 
 class IaCopilotoApplySpec {
   const IaCopilotoApplySpec({
@@ -99,9 +81,7 @@ IaCopilotoApplySpec? iaCopilotoApplySpec({
     return IaCopilotoApplySpec(
       backendTipo: 'ENVIAR_PUSH',
       label:
-          tipo == 'TREINO'
-              ? 'Pedir check-in ao aluno'
-              : 'Enviar notificação ao aluno',
+          tipo == 'TREINO' ? 'Pedir check-in ao aluno' : 'Enviar mensagem ao aluno',
       parametros: msg,
     );
   }
@@ -114,15 +94,4 @@ IaCopilotoApplySpec? iaCopilotoApplySpec({
   }
 
   return null;
-}
-
-bool iaCopilotoShouldReviewProgressao({
-  required String mode,
-  required IaCopilotoApplySpec? apply,
-}) {
-  if (apply != null) return false;
-  final normalized = mode.trim().toLowerCase();
-  return normalized == 'progressão' ||
-      normalized == 'progressao' ||
-      normalized == 'progresso';
 }

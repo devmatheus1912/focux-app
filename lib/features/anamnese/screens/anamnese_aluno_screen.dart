@@ -1,10 +1,14 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -21,16 +25,24 @@ import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_status_banner.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../alunos/widgets/aluno_form_choices.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
+import '../data/anamnese_rascunho_store.dart';
 import '../data/anamnese_repository.dart';
 import '../providers/anamnese_provider.dart';
 import '../utils/anamnese_display.dart';
+import '../utils/anamnese_etapas.dart';
+import '../widgets/anamnese_aluno_campos.dart';
 
-/// S5 — Aluno preenche a ficha (PAR-Q+ → Saúde → Hábitos → Treino → Algo mais).
+part 'anamnese_aluno_etapas.part.dart';
+part 'anamnese_aluno_resumo.part.dart';
+
+/// Aluno preenche a ficha em quatro etapas; ficha enviada abre em resumo.
 class AnamneseAlunoScreen extends ConsumerStatefulWidget {
   const AnamneseAlunoScreen({super.key});
 
@@ -68,7 +80,7 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
   // Treino
   final _objetivoCtrl = TextEditingController();
   final _objDetalhadoCtrl = TextEditingController();
-  int _dispSemanal = 3;
+  int? _dispSemanal;
   final _prefTreinoCtrl = TextEditingController();
   final _restricoesCtrl = TextEditingController();
   final _historicoAtividadeCtrl = TextEditingController();
@@ -84,6 +96,20 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
   bool _applying = false;
   bool _wired = false;
   String? _erro;
+
+  var _etapa = AnamneseEtapa.saudeGeral;
+  var _mostrarPendencias = false;
+
+  /// Ficha já enviada, aberta em uma etapa pelo "Editar".
+  var _editando = false;
+
+  /// "Não tenho" / "Tenho" da etapa de histórico, por campo.
+  final _tenho = <TextEditingController, bool?>{};
+  final _scroll = ScrollController();
+  final _parqKeys = {
+    for (final q in anamneseParqPerguntas) q.key: GlobalKey(),
+  };
+  Timer? _rascunhoTimer;
 
   AnamneseRepository get _repo =>
       AnamneseRepository(ref.read(apiClientProvider));
@@ -114,9 +140,15 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
   ];
 
   void _markDirty() {
-    if (_applying || _dirty) return;
+    if (_applying) return;
+    _rascunhoTimer?.cancel();
+    _rascunhoTimer = Timer(const Duration(milliseconds: 600), _guardarRascunho);
+    if (_dirty) return;
     if (mounted) setState(() => _dirty = true);
   }
+
+  void _guardarRascunho() =>
+      unawaited(AnamneseRascunhoStore.salvar({..._payload(), 'etapa': _etapa.index}));
 
   void _ensureDirtyWiring() {
     if (_wired) return;
@@ -129,14 +161,16 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
   Future<void> _cancel() async {
     FxKeyboardDismissScope.dismiss();
     if (_dirty) {
+      final s = S.of(context);
       final ok = await showFxConfirmSheet(
         context,
-        title: 'Sair sem salvar?',
-        message: 'As respostas desta ficha ainda não foram enviadas.',
-        confirmLabel: 'Sair',
-        destructive: true,
+        title: s.anamneseAlunoSairTitulo,
+        message: s.anamneseAlunoSairTexto,
+        confirmLabel: s.anamneseAlunoSair,
       );
       if (!ok || !mounted) return;
+      _rascunhoTimer?.cancel();
+      _guardarRascunho();
     }
     safePopOrGo(context, '/aluno/perfil');
   }
@@ -149,6 +183,8 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
 
   @override
   void dispose() {
+    _rascunhoTimer?.cancel();
+    _scroll.dispose();
     for (final c in _allCtrls) {
       c
         ..removeListener(_markDirty)
@@ -173,6 +209,7 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
         _enviada = a.isPreenchida || a.isRevisada;
         _loading = false;
       });
+      await _oferecerRascunho();
     } catch (e) {
       if (!mounted) return;
       final semFicha = e is DioException && e.response?.statusCode == 404;
@@ -182,6 +219,7 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
           _loading = false;
         });
         _ensureDirtyWiring();
+        await _oferecerRascunho();
       } else {
         setState(() {
           _erro = friendlyError(e);
@@ -189,6 +227,33 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
         });
       }
     }
+  }
+
+  Future<void> _oferecerRascunho() async {
+    final dados = await AnamneseRascunhoStore.ler();
+    if (dados == null || !mounted) return;
+    final s = S.of(context);
+    final ok = await showFxConfirmSheet(
+      context,
+      title: s.anamneseAlunoRascunhoTitulo,
+      message: s.anamneseAlunoRascunhoTexto,
+      confirmLabel: s.anamneseAlunoRascunhoContinuar,
+      cancelLabel: s.anamneseAlunoRascunhoDescartar,
+    );
+    if (!mounted) return;
+    if (!ok) {
+      await AnamneseRascunhoStore.limpar();
+      return;
+    }
+    final etapa = dados['etapa'];
+    setState(() {
+      _apply(Anamnese.fromJson({...dados, 'status': _anamnese?.status}));
+      _dirty = true;
+      _editando = _enviada;
+      if (etapa is int && etapa >= 0 && etapa < AnamneseEtapa.values.length) {
+        _etapa = AnamneseEtapa.values[etapa];
+      }
+    });
   }
 
   void _apply(Anamnese a) {
@@ -214,22 +279,99 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
     _obsCtrl.text = a.observacoes ?? '';
     _objetivoCtrl.text = a.objetivo ?? '';
     _objDetalhadoCtrl.text = a.objetivoDetalhado ?? '';
-    _dispSemanal = anamneseDisponibilidadeClamp(a.disponibilidadeSemanal);
+    _dispSemanal =
+        a.disponibilidadeSemanal == null
+            ? null
+            : anamneseDisponibilidadeClamp(a.disponibilidadeSemanal);
     _prefTreinoCtrl.text = a.preferenciasTreino ?? '';
     _restricoesCtrl.text = a.restricoesAlimentares ?? '';
     _historicoAtividadeCtrl.text = a.historicoAtividade ?? '';
     _motivoInterrupcoesCtrl.text = a.motivoInterrupcoes ?? '';
     _motivacaoCtrl.text = a.motivacaoAtual ?? '';
     _algoMaisCtrl.text = a.algoMais ?? '';
+    for (final c in _camposTenho) {
+      _tenho[c] = c.text.trim().isEmpty ? null : true;
+    }
     _applying = false;
     _ensureDirtyWiring();
     _dirty = false;
   }
 
+  List<TextEditingController> get _camposTenho => [
+    _historicoCtrl,
+    _cirurgiasCtrl,
+    _doresCtrl,
+    _lesoesCtrl,
+    _medicCtrl,
+    _alergiasCtrl,
+    _gestacaoCtrl,
+    _sintomasCvCtrl,
+  ];
+
+  void _responderTenho(TextEditingController c, bool tem) {
+    setState(() {
+      _tenho[c] = tem;
+      if (!tem) c.clear();
+    });
+    _markDirty();
+  }
+
+  void _irPara(AnamneseEtapa etapa) {
+    setState(() {
+      _etapa = etapa;
+      _mostrarPendencias = false;
+    });
+    if (_scroll.hasClients) _scroll.jumpTo(0);
+    _guardarRascunho();
+  }
+
+  void _voltarEtapa() {
+    if (_etapa.index == 0) {
+      if (_editando) {
+        setState(() => _editando = false);
+      } else {
+        _cancel();
+      }
+      return;
+    }
+    _irPara(AnamneseEtapa.values[_etapa.index - 1]);
+  }
+
+  /// Avança ou mostra o que falta, no lugar da pendência.
+  Future<void> _continuar() async {
+    FxKeyboardDismissScope.dismiss();
+    final completa = anamneseEtapaCompleta(
+      _etapa,
+      parq: _parq,
+      objetivo: _objetivoCtrl.text,
+      dias: _dispSemanal,
+    );
+    if (!completa) {
+      setState(() => _mostrarPendencias = true);
+      if (_etapa == AnamneseEtapa.saudeGeral) {
+        final primeira = anamneseParqPendentes(_parq).first;
+        final alvo = _parqKeys[primeira]?.currentContext;
+        if (alvo != null) {
+          await Scrollable.ensureVisible(
+            alvo,
+            duration: const Duration(milliseconds: 240),
+            alignment: 0.2,
+          );
+        }
+      }
+      return;
+    }
+    if (_etapa == AnamneseEtapa.objetivos) {
+      await _salvar();
+      return;
+    }
+    _irPara(AnamneseEtapa.values[_etapa.index + 1]);
+  }
+
   Future<void> _abrirDisponibilidade() async {
     final picked = await showFxInsetPickerSheet<int>(
       context,
-      title: 'Disponibilidade',
+      title: S.of(context).anamneseAlunoDias,
       selected: _dispSemanal,
       items: [
         for (var d = 1; d <= 7; d++)
@@ -247,7 +389,7 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
   Future<void> _abrirSono() async {
     final picked = await showFxInsetPickerSheet<int>(
       context,
-      title: 'Horas de sono',
+      title: S.of(context).anamneseAlunoHorasSono,
       selected: _sonoHoras?.round(),
       items: [
         for (var h = 4; h <= 12; h++)
@@ -323,7 +465,7 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
       _objDetalhadoCtrl.text,
       AnamneseFieldLimits.objetivoDetalhado,
     ),
-    'disponibilidadeSemanal': _dispSemanal,
+    if (_dispSemanal != null) 'disponibilidadeSemanal': _dispSemanal,
     'preferenciasTreino': anamneseClipField(
       _prefTreinoCtrl.text,
       AnamneseFieldLimits.preferenciasTreino,
@@ -352,34 +494,25 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
 
   Future<void> _salvar() async {
     FxKeyboardDismissScope.dismiss();
-    final parqPendente = _parq.values.any((v) => v == null);
-    if (parqPendente) {
-      FeedbackHelper.showError(
-        context,
-        'Responda todas as perguntas do PAR-Q+ antes de enviar.',
-      );
-      return;
-    }
-    if (_objetivoCtrl.text.trim().isEmpty) {
-      FeedbackHelper.showError(
-        context,
-        'Informe seu objetivo antes de enviar.',
-      );
-      return;
-    }
     HapticFeedback.mediumImpact();
+    final s = S.of(context);
     setState(() => _saving = true);
     try {
       final a = await _repo.salvarMinha(_payload());
+      if (!mounted) return;
+      _rascunhoTimer?.cancel();
+      await AnamneseRascunhoStore.limpar();
       if (!mounted) return;
       ref.invalidate(minhaAnamneseProvider);
       invalidateAlunoDashboardHome(ref);
       setState(() {
         _anamnese = a;
         _enviada = true;
+        _editando = false;
         _dirty = false;
+        _etapa = AnamneseEtapa.saudeGeral;
       });
-      FeedbackHelper.showSuccess(context, 'Enviada para revisão do personal.');
+      FeedbackHelper.showSuccess(context, s.anamneseAlunoEnviada);
     } catch (e) {
       if (mounted) FeedbackHelper.showError(context, friendlyError(e));
     } finally {
@@ -389,16 +522,16 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
     final isDark = chrome.isDark;
-
     final a = _anamnese ?? Anamnese();
-    final showBanner = !_loading && _erro == null && (a.alunoDevePreencher || _enviada);
     final formReady = !_loading && _erro == null;
+    final resumo = formReady && _enviada && !a.alunoDevePreencher && !_editando;
 
     return fxScreenA11yScope(
-      label: 'Minha anamnese',
+      label: s.anamneseAlunoTitulo,
       child: FxFormPopGuard(
         dirty: formReady && _dirty,
         onCancel: _cancel,
@@ -406,26 +539,13 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
           useMesh: true,
           constrainWidth: false,
           appBar: FxShellAppBar(
-            title: 'Anamnese',
-            subtitle: 'Ficha de saúde e objetivos',
+            title: s.anamneseAlunoTitulo,
+            subtitle: resumo || !formReady
+                ? s.anamneseAlunoSubtitulo
+                : s.anamneseAlunoEtapa(_etapa.index + 1, AnamneseEtapa.values.length),
             onBack: _cancel,
           ),
-          bottomNavigationBar:
-              formReady
-                  ? FxFormStickyBar(
-                    child: Semantics(
-                      button: true,
-                      enabled: !_saving,
-                      label: _saving ? 'Salvando anamnese' : 'Salvar anamnese',
-                      child: FxLiquidPrimaryButton(
-                        label: 'Salvar',
-                        loading: _saving,
-                        loadingLabel: 'Salvando…',
-                        onPressed: _saving ? null : _salvar,
-                      ),
-                    ),
-                  )
-                  : null,
+          bottomNavigationBar: formReady && !resumo ? _rodape(s) : null,
           body:
               _loading
                   ? const SkeletonList(count: 6)
@@ -435,330 +555,60 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
                     primary: primary,
                     message: _erro!,
                     onRetry: _load,
-                    title: 'Não conseguimos carregar a anamnese',
+                    title: s.anamneseAlunoErro,
                   )
                   : SafeArea(
-            bottom: false,
-            child: FxKeyboardDismissScope(
-              child: FxContentWidthLimiter(
-                child: RefreshIndicator(
-                  onRefresh: _load,
-                  child: ListView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    keyboardDismissBehavior:
-                        ScrollViewKeyboardDismissBehavior.onDrag,
-                    padding: EdgeInsets.fromLTRB(
-                      FxSettingsLayout.pageInset,
-                      8,
-                      FxSettingsLayout.pageInset,
-                      24 + MediaQuery.viewInsetsOf(context).bottom,
+                    bottom: false,
+                    child: FxKeyboardDismissScope(
+                      child: FxContentWidthLimiter(
+                        child: resumo
+                            ? _corpoResumo(s, a)
+                            : _corpoEtapa(s, a, isDark),
+                      ),
                     ),
-                    children: [
-                    if (showBanner) ...[
-                    FxStatusBanner(
-                      title: _enviada && !a.alunoDevePreencher
-                          ? 'Enviada para revisão'
-                          : anamneseAlunoCtaTitle(a),
-                      body: _enviada && !a.alunoDevePreencher
-                          ? 'Seu personal vai revisar a ficha.'
-                          : anamneseAlunoCtaBody(a),
-                      tone: a.isPrecisaAtestado
-                          ? FxBannerTone.warn
-                          : (_enviada && !a.alunoDevePreencher
-                              ? FxBannerTone.success
-                              : FxBannerTone.info),
-                    ),
-                    const SizedBox(height: FxSettingsLayout.groupGap),
-                  ],
-                  FxSettingsGroup(
-                    header: 'PAR-Q+',
-                    caption:
-                        'Responda com sinceridade. Sim em qualquer item exige atenção do personal.',
-                    children: [
-                      for (var i = 0; i < anamneseParqPerguntas.length; i++)
-                        AlunoChoiceSection(
-                          label: anamneseParqPerguntas[i].label,
-                          isDark: isDark,
-                          showDividerAbove: i > 0,
-                          child: AlunoSegmentedChoice(
-                            options: const [
-                              (value: 'true', label: 'Sim'),
-                              (value: 'false', label: 'Não'),
-                            ],
-                            selected:
-                                _parq[anamneseParqPerguntas[i].key] == null
-                                    ? null
-                                    : (_parq[anamneseParqPerguntas[i].key]!
-                                        ? 'true'
-                                        : 'false'),
-                            isDark: isDark,
-                            onSelect: (v) {
-                              setState(() {
-                                _parq[anamneseParqPerguntas[i].key] =
-                                    v == 'true';
-                              });
-                              _markDirty();
-                            },
-                          ),
-                        ),
-                      if (_parq['parqOutraRazao'] == true)
-                        Padding(
-                          padding: const EdgeInsets.only(top: TokensStrip.s2),
-                          child: AlunoInsetFormField(
-                            controller: _parqOutraDetalheCtrl,
-                            label: 'Detalhe (outra razão)',
-                            hint: 'Descreva o motivo',
-                            icon: Icons.notes_outlined,
-                            maxLines: 3,
-                            maxLength: AnamneseFieldLimits.parqOutraRazaoDetalhe,
-                            showDivider: false,
-                          ),
-                        ),
-                    ],
                   ),
-                  const SizedBox(height: FxSettingsLayout.groupGap),
-                  FxSettingsGroup(
-                    header: 'Saúde',
-                    caption: 'Histórico que o treino precisa respeitar.',
-                    children: [
-                      AlunoInsetFormField(
-                        controller: _historicoCtrl,
-                        label: 'Histórico médico',
-                        hint: 'Doenças, diagnósticos, acompanhamentos',
-                        icon: Icons.history_outlined,
-                        maxLines: 4,
-                        maxLength: AnamneseFieldLimits.historicoMedico,
-                      ),
-                      AlunoInsetFormField(
-                        controller: _cirurgiasCtrl,
-                        label: 'Cirurgias',
-                        hint: 'Ex.: LCA, hérnia, quando ocorreu',
-                        icon: Icons.local_hospital_outlined,
-                        maxLines: 3,
-                        maxLength: AnamneseFieldLimits.cirurgias,
-                      ),
-                      AlunoInsetFormField(
-                        controller: _doresCtrl,
-                        label: 'Dores crônicas',
-                        hint: 'Ex.: cervical, ombro direito',
-                        icon: Icons.sentiment_dissatisfied_outlined,
-                        maxLines: 3,
-                        maxLength: AnamneseFieldLimits.doresCronicas,
-                      ),
-                      AlunoInsetFormField(
-                        controller: _lesoesCtrl,
-                        label: 'Lesões / limitações',
-                        hint: 'Ex.: joelho, lombar, evitar impacto',
-                        icon: Icons.healing_outlined,
-                        maxLines: 3,
-                        maxLength: AnamneseFieldLimits.lesoes,
-                      ),
-                      AlunoInsetFormField(
-                        controller: _medicCtrl,
-                        label: 'Medicamentos',
-                        hint: 'Ex.: anti-hipertensivo, tireoide',
-                        icon: Icons.medication_outlined,
-                        maxLines: 2,
-                        maxLength: AnamneseFieldLimits.medicamentos,
-                      ),
-                      AlunoInsetFormField(
-                        controller: _alergiasCtrl,
-                        label: 'Alergias',
-                        hint: 'Medicamentos, alimentos, outras',
-                        icon: Icons.warning_amber_outlined,
-                        maxLines: 2,
-                        maxLength: AnamneseFieldLimits.alergias,
-                      ),
-                      AlunoInsetFormField(
-                        controller: _gestacaoCtrl,
-                        label: 'Gestação / pós-parto',
-                        hint: 'Se aplicável',
-                        icon: Icons.pregnant_woman_outlined,
-                        maxLines: 2,
-                        maxLength: AnamneseFieldLimits.gestacaoPosParto,
-                      ),
-                      AlunoChoiceSection(
-                        label: 'Histórico familiar cardiovascular',
-                        isDark: isDark,
-                        showDividerAbove: true,
-                        child: AlunoSegmentedChoice(
-                          options: const [
-                            (value: 'true', label: 'Sim'),
-                            (value: 'false', label: 'Não'),
-                          ],
-                          selected: _historicoFamiliarCv == null
-                              ? null
-                              : (_historicoFamiliarCv! ? 'true' : 'false'),
-                          isDark: isDark,
-                          onSelect: (v) {
-                            setState(() => _historicoFamiliarCv = v == 'true');
-                            _markDirty();
-                          },
-                        ),
-                      ),
-                      AlunoInsetFormField(
-                        controller: _sintomasCvCtrl,
-                        label: 'Sintomas cardiovasculares',
-                        hint: 'Palpitação, falta de ar, etc.',
-                        icon: Icons.favorite_border,
-                        maxLines: 2,
-                        maxLength: AnamneseFieldLimits.sintomasCv,
-                        showDivider: false,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: FxSettingsLayout.groupGap),
-                  FxSettingsGroup(
-                    header: 'Hábitos',
-                    caption: 'Sono, estresse e rotina.',
-                    children: [
-                      FxSettingsTile(
-                        fxIcon: 'moon',
-                        label: 'Horas de sono',
-                        value:
-                            _sonoHoras == null
-                                ? 'Selecionar'
-                                : anamneseSonoHorasLabel(_sonoHoras),
-                        picker: true,
-                        onTap: _abrirSono,
-                      ),
-                      AlunoInsetFormField(
-                        controller: _qualidadeSonoCtrl,
-                        label: 'Qualidade do sono',
-                        hint: 'Ex.: boa, irregular, acordar cansado',
-                        icon: Icons.bedtime_outlined,
-                        maxLines: 1,
-                        maxLength: AnamneseFieldLimits.qualidadeSono,
-                      ),
-                      AlunoInsetFormField(
-                        controller: _estresseCtrl,
-                        label: 'Nível de estresse',
-                        hint: 'Ex.: baixo, médio, alto',
-                        icon: Icons.psychology_outlined,
-                        maxLines: 1,
-                        maxLength: AnamneseFieldLimits.nivelEstresse,
-                      ),
-                      AlunoInsetFormField(
-                        controller: _tabagismoCtrl,
-                        label: 'Tabagismo',
-                        hint: 'Não fumo / quantos por dia',
-                        icon: Icons.smoke_free_outlined,
-                        maxLines: 1,
-                        maxLength: AnamneseFieldLimits.tabagismo,
-                      ),
-                      AlunoInsetFormField(
-                        controller: _alcoolCtrl,
-                        label: 'Álcool',
-                        hint: 'Frequência e quantidade',
-                        icon: Icons.local_bar_outlined,
-                        maxLines: 1,
-                        maxLength: AnamneseFieldLimits.alcool,
-                      ),
-                      AlunoInsetFormField(
-                        controller: _obsCtrl,
-                        label: 'Observações',
-                        hint: 'Rotina, preferências, o que quiser avisar',
-                        icon: Icons.notes_outlined,
-                        maxLines: 3,
-                        maxLength: AnamneseFieldLimits.observacoes,
-                        showDivider: false,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: FxSettingsLayout.groupGap),
-                  FxSettingsGroup(
-                    header: 'Treino e objetivos',
-                    caption: 'O que você quer e como pode treinar.',
-                    children: [
-                      AlunoInsetFormField(
-                        controller: _objetivoCtrl,
-                        label: 'Objetivo',
-                        hint: 'Ex.: hipertrofia, emagrecimento',
-                        icon: Icons.flag_outlined,
-                        maxLines: 2,
-                        maxLength: AnamneseFieldLimits.objetivo,
-                      ),
-                      AlunoInsetFormField(
-                        controller: _objDetalhadoCtrl,
-                        label: 'Objetivo detalhado',
-                        hint: 'Meta em 8–12 semanas, eventos, prioridades',
-                        icon: Icons.track_changes_outlined,
-                        maxLines: 3,
-                        maxLength: AnamneseFieldLimits.objetivoDetalhado,
-                      ),
-                      FxSettingsTile(
-                        fxIcon: 'calendar',
-                        label: 'Disponibilidade',
-                        value: anamneseDisponibilidadeLabel(_dispSemanal),
-                        picker: true,
-                        onTap: _abrirDisponibilidade,
-                      ),
-                      AlunoInsetFormField(
-                        controller: _prefTreinoCtrl,
-                        label: 'Preferências de treino',
-                        hint: 'Ex.: manhã, musculação, evitar corrida',
-                        icon: Icons.fitness_center_outlined,
-                        maxLines: 3,
-                        maxLength: AnamneseFieldLimits.preferenciasTreino,
-                      ),
-                      AlunoInsetFormField(
-                        controller: _restricoesCtrl,
-                        label: 'Restrições alimentares',
-                        hint: 'Ex.: lactose, vegetariano',
-                        icon: Icons.restaurant_outlined,
-                        maxLines: 2,
-                        maxLength: AnamneseFieldLimits.restricoesAlimentares,
-                      ),
-                      AlunoInsetFormField(
-                        controller: _historicoAtividadeCtrl,
-                        label: 'Histórico de atividade',
-                        hint: 'O que já praticou e por quanto tempo',
-                        icon: Icons.history_edu_outlined,
-                        maxLines: 3,
-                        maxLength: AnamneseFieldLimits.historicoAtividade,
-                      ),
-                      AlunoInsetFormField(
-                        controller: _motivoInterrupcoesCtrl,
-                        label: 'Motivo de interrupções',
-                        hint: 'Por que parou de treinar antes',
-                        icon: Icons.pause_circle_outline,
-                        maxLines: 2,
-                        maxLength: AnamneseFieldLimits.motivoInterrupcoes,
-                      ),
-                      AlunoInsetFormField(
-                        controller: _motivacaoCtrl,
-                        label: 'Motivação atual',
-                        hint: 'O que te move agora',
-                        icon: Icons.local_fire_department_outlined,
-                        maxLines: 2,
-                        maxLength: AnamneseFieldLimits.motivacaoAtual,
-                        showDivider: false,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: FxSettingsLayout.groupGap),
-                  FxSettingsGroup(
-                    header: 'Algo mais',
-                    caption: 'Qualquer detalhe que o personal precise saber.',
-                    children: [
-                      AlunoInsetFormField(
-                        controller: _algoMaisCtrl,
-                        label: 'Algo mais',
-                        hint: 'Livre — o que não coube acima',
-                        icon: Icons.chat_bubble_outline,
-                        maxLines: 4,
-                        maxLength: AnamneseFieldLimits.algoMais,
-                        showDivider: false,
-                      ),
-                    ],
-                  ),
-                ],
+        ),
+      ),
+    );
+  }
+
+  Widget _rodape(S s) {
+    final ultima = _etapa == AnamneseEtapa.objetivos;
+    return FxFormStickyBar(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (ultima && _enviada) ...[
+            Text(
+              s.anamneseAlunoRevisaDeNovo,
+              textAlign: TextAlign.center,
+              style: FocuxHubTypography.bodyMuted(
+                color: ShellChrome.of(context).mute,
               ),
             ),
+            const SizedBox(height: TokensStrip.s2),
+          ],
+          Row(
+            children: [
+              if (_etapa.index > 0 || _editando) ...[
+                FxTonalButton(
+                  label: s.anamneseAlunoVoltar,
+                  onPressed: _saving ? null : _voltarEtapa,
+                ),
+                const SizedBox(width: TokensStrip.s2),
+              ],
+              Expanded(
+                child: FxLiquidPrimaryButton(
+                  label: ultima ? s.anamneseAlunoEnviar : s.anamneseAlunoContinuar,
+                  loading: _saving,
+                  loadingLabel: s.anamneseAlunoEnviando,
+                  onPressed: _saving ? null : _continuar,
+                ),
+              ),
+            ],
           ),
-        ),
-        ),
-        ),
+        ],
       ),
     );
   }

@@ -16,7 +16,8 @@ void main() {
     expect(screen, contains('Semantics('));
     expect(screen, contains('semanticsLabel:'));
     expect(screen, contains('_PerfilVitrineTiles'));
-    expect(screen, contains("label: 'Link público'"));
+    expect(screen, contains('_PerfilAcessoAlunos'));
+    expect(screen, isNot(contains("label: 'Link público'")));
     expect(screen, isNot(contains("child: const Text('Copiar link')")));
     expect(screen, isNot(contains("label: 'Copiar link'")));
     expect(screen, contains('FxHelpIconButton'));
@@ -28,7 +29,6 @@ void main() {
     expect(screen, isNot(contains('PerfilProfessionalSummary')));
     expect(screen, isNot(contains('ref.watch(dashboardProvider)')));
     expect(screen, contains('FxSettingsLayout.profileName'));
-    expect(screen, contains('FxSettingsLayout.rowMetric'));
     expect(screen, contains('FxSettingsGroup'));
     expect(screen, contains('FxSettingsTile'));
     expect(screen, contains('PerfilAppearanceSection'));

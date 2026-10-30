@@ -290,12 +290,15 @@ TreinoRecente? treinoRecenteDe(ExecucaoTreino h) {
   );
 }
 
-/// Dias (1 = seg … 7 = dom) da semana de [hoje] em que houve treino concluído.
-Set<int> diasFeitosNaSemana(List<ExecucaoTreino> historico, DateTime hoje) =>
-    feitosDaSemana(historico, hoje).keys.toSet();
+/// Já concluiu ao menos um treino.
+bool treinosJaTreinou(List<ExecucaoTreino> historico) => historico.any(
+  (h) => normalizeTreinoStatus(h.status) == treinoStatusConcluido,
+);
 
-/// O que foi feito em cada dia desta semana (1 = segunda).
-Map<int, ({String nome, int treinoId})> feitosDaSemana(
+typedef FeitoDoDia = ({String nome, int treinoId});
+
+/// O que foi feito em cada dia desta semana (1 = segunda), um por sessão.
+Map<int, List<FeitoDoDia>> feitosDaSemana(
   List<ExecucaoTreino> historico,
   DateTime hoje,
 ) {
@@ -304,11 +307,11 @@ Map<int, ({String nome, int treinoId})> feitosDaSemana(
     hoje.month,
     hoje.day,
   ).subtract(Duration(days: hoje.weekday - 1));
-  final dias = <int, ({String nome, int treinoId})>{};
+  final dias = <int, List<FeitoDoDia>>{};
   for (final h in historico) {
     final r = treinoRecenteDe(h);
     if (r != null && !r.quando.isBefore(segunda)) {
-      dias[r.quando.weekday] = (nome: h.treinoNome, treinoId: h.treinoId);
+      (dias[r.quando.weekday] ??= []).add((nome: h.treinoNome, treinoId: h.treinoId));
     }
   }
   return dias;

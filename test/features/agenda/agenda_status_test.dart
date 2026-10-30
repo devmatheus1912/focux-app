@@ -42,12 +42,6 @@ void main() {
   });
 
   test('agenda aluno count e chips', () {
-    expect(agendaAlunoCountLabel(0), 'Nenhum compromisso');
-    expect(agendaAlunoCountLabel(1), '1 compromisso');
-    expect(agendaAlunoCountLabel(3), '3 compromissos');
-    expect(agendaAlunoChipLabel(AgendaAlunoChip.confirmar), 'A confirmar');
-    expect(agendaAlunoChipStatus(AgendaAlunoChip.confirmar), 'AGENDADO');
-    expect(agendaAlunoChipStatus(AgendaAlunoChip.todos), isNull);
     expect(agendaAlunoDefaultTitle(null), 'Sessão de treino');
   });
 

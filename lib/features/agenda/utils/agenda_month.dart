@@ -73,14 +73,8 @@ Map<String, List<Agendamento>> agendaVisibleByDay(List<Agendamento> items) {
   return byDay;
 }
 
-/// Chip da célula: "9h Ana" / "9h30 Ana".
-String agendaChipLabel(Agendamento a) {
-  final h = a.inicio.hour;
-  final m = a.inicio.minute;
-  final hora = m == 0 ? '${h}h' : '${h}h${m.toString().padLeft(2, '0')}';
-  final nome = a.alunoNome.trim().split(RegExp(r'\s+')).first;
-  return nome.isEmpty ? hora : '$hora $nome';
-}
+DateTime agendaSegundaDaSemana(DateTime d) =>
+    DateTime(d.year, d.month, d.day - (d.weekday - 1));
 
 String agendaMonthDayA11y({
   required DateTime day,

@@ -1,4 +1,5 @@
 import '../data/command_center_data.dart';
+import 'dashboard_command_copy.dart';
 
 const copilotActionsStatusAberto = 'ABERTO';
 const copilotActionsStatusAdiado = 'ADIADO';
@@ -32,10 +33,6 @@ String copilotActionsStatusChoiceLabel(
   return '$label $n';
 }
 
-String copilotActionsRevisarAlunoLabel() => 'Revisar aluno';
-
-String copilotActionsVerAlunoLabel() => 'Ver aluno';
-
 String copilotActionsAdiarLabel() => 'Adiar 24h';
 
 String copilotActionsConcluirLabel() => 'Concluir';
@@ -44,43 +41,19 @@ String copilotActionsReabrirLabel() => 'Reabrir';
 
 String copilotActionsAtualizarLabel() => 'Atualizar';
 
-String copilotActionsCompleteConfirmTitle() => 'Concluir esta tarefa?';
-
-String copilotActionsCompleteConfirmMessage() =>
-    'Sai da lista de abertas e vai para concluídas.';
-
-String copilotActionsSnoozeConfirmTitle() => 'Adiar esta tarefa por 24h?';
-
-String copilotActionsSnoozeConfirmMessage() =>
-    'Vai para adiadas. Você pode reabrir depois.';
-
-String copilotActionsReopenConfirmTitle() => 'Reabrir esta tarefa?';
-
-String copilotActionsReopenConfirmMessage() => 'Volta para a lista de abertas.';
-
-String copilotActionsHelpTitle() => 'Tarefas IA';
+String copilotActionsHelpTitle() => 'Tarefas';
 
 String copilotActionsHelpSubtitle() =>
-    'Copiloto e sinais do Radar. Nada some sem você confirmar.';
+    'O que o Copiloto e os alertas pedem de você.';
 
 const copilotActionsComoCalculamos =
-    'Abertas são tarefas salvas do Copiloto e sinais do Radar ainda sem conclusão. A lista pagina e busca no título. Nada some sozinho.';
-
-String copilotActionsSectionDetail(String status, int count) {
-  final one = count == 1;
-  final suffix = switch (status) {
-    copilotActionsStatusAdiado => one ? 'adiada' : 'adiadas',
-    copilotActionsStatusConcluido => one ? 'concluída' : 'concluídas',
-    _ => one ? 'aberta' : 'abertas',
-  };
-  return '$count $suffix';
-}
+    'Abertas são tarefas salvas do Copiloto e alertas automáticos ainda sem conclusão. Cada aluno aparece uma vez por alerta. Nada some sozinho.';
 
 String copilotActionsEmptyTitle(String status) {
   return switch (status) {
     copilotActionsStatusAdiado => 'Nenhuma tarefa adiada',
     copilotActionsStatusConcluido => 'Nenhuma tarefa concluída',
-    _ => 'Nenhuma tarefa IA aberta',
+    _ => 'Nenhuma tarefa aberta',
   };
 }
 
@@ -90,35 +63,48 @@ String copilotActionsEmptySubtitle(String status) {
       'Quando uma ação for adiada, ela fica guardada aqui.',
     copilotActionsStatusConcluido =>
       'As tarefas resolvidas aparecem aqui para auditoria.',
-    _ => 'Copiloto e Radar Focux aparecem aqui quando exigem ação humana.',
+    _ => 'Tarefas do Copiloto e alertas aparecem aqui quando pedem você.',
   };
 }
 
-String copilotActionsModeLabel(FilaAcaoResumo action) {
-  final raw = (action.sourceMode ?? '').trim();
-  if (raw.isEmpty) return 'Treino';
-  final lower = raw.toLowerCase();
-  return lower.substring(0, 1).toUpperCase() + lower.substring(1);
+/// Urgentes primeiro; a ordem do servidor vale dentro de cada grupo.
+List<FilaAcaoResumo> copilotActionsOrdenadas(List<FilaAcaoResumo> itens) {
+  int peso(FilaAcaoResumo a) => a.prioridade.trim().toUpperCase() == 'P0' ? 0 : 1;
+  return [
+    for (final p in [0, 1])
+      for (final a in itens)
+        if (peso(a) == p) a,
+  ];
 }
 
-String copilotActionsDeadlineLabel(
-  FilaAcaoResumo action,
-  String status, {
-  DateTime? now,
-}) {
-  if (status == copilotActionsStatusConcluido) return 'concluída';
-  if (status == copilotActionsStatusAdiado) return 'adiada';
-  final dueAt = DateTime.tryParse(action.dueAt ?? '');
-  if (dueAt == null) {
-    final sla = action.sla.trim();
-    if (sla.isEmpty) return 'vence em 24h';
-    return sla.toLowerCase().contains('vence') ? sla : 'vence em $sla';
+/// "Hoje" ou "Esta semana": nunca a sigla interna de prioridade.
+String copilotActionsSelo(FilaAcaoResumo action) =>
+    action.prioridade.trim().toUpperCase() == 'P0' ? 'Hoje' : 'Esta semana';
+
+/// Título da linha: o nome do aluno, sem o prefixo interno.
+String copilotActionsNome(FilaAcaoResumo action) =>
+    dashboardRadarStudentName(action.titulo) ?? action.titulo.trim();
+
+/// Motivo em frase: tira o nome repetido ("Hugo · mapa corporal").
+String copilotActionsMotivo(FilaAcaoResumo action) {
+  var texto = action.descricao.split('\n').first.trim();
+  final corte = texto.indexOf(' · ');
+  if (corte > 0) texto = texto.substring(corte + 3).trim();
+  if (texto.isEmpty) return action.titulo.trim();
+  if (texto.toLowerCase() == 'mapa corporal') return 'Mapa corporal pendente';
+  return texto[0].toUpperCase() + texto.substring(1);
+}
+
+/// Leva direto ao que falta; sem destino próprio, ao aluno.
+String copilotActionsDestino(FilaAcaoResumo action) {
+  final id = action.alunoId;
+  if (id == null) return action.acaoUrl;
+  final texto = action.descricao.toLowerCase();
+  if (texto.contains('mapa') || texto.contains('medida')) {
+    return '/alunos/$id/evolucao';
   }
-  final diff = dueAt.difference(now ?? DateTime.now());
-  if (diff.isNegative) return 'atrasada';
-  final hours = diff.inHours.clamp(1, 999);
-  return 'vence em ${hours}h';
+  if (texto.contains('feedback') || texto.contains('retomar')) {
+    return '/alunos/$id/chat';
+  }
+  return action.acaoUrl;
 }
-
-String copilotActionsOpenAlunoLabel(bool done) =>
-    done ? copilotActionsVerAlunoLabel() : copilotActionsRevisarAlunoLabel();

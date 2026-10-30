@@ -442,6 +442,7 @@ RouteBase buildChromeShellRoute() {
               return AddExercicioToTreinoScreen(
                 treinoId: intPathParam(state, 'id')!,
                 alunoId: extra.alunoId,
+                modeloId: extra.modeloId,
                 bloco: extra.bloco ?? 'TRABALHO',
               );
             },

@@ -6,18 +6,14 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/motion_preferences.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
-import '../../../l10n/app_localizations.dart';
 import '../data/agenda_repository.dart';
 import '../utils/agenda_month.dart';
 import '../utils/agenda_schedule.dart';
-import '../../../core/widgets/fx_tonal_button.dart';
 
-/// Mês no formato do Calendário do iPhone: título grande, grade de borda a
-/// borda com hairline por semana e atendimentos em chips.
-/// Arrastar (vertical ou horizontal) troca o mês.
+/// Mês: título grande, grade de borda a borda e a contagem de atendimentos.
+/// Arrastar na horizontal troca o mês; o dia abre na visão Dia.
 ///
-/// Com [expand], as semanas dividem a altura disponível e cada dia mostra
-/// quantos chips couberem (mínimo [maxChips]).
+/// Com [expand], as semanas dividem a altura disponível.
 class AgendaMonthGrid extends StatelessWidget {
   const AgendaMonthGrid({
     super.key,
@@ -26,7 +22,6 @@ class AgendaMonthGrid extends StatelessWidget {
     required this.eventsByDay,
     required this.onSelect,
     required this.onSwipe,
-    this.onToday,
     this.expand = false,
     this.now,
   });
@@ -34,10 +29,6 @@ class AgendaMonthGrid extends StatelessWidget {
   /// Altura mínima da célula: a fonte da grade não escala (o leitor de tela
   /// lê o rótulo completo do dia).
   static const double cellHeight = 66;
-  static const int maxChips = 2;
-  static const int _maxChipsExpanded = 5;
-  static const double _chipSlot = 13;
-  static const double _cellChrome = 3 + 24 + 2 + 11;
 
   final DateTime month;
   final DateTime selected;
@@ -45,15 +36,8 @@ class AgendaMonthGrid extends StatelessWidget {
   final ValueChanged<DateTime> onSelect;
   final ValueChanged<int> onSwipe;
 
-  /// Botão "Hoje" na linha do título; nulo esconde.
-  final VoidCallback? onToday;
   final bool expand;
   final DateTime? now;
-
-  static int chipsFor(double height) {
-    final fit = ((height - _cellChrome) / _chipSlot).floor();
-    return fit.clamp(maxChips, _maxChipsExpanded);
-  }
 
   void _swipe(double? velocity) {
     final v = velocity ?? 0;
@@ -69,7 +53,7 @@ class AgendaMonthGrid extends StatelessWidget {
     final days = agendaMonthGrid(month);
     final weeks = agendaMonthWeeks(month);
 
-    Widget weekRows(double height, int chips) => AnimatedSwitcher(
+    Widget weekRows(double height) => AnimatedSwitcher(
       duration: fxMotionDuration(
         context,
         normal: const Duration(milliseconds: 180),
@@ -97,7 +81,6 @@ class AgendaMonthGrid extends StatelessWidget {
                             eventsByDay[agendaIsoDate(days[w * 7 + d])] ??
                             const [],
                         height: height,
-                        maxChips: chips,
                         onTap: () => onSelect(days[w * 7 + d]),
                       ),
                     ),
@@ -120,18 +103,18 @@ class AgendaMonthGrid extends StatelessWidget {
                   final height = h < cellHeight ? cellHeight : h;
                   return SingleChildScrollView(
                     physics: const NeverScrollableScrollPhysics(),
-                    child: weekRows(height, chipsFor(height)),
+                    child: weekRows(height),
                   );
                 },
               ),
             )
-            : weekRows(cellHeight, maxChips);
+            : weekRows(cellHeight);
 
     final body = GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onVerticalDragEnd: (d) => _swipe(d.primaryVelocity),
       onHorizontalDragEnd: (d) => _swipe(d.primaryVelocity),
-      child: MediaQuery.withNoTextScaling(
+      child: MediaQuery.withClampedTextScaling(
+        maxScaleFactor: 1.3,
         child: Column(
           mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -171,7 +154,6 @@ class AgendaMonthGrid extends StatelessWidget {
           month: month,
           onPrev: () => onSwipe(-1),
           onNext: () => onSwipe(1),
-          onToday: onToday,
         ),
         if (expand) Expanded(child: body) else body,
       ],
@@ -184,13 +166,11 @@ class _MonthTitle extends StatelessWidget {
     required this.month,
     required this.onPrev,
     required this.onNext,
-    this.onToday,
   });
 
   final DateTime month;
   final VoidCallback onPrev;
   final VoidCallback onNext;
-  final VoidCallback? onToday;
 
   @override
   Widget build(BuildContext context) {
@@ -246,14 +226,6 @@ class _MonthTitle extends StatelessWidget {
               ),
             ),
           ),
-          if (onToday != null)
-            Tooltip(
-              message: S.of(context).agendaIrParaHoje,
-              child: FxTonalButton(label: S.of(context).agendaHoje, onPressed: () {
-                  HapticFeedback.selectionClick();
-                  onToday!();
-                }, compact: true),
-            ),
           seta(Icons.chevron_left_rounded, 'Mês anterior', onPrev),
           seta(Icons.chevron_right_rounded, 'Próximo mês', onNext),
         ],
@@ -270,7 +242,6 @@ class _MonthDayCell extends StatelessWidget {
     required this.isToday,
     required this.events,
     required this.height,
-    required this.maxChips,
     required this.onTap,
   });
 
@@ -280,7 +251,6 @@ class _MonthDayCell extends StatelessWidget {
   final bool isToday;
   final List<Agendamento> events;
   final double height;
-  final int maxChips;
   final VoidCallback onTap;
 
   @override
@@ -305,8 +275,6 @@ class _MonthDayCell extends StatelessWidget {
               ? chrome.mute
               : chrome.ink;
     }
-    final chips = events.take(maxChips).toList();
-    final extra = events.length - chips.length;
 
     return Semantics(
       button: true,
@@ -352,60 +320,19 @@ class _MonthDayCell extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 2),
-                for (final ag in chips)
-                  _EventChip(
-                    label: agendaChipLabel(ag),
-                    color: primary,
-                    faded: !inMonth,
-                  ),
-                if (extra > 0)
+                if (events.isNotEmpty)
                   Text(
-                    '+$extra',
+                    '${events.length}',
                     maxLines: 1,
                     style: FocuxHubTypography.bodyMuted(
-                      color: chrome.mute,
+                      color: inMonth ? primary : chrome.mute,
                       fontWeight: FontWeight.w700,
-                    ).copyWith(fontSize: 9, height: 1.1),
+                    ),
                   ),
               ],
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _EventChip extends StatelessWidget {
-  const _EventChip({
-    required this.label,
-    required this.color,
-    required this.faded,
-  });
-
-  final String label;
-  final Color color;
-  final bool faded;
-
-  @override
-  Widget build(BuildContext context) {
-    final ink = ShellChrome.of(context).ink;
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 1),
-      padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 0.5),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: faded ? 0.08 : 0.16),
-        borderRadius: BorderRadius.circular(3),
-      ),
-      child: Text(
-        label,
-        maxLines: 1,
-        overflow: TextOverflow.clip,
-        softWrap: false,
-        style: FocuxHubTypography.body(
-          color: faded ? ink.withValues(alpha: 0.5) : ink,
-        ).copyWith(fontSize: 9, height: 1.15, fontWeight: FontWeight.w600),
       ),
     );
   }

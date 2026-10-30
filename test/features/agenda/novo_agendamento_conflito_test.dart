@@ -98,9 +98,7 @@ void main() {
     await tester.tap(find.text('Bruno'));
     await _settle(tester);
 
-    await tester.tap(find.text('Agendar atendimento'));
-    await _settle(tester);
-    await tester.tap(find.text('Agendar atendimento').last);
+    await tester.tap(find.textContaining('Agendar Bruno'));
     await _settle(tester);
 
     expect(repo.criados, 1);

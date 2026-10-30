@@ -45,20 +45,12 @@ Future<List<int>> _pump(WidgetTester tester, {bool expand = false}) async {
 void main() {
   setUp(() => GoogleFonts.config.allowRuntimeFetching = false);
 
-  test('chips por altura: mínimo 2, máximo 5', () {
-    expect(AgendaMonthGrid.chipsFor(AgendaMonthGrid.cellHeight), 2);
-    expect(AgendaMonthGrid.chipsFor(95), 4);
-    expect(AgendaMonthGrid.chipsFor(400), 5);
-  });
-
-  testWidgets('tela inteira: semanas esticam e cabem todos os chips', (
+  testWidgets('tela inteira: semanas esticam e o dia mostra a contagem', (
     tester,
   ) async {
     await _pump(tester, expand: true);
-    expect(find.text('7h Ana'), findsOneWidget);
-    expect(find.text('9h Bruno'), findsOneWidget);
-    expect(find.text('18h Carla'), findsOneWidget);
-    expect(find.text('+1'), findsNothing);
+    expect(find.text('3'), findsWidgets);
+    expect(find.text('7h Ana'), findsNothing);
     final cell = tester.getSize(
       find.bySemanticsLabel(
         agendaMonthDayA11y(
@@ -72,12 +64,8 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('dois chips por dia e +N do resto', (tester) async {
+  testWidgets('leitor de tela ouve a contagem do dia', (tester) async {
     await _pump(tester);
-    expect(find.text('7h Ana'), findsOneWidget);
-    expect(find.text('9h Bruno'), findsOneWidget);
-    expect(find.text('18h Carla'), findsNothing);
-    expect(find.text('+1'), findsOneWidget);
     expect(find.text('Outubro 2026'), findsOneWidget);
     expect(
       find.bySemanticsLabel(
@@ -91,14 +79,17 @@ void main() {
     );
   });
 
-  testWidgets('arrastar para cima avança o mês, para baixo volta', (
+  testWidgets('arrastar na horizontal troca o mês; na vertical, não', (
     tester,
   ) async {
     final swipes = await _pump(tester);
     final grade = find.text('15');
     await tester.fling(grade, const Offset(0, -300), 1000);
     await tester.pump();
-    await tester.fling(grade, const Offset(0, 300), 1000);
+    expect(swipes, isEmpty);
+    await tester.fling(grade, const Offset(-300, 0), 1000);
+    await tester.pump();
+    await tester.fling(grade, const Offset(300, 0), 1000);
     await tester.pump();
     expect(swipes, [1, -1]);
   });

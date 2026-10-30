@@ -69,6 +69,26 @@ extension on _AgendaScreenState {
     },
   );
 
+  /// "Veio" fecha a sessão; "Faltou" só registra, para não contar como feita.
+  Future<void> _registrarPresenca(Agendamento ag, bool veio) async {
+    final s = S.of(context);
+    final repo = ref.read(agendaRepositoryProvider);
+    try {
+      await repo.registrarPresenca(ag.id, veio ? 'PRESENTE' : 'FALTA');
+      if (veio) await repo.atualizarStatus(ag.id, 'CONCLUIDO');
+      await _load(force: true);
+      if (!mounted) return;
+      FeedbackHelper.showSuccess(
+        context,
+        veio ? s.agendaPresencaRegistrada : s.agendaFaltaRegistrada,
+      );
+    } catch (e) {
+      if (mounted) {
+        FeedbackHelper.showApiFailure(context, e, fallback: s.agendaStatusFalhou);
+      }
+    }
+  }
+
   /// Horário recusado pelo servidor (passado/conflito): avisa, recarrega o mês
   /// e reabre a grade, já fora da sheet do atendimento.
   Future<void> _reschedule(

@@ -258,7 +258,12 @@ extension _AddExercicioToTreinoScreenActions
         );
         if (salvou == true && mounted) {
           ref.invalidate(treinoPickerHomeProvider(widget.treinoId));
-          ref.invalidate(treinoProvider(widget.treinoId));
+          sessaoMudou(
+            ref,
+            widget.treinoId,
+            alunoId: widget.alunoId,
+            modeloId: widget.modeloId,
+          );
         }
         return;
       }
@@ -336,7 +341,12 @@ extension _AddExercicioToTreinoScreenActions
                   );
         });
         ref.invalidate(treinoPickerHomeProvider(widget.treinoId));
-        ref.invalidate(treinoProvider(widget.treinoId));
+        sessaoMudou(
+            ref,
+            widget.treinoId,
+            alunoId: widget.alunoId,
+            modeloId: widget.modeloId,
+          );
         unawaited(_recarregarUso());
       }
     } catch (error) {
@@ -395,7 +405,12 @@ extension _AddExercicioToTreinoScreenActions
         if (_adicionados > 0) _adicionados--;
       });
       ref.invalidate(treinoPickerHomeProvider(widget.treinoId));
-      ref.invalidate(treinoProvider(widget.treinoId));
+      sessaoMudou(
+            ref,
+            widget.treinoId,
+            alunoId: widget.alunoId,
+            modeloId: widget.modeloId,
+          );
     } catch (error) {
       if (mounted) {
         setState(

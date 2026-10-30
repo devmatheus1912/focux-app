@@ -29,19 +29,9 @@ void main() {
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, isNot(contains('FxSettingsTile')));
     expect(shellWidgets, contains('IaCopilotResultActionBar'));
-    expect(shellWidgets, contains('FxActionChip'));
-    expect(
-      'FxActionChip'.allMatches(shellWidgets).length,
-      2,
-      reason: 'P0 só em Gerar + sticky de resultado — seletor de aluno é tonal',
-    );
     expect(shellWidgets, contains('DashboardPrioritiesOverlay'));
     expect(shellWidgets, contains('scrollReserve'));
-    expect(shellWidgets, isNot(contains('FxConversionTextLink')));
     expect(shellWidgets, isNot(contains('chrome.cardFill')));
-    expect(shellWidgets, contains('FxToggleChip'));
-    expect(shellWidgets, contains('person_outline_rounded'));
-    expect(shellWidgets, contains('Pronto para revisão'));
     expect(shellWidgets, isNot(contains('Recomendações prontas')));
     expect(shellWidgets, isNot(contains('FxSettingsGroup')));
     expect(shellWidgets, isNot(contains('SafeArea(')));
@@ -53,20 +43,17 @@ void main() {
     expect(screen, contains('CopilotoCardView'));
     expect(screen, isNot(contains('Tarefas IA')));
     expect(actionsPart, contains('explicitChildNodes: true'));
-    expect(shellWidgets, contains('Como funciona'));
     expect(
       File('lib/features/ia/widgets/ia_copiloto_help_sheet.dart')
           .readAsStringSync(),
       contains('Como calculamos'),
     );
-    expect(screen, contains('não monta fichas de treino'));
     expect(actionsPart, contains('showFxHomeSheet'));
     expect(actionsPart, contains('FxHomeSheetSurface'));
     expect(actionsPart, isNot(contains('showModalBottomSheet')));
     final quota = File(
       'lib/features/ia/widgets/ia_quota_upgrade.dart',
     ).readAsStringSync();
-    expect(quota, contains('showFxConfirmSheet'));
     expect(quota, contains('showFxNoticeSheet'));
     expect(quota, isNot(contains('showDialog')));
     expect(actionsPart, isNot(contains('DraggableScrollableSheet')));
@@ -74,24 +61,16 @@ void main() {
     expect(screen, isNot(contains('rascunho editável')));
     expect(insightWidgets, contains('IaCopilotInsight'));
     expect(insightWidgets, contains('insight.detalhe'));
-    expect(insightWidgets, contains('_previewChars'));
-    expect(insightWidgets, contains('IaCopilotTinyTypeChip'));
     expect(insightWidgets, isNot(contains('Mais importante ·')));
     expect(screen, isNot(contains('Ações do rascunho')));
-    expect(screen, contains('Ações das recomendações'));
     expect(screen, contains('showCopilotExecutarConfirmSheet'));
     expect(screen, contains('BrandPalette.softened'));
     expect(screen, isNot(contains('BrandPalette.soft(')));
     expect(screen, isNot(contains('BrandPalette.accent')));
     expect(screen, isNot(contains('BrandPalette.deep')));
     expect(actionsPart, contains('showIaCopilotCreateTaskSheet'));
-    expect(screen, contains('showFxConfirmSheet'));
-    expect(screen, contains('copilotoConfirmarTitulo'));
-    expect(screen, isNot(contains('FxLiquidPrimaryButton')));
-    expect(shellWidgets, isNot(contains('FxLiquidPrimaryButton')));
     expect(shellWidgets, isNot(contains('chevron_right')));
     expect(actionsPart, isNot(contains('chevron_right')));
-    expect(shellWidgets, contains('IaCopilotPreviewCard'));
     expect(shellWidgets, contains('IaCopilotGenerationStatus'));
     expect(
       File(

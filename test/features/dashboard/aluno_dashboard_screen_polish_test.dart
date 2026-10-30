@@ -83,11 +83,7 @@ void main() {
     final treinos = File(
       'lib/features/checkin/screens/meus_treinos_screen.dart',
     ).readAsStringSync();
-    final historico = File(
-      'lib/features/checkin/screens/historico_screen.dart',
-    ).readAsStringSync();
     expect(treinos, contains('TreinosRitmoLinha'));
-    expect(historico, contains('AlunoRitmoCard'));
   });
 
   test('Home do aluno fica certa no tempo e barata de redesenhar', () {

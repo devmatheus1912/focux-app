@@ -17,7 +17,6 @@ void main() {
     expect(screen, contains('historicoListaProvider'));
     expect(screen, contains('agruparHistoricoPorSemana'));
     expect(screen, contains('historicoSemanaCabecalho'));
-    expect(screen, contains('TreinoRecenteRow'));
     expect(screen, contains('HistoricoFiltroFichas'));
     expect(screen, contains('HistoricoMaisRodape'));
     expect(screen, contains('RefreshIndicator'));

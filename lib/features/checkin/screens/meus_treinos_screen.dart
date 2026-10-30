@@ -209,9 +209,7 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
     final abrirHoje = _aoAbrirHoje(destaque);
     final fazerHoje = _aoFazerHoje(destaque, view);
     final semana = alunoRitmoDaSemana(s, home);
-    final jaTreinou = home.historico.any(
-      (h) => normalizeTreinoStatus(h.status) == treinoStatusConcluido,
-    );
+    final jaTreinou = treinosJaTreinou(home.historico);
     final foraDaSemana = treinosForaDaSemana(view.plano, home.rotina);
     return [
       if (view.sessaoAntiga case final aberta?)
@@ -252,6 +250,7 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
         ),
       if (jaTreinou && semana != null)
         TreinosRitmoLinha(titulo: semana.titulo, frase: semana.frase),
+      ...treinosProximaSessao(home.agendaProximoInicio, now),
       if (foraDaSemana.isNotEmpty)
         TreinosHubSecao(
           titulo: s.treinosPlanoTitulo,

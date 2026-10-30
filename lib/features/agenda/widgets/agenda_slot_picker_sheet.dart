@@ -5,6 +5,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_choice_strip.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_toggle_chip.dart';
@@ -98,6 +99,7 @@ class _AgendaSlotPickerSheetState extends State<AgendaSlotPickerSheet> {
   late final List<int> _duracoes;
   DateTime? _inicio;
   var _choosingDay = false;
+  var _periodo = AgendaPeriodo.manha;
 
   DateTime get _now => widget.now ?? DateTime.now();
 
@@ -122,6 +124,7 @@ class _AgendaSlotPickerSheetState extends State<AgendaSlotPickerSheet> {
         wanted != null && agendaSameDay(wanted, _day) && _slotFree(wanted)
             ? wanted
             : _defaultSlot();
+    _periodo = agendaPeriodoDe(_inicio ?? _now);
     _ensureMonth(_day);
   }
 
@@ -281,6 +284,16 @@ class _AgendaSlotPickerSheetState extends State<AgendaSlotPickerSheet> {
                     ),
                 ],
               ),
+              const SizedBox(height: TokensStrip.s3),
+              FxChoiceStrip<AgendaPeriodo>(
+                itens: [
+                  FxChoiceItem(value: AgendaPeriodo.manha, label: s.agendaManha),
+                  FxChoiceItem(value: AgendaPeriodo.tarde, label: s.agendaTarde),
+                  FxChoiceItem(value: AgendaPeriodo.noite, label: s.agendaNoite),
+                ],
+                selecionado: _periodo,
+                onSelecionar: (p) => setState(() => _periodo = p),
+              ),
               SizedBox(height: TokensStrip.s3),
               Expanded(child: _buildSlots(s, chrome, primary)),
             ],
@@ -302,9 +315,13 @@ class _AgendaSlotPickerSheetState extends State<AgendaSlotPickerSheet> {
   Widget _buildSlots(S s, ShellPalette chrome, Color primary) {
     final now = _now;
     final slots =
-        agendaSlotsDoDia(
-          _day,
-        ).where((slot) => !agendaDateTimeIsInPast(slot, now: now)).toList();
+        agendaSlotsDoDia(_day)
+            .where(
+              (slot) =>
+                  !agendaDateTimeIsInPast(slot, now: now) &&
+                  agendaPeriodoDe(slot) == _periodo,
+            )
+            .toList();
     if (slots.isEmpty) {
       return Center(
         child: Text(

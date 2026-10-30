@@ -100,19 +100,6 @@ const agendaMonthShort = [
   'dez',
 ];
 
-String agendaDayHeading({
-  required String weekdayLabel,
-  required DateTime date,
-  required int visibleCount,
-}) {
-  final datePart =
-      '$weekdayLabel · ${date.day} ${agendaMonthShort[date.month]}';
-  if (visibleCount <= 0) return datePart;
-  final countLabel =
-      visibleCount == 1 ? '1 atendimento' : '$visibleCount atendimentos';
-  return '$datePart · $countLabel';
-}
-
 /// "sex, 23 out" — rótulo curto do dia no botão de agendar.
 String agendaDayShortLabel(DateTime date) =>
     '${agendaWeekdayShort(date.weekday).toLowerCase()}, ${date.day} ${agendaMonthShort[date.month]}';
@@ -121,22 +108,16 @@ String agendaEmptyDayHint() => 'Encaixe avaliação, retorno ou sessão.';
 
 const agendaTituloMax = 120;
 
-String agendaNovoTileLabel() => 'Agendar atendimento';
-
-String agendaNovoConfirmTitle() => 'Agendar este horário?';
+/// "Agendar Julio · sáb, 31 out, 08:30": o botão já diz o que vai acontecer.
+String agendaNovoBotaoLabel({String? alunoNome, DateTime? inicio}) {
+  final nome = alunoNome?.trim().split(RegExp(r'\s+')).first ?? '';
+  if (nome.isEmpty || inicio == null) return 'Agendar atendimento';
+  return 'Agendar $nome · ${agendaDayShortLabel(inicio)}, ${agendaHm(inicio)}';
+}
 
 String agendaNovoDiscardTitle() => 'Descartar agendamento?';
 
 String agendaNovoDiscardMessage() => 'O que você preencheu não será salvo.';
-
-String agendaNovoConfirmMessage({
-  required String alunoNome,
-  required DateTime inicio,
-  required DateTime fim,
-}) {
-  final nome = alunoNome.trim().isEmpty ? 'o aluno' : alunoNome.trim();
-  return 'Confirma $nome em ${agendaHm(inicio)}–${agendaHm(fim)}.';
-}
 
 String agendaCompleteConfirmTitle() => 'Marcar como concluído?';
 

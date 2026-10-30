@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../l10n/app_localizations.dart';
 import '../providers/ficha_modelos_provider.dart';
 import '../providers/ficha_volume_provider.dart';
@@ -38,6 +38,26 @@ Future<List<DiaDaSemana>?> lerSemanaDoLugar(WidgetRef ref, {int? alunoId, int? m
   if (alunoId != null) return semanaDaFila(await ref.read(alunoRotinaProvider(alunoId).future));
   if (modeloId != null) return semanaDoModelo(await ref.read(fichaModeloProvider(modeloId).future));
   return null;
+}
+
+/// Dono da atualização: toda mudança na sessão passa aqui, e a ficha ou o
+/// modelo por trás já mostram a contagem e o volume novos.
+void sessaoMudou(
+  WidgetRef ref,
+  int treinoId, {
+  int? alunoId,
+  int? modeloId,
+}) {
+  ref.invalidate(treinoProvider(treinoId));
+  if (alunoId != null) {
+    ref.invalidate(alunoRotinaProvider(alunoId));
+    ref.invalidate(fichaVolumeProvider(alunoId));
+  }
+  if (modeloId != null) {
+    ref.invalidate(fichaModeloProvider(modeloId));
+    ref.invalidate(modeloVolumeProvider(modeloId));
+    ref.invalidate(fichaModelosProvider);
+  }
 }
 
 /// Grava a semana na ficha do aluno ou no modelo e atualiza o que mostra ela.
@@ -88,7 +108,7 @@ SessaoDaSemana? proximaSessaoVazia(List<DiaDaSemana> semana, int treinoId) {
 }
 
 /// Rodapé de quem monta pela ficha ou pelo modelo: "Montar {próxima}" quando
-/// ainda há sessão vazia, senão "Voltar à ficha" / "Voltar ao modelo".
+/// ainda há sessão vazia, senão "Pronto".
 class MontarEmSequencia extends ConsumerWidget {
   const MontarEmSequencia({
     super.key,
@@ -106,21 +126,16 @@ class MontarEmSequencia extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final semana = semanaDoLugar(ref, alunoId: alunoId, modeloId: modeloId);
-    if (semana == null) return const SizedBox.shrink();
     final s = S.of(context);
-    final proxima = proximaSessaoVazia(semana, treinoId);
+    final proxima = semana == null ? null : proximaSessaoVazia(semana, treinoId);
     if (proxima == null) {
-      return FxTonalButton(
-        label: alunoId != null ? s.treinoVoltarAFicha : s.treinoVoltarAoModelo,
-        icon: Icons.check_rounded,
-        expanded: true,
+      return FxLiquidPrimaryButton(
+        label: s.rotinaPronto,
         onPressed: () => context.pop(),
       );
     }
-    return FxTonalButton(
+    return FxLiquidPrimaryButton(
       label: s.treinoMontarProxima(proxima.nome),
-      trailing: const Icon(Icons.arrow_forward_rounded, size: 18),
-      expanded: true,
       onPressed: () => context.pushReplacement(
         '/treinos/${proxima.treinoId}',
         extra: TreinoRouteExtra(
