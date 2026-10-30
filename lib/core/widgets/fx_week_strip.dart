@@ -15,7 +15,11 @@ class FxWeekDay {
     required this.estado,
     this.hoje = false,
     this.proximo = false,
+    this.letra,
   });
+
+  /// Letra da sessão (A, B, C), no lugar do halter.
+  final String? letra;
 
   final int dia;
   final FxWeekDayState estado;
@@ -139,7 +143,16 @@ class _Dia extends StatelessWidget {
           child: concluido
               ? const Icon(Icons.check_rounded, size: 18, color: Colors.white)
               : treino
-              ? Icon(Icons.fitness_center, size: 14, color: sobre ?? Colors.white)
+              ? (dia.letra == null
+                    ? Icon(Icons.fitness_center, size: 14, color: sobre ?? Colors.white)
+                    : Center(
+                        child: Text(
+                          dia.letra!,
+                          style: FocuxHubTypography.cardSubtitle(
+                            color: sobre ?? Colors.white,
+                          ).copyWith(fontWeight: FontWeight.w800),
+                        ),
+                      ))
               : null,
         ),
       ],

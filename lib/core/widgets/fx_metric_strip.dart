@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../theme/design_tokens.dart';
 import '../theme/focux_hub_typography.dart';
 import '../theme/shell_chrome.dart';
 import '../theme/tokens_strip.dart';
@@ -60,12 +61,12 @@ class _Tile extends StatelessWidget {
     final corNumero = zero
         ? chrome.mute.withValues(alpha: 0.6)
         : destaque
-        ? chrome.brand
+        ? (chrome.isDark ? EagleTokens.warnDark : EagleTokens.warn)
         : chrome.ink;
 
     return Semantics(
       button: metrica.onTap != null,
-      label: '${metrica.texto ?? metrica.valor} ${metrica.rotulo}',
+      label: '${metrica.texto ?? metrica.valor} ${metrica.rotulo}${destaque ? ', atenção' : ''}',
       excludeSemantics: true,
       child: Material(
         color: Colors.transparent,
@@ -77,7 +78,7 @@ class _Tile extends StatelessWidget {
               color: chrome.cardFill,
               borderRadius: BorderRadius.circular(TokensStrip.rCard),
               border: Border.all(
-                color: destaque ? chrome.brand.withValues(alpha: 0.5) : chrome.lineStrong,
+                color: chrome.lineStrong,
               ),
             ),
             padding: const EdgeInsets.symmetric(
@@ -94,9 +95,10 @@ class _Tile extends StatelessWidget {
                     child: Text(
                       metrica.texto ?? '${metrica.valor}',
                       maxLines: 1,
-                      style: FocuxHubTypography.metric(
-                        color: corNumero,
+                      style: FocuxHubTypography.cardTitle(color: corNumero).copyWith(
                         fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                        fontFeatures: const [FontFeature.tabularFigures()],
                       ),
                     ),
                   ),

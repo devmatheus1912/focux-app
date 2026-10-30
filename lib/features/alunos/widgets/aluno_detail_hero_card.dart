@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/brand_palette.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -91,10 +91,9 @@ class AlunoDetailHeroCard extends StatelessWidget {
               SizedBox(height: compactContactPriority ? 3 : 5),
               if (!objectiveDefined && onDefineObjective != null)
                 _IdentityObjectiveRow(
-                  label: objective,
-                  primary: primary,
-                  isDark: isDark,
-                  mute: mute,
+                  status: showStatusBadge && !showRiskNotice
+                      ? _IdentityStatusChip(status: status, isDark: isDark)
+                      : null,
                   onDefineObjective: onDefineObjective!,
                 )
               else if (subtitle.isNotEmpty)
@@ -118,7 +117,7 @@ class AlunoDetailHeroCard extends StatelessWidget {
                   isDark: isDark,
                   compact: compactContactPriority,
                 ),
-              ] else if (showStatusBadge) ...[
+              ] else if (showStatusBadge && (objectiveDefined || onDefineObjective == null)) ...[
                 SizedBox(height: compactContactPriority ? 6 : 8),
                 _IdentityStatusChip(status: status, isDark: isDark),
               ],
@@ -226,19 +225,14 @@ class _HeroRiskNotice extends StatelessWidget {
   }
 }
 
+/// Sem objetivo: status e o botão na mesma linha.
 class _IdentityObjectiveRow extends StatelessWidget {
   const _IdentityObjectiveRow({
-    required this.label,
-    required this.primary,
-    required this.isDark,
-    required this.mute,
+    required this.status,
     required this.onDefineObjective,
   });
 
-  final String label;
-  final Color primary;
-  final bool isDark;
-  final Color mute;
+  final Widget? status;
   final VoidCallback onDefineObjective;
 
   @override
@@ -246,39 +240,12 @@ class _IdentityObjectiveRow extends StatelessWidget {
     return Wrap(
       alignment: WrapAlignment.center,
       crossAxisAlignment: WrapCrossAlignment.center,
-      spacing: 4,
-      runSpacing: 4,
+      spacing: TokensStrip.s2,
+      runSpacing: TokensStrip.s1,
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-          decoration: BoxDecoration(
-            color: BrandPalette.soft(primary, dark: isDark),
-            borderRadius: BorderRadius.circular(999),
-            border: Border.all(
-              color: primary.withValues(alpha: isDark ? 0.24 : 0.18),
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.flag_outlined, size: 11, color: mute),
-              const SizedBox(width: 4),
-              Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: mute,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-            ],
-          ),
-        ),
+        if (status != null) status!,
         FxTonalButton(
-          label: 'Definir',
+          label: 'Definir objetivo',
           icon: Icons.flag_outlined,
           compact: true,
           onPressed: onDefineObjective,

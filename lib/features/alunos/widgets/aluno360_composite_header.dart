@@ -228,24 +228,59 @@ class Aluno360HeaderToolbar extends StatelessWidget {
         else
           const Spacer(),
         if (onChat != null && actionsEnabled)
-          IconButton(
+          _AcaoDoTopo(
             tooltip: s.aluno360ChatTooltip,
-            onPressed: onChat,
-            icon: Icon(Icons.chat_bubble_outline_rounded, color: ink),
+            icone: Icons.chat_bubble_outline_rounded,
+            ink: ink,
+            onPressed: onChat!,
           ),
         if (onHelp != null && actionsEnabled)
-          FxHelpIconButton(tooltip: 'Ajuda sobre esta aba', onTap: onHelp!),
-        if (onMenu != null && actionsEnabled)
-          IconButton(
-            tooltip: s.aluno360MenuTooltip,
-            onPressed: onMenu,
-            style: IconButton.styleFrom(
-              minimumSize: const Size(48, 48),
-              side: BorderSide(color: ink.withValues(alpha: 0.14)),
-            ),
-            icon: Icon(Icons.more_horiz_rounded, color: ink),
+          FxHelpIconButton(
+            tooltip: 'Ajuda sobre esta aba',
+            onTap: onHelp!,
+            size: 38,
+            expandHitTarget: true,
           ),
+        if (onMenu != null && actionsEnabled)
+          _AcaoDoTopo(
+            tooltip: s.aluno360MenuTooltip,
+            icone: Icons.more_horiz_rounded,
+            ink: ink,
+            onPressed: onMenu!,
+          ),
+        const SizedBox(width: TokensStrip.s1),
       ],
+    );
+  }
+}
+
+/// Ação do topo: mesmo tamanho e estilo do voltar.
+class _AcaoDoTopo extends StatelessWidget {
+  const _AcaoDoTopo({
+    required this.tooltip,
+    required this.icone,
+    required this.ink,
+    required this.onPressed,
+  });
+
+  final String tooltip;
+  final IconData icone;
+  final Color ink;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      tooltip: tooltip,
+      onPressed: onPressed,
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints.tightFor(width: 48, height: 48),
+      icon: Container(
+        width: 38,
+        height: 38,
+        decoration: ShellChrome.of(context).headerAction(radius: 19),
+        child: Icon(icone, size: 18, color: ink),
+      ),
     );
   }
 }

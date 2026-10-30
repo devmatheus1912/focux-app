@@ -41,7 +41,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('--'), findsOneWidget);
-    expect(find.text('Prontidão wearable'), findsOneWidget);
     expect(find.text('Pronto para treinar'), findsNothing);
     expect(find.text('Boa noite de sono.'), findsNothing);
     expect(

@@ -12,6 +12,7 @@ import '../../../core/widgets/fx_week_strip.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../dashboard/utils/aluno_semana_faixa.dart';
 import '../../treinos/providers/treinos_provider.dart';
+import '../../treinos/utils/semana_da_fila.dart';
 import '../../treinos/widgets/ficha_vigencia_linha.dart';
 
 /// A ficha de treino do aluno no Resumo: a semana em sete dias, a validade e
@@ -43,6 +44,21 @@ class Aluno360FichaCard extends ConsumerWidget {
         ? rotuloDaVigencia(s, rotina.vigencia, agora)
         : null;
     final verbo = vazia ? s.alunoResumoFichaMontar : s.alunoResumoFichaAbrir;
+    final semana = semanaDaFila(rotina);
+    final diasComLetra = [
+      for (final d in dias)
+        FxWeekDay(
+          dia: d.dia,
+          estado: d.estado,
+          hoje: d.hoje,
+          proximo: d.proximo,
+          letra: [
+            for (final x in semana)
+              if (x.dia == d.dia && x.sessoes.isNotEmpty)
+                letraDaSessao(x.sessoes.first.nome),
+          ].firstOrNull,
+        ),
+    ];
     void abrir() => context.push(
       '/alunos/$alunoId/rotina',
       extra: alunoNome.trim(),
@@ -57,50 +73,58 @@ class Aluno360FichaCard extends ConsumerWidget {
         verbo,
       ].join('. '),
       excludeSemantics: true,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: abrir,
+      // O painel fica por fora: Ink com sombra deixava cantos cinza atrás.
+      child: DecoratedBox(
+        decoration: chrome.panel(radius: 20),
+        child: Material(
+          color: Colors.transparent,
+          clipBehavior: Clip.antiAlias,
           borderRadius: BorderRadius.circular(20),
-          child: Ink(
-            decoration: chrome.panel(radius: 20),
-            padding: const EdgeInsets.all(TokensStrip.s4),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
+          child: InkWell(
+            onTap: abrir,
+            child: Padding(
+              padding: const EdgeInsets.all(TokensStrip.s4),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Wrap(
+                    alignment: WrapAlignment.spaceBetween,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: TokensStrip.s2,
+                    runSpacing: TokensStrip.s1,
+                    children: [
+                      Text(
                         s.alunoResumoFichaTitulo,
                         style: FocuxHubTypography.cardTitle(color: chrome.ink),
                       ),
-                    ),
-                    if (rotulo != null)
-                      FxStatusPill(label: rotulo.texto, tone: rotulo.tom),
-                  ],
-                ),
-                const SizedBox(height: TokensStrip.s3),
-                if (vazia)
-                  Text(
-                    s.alunoResumoFichaVazia,
-                    style: FocuxHubTypography.bodyMuted(color: chrome.mute),
-                  )
-                else
-                  FxWeekStrip(dias: dias),
-                const SizedBox(height: TokensStrip.s3),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: vazia
-                      ? FxTonalButton(
+                      if (vazia)
+                        FxTonalButton(
                           label: verbo,
                           icon: Icons.add_rounded,
                           compact: true,
                           onPressed: abrir,
                         )
-                      : FxActionLink(label: verbo, onTap: abrir),
-                ),
-              ],
+                      else
+                        FxActionLink(label: verbo, onTap: abrir),
+                    ],
+                  ),
+                  const SizedBox(height: TokensStrip.s3),
+                  if (vazia)
+                    Text(
+                      s.alunoResumoFichaVazia,
+                      style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                    )
+                  else
+                    FxWeekStrip(dias: diasComLetra),
+                  if (rotulo != null) ...[
+                    const SizedBox(height: TokensStrip.s3),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: FxStatusPill(label: rotulo.texto, tone: rotulo.tom),
+                    ),
+                  ],
+                ],
+              ),
             ),
           ),
         ),
@@ -108,3 +132,9 @@ class Aluno360FichaCard extends ConsumerWidget {
     );
   }
 }
+
+final _letraDaSessao = RegExp(r'^(?:Treino\s+)?([A-Za-z])(?:\s+·\s+.*)?$');
+
+/// "A · Peito" e "Treino A" dão "A"; outro nome não tem letra.
+String? letraDaSessao(String nome) =>
+    _letraDaSessao.firstMatch(nome.trim())?.group(1)?.toUpperCase();

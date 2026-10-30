@@ -97,6 +97,7 @@ class Aluno360ResumoTab extends ConsumerWidget {
     return [
       FxMetric(
         valor: ader,
+        texto: ader > 0 ? '$ader%' : null,
         rotulo: s.alunoResumoMetricaAderencia,
         alerta: ader > 0 && ader < 50,
         onTap: abrirEngajamento,

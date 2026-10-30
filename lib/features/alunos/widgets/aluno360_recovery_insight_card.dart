@@ -41,14 +41,14 @@ class _Aluno360RecoveryInsightCardState
       loading: () => const SizedBox.shrink(),
       error:
           (_, __) => Semantics(
-            label: 'Wearable indisponível',
+            label: 'Prontidão indisponível',
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const DashboardSectionHeader(title: 'Wearable'),
+                const DashboardSectionHeader(title: 'Prontidão'),
                 const SizedBox(height: TokensStrip.s3),
                 OperationalMetricTile(
-                  label: 'Wearable',
+                  label: 'Prontidão',
                   value: 'Indisponível',
                   hint: 'Não foi possível carregar os dados agora',
                   color: EagleTokens.warn,
@@ -65,7 +65,7 @@ class _Aluno360RecoveryInsightCardState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const DashboardSectionHeader(title: 'Wearable'),
+                const DashboardSectionHeader(title: 'Prontidão'),
                 const SizedBox(height: TokensStrip.s3),
                 OperationalMetricTile(
                   label: 'Dados de saúde',
@@ -83,19 +83,19 @@ class _Aluno360RecoveryInsightCardState
           return Semantics(
             label:
                 _expanded
-                    ? 'Recolher wearable não conectado'
-                    : 'Wearable não conectado — toque para expandir',
+                    ? 'Recolher relógio não conectado'
+                    : 'Relógio não conectado, toque para expandir',
             button: true,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const DashboardSectionHeader(title: 'Wearable'),
+                const DashboardSectionHeader(title: 'Prontidão'),
                 const SizedBox(height: TokensStrip.s3),
                 InkWell(
                   onTap: () => setState(() => _expanded = !_expanded),
                   borderRadius: BorderRadius.circular(12),
                   child: OperationalMetricTile(
-                    label: 'Sem dados de saúde',
+                    label: 'Relógio não conectado',
                     value: '—',
                     hint:
                         _expanded
@@ -123,14 +123,7 @@ class _Aluno360RecoveryInsightCardState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const DashboardSectionHeader(title: 'Wearable'),
-              if (temNota && snapshot.recoveryHint.isNotEmpty) ...[
-                const SizedBox(height: 4),
-                Text(
-                  snapshot.recoveryHint,
-                  style: Aluno360Layout.metaStyle(context).copyWith(color: mute),
-                ),
-              ],
+              const DashboardSectionHeader(title: 'Prontidão'),
               const SizedBox(height: TokensStrip.s3),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -147,14 +140,7 @@ class _Aluno360RecoveryInsightCardState
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Prontidão wearable',
-                            style: Aluno360Layout.metaStyle(
-                              context,
-                            ).copyWith(color: ink),
-                          ),
                           if (temNota) ...[
-                            const SizedBox(height: 2),
                             Text(
                               snapshot.recoveryLabel,
                               style: Aluno360Layout.sectionTitleStyle(
@@ -162,8 +148,16 @@ class _Aluno360RecoveryInsightCardState
                                 ink,
                               ),
                             ),
+                            if (snapshot.recoveryHint.isNotEmpty) ...[
+                              const SizedBox(height: 2),
+                              Text(
+                                snapshot.recoveryHint,
+                                style: Aluno360Layout.metaStyle(
+                                  context,
+                                ).copyWith(color: mute),
+                              ),
+                            ],
                           ] else ...[
-                            const SizedBox(height: 2),
                             Text(
                               snapshot.calibrando
                                   ? 'Calibrando: a nota aparece em alguns dias'

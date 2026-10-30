@@ -177,7 +177,7 @@ void main() {
     await _abrir(tester, _hugo());
     expect(find.text('Aderência 30 dias'), findsOneWidget);
     expect(find.text('Dias sem treino'), findsOneWidget);
-    expect(find.text('Check-ins 7 dias'), findsOneWidget);
+    expect(find.text('Sessões 7 dias'), findsOneWidget);
     await tester.tap(find.text('Dias sem treino'));
     await tester.pump(const Duration(milliseconds: 400));
     expect(find.text('rota engajamento'), findsOneWidget);
