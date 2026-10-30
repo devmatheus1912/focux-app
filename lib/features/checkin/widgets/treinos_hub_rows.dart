@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
@@ -52,6 +53,91 @@ class TreinosHubSecao extends StatelessWidget {
           child: Column(children: linhas),
         ),
       ],
+    );
+  }
+}
+
+/// "Seu ritmo" na aba Treinos: uma linha, depois da semana.
+class TreinosRitmoLinha extends StatelessWidget {
+  const TreinosRitmoLinha({super.key, required this.titulo, this.frase});
+
+  final String titulo;
+  final String? frase;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Semantics(
+      container: true,
+      child: Text.rich(
+        TextSpan(
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+          children: [
+            TextSpan(
+              text: titulo,
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+            if (frase != null) TextSpan(text: ' · $frase'),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Sessão que ficou aberta em outro dia: continuar ou descartar, sem adivinhar.
+class TreinosSessaoAbertaAviso extends StatelessWidget {
+  const TreinosSessaoAbertaAviso({
+    super.key,
+    required this.nome,
+    required this.onContinuar,
+    required this.onDescartar,
+  });
+
+  final String nome;
+  final VoidCallback onContinuar;
+  final VoidCallback onDescartar;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = S.of(context);
+    final primary = Theme.of(context).colorScheme.primary;
+    return Container(
+      padding: const EdgeInsets.all(TokensStrip.s3),
+      decoration: fxListCardDecoration(context, accent: primary),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            s.treinosSessaoFicouAberta(nome),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: TokensStrip.s2),
+          Row(
+            children: [
+              FxTonalButton(
+                label: s.treinosContinuar,
+                compact: true,
+                onPressed: onContinuar,
+              ),
+              const SizedBox(width: TokensStrip.s2),
+              FxTonalButton(
+                label: s.treinosDescartar,
+                compact: true,
+                danger: true,
+                onPressed: onDescartar,
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

@@ -4,6 +4,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../treinos/models/rotina_fila.dart';
+import '../../treinos/utils/ficha_vigencia.dart';
 import '../../treinos/utils/semana_da_fila.dart';
 import 'ficha_vigencia_aluno.dart';
 import '../data/checkin_repository.dart';
@@ -20,6 +21,9 @@ class SuaSemanaRow extends StatelessWidget {
     required this.hoje,
     this.status,
     this.previsto,
+    this.feitoExtra,
+    this.acao,
+    this.onAbrir,
   });
 
   final String diaNome;
@@ -32,6 +36,15 @@ class SuaSemanaRow extends StatelessWidget {
   /// `true` feito, `false` não feito (dia que já passou); nulo sem marcação.
   final bool? status;
 
+  /// Treino feito num dia de descanso: aparece no dia em que aconteceu.
+  final String? feitoExtra;
+
+  /// Só na linha de hoje: o que fazer agora, sem repetir a Hoje num cartão.
+  final Widget? acao;
+
+  /// Abre a prévia da sessão do dia.
+  final VoidCallback? onAbrir;
+
   @override
   Widget build(BuildContext context) {
     final s = S.of(context);
@@ -42,8 +55,10 @@ class SuaSemanaRow extends StatelessWidget {
             .where((nome) => nome.isNotEmpty)
             .toList();
     final segue = nomes.isEmpty && dia.segueSequencia;
-    final descanso = nomes.isEmpty && !segue;
-    final texto = segue
+    final descanso = nomes.isEmpty && !segue && feitoExtra == null;
+    final texto = feitoExtra != null
+        ? feitoExtra!
+        : segue
         ? (previsto?.isNotEmpty == true ? s.treinosSemanaProxima(previsto!) : s.rotinaSegueSequencia)
         : descanso
         ? s.rotinaDescanso
@@ -63,9 +78,13 @@ class SuaSemanaRow extends StatelessWidget {
       label:
           '$diaNome, $texto'
           '${hoje ? ', ${s.treinosSuaSemanaHoje}' : ''}'
-          '${marca == null ? '' : ', $marca'}',
-      excludeSemantics: true,
+          '${marca == null ? '' : ', $marca'}'
+          '${feitoExtra == null ? '' : ', ${s.treinosSemanaExtra}'}',
+      button: onAbrir != null,
+      excludeSemantics: acao == null,
       child: Container(
+        constraints: BoxConstraints(minHeight: descanso ? 40 : 48),
+        alignment: Alignment.center,
         padding: const EdgeInsets.symmetric(
           horizontal: TokensStrip.s3,
           vertical: TokensStrip.s2,
@@ -77,46 +96,74 @@ class SuaSemanaRow extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 )
                 : null,
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox(
-              width: 44,
-              child: Text(
-                diaNome,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: peso,
-                  color: cor,
-                ),
+            InkWell(
+              onTap: onAbrir,
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 44,
+                    child: Text(
+                      diaNome,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: peso,
+                        color: cor,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      texto,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: peso,
+                        color: cor,
+                      ),
+                    ),
+                  ),
+                  if (feitoExtra != null) ...[
+                    Text(
+                      s.treinosSemanaExtra,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(width: TokensStrip.s1),
+                  ],
+                  if (status != null) ...[
+                    Icon(
+                      status! ? Icons.check_circle_rounded : Icons.remove_rounded,
+                      size: 18,
+                      color:
+                          status!
+                              ? EagleTokens.good
+                              : theme.colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: TokensStrip.s2),
+                  ],
+                  if (hoje)
+                    Text(
+                      s.treinosSuaSemanaHoje,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  if (onAbrir != null)
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      size: 20,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                ],
               ),
             ),
-            Expanded(
-              child: Text(
-                texto,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: peso,
-                  color: cor,
-                ),
-              ),
-            ),
-            if (status != null) ...[
-              Icon(
-                status! ? Icons.check_circle_rounded : Icons.remove_rounded,
-                size: 18,
-                color:
-                    status!
-                        ? EagleTokens.good
-                        : theme.colorScheme.onSurfaceVariant,
-              ),
-              const SizedBox(width: TokensStrip.s2),
+            if (acao != null) ...[
+              const SizedBox(height: TokensStrip.s2),
+              acao!,
             ],
-            if (hoje)
-              Text(
-                s.treinosSuaSemanaHoje,
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: theme.colorScheme.primary,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
           ],
         ),
       ),
@@ -131,6 +178,8 @@ class SuaSemanaBloco extends StatelessWidget {
     required this.rotina,
     required this.hoje,
     this.historico = const [],
+    this.acaoDeHoje,
+    this.onAbrirSessao,
   });
 
   final RotinaFila rotina;
@@ -138,12 +187,24 @@ class SuaSemanaBloco extends StatelessWidget {
 
   final List<ExecucaoTreino> historico;
 
+  /// Vai dentro da linha de hoje.
+  final Widget? acaoDeHoje;
+
+  /// Abre a prévia; nulo se o aluno não tem esse treino.
+  final VoidCallback? Function(int treinoId)? onAbrirSessao;
+
   /// Dia com treino que já passou: feito ou não feito; hoje só quando feito.
-  bool? _statusDoDia(DiaDaSemana dia, Set<int> feitos) {
+  /// Sessão feita em outro dia da semana também conta (faltar não pula a letra).
+  bool? _statusDoDia(DiaDaSemana dia, Map<int, ({String nome, int treinoId})> feitos) {
+    if (feitos.containsKey(dia.dia)) return true;
     if (!dia.segueSequencia && dia.sessoes.every((x) => x.nome.trim().isEmpty)) return null;
-    if (feitos.contains(dia.dia)) return true;
-    return dia.dia < hoje.weekday ? false : null;
+    if (dia.dia >= hoje.weekday) return null;
+    final ids = feitos.values.map((f) => f.treinoId).toSet();
+    return dia.sessoes.any((x) => ids.contains(x.treinoId));
   }
+
+  bool _descanso(DiaDaSemana dia) =>
+      !dia.segueSequencia && dia.sessoes.every((x) => x.nome.trim().isEmpty);
 
   @override
   Widget build(BuildContext context) {
@@ -159,7 +220,7 @@ class SuaSemanaBloco extends StatelessWidget {
     ];
     final dias = semanaDaFila(rotina);
     final agora = hoje;
-    final feitos = diasFeitosNaSemana(historico, hoje);
+    final feitos = feitosDaSemana(historico, hoje);
     final previstos = nomesPrevistosDaSemana(rotina: rotina, historico: historico, hoje: hoje);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -167,10 +228,16 @@ class SuaSemanaBloco extends StatelessWidget {
         if (temAvisoDaFicha(rotina, agora))
           Padding(
             padding: const EdgeInsets.only(bottom: TokensStrip.s2),
-            child: FichaVigenciaAluno(rotina: rotina, hoje: agora),
+            child: FichaVigenciaAluno(
+              rotina: rotina,
+              hoje: agora,
+              prazoNoTitulo: true,
+            ),
           ),
         TreinosHubSecao(
-          titulo: s.treinosSuaSemana,
+          titulo: rotina.vigencia.estado(agora) == EstadoVigencia.emDia
+              ? s.treinosSuaSemanaAte(dataCurta(rotina.vigencia.fim!))
+              : s.treinosSuaSemana,
           linhas: [
             for (final (i, dia) in dias.indexed)
               SuaSemanaRow(
@@ -179,6 +246,11 @@ class SuaSemanaBloco extends StatelessWidget {
                 hoje: dia.dia == hoje.weekday,
                 status: _statusDoDia(dia, feitos),
                 previsto: previstos[dia.dia],
+                feitoExtra: _descanso(dia) ? feitos[dia.dia]?.nome : null,
+                acao: dia.dia == hoje.weekday ? acaoDeHoje : null,
+                onAbrir: dia.sessoes.isEmpty || dia.sessoes.first.treinoId == null
+                    ? null
+                    : onAbrirSessao?.call(dia.sessoes.first.treinoId!),
               ),
           ],
         ),

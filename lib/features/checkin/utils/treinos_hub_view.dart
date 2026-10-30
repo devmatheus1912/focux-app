@@ -1,4 +1,5 @@
 import '../../treinos/models/rotina_fila.dart';
+import '../../treinos/utils/semana_da_fila.dart';
 import '../data/checkin_repository.dart';
 import 'rotina_decisao.dart';
 import 'treino_ficha_status.dart';
@@ -61,7 +62,15 @@ class TreinosHubView {
     required this.plano,
     required this.ultimos,
     required this.validaAte,
+    this.sessaoAntiga,
+    this.treinoDeHoje,
   });
+
+  /// Sessão que ficou aberta e não é a de hoje: o aluno continua ou descarta.
+  final ExecucaoTreino? sessaoAntiga;
+
+  /// A sessão que a semana marca para hoje, quando há uma com treino.
+  final ExecucaoTreino? treinoDeHoje;
 
   final TreinosDestaque? destaque;
 
@@ -123,7 +132,10 @@ TreinosHubView buildTreinosHubView({
           ? destaque!.treino.id
           : null;
 
+  final treinoDeHojeId = _treinoDeHojeId(rotina, now);
   return TreinosHubView(
+    sessaoAntiga: sessaoAntigaAberta(historico, now, treinoDeHojeId: treinoDeHojeId),
+    treinoDeHoje: treinos.where((t) => t.treinoId == treinoDeHojeId).firstOrNull,
     destaque: destaque,
     depois: depois,
     plano: List.unmodifiable(plano),
@@ -132,6 +144,37 @@ TreinosHubView buildTreinosHubView({
     ),
     validaAte: DateTime(now.year, now.month, now.day + 1),
   );
+}
+
+int? _treinoDeHojeId(RotinaFila? rotina, DateTime now) {
+  if (rotina == null) return null;
+  for (final dia in semanaDaFila(rotina)) {
+    if (dia.dia == now.weekday) {
+      return dia.sessoes.isEmpty ? null : dia.sessoes.first.treinoId;
+    }
+  }
+  return null;
+}
+
+/// Aberta em outro dia, ou aberta sem nenhum exercício num treino que não é o
+/// de hoje. A sessão de hoje com progresso não é antiga: é só continuar.
+ExecucaoTreino? sessaoAntigaAberta(
+  List<ExecucaoTreino> historico,
+  DateTime agora, {
+  int? treinoDeHojeId,
+}) {
+  for (final h in historico) {
+    if (normalizeTreinoStatus(h.status) != treinoStatusEmAndamento || h.id == null) continue;
+    final inicio = h.iniciadoEm == null ? null : DateTime.tryParse(h.iniciadoEm!)?.toLocal();
+    final deHoje =
+        inicio != null &&
+        inicio.year == agora.year &&
+        inicio.month == agora.month &&
+        inicio.day == agora.day;
+    final vazia = (h.exerciciosConcluidos ?? 0) == 0;
+    if (!deHoje || (vazia && treinoDeHojeId != null && h.treinoId != treinoDeHojeId)) return h;
+  }
+  return null;
 }
 
 TreinosDestaque _destaqueDaDecisao(
@@ -248,16 +291,25 @@ TreinoRecente? treinoRecenteDe(ExecucaoTreino h) {
 }
 
 /// Dias (1 = seg … 7 = dom) da semana de [hoje] em que houve treino concluído.
-Set<int> diasFeitosNaSemana(List<ExecucaoTreino> historico, DateTime hoje) {
+Set<int> diasFeitosNaSemana(List<ExecucaoTreino> historico, DateTime hoje) =>
+    feitosDaSemana(historico, hoje).keys.toSet();
+
+/// O que foi feito em cada dia desta semana (1 = segunda).
+Map<int, ({String nome, int treinoId})> feitosDaSemana(
+  List<ExecucaoTreino> historico,
+  DateTime hoje,
+) {
   final segunda = DateTime(
     hoje.year,
     hoje.month,
     hoje.day,
   ).subtract(Duration(days: hoje.weekday - 1));
-  final dias = <int>{};
+  final dias = <int, ({String nome, int treinoId})>{};
   for (final h in historico) {
     final r = treinoRecenteDe(h);
-    if (r != null && !r.quando.isBefore(segunda)) dias.add(r.quando.weekday);
+    if (r != null && !r.quando.isBefore(segunda)) {
+      dias[r.quando.weekday] = (nome: h.treinoNome, treinoId: h.treinoId);
+    }
   }
   return dias;
 }

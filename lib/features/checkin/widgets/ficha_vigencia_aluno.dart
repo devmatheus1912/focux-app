@@ -18,10 +18,18 @@ bool temAvisoDaFicha(RotinaFila rotina, DateTime agora) =>
 /// "Ficha atualizada". A validade orienta, nunca bloqueia: vencida vira um
 /// aviso suave.
 class FichaVigenciaAluno extends StatelessWidget {
-  const FichaVigenciaAluno({super.key, required this.rotina, required this.hoje});
+  const FichaVigenciaAluno({
+    super.key,
+    required this.rotina,
+    required this.hoje,
+    this.prazoNoTitulo = false,
+  });
 
   final RotinaFila rotina;
   final DateTime hoje;
+
+  /// A data já está no título da seção: aqui só o aviso de vencimento.
+  final bool prazoNoTitulo;
 
   @override
   Widget build(BuildContext context) {
@@ -38,12 +46,14 @@ class FichaVigenciaAluno extends StatelessWidget {
     };
     final prazo = switch (vigencia.estado(hoje)) {
       EstadoVigencia.semPrazo => null,
-      EstadoVigencia.emDia => s.alunoFichaAte(dataCurta(vigencia.fim!)),
+      EstadoVigencia.emDia =>
+        prazoNoTitulo ? null : s.alunoFichaAte(dataCurta(vigencia.fim!)),
       EstadoVigencia.venceEmBreve => s.alunoFichaVenceEmDias(dias),
       EstadoVigencia.venceHoje => s.alunoFichaVenceHoje,
       EstadoVigencia.vencida => s.alunoFichaVenceu,
     };
     final atualizada = fichaAtualizadaRecentemente(rotina.atualizadaEm, hoje);
+    if (prazo == null && !atualizada) return const SizedBox.shrink();
     final cor = aviso
         ? (chrome.isDark ? EagleTokens.warnDark : EagleTokens.warn)
         : chrome.mute;

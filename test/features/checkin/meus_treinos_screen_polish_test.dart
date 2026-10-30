@@ -32,8 +32,9 @@ void main() {
         isFalse,
       );
 
+      // O repositório só entra para descartar sessão antiga; ler, só o agregado.
+      expect('checkinRepositoryProvider'.allMatches(screen).length, 1);
       for (final morto in [
-        'checkinRepositoryProvider',
         'meusTreinosPagina',
         'ProgressoSemanalWidget',
         '_WeekProgressStrip',

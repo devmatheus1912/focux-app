@@ -114,12 +114,15 @@ String treinosPlanoDetalhe(S s, ExecucaoTreino t) =>
         ? s.treinosDestaqueEmPreparacao
         : s.treinosExercicios(t.totalExercicios);
 
-/// Detalhe do último treino: duração real; senão exercícios feitos; senão
-/// registro sem séries ("Já fiz").
-String treinosRecenteDetalhe(S s, TreinoRecente r) => switch (r.duracao) {
-  final Duration d => treinosDuracaoTexto(s, d),
-  null => _semDuracao(s, r.exerciciosConcluidos),
-};
+/// Detalhe do último treino, sempre no mesmo formato: exercícios e duração
+/// real, o que houver; sem nenhum dos dois, registro sem séries ("Já fiz").
+String treinosRecenteDetalhe(S s, TreinoRecente r) {
+  final partes = [
+    if (r.exerciciosConcluidos > 0) s.treinosExercicios(r.exerciciosConcluidos),
+    if (r.duracao case final Duration d) treinosDuracaoTexto(s, d),
+  ];
+  return partes.isEmpty ? s.treinosSemSeries : partes.join(' · ');
+}
 
 String _semDuracao(S s, int concluidos) =>
     concluidos > 0 ? s.treinosExerciciosFeitos(concluidos) : s.treinosSemSeries;
