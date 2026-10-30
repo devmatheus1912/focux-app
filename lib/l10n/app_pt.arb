@@ -678,6 +678,18 @@
       "nomes": {"type": "String"}
     }
   },
+  "adicionarSessaoNova": "Sessão nova",
+  "adicionarCopiarDeModelo": "Copiar de um modelo",
+  "adicionarEscolhaModelo": "Escolha o modelo",
+  "adicionarEscolhaSessao": "Escolha a sessão. Entra uma cópia, com os exercícios.",
+  "adicionarBuscarModelo": "Buscar modelo",
+  "adicionarSemModelos": "Nenhum modelo com sessões ainda.",
+  "modelosContagemTopo": "{n, plural, =1{1 modelo} other{{n} modelos}}",
+  "@modelosContagemTopo": {
+    "placeholders": {
+      "n": {"type": "int"}
+    }
+  },
   "rotinaSegueSequencia": "Segue a sequência",
   "rotinaTreinarNesteDia": "Treinar neste dia",
   "rotinaAdicionarTreinoAqui": "Adicionar treino aqui",

@@ -58,7 +58,7 @@ class _ProgressaoAceitarScreenState
 
   void _abrirTreinos(ProgressaoAceitarRouteArgs args, int alunoId) {
     context.push(
-      '/alunos/$alunoId/treinos-list',
+      '/alunos/$alunoId/rotina',
       extra: args.alunoNome ?? 'Aluno',
     );
   }

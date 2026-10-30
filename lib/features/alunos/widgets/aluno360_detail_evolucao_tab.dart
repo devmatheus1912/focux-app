@@ -88,7 +88,7 @@ class Aluno360DetailEvolucaoTab extends StatelessWidget {
             motivo: s.aluno360EvolucaoAjustarTreinoMotivo,
             verbo: s.aluno360EvolucaoAjustarTreinoVerbo,
             onTap: () => context.push(
-              '/alunos/$alunoId/treinos-list',
+              '/alunos/$alunoId/rotina',
               extra: aluno.nome,
             ),
           );

@@ -45,7 +45,7 @@ Future<void> _abrir(
         ),
       ),
       GoRoute(
-        path: '/alunos/:id/treinos-list',
+        path: '/alunos/:id/rotina',
         builder: (_, __) => const Scaffold(body: Text('rota treinos')),
       ),
     ],

@@ -13,6 +13,7 @@ import '../models/ficha_modelo.dart';
 import '../providers/ficha_modelos_provider.dart';
 import 'ficha_acoes.dart';
 import 'modelo_acoes.dart';
+import 'sessoes_sem_uso_aviso.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
 
 /// Aba "Semanas" de Modelos de treino: um card por modelo e "Novo modelo".
@@ -52,9 +53,12 @@ class FichaModelosAba extends ConsumerWidget {
                     onRefresh: () => ref.refresh(fichaModelosProvider.future),
                     child: ListView.separated(
                       padding: const EdgeInsets.all(TokensStrip.s4),
-                      itemCount: lista.length,
+                      // O último item é o aviso de sobras (some sozinho quando não há).
+                      itemCount: lista.length + 1,
                       separatorBuilder: (_, __) => const SizedBox(height: TokensStrip.s2),
-                      itemBuilder: (context, i) => FichaModeloCard(modelo: lista[i]),
+                      itemBuilder: (context, i) => i < lista.length
+                          ? FichaModeloCard(modelo: lista[i])
+                          : const SessoesSemUsoAviso(),
                     ),
                   ),
           ),

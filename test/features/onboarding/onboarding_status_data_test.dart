@@ -218,7 +218,7 @@ void main() {
       final free = normalizeOnboardingWizard(raw, landingCompleta: false);
       expect(free.steps.first.id, 'primeiro-aluno');
       expect(free.steps.first.completed, isTrue);
-      expect(free.nextActionRoute, '/treinos/novo');
+      expect(free.nextActionRoute, '/treinos?novo=1');
       expect(free.steps.map((s) => s.id), isNot(contains('link-bio')));
       expect(
         free.steps.firstWhere((s) => s.id == 'perfil').description,

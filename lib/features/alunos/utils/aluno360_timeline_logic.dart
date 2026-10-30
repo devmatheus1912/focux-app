@@ -544,7 +544,7 @@ String resolveTimeline360DeepLinkForPersonal({
   final raw = link?.trim() ?? '';
   if (raw.isEmpty) return '';
   if (raw == '/checkin/treinos' || raw.startsWith('/checkin/')) {
-    return '/alunos/$alunoId/treinos-list';
+    return '/alunos/$alunoId/rotina';
   }
   return raw;
 }

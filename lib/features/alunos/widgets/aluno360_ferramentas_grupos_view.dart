@@ -240,7 +240,7 @@ class Aluno360FerramentasGrupos extends ConsumerWidget {
               : aluno.diasSemTreino! >= 7
               ? '${aluno.diasSemTreino} dias sem treino'
               : 'Ativo recentemente',
-          onTap: () => push('/alunos/$alunoId/treinos-list', extra: nome),
+          onTap: () => push('/alunos/$alunoId/rotina', extra: nome),
         ),
         Aluno360FerramentasModule.equipamentos => linha(
           label: 'Equipamentos',

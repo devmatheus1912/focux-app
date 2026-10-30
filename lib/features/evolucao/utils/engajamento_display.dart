@@ -190,7 +190,7 @@ String? engajamentoEventoRota(String? tipo, int alunoId) {
     case 'TREINO':
     case 'TREINO_INICIADO':
     case 'CHECKIN_CONCLUIDO':
-      return '/alunos/$alunoId/treinos-list';
+      return '/alunos/$alunoId/rotina';
     default:
       return null;
   }

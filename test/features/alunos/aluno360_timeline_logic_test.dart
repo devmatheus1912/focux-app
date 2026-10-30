@@ -231,13 +231,13 @@ void main() {
   });
 
   group('resolveTimeline360DeepLinkForPersonal', () {
-    test('rewrites aluno checkin shell to treinos-list', () {
+    test('rewrites aluno checkin shell to the ficha', () {
       expect(
         resolveTimeline360DeepLinkForPersonal(
           link: '/checkin/treinos',
           alunoId: 42,
         ),
-        '/alunos/42/treinos-list',
+        '/alunos/42/rotina',
       );
     });
 

@@ -9,6 +9,7 @@ import 'package:focux_app/core/widgets/fx_choice_strip.dart';
 import 'package:focux_app/features/treinos/data/ficha_modelo_repository.dart';
 import 'package:focux_app/features/treinos/models/ficha_modelo.dart';
 import 'package:focux_app/features/treinos/providers/ficha_modelos_provider.dart';
+import 'package:focux_app/features/treinos/providers/treinos_provider.dart';
 import 'package:focux_app/features/treinos/utils/semana_da_fila.dart';
 import 'package:focux_app/features/treinos/utils/semana_do_modelo.dart';
 import 'package:focux_app/features/treinos/utils/treino_criacao_fluxo.dart';
@@ -102,7 +103,10 @@ Future<(_Repo, List<String>)> _abrir(WidgetTester tester, List<FichaModelo> mode
   );
   await tester.pumpWidget(
     ProviderScope(
-      overrides: [fichaModeloRepositoryProvider.overrideWithValue(repo)],
+      overrides: [
+        fichaModeloRepositoryProvider.overrideWithValue(repo),
+        sessoesSemUsoProvider.overrideWith((ref) async => 0),
+      ],
       child: MaterialApp.router(
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: EagleTokens.brandAccent),

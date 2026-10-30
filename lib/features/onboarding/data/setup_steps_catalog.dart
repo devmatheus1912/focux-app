@@ -44,10 +44,10 @@ final setupStepCatalog = [
   ),
   SetupStepCatalogEntry(
     id: 'primeiro-treino',
-    title: 'Crie o primeiro treino',
-    description: 'Monte do zero ou por um modelo rápido.',
+    title: 'Crie seu primeiro modelo',
+    description: 'Escolha os dias e a divisão.',
     icon: 'fitness_center',
-    actionRoute: '/treinos/novo',
+    actionRoute: '/treinos?novo=1',
     estimatedMinutes: 3,
     isDone: (d) => d.primeiroTreinoCriado,
   ),

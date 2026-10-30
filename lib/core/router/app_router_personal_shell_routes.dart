@@ -52,7 +52,9 @@ RouteBase buildPersonalShellRoute() {
         routes: [
           GoRoute(
             path: '/treinos',
-            builder: (context, state) => const TreinosListScreen(),
+            builder: (context, state) => TreinosListScreen(
+              abrirNovoModelo: state.uri.queryParameters['novo'] == '1',
+            ),
           ),
         ],
       ),

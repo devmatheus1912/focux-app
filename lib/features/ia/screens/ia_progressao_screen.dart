@@ -175,7 +175,7 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
 
   void _abrirTreinos() {
     context.push(
-      '/alunos/${widget.alunoId}/treinos-list',
+      '/alunos/${widget.alunoId}/rotina',
       extra: widget.alunoNome,
     );
   }

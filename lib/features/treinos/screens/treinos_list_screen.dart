@@ -40,6 +40,7 @@ import '../../../core/widgets/fx_action_link.dart';
 import '../../../core/widgets/fx_choice_strip.dart';
 import '../../exercicios/screens/exercicios_list_screen.dart';
 import '../widgets/ficha_modelos_aba.dart';
+import 'modelos_de_treino_view.dart';
 import '../widgets/sessoes_sem_uso_aviso.dart';
 import '../widgets/treino_assign_sheet.dart';
 import '../widgets/treino_home_sheet.dart';
@@ -56,11 +57,12 @@ part 'treinos_list_cards.part.dart';
 class TreinosListScreen extends ConsumerWidget {
   final int? alunoId;
   final String? alunoNome;
-
-  const TreinosListScreen({super.key, this.alunoId, this.alunoNome});
+  final bool abrirNovoModelo; // atalhos abrem já na folha de Novo modelo
+  const TreinosListScreen({super.key, this.alunoId, this.alunoNome, this.abrirNovoModelo = false});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    if (alunoId == null) return ModelosDeTreinoView(abrirNovoModelo: abrirNovoModelo);
     return _TreinosListView(alunoId: alunoId, alunoNome: alunoNome);
   }
 }

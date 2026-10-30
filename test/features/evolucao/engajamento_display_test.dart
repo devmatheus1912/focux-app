@@ -100,7 +100,7 @@ void main() {
     expect(engajamentoUltimoValue(const []), '—');
     expect(engajamentoEventoRota('MENSAGEM', 9), '/alunos/9/chat');
     expect(engajamentoEventoRota('MEDIDA', 9), '/alunos/9/evolucao');
-    expect(engajamentoEventoRota('TREINO', 9), '/alunos/9/treinos-list');
+    expect(engajamentoEventoRota('TREINO', 9), '/alunos/9/rotina');
     expect(engajamentoEventoRota('OUTRO', 9), isNull);
   });
 }

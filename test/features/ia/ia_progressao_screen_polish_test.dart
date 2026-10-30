@@ -36,7 +36,7 @@ void main() {
     expect(screen, contains('IaSafetyDisclaimer'));
     expect(screen, contains('IaProgressaoResultView'));
     expect(screen, contains('FxActionChip'));
-    expect(screen, contains('/alunos/\${widget.alunoId}/treinos-list'));
+    expect(screen, contains('/alunos/\${widget.alunoId}/rotina'));
     expect(screen, contains('/alunos/\${widget.alunoId}/evolucao'));
     expect(screen, contains('progressaoPendingReviewLabel'));
     expect(screen, isNot(contains('person_add')));

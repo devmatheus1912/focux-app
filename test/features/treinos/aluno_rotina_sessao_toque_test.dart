@@ -10,6 +10,8 @@ import 'package:focux_app/core/widgets/fx_choice_chip.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
 import 'package:focux_app/features/treinos/data/treino_repository.dart';
 import 'package:focux_app/features/treinos/models/rotina_fila.dart';
+import 'package:focux_app/features/treinos/providers/ficha_modelos_provider.dart';
+import 'package:focux_app/features/treinos/models/ficha_modelo.dart';
 import 'package:focux_app/features/treinos/providers/treinos_provider.dart';
 import 'package:focux_app/features/treinos/screens/aluno_rotina_screen.dart';
 import 'package:focux_app/features/treinos/utils/ficha_vigencia.dart';
@@ -91,6 +93,16 @@ class _FakeTreinoRepository extends TreinoRepository {
   }
 }
 
+const _modeloAbc = FichaModelo(
+  id: 50,
+  nome: 'ABC · 3 dias',
+  itens: [
+    FichaModeloItem(descanso: false, treinoId: 51, nome: 'A · Peito e tríceps', diaSemana: 1, exerciciosCount: 6),
+    FichaModeloItem(descanso: false, treinoId: 52, nome: 'B · Costas e bíceps', diaSemana: 3, exerciciosCount: 5),
+  ],
+  avisoDias: [2, 4, 5, 6, 7],
+);
+
 const _fila = RotinaFila(
   itens: [
     RotinaItem(
@@ -144,7 +156,10 @@ Future<(_FakeTreinoRepository, GoRouter)> _abrir(
   );
   await tester.pumpWidget(
     ProviderScope(
-      overrides: [treinoRepositoryProvider.overrideWithValue(repo)],
+      overrides: [
+        treinoRepositoryProvider.overrideWithValue(repo),
+        fichaModelosProvider.overrideWith((ref) async => const [_modeloAbc]),
+      ],
       child: MaterialApp.router(
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: EagleTokens.brandAccent),
@@ -367,6 +382,41 @@ void main() {
           for (final x in d.sessoes) '${d.dia}:${x.nome}',
       ];
       expect(sessoes, ['1:Peito', '2:Costas', '4:Treino C', '5:Treino D']);
+    });
+  });
+
+  group('adicionar treino', () {
+    testWidgets('Copiar de um modelo põe uma cópia da sessão no dia', (tester) async {
+      final (repo, _) = await _abrir(tester, <Object?>[]);
+
+      // Quarta (dia 3) está de descanso na ficha de teste.
+      await tester.tap(find.text('Adicionar treino').first);
+      await _settle(tester);
+      await tester.tap(find.text('Copiar de um modelo'));
+      await _settle(tester);
+      await tester.tap(find.text('ABC · 3 dias'));
+      await _settle(tester);
+      await tester.tap(find.text('B · Costas e bíceps'));
+      await _settle(tester);
+
+      expect(repo.duplicados, [52]);
+      final quarta = repo.ultimaSemana!.firstWhere((d) => d.dia == 3);
+      expect(quarta.sessoes.single.treinoId, 99);
+    });
+
+    testWidgets('Sessão nova pede o nome', (tester) async {
+      final (repo, _) = await _abrir(tester, <Object?>[]);
+
+      await tester.tap(find.text('Adicionar treino').first);
+      await _settle(tester);
+      await tester.tap(find.text('Sessão nova'));
+      await _settle(tester);
+      await tester.enterText(find.byType(TextField), 'Mobilidade');
+      await tester.tap(find.text('Pronto').last);
+      await _settle(tester);
+
+      expect(repo.duplicados, isEmpty);
+      expect(repo.ultimaSemana!.firstWhere((d) => d.dia == 3).sessoes.single.nome, 'Mobilidade');
     });
   });
 

@@ -323,7 +323,7 @@ class _TreinoDetailOverflowButton extends ConsumerWidget {
 
 void _popTreinoDetail(BuildContext context, {int? alunoId}) {
   if (alunoId != null) {
-    safePopOrGo(context, '/alunos/$alunoId/treinos-list');
+    safePopOrGo(context, '/alunos/$alunoId/rotina');
     return;
   }
   safePopOrGo(context, '/treinos');

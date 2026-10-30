@@ -11,6 +11,7 @@ import 'package:focux_app/core/widgets/fx_choice_strip.dart';
 import 'package:focux_app/features/treinos/data/ficha_modelo_repository.dart';
 import 'package:focux_app/features/treinos/models/ficha_modelo.dart';
 import 'package:focux_app/features/treinos/providers/ficha_modelos_provider.dart';
+import 'package:focux_app/features/treinos/providers/treinos_provider.dart';
 import 'package:focux_app/features/treinos/screens/ficha_modelo_screen.dart';
 import 'package:focux_app/features/treinos/widgets/ficha_modelos_aba.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
@@ -62,6 +63,7 @@ Widget _app(Widget home, {required bool escuro}) {
   return ProviderScope(
     overrides: [
       fichaModeloRepositoryProvider.overrideWithValue(_Repo(const [_hipertrofia, _fullBody])),
+      sessoesSemUsoProvider.overrideWith((ref) async => 0),
     ],
     child: RepaintBoundary(
       key: const ValueKey('tela'),

@@ -28,7 +28,7 @@ Future<void> _pumpCta(
         ),
       ),
       GoRoute(
-        path: '/treinos/novo',
+        path: '/treinos',
         builder: (context, state) => _destino('novo treino'),
       ),
       GoRoute(
@@ -111,7 +111,7 @@ void main() {
     );
 
     expect(passo(alunos: 0, treinos: false)?.route, '/growth/migracao');
-    expect(passo(treinos: false, financeiro: false)?.route, '/treinos/novo');
+    expect(passo(treinos: false, financeiro: false)?.route, '/treinos?novo=1');
     expect(passo(treinos: false)?.cta, 'Criar primeiro treino');
     expect(passo(financeiro: false)?.route, '/financeiro');
     expect(passo(financeiro: false)?.cta, 'Abrir financeiro');

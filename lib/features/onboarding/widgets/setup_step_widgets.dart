@@ -9,13 +9,18 @@ import '../../../core/theme/tokens_strip.dart';
 String normalizeSetupActionRoute(String route) {
   final uri = Uri.parse(route);
   final path = switch (uri.path) {
-    '/treinos' => '/treinos/novo',
+    // "Criar treino" agora é Novo modelo, aberto na própria aba Treinos.
+    '/treinos' || '/treinos/novo' => '/treinos',
     '/financeiro' => '/perfil/wallet',
     '/perfil' => '/perfil/editar',
     _ => uri.path.isEmpty ? route : uri.path,
   };
-  if (uri.hasQuery) {
-    return Uri(path: path, queryParameters: uri.queryParameters).toString();
+  final query = {
+    ...uri.queryParameters,
+    if (path == '/treinos') 'novo': '1',
+  };
+  if (query.isNotEmpty) {
+    return Uri(path: path, queryParameters: query).toString();
   }
   return path;
 }

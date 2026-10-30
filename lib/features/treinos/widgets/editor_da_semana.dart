@@ -5,6 +5,7 @@ import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../l10n/app_localizations.dart';
 import '../providers/treinos_provider.dart';
 import '../utils/semana_da_fila.dart';
+import 'adicionar_treino_folha.dart';
 import 'ficha_acoes.dart';
 import 'ficha_vazia.dart';
 
@@ -25,12 +26,18 @@ mixin EditorDaSemana<W extends ConsumerStatefulWidget> on ConsumerState<W> {
   /// Busca a semana de novo (depois de renomear uma sessão, por exemplo).
   Future<void> recarregarSemana();
 
+  /// "Adicionar treino": sessão nova ou cópia de uma sessão de um modelo.
   Future<void> adicionarNoDia(int dia) async {
-    final nome = await pedirNomeDaSessao(context);
-    if (nome == null || !mounted) return;
-    await gravarSemanaInteira(
-      comSessaoNoDia(semanaAtual, dia: dia, sessao: SessaoDaSemana(nome: nome)),
-    );
+    final escolha = await escolherSessaoParaODia(context);
+    if (escolha == null || !mounted) return;
+    switch (escolha) {
+      case SessaoNova(:final nome):
+        await gravarSemanaInteira(
+          comSessaoNoDia(semanaAtual, dia: dia, sessao: SessaoDaSemana(nome: nome)),
+        );
+      case CopiaDeSessao(:final treinoId, :final exerciciosCount):
+        await _copiarParaODia(treinoId, exerciciosCount, dia);
+    }
   }
 
   Future<void> menuDaSessao(int dia, int indice) async {
@@ -54,8 +61,8 @@ mixin EditorDaSemana<W extends ConsumerStatefulWidget> on ConsumerState<W> {
         await gravarSemanaInteira(moverDia(semanaAtual, de: dia, para: para));
       case SessaoAcao.copiar:
         final para = await escolherDia(context);
-        if (para == null || !mounted) return;
-        await _copiarSessao(sessao, para);
+        if (para == null || !mounted || sessao.treinoId == null) return;
+        await _copiarParaODia(sessao.treinoId!, sessao.exerciciosCount, para);
     }
   }
 
@@ -133,11 +140,12 @@ mixin EditorDaSemana<W extends ConsumerStatefulWidget> on ConsumerState<W> {
     }
   }
 
-  Future<void> _copiarSessao(SessaoDaSemana sessao, int para) async {
-    if (gravandoSemana || sessao.treinoId == null) return;
+  /// Duplica o treino [treinoId] e põe a cópia no dia [para] (independente da origem).
+  Future<void> _copiarParaODia(int treinoId, int? exerciciosCount, int para) async {
+    if (gravandoSemana) return;
     definirGravando(true);
     try {
-      final copia = await ref.read(treinoRepositoryProvider).duplicar(sessao.treinoId!);
+      final copia = await ref.read(treinoRepositoryProvider).duplicar(treinoId);
       if (!mounted) return;
       definirGravando(false);
       await gravarSemanaInteira(
@@ -147,7 +155,7 @@ mixin EditorDaSemana<W extends ConsumerStatefulWidget> on ConsumerState<W> {
           sessao: SessaoDaSemana(
             treinoId: copia.id,
             nome: copia.nome,
-            exerciciosCount: sessao.exerciciosCount,
+            exerciciosCount: exerciciosCount,
           ),
         ),
       );

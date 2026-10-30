@@ -28,13 +28,11 @@ import '../../features/exercicios/models/exercicio_criado.dart' show exercicioOr
 import '../../features/exercicios/screens/add_exercicio_screen.dart';
 import '../../features/exercicios/screens/onboarding_biblioteca_wizard.dart';
 import '../../features/treinos/screens/aluno_rotina_screen.dart';
-import '../../features/treinos/screens/treinos_list_screen.dart';
 import '../../features/ferramentas/screens/ferramentas_screen.dart';
 import '../../features/treinos/screens/ficha_anterior_screen.dart';
 import '../../features/treinos/screens/ficha_modelo_screen.dart';
 import '../../features/treinos/screens/fichas_anteriores_screen.dart';
 import '../../features/treinos/screens/treino_detail_screen.dart';
-import '../../features/treinos/screens/create_treino_screen.dart';
 import '../../features/treinos/screens/add_exercicio_to_treino_screen.dart';
 import '../../features/treinos/utils/treino_criacao_fluxo.dart';
 import '../../features/financeiro/screens/financeiro_screen.dart';
@@ -265,16 +263,13 @@ RouteBase buildChromeShellRoute() {
               return '/alunos/$id/anamnese';
             },
           ),
+          // A lista antiga de treinos do aluno virou a ficha dele.
           GoRoute(
             path: '/alunos/:id/treinos-list',
-            redirect:
-                (context, state) =>
-                    intPathParam(state, 'id') == null ? '/alunos' : null,
-            builder:
-                (context, state) => TreinosListScreen(
-                  alunoId: intPathParam(state, 'id')!,
-                  alunoNome: stringRouteExtra(state),
-                ),
+            redirect: (context, state) {
+              final id = intPathParam(state, 'id');
+              return id == null ? '/alunos' : '/alunos/$id/rotina';
+            },
           ),
           GoRoute(
             path: '/alunos/:id/rotina',
@@ -405,14 +400,12 @@ RouteBase buildChromeShellRoute() {
           ),
 
           // Treinos sub-routes
+          // Sessão solta saiu: links antigos caem em Novo modelo (ou na ficha do aluno).
           GoRoute(
             path: '/treinos/novo',
-            builder: (context, state) {
-              final extra = TreinoRouteExtra.parse(state.extra);
-              return CreateTreinoScreen(
-                alunoId: extra.alunoId,
-                alunoNome: extra.alunoNome,
-              );
+            redirect: (context, state) {
+              final alunoId = TreinoRouteExtra.parse(state.extra).alunoId;
+              return alunoId != null ? '/alunos/$alunoId/rotina' : '/treinos?novo=1';
             },
           ),
           GoRoute(

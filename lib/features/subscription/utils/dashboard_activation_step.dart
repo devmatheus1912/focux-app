@@ -27,7 +27,7 @@ DashboardActivationStep? dashboardActivationStep(
       title: s.ativacaoTreinoTitulo,
       body: s.ativacaoTreinoCorpo,
       cta: s.ativacaoTreinoCta,
-      route: '/treinos/novo',
+      route: '/treinos?novo=1',
     );
   }
   if (!temFinanceiro) {
