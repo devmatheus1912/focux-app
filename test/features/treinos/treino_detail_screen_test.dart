@@ -122,7 +122,7 @@ void main() {
     expect(find.text('Mais detalhes'), findsOneWidget);
     expect(find.text('Objetivo'), findsOneWidget);
     expect(find.text('Tipo de série'), findsNothing);
-    expect(find.text('Vídeo'), findsOneWidget);
+    expect(find.text('Vídeo'), findsNothing); // saiu da prescrição
     expect(find.text('Salvar prescrição'), findsOneWidget);
     expect(find.text('Hipertrofia'), findsOneWidget);
   });

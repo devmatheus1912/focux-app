@@ -9,6 +9,18 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
   bool _showNotes = false;
   bool _maisAberto = false;
   late bool _aplicarAoBloco;
+  late ParametrosDoMetodo _parametros;
+
+  void _mudarParametros(ParametrosDoMetodo novos) {
+    setState(() => _parametros = novos);
+    widget.onParametrosChanged?.call(novos);
+  }
+
+  void _mudarTecnica(String tecnica) {
+    HapticFeedback.selectionClick();
+    setState(() => _tipoSerie = tecnica);
+    widget.onTipoSerieChanged(tecnica);
+  }
 
   @override
   void initState() {
@@ -16,6 +28,7 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
     _presetId = widget.presetId;
     _tipoSerie = widget.tipoSerie;
     _aplicarAoBloco = widget.aplicarAoBloco;
+    _parametros = widget.parametrosIniciais;
     _maisAberto = maisDetalhesPreenchidos(
       carga: widget.cargaCtrl.text,
       rpe: widget.rpeAlvoCtrl?.text ?? '',
@@ -101,7 +114,6 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
             ? selectedPreset.repeticoes
             : widget.repCtrl.text.trim();
     final enabled = widget.enabled;
-    final dropHint = _tipoSerie.toUpperCase() == 'DROPSET';
 
     final fields = <Widget>[
       if (widget.lastPrescription != null) ...[
@@ -216,6 +228,8 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
           ),
         ],
       ),
+      const SizedBox(height: FxSettingsLayout.groupGap),
+      _metodo(),
       if (widget.outrosNoBloco > 0 &&
           widget.onAplicarAoBlocoChanged != null) ...[
         const SizedBox(height: FxSettingsLayout.groupGap),
@@ -261,7 +275,7 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
             FxSettingsTile(
               icon: Icons.tune_rounded,
               label: prescriptionMaisDetalhes,
-              subtitle: 'Tipo de série, carga, RPE e observações',
+              subtitle: prescriptionMaisDetalhesSubtitulo,
               value: '',
               mute: mute,
               line: line,
@@ -279,41 +293,7 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
       FxSettingsGroup(
         header: prescriptionMaisDetalhes,
         accent: widget.primary,
-        footer:
-            dropHint
-                ? Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: FxSettingsLayout.groupPadH,
-                  ),
-                  child: Text(
-                    prescriptionDropHint,
-                    style: FxSettingsLayout.footer(color: mute),
-                  ),
-                )
-                : null,
         children: [
-          FxSettingsTile(
-            icon: Icons.layers_outlined,
-            label: prescriptionTipoSerie,
-            value: workoutTipoSerieLabel(_tipoSerie),
-            mute: mute,
-            line: line,
-            accent: brand,
-            picker: true,
-            onTap: enabled ? _openTipoSeriePicker : null,
-          ),
-          if (_tipoSerie.toUpperCase() == 'SUPERSET')
-            _PrescriptionValueRow(
-              label: prescriptionGrupoSuperset,
-              icon: Icons.link_rounded,
-              iconColor: brand,
-              controller: widget.grupoSupersetCtrl,
-              hint: prescriptionGrupoHint,
-              line: line,
-              ink: ink,
-              mute: mute,
-              keyboardType: TextInputType.number,
-            ),
           if (_showCarga)
             _PrescriptionValueRow(
               label: prescriptionCarga,

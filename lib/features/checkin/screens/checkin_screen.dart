@@ -24,6 +24,8 @@ import '../data/checkin_repository.dart';
 import '../data/checkin_series_pendentes.dart';
 import '../providers/checkin_provider.dart';
 import '../services/checkin_descanso_alerta.dart';
+import '../utils/execucao_metodos.dart';
+import '../widgets/checkin_metodo_folha.dart';
 import '../services/checkin_fila_sync.dart';
 import '../utils/checkin_descanso_relogio.dart';
 import '../utils/checkin_execucao_display.dart';
@@ -336,7 +338,14 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
     HapticFeedback.selectionClick();
     _anotarUltimaSerie(ee, serie);
     if (serie.numero > ee.seriesFeitas) {
-      _iniciarDescanso(depois.descansoSegundos ?? 60);
+      // Drop-set e rest-pause: os passos vêm logo depois, sem descanso cheio.
+      final passos = passosDoMetodo(ee.metodo, cargaDaSerie: serie.cargaKg);
+      if (passos.isNotEmpty) await mostrarPassosDoMetodo(context, passos);
+      if (!mounted) return;
+      // Combinado: a volta passa pelos exercícios do grupo e só descansa no último.
+      final passo = passoDoCombinado(_execucao?.exercicios ?? [depois], depois);
+      if (passo.focoId != null) setState(() => _focoTreinoExercicioId = passo.focoId);
+      if (passo.descansar) _iniciarDescanso(depois.descansoSegundos ?? 60);
     }
   }
 

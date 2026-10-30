@@ -5,6 +5,7 @@ import '../../../core/widgets/fx_action_sheet.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../models/ficha_modelo.dart';
+import 'aplicar_em_alunos_folha.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
 
 enum FichaAcao {
@@ -341,20 +342,13 @@ Future<int?> escolherAluno(
   required List<Aluno> alunos,
   required int excluirId,
   String? titulo,
-}) {
-  return showDialog<int>(
-    context: context,
-    builder:
-        (dialogContext) => SimpleDialog(
-          title: Text(titulo ?? S.of(dialogContext).rotinaUsarEmOutro),
-          children: [
-            for (final aluno in alunos)
-              if (aluno.id != excluirId)
-                SimpleDialogOption(
-                  onPressed: () => Navigator.pop(dialogContext, aluno.id),
-                  child: Text(aluno.nome),
-                ),
-          ],
-        ),
+}) async {
+  final escolhidos = await escolherAlunos(
+    context,
+    alunos: alunos,
+    titulo: titulo ?? S.of(context).rotinaUsarEmOutro,
+    varios: false,
+    excluirId: excluirId,
   );
+  return escolhidos?.firstOrNull?.id;
 }

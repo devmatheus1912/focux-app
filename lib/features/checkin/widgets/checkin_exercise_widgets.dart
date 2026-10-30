@@ -15,6 +15,7 @@ import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../l10n/app_localizations.dart';
 import '../data/checkin_repository.dart';
+import '../../treinos/models/metodo_exercicio.dart';
 import '../utils/checkin_execucao_display.dart';
 import '../utils/checkin_execucao_estado.dart';
 import '../utils/checkin_exercise_tips.dart';
@@ -319,7 +320,12 @@ class CheckinSerieCard extends StatelessWidget {
           ),
           const SizedBox(height: TokensStrip.s2),
           Text(
-            contextLine,
+            [
+              contextLine,
+              // O método prescrito: "Bi-set", "Drop-set", "Pirâmide"…
+              if (ee.metodo.combinado) rotuloDoCombinado(ee.metodo.grupoRotulo, 2),
+              if (ee.metodo.tecnica != Tecnica.normal) rotuloDaTecnica(ee.metodo.tecnica),
+            ].join(' · '),
             style: FocuxHubTypography.bodyMuted(color: chrome.mute),
           ),
           if (ultima != null) ...[

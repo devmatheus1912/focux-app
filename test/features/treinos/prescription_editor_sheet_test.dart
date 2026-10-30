@@ -111,10 +111,14 @@ void main() {
     expect(find.text('Objetivo'), findsOneWidget);
     expect(find.text('Hipertrofia'), findsOneWidget);
     expect(find.text('Salvar prescrição'), findsOneWidget);
+    // A técnica virou a seção "Método", sempre à vista; "Mais detalhes" é carga, RPE e dica.
+    expect(find.text('Drop-set'), findsOneWidget);
+    expect(find.text('Rest-pause'), findsOneWidget);
+    expect(find.text('Grupo superset'), findsNothing);
     await tester.ensureVisible(find.text('Mais detalhes'));
     await tester.tap(find.text('Mais detalhes'));
     await _pumpOpen(tester);
-    expect(find.text('Tipo de série'), findsOneWidget);
+    expect(find.text('Tipo de série'), findsNothing);
 
     await tester.tap(find.text('Salvar prescrição'));
     await _pumpOpen(tester);

@@ -273,8 +273,30 @@ class _TreinoListaUnicaState extends State<_TreinoListaUnica> {
     );
   }
 
+  /// Itens na ordem da lista (a mesma que o aluno executa).
+  List<TreinoExercicioItem> get _itensEmOrdem => [
+    for (final l in _linhas)
+      if (l is LinhaItem) l.item,
+  ];
+
+  Future<void> _gravarCombinados(List<Combinado> combinados) async {
+    try {
+      await widget.repo.gravarCombinados(widget.treinoId, combinados);
+      widget.ref.invalidate(treinoProvider(widget.treinoId));
+    } catch (error) {
+      if (mounted) FeedbackHelper.showError(context, friendlyError(error));
+    }
+  }
+
   Future<void> _menu(TreinoExercicioItem te) async {
     HapticFeedback.selectionClick();
+    final itens = _itensEmOrdem;
+    final combinar = combinarComProximo(itens, te.id);
+    final combinado = te.metodo.combinado;
+    final tamanhoDoGrupo =
+        combinado
+            ? itens.where((e) => e.metodo.grupo == te.metodo.grupo).length
+            : 0;
     AnalyticsService.instance.track(
       ProductEvents.treinoExerciseMenuOpened,
       props: {'id': te.id},
@@ -307,6 +329,31 @@ class _TreinoListaUnicaState extends State<_TreinoListaUnica> {
             icone: Icons.swap_horiz_rounded,
           ),
         ]),
+        // Combinar é aqui, na lista: bi-set, tri-set, circuito.
+        if (combinar != null || combinado)
+          FxActionGroup<String>('Combinar', [
+            if (combinar != null)
+              FxActionItem(
+                valor: 'combinar',
+                rotulo: 'Combinar com o próximo',
+                icone: Icons.link_rounded,
+              ),
+            if (combinado && tamanhoDoGrupo == 2)
+              FxActionItem(
+                valor: 'superset',
+                rotulo:
+                    te.metodo.grupoRotulo == 'SUPERSET'
+                        ? 'Chamar de Bi-set'
+                        : 'Chamar de Superset',
+                icone: Icons.label_outline_rounded,
+              ),
+            if (combinado)
+              FxActionItem(
+                valor: 'separar',
+                rotulo: 'Separar',
+                icone: Icons.link_off_rounded,
+              ),
+          ]),
       ],
       destrutiva: FxActionItem(
         valor: 'remove',
@@ -327,6 +374,12 @@ class _TreinoListaUnicaState extends State<_TreinoListaUnica> {
         await _substituir(te);
       case 'remove':
         await _remover(te);
+      case 'combinar':
+        if (combinar != null) await _gravarCombinados(combinar);
+      case 'separar':
+        await _gravarCombinados(separar(itens, te.id));
+      case 'superset':
+        await _gravarCombinados(alternarSuperset(itens, te.id));
     }
   }
 
@@ -373,6 +426,18 @@ class _TreinoListaUnicaState extends State<_TreinoListaUnica> {
         final primeiro = _linhas[index - 1] is LinhaSecao;
         final ultimo =
             index + 1 >= _linhas.length || _linhas[index + 1] is LinhaSecao;
+        final grupo = te.metodo.grupo;
+        final anterior = _linhas[index - 1];
+        final abreGrupo =
+            grupo != null &&
+            (anterior is! LinhaItem || anterior.item.metodo.grupo != grupo);
+        final doGrupo =
+            grupo == null
+                ? const <TreinoExercicioItem>[]
+                : [
+                  for (final e in _itensEmOrdem)
+                    if (e.metodo.grupo == grupo) e,
+                ];
         return Padding(
           key: ValueKey('item-${te.id}'),
           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -390,13 +455,26 @@ class _TreinoListaUnicaState extends State<_TreinoListaUnica> {
               ),
             ),
             clipBehavior: Clip.antiAlias,
-            child: _ExercicioRow(
-              te: te,
-              reorderIndex: index,
-              isDark: widget.isDark,
-              isLast: ultimo,
-              onEditPrescription: () => widget.onEditPrescription(te),
-              onMenu: () => _menu(te),
+            child: _ComColcheteDoCombinado(
+              grupo: grupo != null,
+              cabecalho:
+                  abreGrupo
+                      ? cabecalhoDoCombinado(
+                        rotulo: te.metodo.grupoRotulo,
+                        tamanho: doGrupo.length,
+                        voltas: te.series,
+                        descansoSegundos: doGrupo.last.descansoSegundos,
+                      )
+                      : null,
+              primary: widget.primary,
+              child: _ExercicioRow(
+                te: te,
+                reorderIndex: index,
+                isDark: widget.isDark,
+                isLast: ultimo,
+                onEditPrescription: () => widget.onEditPrescription(te),
+                onMenu: () => _menu(te),
+              ),
             ),
           ),
         );
@@ -492,6 +570,61 @@ class _SecaoDoTreino extends StatelessWidget {
                 ),
               ),
             ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Barra à esquerda que liga os exercícios de um combinado e, no primeiro, o
+/// cabeçalho "Bi-set · 4 voltas · descanso 90 s depois do último".
+class _ComColcheteDoCombinado extends StatelessWidget {
+  const _ComColcheteDoCombinado({
+    required this.grupo,
+    required this.cabecalho,
+    required this.primary,
+    required this.child,
+  });
+
+  final bool grupo;
+  final String? cabecalho;
+  final Color primary;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!grupo) return child;
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(left: BorderSide(color: primary, width: 3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (cabecalho != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                TokensStrip.s3,
+                TokensStrip.s2,
+                TokensStrip.s3,
+                0,
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.link_rounded, size: 16, color: primary),
+                  const SizedBox(width: TokensStrip.s1),
+                  Expanded(
+                    child: Text(
+                      cabecalho!,
+                      style: FocuxHubTypography.bodyMuted(
+                        color: primary,
+                      ).copyWith(fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          child,
         ],
       ),
     );

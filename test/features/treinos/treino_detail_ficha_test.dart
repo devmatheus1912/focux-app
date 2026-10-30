@@ -6,6 +6,7 @@ import 'package:focux_app/features/exercicios/data/enums.dart';
 import 'package:focux_app/features/exercicios/data/exercicio_repository.dart';
 import 'package:focux_app/features/treinos/data/treino_repository.dart';
 import 'package:focux_app/features/treinos/models/ficha_modelo.dart';
+import 'package:focux_app/features/treinos/models/metodo_exercicio.dart';
 import 'package:focux_app/features/treinos/models/rotina_fila.dart';
 import 'package:focux_app/features/treinos/providers/ficha_modelos_provider.dart';
 import 'package:focux_app/features/treinos/widgets/modelo_contexto_treino.dart';
@@ -233,6 +234,35 @@ void main() {
       // cada seção tem o seu "+ Adicionar", mesmo com exercícios
       expect(find.text('Adicionar'), findsNWidgets(3));
     });
+  });
+
+  testWidgets('combinado aparece ligado na lista, com o cabeçalho do bi-set', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(430, 1600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    TreinoExercicioItem doGrupo(int id, int ordem) => TreinoExercicioItem(
+      id: id,
+      exercicio: Exercicio(id: id + 100, nome: 'Exercício $id', grupoMuscularPrimario: GrupoMuscular.peito),
+      series: 4,
+      repeticoes: '10',
+      ordem: ordem,
+      descansoSegundos: 90,
+      metodo: const MetodoExercicio(grupo: 1, grupoRotulo: 'BISET'),
+    );
+    final router = GoRouter(
+      initialLocation: '/treinos/9',
+      routes: [
+        GoRoute(
+          path: '/treinos/:id',
+          builder: (context, state) => const TreinoDetailScreen(treinoId: 9),
+        ),
+      ],
+    );
+    await tester.pumpWidget(
+      _app(router, treino: Treino(id: 9, nome: 'Treino A', exercicios: [doGrupo(1, 0), doGrupo(2, 1)])),
+    );
+    await _settle(tester);
+
+    expect(find.text('Bi-set · 4 voltas · descanso 90 s depois do último'), findsOneWidget);
   });
 
   group('contexto do modelo', () {

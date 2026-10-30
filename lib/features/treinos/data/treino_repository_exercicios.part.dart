@@ -114,7 +114,10 @@ extension TreinoRepositoryExercicios on TreinoRepository {
     int? rpeAlvo,
     String? observacoes,
     required String tipoSerie,
-    int? grupoSuperset,
+    int? tecnicaQuedas,
+    int? tecnicaReducaoPct,
+    int? tecnicaPausaS,
+    int? tecnicaMiniSeries,
   }) async {
     final response = await _dio.patch(
       '/api/treinos/$treinoId/exercicios/$itemId',
@@ -126,8 +129,28 @@ extension TreinoRepositoryExercicios on TreinoRepository {
         'rpeAlvo': rpeAlvo,
         'observacoes': observacoes?.trim(),
         'tipoSerie': tipoSerie,
-        if (tipoSerie == 'SUPERSET' && grupoSuperset != null)
-          'grupoSuperset': grupoSuperset,
+        if (tecnicaQuedas != null) 'tecnicaQuedas': tecnicaQuedas,
+        if (tecnicaReducaoPct != null) 'tecnicaReducaoPct': tecnicaReducaoPct,
+        if (tecnicaPausaS != null) 'tecnicaPausaS': tecnicaPausaS,
+        if (tecnicaMiniSeries != null) 'tecnicaMiniSeries': tecnicaMiniSeries,
+      },
+    );
+    return Treino.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// Grava todos os combinados do treino (bi-set, tri-set, circuito, superset).
+  /// Cada grupo: itens vizinhos do mesmo bloco; rótulo nulo = pelo tamanho.
+  Future<Treino> gravarCombinados(
+    int treinoId,
+    List<({List<int> itens, String? rotulo})> combinados,
+  ) async {
+    final response = await _dio.put(
+      '/api/treinos/$treinoId/combinados',
+      data: {
+        'combinados': [
+          for (final c in combinados)
+            {'itens': c.itens, if (c.rotulo != null) 'rotulo': c.rotulo},
+        ],
       },
     );
     return Treino.fromJson(response.data as Map<String, dynamic>);

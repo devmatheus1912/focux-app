@@ -44,6 +44,8 @@ import '../widgets/modelo_contexto_treino.dart';
 import '../widgets/treino_assign_sheet.dart';
 import '../widgets/montar_por_modelo.dart';
 import '../widgets/treino_no_lugar.dart';
+import '../models/metodo_exercicio.dart';
+import '../utils/combinados.dart';
 import '../widgets/ficha_acoes.dart';
 import '../providers/ficha_modelos_provider.dart';
 import '../utils/divisao_catalogo.dart';
@@ -52,7 +54,6 @@ import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../widgets/treino_detail_help_sheet.dart';
 import '../widgets/treino_inset_sheet.dart';
 import '../widgets/prescription_editor_sheet.dart';
-import '../widgets/treino_prescription_video_block.dart';
 import '../data/workout_builder_preset.dart';
 import '../../../l10n/app_localizations.dart';
 

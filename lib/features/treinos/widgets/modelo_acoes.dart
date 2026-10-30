@@ -10,6 +10,7 @@ import '../../alunos/providers/alunos_provider.dart';
 import '../models/ficha_modelo.dart';
 import '../providers/ficha_modelos_provider.dart';
 import '../providers/treinos_provider.dart';
+import 'aplicar_em_alunos_folha.dart';
 import 'ficha_acoes.dart';
 import 'ficha_vazia.dart';
 
@@ -21,14 +22,9 @@ Future<bool> aplicarModeloEmAluno(BuildContext context, WidgetRef ref, FichaMode
   final s = S.of(context);
   final alunos = await ref.read(alunosProvider.future);
   if (!context.mounted) return false;
-  final destino = await escolherAluno(
-    context,
-    alunos: alunos,
-    excluirId: -1,
-    titulo: s.modeloAplicarEmAluno,
-  );
-  if (destino == null || !context.mounted) return false;
-  final nome = alunos.where((a) => a.id == destino).map((a) => a.nome).firstOrNull ?? '';
+  final destinos = await escolherAlunos(context, alunos: alunos, titulo: s.modeloAplicarEmAluno);
+  if (destinos == null || destinos.isEmpty || !context.mounted) return false;
+  final nome = destinos.length == 1 ? destinos.single.nome : s.modeloNAlunos(destinos.length);
   final manterCargas = await showFxActionSheet<bool>(
     context,
     title: s.modeloAplicarConfirma(nome),
@@ -46,17 +42,25 @@ Future<bool> aplicarModeloEmAluno(BuildContext context, WidgetRef ref, FichaMode
     ],
   );
   if (manterCargas == null || !context.mounted) return false;
-  try {
-    await ref
-        .read(fichaModeloRepositoryProvider)
-        .aplicar(modelo.id, destino, manterCargas: manterCargas);
-    ref.invalidate(alunoRotinaProvider(destino));
-    if (context.mounted) FeedbackHelper.showSuccess(context, s.modeloAplicado(nome));
-    return true;
-  } catch (_) {
-    if (context.mounted) FeedbackHelper.showError(context, s.checkinNaoSalvou);
-    return false;
+  // Um aluno por vez (sem endpoint novo); quem falhar é avisado pelo nome.
+  final falharam = <String>[];
+  for (final aluno in destinos) {
+    try {
+      await ref
+          .read(fichaModeloRepositoryProvider)
+          .aplicar(modelo.id, aluno.id, manterCargas: manterCargas);
+      ref.invalidate(alunoRotinaProvider(aluno.id));
+    } catch (_) {
+      falharam.add(aluno.nome);
+    }
   }
+  if (!context.mounted) return falharam.length < destinos.length;
+  if (falharam.isEmpty) {
+    FeedbackHelper.showSuccess(context, s.modeloAplicado(nome));
+  } else {
+    FeedbackHelper.showError(context, s.modeloAplicadoFalhou(falharam.join(', ')));
+  }
+  return falharam.length < destinos.length;
 }
 
 Future<bool> renomearModelo(BuildContext context, WidgetRef ref, FichaModelo modelo) async {

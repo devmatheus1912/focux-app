@@ -26,6 +26,7 @@ import '../widgets/ficha_semana.dart';
 import '../widgets/ficha_vazia.dart';
 import '../widgets/ficha_volume_secao.dart';
 import '../widgets/modelo_acoes.dart';
+import '../widgets/estado_do_salvo.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
 
 /// Um modelo de ficha: a semana inteira, editada como a ficha de um aluno.
@@ -160,6 +161,7 @@ class _FichaModeloScreenState extends ConsumerState<FichaModeloScreen>
                 '$contagem · ${modelo.pronto ? s.modeloPronto : s.modeloEmMontagem}',
                 style: FocuxHubTypography.bodyMuted(color: chrome.mute),
               ),
+              EstadoDoSalvo(salvando: _ocupado),
               const SizedBox(height: TokensStrip.s4),
               if (vazia)
                 FichaVazia(
@@ -187,15 +189,17 @@ class _FichaModeloScreenState extends ConsumerState<FichaModeloScreen>
           ),
         ),
         FxStickyActions(
-          primaryLabel: vazia ? s.modeloCriarSemana : s.modeloAplicarEmAluno,
+          primaryLabel: vazia ? s.modeloCriarSemana : s.rotinaPronto,
           loading: _ocupado,
           onPrimary: !vazia
-              ? () => aplicarModeloEmAluno(context, ref, modelo)
+              ? () => context.pop()
               : _plano == null
               ? null
               : () async {
                   if (await gravarSemanaInteira(_plano!.semana)) _plano = null;
                 },
+          secondaryLabel: vazia ? null : s.modeloAplicarEmAluno,
+          onSecondary: vazia ? null : () => aplicarModeloEmAluno(context, ref, modelo),
         ),
       ],
     );

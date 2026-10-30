@@ -131,8 +131,8 @@ void main() {
       contains('FxHomeSheetHandle'),
     );
     expect(screen, contains('expand: true'));
-    expect(screen, contains('TreinoPrescriptionVideoBlock'));
-    expect(screen, contains('treino_prescription_video_block.dart'));
+    expect(screen, isNot(contains('TreinoPrescriptionVideoBlock')));
+    expect(screen, isNot(contains('treino_prescription_video_block.dart')));
     expect(screen, contains('prescription_editor_sheet.dart'));
     expect(screen, contains('PrescriptionEditorSheet'));
     expect(screen, contains('matchWorkoutBuilderPresetId'));

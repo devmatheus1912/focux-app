@@ -1,3 +1,4 @@
+import '../../treinos/models/metodo_exercicio.dart';
 import '../../../core/api/pagina.dart';
 import '../utils/checkin_json.dart';
 
@@ -68,7 +69,11 @@ class ExecucaoExercicio {
     this.proximaSeriePapel,
     this.proximaCargaKg,
     this.proximaRepeticoes,
+    this.metodo = MetodoExercicio.normal,
   });
+
+  /// Técnica e combinado: alterna o bi-set e guia quedas e mini-séries.
+  final MetodoExercicio metodo;
 
   factory ExecucaoExercicio.fromJson(Map<String, dynamic> j) =>
       ExecucaoExercicio(
@@ -111,6 +116,9 @@ class ExecucaoExercicio {
         proximaSeriePapel: checkinJsonString(j['proximaSeriePapel']),
         proximaCargaKg: checkinJsonDouble(j['proximaCargaKg']),
         proximaRepeticoes: checkinJsonString(j['proximaRepeticoes']),
+        metodo: MetodoExercicio.fromJson(
+          j['metodo'] is Map ? Map<String, dynamic>.from(j['metodo'] as Map) : null,
+        ),
       );
 
   Map<String, dynamic> toJson() => {
@@ -185,6 +193,7 @@ class ExecucaoExercicio {
     proximaSeriePapel: proximaSeriePapel,
     proximaCargaKg: proximaCargaKg,
     proximaRepeticoes: proximaRepeticoes,
+    metodo: metodo,
   );
 }
 

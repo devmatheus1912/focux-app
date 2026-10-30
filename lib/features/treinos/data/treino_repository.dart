@@ -5,6 +5,7 @@ import '../../../core/api/offline_sync_service.dart';
 import '../../../core/api/pagina.dart';
 import '../../exercicios/data/exercicio_repository.dart';
 import '../models/ficha_volume.dart';
+import '../models/metodo_exercicio.dart';
 import '../models/rotina_fila.dart';
 import '../utils/ficha_vigencia.dart';
 import '../utils/prescricao_serie.dart';
@@ -29,6 +30,9 @@ class TreinoExercicioItem {
   final String bloco;
   final List<SeriePrescrita> seriesLinhas;
 
+  /// Técnica (drop-set, rest-pause, pirâmide) e combinado (bi-set, tri-set…).
+  final MetodoExercicio metodo;
+
   TreinoExercicioItem({
     required this.id,
     required this.exercicio,
@@ -43,6 +47,7 @@ class TreinoExercicioItem {
     this.grupoSuperset,
     this.bloco = 'TRABALHO',
     this.seriesLinhas = const [],
+    this.metodo = MetodoExercicio.normal,
   });
 
   factory TreinoExercicioItem.fromJson(Map<String, dynamic> json) =>
@@ -65,6 +70,11 @@ class TreinoExercicioItem {
             .whereType<Map>()
             .map((linha) => SeriePrescrita.fromJson(Map<String, dynamic>.from(linha)))
             .toList(),
+        metodo: MetodoExercicio.fromJson(
+          json['metodo'] is Map ? Map<String, dynamic>.from(json['metodo'] as Map) : null,
+          tipoSerie: json['tipoSerie'] as String?,
+          grupoSuperset: json['grupoSuperset'] as int?,
+        ),
       );
 }
 

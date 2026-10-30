@@ -25,6 +25,7 @@ import '../utils/ficha_vigencia.dart';
 import '../utils/semana_da_fila.dart';
 import '../utils/treino_criacao_fluxo.dart';
 import '../widgets/editor_da_semana.dart';
+import '../widgets/estado_do_salvo.dart';
 import '../widgets/ficha_acoes.dart';
 import '../widgets/ficha_help_sheets.dart';
 import '../widgets/ficha_semana.dart';
@@ -226,6 +227,7 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen>
                 linhaDeEstado,
                 style: FocuxHubTypography.bodyMuted(color: chrome.mute),
               ),
+              if (!estado.vazia) EstadoDoSalvo(salvando: _salvando),
               if (!estado.vazia)
                 Padding(
                   padding: const EdgeInsets.only(top: TokensStrip.s3),

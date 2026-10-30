@@ -97,7 +97,7 @@ class FichaModeloCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final s = S.of(context);
-    final contagem = s.modeloContagem(modelo.sessoes.length, modelo.totalExercicios);
+    final contagem = s.modeloContagemExercicios(modelo.totalExercicios);
     final resumo = modelo.resumoDasSessoes;
     return FxTapRow(
       title: modelo.nome,

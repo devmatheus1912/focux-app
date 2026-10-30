@@ -64,7 +64,8 @@ void main() {
     expect(builder, contains('showPrescriptionEditorSheet'));
     expect(detail, contains('_PrescriptionReadinessPanel'));
     expect(detail, contains('mediaTrustLabel'));
-    expect(treinoDetail, contains('TreinoPrescriptionVideoBlock'));
+    // O vídeo saiu da prescrição (biblioteca fixa; exercício próprio em Meus exercícios).
+    expect(treinoDetail, isNot(contains('TreinoPrescriptionVideoBlock')));
   });
 
   test('prévia de vídeo real na sheet; sem stub em breve (§38)', () {

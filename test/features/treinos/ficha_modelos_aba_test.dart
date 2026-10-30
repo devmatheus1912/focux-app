@@ -178,10 +178,10 @@ void main() {
       await _abrir(tester, const [_hipertrofia, _emMontagem]);
 
       expect(find.text('Hipertrofia 4 dias'), findsOneWidget);
-      expect(find.text('A · B · C · D · 4 sessões · 22 exercícios'), findsOneWidget);
+      expect(find.text('A · B · C · D · 22 exercícios'), findsOneWidget);
       expect(find.text('Pronto'), findsOneWidget);
       expect(find.text('Emagrecimento 3 dias'), findsOneWidget);
-      expect(find.text('A · B · 2 sessões · 2 exercícios'), findsOneWidget);
+      expect(find.text('A · B · 2 exercícios'), findsOneWidget);
       expect(find.text('Em montagem'), findsOneWidget);
     });
 

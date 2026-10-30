@@ -14,6 +14,7 @@ import 'package:focux_app/features/treinos/data/ficha_modelo_repository.dart';
 import 'package:focux_app/features/treinos/models/ficha_modelo.dart';
 import 'package:focux_app/features/treinos/models/rotina_fila.dart';
 import 'package:focux_app/features/treinos/providers/ficha_modelos_provider.dart';
+import 'package:focux_app/features/treinos/providers/treinos_provider.dart';
 import 'package:focux_app/features/treinos/screens/ficha_modelo_screen.dart';
 import 'package:focux_app/features/treinos/utils/treino_criacao_fluxo.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
@@ -102,6 +103,7 @@ Future<(_Repo, List<Object?>)> _abrir(WidgetTester tester) async {
     ProviderScope(
       overrides: [
         fichaModeloRepositoryProvider.overrideWithValue(repo),
+        alunoRotinaProvider.overrideWith((ref, id) async => RotinaFila.vazia),
         alunosProvider.overrideWith(
           (ref) async => [
             Aluno(id: 3, nome: 'Ana Souza', email: 'a@a.com', status: 'ATIVO'),
@@ -240,7 +242,11 @@ void main() {
     final (repo, _) = await _abrir(tester);
     await tester.tap(find.text('Aplicar em aluno'));
     await _settle(tester);
+    // A folha mostra a situação da ficha de cada aluno.
+    expect(find.text('Sem ficha'), findsNWidgets(2));
     await tester.tap(find.text('Bia Lima'));
+    await _settle(tester);
+    await tester.tap(find.text('Aplicar'));
     await _settle(tester);
 
     expect(find.text('Aplicar em Bia Lima? A ficha atual é substituída.'), findsOneWidget);
@@ -249,6 +255,28 @@ void main() {
 
     expect(repo.aplicados, [(31, 4, true)]);
     expect(find.text('Ficha aplicada em Bia Lima'), findsOneWidget);
+  });
+
+  testWidgets('aplica em dois alunos de uma vez, com uma confirmação só', (tester) async {
+    final (repo, _) = await _abrir(tester);
+    await tester.tap(find.text('Aplicar em aluno'));
+    await _settle(tester);
+    await tester.tap(find.text('Ana Souza'));
+    await tester.tap(find.text('Bia Lima'));
+    await _settle(tester);
+    await tester.tap(find.text('Aplicar em 2 alunos'));
+    await _settle(tester);
+    expect(find.text('Aplicar em 2 alunos? A ficha atual é substituída.'), findsOneWidget);
+    await tester.tap(find.text('Aplicar com cargas do zero'));
+    await _settle(tester);
+
+    expect(repo.aplicados, [(31, 3, false), (31, 4, false)]);
+  });
+
+  testWidgets('o modelo fecha com Pronto e mostra que está salvo', (tester) async {
+    await _abrir(tester);
+    expect(find.text('Pronto'), findsOneWidget);
+    expect(find.text('Tudo salvo'), findsOneWidget);
   });
 
   testWidgets('cancelar a escolha do aluno não aplica nada', (tester) async {

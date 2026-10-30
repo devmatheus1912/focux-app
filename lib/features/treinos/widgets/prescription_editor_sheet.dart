@@ -21,9 +21,14 @@ import '../utils/workout_prescription_display.dart';
 import 'prescription_editor_copy.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
 
+import '../../../core/theme/shell_chrome.dart';
+import '../../../core/widgets/fx_choice_strip.dart';
+import '../models/metodo_exercicio.dart';
+
 part 'prescription_editor_rows.part.dart';
 part 'prescription_editor_pickers.part.dart';
 part 'prescription_editor_body.part.dart';
+part 'prescription_editor_metodo.part.dart';
 
 /// Largura fixa do trailing dos steppers.
 const _prescriptionTrailingWidth = 128.0;
@@ -107,7 +112,13 @@ class PrescriptionEditorSheet extends StatefulWidget {
     this.outrosNoBloco = 0,
     this.aplicarAoBloco = false,
     this.onAplicarAoBlocoChanged,
+    this.parametrosIniciais = const ParametrosDoMetodo(),
+    this.onParametrosChanged,
   });
+
+  /// Parâmetros da técnica (drop-set, rest-pause, pirâmide) e quem guarda as mudanças.
+  final ParametrosDoMetodo parametrosIniciais;
+  final ValueChanged<ParametrosDoMetodo>? onParametrosChanged;
 
   final bool isDark;
   final Color primary;

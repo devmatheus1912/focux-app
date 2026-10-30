@@ -54,8 +54,11 @@ class FichaModelo {
   /// ("Peito") usa o nome inteiro.
   String get resumoDasSessoes => sessoes
       .map((s) {
-        final match = RegExp(r'^Treino ([A-Za-z])$').firstMatch(s.nome.trim());
-        return match?.group(1)?.toUpperCase() ?? s.nome;
+        final nome = s.nome.trim();
+        // "Treino A" → A; "A · Peito e tríceps" → A; outro nome fica inteiro.
+        final match = RegExp(r'^Treino ([A-Za-z])$').firstMatch(nome) ??
+            RegExp(r'^([A-Za-z]) · ').firstMatch(nome);
+        return match?.group(1)?.toUpperCase() ?? nome;
       })
       .join(' · ');
 

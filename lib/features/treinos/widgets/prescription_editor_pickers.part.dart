@@ -130,29 +130,6 @@ extension on _PrescriptionEditorSheetState {
     widget.onPresetSelected(picked);
   }
 
-  Future<void> _openTipoSeriePicker() async {
-    if (!widget.enabled) return;
-    const tipos = ['NORMAL', 'SUPERSET', 'DROPSET'];
-    final picked = await showFxInsetPickerSheet<String>(
-      context,
-      title: prescriptionTipoSerie,
-      headerIcon: Icons.layers_outlined,
-      selected: _tipoSerie.toUpperCase(),
-      items: [
-        for (final tipo in tipos)
-          FxInsetPickerSheetItem(
-            value: tipo,
-            label: workoutTipoSerieLabel(tipo),
-            subtitle: workoutTipoSerieSubtitle(tipo),
-            icon: Icons.layers_outlined,
-          ),
-      ],
-    );
-    if (picked == null || !mounted) return;
-    setState(() => _tipoSerie = picked);
-    widget.onTipoSerieChanged(picked);
-  }
-
   String _previewLine() {
     final preset = _selectedPreset;
     final series =
