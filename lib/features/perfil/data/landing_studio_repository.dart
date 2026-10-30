@@ -29,44 +29,12 @@ class LandingStudioRepository {
   }
 
   /// Textos novos sem gravar: a página no ar não muda.
-  Future<LandingGerado> sugerir() async {
-    final r = await _dio.post('/api/personal/landing/sugerir');
+  Future<LandingGerado> sugerir(LandingEntrevista entrevista) async {
+    final r = await _dio.post(
+      '/api/personal/landing/sugerir',
+      data: entrevista.toJson(),
+    );
     return LandingGerado.fromJson(r.data as Map<String, dynamic>);
-  }
-
-  /// Retorna estado completo quando o BE envelopa; senão só o [LandingGerado].
-  Future<LandingStudioState> gerar() async {
-    final r = await _dio.post('/api/personal/landing/gerar');
-    final data = r.data;
-    if (data is Map<String, dynamic>) {
-      if (data.containsKey('entrevista') ||
-          data.containsKey('publicado') ||
-          data.containsKey('publicUrl') ||
-          data.containsKey('podePublicar')) {
-        return LandingStudioState.fromJson(data);
-      }
-      final geradoMap = data['gerado'];
-      if (geradoMap is Map) {
-        final gerado = LandingGerado.fromJson(
-          Map<String, dynamic>.from(geradoMap),
-        );
-        return LandingStudioState(
-          gerado: gerado,
-          needsProof: data['needsProof'] as bool? ?? gerado.needsProof,
-          podePublicar:
-              data['podePublicar'] as bool? ?? gerado.hasPublishableCopy,
-        );
-      }
-      if (data.containsKey('heroTitle')) {
-        final gerado = LandingGerado.fromJson(data);
-        return LandingStudioState(
-          gerado: gerado,
-          needsProof: gerado.needsProof,
-          podePublicar: gerado.hasPublishableCopy,
-        );
-      }
-    }
-    return const LandingStudioState();
   }
 
   Future<LandingMidia> saveMidia({
@@ -109,8 +77,22 @@ class LandingStudioRepository {
     return getState();
   }
 
-  Future<String> previewHtml() async {
-    final r = await _dio.get('/api/personal/landing/preview');
+  /// Prévia do que está no editor, sem gravar.
+  Future<String> previewHtml({
+    required LandingEntrevista entrevista,
+    required LandingGerado gerado,
+    String? heroImageUrl,
+    String? bioImageUrl,
+  }) async {
+    final r = await _dio.post(
+      '/api/personal/landing/preview',
+      data: {
+        'entrevista': entrevista.toJson(),
+        'gerado': gerado.toJson(),
+        'heroImageUrl': heroImageUrl,
+        'bioImageUrl': bioImageUrl,
+      },
+    );
     final data = r.data;
     if (data is String) return data;
     if (data is Map && data['html'] is String) return data['html'] as String;

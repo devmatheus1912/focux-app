@@ -41,9 +41,27 @@ Future<T?> showFxInsetPickerSheet<T>(
   final maxHeight =
       MediaQuery.sizeOf(context).height * FxHomeSheetChrome.maxHeightFactor;
 
+  final selecionado =
+      selected == null
+          ? -1
+          : items.indexWhere((item) => equals(selected, item.value));
+  final rolagem = ScrollController();
+  var posicionou = false;
+
   return showFxHomeSheet<T>(
     context,
     builder: (ctx) {
+      // Item escolhido aparece ao abrir, mesmo no fim da lista.
+      if (scrollable && selecionado >= 0 && !posicionou) {
+        posicionou = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!rolagem.hasClients) return;
+          final p = rolagem.position;
+          final linha = (p.maxScrollExtent + p.viewportDimension) / items.length;
+          final alvo = selecionado * linha - (p.viewportDimension - linha) / 2;
+          rolagem.jumpTo(alvo.clamp(0, p.maxScrollExtent));
+        });
+      }
       final group = FxSettingsGroup(
         accent: primary,
         edgeToEdgeRows: true,
@@ -86,12 +104,17 @@ Future<T?> showFxInsetPickerSheet<T>(
             ),
             const SizedBox(height: TokensStrip.s3),
             if (scrollable)
-              Flexible(child: SingleChildScrollView(child: group))
+              Flexible(
+                child: SingleChildScrollView(
+                  controller: rolagem,
+                  child: group,
+                ),
+              )
             else
               group,
           ],
         ),
       );
     },
-  );
+  ).whenComplete(rolagem.dispose);
 }

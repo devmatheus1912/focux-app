@@ -84,7 +84,7 @@ void main() {
     expect(
       const LandingEntrevista(
         nomeMarca: 'A',
-        nicho: 'N',
+        nicho: 'Hipertrofia',
         promessa: 'P',
         cta: 'C',
       ).isReadyToGenerate,
@@ -93,7 +93,7 @@ void main() {
     expect(
       const LandingEntrevista(
         nomeMarca: 'A',
-        nicho: 'N',
+        nicho: 'Hipertrofia',
         promessa: 'P',
         ofertaNome: 'Consultoria',
         cta: 'C',

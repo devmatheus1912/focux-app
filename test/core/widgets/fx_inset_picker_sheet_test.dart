@@ -54,6 +54,39 @@ void main() {
     expect(picked, ThemeMode.dark);
   });
 
+  testWidgets('lista longa abre com o item escolhido à vista', (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder:
+                  (context) => TextButton(
+                    onPressed: () {
+                      showFxInsetPickerSheet<int>(
+                        context,
+                        title: 'Mês',
+                        selected: 29,
+                        items: [
+                          for (var i = 0; i < 30; i++)
+                            FxInsetPickerSheetItem(value: i, label: 'Item $i'),
+                        ],
+                      );
+                    },
+                    child: const Text('abrir'),
+                  ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('abrir'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Item 29').hitTestable(), findsOneWidget);
+  });
+
   test('perfil appearance mostra as três opções à vista, sem sheet', () {
     final source = File(
       'lib/features/perfil/widgets/perfil_appearance_section.dart',

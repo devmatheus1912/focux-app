@@ -108,17 +108,16 @@ extension on _LandingEditorScreenState {
     setState(() => _busy = true);
     try {
       final repo = ref.read(landingStudioRepositoryProvider);
-      await repo.saveEntrevista(entrevista);
-      final state = await repo.gerar();
+      // No ar, a entrevista só grava ao publicar: ela alimenta a página.
+      if (!_publicado) await repo.saveEntrevista(entrevista);
+      final gerado = await repo.sugerir(entrevista);
       if (!mounted) return;
       setState(() {
-        _applyGerado(state.gerado);
-        if (state.publicUrl != null) _publicUrl = state.publicUrl;
-        if (state.slug != null) _slug = state.slug;
-        _needsProof = state.needsProof || state.gerado.needsProof;
-        _podePublicar = state.podePublicar || state.gerado.hasPublishableCopy;
+        _applyGerado(gerado);
+        _needsProof = gerado.needsProof;
+        _podePublicar = gerado.hasPublishableCopy;
         _step = 1;
-        _dirty = false;
+        _dirty = true;
         _busy = false;
       });
       unawaited(AnalyticsService.instance.track(ProductEvents.landingGerado));
@@ -158,15 +157,12 @@ extension on _LandingEditorScreenState {
             resourceType: 'image',
           );
       if (!mounted) return;
-      // Accent vem da identidade; não sobrescreve corPrimaria no BE.
-      final midia = await ref.read(landingStudioRepositoryProvider).saveMidia(
-            heroImageUrl: hero ? url : _heroImageUrl,
-            bioImageUrl: hero ? _bioImageUrl : url,
-          );
-      if (!mounted) return;
       setState(() {
-        _heroImageUrl = midia.heroImageUrl ?? (hero ? url : _heroImageUrl);
-        _bioImageUrl = midia.bioImageUrl ?? (hero ? _bioImageUrl : url);
+        if (hero) {
+          _heroImageUrl = url;
+        } else {
+          _bioImageUrl = url;
+        }
         _uploadingHero = false;
         _uploadingBio = false;
         _dirty = true;
@@ -282,13 +278,19 @@ extension on _LandingEditorScreenState {
 
   Future<void> _openPublicOrPreview() async {
     final url = _resolvedPublicUrl();
-    if (_publicado && url != null) {
+    if (_publicado && !_dirty && url != null) {
       await openLandingLink(context, url: url);
       return;
     }
     try {
-      final html =
-          await ref.read(landingStudioRepositoryProvider).previewHtml();
+      final html = await ref
+          .read(landingStudioRepositoryProvider)
+          .previewHtml(
+            entrevista: _entrevistaFromFields(),
+            gerado: _geradoFromFields(),
+            heroImageUrl: _heroImageUrl,
+            bioImageUrl: _bioImageUrl,
+          );
       if (!mounted) return;
       if (html.trim().isEmpty) {
         FeedbackHelper.showWarn(context, 'Preview indisponível ainda.');
@@ -393,9 +395,9 @@ extension on _LandingEditorScreenState {
   Future<void> _refazerSecao(LandingSecao secao) async {
     FocusScope.of(context).unfocus();
     try {
-      final repo = ref.read(landingStudioRepositoryProvider);
-      await repo.saveEntrevista(_entrevistaFromFields());
-      final g = await repo.sugerir();
+      final g = await ref
+          .read(landingStudioRepositoryProvider)
+          .sugerir(_entrevistaFromFields());
       if (!mounted) return;
       setState(() {
         switch (secao) {

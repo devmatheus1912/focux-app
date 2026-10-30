@@ -30,7 +30,7 @@ void main() {
             .readAsStringSync();
     expect(landing, contains('/api/personal/landing'));
     expect(landing, contains('/api/personal/landing/entrevista'));
-    expect(landing, contains('/api/personal/landing/gerar'));
+    expect(landing, contains('/api/personal/landing/sugerir'));
     expect(landing, contains('/api/personal/landing/midia'));
     expect(landing, contains('/api/personal/landing/publicar'));
     expect(landing, contains('/api/personal/landing/preview'));

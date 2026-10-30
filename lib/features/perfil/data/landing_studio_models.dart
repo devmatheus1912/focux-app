@@ -74,7 +74,7 @@ class LandingEntrevista {
 
   bool get isReadyToGenerate =>
       nomeMarca.trim().isNotEmpty &&
-      nicho.trim().isNotEmpty &&
+      RegExp(r'\p{L}', unicode: true).allMatches(nicho).length >= 3 &&
       promessa.trim().isNotEmpty &&
       ofertaNome.trim().isNotEmpty &&
       cta.trim().isNotEmpty;
