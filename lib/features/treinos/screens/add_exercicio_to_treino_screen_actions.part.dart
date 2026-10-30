@@ -152,9 +152,10 @@ extension _AddExercicioToTreinoScreenActions
     );
   }
 
-  Future<void> _openCreateExercise() async {
+  Future<void> _openCreateExercise([String? nome]) async {
+    final query = {'origem': 'treino', if (nome != null && nome.trim().isNotEmpty) 'nome': nome.trim()};
     final criado = await context.push<ExercicioCriado>(
-      '/exercicios/novo?origem=treino',
+      Uri(path: '/exercicios/novo', queryParameters: query).toString(),
     );
     if (criado == null || !mounted) return;
     ref.invalidate(treinoPickerHomeProvider(widget.treinoId));

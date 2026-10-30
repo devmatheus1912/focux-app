@@ -252,7 +252,7 @@ void main() {
       (tester) async {
         final adapter = await abrir(tester, 'AQUECIMENTO');
         expect(find.text('Adicionando ao aquecimento'), findsOneWidget);
-        expect(find.text('Fechar'), findsOneWidget);
+        expect(find.byTooltip('Fechar'), findsOneWidget);
 
         await tester.tap(find.text('Supino reto'));
         for (var i = 0; i < 8; i++) {

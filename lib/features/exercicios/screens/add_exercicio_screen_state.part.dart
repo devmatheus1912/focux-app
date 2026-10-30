@@ -114,6 +114,8 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
       // Cópia da biblioteca: mesmos dados, nome "(meu)", nunca o vídeo.
       _prefillFrom(widget.copiaDe!);
       _nomeCtrl.text = nomeDaCopia(widget.copiaDe!.nomeDisplay);
+    } else if (widget.nomeInicial?.trim().isNotEmpty == true) {
+      _nomeCtrl.text = widget.nomeInicial!.trim();
     }
   }
 

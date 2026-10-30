@@ -678,6 +678,8 @@
       "nomes": {"type": "String"}
     }
   },
+  "adicionarFechar": "Fechar",
+  "adicionarBuscaDica": "Exercício, músculo ou equipamento",
   "adicionarSessaoNova": "Sessão nova",
   "adicionarCopiarDeModelo": "Copiar de um modelo",
   "adicionarEscolhaModelo": "Escolha o modelo",

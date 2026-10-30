@@ -19,7 +19,7 @@ void main() {
     expect(screen, contains('FxFormPopGuard'));
     expect(screen, contains("'Pronto · \$_adicionados adicionados'"));
     expect(screen, contains('AddUndoBar'));
-    expect(screen, contains("'Fechar'"));
+    expect(screen, contains('adicionarFechar'));
     expect(screen, contains('destinoDoAdicionar'));
     expect(screen, isNot(contains("label: 'Concluir'")));
     expect(screen, isNot(contains('FxActionChip.solidBackground')));

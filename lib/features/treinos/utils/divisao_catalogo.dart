@@ -1,3 +1,4 @@
+import '../../exercicios/data/enums.dart';
 import '../../exercicios/data/template_splits.dart';
 
 /// Uma divisão da ficha: as letras (sessões) que o personal monta.
@@ -91,4 +92,69 @@ Divisao umaPorDia(int dias) => _generica(dias.clamp(0, 7));
     if (i >= 0) return (split, split.dias.length == 1 ? 0 : i);
   }
   return null;
+}
+
+/// Palavras do nome da sessão que viram grupos ("Peito e tríceps", "Costas e bíceps").
+const _gruposPorPalavra = <String, List<GrupoMuscular>>{
+  'peito': [GrupoMuscular.peito],
+  'triceps': [GrupoMuscular.triceps],
+  'biceps': [GrupoMuscular.biceps],
+  'costas': [GrupoMuscular.costasLatissimo, GrupoMuscular.costasRetangulares],
+  'ombro': [GrupoMuscular.ombroAnterior, GrupoMuscular.ombroLateral, GrupoMuscular.ombroPosterior],
+  'ombros': [GrupoMuscular.ombroAnterior, GrupoMuscular.ombroLateral, GrupoMuscular.ombroPosterior],
+  'pernas': [GrupoMuscular.quadriceps, GrupoMuscular.posteriorCoxa],
+  'perna': [GrupoMuscular.quadriceps, GrupoMuscular.posteriorCoxa],
+  'quadriceps': [GrupoMuscular.quadriceps],
+  'posterior': [GrupoMuscular.posteriorCoxa],
+  'gluteo': [GrupoMuscular.gluteo],
+  'gluteos': [GrupoMuscular.gluteo],
+  'panturrilha': [GrupoMuscular.panturrilha],
+  'abdomen': [GrupoMuscular.abdomen],
+  'abdominal': [GrupoMuscular.abdomen],
+  'trapezio': [GrupoMuscular.trapezio],
+  'antebraco': [GrupoMuscular.antebraco],
+  'bracos': [GrupoMuscular.biceps, GrupoMuscular.triceps],
+};
+
+/// Padrão de movimento de um bloco do modelo → grupo principal.
+const _grupoDoPadrao = <PadraoMovimento, GrupoMuscular>{
+  PadraoMovimento.pushHorizontal: GrupoMuscular.peito,
+  PadraoMovimento.pushVertical: GrupoMuscular.ombroAnterior,
+  PadraoMovimento.pullVertical: GrupoMuscular.costasLatissimo,
+  PadraoMovimento.pullHorizontal: GrupoMuscular.costasRetangulares,
+  PadraoMovimento.squat: GrupoMuscular.quadriceps,
+  PadraoMovimento.hinge: GrupoMuscular.posteriorCoxa,
+  PadraoMovimento.lunge: GrupoMuscular.quadriceps,
+};
+
+String _semAcento(String s) => s
+    .toLowerCase()
+    .replaceAll(RegExp('[áàâã]'), 'a')
+    .replaceAll(RegExp('[éê]'), 'e')
+    .replaceAll('í', 'i')
+    .replaceAll(RegExp('[óôõ]'), 'o')
+    .replaceAll('ú', 'u')
+    .replaceAll('ç', 'c');
+
+/// Grupos musculares de uma sessão pelo nome: primeiro as palavras do foco
+/// ("A · Peito e tríceps" → peito e tríceps); sem palavra conhecida, os blocos
+/// do dia no modelo de exercícios ("Empurrar"). Nome genérico ("Treino A") → vazio.
+Set<GrupoMuscular> gruposDaSessao(String nome) {
+  final texto = nome.trim();
+  final foco = texto.contains(' · ') ? texto.split(' · ').last : texto;
+  final porPalavra = <GrupoMuscular>{
+    for (final palavra in _semAcento(foco).split(RegExp(r'[^a-z]+')))
+      ...?_gruposPorPalavra[palavra],
+  };
+  if (porPalavra.isNotEmpty) return porPalavra;
+  final dia = sugestaoDaSessao(texto);
+  if (dia == null) return const {};
+  final (split, indice) = dia;
+  return {
+    for (final slot in split.dias[indice].slots)
+      if (slot.grupo case final grupo?)
+        grupo
+      else if (_grupoDoPadrao[slot.padrao] case final grupo?)
+        grupo,
+  };
 }

@@ -102,14 +102,23 @@ void main() {
       );
       expect(ordem.first, GrupoMuscular.triceps);
       expect(ordem[1], GrupoMuscular.costasLatissimo);
-      expect(
-        rotuloChipGrupo(nome: 'Peito', naBiblioteca: 41, noTreino: 0),
-        'Peito · 41',
+      // O número é só o que já está no treino; o da biblioteca não aparece.
+      expect(rotuloChipGrupo(nome: 'Peito', noTreino: 0), 'Peito');
+      expect(rotuloChipGrupo(nome: 'Tríceps', noTreino: 2), 'Tríceps · 2');
+    });
+
+    test('grupos da sessão vêm primeiro na fileira', () {
+      final ordem = ordemDosGrupos(
+        naBiblioteca: {
+          GrupoMuscular.peito: 41,
+          GrupoMuscular.costasLatissimo: 54,
+          GrupoMuscular.triceps: 19,
+        },
+        noTreino: {GrupoMuscular.costasLatissimo: 3},
+        marcados: {GrupoMuscular.peito, GrupoMuscular.triceps},
       );
-      expect(
-        rotuloChipGrupo(nome: 'Tríceps', naBiblioteca: 19, noTreino: 2),
-        'Tríceps · 2 no treino',
-      );
+      expect(ordem.take(2).toSet(), {GrupoMuscular.peito, GrupoMuscular.triceps});
+      expect(ordem[2], GrupoMuscular.costasLatissimo);
     });
   });
 
@@ -205,7 +214,7 @@ void main() {
       expect(expirou, 1);
     });
 
-    testWidgets('ExerciseBalanceStrip mostra, liga o grupo e dispensa aviso', (
+    testWidgets('ExerciseBalanceStrip só mostra o aviso e dispensa', (
       tester,
     ) async {
       GrupoMuscular? tocado;
@@ -223,11 +232,11 @@ void main() {
         ),
       );
       await tester.pump();
-      expect(find.text('No treino:'), findsOneWidget);
-      expect(find.text('Peito 4'), findsOneWidget);
+      // "No treino" agora está nos chips de grupo; a faixa é só o aviso.
+      expect(find.text('No treino:'), findsNothing);
+      expect(find.text('Peito 4'), findsNothing);
+      expect(tocado, isNull);
       expect(find.text('Sem costas ainda'), findsOneWidget);
-      await tester.tap(find.text('Peito 4'));
-      expect(tocado, GrupoMuscular.peito);
       await tester.tap(find.byTooltip('Dispensar aviso'));
       await tester.pump();
       expect(find.text('Sem costas ainda'), findsNothing);
@@ -280,6 +289,8 @@ void main() {
       List<int> maisUsados = const [],
       Map<GrupoMuscular, int> balanco = const {},
       Set<RegiaoCorpo> regioes = const {},
+      Set<GrupoMuscular> gruposIniciais = const {},
+      void Function(String? nome)? onCadastrar,
     }) async {
       await tester.binding.setSurfaceSize(const Size(390, 844));
       addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -329,6 +340,8 @@ void main() {
                       maisUsadosIds: maisUsados,
                       balanco: balanco,
                       regioesAluno: regioes,
+                      gruposIniciais: gruposIniciais,
+                      onCadastrar: onCadastrar,
                     ),
               ),
             ),
@@ -368,7 +381,7 @@ void main() {
       tester,
     ) async {
       await abrir(tester, itens, recentes: [3], maisUsados: [2, 3]);
-      expect(find.text('Favoritos'), findsNWidgets(2)); // chip + seção
+      expect(find.text('Favoritos'), findsOneWidget); // só a seção (o chip saiu)
       expect(find.text('Recentes'), findsOneWidget);
       expect(find.text('Mais usados'), findsOneWidget);
       // sem repetição: o favorito não volta na letra S
@@ -379,17 +392,45 @@ void main() {
 
     testWidgets('grupos combináveis: Peito + Tríceps juntos', (tester) async {
       await abrir(tester, itens);
-      await tester.tap(find.text('Peito · 2'));
+      // Tela larga: a fileira inteira cabe e os chips ficam todos tocáveis.
+      await tester.binding.setSurfaceSize(const Size(1400, 844));
+      await tester.pump();
+      Finder chip(String nome) => find.descendant(
+        of: find.byType(ExerciseGroupChips),
+        matching: find.text(nome),
+      );
+      await tester.tap(chip('Peito'));
       await tester.pump(const Duration(milliseconds: 200));
       expect(find.text('Crucifixo'), findsOneWidget);
       expect(find.text('Tríceps testa'), findsNothing);
-      await tester.tap(find.text('Tríceps · 2'));
+      await tester.tap(chip('Tríceps'));
       await tester.pump(const Duration(milliseconds: 200));
       expect(find.text('Crucifixo'), findsOneWidget);
       expect(find.text('Tríceps testa'), findsOneWidget);
-      await tester.tap(find.text('Todos'));
+      await tester.tap(chip('Limpar'));
       await tester.pump(const Duration(milliseconds: 200));
       expect(find.text('Tríceps corda'), findsOneWidget);
+      expect(chip('Limpar'), findsNothing);
+    });
+
+    testWidgets('abre com os grupos da sessão marcados e sem "Limpar"', (tester) async {
+      await abrir(tester, itens, gruposIniciais: {GrupoMuscular.triceps});
+      expect(find.text('Tríceps testa'), findsOneWidget);
+      expect(find.text('Crucifixo'), findsNothing);
+      expect(find.text('Limpar'), findsNothing);
+      expect(find.text('Equipamento'), findsOneWidget);
+    });
+
+    testWidgets('lista até o fim oferece "Criar meu exercício"', (tester) async {
+      String? pedido = 'nada';
+      await abrir(tester, itens, onCadastrar: (nome) => pedido = nome);
+      await tester.dragUntilVisible(
+        find.text('Criar meu exercício'),
+        find.byType(ListView).last,
+        const Offset(0, -200),
+      );
+      await tester.tap(find.text('Criar meu exercício'));
+      expect(pedido, isNull);
     });
 
     testWidgets('marca a região do aluno só como aviso', (tester) async {
@@ -398,11 +439,10 @@ void main() {
       expect(find.text('Supino reto'), findsOneWidget);
     });
 
-    testWidgets('"No treino" aparece no painel com a contagem', (tester) async {
+    testWidgets('"no treino" fica só no chip do grupo', (tester) async {
       await abrir(tester, itens, balanco: {GrupoMuscular.peito: 2});
-      expect(find.text('No treino:'), findsOneWidget);
-      expect(find.text('Peito 2'), findsOneWidget);
-      expect(find.text('Peito · 2 no treino'), findsOneWidget);
+      expect(find.text('No treino:'), findsNothing);
+      expect(find.text('Peito · 2'), findsOneWidget);
     });
   });
 }

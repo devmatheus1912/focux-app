@@ -110,13 +110,17 @@ void main() {
 
     expect(find.bySemanticsLabel('Adicionar exercício'), findsOneWidget);
     expect(find.text('Adicionando ao treino'), findsOneWidget);
-    expect(find.text('Fechar'), findsOneWidget);
+    expect(find.byTooltip('Fechar'), findsOneWidget);
     expect(find.text('Treino Emagrecimento'), findsWidgets);
-    expect(find.text('Todos'), findsOneWidget);
     expect(find.text('Movimento'), findsNothing);
     expect(find.text('Músculo'), findsNothing); // sem aba: chips de grupo
-    // o cadastro virou o "+" do topo, sem rodapé fixo
-    expect(find.byTooltip('Cadastrar exercício'), findsOneWidget);
+    // uma fileira só: sem Filtros, Favoritos, Com vídeo nem "No treino"
+    expect(find.text('Filtros'), findsNothing);
+    expect(find.text('Com vídeo'), findsNothing);
+    expect(find.text('No treino:'), findsNothing);
+    expect(find.text('Equipamento'), findsOneWidget); // fim da fileira (pode estar fora da tela em telas estreitas)
+    // criar exercício saiu do cabeçalho
+    expect(find.byTooltip('Cadastrar exercício'), findsNothing);
     expect(find.text('Buscar'), findsOneWidget);
     // os botões do cabeçalho não encostam na borda da tela
     final tela = tester.view.physicalSize.width / tester.view.devicePixelRatio;
@@ -141,7 +145,7 @@ void main() {
     await tester.tap(chip);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 80));
-    expect(find.text('Todos'), findsOneWidget);
+    expect(find.text('Limpar'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

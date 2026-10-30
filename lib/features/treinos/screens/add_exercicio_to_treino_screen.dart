@@ -42,6 +42,8 @@ import '../data/treino_repository.dart';
 import '../data/workout_builder_preset.dart';
 import '../providers/treinos_provider.dart';
 import '../services/recent_exercise_usage_store.dart';
+import '../../../l10n/app_localizations.dart';
+import '../utils/divisao_catalogo.dart';
 import '../utils/add_exercise_prescription_input.dart';
 import '../utils/exercise_picker_filter.dart';
 import '../utils/prescricao_padrao_bloco.dart';
@@ -59,7 +61,6 @@ import '../../anamnese/providers/anamnese_provider.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../widgets/exercise_library_panel.dart';
 import '../widgets/prescription_editor_sheet.dart';
-import '../../../core/widgets/fx_tonal_button.dart';
 
 part 'add_exercicio_to_treino_screen_actions.part.dart';
 
@@ -193,19 +194,12 @@ class _AddExercicioToTreinoScreenState
               data: (treino) => displayWorkoutName(treino.nome),
               orElse: () => 'Montando treino',
             ),
-            leadingWidth: 120,
-            leading: FxTonalButton(
-              label: 'Fechar',
+            leading: IconButton(
+              tooltip: S.of(context).adicionarFechar,
               onPressed: _cancel,
-              compact: true,
+              icon: const Icon(Icons.close_rounded),
             ),
             actions: [
-              ShellHeaderIconButton(
-                icon: 'plus',
-                tooltip: 'Cadastrar exercício',
-                onTap: _openCreateExercise,
-              ),
-              const SizedBox(width: FxHelpChrome.gap),
               FxHelpIconButton(
                 tooltip: 'Ajuda para adicionar exercícios',
                 onTap: () => showAddExercicioHelpSheet(context),
@@ -340,7 +334,11 @@ class _AddExercicioToTreinoScreenState
                             onSelect: _adicionarRapido,
                             onPreview: _abrirPrevia,
                             libraryTotalCount: home.libraryCount,
-                            searchPlaceholder: pickerHints.searchPlaceholder,
+                            searchPlaceholder: S.of(context).adicionarBuscaDica,
+                            gruposIniciais: treinoAsync.maybeWhen(
+                              data: (treino) => gruposDaSessao(treino.nome),
+                              orElse: () => const {},
+                            ),
                             recentIds: _recentIds,
                             maisUsadosIds: _maisUsadosIds,
                             balanco: balanco,

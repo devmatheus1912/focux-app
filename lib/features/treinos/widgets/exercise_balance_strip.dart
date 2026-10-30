@@ -5,8 +5,6 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../exercicios/data/enums.dart';
-import '../../exercicios/data/exercicio_taxonomy_labels.dart';
-import '../screens/widgets/exercise_picker_filter_bar.dart';
 import '../utils/exercise_balance.dart';
 
 /// "No treino: Peito 3 · Tríceps 1", com um aviso discreto de antagonista.
@@ -56,53 +54,15 @@ class _ExerciseBalanceStripState extends State<ExerciseBalanceStrip> {
     if (widget.balanco.isEmpty) return const SizedBox.shrink();
     final mute =
         widget.isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final entradas =
-        widget.balanco.entries.toList()
-          ..sort((a, b) => b.value.compareTo(a.value));
     final aviso = _avisoDispensado ? null : avisoAntagonista(widget.balanco);
 
+    // "No treino" já aparece nos chips de grupo; aqui fica só o aviso.
+    if (aviso == null) return const SizedBox.shrink();
     return Padding(
-      padding: const EdgeInsets.only(top: 10),
+      padding: const EdgeInsets.only(top: 6),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Semantics(
-            container: true,
-            label: 'Exercícios por grupo no treino',
-            child: SizedBox(
-              height: 44,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                clipBehavior: Clip.none,
-                children: [
-                  Center(
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: Text(
-                        'No treino:',
-                        style: FocuxHubTypography.bodyMuted(
-                          color: mute,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ),
-                  for (final e in entradas) ...[
-                    ExercisePickerChip(
-                      label:
-                          '${TaxonomyLabels.grupo[e.key] ?? e.key.name} ${e.value}',
-                      selected: widget.selecionados.contains(e.key),
-                      primary: widget.primary,
-                      isDark: widget.isDark,
-                      onTap: () => widget.onToggle(e.key),
-                    ),
-                    const SizedBox(width: 8),
-                  ],
-                ],
-              ),
-            ),
-          ),
-          if (aviso != null)
             Row(
               children: [
                 Icon(Icons.info_outline_rounded, size: 16, color: mute),

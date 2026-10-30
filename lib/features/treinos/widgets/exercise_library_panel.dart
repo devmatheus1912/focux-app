@@ -23,7 +23,9 @@ import '../../exercicios/screens/widgets/exercise_video_preview_sheet.dart';
 import '../screens/widgets/exercise_picker_filter_bar.dart';
 import '../utils/aluno_restricao_match.dart';
 import '../utils/exercise_library_sections.dart';
+import '../../../core/widgets/fx_link_row.dart';
 import '../utils/exercise_picker_filter.dart';
+import 'exercise_picker_filter_sheet.dart';
 import '../utils/exercise_picker_library_label.dart';
 import '../utils/exercise_picker_sort.dart';
 import 'exercise_alpha_rail.dart';
@@ -66,13 +68,18 @@ class ExerciseLibraryPanel extends ConsumerStatefulWidget {
     this.regioesAluno = const {},
     this.onPreview,
     this.bottomPadding = 0,
+    this.gruposIniciais = const {},
   });
+
+  /// Grupos da sessão ("A · Peito e tríceps"): já vêm marcados ao abrir.
+  final Set<GrupoMuscular> gruposIniciais;
 
   /// Prescrição já aplicada a cada exercício que está no treino ("3 × 10-12").
   final Map<int, String> resumoNoTreino;
 
   /// "Não achou? Cadastrar 'termo'": abre o cadastro de exercício.
-  final VoidCallback? onCadastrar;
+  /// Abre o cadastro; recebe o texto da busca quando ela não achou nada.
+  final void Function(String? nome)? onCadastrar;
 
   /// Grupos que já estão no treino ("No treino: Peito 3").
   final Map<GrupoMuscular, int> balanco;
@@ -160,6 +167,7 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
   void initState() {
     super.initState();
     _filter = widget.filter;
+    _grupos.addAll(widget.gruposIniciais);
     _committedQuery = widget.initialQuery.trim();
     _searchCtrl = TextEditingController(text: widget.initialQuery);
     _searchFocus = FocusNode();
@@ -234,6 +242,21 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
     });
   }
 
+  /// "Limpar" só aparece quando há algo além dos grupos da sessão.
+  bool get _temAlgoAlemDaSessao =>
+      _filter.isActive ||
+      _grupos.length != widget.gruposIniciais.length ||
+      !_grupos.containsAll(widget.gruposIniciais);
+
+  void _limparTudo() {
+    setState(() {
+      _grupos
+        ..clear()
+        ..addAll(widget.gruposIniciais);
+    });
+    _onFilterChanged(const ExercisePickerFilter());
+  }
+
   void _onFilterChanged(ExercisePickerFilter next) {
     setState(() => _filter = next);
     widget.onFilterChanged(next);
@@ -244,12 +267,6 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
     setState(() {
       if (!_grupos.add(grupo)) _grupos.remove(grupo);
     });
-    _fetchPage(reset: true);
-  }
-
-  void _limparGrupos() {
-    if (_grupos.isEmpty) return;
-    setState(_grupos.clear);
     _fetchPage(reset: true);
   }
 
@@ -499,14 +516,6 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
                           ),
                 ),
               ),
-              const SizedBox(height: 10),
-              ExercisePickerFilterBar(
-                filter: _filter,
-                isDark: isDark,
-                primary: primary,
-                resultCaption: caption,
-                onChanged: _onFilterChanged,
-              ),
               if (_termosReconhecidos.isNotEmpty) ...[
                 const SizedBox(height: 10),
                 Wrap(
@@ -529,10 +538,41 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
                 selecionados: _grupos,
                 noTreino: widget.balanco,
                 onToggle: _alternarGrupo,
-                onLimpar: _limparGrupos,
+                marcadosPrimeiro: widget.gruposIniciais,
                 primary: primary,
                 isDark: isDark,
+                antes: [
+                  if (_temAlgoAlemDaSessao)
+                    ExercisePickerChip(
+                      label: 'Limpar',
+                      selected: false,
+                      primary: primary,
+                      isDark: isDark,
+                      onTap: _limparTudo,
+                    ),
+                ],
+                extras: [
+                  ExercisePickerChip(
+                    label: rotuloDoEquipamento(_filter),
+                    selected: _filter.isActive,
+                    primary: primary,
+                    isDark: isDark,
+                    onTap: () => showExercisePickerFilterSheet(
+                      context,
+                      filter: _filter,
+                      onChanged: _onFilterChanged,
+                    ),
+                  ),
+                ],
               ),
+              if (caption != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Text(
+                    caption.secondary == null ? caption.primary : '${caption.primary} · ${caption.secondary}',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ),
               ExerciseBalanceStrip(
                 balanco: widget.balanco,
                 selecionados: _grupos,
@@ -664,8 +704,8 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
           action:
               _committedQuery.isNotEmpty && widget.onCadastrar != null
                   ? FxEmptyAction(
-                    label: 'Cadastrar "$_committedQuery"',
-                    onTap: widget.onCadastrar!,
+                    label: 'Não achou? Criar “$_committedQuery”',
+                    onTap: () => widget.onCadastrar!(_committedQuery),
                   )
                   : _committedQuery.isNotEmpty ||
                       _filter.isActive ||
@@ -710,6 +750,13 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
       onFavoriteToggle: _toggleFavorite,
       loadingMore: _loadingMore,
       bottomPadding: widget.bottomPadding,
+      rodape: widget.onCadastrar == null || _hasNext
+          ? null
+          : FxLinkRow(
+              label: 'Criar meu exercício',
+              icon: Icons.add_rounded,
+              onTap: () => widget.onCadastrar!(null),
+            ),
     );
   }
 }
@@ -769,7 +816,11 @@ class _GroupedExerciseList extends StatelessWidget {
     this.onUploadVideo,
     this.loadingMore = false,
     this.bottomPadding = 0,
+    this.rodape,
   });
+
+  /// Fim da lista ("Criar meu exercício"), só depois da última página.
+  final Widget? rodape;
 
   final ScrollController controller;
   final List<ExerciseLibrarySection> sections;
@@ -805,9 +856,12 @@ class _GroupedExerciseList extends StatelessWidget {
         FxSettingsLayout.pageInset + 20,
         12 + bottomPadding,
       ),
-      itemCount: sections.length + (loadingMore ? 1 : 0),
+      itemCount: sections.length + (loadingMore || rodape != null ? 1 : 0),
       itemBuilder: (context, sectionIndex) {
         if (sectionIndex >= sections.length) {
+          if (!loadingMore && rodape != null) {
+            return Padding(padding: const EdgeInsets.only(top: 16), child: rodape);
+          }
           return const Padding(
             padding: EdgeInsets.symmetric(vertical: 16),
             child: Center(child: FxLoading(size: 22)),

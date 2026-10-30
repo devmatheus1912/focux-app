@@ -461,6 +461,7 @@ RouteBase buildChromeShellRoute() {
               return AddExercicioScreen(
                 copiaDe: extra is Exercicio ? extra : null,
                 origem: exercicioOrigemDe(state.uri.queryParameters['origem']),
+                nomeInicial: state.uri.queryParameters['nome'],
               );
             },
           ),

@@ -47,7 +47,11 @@ class AddExercicioScreen extends ConsumerStatefulWidget {
     this.exercicioId,
     this.copiaDe,
     this.origem = ExercicioOrigem.biblioteca,
+    this.nomeInicial,
   });
+
+  /// Nome já digitado na busca do seletor ("Não achou? Criar “…”").
+  final String? nomeInicial;
 
   /// De onde o cadastro foi aberto: decide as opções depois de criar.
   final ExercicioOrigem origem;

@@ -1,5 +1,6 @@
 import '../../exercicios/data/enums.dart';
 import '../../exercicios/data/exercicio_repository.dart';
+import '../../exercicios/data/exercicio_taxonomy_labels.dart';
 
 class ExercisePickerFilter {
   const ExercisePickerFilter({
@@ -107,4 +108,17 @@ List<Exercicio> applyExercisePickerFilter(
     }
     return true;
   }).toList();
+}
+
+/// Rótulo do chip "Equipamento" da fileira: "Equipamento" sem filtro,
+/// "Halter · Polia" com até dois itens, "3 equipamentos" com mais.
+String rotuloDoEquipamento(ExercisePickerFilter filter) {
+  final nomes = [
+    if (filter.espaco != null)
+      TaxonomyLabels.espacoShort[filter.espaco!] ?? TaxonomyLabels.espaco[filter.espaco!] ?? filter.espaco!.name,
+    for (final e in filter.equipamentos) TaxonomyLabels.equipamento[e] ?? e.name,
+  ];
+  if (nomes.isEmpty) return 'Equipamento';
+  if (nomes.length <= 2) return nomes.join(' · ');
+  return '${nomes.length} equipamentos';
 }

@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/treinos/models/rotina_fila.dart';
+import 'package:focux_app/features/treinos/utils/exercise_picker_filter.dart';
+import 'package:focux_app/features/exercicios/data/enums.dart';
 import 'package:focux_app/features/treinos/utils/divisao_catalogo.dart';
 import 'package:focux_app/features/treinos/utils/semana_da_fila.dart';
 import 'package:focux_app/features/treinos/widgets/treino_no_lugar.dart';
@@ -204,5 +206,45 @@ void main() {
       expect(troca.saem.map((x) => x.nome), ['C · Pernas']);
       expect(troca.semana.where((d) => d.segueSequencia).map((d) => d.dia), [3, 4]);
     });
+  });
+
+  group('gruposDaSessao', () {
+    test('pelas palavras do foco', () {
+      expect(gruposDaSessao('A · Peito e tríceps'), {GrupoMuscular.peito, GrupoMuscular.triceps});
+      expect(gruposDaSessao('B · Costas e bíceps'), {
+        GrupoMuscular.costasLatissimo,
+        GrupoMuscular.costasRetangulares,
+        GrupoMuscular.biceps,
+      });
+      expect(gruposDaSessao('C · Pernas e glúteo'), {
+        GrupoMuscular.quadriceps,
+        GrupoMuscular.posteriorCoxa,
+        GrupoMuscular.gluteo,
+      });
+    });
+
+    test('sem palavra conhecida, pelos blocos do modelo', () {
+      expect(gruposDaSessao('A · Superior'), contains(GrupoMuscular.peito));
+      expect(gruposDaSessao('A · Empurrar'), contains(GrupoMuscular.triceps));
+    });
+
+    test('nome genérico não marca nada', () {
+      expect(gruposDaSessao('Treino A'), isEmpty);
+      expect(gruposDaSessao(''), isEmpty);
+    });
+  });
+
+  test('rótulo do chip Equipamento', () {
+    expect(rotuloDoEquipamento(const ExercisePickerFilter()), 'Equipamento');
+    expect(
+      rotuloDoEquipamento(const ExercisePickerFilter(equipamentos: {Equipamento.halter, Equipamento.polia})),
+      allOf(contains('·'), isNot(contains('equipamentos'))),
+    );
+    expect(
+      rotuloDoEquipamento(
+        const ExercisePickerFilter(equipamentos: {Equipamento.halter, Equipamento.polia, Equipamento.barra}),
+      ),
+      '3 equipamentos',
+    );
   });
 }
