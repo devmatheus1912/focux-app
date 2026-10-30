@@ -244,14 +244,37 @@ class _InboxTile extends StatelessWidget {
                   photoUrl: item.fotoUrl,
                   variant: AlunoAvatarVariant.strip,
                 ),
-        trailing: Text(
-          unread > 0
-              ? (unread > 99 ? '99+' : '$unread')
-              : fxTimeAgo(item.enviadoEm),
-          style: FocuxHubTypography.bodyMuted(
-            color: unread > 0 ? primary : fxScreenMute(context),
-            fontWeight: FontWeight.w700,
-          ),
+        trailing: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(
+              fxTimeAgo(item.enviadoEm),
+              style: FocuxHubTypography.bodyMuted(
+                color: unread > 0 ? primary : fxScreenMute(context),
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            if (unread > 0) ...[
+              const SizedBox(height: TokensStrip.s1),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: TokensStrip.s2,
+                  vertical: 2,
+                ),
+                decoration: BoxDecoration(
+                  color: primary,
+                  borderRadius: BorderRadius.circular(TokensStrip.rPill),
+                ),
+                child: Text(
+                  unread > 99 ? '99+' : '$unread',
+                  style: FocuxHubTypography.chip(
+                    Theme.of(context).colorScheme.onPrimary,
+                  ),
+                ),
+              ),
+            ],
+          ],
         ),
         accent: unread > 0 || selected ? primary : null,
         onTap: onTap,

@@ -48,7 +48,7 @@ void main() {
     expect(tester.takeException(), isNull);
 
     final ia = tester.widget<Text>(find.text('200'));
-    expect(ia.style?.fontFamily, contains('Barlow'));
+    expect(ia.style?.fontFamily, contains('Inter'));
     expect(ia.style?.fontWeight, FontWeight.w700);
 
     final titleCenter = tester.getCenter(find.text('Assinar Pro'));

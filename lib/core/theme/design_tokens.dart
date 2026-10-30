@@ -6,7 +6,7 @@ export 'app_typography.dart';
 /// Fonte única de verdade para todos os tokens visuais.
 ///
 /// Palette: Azul petróleo + cinematic dark · Liquid Glass surfaces.
-/// Typography: Inter (display/body) + JetBrains Mono (technical/numbers).
+/// Typography: Inter.
 abstract class EagleTokens {
   // ── Brand (TOKENS STRIP #0B4F5C — azul petróleo) ───────────────────
   static const Color brand = Color(0xFF0B4F5C);

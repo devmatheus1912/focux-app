@@ -62,8 +62,7 @@ void main() {
     await _pump(tester, _ativa, onShare: () => compartilhou = true);
 
     expect(find.text('ABCD234567'), findsOneWidget);
-    expect(find.text('1 de 3'), findsOneWidget);
-    expect(find.text('30 de 90 dias'), findsOneWidget);
+    expect(find.text('1 de 3 · 30 de 90 dias'), findsOneWidget);
     expect(find.text('Maria L.'), findsOneWidget);
     expect(find.text('+30 dias no seu plano'), findsOneWidget);
     expect(find.text('Assinou · libera após 30 dias pagos'), findsOneWidget);
@@ -120,12 +119,13 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.textContaining('Campanha pausada'), findsOneWidget);
-    expect(find.text('—'), findsOneWidget);
     await tester.scrollUntilVisible(
-      find.text('3. Você ganha dias extras'),
+      find.text('Como funciona'),
       200,
       scrollable: find.byType(Scrollable).first,
     );
+    await tester.tap(find.text('Como funciona'));
+    await tester.pumpAndSettle();
     expect(find.text('3. Você ganha dias extras'), findsOneWidget);
   });
 }

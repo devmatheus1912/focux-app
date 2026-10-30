@@ -15,10 +15,10 @@ void main() {
   });
 
   test('resumo e rótulo de aceite', () {
-    expect(lgpdConsentResumo(2, 3), '2 de 3 aceitos');
-    expect(lgpdConsentResumo(1, 1), '1 de 1 aceito');
-    expect(lgpdConsentAceitoLabel(c(atual)), 'Aceito em 10/09/2026 · v2026-09');
-    expect(lgpdConsentAceitoLabel(c(atual, em: '')), 'Aceito · v2026-09');
+    expect(lgpdConsentResumo(2, 3), 'Falta aceitar 1 documento');
+    expect(lgpdConsentResumo(1, 1), 'Tudo aceito');
+    expect(lgpdConsentAceitoLabel(c(atual)), 'Aceito em 10/09/2026');
+    expect(lgpdConsentAceitoLabel(c(atual, em: '')), 'Aceito');
   });
 
   test('tipos por perfil', () {

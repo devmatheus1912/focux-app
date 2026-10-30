@@ -67,25 +67,6 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
                         color: primary,
                         size: 18,
                       ),
-                      trailing: Container(
-                        margin: const EdgeInsets.only(top: 6),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: primary.withValues(alpha: dark ? 0.16 : 0.10),
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                        child: Text(
-                          '${filtered.length}/${alunos.length}',
-                          style: TextStyle(
-                            color: primary,
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ),
                     ),
                     SizedBox(height: TokensStrip.s4),
                     TextField(
@@ -135,97 +116,67 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
                           else
                             ...filtered.map((a) {
                               final selected = _selectedAlunoId == a.id;
-                              final objetivo =
-                                  (a.objetivo == null || a.objetivo!.isEmpty)
-                                      ? 'Sem objetivo definido'
-                                      : a.objetivo!;
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 10),
-                                child: InkWell(
-                                  borderRadius: BorderRadius.circular(18),
-                                  onTap: () => Navigator.of(ctx).pop(a.id),
-                                  child: AnimatedContainer(
-                                    duration: const Duration(milliseconds: 160),
-                                    padding: const EdgeInsets.all(12),
-                                    decoration:
+                              final objetivo = a.objetivo?.trim() ?? '';
+                              return InkWell(
+                                borderRadius: BorderRadius.circular(
+                                  TokensStrip.rCard,
+                                ),
+                                onTap: () => Navigator.of(ctx).pop(a.id),
+                                child: Ink(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: TokensStrip.s2,
+                                    vertical: TokensStrip.s2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color:
                                         selected
-                                            ? fxListCardDecoration(
-                                              ctx,
-                                              selected: true,
-                                              accent: primary,
-                                              radius: 18,
-                                            )
-                                            : fxListCardDecoration(
-                                              ctx,
-                                              radius: 18,
+                                            ? primary.withValues(alpha: 0.08)
+                                            : null,
+                                    borderRadius: BorderRadius.circular(
+                                      TokensStrip.rCard,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      AlunoAvatar(
+                                        name: a.nome,
+                                        variant: AlunoAvatarVariant.strip,
+                                      ),
+                                      const SizedBox(width: TokensStrip.s3),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              a.nome,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style:
+                                                  FocuxHubTypography.cardTitle(
+                                                    color: ink,
+                                                  ),
                                             ),
-                                    child: Row(
-                                      children: [
-                                        Container(
-                                          width: 42,
-                                          height: 42,
-                                          decoration: BoxDecoration(
-                                            color:
-                                                selected
-                                                    ? primary
-                                                    : primary.withValues(
-                                                      alpha: dark ? 0.16 : 0.10,
-                                                    ),
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: Center(
-                                            child: Text(
-                                              _iniciais(a.nome),
-                                              style: TextStyle(
-                                                color:
-                                                    selected
-                                                        ? Colors.white
-                                                        : primary,
-                                                fontSize: 13,
-                                                fontWeight: FontWeight.w900,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 12),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                a.nome,
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: TextStyle(
-                                                  color: ink,
-                                                  fontSize: 13.5,
-                                                  fontWeight: FontWeight.w800,
-                                                ),
-                                              ),
-                                              const SizedBox(height: 3),
+                                            if (objetivo.isNotEmpty)
                                               Text(
                                                 objetivo,
                                                 maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
-                                                style: TextStyle(
-                                                  color: mute,
-                                                  fontSize: 11.5,
-                                                ),
+                                                style:
+                                                    FocuxHubTypography.bodyMuted(
+                                                      color: mute,
+                                                    ),
                                               ),
-                                            ],
-                                          ),
+                                          ],
                                         ),
-                                        const SizedBox(width: 10),
+                                      ),
+                                      if (selected)
                                         Icon(
-                                          selected
-                                              ? Icons.check_circle
-                                              : Icons.check_circle_outline,
-                                          color: selected ? primary : mute,
-                                          size: selected ? 22 : 20,
+                                          Icons.check_rounded,
+                                          color: primary,
+                                          size: 20,
                                         ),
-                                      ],
-                                    ),
+                                    ],
                                   ),
                                 ),
                               );
@@ -251,15 +202,6 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
       _proximaAcao = null;
       _aplicando = false;
     });
-  }
-
-  String _iniciais(String nome) {
-    final partes =
-        nome.trim().split(RegExp(r'\s+')).where((p) => p.isNotEmpty).toList();
-    if (partes.isEmpty) return '?';
-    final first = partes.first.characters.first;
-    final second = partes.length > 1 ? partes.last.characters.first : '';
-    return ('$first$second').toUpperCase();
   }
 
   Future<void> _analisar(int alunoId, String nome) {

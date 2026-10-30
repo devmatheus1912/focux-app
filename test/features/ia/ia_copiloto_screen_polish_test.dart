@@ -51,11 +51,10 @@ void main() {
     expect(screen, contains('iaCopilotoHomeProvider'));
     expect(screen, contains("retryLabel:"));
     expect(screen, isNot(contains('OutlinedButton')));
-    expect(screen, contains('showBack: false'));
+    expect(screen, contains('showBack: _gerado'));
     expect(screen, contains('constrainWidth: false'));
     expect(screen, contains('FxContentWidthLimiter'));
     expect(screen, contains('keyboardDismissBehavior'));
-    expect(screen, isNot(contains('onBack:')));
     expect(screen, isNot(contains('safePopOr')));
   });
 }

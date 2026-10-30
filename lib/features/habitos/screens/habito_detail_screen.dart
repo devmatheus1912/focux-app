@@ -304,7 +304,7 @@ class _HabitoDetailBody extends StatelessWidget {
                           const SizedBox(height: 6),
                           Text(
                             habito.feitoHoje ? 'Feito' : 'Pendente',
-                            style: FocuxHubTypography.kpi(
+                            style: FocuxHubTypography.metric(
                               color: fxScreenInk(context),
                               fontSize: FocuxHubTypography.metricLg,
                             ),

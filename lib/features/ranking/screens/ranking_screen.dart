@@ -350,7 +350,7 @@ class _RankingFocusCard extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             rankingPosicaoLabel(first.posicao),
-            style: FocuxHubTypography.kpi(
+            style: FocuxHubTypography.metric(
               color: chrome.ink,
               fontSize: FocuxHubTypography.metricLg,
             ),

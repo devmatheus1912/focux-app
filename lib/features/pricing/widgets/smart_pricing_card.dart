@@ -273,7 +273,7 @@ class _PriceCol extends StatelessWidget {
         const SizedBox(height: 1),
         Text(
           value,
-          style: FocuxHubTypography.kpi(
+          style: FocuxHubTypography.metric(
             color: valueColor,
             fontSize: FocuxHubTypography.metricMd,
           ),

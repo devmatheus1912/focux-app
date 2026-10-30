@@ -95,7 +95,7 @@ class DunningFocusCard extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             '$abertas',
-            style: FocuxHubTypography.kpi(
+            style: FocuxHubTypography.metric(
               color: chrome.ink,
               fontSize: FocuxHubTypography.metricLg,
             ),

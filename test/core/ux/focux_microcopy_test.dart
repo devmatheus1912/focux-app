@@ -8,7 +8,6 @@ void main() {
     expect(FocuxMicrocopy.tentarNovamente, 'Tentar novamente');
     expect(FocuxMicrocopy.cancelar, 'Cancelar');
     expect(FocuxMicrocopy.salvar, 'Salvar');
-    expect(FocuxMicrocopy.algoDeuErrado, contains('Tente novamente'));
     expect(FocuxMicrocopy.version, isNotEmpty);
   });
 

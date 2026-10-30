@@ -119,8 +119,8 @@ class _FxFormSheet extends StatelessWidget {
     return FxHomeSheetSurface(
       isDark: isDark,
       maxHeight: maxHeight,
-      expand: true,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           FxHomeSheetHandle(isDark: isDark),
@@ -132,7 +132,7 @@ class _FxFormSheet extends StatelessWidget {
             leading: Icon(icon, color: accent, size: 18),
           ),
           SizedBox(height: TokensStrip.s4),
-          Expanded(
+          Flexible(
             child: SingleChildScrollView(
               keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               child: child,
@@ -163,11 +163,13 @@ class _FxFormSheet extends StatelessWidget {
               label: confirmLabel,
               onPressed: () => FxHomeSheetChrome.dismissAndPop(context, true),
             ),
-          const SizedBox(height: 10),
-          SizedBox(
-            height: 48,
-            child: FxTonalButton(label: cancelLabel, onPressed: () => FxHomeSheetChrome.dismissAndPop(context, false), compact: true),
-          ),
+          if (destructive) ...[
+            const SizedBox(height: 10),
+            SizedBox(
+              height: 48,
+              child: FxTonalButton(label: cancelLabel, onPressed: () => FxHomeSheetChrome.dismissAndPop(context, false), compact: true),
+            ),
+          ],
         ],
       ),
     );

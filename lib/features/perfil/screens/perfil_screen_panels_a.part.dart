@@ -1,5 +1,34 @@
 part of 'perfil_screen.dart';
 
+/// Indicação rende meses de plano: fica à vista, não só em Ferramentas.
+class _PerfilIndique extends StatelessWidget {
+  const _PerfilIndique({required this.mute, required this.line});
+
+  final Color mute;
+  final Color line;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = S.of(context);
+    return FxSettingsGroup(
+      children: [
+        FxSettingsTile(
+          icon: Icons.card_giftcard_outlined,
+          label: s.perfilIndiqueGanhe,
+          value: s.perfilIndiqueValor,
+          mute: mute,
+          line: line,
+          showDivider: false,
+          onTap: () {
+            AnalyticsService.instance.track(ProductEvents.referralPerfilAberto);
+            context.push('/referral');
+          },
+        ),
+      ],
+    );
+  }
+}
+
 /// Código do personal: o aluno precisa dele em todo plano, sem cadeado.
 class _PerfilAcessoAlunos extends StatelessWidget {
   const _PerfilAcessoAlunos({

@@ -138,7 +138,7 @@ void main() {
     expect(stage, contains('managementMode'));
     expect(stage, contains('FocuxHubTypography.sectionTitle'));
     expect(stage, contains('paywallNumberStyle'));
-    expect(stage, contains('FocuxHubTypography.kpi'));
+    expect(stage, contains('FocuxHubTypography.metric'));
     expect(stage, contains('fontWeight: FontWeight.w700'));
     expect(stage, contains('Table('));
     expect(stage, contains('prefersReducedMotion'));

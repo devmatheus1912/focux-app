@@ -363,7 +363,7 @@ class _BlocoQuantoEntrou extends StatelessWidget {
               alignment: Alignment.centerLeft,
               child: Text(
                 valor,
-                style: FocuxHubTypography.kpi(
+                style: FocuxHubTypography.metric(
                   color: ink,
                   fontSize: FocuxHubTypography.metricLg,
                 ).copyWith(

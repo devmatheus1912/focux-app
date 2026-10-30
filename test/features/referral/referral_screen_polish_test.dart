@@ -23,11 +23,8 @@ void main() {
     expect(screen, contains('SkeletonList'));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
-    expect(body, contains('OperationalMetricTile'));
     expect(body, contains('FxStripCard'));
-    expect(body, contains('FxActionChip'));
     expect(body, contains('l10n.referralCopyInvite'));
-    expect(hub, isNot(contains('FxLiquidPrimaryButton')));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains("safePopOrGo(context, '/perfil')"));
     expect(hub, isNot(contains('FxSettingsGroup')));

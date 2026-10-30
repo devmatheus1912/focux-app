@@ -29,48 +29,53 @@ extension ConversationScreenSheetsActions on _ConversationScreenState {
                 children: [
                   FxHomeSheetHandle(isDark: isDark),
                   SizedBox(height: TokensStrip.s4),
-                  if (canInteract) ...[
+                  if (formatChatTextForDisplay(msg.conteudo).isNotEmpty) ...[
                     Text(
-                      'Reagir',
-                      style: TextStyle(
-                        color:
-                            isDark
-                                ? EagleTokens.darkInk
-                                : TokensStrip.textPrimary,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
+                      formatChatTextForDisplay(msg.conteudo),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: FocuxHubTypography.bodyMuted(
+                        color: ShellChrome.of(sheetContext).mute,
                       ),
                     ),
-                    const SizedBox(height: 10),
-                    Wrap(
-                      spacing: 10,
-                      runSpacing: 10,
-                      children: [
-                        for (final emoji
-                            in _ConversationScreenState._quickReactions)
-                          InkWell(
-                            onTap: () {
-                              Navigator.pop(sheetContext);
-                              _toggleReaction(msg, emoji);
-                            },
-                            borderRadius: BorderRadius.circular(16),
-                            child: Container(
-                              width: 48,
-                              height: 48,
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: primarySoft,
-                                borderRadius: BorderRadius.circular(16),
+                    const SizedBox(height: TokensStrip.s3),
+                  ],
+                  if (canInteract) ...[
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          for (final emoji
+                              in _ConversationScreenState._quickReactions)
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                right: TokensStrip.s2,
                               ),
-                              child: Text(
-                                emoji,
-                                style: const TextStyle(fontSize: 24),
+                              child: InkWell(
+                                onTap: () {
+                                  Navigator.pop(sheetContext);
+                                  _toggleReaction(msg, emoji);
+                                },
+                                borderRadius: BorderRadius.circular(16),
+                                child: Container(
+                                  width: 48,
+                                  height: 48,
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    color: primarySoft,
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: Text(
+                                    emoji,
+                                    style: const TextStyle(fontSize: 24),
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                      ],
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: 18),
+                    const SizedBox(height: TokensStrip.s2),
                     ListTile(
                       contentPadding: EdgeInsets.zero,
                       leading: Icon(Icons.reply_rounded, color: primary),

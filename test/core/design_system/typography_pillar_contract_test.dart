@@ -40,7 +40,7 @@ void main() {
       expect(strip, contains(name), reason: 'TokensStrip.$name ausente');
     }
     final focux = File('lib/core/theme/focux_typography.dart').readAsStringSync();
-    for (final name in ['monoMetric', 'headline', 'body', 'kpiCondensed']) {
+    for (final name in ['numero', 'headline', 'body']) {
       expect(focux, contains(name), reason: 'FocuxTypography.$name ausente');
     }
   });
@@ -48,7 +48,7 @@ void main() {
   test('app theme builds textTheme via AppTypography', () {
     final theme = File('lib/core/theme/app_theme.dart').readAsStringSync();
     expect(theme, contains('AppTypography.inter'));
-    expect(theme, contains('AppTypography.mono'));
+    expect(theme, isNot(contains('AppTypography.mono')));
     expect(theme, contains('textTheme:'));
     expect(theme, contains('TokensStrip.fontH1'));
   });
@@ -90,9 +90,6 @@ void main() {
       'assets/google_fonts/Inter-Medium.ttf',
       'assets/google_fonts/Inter-SemiBold.ttf',
       'assets/google_fonts/Inter-Bold.ttf',
-      'assets/google_fonts/JetBrainsMono-Regular.ttf',
-      'assets/google_fonts/JetBrainsMono-Bold.ttf',
-      'assets/google_fonts/BarlowCondensed-Bold.ttf',
       'assets/google_fonts/OFL.txt',
     ];
     for (final path in required) {
@@ -101,8 +98,6 @@ void main() {
     final pubspec = File('pubspec.yaml').readAsStringSync();
     expect(pubspec, contains('assets/google_fonts/'));
     expect(pubspec, contains('family: Inter'));
-    expect(pubspec, contains('family: JetBrains Mono'));
-    expect(pubspec, contains('family: Barlow Condensed'));
   });
 
   test('features do not call AppTypography.inter ad-hoc', () {

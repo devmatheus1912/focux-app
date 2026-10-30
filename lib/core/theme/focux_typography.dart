@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'app_typography.dart';
 import 'tokens_strip.dart';
 
-/// Escala tipográfica compartilhada — Inter (UI), JetBrains Mono (métricas), Barlow Condensed (KPI).
+/// Escala tipográfica compartilhada — Inter.
 abstract final class FocuxTypography {
   FocuxTypography._();
 
@@ -37,31 +37,19 @@ abstract final class FocuxTypography {
         height: TokensStrip.leadingBody,
       );
 
-  /// Números, KPIs, valores monetários — JetBrains Mono.
-  static TextStyle monoMetric({
+  /// Número da interface: Inter forte, dígitos de largura igual.
+  static TextStyle numero({
     required Color color,
     double? fontSize,
-    FontWeight fontWeight = FontWeight.w700,
+    FontWeight fontWeight = FontWeight.w800,
     double? height,
     double? letterSpacing,
-  }) =>
-      AppTypography.mono(
-        fontSize: fontSize ?? TokensStrip.fontBody,
-        fontWeight: fontWeight,
-        color: color,
-        height: height,
-        letterSpacing: letterSpacing,
-      );
-
-  static TextStyle kpiCondensed({
-    required Color color,
-    double? fontSize,
-    FontWeight fontWeight = FontWeight.w700,
-  }) =>
-      AppTypography.condensed(
-        fontSize: fontSize ?? TokensStrip.fontH2,
-        fontWeight: fontWeight,
-        color: color,
-        height: 1,
-      );
+  }) => AppTypography.inter(
+    fontSize: fontSize ?? TokensStrip.fontBody,
+    fontWeight: fontWeight,
+    color: color,
+    height: height,
+    letterSpacing: letterSpacing,
+    fontFeatures: const [FontFeature.tabularFigures()],
+  );
 }

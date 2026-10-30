@@ -35,7 +35,7 @@ Future<void> showPerfilLgpdConsentSheet(
         size: 22,
       ),
       title: 'Consentimentos',
-      subtitle: 'Leia cada documento e confirme o aceite (LGPD).',
+      subtitle: 'Toque em um documento para ler.',
       child: PerfilLgpdConsentBody(tipos: tipos),
     ),
   );
@@ -210,56 +210,54 @@ class _ConsentRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: TokensStrip.s3),
+      padding: const EdgeInsets.only(bottom: TokensStrip.s1),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           InkWell(
             onTap: onAbrir,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  titulo,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: FocuxHubTypography.cardTitle(color: ink),
-                ),
-                const SizedBox(height: TokensStrip.s1),
-                Text(
-                  subtitulo,
-                  style: FocuxHubTypography.bodyMuted(color: mute),
-                ),
-              ],
+            borderRadius: BorderRadius.circular(TokensStrip.rInput),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: TokensStrip.s2),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          titulo,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: FocuxHubTypography.cardTitle(color: ink),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          subtitulo,
+                          style: FocuxHubTypography.bodyMuted(color: mute),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: TokensStrip.s2),
+                  if (busy)
+                    const SizedBox(width: 22, height: 22, child: FxLoading())
+                  else if (aceito)
+                    const Icon(
+                      Icons.check_circle_rounded,
+                      color: EagleTokens.good,
+                      size: 22,
+                    )
+                  else
+                    Icon(Icons.chevron_right_rounded, color: mute, size: 22),
+                ],
+              ),
             ),
           ),
-          if (busy)
-            const Padding(
-              padding: EdgeInsets.only(top: TokensStrip.s2),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: SizedBox(width: 22, height: 22, child: FxLoading()),
-              ),
-            )
-          else if (aceito)
-            const Padding(
-              padding: EdgeInsets.only(top: TokensStrip.s2),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Icon(
-                  Icons.check_circle_rounded,
-                  color: EagleTokens.good,
-                  size: 22,
-                ),
-              ),
-            )
-          else
-            Padding(
-              padding: const EdgeInsets.only(top: TokensStrip.s2),
-              child: FxLiquidPrimaryButton(
-                label: 'Ler e aceitar',
-                onPressed: onAceitar,
-              ),
+          if (!aceito && !busy)
+            FxLiquidPrimaryButton(
+              label: 'Ler e aceitar',
+              onPressed: onAceitar,
             ),
         ],
       ),

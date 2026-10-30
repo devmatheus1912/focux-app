@@ -311,7 +311,7 @@ class AlunoListCard extends ConsumerWidget {
                                               fontWeight: FontWeight.w600,
                                               height: 1.15,
                                             )
-                                            : AppTypography.mono(
+                                            : FocuxHubTypography.metric(
                                               fontSize: compact ? 11.5 : 12.5,
                                               fontWeight: FontWeight.w700,
                                               color: aderColor,

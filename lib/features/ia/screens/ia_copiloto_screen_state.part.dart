@@ -7,6 +7,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
     with SingleTickerProviderStateMixin {
   bool _gerando = false;
   bool _gerado = false;
+  bool _mensagemEnviada = false;
   Object? _erro;
   int? _selectedAlunoId;
   String? _selectedAlunoNome;
@@ -23,10 +24,26 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
       );
 
   String get _resultPrimaryLabel =>
-      _applySpec?.label ?? iaCopilotoCriarTarefaLabel();
+      _mensagemEnviada
+          ? S.of(context).copilotoMensagemEnviada
+          : _applySpec?.label ?? iaCopilotoCriarTarefaLabel();
 
-  VoidCallback get _resultPrimaryAction =>
-      _applySpec != null ? _aplicarAcao : _atribuir;
+  VoidCallback? get _resultPrimaryAction {
+    if (_mensagemEnviada) return null;
+    return _applySpec != null ? _aplicarAcao : _atribuir;
+  }
+
+  void _voltarAoInicio() {
+    setState(() {
+      _gerado = false;
+      _mensagemEnviada = false;
+      _selectedAlunoId = null;
+      _selectedAlunoNome = null;
+      _proximaAcao = null;
+      _aplicando = false;
+      _erro = null;
+    });
+  }
 
   @override
   Widget build(BuildContext context) => buildIaCopilotoBody(context);

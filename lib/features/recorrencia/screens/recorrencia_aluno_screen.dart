@@ -362,7 +362,7 @@ class _RecorrenciaAlunoScreenState
                                       const SizedBox(height: 6),
                                       Text(
                                         recorrenciaValorLabel(assinatura.valor),
-                                        style: FocuxHubTypography.kpi(
+                                        style: FocuxHubTypography.metric(
                                           color: ShellChrome.forBrightness(context, isDark).ink,
                                           fontSize: FocuxHubTypography.metricLg,
                                         ),

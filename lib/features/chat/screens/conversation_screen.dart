@@ -21,6 +21,7 @@ import '../../../core/providers/personal_brand_provider.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/storage/secure_storage.dart';
 import '../../../core/theme/brand_palette.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -616,8 +617,9 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                                 accentColor: primary,
                                                 groupSlot: groupSlot,
                                                 highlighted:
+                                                    msg.id != null &&
                                                     _highlightedMessageId ==
-                                                    msg.id,
+                                                        msg.id,
                                                 replyLabelBuilder:
                                                     _replySenderLabel,
                                                 onLongPress:

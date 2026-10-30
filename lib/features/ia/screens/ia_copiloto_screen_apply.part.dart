@@ -69,6 +69,9 @@ extension IaCopilotScreenApply on _IaCopilotoScreenState {
       );
       if (!mounted) return;
       if (resp.ok) {
+        if (spec.backendTipo == 'ENVIAR_PUSH') {
+          setState(() => _mensagemEnviada = true);
+        }
         FeedbackHelper.showSuccess(context, resp.mensagem);
       } else {
         FeedbackHelper.showError(context, resp.mensagem);
@@ -156,17 +159,5 @@ extension IaCopilotScreenApply on _IaCopilotoScreenState {
       case 'denunciar':
         await _denunciar();
     }
-  }
-
-  /// Volta à abertura para analisar outro aluno.
-  Future<void> _trocarAluno() async {
-    setState(() {
-      _gerado = false;
-      _proximaAcao = null;
-      _aplicando = false;
-      _erro = null;
-    });
-    await _selecionarAluno();
-    if (mounted && _selectedAlunoId != null) await _gerar();
   }
 }

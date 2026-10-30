@@ -23,7 +23,7 @@ class IaCopilotResultActionBar extends StatelessWidget {
 
   final Color brand;
   final String? primaryLabel;
-  final VoidCallback onPrimary;
+  final VoidCallback? onPrimary;
   final VoidCallback onMore;
 
   /// Folga de scroll quando a barra está visível (botão + padding + nav).
@@ -33,9 +33,7 @@ class IaCopilotResultActionBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Material(
-      color: (isDark ? EagleTokens.darkBg : TokensStrip.pageBg).withValues(
-        alpha: isDark ? 0.92 : 0.94,
-      ),
+      color: isDark ? EagleTokens.darkBg : TokensStrip.pageBg,
       child: Padding(
         padding: EdgeInsets.fromLTRB(
           TokensStrip.s4,

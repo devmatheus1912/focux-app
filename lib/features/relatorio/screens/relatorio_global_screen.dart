@@ -340,7 +340,7 @@ class _RelatorioFocusCard extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             relatorioAderenciaMediaLabel(dados.aderenciaMediaGeral),
-            style: FocuxHubTypography.kpi(
+            style: FocuxHubTypography.metric(
               color: chrome.ink,
               fontSize: FocuxHubTypography.metricLg,
             ),

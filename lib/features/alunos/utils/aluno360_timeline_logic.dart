@@ -21,6 +21,10 @@ String timeline360NumerosEmVirgula(String text) => text.replaceAllMapped(
 bool timeline360EhVisualizacao({required String kind, required String body}) =>
     kind == 'Autonomia' && body.trim().toLowerCase() == 'visualizado';
 
+/// O chat repete o treino como "Treino registrado: A"; o Check-in já conta.
+bool timeline360EhEcoDoTreino({required String kind, required String body}) =>
+    kind == 'Chat' && body.trim().startsWith('Treino registrado:');
+
 /// "Peso 458,0 kg" fora da faixa ganha "· Confirme este valor".
 String timeline360MarcaMedidaSuspeita(String body) {
   final peso = RegExp(r'peso\s+(-?\d+(?:[.,]\d+)?)\s*kg', caseSensitive: false)

@@ -4,11 +4,11 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/fx_action_chip.dart';
+import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_strip_card.dart';
-import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/referral_info.dart';
@@ -45,7 +45,6 @@ class ReferralBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = S.of(context);
     final chrome = ShellChrome.forBrightness(context, isDark);
-    final primary = Theme.of(context).colorScheme.primary;
     final banner = referralBannerText(l10n, info);
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
@@ -69,32 +68,7 @@ class ReferralBody extends StatelessWidget {
           onCopyLink: onCopyLink,
         ),
         const SizedBox(height: TokensStrip.s4),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: OperationalMetricTile(
-                label: l10n.referralRewardsMetric,
-                value: referralRewardsProgress(l10n, info) ?? '—',
-                hint: l10n.referralConvertedCount(info.usosTotais),
-                color: primary,
-                isDark: isDark,
-                emphasis: info.limiteAtingido
-                    ? OperationalMetricEmphasis.muted
-                    : OperationalMetricEmphasis.normal,
-              ),
-            ),
-            const SizedBox(width: TokensStrip.s2),
-            Expanded(
-              child: OperationalMetricTile(
-                label: l10n.referralDaysMetric,
-                value: referralDaysProgress(l10n, info),
-                color: EagleTokens.good,
-                isDark: isDark,
-              ),
-            ),
-          ],
-        ),
+        _ReferralProgresso(info: info, isDark: isDark),
         const SizedBox(height: TokensStrip.s4),
         DashboardSectionHeader(title: l10n.referralListTitle),
         const SizedBox(height: TokensStrip.s2),
@@ -125,15 +99,71 @@ class ReferralBody extends StatelessWidget {
               ),
             ),
         const SizedBox(height: TokensStrip.s4),
-        DashboardSectionHeader(title: l10n.referralHowItWorks),
-        const SizedBox(height: TokensStrip.s2),
-        for (final passo in referralComoFuncionaPassos(l10n, info))
-          FxSatelliteListTile(
-            title: passo.titulo,
-            titleCase: false,
-            subtitle: Text(passo.detalhe),
+        Theme(
+          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+          child: ExpansionTile(
+            tilePadding: EdgeInsets.zero,
+            childrenPadding: EdgeInsets.zero,
+            title: Text(
+              l10n.referralHowItWorks,
+              style: FocuxHubTypography.sectionTitle(
+                context,
+                color: chrome.ink,
+              ),
+            ),
+            children: [
+              for (final passo in referralComoFuncionaPassos(l10n, info))
+                FxSatelliteListTile(
+                  title: passo.titulo,
+                  titleCase: false,
+                  subtitle: Text(passo.detalhe),
+                ),
+            ],
           ),
+        ),
       ],
+    );
+  }
+}
+
+class _ReferralProgresso extends StatelessWidget {
+  const _ReferralProgresso({required this.info, required this.isDark});
+
+  final ReferralInfo info;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = S.of(context);
+    final chrome = ShellChrome.forBrightness(context, isDark);
+    final primary = Theme.of(context).colorScheme.primary;
+    final texto = [
+      if (referralRewardsProgress(l10n, info) case final premios?) premios,
+      referralDaysProgress(l10n, info),
+    ].join(' · ');
+    return FxStripCard(
+      semanticsLabel: texto,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            l10n.referralRewardsMetric,
+            style: FocuxHubTypography.chip(chrome.mute),
+          ),
+          const SizedBox(height: TokensStrip.s1),
+          Text(texto, style: FocuxHubTypography.cardTitle(color: chrome.ink)),
+          const SizedBox(height: TokensStrip.s2),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(TokensStrip.s1),
+            child: LinearProgressIndicator(
+              minHeight: 6,
+              value: referralProgressoFracao(info),
+              color: primary,
+              backgroundColor: primary.withValues(alpha: 0.12),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -176,7 +206,6 @@ class _ReferralCodeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = S.of(context);
     final chrome = ShellChrome.forBrightness(context, isDark);
-    final primary = Theme.of(context).colorScheme.primary;
     final codigo = referralCodigoLabel(info.codigo);
     final headline = referralRewardHeadline(l10n, info);
     final desconto = referralDiscountLine(l10n, info);
@@ -186,51 +215,45 @@ class _ReferralCodeCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (headline != null) ...[
+            Text(
+              headline,
+              style: FocuxHubTypography.cardTitle(color: chrome.ink),
+            ),
+            const SizedBox(height: TokensStrip.s1),
+          ],
+          if (desconto != null) ...[
+            Text(
+              desconto,
+              style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+            ),
+            const SizedBox(height: TokensStrip.s3),
+          ],
           Text(
             l10n.referralYourCode,
             style: FocuxHubTypography.chip(chrome.mute),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 2),
           SelectableText(
             codigo,
-            style: FocuxHubTypography.kpi(
+            style: FocuxHubTypography.metric(
               color: chrome.ink,
               fontSize: FocuxHubTypography.metricLg,
             ),
           ),
-          if (headline != null) ...[
-            const SizedBox(height: 6),
-            Text(
-              headline,
-              style: FocuxHubTypography.body(
-                color: chrome.ink,
-              ).copyWith(fontWeight: FontWeight.w700),
+          const SizedBox(height: TokensStrip.s3),
+          FxLiquidPrimaryButton(
+            label: l10n.referralCopyInvite,
+            onPressed: onShare,
+          ),
+          if (referralTemLink(info.linkCompartilhamento)) ...[
+            const SizedBox(height: TokensStrip.s2),
+            FxTonalButton(
+              label: l10n.referralCopyLinkOnly,
+              expanded: true,
+              onPressed: onCopyLink,
             ),
           ],
-          if (desconto != null) ...[
-            const SizedBox(height: 4),
-            Text(desconto, style: FocuxHubTypography.body(color: chrome.mute)),
-          ],
-          const SizedBox(height: TokensStrip.s3),
-          Wrap(
-            spacing: TokensStrip.s2,
-            runSpacing: TokensStrip.s2,
-            children: [
-              FxActionChip(
-                label: l10n.referralCopyInvite,
-                accent: primary,
-                isDark: isDark,
-                onPressed: onShare,
-              ),
-              if (referralTemLink(info.linkCompartilhamento))
-                FxActionChip(
-                  label: l10n.referralCopyLinkOnly,
-                  accent: chrome.mute,
-                  isDark: isDark,
-                  onPressed: onCopyLink,
-                ),
-            ],
-          ),
         ],
       ),
     );

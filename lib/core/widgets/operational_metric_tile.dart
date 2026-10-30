@@ -111,7 +111,7 @@ class OperationalMetricTile extends StatelessWidget {
                   value,
                   maxLines: valueMaxLines ?? (dense ? 1 : 2),
                   overflow: TextOverflow.ellipsis,
-                  style: FocuxHubTypography.kpi(
+                  style: FocuxHubTypography.metric(
                     color: ink,
                     fontSize:
                         dense

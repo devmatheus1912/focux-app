@@ -37,7 +37,6 @@ void main() {
     expect(screen, contains('chatInboxViewed'));
     expect(screen, contains('inboxHome(q:'));
     expect(screen, contains('chatInboxQueryProvider'));
-    expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('keyboardDismissBehavior'));
     expect(screen, contains('viewInsetsOf'));
     expect(screen, contains('hubCount:'));

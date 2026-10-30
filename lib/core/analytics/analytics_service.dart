@@ -188,6 +188,7 @@ class ProductEvents {
   static const referralLinkCopied = 'referral_link_copied';
   static const referralLoadFailed = 'referral_load_failed';
   static const referralHelpOpened = 'referral_help_opened';
+  static const referralPerfilAberto = 'referral_perfil_aberto';
   static const activationCtaTapped = 'activation_cta_tapped';
   static const setupWizardViewed = 'setup_wizard_viewed';
   static const setupWizardRefreshed = 'setup_wizard_refreshed';

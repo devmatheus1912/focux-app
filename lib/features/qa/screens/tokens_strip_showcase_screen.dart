@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -235,7 +234,7 @@ class _HeaderBadge extends StatelessWidget {
           ),
           child: Text(
             'v$version',
-            style: GoogleFonts.jetBrainsMono(
+            style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w600,
               color: TokensStrip.primaryHover,
@@ -425,7 +424,7 @@ class _SpacingTable extends StatelessWidget {
   }
 
   TextStyle _cell() =>
-      GoogleFonts.jetBrainsMono(fontSize: 11, color: TokensStrip.textSecondary);
+      TextStyle(fontSize: 11, color: TokensStrip.textSecondary);
 }
 
 class _BorderRadiusSpec extends StatelessWidget {
@@ -583,7 +582,7 @@ class _ElevationStrip extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       '$dp',
-                      style: GoogleFonts.jetBrainsMono(
+                      style: TextStyle(
                         fontSize: 9,
                         color: TokensStrip.textSecondary,
                       ),
@@ -1113,7 +1112,7 @@ class _ButtonAnatomy extends StatelessWidget {
             width: 92,
             child: Text(
               left,
-              style: GoogleFonts.jetBrainsMono(
+              style: TextStyle(
                 fontSize: 8.5,
                 color: TokensStrip.textSecondary,
                 height: 1.2,
@@ -1129,7 +1128,7 @@ class _ButtonAnatomy extends StatelessWidget {
                 if (mid.isNotEmpty)
                   Text(
                     mid,
-                    style: GoogleFonts.jetBrainsMono(
+                    style: TextStyle(
                       fontSize: 8.5,
                       fontWeight: FontWeight.w700,
                       color: TokensStrip.textPrimary,
@@ -1138,7 +1137,7 @@ class _ButtonAnatomy extends StatelessWidget {
                 if (right.isNotEmpty)
                   Text(
                     right,
-                    style: GoogleFonts.jetBrainsMono(
+                    style: TextStyle(
                       fontSize: 8,
                       color: TokensStrip.textSecondary,
                       height: 1.2,

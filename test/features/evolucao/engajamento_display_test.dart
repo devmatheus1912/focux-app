@@ -40,8 +40,6 @@ void main() {
     expect(engajamentoEventoLabel('Peito A · em andamento', 'TREINO'),
         'Peito A · em andamento');
     expect(engajamentoEventoLabel('  ', 'MEDIDA'), 'Medida');
-    expect(engajamentoStatusLabel('EM_ANDAMENTO'), 'Em andamento');
-    expect(engajamentoStatusLabel('CONCLUIDO'), 'Concluído');
     expect(
       engajamentoEventoSubtitle(tipo: 'TREINO', titulo: 'Peito A · concluído'),
       'Treino',

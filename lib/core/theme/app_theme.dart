@@ -36,16 +36,17 @@ class AppTheme {
     height: height,
   );
 
-  static TextStyle _mono({
+  static TextStyle _rotuloNumerico({
     double? fontSize,
     FontWeight? fontWeight,
     Color? color,
     double? letterSpacing,
-  }) => AppTypography.mono(
+  }) => AppTypography.inter(
     fontSize: fontSize,
     fontWeight: fontWeight,
     color: color,
     letterSpacing: letterSpacing,
+    fontFeatures: const [FontFeature.tabularFigures()],
   );
 
   static ThemeData _build(Color storedPrimary, bool dark, {Color? secondary}) {
@@ -195,13 +196,13 @@ class AppTheme {
         color: onSurface,
         letterSpacing: 0.05,
       ),
-      labelMedium: _mono(
+      labelMedium: _rotuloNumerico(
         fontSize: 10.5,
         fontWeight: FontWeight.w500,
         color: onSurfMute,
         letterSpacing: 0.8,
       ),
-      labelSmall: _mono(
+      labelSmall: _rotuloNumerico(
         fontSize: 9.5,
         fontWeight: FontWeight.w500,
         color: onSurfMute,

@@ -308,7 +308,7 @@ class _DesafioDetailBody extends StatelessWidget {
                           const SizedBox(height: 6),
                           Text(
                             desafioMeuLugarValue(meuIndex),
-                            style: FocuxHubTypography.kpi(
+                            style: FocuxHubTypography.metric(
                               color: fxScreenInk(context),
                               fontSize: FocuxHubTypography.metricLg,
                             ),

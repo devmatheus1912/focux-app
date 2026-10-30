@@ -4,11 +4,6 @@ import '../data/evolucao_repository.dart';
 
 enum EvolucaoHubView { medidas, recordes }
 
-String evolucaoHubViewLabel(EvolucaoHubView view) => switch (view) {
-  EvolucaoHubView.medidas => 'Medidas',
-  EvolucaoHubView.recordes => 'Recordes',
-};
-
 const evolucaoDetalheSecoes = [
   (value: 'medidas', label: 'Medidas'),
   (value: 'recordes', label: 'Recordes'),
@@ -17,50 +12,10 @@ const evolucaoDetalheSecoes = [
 EvolucaoHubView evolucaoHubViewFromSecao(String value) =>
     value == 'recordes' ? EvolucaoHubView.recordes : EvolucaoHubView.medidas;
 
-String evolucaoCountLabel(int count, {required bool recordes}) {
-  if (recordes) {
-    if (count <= 0) return '0';
-    return '$count';
-  }
-  if (count <= 0) return '0';
-  return '$count';
-}
-
-String evolucaoMedidasHint(int count) {
-  if (count <= 0) return 'Nenhuma medida ainda';
-  if (count == 1) return '1 registro';
-  return '$count registros';
-}
-
-/// Conta só registros com peso ou circunferência — alinha KPI e lista.
-int evolucaoMedidasComConteudoCount(List<MedidaCorporal> medidas) =>
-    medidas.where(evolucaoMedidaTemConteudo).length;
-
 List<MedidaCorporal> evolucaoMedidasComConteudo(List<MedidaCorporal> medidas) {
   final ordenada = [...medidas.where(evolucaoMedidaTemConteudo)]
     ..sort((a, b) => b.data.compareTo(a.data));
   return ordenada;
-}
-
-String evolucaoRecordesHint(int count) {
-  if (count <= 0) return 'Nenhuma marca ainda';
-  if (count == 1) return '1 marca pessoal';
-  return '$count marcas pessoais';
-}
-
-String evolucaoHubSubtitle() => 'Peso, medidas e recordes';
-
-String evolucaoVariacaoValue(List<MedidaCorporal> medidas) {
-  final stamp = evolucaoVariacaoPeso(medidas).trim();
-  if (stamp.isEmpty) return '—';
-  return stamp.replaceAll(' desde o início', '');
-}
-
-String evolucaoVariacaoHint(List<MedidaCorporal> medidas) {
-  if (evolucaoVariacaoPeso(medidas).isEmpty) {
-    return 'Registre 2 pesos para comparar';
-  }
-  return 'Desde a 1ª medida';
 }
 
 String evolucaoUltimaMedidaHint(List<MedidaCorporal> medidas) {
@@ -125,16 +80,6 @@ String evolucaoMedidaSubtitle(MedidaCorporal medida) {
   return 'Registro sem valores';
 }
 
-String evolucaoMedidaValue(MedidaCorporal medida) {
-  if (medida.peso != null) {
-    return formatBrKg(medida.peso!);
-  }
-  if (medida.cintura != null) {
-    return formatBrCm(medida.cintura!);
-  }
-  return '';
-}
-
 String evolucaoRecordeSubtitle(RecordePessoal recorde) {
   final parts = <String>[];
   if (recorde.cargaKg != null) {
@@ -162,4 +107,18 @@ String evolucaoRecordeValue(RecordePessoal recorde) {
 List<double> evolucaoPesosOrdenados(List<MedidaCorporal> medidas) {
   final pesos = [...medidas]..sort((a, b) => a.data.compareTo(b.data));
   return pesos.where((m) => m.peso != null).map((m) => m.peso!).toList();
+}
+
+/// Maior carga de cada exercício, a maior em cima.
+List<RecordePessoal> evolucaoMelhoresRecordes(List<RecordePessoal> lista) {
+  final melhor = <String, RecordePessoal>{};
+  for (final r in lista) {
+    final chave = r.exercicioNome.trim().toLowerCase();
+    final atual = melhor[chave];
+    if (atual == null || (r.cargaKg ?? 0) > (atual.cargaKg ?? 0)) {
+      melhor[chave] = r;
+    }
+  }
+  return melhor.values.toList()
+    ..sort((a, b) => (b.cargaKg ?? 0).compareTo(a.cargaKg ?? 0));
 }

@@ -11,6 +11,7 @@ import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_sparkline.dart';
 import '../../dashboard/utils/aluno_volume_format.dart';
+import '../utils/aluno360_timeline_logic.dart';
 import '../../../core/widgets/fx_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../constants/aluno_360_layout.dart';
@@ -84,7 +85,9 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
 
   static String? _ultimoPrValue(EvolucaoInteligente ev) {
     final label = ev.ultimoPrLabel?.trim();
-    if (label != null && label.isNotEmpty) return label;
+    if (label != null && label.isNotEmpty) {
+      return timeline360NumerosEmVirgula(label);
+    }
     final carga = ev.ultimoPrCargaKg;
     if (carga == null || carga <= 0) return null;
     final formatted =
@@ -277,7 +280,7 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ],
-                              if (sparklineData.isNotEmpty) ...[
+                              if (sparklineData.isNotEmpty && !singleWeek) ...[
                                 const SizedBox(height: TokensStrip.s2),
                                 _VolumeSparklineRow(
                                   data: sparklineData,

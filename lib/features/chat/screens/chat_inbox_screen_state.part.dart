@@ -204,6 +204,11 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
         safePopOrGo(context, '/dashboard/personal');
       },
       actions: [
+        IconButton(
+          tooltip: 'Nova conversa',
+          onPressed: _showAlunoPicker,
+          icon: const Icon(Icons.edit_square),
+        ),
         FxHelpIconButton(
           tooltip: 'Como usar as mensagens',
           onTap: () {
@@ -347,21 +352,24 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
                   FxSettingsLayout.pageInset,
                   8,
                 ),
-                child: Wrap(
-                  spacing: TokensStrip.s2,
-                  runSpacing: TokensStrip.s2,
-                  children: [
-                    for (final view in ChatInboxHubView.values)
-                      FxToggleChip(
-                        label: chatInboxHubViewLabel(view),
-                        selected: _view == view,
-                        isDark: isDark,
-                        onTap: () {
-                          if (_view == view) return;
-                          setState(() => _view = view);
-                        },
-                      ),
-                  ],
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Wrap(
+                    spacing: TokensStrip.s2,
+                    runSpacing: TokensStrip.s2,
+                    children: [
+                      for (final view in ChatInboxHubView.values)
+                        FxToggleChip(
+                          label: chatInboxHubViewLabel(view),
+                          selected: _view == view,
+                          isDark: isDark,
+                          onTap: () {
+                            if (_view == view) return;
+                            setState(() => _view = view);
+                          },
+                        ),
+                    ],
+                  ),
                 ),
               ),
             Expanded(
@@ -372,22 +380,6 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
                         child: _buildHubBody(isDark, primary),
                       ),
             ),
-            if (!_isSearching && !_selectionActive)
-              SafeArea(
-                top: false,
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    FxSettingsLayout.pageInset,
-                    TokensStrip.s2,
-                    FxSettingsLayout.pageInset,
-                    TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
-                  ),
-                  child: FxLiquidPrimaryButton(
-                    label: 'Nova conversa',
-                    onPressed: _showAlunoPicker,
-                  ),
-                ),
-              ),
           ],
         ),
       ),

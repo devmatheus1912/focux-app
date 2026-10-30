@@ -13,12 +13,12 @@ import 'paywall_glass.dart';
 /// Colunas de valor — mesma largura no header e na célula (eixo único).
 const double _kValueCol = 80;
 
-/// Números da paywall — Barlow Condensed, mesmo role KPI da Home.
+/// Números da paywall — Inter, mesmo role KPI da Home.
 TextStyle paywallNumberStyle({
   required Color color,
   double fontSize = TokensStrip.fontBodySm,
 }) {
-  return FocuxHubTypography.kpi(
+  return FocuxHubTypography.metric(
     color: color,
     fontSize: fontSize,
     fontWeight: FontWeight.w700,

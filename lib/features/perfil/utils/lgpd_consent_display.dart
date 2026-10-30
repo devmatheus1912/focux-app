@@ -16,15 +16,17 @@ LgpdConsentEstado lgpdConsentEstado(LgpdConsent? consent, String versaoAtual) {
       : LgpdConsentEstado.versaoAntiga;
 }
 
-String lgpdConsentResumo(int aceitos, int total) =>
-    '$aceitos de $total ${total == 1 ? 'aceito' : 'aceitos'}';
+String lgpdConsentResumo(int aceitos, int total) {
+  final faltam = total - aceitos;
+  if (faltam <= 0) return 'Tudo aceito';
+  return faltam == 1 ? 'Falta aceitar 1 documento' : 'Faltam $faltam documentos';
+}
 
 String lgpdConsentAceitoLabel(LgpdConsent consent) {
   final data = DateTime.tryParse(consent.aceitoEm.trim());
-  if (data == null) return 'Aceito · v${consent.versao}';
+  if (data == null) return 'Aceito';
   String dd(int n) => n.toString().padLeft(2, '0');
-  return 'Aceito em ${dd(data.day)}/${dd(data.month)}/${data.year} '
-      '· v${consent.versao}';
+  return 'Aceito em ${dd(data.day)}/${dd(data.month)}/${data.year}';
 }
 
 const lgpdConsentTiposPersonal = ['TERMOS', 'PRIVACIDADE'];

@@ -598,7 +598,7 @@ class _CartaoMensalidade extends StatelessWidget {
           const SizedBox(height: TokensStrip.s3),
           Text(
             mensalidade.valor.formatCobranca(),
-            style: FocuxHubTypography.kpi(
+            style: FocuxHubTypography.metric(
               color: chrome.ink,
               fontSize: FocuxHubTypography.metricLg,
             ).copyWith(

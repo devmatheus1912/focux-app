@@ -29,10 +29,7 @@ void main() {
     expect(screen, contains('IndexedStack'));
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, contains('FxSatelliteListTile'));
-    expect(screen, contains('DashboardSectionHeader'));
     expect(screen, contains('RefreshIndicator'));
-    expect(screen, contains('FxHubHeader'));
-    expect(screen, contains('OperationalMetricTile'));
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('showEvolucaoHelpSheet'));
@@ -40,9 +37,6 @@ void main() {
     expect(screen, contains("'/alunos/\${widget.alunoId}/evolucao-comparativo'"));
     expect(screen, contains('compartilharEvolucao'));
     expect(screen, contains('AlunoInsetFormField'));
-    expect(screen, contains('FxActionChip'));
-    expect(screen, contains('evolucaoVariacaoValue'));
-    expect(screen, contains('FxHubFreshness.fromFetchedAt'));
     expect(screen, contains('FxErrorState'));
     expect(screen, contains('PopScope'));
     expect(screen, contains("'/alunos/\${widget.alunoId}'"));

@@ -287,7 +287,7 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
               const SizedBox(height: 6),
               Text(
                 habitoComplianceLabel(focus.alunoNome),
-                style: FocuxHubTypography.kpi(
+                style: FocuxHubTypography.metric(
                   color: ShellChrome.of(context).ink,
                   fontSize: FocuxHubTypography.metricLg,
                 ),
@@ -327,7 +327,7 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
               const SizedBox(height: 6),
               Text(
                 _habitos.first.titulo,
-                style: FocuxHubTypography.kpi(
+                style: FocuxHubTypography.metric(
                   color: ShellChrome.of(context).ink,
                   fontSize: FocuxHubTypography.metricLg,
                 ),

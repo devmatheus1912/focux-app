@@ -49,7 +49,12 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
 
     return fxScreenA11yScope(
       label: 'Copiloto',
-      child: FeatureGate(
+      child: PopScope(
+        canPop: !_gerado,
+        onPopInvokedWithResult: (didPop, _) {
+          if (!didPop) _voltarAoInicio();
+        },
+        child: FeatureGate(
         featureName: 'Copiloto IA',
         requiredPlan: SubscriptionPlan.PRO,
         capability: 'iaCopiloto',
@@ -60,7 +65,8 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
           appBar: FxShellAppBar(
             title: 'Copiloto',
             subtitle: _gerado ? _selectedAlunoNome : null,
-            showBack: false,
+            showBack: _gerado,
+            onBack: _voltarAoInicio,
             actions: [
               FxHelpIconButton(
                 tooltip: 'Como usar o Copiloto',
@@ -139,7 +145,7 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                             alunoNome: _selectedAlunoNome,
                             onAnalisar: _analisar,
                             onAnalisarSelecionado: _gerar,
-                            onEscolherAluno: _trocarAluno,
+                            onEscolherAluno: _selecionarAluno,
                             onVerTarefas:
                                 () => context.push(
                                   '/dashboard/command-center/copiloto',
@@ -227,12 +233,6 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                                   ],
                                 ],
                               ),
-                            ),
-                            const SizedBox(width: TokensStrip.s2),
-                            FxTonalButton(
-                              label: S.of(context).copilotoTrocar,
-                              compact: true,
-                              onPressed: _trocarAluno,
                             ),
                           ],
                         ),
@@ -328,7 +328,6 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                                       IaCopilotInsightItem(
                                         index: e.key,
                                         insight: e.value,
-                                        highlighted: e.key == 0,
                                         brand: brand,
                                         mute: mute,
                                       ),
@@ -362,6 +361,7 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
             ),
           ),
         ),
+      ),
       ),
     );
   }

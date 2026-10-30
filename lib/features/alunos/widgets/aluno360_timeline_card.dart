@@ -109,7 +109,8 @@ class Aluno360TimelineCard extends StatelessWidget {
         .where(
           (item) =>
               !isSmokeTimelineContent(item.body) &&
-              !timeline360EhVisualizacao(kind: item.kind, body: item.body),
+              !timeline360EhVisualizacao(kind: item.kind, body: item.body) &&
+              !timeline360EhEcoDoTreino(kind: item.kind, body: item.body),
         )
         .toList(growable: false);
     return sortTimeline360Items(

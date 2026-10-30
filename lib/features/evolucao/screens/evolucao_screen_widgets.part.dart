@@ -1,5 +1,91 @@
 part of 'evolucao_screen.dart';
 
+/// Peso é o número que o personal abre a tela para ver.
+class _EvolucaoPesoHero extends StatelessWidget {
+  const _EvolucaoPesoHero({required this.medidas});
+
+  final List<MedidaCorporal> medidas;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    final variacao = evolucaoVariacaoPeso(medidas);
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(TokensStrip.s3),
+      decoration: fxListCardDecoration(context),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Peso atual', style: FocuxHubTypography.chip(chrome.mute)),
+          const SizedBox(height: TokensStrip.s1),
+          Text(
+            evolucaoPesoAtual(medidas),
+            style: FocuxHubTypography.metric(
+              color: chrome.ink,
+              fontSize: 34,
+              height: 1.1,
+            ),
+          ),
+          const SizedBox(height: TokensStrip.s1),
+          Text(
+            [
+              if (variacao.isNotEmpty) variacao,
+              evolucaoUltimaMedidaHint(medidas),
+            ].join(' · '),
+            style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _EvolucaoAtalho extends StatelessWidget {
+  const _EvolucaoAtalho({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(TokensStrip.rCard),
+        child: Ink(
+          padding: const EdgeInsets.all(TokensStrip.s3),
+          decoration: fxListCardDecoration(context),
+          child: Row(
+            children: [
+              Icon(
+                icon,
+                size: 20,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(width: TokensStrip.s2),
+              Expanded(
+                child: Text(
+                  label,
+                  style: FocuxHubTypography.cardTitle(color: chrome.ink),
+                ),
+              ),
+              Icon(Icons.chevron_right_rounded, size: 20, color: chrome.mute),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _TabMedidas extends StatelessWidget {
   final String alunoNome;
   final AsyncValue<List<MedidaCorporal>> medidasAsync;
@@ -72,24 +158,9 @@ class _TabMedidas extends StatelessWidget {
               96,
             ),
             children: [
-              if (weightData.isNotEmpty) ...[
-                const DashboardSectionHeader(title: 'Peso'),
-                const SizedBox(height: TokensStrip.s2),
-                Text(
-                  weightData.length < 2
-                      ? 'Primeiro ponto de peso — registre outra medida para ver tendência.'
-                      : 'Últimas medidas com peso.',
-                  style: FocuxHubTypography.bodyMuted(
-                    color: fxScreenMute(context),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: TokensStrip.s3),
+              if (weightData.length > 1) ...[
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: TokensStrip.s3,
-                    vertical: TokensStrip.s3,
-                  ),
+                  padding: const EdgeInsets.all(TokensStrip.s3),
                   decoration: fxListCardDecoration(context),
                   child: Center(
                     child: FxSparkline(
@@ -97,25 +168,16 @@ class _TabMedidas extends StatelessWidget {
                       width: 320,
                       height: 72,
                       color: EagleTokens.good,
-                      fill: weightData.length > 1,
+                      fill: true,
                     ),
                   ),
                 ),
-                const SizedBox(height: TokensStrip.s5),
+                const SizedBox(height: TokensStrip.s4),
               ],
-              const DashboardSectionHeader(title: 'Medidas'),
-              const SizedBox(height: TokensStrip.s3),
               for (final medida in ordenada)
                 FxSatelliteListTile(
                   title: evolucaoMedidaLabel(medida),
                   subtitle: Text(evolucaoMedidaSubtitle(medida)),
-                  trailing: Text(
-                    evolucaoMedidaValue(medida),
-                    style: FocuxHubTypography.bodyMuted(
-                      color: fxScreenMute(context),
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
                 ),
             ],
           ),
@@ -169,7 +231,7 @@ class _TabRecordes extends StatelessWidget {
             ),
           );
         }
-        final ordenada = [...lista]..sort((a, b) => b.data.compareTo(a.data));
+        final melhores = evolucaoMelhoresRecordes(lista);
         return RefreshIndicator(
           onRefresh: () async => onRetry(),
           child: ListView(
@@ -181,17 +243,15 @@ class _TabRecordes extends StatelessWidget {
               32,
             ),
             children: [
-              const DashboardSectionHeader(title: 'Recordes'),
-              const SizedBox(height: TokensStrip.s3),
-              for (final recorde in ordenada)
+              for (final recorde in melhores)
                 FxSatelliteListTile(
                   title: recorde.exercicioNome,
                   subtitle: Text(evolucaoRecordeSubtitle(recorde)),
                   trailing: Text(
                     evolucaoRecordeValue(recorde),
-                    style: FocuxHubTypography.bodyMuted(
-                      color: fxScreenMute(context),
-                      fontWeight: FontWeight.w700,
+                    style: FocuxHubTypography.metric(
+                      color: fxScreenInk(context),
+                      fontSize: TokensStrip.fontBody,
                     ),
                   ),
                 ),

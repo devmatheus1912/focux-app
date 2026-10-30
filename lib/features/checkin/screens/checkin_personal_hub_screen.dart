@@ -249,7 +249,7 @@ class _CheckinTodayCard extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             '$count',
-            style: FocuxHubTypography.kpi(
+            style: FocuxHubTypography.metric(
               color: chrome.ink,
               fontSize: FocuxHubTypography.metricLg,
             ),

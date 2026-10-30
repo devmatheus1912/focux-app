@@ -9,7 +9,6 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/feedback_helper.dart';
@@ -20,11 +19,8 @@ import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_help.dart';
-import '../../../core/widgets/fx_hub_header.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../../core/widgets/operational_metric_tile.dart';
-import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../../core/widgets/fx_sparkline.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -36,7 +32,6 @@ import '../../alunos/widgets/aluno_form_choices.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../../avaliacao/data/avaliacao_repository.dart';
 import '../../avaliacao/utils/evolucao_comparativo_display.dart';
-import '../../../core/widgets/fx_action_chip.dart';
 import '../data/evolucao_repository.dart';
 import '../utils/evolucao_display.dart';
 import '../providers/evolucao_home_provider.dart';
@@ -60,7 +55,6 @@ class EvolucaoScreen extends ConsumerStatefulWidget {
 
 class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
   EvolucaoHubView _view = EvolucaoHubView.medidas;
-  DateTime? _fetchedAt;
 
   void _registrar() {
     if (_view == EvolucaoHubView.medidas) {
@@ -71,10 +65,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
   }
 
   void _abrirFotos() {
-    context.push(
-      '/alunos/${widget.alunoId}/fotos',
-      extra: widget.alunoNome,
-    );
+    context.push('/alunos/${widget.alunoId}/fotos', extra: widget.alunoNome);
   }
 
   void _abrirComparativo() {
@@ -112,10 +103,6 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
     final medidasAsync = homeAsync.whenData((h) => h.medidas);
     final recordesAsync = homeAsync.whenData((h) => h.recordes);
     final medidas = medidasAsync.asData?.value;
-    final variacao = medidas == null ? null : evolucaoVariacaoPeso(medidas);
-    if (homeAsync.hasValue && _fetchedAt == null) {
-      _fetchedAt = DateTime.now();
-    }
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
 
@@ -128,223 +115,153 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
           safePopOrGo(context, '/alunos/${widget.alunoId}');
         },
         child: FxShellScaffold(
-        useMesh: true,
-        appBar: FxShellAppBar(
-          title: 'Evolução',
-          subtitle: FxHubFreshness.fromFetchedAt(_fetchedAt),
-          onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
-          actions: [
-            IconButton(
-              tooltip: 'Enviar no chat',
-              icon: const Icon(Icons.chat_bubble_outline_rounded),
-              onPressed: _compartilharNoChat,
-            ),
-            FxHelpIconButton(
-              tooltip: 'Como usar a evolução',
-              onTap: () => showEvolucaoHelpSheet(context),
-            ),
-          ],
-        ),
-        body: Column(
-          children: [
-            Expanded(
-              child: homeAsync.when(
-                loading:
-                    () => const Padding(
-                      padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-                      child: SkeletonList(count: 4),
-                    ),
-                error:
-                    (e, _) => FxErrorState(
-                      chromeOnDark: chrome.isDark,
-                      primary: primary,
-                      message: friendlyError(e),
-                      onRetry:
-                          () => ref.invalidate(
-                            evolucaoHomeProvider(widget.alunoId),
-                          ),
-                      title: 'Não conseguimos carregar a evolução',
-                    ),
-                data:
-                    (_) => FxContentWidthLimiter(
-                child: Column(
-                  children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(
-                          FxSettingsLayout.pageInset,
-                          TokensStrip.s4,
-                          FxSettingsLayout.pageInset,
-                          TokensStrip.s2,
-                        ),
+          useMesh: true,
+          appBar: FxShellAppBar(
+            title: 'Evolução',
+            subtitle: fxTitleCaseName(widget.alunoNome),
+            onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
+            actions: [
+              IconButton(
+                tooltip: 'Enviar no chat',
+                icon: const Icon(Icons.chat_bubble_outline_rounded),
+                onPressed: _compartilharNoChat,
+              ),
+              FxHelpIconButton(
+                tooltip: 'Como usar a evolução',
+                onTap: () => showEvolucaoHelpSheet(context),
+              ),
+            ],
+          ),
+          body: Column(
+            children: [
+              Expanded(
+                child: homeAsync.when(
+                  loading:
+                      () => const Padding(
+                        padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                        child: SkeletonList(count: 4),
+                      ),
+                  error:
+                      (e, _) => FxErrorState(
+                        chromeOnDark: chrome.isDark,
+                        primary: primary,
+                        message: friendlyError(e),
+                        onRetry:
+                            () => ref.invalidate(
+                              evolucaoHomeProvider(widget.alunoId),
+                            ),
+                        title: 'Não conseguimos carregar a evolução',
+                      ),
+                  data:
+                      (_) => FxContentWidthLimiter(
                         child: Column(
                           children: [
-                            FxHubHeader(
-                              title: fxTitleCaseName(widget.alunoNome),
-                              subtitle: evolucaoHubSubtitle(),
-                            ),
-                            const SizedBox(height: TokensStrip.s4),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: OperationalMetricTile(
-                                    label: 'Peso',
-                                    value: evolucaoPesoAtual(
-                                      medidas ?? const [],
-                                    ),
-                                    hint: evolucaoUltimaMedidaHint(
-                                      medidas ?? const [],
-                                    ),
-                                    color: primary,
-                                    isDark: chrome.isDark,
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                FxSettingsLayout.pageInset,
+                                TokensStrip.s4,
+                                FxSettingsLayout.pageInset,
+                                TokensStrip.s2,
+                              ),
+                              child: Column(
+                                children: [
+                                  _EvolucaoPesoHero(
+                                    medidas: medidas ?? const [],
                                   ),
-                                ),
-                                const SizedBox(width: TokensStrip.s2),
-                                Expanded(
-                                  child: OperationalMetricTile(
-                                    label: 'Variação',
-                                    value: evolucaoVariacaoValue(
-                                      medidas ?? const [],
-                                    ),
-                                    hint: evolucaoVariacaoHint(
-                                      medidas ?? const [],
-                                    ),
-                                    color: primary,
-                                    isDark: chrome.isDark,
-                                    emphasis:
-                                        variacao == null || variacao.isEmpty
-                                            ? OperationalMetricEmphasis.muted
-                                            : OperationalMetricEmphasis.normal,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: TokensStrip.s2),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: OperationalMetricTile(
-                                    label: 'Medidas',
-                                    value: evolucaoCountLabel(
-                                      evolucaoMedidasComConteudoCount(
-                                        medidas ?? const [],
+                                  const SizedBox(height: TokensStrip.s2),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: _EvolucaoAtalho(
+                                          icon: Icons.photo_library_outlined,
+                                          label: 'Fotos',
+                                          onTap: _abrirFotos,
+                                        ),
                                       ),
-                                      recordes: false,
-                                    ),
-                                    hint: evolucaoMedidasHint(
-                                      evolucaoMedidasComConteudoCount(
-                                        medidas ?? const [],
+                                      const SizedBox(width: TokensStrip.s2),
+                                      Expanded(
+                                        child: _EvolucaoAtalho(
+                                          icon: Icons.compare_arrows_rounded,
+                                          label: 'Comparativo',
+                                          onTap: _abrirComparativo,
+                                        ),
                                       ),
-                                    ),
-                                    color: primary,
-                                    isDark: chrome.isDark,
+                                    ],
                                   ),
-                                ),
-                                const SizedBox(width: TokensStrip.s2),
-                                Expanded(
-                                  child: OperationalMetricTile(
-                                    label: 'Recordes',
-                                    value: evolucaoCountLabel(
-                                      recordesAsync.asData?.value.length ?? 0,
-                                      recordes: true,
-                                    ),
-                                    hint: evolucaoRecordesHint(
-                                      recordesAsync.asData?.value.length ?? 0,
-                                    ),
-                                    color: primary,
+                                  const SizedBox(height: TokensStrip.s4),
+                                  AlunoSegmentedChoice(
+                                    options: evolucaoDetalheSecoes,
+                                    selected: _view.name,
                                     isDark: chrome.isDark,
+                                    onSelect:
+                                        (value) => setState(
+                                          () =>
+                                              _view = evolucaoHubViewFromSecao(
+                                                value,
+                                              ),
+                                        ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                            const SizedBox(height: TokensStrip.s3),
-                            Wrap(
-                              spacing: TokensStrip.s2,
-                              runSpacing: TokensStrip.s2,
-                              children: [
-                                FxActionChip(
-                                  label: 'Fotos',
-                                  accent: primary,
-                                  isDark: chrome.isDark,
-                                  onPressed: _abrirFotos,
-                                ),
-                                FxActionChip(
-                                  label: 'Comparativo',
-                                  accent: primary,
-                                  isDark: chrome.isDark,
-                                  onPressed: _abrirComparativo,
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: TokensStrip.s4),
-                            AlunoSegmentedChoice(
-                              options: evolucaoDetalheSecoes,
-                              selected: _view.name,
-                              isDark: chrome.isDark,
-                              onSelect: (value) => setState(
-                                () => _view = evolucaoHubViewFromSecao(value),
+                            Expanded(
+                              child: IndexedStack(
+                                index: _view.index,
+                                children: [
+                                  _TabMedidas(
+                                    alunoNome: widget.alunoNome,
+                                    medidasAsync: medidasAsync,
+                                    onRetry: () {
+                                      EvolucaoHomeClientCache.invalidate(
+                                        widget.alunoId,
+                                      );
+                                      ref.invalidate(
+                                        evolucaoHomeProvider(widget.alunoId),
+                                      );
+                                    },
+                                  ),
+                                  _TabRecordes(
+                                    alunoNome: widget.alunoNome,
+                                    recordesAsync: recordesAsync,
+                                    onRetry: () {
+                                      EvolucaoHomeClientCache.invalidate(
+                                        widget.alunoId,
+                                      );
+                                      ref.invalidate(
+                                        evolucaoHomeProvider(widget.alunoId),
+                                      );
+                                    },
+                                  ),
+                                ],
                               ),
                             ),
                           ],
                         ),
                       ),
-                    Expanded(
-                      child: IndexedStack(
-                        index: _view.index,
-                        children: [
-                          _TabMedidas(
-                            alunoNome: widget.alunoNome,
-                            medidasAsync: medidasAsync,
-                            onRetry: () {
-                              EvolucaoHomeClientCache.invalidate(
-                                widget.alunoId,
-                              );
-                              ref.invalidate(
-                                evolucaoHomeProvider(widget.alunoId),
-                              );
-                            },
-                          ),
-                          _TabRecordes(
-                            alunoNome: widget.alunoNome,
-                            recordesAsync: recordesAsync,
-                            onRetry: () {
-                              EvolucaoHomeClientCache.invalidate(
-                                widget.alunoId,
-                              );
-                              ref.invalidate(
-                                evolucaoHomeProvider(widget.alunoId),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                    ),
-              ),
-            ),
-            if (homeAsync.hasValue)
-              SafeArea(
-                top: false,
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    FxSettingsLayout.pageInset,
-                    TokensStrip.s2,
-                    FxSettingsLayout.pageInset,
-                    TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
-                  ),
-                  child: FxLiquidPrimaryButton(
-                    label:
-                        _view == EvolucaoHubView.medidas
-                            ? 'Registrar medida'
-                            : 'Registrar recorde',
-                    onPressed: _registrar,
-                  ),
                 ),
               ),
-          ],
+              if (homeAsync.hasValue)
+                SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      FxSettingsLayout.pageInset,
+                      TokensStrip.s2,
+                      FxSettingsLayout.pageInset,
+                      TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
+                    ),
+                    child: FxLiquidPrimaryButton(
+                      label:
+                          _view == EvolucaoHubView.medidas
+                              ? 'Registrar medida'
+                              : 'Registrar recorde',
+                      onPressed: _registrar,
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
-      ),
       ),
     );
   }
@@ -366,6 +283,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             AlunoInsetFormField(
+              rotuloVisivel: true,
               controller: pesoCtrl,
               label: 'Peso (kg)',
               icon: Icons.monitor_weight_outlined,
@@ -374,6 +292,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
               ),
             ),
             AlunoInsetFormField(
+              rotuloVisivel: true,
               controller: abdomenCtrl,
               label: 'Circunf. abdômen (cm)',
               icon: Icons.straighten_outlined,
@@ -382,6 +301,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
               ),
             ),
             AlunoInsetFormField(
+              rotuloVisivel: true,
               controller: quadrilCtrl,
               label: 'Quadril (cm)',
               icon: Icons.straighten_outlined,
@@ -390,6 +310,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
               ),
             ),
             AlunoInsetFormField(
+              rotuloVisivel: true,
               controller: bracoCtrl,
               label: 'Braço (cm)',
               icon: Icons.straighten_outlined,
@@ -398,6 +319,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
               ),
             ),
             AlunoInsetFormField(
+              rotuloVisivel: true,
               controller: gorduraCtrl,
               label: 'Gordura corporal (%)',
               icon: Icons.pie_chart_outline_outlined,
@@ -406,6 +328,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
               ),
             ),
             AlunoInsetFormField(
+              rotuloVisivel: true,
               controller: massaCtrl,
               label: 'Massa magra (kg)',
               icon: Icons.fitness_center_outlined,
@@ -434,9 +357,9 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
         final manter = await showFxConfirmSheet(
           context,
           title: S.of(context).aluno360ConfirmeValoresTitulo,
-          message: S.of(context).aluno360ConfirmeValoresMensagem(
-            suspeitas.join(', '),
-          ),
+          message: S
+              .of(context)
+              .aluno360ConfirmeValoresMensagem(suspeitas.join(', ')),
           confirmLabel: S.of(context).aluno360ConfirmeValoresSalvar,
           cancelLabel: S.of(context).aluno360ConfirmeValoresCorrigir,
           icon: Icons.warning_amber_rounded,
@@ -488,7 +411,8 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
               context,
               friendlyError(
                 avaliacaoErr,
-                fallback: 'Medida salva. Gordura/massa não entraram na avaliação.',
+                fallback:
+                    'Medida salva. Gordura/massa não entraram na avaliação.',
               ),
             );
           }
@@ -524,11 +448,13 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             AlunoInsetFormField(
+              rotuloVisivel: true,
               controller: exercicioCtrl,
               label: 'Exercício',
               icon: Icons.fitness_center_outlined,
             ),
             AlunoInsetFormField(
+              rotuloVisivel: true,
               controller: cargaCtrl,
               label: 'Carga (kg)',
               icon: Icons.tune_outlined,
@@ -537,6 +463,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
               ),
             ),
             AlunoInsetFormField(
+              rotuloVisivel: true,
               controller: repsCtrl,
               label: 'Repetições (opcional)',
               icon: Icons.repeat_outlined,

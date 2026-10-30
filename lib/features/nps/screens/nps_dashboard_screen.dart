@@ -332,7 +332,7 @@ class _NpsFocusCard extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             formatBrDecimal(resumo.npsScore),
-            style: FocuxHubTypography.kpi(
+            style: FocuxHubTypography.metric(
               color: chrome.ink,
               fontSize: FocuxHubTypography.metricLg,
             ),

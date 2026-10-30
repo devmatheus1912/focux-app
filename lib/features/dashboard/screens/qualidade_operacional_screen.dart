@@ -253,7 +253,7 @@ class _QualidadeBody extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 '${data.score}',
-                style: FocuxHubTypography.kpi(
+                style: FocuxHubTypography.metric(
                   color: scoreColor,
                   fontSize: FocuxHubTypography.metricLg,
                 ),

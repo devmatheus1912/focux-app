@@ -273,7 +273,7 @@ class _StreakCard extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             gamificacaoStreakLabel(streak, isAluno: isAluno),
-            style: FocuxHubTypography.kpi(
+            style: FocuxHubTypography.metric(
               color: chrome.ink,
               fontSize: FocuxHubTypography.metricLg,
             ),

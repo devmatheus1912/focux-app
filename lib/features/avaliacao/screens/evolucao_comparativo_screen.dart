@@ -171,30 +171,35 @@ class _EvolucaoComparativoScreenState
           mainAxisSize: MainAxisSize.min,
           children: [
             AlunoInsetFormField(
+              rotuloVisivel: true,
               controller: peso,
               label: 'Peso (kg)',
               icon: Icons.monitor_weight_outlined,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
             ),
             AlunoInsetFormField(
+              rotuloVisivel: true,
               controller: altura,
               label: 'Altura (cm)',
               icon: Icons.height_outlined,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
             ),
             AlunoInsetFormField(
+              rotuloVisivel: true,
               controller: gordura,
               label: '% Gordura',
               icon: Icons.percent_outlined,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
             ),
             AlunoInsetFormField(
+              rotuloVisivel: true,
               controller: massaMagra,
               label: '% Massa magra',
               icon: Icons.fitness_center_outlined,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
             ),
             AlunoInsetFormField(
+              rotuloVisivel: true,
               controller: cintura,
               label: 'Cintura (cm)',
               icon: Icons.straighten_outlined,

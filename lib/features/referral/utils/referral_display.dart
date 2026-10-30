@@ -72,6 +72,13 @@ String referralDaysProgress(S l10n, ReferralInfo info) {
   return l10n.referralDaysProgress(info.diasGanhos, teto);
 }
 
+/// Quanto do teto de dias já foi ganho, de 0 a 1.
+double referralProgressoFracao(ReferralInfo info) {
+  final teto = info.tetoDias;
+  if (teto == null || teto <= 0) return 0;
+  return (info.diasGanhos / teto).clamp(0.0, 1.0);
+}
+
 ReferralBanner referralBanner(ReferralInfo info) {
   if (!info.campanhaAtiva) return ReferralBanner.campaignInactive;
   if (info.recompensasEmAnalise > 0) return ReferralBanner.underReview;

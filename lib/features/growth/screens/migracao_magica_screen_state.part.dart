@@ -404,7 +404,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                             controller: _controller,
                             maxLines: 8,
                             minLines: 4,
-                            style: AppTypography.mono(
+                            style: TextStyle(
                               fontSize: 13,
                               color: ink,
                               height: 1.6,

@@ -132,7 +132,7 @@ void main() {
     expect(helper, contains('void safePopOr'));
     expect(checkin, contains("safePopOrGo(context, '/checkin/treinos')"));
     // Copiloto é tab do shell — sem seta/safePop (showBack: false).
-    expect(copilot, contains("showBack: false"));
+    expect(copilot, contains("showBack: _gerado"));
     expect(copilot, isNot(contains('safePopOr(')));
     expect(
       chat,

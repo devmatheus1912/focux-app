@@ -99,7 +99,7 @@ class CheckinRestFocusView extends StatelessWidget {
                     ),
                     Text(
                       countdown,
-                      style: FocuxHubTypography.kpi(
+                      style: FocuxHubTypography.metric(
                         color: chrome.ink,
                         fontSize: TokensStrip.fontH1,
                         fontWeight: FontWeight.w700,

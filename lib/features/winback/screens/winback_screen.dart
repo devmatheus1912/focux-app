@@ -417,7 +417,7 @@ class _WinbackFocusCard extends StatelessWidget {
             onTap: canOpen ? onAluno : null,
             child: Text(
               winbackAlunoLabel(first.alunoNome),
-              style: FocuxHubTypography.kpi(
+              style: FocuxHubTypography.metric(
                 color: chrome.ink,
                 fontSize: FocuxHubTypography.metricLg,
               ),

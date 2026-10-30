@@ -91,7 +91,8 @@ class ExecutarAcaoResponse {
     required this.exerciciosAjustados,
   });
 
-  bool get ok => status.toUpperCase() == 'OK';
+  /// `SEM_TOKEN`: mensagem salva no chat, só faltou a notificação no aparelho.
+  bool get ok => const {'OK', 'SEM_TOKEN'}.contains(status.toUpperCase());
 
   factory ExecutarAcaoResponse.fromJson(Map<String, dynamic> json) {
     return ExecutarAcaoResponse(

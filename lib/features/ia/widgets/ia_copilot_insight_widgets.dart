@@ -11,14 +11,12 @@ class IaCopilotInsightItem extends StatefulWidget {
     super.key,
     required this.index,
     required this.insight,
-    required this.highlighted,
     required this.brand,
     required this.mute,
   });
 
   final int index;
   final IaCopilotInsight insight;
-  final bool highlighted;
   final Color brand;
   final Color mute;
 
@@ -27,10 +25,8 @@ class IaCopilotInsightItem extends StatefulWidget {
 }
 
 class _IaCopilotInsightItemState extends State<IaCopilotInsightItem> {
-  bool _expanded = false;
-
-  static const _linhasFechado = 3;
-  static const _charsPorLinha = 40;
+  // A primeira recomendação abre sozinha; as outras ficam no título.
+  late bool _expanded = widget.index == 0;
 
   @override
   Widget build(BuildContext context) {
@@ -38,37 +34,23 @@ class _IaCopilotInsightItemState extends State<IaCopilotInsightItem> {
     final insight = widget.insight;
     final ink = fxScreenInk(context);
     final recomendacao = insight.recomendacao;
-    final longo =
-        insight.detalhe.length + recomendacao.length >
-        _linhasFechado * 2 * _charsPorLinha;
-    final linhas = _expanded || !longo ? null : _linhasFechado;
 
     Widget bloco(String rotulo, String texto) => Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          rotulo,
-          style: FocuxHubTypography.bodyMuted(
-            color: widget.mute,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+        Text(rotulo, style: FocuxHubTypography.chip(widget.mute)),
         const SizedBox(height: 2),
-        Text(
-          texto,
-          maxLines: linhas,
-          overflow: linhas == null ? null : TextOverflow.ellipsis,
-          style: FocuxHubTypography.body(color: ink),
-        ),
+        Text(texto, style: FocuxHubTypography.body(color: ink)),
       ],
     );
 
     return Semantics(
-      button: longo,
+      button: true,
+      expanded: _expanded,
       label: [
         insight.titulo,
-        insight.detalhe,
-        if (recomendacao.isNotEmpty) recomendacao,
+        if (_expanded) insight.detalhe,
+        if (_expanded && recomendacao.isNotEmpty) recomendacao,
       ].join('. '),
       excludeSemantics: true,
       child: Padding(
@@ -76,13 +58,10 @@ class _IaCopilotInsightItemState extends State<IaCopilotInsightItem> {
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            onTap: longo ? () => setState(() => _expanded = !_expanded) : null,
+            onTap: () => setState(() => _expanded = !_expanded),
             borderRadius: BorderRadius.circular(TokensStrip.rCard),
             child: Ink(
-              decoration: fxListCardDecoration(
-                context,
-                accent: widget.highlighted ? widget.brand : null,
-              ),
+              decoration: fxListCardDecoration(context),
               padding: const EdgeInsets.all(TokensStrip.s3),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -97,21 +76,22 @@ class _IaCopilotInsightItemState extends State<IaCopilotInsightItem> {
                           style: FocuxHubTypography.cardTitle(color: ink),
                         ),
                       ),
-                      if (longo)
-                        Icon(
-                          _expanded
-                              ? Icons.expand_less_rounded
-                              : Icons.expand_more_rounded,
-                          size: 20,
-                          color: widget.mute,
-                        ),
+                      Icon(
+                        _expanded
+                            ? Icons.expand_less_rounded
+                            : Icons.expand_more_rounded,
+                        size: 20,
+                        color: widget.mute,
+                      ),
                     ],
                   ),
-                  const SizedBox(height: TokensStrip.s2),
-                  bloco(s.copilotoOQueVimos, insight.detalhe),
-                  if (recomendacao.isNotEmpty) ...[
+                  if (_expanded) ...[
                     const SizedBox(height: TokensStrip.s2),
-                    bloco(s.copilotoOQueFazer, recomendacao),
+                    bloco(s.copilotoOQueVimos, insight.detalhe),
+                    if (recomendacao.isNotEmpty) ...[
+                      const SizedBox(height: TokensStrip.s2),
+                      bloco(s.copilotoOQueFazer, recomendacao),
+                    ],
                   ],
                 ],
               ),

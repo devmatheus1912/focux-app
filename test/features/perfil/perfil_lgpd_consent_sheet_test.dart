@@ -64,7 +64,7 @@ void main() {
       },
     );
 
-    expect(find.text('1 de 2 aceitos'), findsOneWidget);
+    expect(find.text('Falta aceitar 1 documento'), findsOneWidget);
     expect(find.textContaining('Aceito em'), findsOneWidget);
     expect(find.text('Ler e aceitar'), findsOneWidget);
     expect(find.textContaining('Só ler'), findsNothing);
@@ -114,7 +114,7 @@ void main() {
 
     final titulo = tester.getRect(find.text('Termos de uso'));
     final botao = tester.getRect(find.byType(FxLiquidPrimaryButton).first);
-    expect(titulo.width, greaterThan(160));
+    expect(titulo.width, greaterThan(80));
     expect(titulo.height, lessThan(96));
     expect(botao.top, greaterThan(titulo.bottom));
     expect(botao.width, greaterThan(300));

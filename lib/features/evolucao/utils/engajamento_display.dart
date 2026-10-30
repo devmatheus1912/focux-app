@@ -54,21 +54,6 @@ String engajamentoWhenLabel(String dataHora) {
   }
 }
 
-String engajamentoStatusLabel(String? status) {
-  switch ((status ?? '').trim().toUpperCase()) {
-    case 'EM_ANDAMENTO':
-      return 'Em andamento';
-    case 'CONCLUIDO':
-      return 'Concluído';
-    case 'CANCELADO':
-      return 'Cancelado';
-    case '':
-      return '';
-    default:
-      return status!.trim();
-  }
-}
-
 String engajamentoEventoLabel(String? descricao, String? tipo) {
   final text = descricao?.trim();
   if (text != null && text.isNotEmpty) {

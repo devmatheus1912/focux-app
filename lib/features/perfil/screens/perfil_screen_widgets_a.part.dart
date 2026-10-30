@@ -263,6 +263,10 @@ class _PerfilBodyState extends State<_PerfilBody> {
                           const SizedBox(
                             height: PerfilLayout.sectionGapPrimary,
                           ),
+                          _PerfilIndique(mute: mute, line: line),
+                          const SizedBox(
+                            height: PerfilLayout.sectionGapPrimary,
+                          ),
                           FxStaggerItem(
                             index: 3,
                             child: PerfilMarcaVitrineSection(

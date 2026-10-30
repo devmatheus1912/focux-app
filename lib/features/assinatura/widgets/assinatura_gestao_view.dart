@@ -11,10 +11,18 @@ import '../../../l10n/app_localizations.dart';
 typedef AssinaturaUso = ({String rotulo, int usado, int? limite});
 
 /// Quem já assina: o plano, o que usa e o que tem. Sem vitrine.
+/// `planoValidoAte` pode somar bônus de indicação, então não é a data da cobrança.
+String? assinaturaAcessoAte(DateTime? data) {
+  if (data == null) return null;
+  String dois(int n) => n.toString().padLeft(2, '0');
+  return '${dois(data.day)}/${dois(data.month)}/${data.year}';
+}
+
 class AssinaturaGestaoView extends StatelessWidget {
   const AssinaturaGestaoView({
     super.key,
     required this.planoNome,
+    this.validoAte,
     required this.usos,
     required this.inclusos,
     required this.gerenciarLabel,
@@ -27,6 +35,7 @@ class AssinaturaGestaoView extends StatelessWidget {
   });
 
   final String planoNome;
+  final DateTime? validoAte;
   final List<AssinaturaUso> usos;
   final List<String> inclusos;
   final String gerenciarLabel;
@@ -93,6 +102,11 @@ class AssinaturaGestaoView extends StatelessWidget {
                 s.assinaturaAtiva,
                 style: FocuxHubTypography.bodyMuted(color: chrome.mute),
               ),
+              if (assinaturaAcessoAte(validoAte) case final data?)
+                Text(
+                  s.assinaturaAcessoAte(data),
+                  style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                ),
             ],
           ),
         ),

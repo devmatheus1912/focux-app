@@ -80,7 +80,7 @@ extension on _AutomacoesScreenState {
                     const SizedBox(height: 6),
                     Text(
                       t.nome,
-                      style: FocuxHubTypography.kpi(
+                      style: FocuxHubTypography.metric(
                         color: Theme.of(context).colorScheme.onSurface,
                         fontSize: FocuxHubTypography.metricLg,
                       ),

@@ -91,29 +91,18 @@ abstract final class FocuxHubTypography {
     return bodyMuted(color: color, fontWeight: fontWeight);
   }
 
-  /// Números / KPIs — JetBrains Mono.
+  /// Todo número da interface: Inter forte com dígitos de largura igual.
   static TextStyle metric({
     required Color color,
     double? fontSize,
-    FontWeight fontWeight = FontWeight.w700,
+    FontWeight fontWeight = FontWeight.w800,
     double? height,
     double? letterSpacing,
-  }) => FocuxTypography.monoMetric(
+  }) => FocuxTypography.numero(
     color: color,
     fontSize: fontSize,
     fontWeight: fontWeight,
     height: height,
     letterSpacing: letterSpacing,
-  );
-
-  /// KPI condensado (Barlow).
-  static TextStyle kpi({
-    required Color color,
-    double? fontSize,
-    FontWeight fontWeight = FontWeight.w700,
-  }) => FocuxTypography.kpiCondensed(
-    color: color,
-    fontSize: fontSize,
-    fontWeight: fontWeight,
   );
 }

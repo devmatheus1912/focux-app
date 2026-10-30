@@ -30,7 +30,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
     expect(find.text('Novo item'), findsOneWidget);
 
-    await tester.tap(find.text('Cancelar'));
+    await tester.tap(find.byTooltip('Fechar'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
     expect(result, isFalse);

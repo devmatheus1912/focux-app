@@ -299,7 +299,7 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
                                       ),
                                       Text(
                                         '${_cols[col]?.length ?? 0}',
-                                        style: FocuxHubTypography.kpi(
+                                        style: FocuxHubTypography.metric(
                                           color: ink,
                                           fontSize:
                                               FocuxHubTypography.metricMd,

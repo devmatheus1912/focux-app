@@ -94,6 +94,7 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
         },
         child: AssinaturaGestaoView(
           planoNome: PaywallCatalog.displayPlanName(currentPlan),
+          validoAte: meFeatures?.validoAte,
           usos: [
             if (meFeatures != null) ...[
               (

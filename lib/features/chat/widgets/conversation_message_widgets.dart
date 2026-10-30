@@ -439,7 +439,7 @@ class ConversationBubble extends StatelessWidget {
     final metaColor = chrome.mute;
     final deleted = msg.deletedAt != null;
     final displayText = formatChatTextForDisplay(msg.conteudo);
-    final bubbleMaxWidth = (MediaQuery.sizeOf(context).width - 56).clamp(
+    final bubbleMaxWidth = (MediaQuery.sizeOf(context).width * 0.78).clamp(
       220.0,
       520.0,
     );

@@ -46,7 +46,7 @@ class _AnalyticsBody extends StatelessWidget {
                       const SizedBox(height: 6),
                       Text(
                         '${formatBrDecimal(taxaInadimplencia)}%',
-                        style: FocuxHubTypography.kpi(
+                        style: FocuxHubTypography.metric(
                           color: ink,
                           fontSize: FocuxHubTypography.metricLg,
                         ),
