@@ -83,7 +83,7 @@ void main() {
 
     expect(hub, contains('alunoPerfilTitulo'));
     expect(hubBody, contains('alunoPerfilAnamnese'));
-    expect(profile, contains('foto de evolução'));
+    expect(profile, contains('Braço'));
     expect(profile, contains('friendlyError'));
     expect(profile, contains('segurança e aderência'));
   });

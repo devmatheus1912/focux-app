@@ -26,15 +26,14 @@ void main() {
       expect('emphasize: true'.allMatches(screen), isEmpty);
       expect('emphasize: true'.allMatches(destaque), isEmpty);
       expect(screen, contains('TreinosHojeLinha('));
-      expect(screen, contains('FxHelpIconButton'));
+      expect(screen, contains('TreinosAjudaBotao'));
       expect(
         File('lib/features/checkin/widgets/treinos_destaque_card.dart').existsSync(),
         isFalse,
       );
 
-      // O repositório só entra para descartar sessão antiga; ler, só o agregado.
-      expect('checkinRepositoryProvider'.allMatches(screen).length, 1);
       for (final morto in [
+        'checkinRepositoryProvider',
         'meusTreinosPagina',
         'ProgressoSemanalWidget',
         '_WeekProgressStrip',

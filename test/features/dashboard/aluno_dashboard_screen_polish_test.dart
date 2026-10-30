@@ -86,7 +86,7 @@ void main() {
     final historico = File(
       'lib/features/checkin/screens/historico_screen.dart',
     ).readAsStringSync();
-    expect(treinos, contains('AlunoRitmoCard'));
+    expect(treinos, contains('TreinosRitmoLinha'));
     expect(historico, contains('AlunoRitmoCard'));
   });
 

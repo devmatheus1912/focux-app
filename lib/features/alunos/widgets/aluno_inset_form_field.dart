@@ -28,7 +28,12 @@ class AlunoInsetFormField extends StatelessWidget {
     this.rotuloVisivel = false,
     this.obrigatorio = false,
     this.ajuda,
+    this.rotuloFlutuante = false,
   });
+
+  /// Rótulo pequeno acima do valor, dentro da linha: o campo cheio continua
+  /// dizendo o que é.
+  final bool rotuloFlutuante;
 
   final TextEditingController controller;
   final String label;
@@ -90,6 +95,10 @@ class AlunoInsetFormField extends StatelessWidget {
             ).copyWith(
               // Contador só nos campos curtos (BE @Size ≤ 50).
               counterText: (maxLength != null && maxLength! <= 50) ? null : '',
+              labelText: rotuloFlutuante ? label : null,
+              floatingLabelBehavior: rotuloFlutuante
+                  ? FloatingLabelBehavior.always
+                  : null,
             ),
           ),
         ),

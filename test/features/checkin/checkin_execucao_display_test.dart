@@ -69,15 +69,6 @@ void main() {
   test('séries e contexto cabem em uma linha', () {
     expect(checkinSeriesRepsLabel(3, '12'), '3 × 12');
     expect(
-      checkinSerieContextLine(
-        s,
-        seriesReps: '3 × 12',
-        carga: '80 kg',
-        descansoSegundos: 60,
-      ),
-      '3 × 12 · 80 kg · descanso 60s',
-    );
-    expect(
       checkinChromeContextLine(s, duration: '08:12', current: 2, total: 5),
       '08:12 · exercício 2 de 5',
     );
@@ -88,10 +79,6 @@ void main() {
     expect(
       checkinConfirmarRestanteLabel(s, feitas: 1, total: 4),
       'Confirmar 3 séries que faltam',
-    );
-    expect(
-      checkinTrocarExercicioHint(s, index: 2, total: 2),
-      'Exercício 2 de 2 · toque para trocar',
     );
   });
 

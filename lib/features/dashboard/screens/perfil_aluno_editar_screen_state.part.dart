@@ -44,6 +44,8 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
   String _baseNascimento = '';
   String? _baseFotoUrl;
 
+  var _mesmoNumero = true;
+
   void _onFieldChanged() {
     if (mounted) setState(() {});
   }
@@ -132,13 +134,16 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
     }
     _nome.text = aluno.nome;
     _email.text = aluno.email;
-    _telefone.text = aluno.telefone ?? '';
-    _whatsapp.text = aluno.whatsapp ?? '';
+    _telefone.text = BrPhone.formatDisplay(aluno.telefone);
+    _whatsapp.text = BrPhone.formatDisplay(aluno.whatsapp ?? aluno.telefone);
+    _mesmoNumero =
+        BrPhone.digitsOnly(_telefone.text).isEmpty ||
+        BrPhone.digitsOnly(_telefone.text) == BrPhone.digitsOnly(_whatsapp.text);
     _objetivo.text = aluno.objetivo ?? '';
     _genero.text = aluno.genero ?? '';
     _tipoConsultoria.text = aluno.tipoConsultoria ?? '';
-    _peso.text = aluno.peso?.toString() ?? '';
-    _altura.text = aluno.altura?.toString() ?? '';
+    _peso.text = aluno.peso == null ? '' : numeroSemZero(aluno.peso!);
+    _altura.text = aluno.altura == null ? '' : aluno.altura!.toStringAsFixed(2).replaceAll('.', ',');
     _dataNascimento.text = formatBirthDateForDisplay(aluno.dataNascimento);
     _fotoUrl = aluno.fotoUrl;
     _captureBaseline();
@@ -196,7 +201,7 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
       await alunoRepo.atualizarMe({
         'nome': _nome.text.trim(),
         'email': _email.text.trim(),
-        'telefone': _telefone.text.trim(),
+        'telefone': _mesmoNumero ? _whatsapp.text.trim() : _telefone.text.trim(),
         'whatsapp': _whatsapp.text.trim(),
         'objetivo': _objetivo.text.trim(),
         'genero': _genero.text.trim(),
@@ -224,18 +229,49 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
     }
   }
 
-  String _formatarDataCurta(String value) {
-    final parsed = DateTime.tryParse(value);
-    if (parsed == null) return value;
-    final dia = parsed.day.toString().padLeft(2, '0');
-    final mes = parsed.month.toString().padLeft(2, '0');
-    return '$dia/$mes/${parsed.year}';
+  Future<void> _escolher(
+    String titulo,
+    TextEditingController campo,
+    List<({String valor, String rotulo})> opcoes,
+  ) async {
+    final escolha = await showFxGroupedActionSheet<String>(
+      context,
+      titulo: titulo,
+      grupos: [
+        FxActionGroup<String>(null, [
+          for (final o in opcoes)
+            FxActionItem(
+              valor: o.valor,
+              rotulo: o.rotulo,
+              icone: Icons.chevron_right_rounded,
+            ),
+        ]),
+      ],
+    );
+    if (escolha != null && mounted) campo.text = escolha;
+  }
+
+  String _dataCurta(DateTime d) =>
+      '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
+
+  Future<void> _escolherNascimento() async {
+    final agora = DateTime.now();
+    final atual = DateTime.tryParse(normalizeBirthDateForApi(_dataNascimento.text) ?? '');
+    final data = await showDatePicker(
+      context: context,
+      initialDate: atual ?? DateTime(agora.year - 25),
+      firstDate: DateTime(1920),
+      lastDate: agora,
+      locale: const Locale('pt', 'BR'),
+    );
+    if (data == null || !mounted) return;
+    _dataNascimento.text = formatBirthDateForDisplay(data.toIso8601String());
   }
 
   Future<void> _registrarMedida() async {
-    final dataCtrl = TextEditingController(
-      text: DateTime.now().toIso8601String().substring(0, 10),
-    );
+    final formKey = GlobalKey<FormState>();
+    var data = DateTime.now();
+    String? erroGeral;
     final pesoCtrl = TextEditingController(text: _peso.text.trim());
     final cinturaCtrl = TextEditingController();
     final quadrilCtrl = TextEditingController();
@@ -277,15 +313,39 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
               }
             }
 
+            Future<void> escolherData() async {
+              final hoje = DateTime.now();
+              final nova = await showDatePicker(
+                context: ctx,
+                initialDate: data,
+                firstDate: DateTime(hoje.year - 10),
+                lastDate: hoje,
+                locale: const Locale('pt', 'BR'),
+              );
+              if (nova != null) setModalState(() => data = nova);
+            }
+
             Future<void> salvar() async {
-              setModalState(() => saving = true);
+              if (!formKey.currentState!.validate()) return;
+              final vazia =
+                  fotoUrl == null &&
+                  [pesoCtrl, cinturaCtrl, quadrilCtrl, bracoCtrl]
+                      .every((c) => c.text.trim().isEmpty);
+              if (vazia) {
+                setModalState(() => erroGeral = 'Preencha uma medida ou adicione uma foto.');
+                return;
+              }
+              setModalState(() {
+                erroGeral = null;
+                saving = true;
+              });
               try {
                 final repo = EvolucaoRepository(ref.read(apiClientProvider));
                 final peso = double.tryParse(
                   pesoCtrl.text.trim().replaceAll(',', '.'),
                 );
                 await repo.adicionarMinhaMedida(
-                  data: dataCtrl.text.trim(),
+                  data: data.toIso8601String().substring(0, 10),
                   peso: peso,
                   cintura: double.tryParse(
                     cinturaCtrl.text.trim().replaceAll(',', '.'),
@@ -300,7 +360,7 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
                 );
                 ref.invalidate(alunoPerfilHomeProvider);
                 if (peso != null) {
-                  _peso.text = peso.toStringAsFixed(1);
+                  _peso.text = numeroSemZero(peso);
                   await _save(silent: true);
                 }
                 if (!ctx.mounted || !mounted) return;
@@ -332,92 +392,94 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
                     SizedBox(height: TokensStrip.s4),
                     FxHomeSheetHeader(
                       isDark: Theme.of(ctx).brightness == Brightness.dark,
-                      title: 'Registrar progresso',
-                      subtitle:
-                          'Atualize peso, medidas e uma foto opcional para acompanhar sua evolucao sem depender do personal.',
+                      title: 'Registrar medida',
                       leading: Icon(
                         Icons.monitor_weight_outlined,
                         color: Theme.of(ctx).colorScheme.primary,
                         size: 18,
                       ),
                     ),
-                    const SizedBox(height: TokensStrip.s4),
-                    _Field(
-                      controller: dataCtrl,
-                      label: 'Data AAAA-MM-DD',
+                    const SizedBox(height: TokensStrip.s3),
+                    FxTonalButton(
+                      label: _dataCurta(data),
                       icon: Icons.calendar_today_outlined,
+                      compact: true,
+                      onPressed: escolherData,
                     ),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _Field(
+                    const SizedBox(height: TokensStrip.s3),
+                    Form(
+                      key: formKey,
+                      child: Column(
+                        children: [
+                          MedidaCampo(
                             controller: pesoCtrl,
-                            label: 'Peso kg',
-                            icon: Icons.monitor_weight_outlined,
-                            keyboardType: TextInputType.number,
+                            label: 'Peso',
+                            sufixo: 'kg',
+                            validator: validarPeso,
                           ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: _Field(
-                            controller: cinturaCtrl,
-                            label: 'Cintura cm',
-                            icon: Icons.straighten_outlined,
-                            keyboardType: TextInputType.number,
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: MedidaCampo(
+                                  controller: cinturaCtrl,
+                                  label: 'Cintura',
+                                  sufixo: 'cm',
+                                  validator: validarCm,
+                                ),
+                              ),
+                              const SizedBox(width: TokensStrip.s2),
+                              Expanded(
+                                child: MedidaCampo(
+                                  controller: quadrilCtrl,
+                                  label: 'Quadril',
+                                  sufixo: 'cm',
+                                  validator: validarCm,
+                                ),
+                              ),
+                              const SizedBox(width: TokensStrip.s2),
+                              Expanded(
+                                child: MedidaCampo(
+                                  controller: bracoCtrl,
+                                  label: 'Braço',
+                                  sufixo: 'cm',
+                                  validator: validarCm,
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _Field(
-                            controller: quadrilCtrl,
-                            label: 'Quadril cm',
-                            icon: Icons.straighten_outlined,
-                            keyboardType: TextInputType.number,
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: _Field(
-                            controller: bracoCtrl,
-                            label: 'Braco cm',
-                            icon: Icons.fitness_center,
-                            keyboardType: TextInputType.number,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    OutlinedButton.icon(
-                      onPressed: uploading ? null : selecionarFoto,
-                      icon:
-                          uploading
-                              ? const SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: FxLoading(strokeWidth: 2),
-                              )
-                              : const Icon(Icons.add_a_photo_outlined),
-                      label: Text(
-                        fotoUrl == null
-                            ? 'Adicionar foto de progresso'
-                            : 'Foto de progresso pronta',
+                        ],
                       ),
                     ),
-                    if (fotoUrl != null) ...[
-                      const SizedBox(height: 12),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(18),
-                        child: AspectRatio(
-                          aspectRatio: 1.15,
-                          child: FxCachedNetworkImage(
-                            imageUrl: fotoUrl!,
-                            fit: BoxFit.cover,
-                            memCacheWidth: 720,
-                          ),
+                    Row(
+                      children: [
+                        FxTonalButton(
+                          label: fotoUrl == null ? 'Adicionar foto' : 'Trocar foto',
+                          icon: Icons.add_a_photo_outlined,
+                          compact: true,
+                          loading: uploading,
+                          onPressed: uploading ? null : selecionarFoto,
                         ),
+                        if (fotoUrl != null) ...[
+                          const SizedBox(width: TokensStrip.s3),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(TokensStrip.rSm),
+                            child: FxCachedNetworkImage(
+                              imageUrl: fotoUrl!,
+                              width: 48,
+                              height: 48,
+                              fit: BoxFit.cover,
+                              memCacheWidth: 144,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    if (erroGeral != null) ...[
+                      const SizedBox(height: TokensStrip.s2),
+                      Text(
+                        erroGeral!,
+                        style: FocuxHubTypography.bodyMuted(color: EagleTokens.bad),
                       ),
                     ],
                     const SizedBox(height: 18),
@@ -444,9 +506,6 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final homeAsync = ref.watch(alunoPerfilHomeProvider);
-    final freshnessLabel = FxHubFreshness.fromFetchedAt(
-      homeAsync.value?.fetchedAt,
-    );
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final chrome = ShellChrome.forBrightness(context, isDark);
     final ink = chrome.ink;
@@ -463,7 +522,6 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
           constrainWidth: false,
           appBar: FxShellAppBar(
             title: 'Editar cadastro',
-            subtitle: freshnessLabel,
             onBack: _cancel,
           ),
           bottomNavigationBar: FxFormStickyBar(
@@ -471,7 +529,7 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
               loading: _saving,
               loadingLabel: 'Salvando…',
               label: _saving ? 'Salvando…' : 'Salvar meu perfil',
-              onPressed: _saving ? null : _save,
+              onPressed: _saving || !_isDirty ? null : _save,
             ),
           ),
           body: homeAsync.when(
@@ -490,7 +548,6 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
               ),
           data: (home) {
             final aluno = home.aluno;
-            final medidas = home.medidas;
             _loadIfNeeded(aluno);
             return FxKeyboardDismissScope(
               child: Form(
@@ -609,6 +666,7 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
                           controller: _nome,
                           label: 'Nome',
                           icon: Icons.person_outline,
+                          rotuloFlutuante: true,
                           validator:
                               (v) =>
                                   v == null || v.trim().isEmpty
@@ -617,9 +675,10 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
                         ),
                         AlunoInsetFormField(
                           controller: _email,
-                          label: 'Email',
+                          label: 'E-mail',
                           icon: Icons.email_outlined,
                           keyboardType: TextInputType.emailAddress,
+                          rotuloFlutuante: true,
                           validator: (v) {
                             if (v == null || v.trim().isEmpty) {
                               return 'Obrigatório.';
@@ -629,27 +688,52 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
                           },
                         ),
                         AlunoInsetFormField(
-                          controller: _telefone,
-                          label: 'Telefone',
-                          icon: Icons.phone_outlined,
-                          keyboardType: TextInputType.phone,
-                        ),
-                        AlunoInsetFormField(
                           controller: _whatsapp,
                           label: 'WhatsApp',
                           icon: Icons.chat_outlined,
                           keyboardType: TextInputType.phone,
+                          inputFormatters: [BrPhone.formatter()],
+                          rotuloFlutuante: true,
                         ),
-                        AlunoInsetFormField(
-                          controller: _genero,
-                          label: 'Gênero',
-                          icon: Icons.badge_outlined,
+                        InkWell(
+                          onTap:
+                              () => setState(() => _mesmoNumero = !_mesmoNumero),
+                          child: Row(
+                            children: [
+                              Checkbox(
+                                value: _mesmoNumero,
+                                onChanged:
+                                    (v) => setState(() => _mesmoNumero = v ?? true),
+                              ),
+                              Expanded(
+                                child: Text(
+                                  'É o mesmo número do telefone',
+                                  style: FxSettingsLayout.footer(color: mute),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        AlunoInsetFormField(
-                          controller: _dataNascimento,
-                          label: 'Nascimento DD-MM-AAAA',
-                          icon: Icons.cake_outlined,
-                          showDivider: false,
+                        if (!_mesmoNumero)
+                          AlunoInsetFormField(
+                            controller: _telefone,
+                            label: 'Telefone',
+                            icon: Icons.phone_outlined,
+                            keyboardType: TextInputType.phone,
+                            inputFormatters: [BrPhone.formatter()],
+                            rotuloFlutuante: true,
+                          ),
+                        CampoDeEscolha(
+                          rotulo: 'Gênero',
+                          valor: rotuloDoGenero(_genero.text),
+                          icone: Icons.badge_outlined,
+                          onTap: () => _escolher('Gênero', _genero, generosDoAluno),
+                        ),
+                        CampoDeEscolha(
+                          rotulo: 'Nascimento',
+                          valor: _dataNascimento.text.replaceAll('-', '/'),
+                          icone: Icons.cake_outlined,
+                          onTap: _escolherNascimento,
                         ),
                       ],
                     ),
@@ -659,128 +743,44 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
                       caption:
                           'O que você quer construir e de onde está partindo.',
                       children: [
-                        AlunoInsetFormField(
-                          controller: _objetivo,
-                          label: 'Objetivo principal',
-                          icon: Icons.flag_outlined,
-                          maxLines: 2,
-                        ),
-                        AlunoInsetFormField(
-                          controller: _tipoConsultoria,
-                          label: 'Tipo de consultoria',
-                          icon: Icons.fitness_center,
-                        ),
-                        AlunoInsetFormField(
-                          controller: _peso,
-                          label: 'Peso kg',
-                          icon: Icons.monitor_weight_outlined,
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
+                        CampoDeEscolha(
+                          rotulo: 'Objetivo',
+                          valor: _objetivo.text,
+                          icone: Icons.flag_outlined,
+                          onTap: () => _escolher(
+                            'Objetivo',
+                            _objetivo,
+                            [
+                              for (final o in objetivosDoAluno)
+                                (valor: o, rotulo: o),
+                            ],
                           ),
                         ),
                         AlunoInsetFormField(
                           controller: _altura,
-                          label: 'Altura m',
+                          label: 'Altura (m)',
                           icon: Icons.height,
+                          rotuloFlutuante: true,
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
                           ),
-                          showDivider: false,
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: FxSettingsLayout.groupGap),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: FxSettingsLayout.groupPadH,
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Progresso corporal',
-                                  style: FxSettingsLayout.sectionHeader(
-                                    color: mute,
-                                  ),
-                                ),
-                                const SizedBox(
-                                  height: FxSettingsLayout.captionAfterHeader,
-                                ),
-                                Text(
-                                  'Medidas, foto de evolução e histórico rápido.',
-                                  style: FxSettingsLayout.footer(color: mute),
-                                ),
-                              ],
-                            ),
-                          ),
-                          FilledButton.tonalIcon(
+                        CampoDeEscolha(
+                          rotulo: 'Peso',
+                          valor: _peso.text.isEmpty ? '' : '${_peso.text} kg',
+                          icone: Icons.monitor_weight_outlined,
+                          acao: FxTonalButton(
+                            label: 'Registrar',
+                            compact: true,
                             onPressed: _registrarMedida,
-                            style: FilledButton.styleFrom(
-                              minimumSize: const Size(0, 44),
-                            ),
-                            icon: const Icon(Icons.add_chart),
-                            label: const Text('Registrar'),
                           ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: FxSettingsLayout.headerToGroup),
-                    FxSettingsGroup(
-                      children: [
-                        if (medidas.isEmpty)
-                          Padding(
-                            padding: const EdgeInsets.all(TokensStrip.s3),
-                            child: FxEmptyState(
-                              icon: 'chart',
-                              title: 'Histórico corporal vazio',
-                              subtitle:
-                                  'Registrar a primeira medida melhora acompanhamento, ajuste de carga e conversa com o personal.',
-                              action: FxEmptyAction(
-                                label: 'Registrar medida',
-                                onTap: _registrarMedida,
-                              ),
-                            ),
-                          )
-                        else ...[
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(
-                              FxSettingsLayout.groupPadH,
-                              TokensStrip.s3,
-                              FxSettingsLayout.groupPadH,
-                              TokensStrip.s2,
-                            ),
-                            child: Text(
-                              'Últimas atualizações',
-                              style: TextStyle(
-                                color: ink,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
+                        ),
+                        if (_tipoConsultoria.text.trim().isNotEmpty)
+                          CampoDeEscolha(
+                            rotulo: 'Consultoria',
+                            valor: rotuloDaConsultoria(_tipoConsultoria.text),
+                            icone: Icons.fitness_center,
                           ),
-                          ...medidas
-                              .take(3)
-                              .map(
-                                (medida) => Padding(
-                                  padding: const EdgeInsets.fromLTRB(
-                                    FxSettingsLayout.groupPadH,
-                                    0,
-                                    FxSettingsLayout.groupPadH,
-                                    TokensStrip.s2,
-                                  ),
-                                  child: _ProgressEntryCard(
-                                    medida: medida,
-                                    isDark: isDark,
-                                    formatarData: _formatarDataCurta,
-                                  ),
-                                ),
-                              ),
-                          const SizedBox(height: TokensStrip.s2),
-                        ],
                       ],
                     ),
                     const SizedBox(height: FxSettingsLayout.groupGap),

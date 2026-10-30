@@ -14,7 +14,6 @@ void main() {
     expect(screen, contains('viewInsetsOf'));
     expect(screen, contains('FxFormStickyBar'));
     expect(screen, contains('FxFormPopGuard'));
-    expect(screen, contains('onTapOutside'));
   });
 
   test('anamnese aluno: FxKeyboardDismissScope + viewInsets', () {

@@ -85,21 +85,6 @@ String checkinSeriesRepsLabel(int? series, String? reps) {
   return '$s × $r';
 }
 
-String checkinSerieContextLine(
-  S s, {
-  required String seriesReps,
-  String? carga,
-  int? descansoSegundos,
-}) {
-  final parts = <String>[
-    seriesReps,
-    if (carga != null && carga.trim().isNotEmpty) carga.trim(),
-    if (descansoSegundos != null && descansoSegundos > 0)
-      s.checkinDescansoSegundos(descansoSegundos),
-  ];
-  return parts.join(' · ');
-}
-
 String? checkinCargaLabel(double? value) {
   if (value == null) return null;
   final rounded =
@@ -155,12 +140,6 @@ String checkinConfirmarRestanteLabel(
   final left = (total ?? 0) - feitas;
   return s.checkinConfirmarRestante(left <= 1 ? 1 : left);
 }
-
-String checkinTrocarExercicioHint(
-  S s, {
-  required int index,
-  required int total,
-}) => s.checkinTrocarHint(index, total);
 
 T checkinPickCurrentExercise<T>({
   required List<T> exercicios,

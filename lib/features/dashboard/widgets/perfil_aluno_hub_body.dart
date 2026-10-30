@@ -19,6 +19,7 @@ import '../utils/aluno_confirm_logout.dart';
 import '../utils/aluno_delete_account.dart';
 import '../utils/aluno_perfil_completion.dart';
 import 'perfil_aluno_completar_card.dart';
+import 'perfil_progresso_bloco.dart';
 
 /// Identidade e conta. As ferramentas moram em `/aluno/ferramentas`, abertas
 /// pela Hoje.
@@ -128,6 +129,8 @@ class PerfilAlunoHubBody extends ConsumerWidget {
             ),
             const SizedBox(height: FxSettingsLayout.groupGap),
           ],
+          PerfilProgressoBloco(medidas: home.medidas),
+          const SizedBox(height: FxSettingsLayout.groupGap),
           FxStaggerItem(
             index: 2,
             child: FxSettingsGroup(
