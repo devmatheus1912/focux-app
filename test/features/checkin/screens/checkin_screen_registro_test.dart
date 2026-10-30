@@ -201,7 +201,7 @@ void main() {
 
       expect(find.text('Número da série acima do planejado.'), findsOneWidget);
       expect(find.text('Pular descanso'), findsNothing);
-      expect(find.text('0/3'), findsOneWidget);
+      expect(_rotuloDaSerie('Série 1 de 3'), findsOneWidget);
       expect(await fila.ler(), isEmpty);
       expect(haptics, isNot(contains(_sucesso)));
 
@@ -224,7 +224,7 @@ void main() {
       expect(await fila.ler(), isEmpty);
       expect(find.text('1 série esperando conexão'), findsNothing);
       expect(find.text('Pular descanso'), findsNothing);
-      expect(find.text('0/3'), findsOneWidget);
+      expect(_rotuloDaSerie('Série 1 de 3'), findsOneWidget);
       expect(haptics, isNot(contains(_sucesso)));
       expect(find.text('Sessão expirada. Faça login novamente.'), findsOneWidget);
     });
@@ -332,7 +332,7 @@ void main() {
       await pumpSheet(tester);
       expect(repo.descartes, 0);
       expect(find.text('treinos'), findsNothing);
-      expect(find.text('1/3'), findsOneWidget);
+      expect(_rotuloDaSerie('Série 2 de 3'), findsOneWidget);
     });
 
     testWidgets('2º toque em Descartar apaga e sai', (tester) async {
@@ -474,3 +474,8 @@ void main() {
     handle.dispose();
   });
 }
+
+/// O progresso da série (bolinhas) com o rótulo de acessibilidade, mesmo atrás de uma folha.
+Finder _rotuloDaSerie(String rotulo) => find.byWidgetPredicate(
+  (w) => w is Semantics && w.properties.label == rotulo,
+);

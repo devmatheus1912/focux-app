@@ -12,6 +12,12 @@ class HealthService {
   static final Health _health = Health();
   static const _prefKey = 'health_authorized';
 
+  /// Tipos já pedidos ao sistema. Mudou a lista (ex.: FC em repouso e HRV
+  /// entraram depois), pede de novo uma vez: o iPhone só pergunta os novos.
+  static const _tiposKey = 'health_tipos_pedidos';
+
+  static String get _assinatura => assinaturaDosTipos(_types.map((t) => t.name));
+
   static final _types = [
     HealthDataType.STEPS,
     HealthDataType.HEART_RATE,
@@ -46,11 +52,20 @@ class HealthService {
       );
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(_prefKey, granted);
+      await prefs.setString(_tiposKey, _assinatura);
       return granted;
     } catch (e) {
       if (kDebugMode) debugPrint('[HealthService] Auth error: $e');
       return false;
     }
+  }
+
+  /// Já conectado, mas a lista de tipos mudou desde o último pedido: pede de novo.
+  static Future<void> pedirTiposNovosSeMudou() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!(prefs.getBool(_prefKey) ?? false)) return;
+    if (!precisaPedirDeNovo(prefs.getString(_tiposKey), _assinatura)) return;
+    await requestAuthorization();
   }
 
   /// Check if we already have authorization.
@@ -214,8 +229,15 @@ class HealthService {
     } catch (_) {}
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_prefKey);
+    await prefs.remove(_tiposKey);
   }
 }
+
+/// Lista de tipos em ordem estável, para comparar entre versões do app.
+String assinaturaDosTipos(Iterable<String> tipos) => (tipos.toList()..sort()).join(',');
+
+/// Pede de novo quando nunca guardou a lista ou quando ela mudou.
+bool precisaPedirDeNovo(String? guardada, String atual) => guardada != atual;
 
 /// Resumo das leituras do dia (e da última noite).
 class HealthSummary {

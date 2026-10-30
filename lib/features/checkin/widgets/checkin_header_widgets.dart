@@ -7,7 +7,6 @@ import '../../../core/theme/focux_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/fx_help.dart';
 import '../../../l10n/app_localizations.dart';
 import '../utils/checkin_execucao_display.dart';
 
@@ -67,29 +66,22 @@ class CheckinWorkoutHeader extends StatelessWidget {
                 ],
               ),
             ),
+            // "?", "⋯" e "Sair": mesma altura (48), mesmo estilo tonal, sem sombra.
             if (onHelp != null)
-              FxHelpIconButton(
+              _BotaoDoCabecalho(
                 tooltip: s.checkinDicasExercicio,
-                onTap: onHelp!,
-                expandHitTarget: true,
+                icone: Icons.help_outline_rounded,
+                onPressed: onHelp!,
               ),
-            if (onMais != null)
-              SizedBox(
-                height: checkinExecutionControlMin,
-                child: Center(
-                  child: IconButton(
-                    tooltip: s.checkinMais,
-                    onPressed: onMais,
-                    style: IconButton.styleFrom(
-                      minimumSize: const Size(48, 48),
-                      side: BorderSide(
-                        color: chrome.mute.withValues(alpha: 0.35),
-                      ),
-                    ),
-                    icon: Icon(Icons.more_horiz_rounded, color: chrome.ink),
-                  ),
-                ),
+            if (onMais != null) ...[
+              const SizedBox(width: TokensStrip.s1),
+              _BotaoDoCabecalho(
+                tooltip: s.checkinMais,
+                icone: Icons.more_horiz_rounded,
+                onPressed: onMais!,
               ),
+            ],
+            const SizedBox(width: TokensStrip.s1),
             SizedBox(
               height: checkinExecutionControlMin,
               child: Center(
@@ -104,6 +96,30 @@ class CheckinWorkoutHeader extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Botão de ícone tonal do cabeçalho da execução (48, sem sombra).
+class _BotaoDoCabecalho extends StatelessWidget {
+  const _BotaoDoCabecalho({required this.tooltip, required this.icone, required this.onPressed});
+
+  final String tooltip;
+  final IconData icone;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final brand = Theme.of(context).colorScheme.primary;
+    return IconButton(
+      tooltip: tooltip,
+      onPressed: onPressed,
+      style: IconButton.styleFrom(
+        minimumSize: const Size(48, 48),
+        backgroundColor: brand.withValues(alpha: 0.08),
+        side: BorderSide(color: brand.withValues(alpha: 0.35)),
+      ),
+      icon: Icon(icone, color: brand),
     );
   }
 }

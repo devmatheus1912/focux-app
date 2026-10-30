@@ -4,6 +4,7 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_status_pill.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
 import '../data/health_repository.dart';
 import '../utils/health_plausibilidade.dart';
@@ -36,16 +37,21 @@ class SaudeMetricTile extends StatelessWidget {
   /// Cartão vazio que vira chamada ("Registrar sono").
   final bool acao;
 
+  /// Sem dado ("--" ou cartão de chamada): texto pequeno e apagado, nunca em
+  /// tamanho de número (antes "Registrar sono" grande parecia botão).
+  bool get _vazio => acao || valor.trim().isEmpty || valor.trim() == '--';
+
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
+    final texto = _vazio ? 'Sem registro' : valor;
     return Semantics(
       container: true,
       button: onTap != null,
       label: [
         rotulo,
-        valor + (unidade == null ? '' : ' $unidade'),
+        texto + (unidade == null || _vazio ? '' : ' $unidade'),
         if (apoio != null) apoio!,
       ].join(', '),
       excludeSemantics: true,
@@ -105,15 +111,15 @@ class SaudeMetricTile extends StatelessWidget {
                   alignment: Alignment.centerLeft,
                   child: Text.rich(
                     TextSpan(
-                      text: valor,
+                      text: texto,
                       style: TextStyle(
-                        color: acao ? chrome.mute : chrome.ink,
-                        fontSize: acao ? 20 : 28,
-                        fontWeight: FontWeight.w800,
+                        color: _vazio ? chrome.mute : chrome.ink,
+                        fontSize: _vazio ? 16 : 28,
+                        fontWeight: _vazio ? FontWeight.w600 : FontWeight.w800,
                         fontFeatures: const [FontFeature.tabularFigures()],
                       ),
                       children: [
-                        if (unidade != null)
+                        if (unidade != null && !_vazio)
                           TextSpan(
                             text: ' $unidade',
                             style: TextStyle(
@@ -190,16 +196,16 @@ class _ProntidaoTendenciaState extends State<ProntidaoTendencia> {
     final dias = widget.dias;
     final comNota = ProntidaoTendencia.diasComNota(dias);
 
-    Widget corpo;
+    // Sem nota nenhuma, a seção não aparece; com 1 ou 2, uma linha sem cartão.
+    if (comNota == 0) return const SizedBox.shrink();
     if (comNota < ProntidaoTendencia.minimoDeDias) {
-      corpo = Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Text(
-          'Sua tendência aparece depois de 3 dias com nota.',
-          style: TextStyle(color: chrome.mute, fontSize: 14),
-        ),
+      return Text(
+        'Sua tendência aparece com 3 dias de nota.',
+        style: TextStyle(color: chrome.mute, fontSize: 14),
       );
-    } else {
+    }
+    Widget corpo;
+    {
       final sel = _selecionado;
       corpo = Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -366,32 +372,18 @@ class SaudeConexaoCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Wrap(
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      spacing: 8,
-                      children: [
-                        Text(
-                          rotuloFonte,
-                          style: TextStyle(
-                            color: chrome.ink,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                        Text.rich(
-                          TextSpan(
-                            children: [
-                              TextSpan(
-                                text: '● ',
-                                style: TextStyle(color: primary, fontSize: 11),
-                              ),
-                              const TextSpan(text: 'Conectada'),
-                            ],
-                          ),
-                          style: TextStyle(color: chrome.mute, fontSize: 13),
-                        ),
-                      ],
+                    Text(
+                      rotuloFonte,
+                      style: TextStyle(
+                        color: chrome.ink,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
+                    const SizedBox(height: 4),
+                    // Selo abaixo do nome: não quebra a linha do título.
+                    const FxStatusPill(label: 'Conectada', tone: FxPillTone.success),
+                    const SizedBox(height: 4),
                     Text(
                       sincronizado,
                       maxLines: 2,
@@ -441,6 +433,8 @@ class SaudeConexaoCard extends StatelessWidget {
               Semantics(
                 label: 'Compartilhar saúde com meu personal',
                 child: Switch.adaptive(
+                  // Na cor da marca, não no verde do sistema.
+                  activeTrackColor: primary,
                   value: compartilhando ?? false,
                   onChanged: compartilhando == null ? null : onCompartilhar,
                 ),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_sticky_actions.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
@@ -52,46 +53,62 @@ class SaudeDesconectadoView extends StatelessWidget {
       ),
     );
 
-    return RefreshIndicator(
-      onRefresh: onAtualizar,
-      child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(TokensStrip.s5),
-        children: [
-          const SizedBox(height: TokensStrip.s5),
-          Center(
-            child: Container(
-              width: 84,
-              height: 84,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: primary.withValues(alpha: 0.14),
-              ),
-              child: Icon(Icons.favorite_rounded, size: 40, color: chrome.ink),
+    // O botão fica preso embaixo, na zona do polegar (antes ficava no meio).
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: onAtualizar,
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(TokensStrip.s5),
+              children: [
+                const SizedBox(height: TokensStrip.s5),
+                Center(
+                  child: Container(
+                    width: 84,
+                    height: 84,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: primary.withValues(alpha: 0.14),
+                    ),
+                    child: Icon(
+                      Icons.favorite_rounded,
+                      size: 40,
+                      color: primary,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: TokensStrip.s4),
+                Text(
+                  'Conecte para ver sua prontidão',
+                  textAlign: TextAlign.center,
+                  style: FocuxHubTypography.body(color: chrome.ink).copyWith(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                    height: 1.2,
+                  ),
+                ),
+                const SizedBox(height: TokensStrip.s5),
+                linha(
+                  Icons.bedtime_outlined,
+                  'Lemos seu sono, batimentos e passos',
+                ),
+                linha(
+                  Icons.lock_outline_rounded,
+                  'Não escrevemos nada no $fonte',
+                ),
+                linha(
+                  Icons.visibility_outlined,
+                  'Você escolhe se seu personal vê seus dados',
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: TokensStrip.s4),
-          Text(
-            'Conecte para ver sua prontidão',
-            textAlign: TextAlign.center,
-            style: FocuxHubTypography.body(
-              color: chrome.ink,
-            ).copyWith(fontSize: 22, fontWeight: FontWeight.w800, height: 1.2),
-          ),
-          const SizedBox(height: TokensStrip.s5),
-          linha(Icons.bedtime_outlined, 'Lemos seu sono, batimentos e passos'),
-          linha(
-            Icons.lock_outline_rounded,
-            'Não escrevemos nada no $fonte',
-          ),
-          linha(
-            Icons.visibility_outlined,
-            'Você escolhe se seu personal vê seus dados',
-          ),
-          const SizedBox(height: TokensStrip.s3),
-          FxLiquidPrimaryButton(label: 'Conectar $fonte', onPressed: onConectar),
-        ],
-      ),
+        ),
+        FxStickyActions(primaryLabel: 'Conectar $fonte', onPrimary: onConectar),
+      ],
     );
   }
 }
@@ -102,11 +119,8 @@ class SaudeSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget bloco(double altura) => FxLoading.sectionShimmer(
-      context,
-      height: altura,
-      showHeader: false,
-    );
+    Widget bloco(double altura) =>
+        FxLoading.sectionShimmer(context, height: altura, showHeader: false);
     return ListView(
       physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.all(TokensStrip.s4),
@@ -190,7 +204,8 @@ class _MetaPassosSheetState extends State<_MetaPassosSheet> {
                 SaudeMetaPassos.passo,
             label: milhar(_valor),
             onChanged:
-                (v) => setState(() => _valor = SaudeMetaPassos.ajustar(v.round())),
+                (v) =>
+                    setState(() => _valor = SaudeMetaPassos.ajustar(v.round())),
           ),
         ],
       ),

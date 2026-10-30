@@ -2,6 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../../core/widgets/fx_tonal_button.dart';
+
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
@@ -64,12 +66,54 @@ class ProntidaoCard extends StatelessWidget {
             'dormir ou registre o sono no app Saúde.';
     }
 
+    // Sem nota, uma faixa de uma linha: o anel vazio parecia "carregando" ou
+    // "nota zero" e empurrava os dados do dia para baixo da dobra.
+    if (estado != ProntidaoEstado.comNota) {
+      final (rotulo, icone, acao) = switch (estado) {
+        ProntidaoEstado.calibrando => ('Por quê?', Icons.hourglass_bottom_rounded, onPorQue),
+        ProntidaoEstado.indisponivel => ('Atualizar', Icons.cloud_off_rounded, onAtualizar ?? onComoRegistrar),
+        _ => ('Como registrar', Icons.bedtime_outlined, onComoRegistrar),
+      };
+      return Semantics(
+        container: true,
+        label: 'Prontidão de hoje: $titulo. $texto',
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(TokensStrip.s4, TokensStrip.s3, TokensStrip.s3, TokensStrip.s3),
+          decoration: BoxDecoration(
+            gradient: marca.degrade,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          // Título numa linha e o botão logo abaixo: cabe de 320 dp à letra 2x.
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(icone, color: marca.sobre, size: 22),
+                  const SizedBox(width: TokensStrip.s3),
+                  Expanded(
+                    child: Text(
+                      titulo,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: FocuxHubTypography.body(color: marca.sobre)
+                          .copyWith(fontSize: 16, fontWeight: FontWeight.w800, height: 1.2),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: TokensStrip.s2),
+              _BotaoDoCard(rotulo: rotulo, icone: icone, cheio: true, marca: marca, onTap: acao),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Semantics(
       container: true,
-      label:
-          estado == ProntidaoEstado.comNota
-              ? 'Prontidão de hoje: nota $score de 100, $titulo'
-              : 'Prontidão de hoje: $titulo',
+      label: 'Prontidão de hoje: nota $score de 100, $titulo',
       child: Container(
         constraints: const BoxConstraints(minHeight: 232),
         padding: const EdgeInsets.all(TokensStrip.s5),
@@ -286,45 +330,14 @@ class _BotaoDoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fundo = cheio ? marca.sobre : marca.sobre.withValues(alpha: 0.16);
-    final texto = cheio ? marca.fundo : marca.sobre;
-    return Semantics(
-      button: true,
+    // O secundário tonal do kit, nas cores do card de marca.
+    return FxTonalButton(
       label: rotulo,
-      excludeSemantics: true,
-      child: Material(
-        color: fundo,
-        shape: const StadiumBorder(),
-        child: InkWell(
-          customBorder: const StadiumBorder(),
-          onTap: onTap,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 48),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 18),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(icone, size: 18, color: texto),
-                  const SizedBox(width: 8),
-                  Flexible(
-                    child: Text(
-                      rotulo,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: texto,
-                        fontSize: 14.5,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
+      icon: icone,
+      compact: true,
+      fundo: cheio ? marca.sobre : marca.sobre.withValues(alpha: 0.16),
+      texto: cheio ? marca.fundo : marca.sobre,
+      onPressed: onTap,
     );
   }
 }

@@ -204,7 +204,7 @@ void main() {
     expect(find.textContaining('/100'), findsNothing);
     expect(find.text('12.000'), findsOneWidget);
     expect(find.text('8h'), findsOneWidget);
-    expect(find.byTooltip(saudeAtualizarLabel()), findsOneWidget);
+    expect(find.text('Atualizar'), findsOneWidget); // na faixa compacta da prontidão
     expect(atualizacoes, 0);
   });
 
@@ -232,7 +232,8 @@ void main() {
     expect(find.text('Recuperação parcial'), findsNothing);
     expect(find.text('Sem sono registrado'), findsOneWidget);
     expect(find.text('Como registrar'), findsOneWidget);
-    expect(find.text('Registrar sono'), findsOneWidget);
+    expect(find.text('Registrar sono'), findsNothing);
+    expect(find.text('Sem registro'), findsWidgets); // cartão de sono vazio, texto pequeno
     expect(find.text('5.124'), findsOneWidget);
     // calorias implausíveis (24 kcal com 5 mil passos) viram "--"
     expect(find.text('24'), findsNothing);
@@ -331,14 +332,24 @@ void main() {
     expect(find.text('Seu personal já vê sua prontidão'), findsNothing);
   });
 
-  testWidgets('tendência: com menos de 3 dias com nota mostra a mensagem', (
+  testWidgets('tendência: sem nota a seção some', (
     tester,
   ) async {
     await abrir(tester);
-    expect(
-      find.text('Sua tendência aparece depois de 3 dias com nota.'),
-      findsOneWidget,
+    expect(find.text('Últimos 7 dias'), findsNothing);
+    expect(find.textContaining('Sua tendência'), findsNothing);
+  });
+
+  testWidgets('tendência: com 1 ou 2 dias de nota, uma linha sem cartão', (tester) async {
+    final hoje = DateTime(2026, 10, 29);
+    await abrir(
+      tester,
+      historico: [
+        RecoveryDia(data: hoje, score: 62, rotulo: 'Treino moderado', sonoHoras: 7, fcRepouso: 58, passos: 8000),
+      ],
     );
+    expect(find.text('Últimos 7 dias'), findsNothing);
+    expect(find.text('Sua tendência aparece com 3 dias de nota.'), findsOneWidget);
   });
 
   testWidgets('tendência: com 3 ou mais dias mostra as barras', (tester) async {

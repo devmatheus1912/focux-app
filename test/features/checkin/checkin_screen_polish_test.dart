@@ -189,7 +189,7 @@ void main() {
     );
     expect(header, contains('s.checkinSair'));
     expect(header, contains('checkinExecutionControlMin'));
-    expect(header, contains('FxHelpIconButton'));
+    expect(header, contains('_BotaoDoCabecalho')); // "?", "⋯" no mesmo estilo tonal
     expect(header, contains('s.checkinMais'));
     expect(header, isNot(contains('CheckinLiveBadge')));
     expect(header, isNot(contains('AO VIVO')));

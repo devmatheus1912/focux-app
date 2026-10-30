@@ -1,5 +1,6 @@
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/features/checkin/models/checkin_execucao_models.dart';
 import 'package:focux_app/features/checkin/utils/checkin_execucao_display.dart';
 import 'package:focux_app/l10n/app_localizations_pt.dart';
 
@@ -165,5 +166,23 @@ void main() {
       ).id,
       2,
     );
+  });
+
+  group('ultimaVezDoExercicio', () {
+    ExecucaoSerie serie(int n, double? kg, String? reps) =>
+        ExecucaoSerie(id: n, numero: n, cargaKg: kg, repeticoes: reps, dor: false);
+
+    test('pega a última série (maior número), com carga e reps', () {
+      final u = ultimaVezDoExercicio([serie(1, 10, '12'), serie(3, 12.5, '8'), serie(2, 12.5, '10')]);
+      expect(u?.cargaKg, 12.5);
+      expect(u?.reps, 8);
+    });
+
+    test('sem carga fica só reps; sem nada, nulo', () {
+      expect(ultimaVezDoExercicio([serie(1, null, '15')])?.cargaKg, isNull);
+      expect(ultimaVezDoExercicio([serie(1, null, '15')])?.reps, 15);
+      expect(ultimaVezDoExercicio([serie(1, null, null)]), isNull);
+      expect(ultimaVezDoExercicio(const []), isNull);
+    });
   });
 }

@@ -190,7 +190,7 @@ void main() {
           (tester) async {
             await abrir(tester, tela, escala, entrada.value);
             expect(tester.takeException(), isNull);
-            expect(find.text('Prontidão de hoje'), findsOneWidget);
+            expect(find.byType(ProntidaoCard), findsOneWidget);
           },
         );
       }
@@ -209,7 +209,7 @@ void main() {
           lessThan(60));
     });
 
-    testWidgets('o botão de ajuda e o de sync ficam dentro da borda', (
+    testWidgets('o botão de ajuda fica dentro da borda', (
       tester,
     ) async {
       await abrir(tester, const Size(320, 640), 1.0, null);
@@ -225,5 +225,45 @@ void main() {
     expect(r.naoCompartilhado, isTrue);
     expect(r.recoveryScore, isNull);
     expect(RecoverySnapshot.fromJson({'recoveryScore': 70}).naoCompartilhado, isFalse);
+  });
+
+  group('calorias e fonte', () {
+    test('relógio pelo nome da fonte', () {
+      expect(fonteEhRelogio('Apple Watch de Matheus'), isTrue);
+      expect(fonteEhRelogio('Galaxy Watch5'), isTrue);
+      expect(fonteEhRelogio('Garmin Connect'), isTrue);
+      expect(fonteEhRelogio('iPhone de Ana'), isFalse);
+      expect(fonteEhRelogio(''), isFalse);
+    });
+
+    test('com relógio e sem energia ativa, não pede relógio', () {
+      expect(
+        apoioDasCalorias(passos: 5631, kcal: 0, fonteEhRelogio: true, semDadosHoje: 'x'),
+        'Sem energia ativa hoje',
+      );
+      expect(
+        apoioDasCalorias(passos: 5631, kcal: 0, fonteEhRelogio: false, semDadosHoje: 'x'),
+        'Precisa de um relógio',
+      );
+      expect(apoioDasCalorias(passos: 500, kcal: 0, fonteEhRelogio: false, semDadosHoje: 'x'), 'x');
+      expect(
+        apoioDasCalorias(passos: 5631, kcal: 320, fonteEhRelogio: true, semDadosHoje: 'x'),
+        'Até agora',
+      );
+    });
+  });
+
+  group('tipos pedidos ao sistema', () {
+    test('assinatura não depende da ordem', () {
+      expect(assinaturaDosTipos(['STEPS', 'HEART_RATE']), assinaturaDosTipos(['HEART_RATE', 'STEPS']));
+    });
+
+    test('pede de novo quando nunca guardou ou quando mudou', () {
+      final antes = assinaturaDosTipos(['STEPS', 'HEART_RATE']);
+      final agora = assinaturaDosTipos(['STEPS', 'HEART_RATE', 'RESTING_HEART_RATE']);
+      expect(precisaPedirDeNovo(null, agora), isTrue);
+      expect(precisaPedirDeNovo(antes, agora), isTrue);
+      expect(precisaPedirDeNovo(agora, agora), isFalse);
+    });
   });
 }

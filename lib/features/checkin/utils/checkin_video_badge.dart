@@ -11,7 +11,7 @@ abstract final class CheckinVideoBadge {
     String? licenseStatus,
     String? videoSource,
   }) {
-    if (licenseStatus == 'LICENSED') return 'Vídeo licenciado';
+    // "Vídeo licenciado" não serve ao aluno no meio do treino (cobria a demonstração).
     if (videoSource == 'PERSONAL_UPLOAD') return 'Enviado pelo personal';
     return null;
   }
@@ -20,7 +20,6 @@ abstract final class CheckinVideoBadge {
     String? licenseStatus,
     String? videoSource,
   }) {
-    if (licenseStatus == 'LICENSED') return Icons.verified_rounded;
     if (videoSource == 'PERSONAL_UPLOAD') return Icons.person_rounded;
     return null;
   }

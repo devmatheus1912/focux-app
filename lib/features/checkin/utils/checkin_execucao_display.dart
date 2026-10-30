@@ -1,3 +1,4 @@
+import '../models/checkin_execucao_models.dart';
 import 'package:flutter/painting.dart';
 
 import '../../../core/theme/tokens_strip.dart';
@@ -197,3 +198,15 @@ String checkinRestSemanticsLabel(
   if (ctx == null || ctx.isEmpty) return s.checkinDescansoTempo(time);
   return s.checkinDescansoTempoCom(time, ctx);
 }
+
+/// Carga e reps da **última** série registrada na sessão anterior deste exercício
+/// (a de maior número). Nula quando não há nada útil para repetir.
+({double? cargaKg, int? reps})? ultimaVezDoExercicio(List<ExecucaoSerie> anteriores) {
+  if (anteriores.isEmpty) return null;
+  final ultima = anteriores.reduce((a, b) => b.numero > a.numero ? b : a);
+  final reps = int.tryParse(ultima.repeticoes?.trim() ?? '');
+  final carga = (ultima.cargaKg ?? 0) > 0 ? ultima.cargaKg : null;
+  if (carga == null && reps == null) return null;
+  return (cargaKg: carga, reps: reps);
+}
+

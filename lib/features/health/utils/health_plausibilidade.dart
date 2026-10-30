@@ -7,6 +7,26 @@ import '../data/health_repository.dart';
 bool caloriasPlausiveis({required int passos, required double kcalAtivas}) =>
     !(passos > 2000 && kcalAtivas < passos * 0.02);
 
+/// A fonte dos dados é um relógio ("Apple Watch de Ana", "Galaxy Watch5", "Garmin"…).
+bool fonteEhRelogio(String fonte) {
+  final f = fonte.toLowerCase();
+  return const ['watch', 'relógio', 'relogio', 'wear os', 'garmin', 'fitbit', 'amazfit', 'polar', 'coros', 'whoop']
+      .any(f.contains);
+}
+
+/// Texto de apoio do cartão de calorias. Com relógio e sem energia ativa o problema
+/// não é "falta relógio": é a permissão ou o relógio fora do pulso.
+String apoioDasCalorias({
+  required int passos,
+  required double kcal,
+  required bool fonteEhRelogio,
+  required String semDadosHoje,
+}) {
+  if (caloriasPlausiveis(passos: passos, kcalAtivas: kcal) && kcal >= 1) return 'Até agora';
+  if (fonteEhRelogio) return 'Sem energia ativa hoje';
+  return passos > 2000 ? 'Precisa de um relógio' : semDadosHoje;
+}
+
 /// 5124 vira "5.124".
 String milhar(int n) {
   final texto = n.abs().toString();

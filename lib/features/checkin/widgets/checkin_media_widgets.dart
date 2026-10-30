@@ -320,11 +320,13 @@ class _CheckinExerciseVideoPreviewState
                 (context, constraints) => Container(
                   color: Colors.black,
                   width: double.infinity,
-                  height: checkinMediaAltura(
-                    largura: constraints.maxWidth,
-                    alturaTela: MediaQuery.sizeOf(context).height,
-                    aspectRatio: video.aspectRatio,
-                  ),
+                  height: constraints.hasBoundedHeight
+                      ? constraints.maxHeight
+                      : checkinMediaAltura(
+                        largura: constraints.maxWidth,
+                        alturaTela: MediaQuery.sizeOf(context).height,
+                        aspectRatio: video.aspectRatio,
+                      ),
                   child: FittedBox(
                     fit: BoxFit.contain,
                     child: SizedBox(
@@ -389,7 +391,7 @@ class CheckinVideoPlayButton extends StatelessWidget {
         message: label,
         excludeFromSemantics: true,
         child: Material(
-          color: Colors.black.withValues(alpha: 0.42),
+          color: Colors.black.withValues(alpha: 0.28),
           shape: const CircleBorder(),
           child: InkWell(
             customBorder: const CircleBorder(),

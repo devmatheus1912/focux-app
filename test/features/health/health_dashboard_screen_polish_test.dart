@@ -25,7 +25,9 @@ void main() {
     expect(screen, contains('SaudeConexaoCard'));
     expect(screen, contains('SaudeDesconectadoView'));
     expect(screen, contains('Como calculamos'));
-    expect(screen, contains('saudeAtualizarLabel'));
+    // Atualizar é puxar para baixo: o botão de sync do topo saiu.
+    expect(screen, isNot(contains('saudeAtualizarLabel')));
+    expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('saudeSyncSoftError'));
     expect(screen, contains('_syncSoftError'));
     expect(screen, contains('_SaudeSoftSyncBanner'));
@@ -35,8 +37,7 @@ void main() {
     expect(screen, contains('_comoLiberar'));
     expect(screen, contains('TargetPlatform.iOS'));
     expect(screen, contains('FxErrorState'));
-    expect(screen, contains('ShellHeaderIconButton'));
-    expect(screen, contains('refresh-cw'));
+    expect(screen, isNot(contains('refresh-cw')));
     expect(screen, contains('_refreshing'));
     expect(screen, contains('_alterarCompartilhamento'));
     expect(screen, isNot(contains('FxHubFreshness')));

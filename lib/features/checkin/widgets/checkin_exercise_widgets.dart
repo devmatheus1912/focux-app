@@ -212,17 +212,16 @@ class CheckinSerieCard extends StatelessWidget {
         if (m.maxHeight < alturaMinimaMidia) {
           return Center(child: _botaoVerVideo(context));
         }
-        return Center(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxHeight: m.maxHeight),
-            child: FxStripCard(
-              glowStrength: 0.04,
-              accent: brand,
-              padding: EdgeInsets.zero,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(TokensStrip.rCard),
-                child: _inlineDemoPreview(ee: ee, brand: brand, dark: dark),
-              ),
+        // A sobra de altura vai para a mídia, nunca para faixas vazias.
+        return SizedBox(
+          height: m.maxHeight,
+          child: FxStripCard(
+            glowStrength: 0.04,
+            accent: brand,
+            padding: EdgeInsets.zero,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(TokensStrip.rCard),
+              child: _inlineDemoPreview(ee: ee, brand: brand, dark: dark),
             ),
           ),
         );
@@ -240,17 +239,14 @@ class CheckinSerieCard extends StatelessWidget {
       carga: checkinCargaLabel(ee.proximaCargaKg ?? ee.cargaKg),
       descansoSegundos: ee.descansoSegundos,
     );
-    final previous = _previousLine(s, ee);
+    final ultima = ultimaVezDoExercicio(ee.seriesAnteriores);
     final trocarHint = checkinTrocarExercicioHint(
       s,
       index: index,
       total: total,
     );
     final dots = _dots(ee);
-    final kpi =
-        ee.proximaSeriePapel == 'AQUECIMENTO'
-            ? 'Aquecimento · ${checkinSerieKpiLabel(ee.seriesFeitas, ee.series)}'
-            : checkinSerieKpiLabel(ee.seriesFeitas, ee.series);
+    final aquecimento = ee.proximaSeriePapel == 'AQUECIMENTO';
 
     return FxStripCard(
       accent: brand,
@@ -274,10 +270,8 @@ class CheckinSerieCard extends StatelessWidget {
                     ee.exercicioNome,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: FocuxHubTypography.pageTitle(
-                      context,
-                      color: chrome.ink,
-                    ),
+                    style: FocuxHubTypography.cardTitle(color: chrome.ink)
+                        .copyWith(fontSize: 20, height: 1.2),
                   ),
                 ),
               ),
@@ -300,29 +294,27 @@ class CheckinSerieCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: TokensStrip.s2),
+          // As bolinhas são o único indicador de progresso (o "0/4" repetia).
           Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(
-                kpi,
-                style: FocuxHubTypography.metric(
-                  color: brand,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w800,
-                ).copyWith(
-                  height: 1.05,
-                  fontFeatures: const [FontFeature.tabularFigures()],
+              if (aquecimento) ...[
+                Text(
+                  s.checkinAquecimento,
+                  style: FocuxHubTypography.bodyMuted(color: brand),
                 ),
-              ),
-              if (dots.isNotEmpty) ...[
-                const SizedBox(width: TokensStrip.s3),
-                Expanded(
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: FxSetDots(series: dots, accent: brand),
-                  ),
-                ),
+                const SizedBox(width: TokensStrip.s2),
               ],
+              // O leitor de tela ouve "Série N de M" mesmo quando não há bolinhas.
+              Semantics(
+                label: s.checkinSerieDe(
+                  (ee.seriesFeitas + 1).clamp(1, ee.series ?? dots.length.clamp(1, 99)),
+                  ee.series ?? dots.length,
+                ),
+                excludeSemantics: true,
+                child: dots.isEmpty
+                    ? const SizedBox(height: 1)
+                    : FxSetDots(series: dots, accent: brand),
+              ),
             ],
           ),
           const SizedBox(height: TokensStrip.s2),
@@ -330,11 +322,21 @@ class CheckinSerieCard extends StatelessWidget {
             contextLine,
             style: FocuxHubTypography.bodyMuted(color: chrome.mute),
           ),
-          if (previous != null)
-            Text(
-              previous,
-              style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+          if (ultima != null) ...[
+            const SizedBox(height: TokensStrip.s2),
+            FxTonalButton(
+              label: s.checkinUltimaVezChip(_resumoUltimaVez(s, ultima)),
+              icon: Icons.history_rounded,
+              compact: true,
+              onPressed: onEditarCarga == null && onEditarReps == null
+                  ? null
+                  : () {
+                      HapticFeedback.selectionClick();
+                      if (ultima.cargaKg != null) onEditarCarga?.call(ultima.cargaKg!);
+                      if (ultima.reps != null) onEditarReps?.call(ultima.reps!);
+                    },
             ),
+          ],
         ],
       ),
     );
@@ -407,14 +409,10 @@ class CheckinSerieCard extends StatelessWidget {
     return cargaCurta ?? (temReps ? '$reps reps' : null);
   }
 
-  static String? _previousLine(S s, ExecucaoExercicio ee) {
-    final parts = <String>[
-      if (ee.seriesFeitasAnterior != null)
-        s.checkinNSeries(ee.seriesFeitasAnterior!),
-      if (checkinCargaLabel(ee.cargaAnteriorKg) != null)
-        checkinCargaLabel(ee.cargaAnteriorKg)!,
-    ];
-    if (parts.isEmpty) return null;
-    return s.checkinUltimaVez(parts.join(' · '));
+  static String _resumoUltimaVez(S s, ({double? cargaKg, int? reps}) u) {
+    final carga = u.cargaKg == null ? null : checkinCargaLabel(u.cargaKg);
+    if (carga != null && u.reps != null) return '$carga × ${u.reps}';
+    return carga ?? s.checkinNReps(u.reps!);
   }
+
 }

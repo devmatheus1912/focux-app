@@ -146,6 +146,8 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
     try {
       final auth = await _resolveCheckAuthorization();
       if (auth) {
+        // Só no app de verdade (os testes injetam a autorização).
+        if (widget.checkAuthorization == null) await HealthService.pedirTiposNovosSeMudou();
         await _loadData();
       } else {
         if (mounted) {
@@ -402,6 +404,25 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
     });
   }
 
+  /// "FC em repouso × FC média do dia": o número que mais confunde.
+  Future<void> _explicarFc({required double fcRepouso, required double media}) {
+    return showFxHelpSheet(
+      context,
+      title: 'Frequência cardíaca',
+      subtitle: 'Dois números diferentes, para coisas diferentes.',
+      tips: [
+        FxHelpTip(
+          fcRepouso > 0 ? 'Em repouso: ${fcRepouso.round()} bpm' : 'Em repouso: sem leitura hoje',
+          'Medida parado, em geral ao acordar. Entra na sua nota de prontidão e é comparada com a sua própria média.',
+        ),
+        FxHelpTip(
+          media > 0 ? 'Média do dia: ${media.round()} bpm' : 'Média do dia: sem leitura',
+          'Todas as leituras de hoje, inclusive treino e caminhada. Sobe quando você se mexe; não entra na nota.',
+        ),
+      ],
+    );
+  }
+
   Future<void> _gerenciarConexao() async {
     final escolha = await showFxGroupedActionSheet<String>(
       context,
@@ -433,7 +454,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
   String _subtitulo() {
     final quando = _fetchedAt;
     if (quando == null) {
-      return _authorized ? rotuloPlataformaSaude() : 'Conecte o wearable';
+      return _authorized ? rotuloPlataformaSaude() : 'Conecte o seu relógio ou o app Saúde';
     }
     final hora =
         '${quando.hour.toString().padLeft(2, '0')}:${quando.minute.toString().padLeft(2, '0')}';
@@ -458,13 +479,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
           subtitle: _subtitulo(),
           showBack: false,
           actions: [
-            if (_authorized && !_loading)
-              ShellHeaderIconButton(
-                icon: 'refresh-cw',
-                tooltip: saudeAtualizarLabel(),
-                onTap: _refreshing ? null : _refreshDashboard,
-              ),
-            if (_authorized && !_loading) SizedBox(width: FxHelpChrome.gap),
+            // Atualizar é puxar a tela para baixo (o botão repetia isso).
             FxHelpIconButton(
               tooltip: 'Como usar Saúde',
               onTap: () {
@@ -488,7 +503,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
                     ),
                     const FxHelpTip(
                       'Atualizar',
-                      'O ícone de sync no topo relê o relógio e envia ao servidor.',
+                      'Puxe a tela para baixo: relemos o relógio e enviamos ao servidor.',
                     ),
                     FxHelpTip(
                       'Desconectar',
@@ -648,6 +663,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
                             : (s.avgHeartRate > 0
                                 ? 'Inclui treino e caminhada'
                                 : saudeSemBatimento),
+                    onTap: () => _explicarFc(fcRepouso: fcRepouso, media: s.avgHeartRate),
                   ),
                 ),
                 const SizedBox(width: TokensStrip.s2),
@@ -661,12 +677,16 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
                             : '--',
                     unidade:
                         caloriasOk && s.caloriesBurned >= 1 ? 'kcal' : null,
-                    apoio:
-                        caloriasOk && s.caloriesBurned >= 1
-                            ? 'Até agora'
-                            : (s.steps > 2000
-                                ? 'Precisa de um relógio'
-                                : saudeSemDadosHoje),
+                    apoio: apoioDasCalorias(
+                      passos: s.steps,
+                      kcal: s.caloriesBurned,
+                      fonteEhRelogio: fonteEhRelogio(s.fonte),
+                      semDadosHoje: saudeSemDadosHoje,
+                    ),
+                    // Com relógio e sem energia ativa, o caminho é a permissão.
+                    onTap: !(caloriasOk && s.caloriesBurned >= 1) && fonteEhRelogio(s.fonte)
+                        ? _gerenciarConexao
+                        : null,
                   ),
                 ),
               ],
@@ -686,13 +706,15 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
             ),
           ),
           const SizedBox(height: TokensStrip.s6),
-          Center(
-            child: Text(
-              'Passos não entram na nota: medem atividade, não recuperação.',
-              textAlign: TextAlign.center,
-              style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+          // Só faz sentido falar da nota quando ela existe.
+          if (recovery?.recoveryScore != null)
+            Center(
+              child: Text(
+                'Passos não entram na nota: medem atividade, não recuperação.',
+                textAlign: TextAlign.center,
+                style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+              ),
             ),
-          ),
           const SizedBox(height: TokensStrip.s4),
         ],
       ),

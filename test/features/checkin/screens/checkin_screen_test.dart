@@ -51,7 +51,7 @@ void main() {
 
     await tester.tap(find.text('Pular descanso'));
     await tester.pump();
-    expect(find.text('1/3'), findsOneWidget);
+    expect(_rotuloDaSerie('Série 2 de 3'), findsOneWidget);
   });
 
   testWidgets('conexão volta: fila reenvia e o aviso some', (tester) async {
@@ -104,7 +104,7 @@ void main() {
 
     expect(repo.registros, 1);
     expect(await fila.ler(), isEmpty);
-    expect(find.text('1/3'), findsOneWidget);
+    expect(_rotuloDaSerie('Série 2 de 3'), findsOneWidget);
   });
 
   testWidgets('finalizar com série pendente avisa e não conclui', (
@@ -250,3 +250,8 @@ void main() {
     expect(size.width, greaterThanOrEqualTo(checkinFeedbackChipMin));
   });
 }
+
+/// O progresso da série (bolinhas) com o rótulo de acessibilidade, mesmo atrás de uma folha.
+Finder _rotuloDaSerie(String rotulo) => find.byWidgetPredicate(
+  (w) => w is Semantics && w.properties.label == rotulo,
+);
