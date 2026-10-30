@@ -36,6 +36,14 @@ void main() {
     );
   });
 
+  test('"Já fiz" é treino: aparece, sem séries', () {
+    final view = formatChatSystemEvent(
+      'Treino registrado: Treino B. Feito sem registrar séries. Responda no chat.',
+    );
+    expect(view.tipo, ChatEventoTipo.treino);
+    expect(view.threadLabel, 'Treino B · sem registrar séries');
+  });
+
   test('evolução conta os exercícios e guarda as linhas', () {
     final view = formatChatSystemEvent(
       'Boa, Julio! Você evoluiu neste treino.\n\n'

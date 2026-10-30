@@ -31,6 +31,11 @@ final _treinoRegistrado = RegExp(
   caseSensitive: false,
 );
 
+final _feitoSemSeries = RegExp(
+  r'^treino\s+registrado:\s*(.+?)\.\s*feito\s+sem\s+registrar',
+  caseSensitive: false,
+);
+
 final _sessaoVazia = RegExp(r'sem\s+s[eé]ries\s+registradas', caseSensitive: false);
 
 final _evoluiu = RegExp(r'voc[eê]\s+evoluiu', caseSensitive: false);
@@ -45,6 +50,15 @@ ChatSystemEventView formatChatSystemEvent(String raw) {
   final text = formatChatTextForDisplay(raw);
   if (text.isEmpty) {
     return const ChatSystemEventView(title: 'Atualização do treino');
+  }
+
+  final jaFiz = _feitoSemSeries.firstMatch(text);
+  if (jaFiz != null) {
+    return ChatSystemEventView(
+      title: 'Treino registrado',
+      detail: '${jaFiz.group(1)!.trim()} · sem registrar séries',
+      tipo: ChatEventoTipo.treino,
+    );
   }
 
   if (_sessaoVazia.hasMatch(text)) {
