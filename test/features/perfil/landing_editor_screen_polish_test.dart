@@ -18,6 +18,6 @@ void main() {
     expect(screen, contains('Entrevista'));
     expect(screen, contains('FloatingLabelBehavior.always'));
     expect(screen, contains('minLines: 2'));
-    expect(screen, contains('maxLines: 6'));
+    expect(screen, contains('maxLines: 4'));
   });
 }

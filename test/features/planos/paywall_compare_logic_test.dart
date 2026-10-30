@@ -50,7 +50,7 @@ void main() {
     expect(view.rows.any((r) => r.feature.contains('✦')), isFalse);
   });
 
-  test('managementMode no plano atual esconde billing e muda subtítulo', () {
+  test('managementMode no plano atual esconde billing', () {
     final view = buildPaywallCompareView(
       selected: SubscriptionPlan.ENTERPRISE,
       current: SubscriptionPlan.ENTERPRISE,
@@ -58,9 +58,5 @@ void main() {
     );
     expect(view.headline, 'Seu plano Enterprise');
     expect(view.showBillingToggle, isFalse);
-    expect(
-      view.subtitle,
-      'Status, cobrança na loja e cancelamento — sem vitrine de upgrade.',
-    );
   });
 }

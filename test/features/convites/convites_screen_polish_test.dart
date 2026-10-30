@@ -10,10 +10,7 @@ void main() {
     expect(screen, contains('fxScreenA11yScope'));
     expect(screen, contains('FxShellScaffold'));
     expect(screen, contains('FxHelpIconButton'));
-    expect(screen, contains('OperationalMetricTile'));
     expect(screen, contains('FxLiquidPrimaryButton'));
-    expect(screen, contains('FxActionChip'));
-    expect(screen, contains('FxEmptyState'));
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, contains('FxErrorState'));
     expect(screen, contains('SkeletonList'));

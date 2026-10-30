@@ -14,21 +14,23 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
-import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_motion.dart';
-import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../../core/widgets/operational_metric_tile.dart';
-import '../../../core/widgets/fx_action_chip.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../data/convite_repository.dart';
 import '../providers/convite_provider.dart';
 import '../utils/convite_display.dart';
 import '../widgets/convites_help_sheet.dart';
+import '../widgets/convite_cards.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../perfil/data/perfil_repository.dart';
+import '../../perfil/providers/perfil_provider.dart';
+import '../../perfil/widgets/perfil_public_link_sheet.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
 
 class ConvitesScreen extends ConsumerStatefulWidget {
@@ -50,6 +52,8 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
   DateTime? _fetchedAt;
   Timer? _countdownTimer;
   var _viewTracked = false;
+
+  PerfilPersonal? get _perfil => ref.watch(perfilProvider).value;
 
   @override
   void initState() {
@@ -230,7 +234,7 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
     await copySensitiveToClipboard(_shareLink);
     if (!mounted) return;
     AnalyticsService.instance.track(ProductEvents.convitesCopied);
-    FeedbackHelper.showSuccess(context, 'Link copiado. Some em 1 min.');
+    FeedbackHelper.showSuccess(context, 'Link copiado.');
   }
 
   Future<void> _compartilharWhatsApp() async {
@@ -321,66 +325,49 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
                               return Column(
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
-                                  if (!ativo)
-                                    SizedBox(
-                                      height: 280,
-                                      child: FxEmptyState(
-                                        icon: 'users',
-                                        title: 'Nenhum convite ativo',
-                                        subtitle:
-                                            'Gere um link de um uso. O aluno cria a conta e troca a senha no primeiro acesso.',
+                                  if (linkVisivel)
+                                    ConviteLinkCard(
+                                      mensagem: conviteShareMessage(
+                                        personalNome: _personalNome,
+                                        shareLink: _shareLink,
                                       ),
-                                    )
-                                  else ...[
-                                    OperationalMetricTile(
-                                      label: 'Link vigente',
-                                      value: conviteRemainingLabel(
+                                      validade: conviteRemainingLabel(
                                         _convite!.expiraEm,
                                         DateTime.now(),
                                       ),
-                                      hint: conviteVigenteHint(
-                                        linkVisivel: linkVisivel,
-                                        email: _convite!.email,
+                                      email: _convite!.email,
+                                      onWhatsapp: _compartilharWhatsApp,
+                                      onCopiar: _copiar,
+                                    )
+                                  else if (ativo)
+                                    ConviteAtivoCard(
+                                      validade: conviteRemainingLabel(
+                                        _convite!.expiraEm,
+                                        DateTime.now(),
                                       ),
-                                      color: primary,
-                                      isDark: isDark,
+                                      email: _convite!.email,
+                                    )
+                                  else
+                                    const ConvitePassos(),
+                                  if (!linkVisivel) ...[
+                                    const SizedBox(height: TokensStrip.s4),
+                                    Semantics(
+                                      label: conviteEmailLabel,
+                                      child: TextField(
+                                        controller: _emailCtrl,
+                                        enabled: !_generating,
+                                        keyboardType: TextInputType.emailAddress,
+                                        autocorrect: false,
+                                        textInputAction: TextInputAction.done,
+                                        decoration: FxInputDeco.build(
+                                          context,
+                                          conviteEmailLabel,
+                                          icon: Icons.alternate_email_rounded,
+                                          hint: conviteEmailHint,
+                                        ),
+                                      ),
                                     ),
-                                    if (linkVisivel) ...[
-                                      const SizedBox(height: TokensStrip.s4),
-                                      Wrap(
-                                        spacing: TokensStrip.s2,
-                                        runSpacing: TokensStrip.s2,
-                                        children: [
-                                          FxActionChip(
-                                            label: 'Copiar',
-                                            accent: primary,
-                                            isDark: isDark,
-                                            onPressed: _copiar,
-                                          ),
-                                          FxActionChip(
-                                            label: 'WhatsApp',
-                                            accent: primary,
-                                            isDark: isDark,
-                                            onPressed: _compartilharWhatsApp,
-                                          ),
-                                        ],
-                                      ),
-                                    ],
                                   ],
-                                  const SizedBox(height: TokensStrip.s4),
-                                  TextField(
-                                    controller: _emailCtrl,
-                                    enabled: !_generating,
-                                    keyboardType: TextInputType.emailAddress,
-                                    autocorrect: false,
-                                    textInputAction: TextInputAction.done,
-                                    decoration: FxInputDeco.build(
-                                      context,
-                                      conviteEmailLabel,
-                                      icon: Icons.alternate_email_rounded,
-                                      hint: conviteEmailHint,
-                                    ),
-                                  ),
                                   if (_error != null) ...[
                                     const SizedBox(height: TokensStrip.s4),
                                     FxErrorState(
@@ -389,6 +376,18 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
                                       title: 'Não gerou',
                                       message: _error!,
                                       onRetry: _gerar,
+                                    ),
+                                  ],
+                                  if (_perfil case final perfil?) ...[
+                                    const SizedBox(height: TokensStrip.s3),
+                                    FxSatelliteListTile(
+                                      title: S.of(context).conviteJaTemApp,
+                                      titleCase: false,
+                                      onTap:
+                                          () => showPerfilCodigoSheet(
+                                            context,
+                                            perfil: perfil,
+                                          ),
                                     ),
                                   ],
                                 ],
@@ -409,23 +408,33 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
                           ),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              if (ativo)
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                    bottom: TokensStrip.s2,
-                                  ),
-                                  child: FxTonalButton(label: _revoking ? 'Revogando…' : 'Revogar link', onPressed: _revoking || _generating
-                                            ? null
-                                            : _revogar, compact: true),
+                              if (linkVisivel)
+                                FxTonalButton(
+                                  label: ativo ? 'Gerar outro link' : 'Gerar link',
+                                  expanded: true,
+                                  onPressed:
+                                      _generating || _revoking ? null : _gerar,
+                                )
+                              else
+                                FxLiquidPrimaryButton(
+                                  label: ativo ? 'Gerar outro link' : 'Gerar link',
+                                  loading: _generating,
+                                  loadingLabel: 'Gerando…',
+                                  onPressed:
+                                      _generating || _revoking ? null : _gerar,
                                 ),
-                              FxLiquidPrimaryButton(
-                                label: ativo ? 'Gerar novo link' : 'Gerar link',
-                                loading: _generating,
-                                loadingLabel: 'Gerando…',
-                                onPressed:
-                                    _generating || _revoking ? null : _gerar,
-                              ),
+                              if (ativo) ...[
+                                const SizedBox(height: TokensStrip.s2),
+                                FxTonalButton(
+                                  label: _revoking ? 'Revogando…' : 'Revogar link',
+                                  danger: true,
+                                  compact: true,
+                                  onPressed:
+                                      _revoking || _generating ? null : _revogar,
+                                ),
+                              ],
                             ],
                           ),
                         ),

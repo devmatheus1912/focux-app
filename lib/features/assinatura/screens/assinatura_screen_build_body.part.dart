@@ -2,6 +2,7 @@ part of 'assinatura_screen.dart';
 
 extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
   Widget buildPaywallPlansScroll({
+    required bool gestao,
     required List<Plano> planosList,
     required SubscriptionPlan currentPlan,
     required Color ink,
@@ -26,7 +27,7 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
         icon: 'dollar-sign',
         title: 'Planos em sincronização',
         subtitle:
-            'Atualize em instantes — o Pro destrava cobrança PIX, IA e landing pública.',
+            'Tente de novo em instantes.',
         action: FxEmptyAction(
           label: 'Atualizar',
           onTap: () {
@@ -82,6 +83,58 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
               iaRestantes: meFeatures.iaRestantes,
             );
 
+    if (gestao) {
+      final s = S.of(context);
+      final proximo = paywallNextTier;
+      final loja = subscriptionUsesNativeStore;
+      return RefreshIndicator(
+        onRefresh: () async {
+          ref.invalidate(paywallHomeProvider);
+          await ref.read(paywallHomeProvider.future);
+        },
+        child: AssinaturaGestaoView(
+          planoNome: PaywallCatalog.displayPlanName(currentPlan),
+          usos: [
+            if (meFeatures != null) ...[
+              (
+                rotulo: s.assinaturaUsoAlunos,
+                usado: meFeatures.alunosAtivos,
+                limite: meFeatures.limiteAlunos,
+              ),
+              if ((meFeatures.limiteIaMensal ?? 0) > 0)
+                (
+                  rotulo: s.assinaturaUsoIa,
+                  usado: meFeatures.iaUsadaMes,
+                  limite: meFeatures.limiteIaMensal,
+                ),
+            ],
+          ],
+          inclusos: paywallInclusos(
+            vitrine?.rowsFor(currentPlan) ??
+                (currentPlan == SubscriptionPlan.ENTERPRISE
+                    ? PaywallCatalog.comparisonFreeVsEnterprise
+                    : PaywallCatalog.comparisonFreeVsPro),
+          ),
+          gerenciarLabel: 'Gerenciar assinatura na loja',
+          onGerenciar: loja && !_loadingCheckout ? _openSubscriptionManagement : null,
+          onRestaurar: loja ? _restorePurchases : null,
+          onTermos:
+              () => _showAssinaturaTermosSheet(
+                context,
+                mute: mute,
+                primary: primary,
+                showStoreBillingNote: loja,
+                restoring: _restoringPurchases,
+                onRestore: loja ? _restorePurchases : null,
+              ),
+          superiorNome:
+              proximo == null ? null : PaywallCatalog.displayPlanName(proximo),
+          onSuperior: proximo == null ? null : () => _selectPlan(proximo),
+          onCancelar: () => context.push('/cancel-save'),
+        ),
+      );
+    }
+
     final storeOk = kIsWeb || !subscriptionUsesNativeStore || _storeAvailable;
     final managingCurrent = managementMode && selPlan == currentPlan;
     final showBilling =
@@ -90,6 +143,12 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
         subscriptionUsesNativeStore &&
         storeOk &&
         !managingCurrent;
+
+    final linhas =
+        vitrine?.rowsFor(selPlan) ??
+        (selPlan == SubscriptionPlan.ENTERPRISE
+            ? PaywallCatalog.comparisonFreeVsEnterprise
+            : PaywallCatalog.comparisonFreeVsPro);
 
     return RefreshIndicator(
       onRefresh: () async {
@@ -131,11 +190,7 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
                       plans: tabPlans,
                       currentPlan: currentPlan,
                       selectedPlan: selPlan,
-                      comparisonRows:
-                          vitrine?.rowsFor(selPlan) ??
-                          (selPlan == SubscriptionPlan.ENTERPRISE
-                              ? PaywallCatalog.comparisonFreeVsEnterprise
-                              : PaywallCatalog.comparisonFreeVsPro),
+                      comparisonRows: _compararTudo ? linhas : paywallLinhasDecisivas(linhas),
                       billingPeriod: _billingPeriod,
                       onSelectPlan: _selectPlan,
                       onBillingPeriod:
@@ -161,6 +216,20 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
                       line: line,
                     ),
                   ),
+                  if (paywallLinhasDecisivas(linhas).length < linhas.length)
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: FxActionLink(
+                        label:
+                            _compararTudo
+                                ? S.of(context).assinaturaVerMenos
+                                : S.of(context).assinaturaVerTudo,
+                        onTap:
+                            () => setState(
+                              () => _compararTudo = !_compararTudo,
+                            ),
+                      ),
+                    ),
                   if (!_storeAvailable &&
                       !kIsWeb &&
                       subscriptionUsesNativeStore &&

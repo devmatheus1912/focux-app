@@ -73,7 +73,7 @@ void main() {
     final alunosPaid = tester.getCenter(find.text('30'));
     expect((headerPro.dx - alunosPaid.dx).abs(), lessThan(12));
 
-    // Primeira linha com ✓ é Free e Pro (Centro de Comando); a última é só Pro.
+    // Primeira linha com ✓ é Free e Pro (Aba Hoje); a última é só Pro.
     final checkDx = tester
         .getCenter(find.byIcon(Icons.check_rounded, skipOffstage: false).last)
         .dx;

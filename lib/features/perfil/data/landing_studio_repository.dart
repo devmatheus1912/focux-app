@@ -28,6 +28,12 @@ class LandingStudioRepository {
     return getState();
   }
 
+  /// Textos novos sem gravar: a página no ar não muda.
+  Future<LandingGerado> sugerir() async {
+    final r = await _dio.post('/api/personal/landing/sugerir');
+    return LandingGerado.fromJson(r.data as Map<String, dynamic>);
+  }
+
   /// Retorna estado completo quando o BE envelopa; senão só o [LandingGerado].
   Future<LandingStudioState> gerar() async {
     final r = await _dio.post('/api/personal/landing/gerar');

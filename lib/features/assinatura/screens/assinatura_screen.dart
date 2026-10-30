@@ -21,7 +21,10 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/clipboard_sensitive.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
+import '../../../core/widgets/fx_action_link.dart';
 import '../../../core/widgets/fx_empty_state.dart';
+import '../widgets/assinatura_gestao_view.dart';
+import '../../planos/paywall/paywall_compare_logic.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
@@ -135,6 +138,7 @@ class AssinaturaScreen extends ConsumerStatefulWidget {
 }
 
 class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
+  var _compararTudo = false;
   StreamSubscription<IapPurchaseEvent>? _purchaseEvents;
   final ScrollController _paywallScrollController = ScrollController();
 

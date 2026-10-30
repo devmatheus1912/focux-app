@@ -195,7 +195,7 @@ void main() {
     );
     await _settle(tester);
     expect(find.text('Quanto entrou'), findsOneWidget);
-    expect(find.text('Lançado para o mês'), findsOneWidget);
+    expect(find.text('de R\$ 600 lançados'), findsOneWidget);
     expect(find.text('Quem atrasa'), findsOneWidget);
     expect(
       find.text(
@@ -279,7 +279,7 @@ void main() {
       find.textContaining('O recebido conta pela data do pagamento'),
       findsNothing,
     );
-    expect(find.textContaining('ainda em aberto'), findsOneWidget);
+    expect(find.text('R\$ 100 a receber'), findsOneWidget);
   });
 
   testWidgets('Quem atrasa abre a lista de atrasadas', (tester) async {
@@ -332,7 +332,7 @@ void main() {
     await _settle(tester);
     await tester.tap(find.text('${meses[anterior.month]} ${anterior.year}'));
     await _settle(tester);
-    expect(find.text('R\$ 250'), findsOneWidget); // lançado do outro mês
+    expect(find.text('de R\$ 250 lançados'), findsOneWidget);
     // a coorte é do mês atual: some ao olhar outro mês
     expect(find.text('Detalhes'), findsNothing);
   });

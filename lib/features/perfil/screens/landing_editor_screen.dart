@@ -8,8 +8,13 @@ import 'package:image_picker/image_picker.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/api/media_upload_service.dart';
 import '../../../core/config/env.dart';
+import 'package:go_router/go_router.dart';
+
 import '../../../core/router/safe_navigation.dart';
-import '../../../core/theme/brand_palette.dart';
+import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/widgets/fx_home_sheet.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
@@ -22,7 +27,6 @@ import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_form_chrome.dart';
 import '../../../core/widgets/fx_help.dart';
-import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_cached_network_image.dart';
@@ -41,6 +45,7 @@ import 'landing_preview_screen.dart';
 part 'landing_editor_screen_actions.part.dart';
 part 'landing_studio_screen_entrevista.part.dart';
 part 'landing_studio_screen_revisao.part.dart';
+part 'landing_studio_secoes.part.dart';
 
 /// Landing studio v2 — S5: entrevista → gerar → revisar → publicar.
 ///
@@ -94,7 +99,6 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
   String? _heroImageUrl;
   String? _bioImageUrl;
   bool _dirty = false;
-  DateTime? _fetchedAt;
   List<LandingMetodoPasso> _metodo = const [];
   List<LandingStudioServico> _servicos = const [];
   List<LandingStudioFaq> _faq = const [];
@@ -171,7 +175,7 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
         capability: 'landingCompleta',
         requiredPlan: SubscriptionPlan.ENTERPRISE,
         child: FxFormPopGuard(
-          dirty: _dirty || _step == 1,
+          dirty: _dirty,
           onCancel: _onBack,
           child: FxShellScaffold(
             useMesh: true,
@@ -219,32 +223,11 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
                 ? null
                 : FxFormStickyBar(
                     child: _step == 1
-                        ? Row(
-                            children: [
-                              Expanded(
-                                child: FxLiquidSecondaryButton(
-                                  label: 'Entrevista',
-                                  onPressed: _busy
-                                      ? null
-                                      : () => setState(() => _step = 0),
-                                ),
-                              ),
-                              const SizedBox(width: TokensStrip.s2),
-                              Expanded(
-                                flex: 2,
-                                child: FxLiquidPrimaryButton(
-                                  label: _busy
-                                      ? 'Publicando…'
-                                      : (_publicado
-                                          ? 'Republicar'
-                                          : 'Publicar'),
-                                  loading: _busy,
-                                  loadingLabel: 'Publicando…',
-                                  onPressed:
-                                      _canPublish ? _publicar : null,
-                                ),
-                              ),
-                            ],
+                        ? FxLiquidPrimaryButton(
+                            label: _textoPublicar(S.of(context)),
+                            loading: _busy,
+                            loadingLabel: 'Publicando…',
+                            onPressed: _canPublish ? _publicar : null,
                           )
                         : FxLiquidPrimaryButton(
                             label: _busy ? 'Gerando…' : 'Gerar página',

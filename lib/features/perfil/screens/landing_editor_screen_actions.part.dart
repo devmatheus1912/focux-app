@@ -76,7 +76,6 @@ extension on _LandingEditorScreenState {
       if (!mounted) return;
       setState(() {
         _applyState(state);
-        _fetchedAt = DateTime.now();
         _loading = false;
         _error = null;
       });
@@ -201,7 +200,7 @@ extension on _LandingEditorScreenState {
     if (_heroTitle.text.trim().isEmpty || _primaryCta.text.trim().isEmpty) {
       FeedbackHelper.showWarn(
         context,
-        'Título e CTA são obrigatórios para publicar.',
+        'Título principal e texto do botão são obrigatórios.',
       );
       return;
     }
@@ -307,8 +306,8 @@ extension on _LandingEditorScreenState {
 
   Future<void> _onBack() async {
     FocusScope.of(context).unfocus();
-    if (_step == 1 && !_busy) {
-      setState(() => _step = 0);
+    if (_step == 0 && _heroTitle.text.trim().isNotEmpty && !_busy) {
+      setState(() => _step = 1);
       return;
     }
     if (_dirty) {
@@ -330,7 +329,8 @@ extension on _LandingEditorScreenState {
     return e.isReadyToGenerate && !_busy && !_loading;
   }
 
-  bool get _isProfessionalReady => LandingStudioGuidance.isProfessionalReady(
+  List<LandingPendencia> get _pendencias => landingPendencias(
+    S.of(context),
     heroImageUrl: _heroImageUrl,
     ofertaPreco: _ofertaPreco.text,
     needsProof: _needsProof,
@@ -341,33 +341,102 @@ extension on _LandingEditorScreenState {
     whatsapp: _whatsapp.text,
   );
 
-  List<String> get _publishMissing => LandingStudioGuidance.missingForPublish(
-    heroImageUrl: _heroImageUrl,
-    ofertaPreco: _ofertaPreco.text,
-    needsProof: _needsProof,
-    provaTexto: _prova.text,
-    bioImageUrl: _bioImageUrl,
-    heroTitle: _heroTitle.text,
-    primaryCta: _primaryCta.text,
-    whatsapp: _whatsapp.text,
-    podePublicar: _podePublicar,
-  );
+  /// Código ainda é o padrão: aluno e link dependem dele.
+  bool get _codigoProvisorio {
+    final slug = (_slug ?? '').trim();
+    return slug.isEmpty ||
+        slug == 'personal' ||
+        RegExp(r'^personal-\d+$').hasMatch(slug);
+  }
+
+  String _textoPublicar(S s) {
+    if (!_publicado) return s.landingPublicar;
+    return _dirty ? s.landingPublicarAlteracoes : s.landingTudoPublicado;
+  }
+
+  void _voltarParaEntrevista() => setState(() => _step = 0);
+
+  /// Altera uma lista da página e marca que há o que publicar.
+  void _mudarLista(VoidCallback mudanca) {
+    mudanca();
+    _markDirty();
+  }
+
+  Future<void> _abrirSecao(BuildContext context, LandingSecao secao) async {
+    await showFxHomeSheet<void>(
+      context,
+      isScrollControlled: true,
+      builder: (_) => _LandingSecaoFolha(secao: secao, state: this),
+    );
+    if (mounted) setState(() {});
+  }
+
+  String _resumoDaSecao(S s, LandingSecao secao) {
+    String primeira(String? t) => t?.trim().isNotEmpty == true ? t!.trim() : s.landingVazio;
+    return switch (secao) {
+      LandingSecao.capa => primeira(_heroTitle.text),
+      LandingSecao.sobre => primeira(_bio.text),
+      LandingSecao.metodo => s.landingItens(_metodo.length),
+      LandingSecao.inclui => s.landingItens(_servicos.length),
+      LandingSecao.planos => primeira(
+        [_ofertaNome.text, _ofertaPreco.text]
+            .where((t) => t.trim().isNotEmpty)
+            .join(' · '),
+      ),
+      LandingSecao.depoimentos => s.landingDepoimentosResumo,
+      LandingSecao.perguntas => s.landingItens(_faq.length),
+      LandingSecao.contato => primeira(_whatsapp.text),
+    };
+  }
+
+  /// Texto novo só desta seção; o resto continua como está.
+  Future<void> _refazerSecao(LandingSecao secao) async {
+    FocusScope.of(context).unfocus();
+    try {
+      final repo = ref.read(landingStudioRepositoryProvider);
+      await repo.saveEntrevista(_entrevistaFromFields());
+      final g = await repo.sugerir();
+      if (!mounted) return;
+      setState(() {
+        switch (secao) {
+          case LandingSecao.capa:
+            _heroTitle.text = g.heroTitle;
+            _heroSubtitle.text = g.heroSubtitle;
+            _primaryCta.text = g.primaryCta;
+          case LandingSecao.sobre:
+            _bio.text = g.bio;
+          case LandingSecao.metodo:
+            _metodo = List.of(g.metodo);
+          case LandingSecao.inclui:
+            _servicos = List.of(g.servicos);
+          case LandingSecao.perguntas:
+            _faq = List.of(g.faq);
+          case LandingSecao.contato:
+            _fechamento.text = g.fechamento;
+          case LandingSecao.planos:
+          case LandingSecao.depoimentos:
+            break;
+        }
+        _dirty = true;
+      });
+    } catch (e) {
+      if (mounted) FeedbackHelper.showError(context, friendlyError(e));
+    }
+  }
 
   bool get _canPublish {
     if (_busy || _uploadingHero || _uploadingBio) return false;
     if (!_podePublicar) return false;
+    if (_publicado && !_dirty) return false;
     return _heroTitle.text.trim().isNotEmpty &&
         _primaryCta.text.trim().isNotEmpty;
   }
 
   String get _appBarSubtitle {
-    final stepLabel = _step == 0
-        ? 'Passo 1 · Entrevista'
+    return _step == 0
+        ? 'Entrevista'
         : _publicado
-            ? 'No ar · revisar e republicar'
-            : 'Passo 2 · Revisar e publicar';
-    final fresh = FxHubFreshness.fromFetchedAt(_fetchedAt);
-    if (fresh == null || fresh.isEmpty) return stepLabel;
-    return '$stepLabel · $fresh';
+            ? 'No ar'
+            : 'Rascunho';
   }
 }

@@ -16,15 +16,6 @@ bool conviteAindaValido(DateTime? expiresAt, DateTime now) {
   return expiresAt.isAfter(now);
 }
 
-/// O link só aparece logo depois de gerar; o servidor guarda só o hash.
-String conviteVigenteHint({required bool linkVisivel, String? email}) {
-  final destino =
-      (email ?? '').trim().isEmpty ? 'Um uso' : 'Só para ${email!.trim()}';
-  return linkVisivel
-      ? '$destino. Some da área de transferência em 1 min.'
-      : '$destino. Por segurança o link só aparece ao gerar. Gere outro para reenviar.';
-}
-
 const conviteEmailLabel = 'E-mail do aluno (opcional)';
 const conviteEmailHint = 'Com e-mail, só essa pessoa consegue usar o link';
 

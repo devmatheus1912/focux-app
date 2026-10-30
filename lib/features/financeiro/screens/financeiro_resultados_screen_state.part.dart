@@ -86,14 +86,12 @@ class _FinanceiroResultadosScreenState
   }
 
   Future<void> _abrirMes() async {
-    var ops = financeiroMesOpcoes();
-    if (!ops.any((o) => o.ano == _ano && o.mes == _mes)) {
-      ops = [FinanceiroMesOpcao(ano: _ano, mes: _mes), ...ops];
-    }
+    final s = S.of(context);
+    final ops = resultadosMesOpcoes(DateTime.now());
     final selected = FinanceiroMesOpcao(ano: _ano, mes: _mes).key;
     final picked = await showFxInsetPickerSheet<String>(
       context,
-      title: S.of(context).resultadosSemMes,
+      title: s.resultadosSemMes,
       selected: selected,
       items: [
         for (final o in ops)
@@ -102,13 +100,22 @@ class _FinanceiroResultadosScreenState
     );
     if (!mounted || picked == null || picked == selected) return;
     final match = ops.where((o) => o.key == picked).firstOrNull;
-    if (match == null) return;
+    if (match != null) await _irParaMes(match.ano, match.mes);
+  }
+
+  Future<void> _irParaMes(int ano, int mes) async {
+    if (resultadosMesFuturo(ano, mes, DateTime.now())) return;
     setState(() {
-      _ano = match.ano;
-      _mes = match.mes;
+      _ano = ano;
+      _mes = mes;
       _erro = null;
     });
     if (!_mesAtual) await _carregarOutroMes();
+  }
+
+  void _andarMes(int delta) {
+    final d = DateTime(_ano, _mes + delta);
+    _irParaMes(d.year, d.month);
   }
 
   void _abrirLista(MensalidadeFiltro filtro) {
@@ -151,12 +158,17 @@ class _FinanceiroResultadosScreenState
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final home = ref.watch(financeiroHomeProvider).value;
     final resumo = _mesAtual ? home?.resumoMesAtual : _outroMes;
+    final mesVazio =
+        resumo == null ||
+        (resumo.totalPrevisto.isZero && resumo.totalRecebido.isZero);
     final zeroData =
-        !d.receitaMes.isPositive &&
-        d.vencimentosProximos.isEmpty &&
-        d.topAlunos.isEmpty &&
-        (resumo == null ||
-            (resumo.totalPrevisto.isZero && resumo.totalRecebido.isZero));
+        mesVazio &&
+        (!_mesAtual ||
+            (!d.receitaMes.isPositive &&
+                d.vencimentosProximos.isEmpty &&
+                d.topAlunos.isEmpty));
+    final titulo = financeiroMesTitulo(_mes, _ano);
+    final variacao = resultadosVariacaoPct(d.evolucaoMensal, _ano, _mes);
 
     return fxScreenA11yScope(
       label: 'Resultados do financeiro',
@@ -170,66 +182,83 @@ class _FinanceiroResultadosScreenState
           padding: const EdgeInsets.only(bottom: TokensStrip.s6),
           children: [
             _SeletorDeMes(
-              rotulo: financeiroMesTitulo(_mes, _ano),
+              rotulo: titulo,
               onTap: _abrirMes,
+              onAnterior: () => _andarMes(-1),
+              onProximo: _mesAtual ? null : () => _andarMes(1),
             ),
             if (_loadingOutroMes)
               const Padding(
                 padding: EdgeInsets.all(TokensStrip.s4),
                 child: SkeletonList(count: 3),
               )
+            else if (!_mesAtual && _erro != null)
+              DashboardErrorState(
+                chromeOnDark: isDark,
+                primary: Theme.of(context).colorScheme.primary,
+                message: _erro!,
+                onRetry: _carregarOutroMes,
+              )
             else if (zeroData)
               Padding(
                 padding: const EdgeInsets.all(FxSettingsLayout.pageInset),
                 child: FxEmptyState(
                   icon: 'coin',
-                  title: s.resultadosVazioTitulo,
-                  subtitle: s.resultadosVazioTexto,
-                  action: FxEmptyAction(
-                    label: 'Nova mensalidade',
-                    onTap: () => FinanceiroHubScope.maybeOf(
-                      context,
-                    )?.openNovaMensalidade(source: 'resultados_empty'),
-                  ),
+                  title: _mesAtual ? s.resultadosVazioTitulo : s.resultadosVazioMes(titulo),
+                  subtitle: _mesAtual ? s.resultadosVazioTexto : null,
+                  action: _mesAtual
+                      ? FxEmptyAction(
+                        label: 'Nova mensalidade',
+                        onTap: () => FinanceiroHubScope.maybeOf(
+                          context,
+                        )?.openNovaMensalidade(source: 'resultados_empty'),
+                      )
+                      : null,
                 ),
               )
             else ...[
               if (resumo != null) ...[
-                _BlocoQuantoEntrou(resumo: resumo),
-                const SizedBox(height: TokensStrip.s3),
-                _BlocoLancado(resumo: resumo),
+                _BlocoQuantoEntrou(resumo: resumo, variacaoPct: variacao),
                 const SizedBox(height: TokensStrip.s3),
                 _BlocoQuemAtrasa(
                   resumo: resumo,
                   onTap: () => _abrirLista(MensalidadeFiltro.atrasadas),
                 ),
               ],
-              if (d.vencimentosProximos.isNotEmpty) ...[
+              if (d.evolucaoMensal.isNotEmpty) ...[
+                const SizedBox(height: FxSettingsLayout.groupGap),
+                _EvolucaoChart(
+                  items: d.evolucaoMensal,
+                  isDark: isDark,
+                  ano: _ano,
+                  mes: _mes,
+                  onMes: _irParaMes,
+                ),
+              ],
+              if (_mesAtual && d.vencimentosProximos.isNotEmpty) ...[
                 const SizedBox(height: FxSettingsLayout.groupGap),
                 _FinanceiroVencimentosGroup(items: d.vencimentosProximos),
               ],
-              if (d.evolucaoMensal.isNotEmpty) ...[
-                const SizedBox(height: FxSettingsLayout.groupGap),
-                _EvolucaoChart(items: d.evolucaoMensal, isDark: isDark),
-              ],
-              if (d.topAlunos.isNotEmpty) ...[
+              if (_mesAtual && d.topAlunos.isNotEmpty) ...[
                 const SizedBox(height: FxSettingsLayout.groupGap),
                 _FinanceiroTopAlunosGroup(items: d.topAlunos),
               ],
-              const SizedBox(height: FxSettingsLayout.groupGap),
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: FxSettingsLayout.pageInset,
+              if (_mesAtual) ...[
+                const SizedBox(height: FxSettingsLayout.groupGap),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: FxSettingsLayout.pageInset,
+                  ),
+                  child: DashboardSectionHeader(title: s.resultadosSecaoPreco),
                 ),
-                child: DashboardSectionHeader(title: s.resultadosSecaoPreco),
-              ),
-              const SizedBox(height: TokensStrip.s2),
-              const Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: FxSettingsLayout.pageInset,
+                const SizedBox(height: TokensStrip.s2),
+                const Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: FxSettingsLayout.pageInset,
+                  ),
+                  child: SmartPricingCard(),
                 ),
-                child: SmartPricingCard(),
-              ),
+              ],
               if (_mesAtual && _coorte != null) ...[
                 const SizedBox(height: FxSettingsLayout.groupGap),
                 _SecaoDetalhes(

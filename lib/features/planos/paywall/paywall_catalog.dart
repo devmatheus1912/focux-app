@@ -69,7 +69,7 @@ class PaywallCatalog {
   static const List<PaywallComparisonRow> comparisonFreeVsPro = [
     PaywallComparisonRow(feature: 'Alunos', free: '3', paid: '30'),
     PaywallComparisonRow(
-      feature: 'Centro de Comando + Índice Focux',
+      feature: 'Aba Hoje + Índice Focux',
       free: '✓',
       paid: '✓',
     ),
@@ -107,7 +107,7 @@ class PaywallCatalog {
   static const List<PaywallComparisonRow> comparisonFreeVsEnterprise = [
     PaywallComparisonRow(feature: 'Alunos', free: '3', paid: '∞'),
     PaywallComparisonRow(
-      feature: 'Centro de Comando + Índice Focux',
+      feature: 'Aba Hoje + Índice Focux',
       free: '✓',
       paid: '✓',
     ),

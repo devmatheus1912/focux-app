@@ -1,159 +1,122 @@
 part of 'financeiro_resultados_screen.dart';
 
+/// Recebido de 6 meses. O mês na tela fica em destaque; tocar numa barra vai
+/// para aquele mês.
 class _EvolucaoChart extends StatelessWidget {
+  const _EvolucaoChart({
+    required this.items,
+    required this.isDark,
+    required this.ano,
+    required this.mes,
+    required this.onMes,
+  });
+
   final List<EvolucaoMensalItem> items;
   final bool isDark;
-  const _EvolucaoChart({required this.items, required this.isDark});
+  final int ano;
+  final int mes;
+  final void Function(int ano, int mes) onMes;
 
   @override
   Widget build(BuildContext context) {
     if (items.isEmpty) return const SizedBox.shrink();
-
     final ink = fxScreenInk(context);
     final mute = fxScreenMute(context);
     final primary = Theme.of(context).colorScheme.primary;
-    final primarySoft = BrandPalette.soft(primary, dark: isDark);
-    final primaryDeep = BrandPalette.deep(primary);
-    final primaryAccent = BrandPalette.accent(primary);
-
+    final trilho = BrandPalette.soft(primary, dark: isDark);
     final maxV = items.map((e) => e.recebido.cents).reduce(math.max);
-    final chartMax = maxV <= 0 ? 10000.0 : maxV.toDouble();
 
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: FxSettingsLayout.pageInset,
       ),
       child: Container(
-        padding: const EdgeInsets.fromLTRB(
-          TokensStrip.s4,
-          TokensStrip.s4,
-          TokensStrip.s4,
-          TokensStrip.s3,
-        ),
-        decoration: fxListCardDecoration(
-          context,
-          accent: primary,
-          radius: FxSettingsLayout.groupRadius,
-        ),
+        padding: const EdgeInsets.all(TokensStrip.s3),
+        decoration: fxListCardDecoration(context),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
-              children: [
-                Flexible(
-                  child: Text(
-                    'Evolução · 6 meses',
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: FocuxHubTypography.body(
-                      color: ink,
-                    ).copyWith(fontWeight: FontWeight.w600, letterSpacing: -0.2),
-                  ),
-                ),
-                const SizedBox(width: TokensStrip.s2),
-                if (items.length > 1)
-                  Builder(
-                    builder: (_) {
-                      final prev = items[items.length - 2].recebido;
-                      final curr = items.last.recebido;
-                      if (prev.isPositive) {
-                        final diff =
-                            ((curr.cents - prev.cents) / prev.cents * 100)
-                                .round();
-                        final sign = diff > 0 ? '+' : '';
-                        return Text(
-                          '$sign$diff% vs ${items[items.length - 2].mes.substring(5)}',
-                          style: FocuxHubTypography.chip(mute),
-                        );
-                      }
-                      return const SizedBox.shrink();
-                    },
-                  ),
-              ],
+            Text(
+              S.of(context).resultadosEvolucao,
+              style: FocuxHubTypography.cardTitle(color: ink),
             ),
-            const SizedBox(height: TokensStrip.s4),
+            const SizedBox(height: TokensStrip.s3),
             SizedBox(
               height: 130,
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
-                children:
-                    items.asMap().entries.map((e) {
-                      final isLast = e.key == items.length - 1;
-                      final h = (e.value.recebido.cents / chartMax).clamp(
-                        0.05,
-                        1.0,
-                      );
-
-                      final mes = e.value.mes;
-                      final label = mes.length >= 7 ? mes.substring(5) : mes;
-
-                      return Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Text(
-                              '${formatBrDecimal(e.value.recebido.cents / 100000)}k',
-                              style: TextStyle(
-                                fontSize: 9.5,
-                                color: isLast ? ink : mute,
-                                fontWeight:
-                                    isLast ? FontWeight.w600 : FontWeight.w400,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Expanded(
-                              child: Align(
-                                alignment: Alignment.bottomCenter,
-                                child: FractionallySizedBox(
-                                  heightFactor: h,
-                                  widthFactor: 0.7,
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      borderRadius: const BorderRadius.vertical(
-                                        top: Radius.circular(6),
-                                        bottom: Radius.circular(2),
+                children: [
+                  for (final item in items)
+                    Expanded(
+                      child: Builder(
+                        builder: (context) {
+                          final m = resultadosMesDoItem(item.mes);
+                          final selecionado = m?.ano == ano && m?.mes == mes;
+                          final valor = item.recebido.cents;
+                          final altura = maxV <= 0 ? 0.0 : valor / maxV;
+                          final nome = m == null
+                              ? item.mes
+                              : financeiroMesCurto(m.mes);
+                          return Semantics(
+                            button: m != null,
+                            selected: selecionado,
+                            label: '$nome, ${item.recebido.formatCompact()}',
+                            excludeSemantics: true,
+                            child: InkWell(
+                              onTap: m == null ? null : () => onMes(m.ano, m.mes),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  if (selecionado)
+                                    FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      child: Text(
+                                        item.recebido.formatCompact(),
+                                        maxLines: 1,
+                                        style: FocuxHubTypography.bodyMuted(
+                                          color: ink,
+                                          fontWeight: FontWeight.w700,
+                                        ),
                                       ),
-                                      gradient:
-                                          isLast
-                                              ? LinearGradient(
-                                                begin: Alignment.topCenter,
-                                                end: Alignment.bottomCenter,
-                                                colors:
-                                                    isDark
-                                                        ? [
-                                                          primaryAccent,
-                                                          primary,
-                                                        ]
-                                                        : [
-                                                          primary,
-                                                          primaryDeep,
-                                                        ],
-                                              )
-                                              : null,
-                                      color:
-                                          !isLast
-                                              ? (isDark
-                                                  ? mute.withValues(alpha: 0.22)
-                                                  : primarySoft)
-                                              : null,
+                                    ),
+                                  const SizedBox(height: TokensStrip.s1),
+                                  Expanded(
+                                    child: Align(
+                                      alignment: Alignment.bottomCenter,
+                                      child: FractionallySizedBox(
+                                        heightFactor: altura,
+                                        widthFactor: 0.7,
+                                        child: DecoratedBox(
+                                          decoration: BoxDecoration(
+                                            color: selecionado ? primary : trilho,
+                                            borderRadius:
+                                                const BorderRadius.vertical(
+                                                  top: Radius.circular(6),
+                                                ),
+                                          ),
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                ),
+                                  const SizedBox(height: TokensStrip.s1),
+                                  Text(
+                                    nome,
+                                    style: FocuxHubTypography.bodyMuted(
+                                      color: selecionado ? ink : mute,
+                                      fontWeight:
+                                          selecionado
+                                              ? FontWeight.w700
+                                              : FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                            const SizedBox(height: TokensStrip.s1),
-                            Text(
-                              label,
-                              style: FocuxHubTypography.chip(
-                                isLast ? ink : mute,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }).toList(),
+                          );
+                        },
+                      ),
+                    ),
+                ],
               ),
             ),
           ],
@@ -300,66 +263,101 @@ void _openAlunoOrMensalidades(
   _openMensalidades(context, source: source);
 }
 
-/// "Outubro 2026 ▾": o mês que os blocos abaixo mostram.
+/// ‹ Outubro 2026 ›: o mês que os blocos abaixo mostram.
 class _SeletorDeMes extends StatelessWidget {
-  const _SeletorDeMes({required this.rotulo, required this.onTap});
+  const _SeletorDeMes({
+    required this.rotulo,
+    required this.onTap,
+    required this.onAnterior,
+    required this.onProximo,
+  });
 
   final String rotulo;
   final VoidCallback onTap;
+  final VoidCallback onAnterior;
+
+  /// Nulo no mês atual: não há mês futuro aqui.
+  final VoidCallback? onProximo;
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        FxSettingsLayout.pageInset,
-        TokensStrip.s3,
-        FxSettingsLayout.pageInset,
-        TokensStrip.s3,
+      padding: const EdgeInsets.symmetric(
+        horizontal: TokensStrip.s2,
+        vertical: TokensStrip.s2,
       ),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: FxActionChip(
-          label: rotulo,
-          accent: Theme.of(context).colorScheme.primary,
-          isDark: Theme.of(context).brightness == Brightness.dark,
-          onPressed: onTap,
-        ),
+      child: Row(
+        children: [
+          IconButton(
+            tooltip: s.agendaMesAnterior,
+            onPressed: onAnterior,
+            icon: const Icon(Icons.chevron_left_rounded),
+          ),
+          Expanded(
+            child: Center(
+              child: FxActionChip(
+                label: rotulo,
+                accent: Theme.of(context).colorScheme.primary,
+                isDark: Theme.of(context).brightness == Brightness.dark,
+                onPressed: onTap,
+              ),
+            ),
+          ),
+          IconButton(
+            tooltip: s.agendaProximoMes,
+            onPressed: onProximo,
+            icon: const Icon(Icons.chevron_right_rounded),
+          ),
+        ],
       ),
     );
   }
 }
 
-/// Cartão com um rótulo, um número grande e linhas de apoio.
-class _BlocoNumero extends StatelessWidget {
-  const _BlocoNumero({
-    required this.rotulo,
-    required this.valor,
-    required this.apoio,
-    this.destaque = false,
-  });
+/// Destaque do mês: o que entrou, sobre o que foi lançado.
+class _BlocoQuantoEntrou extends StatelessWidget {
+  const _BlocoQuantoEntrou({required this.resumo, this.variacaoPct});
 
-  final String rotulo;
-  final String valor;
-  final List<String> apoio;
-  final bool destaque;
+  final ResumoMensal resumo;
+  final int? variacaoPct;
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     final mute = fxScreenMute(context);
     final ink = fxScreenInk(context);
+    final primary = Theme.of(context).colorScheme.primary;
+    final variacao = variacaoPct;
+    final apoio = [
+      s.resultadosDeLancado(resumo.totalPrevisto.formatCompact()),
+      if (resumo.totalEmAberto.isPositive)
+        s.resultadosAReceber(resumo.totalEmAberto.formatCompact()),
+      if (variacao != null)
+        s.resultadosVariacao('${variacao > 0 ? '+' : ''}$variacao'),
+      if (resumo.recebidoDeMesesAnteriores.isPositive)
+        s.financeiroDeMesesAnteriores(
+          resumo.recebidoDeMesesAnteriores.formatCompact(),
+        ),
+      if (resultadosRecebidoMaiorQueLancado(resumo)) s.resultadosExplicaRecebido,
+    ];
+    final valor = resumo.totalRecebido.formatCompact();
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: FxSettingsLayout.pageInset,
       ),
       child: FxStripCard(
-        emphasize: destaque,
+        emphasize: true,
         padding: const EdgeInsets.all(TokensStrip.s3),
-        semanticsLabel: '$rotulo $valor. ${apoio.join('. ')}',
+        semanticsLabel: '${s.resultadosQuantoEntrou} $valor. ${apoio.join('. ')}',
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(rotulo, style: FocuxHubTypography.chip(mute)),
-            const SizedBox(height: 6),
+            Text(
+              s.resultadosQuantoEntrou,
+              style: FocuxHubTypography.chip(mute),
+            ),
+            const SizedBox(height: TokensStrip.s1),
             FittedBox(
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
@@ -374,56 +372,23 @@ class _BlocoNumero extends StatelessWidget {
                 ),
               ),
             ),
+            const SizedBox(height: TokensStrip.s2),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(TokensStrip.s1),
+              child: LinearProgressIndicator(
+                minHeight: 6,
+                value: resultadosProgresso(resumo),
+                color: primary,
+                backgroundColor: primary.withValues(alpha: 0.12),
+              ),
+            ),
             for (final linha in apoio) ...[
-              const SizedBox(height: 4),
+              const SizedBox(height: TokensStrip.s1),
               Text(linha, style: FocuxHubTypography.bodyMuted(color: mute)),
             ],
           ],
         ),
       ),
-    );
-  }
-}
-
-class _BlocoQuantoEntrou extends StatelessWidget {
-  const _BlocoQuantoEntrou({required this.resumo});
-
-  final ResumoMensal resumo;
-
-  @override
-  Widget build(BuildContext context) {
-    final s = S.of(context);
-    return _BlocoNumero(
-      rotulo: s.resultadosQuantoEntrou,
-      valor: resumo.totalRecebido.formatCompact(),
-      destaque: true,
-      apoio: [
-        if (resumo.recebidoDeMesesAnteriores.isPositive)
-          s.financeiroDeMesesAnteriores(
-            resumo.recebidoDeMesesAnteriores.formatCompact(),
-          ),
-      ],
-    );
-  }
-}
-
-class _BlocoLancado extends StatelessWidget {
-  const _BlocoLancado({required this.resumo});
-
-  final ResumoMensal resumo;
-
-  @override
-  Widget build(BuildContext context) {
-    final s = S.of(context);
-    return _BlocoNumero(
-      rotulo: s.resultadosLancado,
-      valor: resumo.totalPrevisto.formatCompact(),
-      apoio: [
-        if (resumo.totalEmAberto.isPositive)
-          s.resultadosAindaEmAberto(resumo.totalEmAberto.formatCompact()),
-        if (resultadosRecebidoMaiorQueLancado(resumo))
-          s.resultadosExplicaRecebido,
-      ],
     );
   }
 }

@@ -109,8 +109,13 @@ void main() {
     expect(build, contains('Continuar no FREE'));
     expect(build, contains('Compras bloqueadas no aparelho'));
     expect(build, contains('managementMode'));
-    expect(build, contains("title: managementMode ? 'Assinatura' : 'Planos'"));
-    expect(build, contains("'Cancelar'"));
+    expect(build, contains("title: gestao ? 'Assinatura' : 'Planos'"));
+    expect(
+      File(
+        'lib/features/assinatura/widgets/assinatura_gestao_view.dart',
+      ).readAsStringSync(),
+      contains('onCancelar'),
+    );
     expect(build, contains('FxTonalButton('));
     expect(build, isNot(contains('Icons.cancel_outlined')));
 

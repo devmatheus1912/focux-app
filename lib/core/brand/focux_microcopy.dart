@@ -33,9 +33,6 @@ abstract final class FocuxMicrocopy {
 
   static const commandCenter = 'Centro de Comando';
   static const focuxScore = 'Índice Focux';
-  static const commandCenterPlusFocuxScore = 'Centro de Comando + Índice Focux';
-  static const commandCenterPlusFilaDoDia = 'Centro de Comando + fila do dia';
-  static const commandCenterPlusScoreCompact = 'Centro de Comando+Índice Focux';
   static const focuxScoreVisualizacao = 'Índice Focux (visualização)';
   static const focuxScoreAlertasRisco = 'Índice Focux + alertas de risco';
   static const focuxScoreMotorRetencaoIa =

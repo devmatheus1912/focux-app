@@ -243,26 +243,25 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
     final managementMode =
         currentPlan != SubscriptionPlan.FREE && !paywallHasUpgradeAbove;
 
+    // Plano pago aberto: gestão com uso real, sem rodapé de compra.
+    final gestao =
+        planos != null &&
+        currentPlan != SubscriptionPlan.FREE &&
+        selectedPlan == currentPlan &&
+        !_paymentBlocked;
+
     return FxShellScaffold(
       useMesh: true,
       appBar: FxShellAppBar(
-        title: managementMode ? 'Assinatura' : 'Planos',
+        title: gestao ? 'Assinatura' : 'Planos',
         subtitle: FxHubFreshness.fromFetchedAt(_paywallFetchedAt),
         onBack: () {
           FxKeyboardDismissScope.dismiss();
           safePopOrGo(context, '/perfil');
         },
-        actions: [
-          if (currentPlan != SubscriptionPlan.FREE)
-            Semantics(
-              button: true,
-              label: 'Cancelar assinatura',
-              child: FxTonalButton(label: 'Cancelar', onPressed: () => context.push('/cancel-save'), compact: true),
-            ),
-        ],
       ),
       bottomNavigationBar:
-          selectedBackendPlan == null
+          selectedBackendPlan == null || gestao
               ? null
               : FxContentWidthLimiter(
                 expandHeight: false,
@@ -358,7 +357,7 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
                       icon: 'dollar-sign',
                       title: 'Planos em sincronização',
                       subtitle:
-                          'Não carregamos o catálogo agora. Atualize — o Pro destrava cobrança PIX, IA e landing pública.',
+                          'Não carregamos os planos agora. Tente de novo em instantes.',
                       action: FxEmptyAction(
                         label: 'Tentar de novo',
                         onTap: () {
@@ -385,6 +384,7 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
             paywallNextTier: paywallNextTier,
             paywallHasUpgradeAbove: paywallHasUpgradeAbove,
             managementMode: managementMode,
+            gestao: gestao,
           );
         },
       ),

@@ -45,14 +45,6 @@ void main() {
     );
   });
 
-  test('conviteVigenteHint explica link oculto e e-mail preso', () {
-    expect(conviteVigenteHint(linkVisivel: true), startsWith('Um uso.'));
-    expect(
-      conviteVigenteHint(linkVisivel: false, email: 'a@b.com'),
-      allOf(startsWith('Só para a@b.com'), contains('Gere outro')),
-    );
-  });
-
   test('conviteCadastroEmailDica', () {
     expect(conviteCadastroEmailDica(null), isNull);
     expect(conviteCadastroEmailDica('  '), isNull);

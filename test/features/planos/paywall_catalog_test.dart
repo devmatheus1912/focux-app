@@ -11,7 +11,7 @@ void main() {
       ...PaywallCatalog.comparisonFreeVsEnterprise,
     ].map((r) => r.feature).join(' | ');
     expect(rotulos, isNot(contains('CRM')));
-    expect(rotulos, contains('Centro de Comando + Índice Focux'));
+    expect(rotulos, contains('Aba Hoje + Índice Focux'));
   });
 
   test('upgradeTriggers match reference', () {

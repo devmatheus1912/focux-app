@@ -417,3 +417,7 @@ String financeiroContatoSubtitle(String? observacao, String? registradoEm) {
   return '$note · $when';
 }
 
+String financeiroMesCurto(int mes) => const [
+  'jan', 'fev', 'mar', 'abr', 'mai', 'jun',
+  'jul', 'ago', 'set', 'out', 'nov', 'dez',
+][mes - 1];

@@ -63,14 +63,7 @@ String paywallCompareHeadline({
   return 'Ver ${paywallPrettyName(selected)}';
 }
 
-String paywallCompareSubtitle({
-  required SubscriptionPlan selected,
-  required SubscriptionPlan current,
-  required bool managementMode,
-}) {
-  if (managementMode && selected == current) {
-    return 'Status, cobrança na loja e cancelamento — sem vitrine de upgrade.';
-  }
+String paywallCompareSubtitle({required SubscriptionPlan selected}) {
   return PaywallCatalog.subtitleForPlan(selected);
 }
 
@@ -78,6 +71,19 @@ bool paywallCompareCellIncluded(String value) {
   final t = value.trim();
   return t.isNotEmpty && t != '—';
 }
+
+/// Só o que muda de um plano para outro, até [limite] linhas.
+List<PaywallComparisonRow> paywallLinhasDecisivas(
+  List<PaywallComparisonRow> rows, {
+  int limite = 6,
+}) => rows.where((r) => r.free.trim() != r.paid.trim()).take(limite).toList();
+
+/// O que o plano traz, em texto corrido, sem o que ele não tem.
+List<String> paywallInclusos(List<PaywallComparisonRow> rows) => [
+  for (final r in rows)
+    if (paywallCompareCellIncluded(r.paid))
+      PaywallCatalog.parseFeatureLabel(r.feature).label,
+];
 
 PaywallCompareView buildPaywallCompareView({
   required SubscriptionPlan selected,
@@ -113,11 +119,7 @@ PaywallCompareView buildPaywallCompareView({
     selected: selected,
     baseline: baseline,
     headline: paywallCompareHeadline(selected: selected, current: current),
-    subtitle: paywallCompareSubtitle(
-      selected: selected,
-      current: current,
-      managementMode: managementMode,
-    ),
+    subtitle: paywallCompareSubtitle(selected: selected),
     baselineColumnLabel: paywallTabLabel(baseline),
     selectedColumnLabel: paywallTabLabel(selected),
     rows: mapped,
