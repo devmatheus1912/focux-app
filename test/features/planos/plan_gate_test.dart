@@ -106,7 +106,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(aberto, 0);
-    expect(find.text('Desbloqueie no Enterprise'), findsOneWidget);
+    expect(find.text('Ver todos os planos'), findsOneWidget);
   });
 
   testWidgets('liberado: sem cadeado, segue direto', (tester) async {
@@ -122,7 +122,7 @@ void main() {
     await tester.tap(find.text('Abrir recurso'));
     await tester.pumpAndSettle();
     expect(aberto, 1);
-    expect(find.textContaining('Desbloqueie'), findsNothing);
+    expect(find.text('Ver todos os planos'), findsNothing);
   });
 
   testWidgets('aluno nunca vê paywall', (tester) async {
@@ -138,6 +138,6 @@ void main() {
     await tester.tap(find.text('Abrir recurso'));
     await tester.pumpAndSettle();
     expect(aberto, 0);
-    expect(find.textContaining('Desbloqueie'), findsNothing);
+    expect(find.text('Ver todos os planos'), findsNothing);
   });
 }

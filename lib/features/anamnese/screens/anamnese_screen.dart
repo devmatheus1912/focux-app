@@ -18,21 +18,18 @@ import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_help.dart';
-import '../../../core/widgets/fx_hub_header.dart';
+import '../../../core/widgets/fx_grouped_action_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/auth/providers/auth_provider.dart';
-import '../../alunos/widgets/aluno_form_choices.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../data/anamnese_repository.dart';
 import '../providers/anamnese_provider.dart';
 import '../utils/anamnese_display.dart';
 import '../utils/anamnese_pdf.dart';
 import '../widgets/anamnese_help_sheet.dart';
-import '../../../core/widgets/fx_action_chip.dart';
 
 part 'anamnese_screen_ficha.part.dart';
 
@@ -51,7 +48,6 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen> {
   bool _acting = false;
   String? _erro;
   DateTime? _fetchedAt;
-  var _secao = anamneseSecaoParq;
 
   AnamneseRepository get _repo =>
       AnamneseRepository(ref.read(apiClientProvider));
@@ -200,7 +196,6 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen> {
     if (a == null) return null;
     if (a.isNaoIniciada || a.isSolicitada) return 'Solicitar anamnese';
     if (a.isPreenchida || a.isPrecisaAtestado) return 'Marcar revisada';
-    if (a.isRevisada) return 'Pedir atualização';
     return null;
   }
 
@@ -216,15 +211,65 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen> {
         confirmLabel: 'Marcar revisada',
       );
     }
-    if (a.isRevisada) {
-      return () => _revisar(
-        status: AnamneseStatus.solicitada,
-        title: 'Pedir atualização',
-        subtitle: 'O aluno será notificado para atualizar a ficha.',
-        confirmLabel: 'Pedir atualização',
-      );
-    }
     return null;
+  }
+
+  Future<void> _abrirMenu() async {
+    final a = _anamnese;
+    if (a == null) return;
+    final acao = await showFxGroupedActionSheet<String>(
+      context,
+      titulo: 'Anamnese',
+      icone: Icons.fact_check_outlined,
+      grupos: [
+        FxActionGroup<String>(null, [
+          FxActionItem(
+            valor: 'atestado',
+            rotulo: 'Pedir atestado',
+            icone: Icons.medical_information_outlined,
+          ),
+          if (a.personalPodeRevisar)
+            FxActionItem(
+              valor: 'atualizar',
+              rotulo: 'Pedir atualização',
+              icone: Icons.refresh_rounded,
+            ),
+          FxActionItem(
+            valor: 'chat',
+            rotulo: 'Abrir chat',
+            icone: Icons.chat_bubble_outline_rounded,
+          ),
+          if (a.personalPodeRevisar)
+            FxActionItem(
+              valor: 'pdf',
+              rotulo: 'Exportar PDF',
+              icone: Icons.picture_as_pdf_outlined,
+            ),
+        ]),
+      ],
+    );
+    if (!mounted || acao == null) return;
+    switch (acao) {
+      case 'atestado':
+        await _revisar(
+          status: AnamneseStatus.precisaAtestado,
+          title: 'Pedir atestado',
+          subtitle: 'Oriente o aluno sobre o que o atestado deve cobrir.',
+          confirmLabel: 'Pedir atestado',
+          pedirAtestado: true,
+        );
+      case 'atualizar':
+        await _revisar(
+          status: AnamneseStatus.solicitada,
+          title: 'Pedir atualização',
+          subtitle: 'O aluno será notificado para atualizar a ficha.',
+          confirmLabel: 'Pedir atualização',
+        );
+      case 'chat':
+        context.push('/alunos/${widget.alunoId}/chat');
+      case 'pdf':
+        await _exportarPdf();
+    }
   }
 
   List<Widget> get _appBarActions {
@@ -234,11 +279,11 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen> {
         tooltip: 'Como usar a anamnese',
         onTap: () => showAnamneseHelpSheet(context),
       ),
-      if (a?.personalPodeRevisar == true)
-        ShellHeaderIconButton(
-          icon: 'article',
-          tooltip: 'Exportar PDF',
-          onTap: _exportarPdf,
+      if (a != null && !a.isNaoIniciada && !a.isSolicitada)
+        IconButton(
+          tooltip: 'Mais ações',
+          onPressed: _abrirMenu,
+          icon: const Icon(Icons.more_horiz_rounded),
         ),
     ];
   }
@@ -336,51 +381,8 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen> {
                 24,
               ),
               children: [
-                FxHubHeader(
-                  title: anamneseStatusLabel(a.status),
-                  subtitle: anamneseStatusSubtitle(a.status),
-                ),
-                const SizedBox(height: TokensStrip.s3),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: OperationalMetricTile(
-                        label: 'Clínico',
-                        value: anamneseClinicoResumoValue(a),
-                        hint: anamneseClinicoResumoHint(a),
-                        color: primary,
-                        isDark: isDark,
-                        dense: true,
-                        emphasis:
-                            a.parqPositivo == true || a.alertas.isNotEmpty
-                                ? OperationalMetricEmphasis.alert
-                                : OperationalMetricEmphasis.normal,
-                      ),
-                    ),
-                    const SizedBox(width: TokensStrip.s2),
-                    Expanded(
-                      child: OperationalMetricTile(
-                        label: 'Treino',
-                        value: anamneseOperacaoResumoValue(a),
-                        hint: anamneseOperacaoResumoHint(a),
-                        color: primary,
-                        isDark: isDark,
-                        dense: true,
-                        emphasis: OperationalMetricEmphasis.muted,
-                      ),
-                    ),
-                  ],
-                ),
                 _AnamneseBody(
                   anamnese: a,
-                  acting: _acting,
-                  isDark: isDark,
-                  primary: primary,
-                  alunoId: widget.alunoId,
-                  secao: _secao,
-                  onSecao: (value) => setState(() => _secao = value),
-                  onRevisar: _revisar,
                 ),
               ],
             ),

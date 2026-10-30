@@ -14,29 +14,31 @@ enum ProgressaoObjetivo {
   final String label;
 }
 
-String progressaoHubSubtitle(String alunoNome) {
-  final nome = alunoNome.trim();
-  if (nome.isEmpty) return 'Sugestão de carga, só se você pedir';
-  return '$nome · só se você pedir';
+const progressaoTitulo = 'Ajustar cargas';
+const progressaoAdicionarObservacao = 'Adicionar observação';
+const progressaoNadaMuda = 'Nada muda no treino até você aceitar.';
+const progressaoSemExecucao =
+    'Falta um treino concluído nas últimas 4 semanas para sugerir cargas.';
+
+/// Parte do objetivo do aluno; o personal pode trocar na tela.
+ProgressaoObjetivo progressaoObjetivoDoAluno(String? objetivo) {
+  final texto = objetivo?.toLowerCase() ?? '';
+  if (texto.contains('for')) return ProgressaoObjetivo.forca;
+  if (texto.contains('resist')) return ProgressaoObjetivo.resistencia;
+  return ProgressaoObjetivo.hipertrofia;
 }
 
 String progressaoStickyLabel({required bool hasResult}) =>
-    hasResult ? 'Gerar outra' : 'Gerar progressão';
+    hasResult ? 'Gerar outra' : 'Gerar sugestões';
 
 String progressaoStickyLoadingLabel() => 'Gerando…';
 
-String progressaoConfirmTitle() => 'Gerar progressão com IA?';
+String progressaoConfirmTitle() => 'Gerar sugestões de carga?';
 
 String progressaoConfirmMessage() =>
     'A IA lê o treino ativo e as últimas execuções. Nada entra no treino sem você aceitar.';
 
 String progressaoConfirmLabel() => 'Gerar';
-
-String progressaoPendingMetricHint(int count) {
-  if (count <= 0) return 'Nada pendente neste aluno';
-  if (count == 1) return '1 sugestão para revisar';
-  return '$count sugestões para revisar';
-}
 
 String progressaoPendingReviewLabel(int count) {
   if (count <= 0) return 'Revisar sugestões pendentes';

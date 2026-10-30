@@ -68,16 +68,12 @@ class _AssinaturaStickyFooter extends StatelessWidget {
   final String footnote;
   final bool enabled;
   final bool loading;
-  final bool showLegalConsent;
-  final bool isUpgrade;
   final Color? tierAccent;
   final Color ink;
   final Color mute;
   final Color primary;
   final VoidCallback onSubscribe;
   final VoidCallback onManage;
-  final VoidCallback? onRestore;
-  final bool restoringPurchases;
   final VoidCallback? onBillingDetails;
 
   const _AssinaturaStickyFooter({
@@ -87,16 +83,12 @@ class _AssinaturaStickyFooter extends StatelessWidget {
     required this.footnote,
     required this.enabled,
     required this.loading,
-    required this.showLegalConsent,
-    this.isUpgrade = false,
     this.tierAccent,
     required this.ink,
     required this.mute,
     required this.primary,
     required this.onSubscribe,
     required this.onManage,
-    this.onRestore,
-    this.restoringPurchases = false,
     this.onBillingDetails,
   });
 
@@ -221,38 +213,9 @@ class _AssinaturaStickyFooter extends StatelessWidget {
             style: FocuxHubTypography.bodyMuted(color: secondary, height: 1.35),
           ),
         ],
-        if (onRestore != null && mode == _AssinaturaCtaMode.manageStore) ...[
-          const SizedBox(height: TokensStrip.s2),
-          Semantics(
-            button: true,
-            label:
-                restoringPurchases
-                    ? S.of(context).assinaturaRestaurandoCompras
-                    : S.of(context).assinaturaRestaurarCompras,
-            child: FxLiquidSecondaryButton(
-              label: restoringPurchases
-                  ? S.of(context).assinaturaRestaurando
-                  : S.of(context).assinaturaRestaurarCompras,
-              icon: Icons.restore_rounded,
-              onPressed: restoringPurchases ? null : onRestore,
-            ),
-          ),
-        ] else if (onRestore != null)
-          FxTonalButton(label: restoringPurchases
-                  ? S.of(context).assinaturaRestaurandoCompras
-                  : S.of(context).assinaturaRestaurarCompras, onPressed: restoringPurchases ? null : onRestore, compact: true),
         if (onBillingDetails != null) ...[
           const SizedBox(height: TokensStrip.s1),
           FxTonalButton(label: 'Termos e cobrança', onPressed: onBillingDetails, compact: true),
-        ],
-        if (showLegalConsent) ...[
-          const SizedBox(height: TokensStrip.s1),
-          _PaywallLegalConsentLine(
-            ink: ink,
-            mute: mute,
-            primary: tierAccent ?? primary,
-            isUpgrade: isUpgrade,
-          ),
         ],
       ],
     );

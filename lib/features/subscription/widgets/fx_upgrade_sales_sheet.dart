@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
@@ -7,194 +8,123 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
-import '../../planos/data/plano_recurso.dart';
-import '../../planos/paywall/paywall_catalog.dart';
+import '../../assinatura/providers/assinatura_provider.dart';
+import '../../planos/paywall/paywall_price.dart';
+import '../../planos/paywall/trial_eligibility_provider.dart';
+import '../../planos/providers/plano_features_provider.dart';
 import '../models/subscription_plan.dart';
 import '../plan_entitlements.dart';
 import '../services/upgrade_prompt_cooldown.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
 
-/// Corpo de venda reutilizável (sheet Free + FeatureGate).
-class FxUpgradeSalesPanel extends StatelessWidget {
+/// Corpo de venda: ganho, três benefícios, preço real e ação. Usado em folha,
+/// tela empilhada e aba.
+class FxUpgradeSalesPanel extends ConsumerWidget {
   const FxUpgradeSalesPanel({
     super.key,
     required this.offer,
     required this.benefits,
     required this.plan,
     required this.onCta,
-    this.onDismiss,
-    this.priceAnchor,
-    this.compact = false,
+    required this.onVerPlanos,
   });
 
   final LockedOffer offer;
   final List<UpgradeSalesBenefit> benefits;
   final SubscriptionPlan plan;
   final VoidCallback onCta;
-  final VoidCallback? onDismiss;
-  final String? priceAnchor;
-  final bool compact;
+  final VoidCallback onVerPlanos;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final chrome = ShellChrome.of(context);
-    final ink = chrome.ink;
-    final mute = chrome.mute;
-    final accent = PaywallCatalog.tierAccentOnSurface(
-      plan,
-      isDark: chrome.isDark,
+    final primary = Theme.of(context).colorScheme.primary;
+    final atual =
+        ref.watch(planoFeaturesProvider).value?.plano ?? SubscriptionPlan.FREE;
+    final planos = ref.watch(paywallHomeProvider).value?.planos ?? const [];
+    final preco =
+        planos
+            .where((p) => subscriptionPlanFromApi(p.nome) == plan)
+            .firstOrNull
+            ?.precoMensal;
+    final teste = upgradeTemTeste(
+      plan: plan,
+      atual: atual,
+      elegivel: ref.watch(storeTrialEligibleProvider).value ?? false,
     );
-    final planLabel = PlanEntitlements.displayPlanName(plan);
-    final roi = PaywallCatalog.roiTagForPlan(plan);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Align(
-          alignment: Alignment.centerLeft,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            decoration: BoxDecoration(
-              color: accent.withValues(alpha: chrome.isDark ? 0.22 : 0.12),
-              borderRadius: BorderRadius.circular(999),
-              border: Border.all(
-                color: accent.withValues(alpha: chrome.isDark ? 0.45 : 0.28),
-              ),
-            ),
-            child: Text(
-              'Incluso no $planLabel',
-              style: FocuxHubTypography.bodyMuted(
-                color: accent,
-                fontWeight: FontWeight.w800,
-              ).copyWith(fontSize: 12, letterSpacing: 0.2),
-            ),
-          ),
-        ),
-        SizedBox(height: compact ? TokensStrip.s2 : TokensStrip.s3),
         Text(
           offer.headline,
-          style: FocuxHubTypography.sectionTitle(context, color: ink).copyWith(
-            fontSize: compact ? 20 : 22,
-            height: 1.15,
-            fontWeight: FontWeight.w800,
-          ),
+          style: FocuxHubTypography.pageTitle(context, color: chrome.ink),
         ),
         const SizedBox(height: TokensStrip.s2),
-        Text(
-          offer.body,
-          style: FocuxHubTypography.bodyMuted(
-            color: mute,
-            fontWeight: FontWeight.w600,
-          ).copyWith(height: 1.4),
-        ),
-        SizedBox(height: compact ? TokensStrip.s3 : TokensStrip.s4),
-        for (var i = 0; i < benefits.length; i++) ...[
-          if (i > 0) SizedBox(height: compact ? 8 : 10),
-          _BenefitRow(benefit: benefits[i], accent: accent, ink: ink, mute: mute),
+        if (atual == SubscriptionPlan.PRO &&
+            plan == SubscriptionPlan.ENTERPRISE) ...[
+          Text(
+            'Você mantém tudo do Pro e ganha isto:',
+            style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+          ),
+          const SizedBox(height: TokensStrip.s2),
         ],
-        if (priceAnchor != null || roi != null) ...[
-          SizedBox(height: compact ? TokensStrip.s3 : TokensStrip.s4),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: accent.withValues(alpha: chrome.isDark ? 0.14 : 0.08),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: accent.withValues(alpha: chrome.isDark ? 0.28 : 0.16),
-              ),
-            ),
-            child: Column(
+        for (final b in benefits.take(3))
+          Padding(
+            padding: const EdgeInsets.only(bottom: TokensStrip.s2),
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (priceAnchor != null)
-                  Text(
-                    priceAnchor!,
-                    style: FocuxHubTypography.cardTitle(color: ink).copyWith(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
-                    ),
+                Icon(Icons.check_rounded, color: primary, size: 20),
+                const SizedBox(width: TokensStrip.s2),
+                Expanded(
+                  child: Text(
+                    b.label,
+                    style: FocuxHubTypography.body(color: chrome.ink),
                   ),
-                if (roi != null) ...[
-                  if (priceAnchor != null) const SizedBox(height: 4),
-                  Text(
-                    roi,
-                    style: FocuxHubTypography.bodyMuted(
-                      color: mute,
-                      fontWeight: FontWeight.w600,
-                    ).copyWith(fontSize: 12, height: 1.35),
-                  ),
-                ],
+                ),
               ],
             ),
           ),
-        ],
-        SizedBox(height: compact ? TokensStrip.s3 : TokensStrip.s4),
+        const SizedBox(height: TokensStrip.s2),
+        Text(
+          upgradeLinhaDePreco(plan: plan, precoMensal: preco, teste: teste),
+          style: FocuxHubTypography.cardTitle(color: chrome.ink),
+        ),
+        const SizedBox(height: TokensStrip.s3),
         FxLiquidPrimaryButton(
-          label: offer.ctaLabel,
-          icon: Icons.workspace_premium_rounded,
+          label: teste ? 'Começar $kTrialDays dias grátis' : offer.ctaLabel,
+          icon: null,
           onPressed: onCta,
         ),
-        if (onDismiss != null)
-          FxTonalButton(label: 'Agora não', onPressed: onDismiss, compact: true),
+        const SizedBox(height: TokensStrip.s2),
+        FxTonalButton(
+          label: 'Ver todos os planos',
+          expanded: true,
+          onPressed: onVerPlanos,
+        ),
       ],
     );
   }
 }
 
-class _BenefitRow extends StatelessWidget {
-  const _BenefitRow({
-    required this.benefit,
-    required this.accent,
-    required this.ink,
-    required this.mute,
-  });
+bool upgradeTemTeste({
+  required SubscriptionPlan plan,
+  required SubscriptionPlan atual,
+  required bool elegivel,
+}) => elegivel && plan == kTrialPlan && atual == SubscriptionPlan.FREE;
 
-  final UpgradeSalesBenefit benefit;
-  final Color accent;
-  final Color ink;
-  final Color mute;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: accent.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(11),
-          ),
-          child: Icon(benefit.icon, size: 18, color: accent),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                benefit.label,
-                style: FocuxHubTypography.cardTitle(color: ink).copyWith(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                benefit.detail,
-                style: FocuxHubTypography.bodyMuted(
-                  color: mute,
-                  fontWeight: FontWeight.w600,
-                ).copyWith(fontSize: 12.5, height: 1.35),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
+/// Preço do catálogo; sem rede, cai só no nome do plano.
+String upgradeLinhaDePreco({
+  required SubscriptionPlan plan,
+  required double? precoMensal,
+  required bool teste,
+}) {
+  final nome = PlanEntitlements.displayPlanName(plan);
+  if (precoMensal == null || precoMensal <= 0) return 'Plano $nome';
+  final preco = '${formatPaywallBrl(precoMensal)}/mês';
+  return teste ? '$kTrialDays dias grátis, depois $preco' : '$nome · $preco';
 }
 
 /// Sheet canônico de conversão Free → Pro/Enterprise.
@@ -230,56 +160,22 @@ abstract final class FxUpgradeSalesSheet {
       featureName: featureName,
       plan: plan,
     );
-    final bodyOverride = PaywallCatalog.modalMessageFor(
-      capability: PlanoRecursoKeys.toCopyCapability(capability),
-      featureName: featureName,
-    );
-    final enriched = LockedOffer(
-      headline: offer.headline,
-      body: bodyOverride ?? offer.body,
-      ctaLabel: offer.ctaLabel,
-      targetPlan: plan,
-    );
-    final accent = PaywallCatalog.tierAccentOnSurface(
-      plan,
-      isDark: Theme.of(context).brightness == Brightness.dark,
-    );
-    final priceAnchor = switch (plan) {
-      SubscriptionPlan.ENTERPRISE => 'Enterprise · marca, loja e time',
-      SubscriptionPlan.PRO => 'Pro · a partir da assinatura mensal',
-      _ => null,
-    };
-    final planLabel = PlanEntitlements.displayPlanName(plan);
-
     await showFxHomeSheet<void>(
       context,
       builder: (ctx) {
         final isDark = Theme.of(ctx).brightness == Brightness.dark;
         return FxHomeSheetScaffold(
           isDark: isDark,
-          leading: Container(
-            width: FxHomeSheetChrome.leadingSize,
-            height: FxHomeSheetChrome.leadingSize,
-            decoration: BoxDecoration(
-              color: accent.withValues(alpha: isDark ? 0.2 : 0.12),
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: accent.withValues(alpha: isDark ? 0.4 : 0.22),
-              ),
-            ),
-            child: Icon(
-              Icons.workspace_premium_rounded,
-              color: accent,
-              size: 20,
-            ),
+          leading: Icon(
+            Icons.lock_outline_rounded,
+            color: Theme.of(ctx).colorScheme.primary,
+            size: 20,
           ),
-          title: 'Desbloqueie no $planLabel',
-          subtitle: featureName,
+          title: featureName,
           child: FxUpgradeSalesPanel(
-            offer: enriched,
+            offer: offer,
             benefits: benefits,
             plan: plan,
-            priceAnchor: priceAnchor,
             onCta: () {
               if (respectCooldown) {
                 UpgradePromptCooldown.markShown(key);
@@ -302,11 +198,12 @@ abstract final class FxUpgradeSalesSheet {
                 '/assinatura?plano=${plan.apiName}&source=$source&feature=${Uri.encodeComponent(featureName)}$capQuery',
               );
             },
-            onDismiss: () {
+            onVerPlanos: () {
               if (respectCooldown) {
                 UpgradePromptCooldown.markShown(key);
               }
               FxHomeSheetChrome.dismissAndPop(ctx);
+              context.push('/assinatura?source=$source');
             },
           ),
         );

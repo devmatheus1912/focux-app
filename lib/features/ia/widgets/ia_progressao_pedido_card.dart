@@ -89,24 +89,34 @@ class IaProgressaoPedidoCard extends StatelessWidget {
               ),
           ],
         ),
-        const SizedBox(height: TokensStrip.s4),
-        TextField(
-          controller: observacoes,
-          enabled: enabled,
-          minLines: 2,
-          maxLines: 4,
-          textCapitalization: TextCapitalization.sentences,
-          textInputAction: TextInputAction.newline,
-          onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
-          inputFormatters: [
-            LengthLimitingTextInputFormatter(progressaoObservacoesMax),
-          ],
-          style: FocuxHubTypography.body(color: ink),
-          decoration: FxInputDeco.build(
-            context,
-            progressaoObservacoesLabel,
-            hint: progressaoObservacoesHint,
-          ).copyWith(alignLabelWithHint: true),
+        const SizedBox(height: TokensStrip.s2),
+        Theme(
+          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+          child: ExpansionTile(
+            tilePadding: EdgeInsets.zero,
+            childrenPadding: EdgeInsets.zero,
+            title: Text(progressaoAdicionarObservacao, style: mutedStyle),
+            children: [
+              TextField(
+                controller: observacoes,
+                enabled: enabled,
+                minLines: 2,
+                maxLines: 4,
+                textCapitalization: TextCapitalization.sentences,
+                textInputAction: TextInputAction.newline,
+                onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
+                inputFormatters: [
+                  LengthLimitingTextInputFormatter(progressaoObservacoesMax),
+                ],
+                style: FocuxHubTypography.body(color: ink),
+                decoration: FxInputDeco.build(
+                  context,
+                  progressaoObservacoesLabel,
+                  hint: progressaoObservacoesHint,
+                ).copyWith(alignLabelWithHint: true),
+              ),
+            ],
+          ),
         ),
       ],
     );

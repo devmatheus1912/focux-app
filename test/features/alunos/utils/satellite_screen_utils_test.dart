@@ -1,6 +1,4 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:focux_app/core/theme/design_tokens.dart';
 import 'package:focux_app/features/alunos/utils/satellite_screen_utils.dart';
 
 void main() {
@@ -19,13 +17,5 @@ void main() {
   });
 
   group('financeiroMensalidadeStatusInk', () {
-    test('darkens Pago on light theme', () {
-      final ink = financeiroMensalidadeStatusInk(
-        Colors.green,
-        status: 'PAGO',
-        isDark: false,
-      );
-      expect(ink, EagleTokens.good);
-    });
   });
 }

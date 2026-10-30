@@ -330,7 +330,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
             AlunoInsetFormField(
               rotuloVisivel: true,
               controller: massaCtrl,
-              label: 'Massa magra (kg)',
+              label: 'Massa magra (%)',
               icon: Icons.fitness_center_outlined,
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,

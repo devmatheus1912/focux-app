@@ -109,7 +109,7 @@ const _modulos = [
   'Treinos',
   'Equipamentos',
   'Aderência',
-  'IA Progresso',
+  'Ajustar cargas com IA',
   'Feedback em vídeo',
   'Composição corporal',
   'Plano de sucesso',
@@ -182,7 +182,7 @@ void main() {
         ),
       ),
     );
-    expect(find.text('Confirme este valor'), findsOneWidget);
+    expect(find.text('Confira o valor'), findsOneWidget);
     expect(find.textContaining('818,0'), findsWidgets);
   });
 
@@ -197,7 +197,7 @@ void main() {
         ),
       ),
     );
-    expect(find.text('Confirme este valor'), findsNothing);
+    expect(find.text('Confira o valor'), findsNothing);
     expect(find.text('Última avaliação registrada'), findsOneWidget);
   });
 

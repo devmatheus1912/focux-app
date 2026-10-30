@@ -1,36 +1,31 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/features/onboarding/data/onboarding_repository.dart';
 import 'package:focux_app/features/onboarding/utils/onboarding_wizard_display.dart';
 
 void main() {
-  test('sticky distingue continuar e concluir', () {
-    expect(wizardStickyLabel(allDone: false), 'Continuar');
-    expect(wizardStickyLabel(allDone: true), 'Concluir');
-  });
+  OnboardingStep passo(String id, {bool feito = false}) => OnboardingStep(
+    id: id,
+    title: id,
+    description: '',
+    icon: '',
+    completed: feito,
+    actionRoute: '/',
+    estimatedMinutes: 1,
+  );
 
-  test('copy de concluir não promete apagar dados', () {
-    expect(wizardConfirmMessage(), contains('Home'));
-    expect(wizardHelpConcluirBody().toLowerCase(), isNot(contains('apaga')));
-  });
-
-  test('etapa é discreta e 1-based nos pendentes', () {
+  test('botão diz a ação do passo atual', () {
     expect(
-      wizardEtapaLabel(completedCount: 1, totalCount: 4, allDone: false),
-      'Etapa 2 de 4',
+      wizardStickyLabel(allDone: false, steps: [passo('primeiro-aluno')]),
+      'Cadastrar aluno',
     );
     expect(
-      wizardEtapaLabel(completedCount: 4, totalCount: 4, allDone: true),
-      'Etapa 4 de 4',
+      wizardStickyLabel(
+        allDone: false,
+        steps: [passo('primeiro-aluno', feito: true), passo('primeiro-treino')],
+      ),
+      'Criar treino',
     );
-    expect(
-      wizardTitlesCaption(prefix: 'Já feito:', titles: ['Perfil', 'Aluno']),
-      'Já feito: Perfil, Aluno',
-    );
-    expect(wizardTitlesCaption(prefix: 'Depois:', titles: const []), '');
+    expect(wizardStickyLabel(allDone: true, steps: const []), 'Concluir');
   });
 
-  test('sair no meio não apaga progresso', () {
-    expect(wizardLeaveTitle(), contains('Sair'));
-    expect(wizardLeaveMessage().toLowerCase(), contains('salvo'));
-    expect(wizardLeaveConfirm(), 'Sair');
-  });
 }

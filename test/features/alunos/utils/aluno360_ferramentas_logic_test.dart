@@ -258,7 +258,7 @@ void main() {
       expect(composicaoSuspeita(bf: '18,0', massaMagra: '55,0'), isFalse);
       expect(
         aluno360ComposicaoValor(bf: '818,0', massaMagra: '51,0'),
-        'Confirme este valor',
+        'Confira o valor',
       );
       expect(aluno360ComposicaoValor(bf: '18,0', massaMagra: '55,0'), 'OK');
       expect(

@@ -163,18 +163,6 @@ OperacaoStickyAction resolveOperacaoStickyAction({
   );
 }
 
-String? operacaoStatusSubtitle(
-  Aluno aluno, {
-  required bool heroShowsRisco,
-  bool compactFollowUpVisible = false,
-}) {
-  if (compactFollowUpVisible) return null;
-  if (heroShowsRisco) {
-    return 'Resumo · aderência de 30 dias e check-ins dos últimos 7 dias';
-  }
-  return 'Próximo contato: ${formatProximoContato(aluno)}';
-}
-
 /// Copy + CTA for a week with zero check-ins in the adherence spark block.
 class OperacaoAdherenceEmptyState {
   const OperacaoAdherenceEmptyState({
@@ -195,51 +183,3 @@ class OperacaoAdherenceEmptyState {
   }
 }
 
-/// Legend only when some day treinou or faltou (neutral-only week is self-evident).
-bool shouldShowOperacaoAdherenceLegend({
-  required List<AderenciaWeekPoint> points,
-}) => points.any((point) {
-  final status = resolveAderenciaDiaStatus(point);
-  return status == AderenciaDiaStatus.treinou ||
-      status == AderenciaDiaStatus.faltou;
-});
-
-OperacaoAdherenceEmptyState? resolveOperacaoAdherenceEmptyState({
-  required AderenciaWeekSummary week,
-  required Aluno360OperacaoSnapshot? operacao,
-}) {
-  if (week.points.isEmpty || week.hasAnyCheckin) return null;
-
-  final message =
-      week.resumo.trim().isNotEmpty
-          ? week.resumo.trim()
-          : 'Nenhum check-in nos últimos 7 dias.';
-
-  if (operacao?.showPrepareMessage == true) {
-    return OperacaoAdherenceEmptyState(message: message, showCheckinCta: false);
-  }
-
-  return OperacaoAdherenceEmptyState(
-    message: message,
-    hint: 'Peça um check-in com mensagem pronta.',
-    showCheckinCta: true,
-  );
-}
-
-/// Human-readable idle days for operational tiles.
-String formatDiasSemTreinoDisplay(int? dias) {
-  if (dias == null) return '—';
-  if (dias <= 0) return 'hoje';
-  return '${dias}d';
-}
-
-String formatSemTreinoOperacaoLabel(int? dias) {
-  if (dias != null && dias <= 0) return 'Último treino';
-  return 'Sem treino';
-}
-
-String semTreinoOperacaoSubtitle(int? dias) {
-  if (dias == null) return 'Ainda sem histórico no app';
-  if (dias <= 0) return 'Treinou recentemente';
-  return '$dias ${dias == 1 ? 'dia' : 'dias'} sem treinar';
-}

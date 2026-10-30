@@ -1,4 +1,3 @@
-import '../../planos/data/planos_repository.dart';
 import 'onboarding_status_data.dart';
 
 class SetupStepCatalogEntry {
@@ -6,37 +5,33 @@ class SetupStepCatalogEntry {
     required this.id,
     required this.title,
     required this.description,
+    required this.acao,
     required this.icon,
     required this.actionRoute,
     required this.estimatedMinutes,
     required this.isDone,
-    this.requiresLandingCompleta = false,
-    this.recurso,
   });
 
   final String id;
   final String title;
   final String description;
+
+  /// Texto do botão: diz o que acontece ao tocar.
+  final String acao;
   final String icon;
   final String actionRoute;
   final int estimatedMinutes;
   final bool Function(OnboardingStatusData data) isDone;
-
-  /// Passo de marketing (link/landing) — só no checklist com capability.
-  final bool requiresLandingCompleta;
-
-  /// Recurso do plano exigido; trancado → passo some do checklist.
-  final String? recurso;
 }
 
-/// Ordem de ativação: aluno → treino → perfil operacional → PIX → pacote →
-/// hábitos → link na bio (Enterprise). Espelha o guia canônico do produto;
-/// o BFF `/wizard` é normalizado no cliente para esta ordem.
+/// Três passos, iguais em todo plano: o valor aparece quando o aluno recebe o
+/// primeiro treino. O resto vira sugestão na Hoje ([setupProximaSugestao]).
 final setupStepCatalog = [
   SetupStepCatalogEntry(
     id: 'primeiro-aluno',
     title: 'Cadastre seu primeiro aluno',
     description: 'Cadastre ou importe da concorrência.',
+    acao: 'Cadastrar aluno',
     icon: 'person_add',
     actionRoute: '/alunos/novo',
     estimatedMinutes: 2,
@@ -44,101 +39,67 @@ final setupStepCatalog = [
   ),
   SetupStepCatalogEntry(
     id: 'primeiro-treino',
-    title: 'Crie seu primeiro modelo',
+    title: 'Crie um treino',
     description: 'Escolha os dias e a divisão.',
+    acao: 'Criar treino',
     icon: 'fitness_center',
     actionRoute: '/treinos?novo=1',
     estimatedMinutes: 3,
     isDone: (d) => d.primeiroTreinoCriado,
   ),
   SetupStepCatalogEntry(
-    id: 'perfil',
-    title: 'Complete seu perfil',
-    description: 'Foto, bio e contato profissional.',
-    icon: 'person',
-    actionRoute: '/perfil/editar',
-    estimatedMinutes: 2,
-    isDone: (d) => d.perfilCompleto,
-  ),
-  SetupStepCatalogEntry(
-    id: 'pagamento',
-    title: 'Configure o recebimento',
-    description: 'Chave PIX para receber no app.',
-    icon: 'attach_money',
-    actionRoute: '/perfil/wallet',
+    id: 'enviar-treino',
+    title: 'Envie o treino para o aluno',
+    description: 'Atribua o treino e o aluno já pode começar.',
+    acao: 'Enviar treino',
+    icon: 'send',
+    actionRoute: '/alunos',
     estimatedMinutes: 1,
-    isDone: (d) => d.pagamentoConfigurado,
-    recurso: PlanoRecursoKeys.carteira,
-  ),
-  SetupStepCatalogEntry(
-    id: 'pacote',
-    title: 'Crie seu primeiro pacote',
-    description: 'O que o aluno contrata com você.',
-    icon: 'inventory_2',
-    actionRoute: '/pacotes',
-    estimatedMinutes: 2,
-    isDone: (d) => d.pacoteCriado,
-    recurso: PlanoRecursoKeys.loja,
-  ),
-  SetupStepCatalogEntry(
-    id: 'habito',
-    title: 'Configure hábitos',
-    description: 'Rotina de check-in e aderência.',
-    icon: 'repeat',
-    actionRoute: '/habitos',
-    estimatedMinutes: 2,
-    isDone: (d) => d.habitoConfigurado,
-    recurso: PlanoRecursoKeys.habitos,
-  ),
-  SetupStepCatalogEntry(
-    id: 'link-bio',
-    title: 'Crie seu link na bio',
-    description: 'Página pública para captação.',
-    icon: 'link',
-    actionRoute: '/perfil/landing-editor',
-    estimatedMinutes: 2,
-    isDone: (d) => d.linkBioConfigurado,
-    requiresLandingCompleta: true,
-    recurso: PlanoRecursoKeys.landing,
+    isDone: (d) => d.treinoEnviado,
   ),
 ];
 
-/// Ids de passo cujo recurso não está liberado no plano atual.
-Set<String> setupStepsHiddenByPlan(bool Function(String recurso) liberado) => {
-  for (final step in setupStepCatalog)
-    if (step.recurso != null && !liberado(step.recurso!)) step.id,
-};
+/// Depois dos três passos, uma sugestão por vez na Hoje.
+class SetupSugestao {
+  const SetupSugestao({
+    required this.id,
+    required this.title,
+    required this.rota,
+  });
 
-/// Plano desconhecido não esconde nada (a tela de destino tem gate).
-Set<String> setupStepsHiddenFor(PlanoFeatures? features) =>
-    features == null
-        ? const {}
-        : setupStepsHiddenByPlan((k) => features.recurso(k).liberado);
-
-/// Passos visíveis no plano atual (esconde link-bio sem capability e
-/// passos em [hidden]).
-List<SetupStepCatalogEntry> visibleSetupSteps({
-  required bool landingCompleta,
-  Set<String> hidden = const {},
-}) {
-  return setupStepCatalog
-      .where(
-        (step) =>
-            (!step.requiresLandingCompleta || landingCompleta) &&
-            !hidden.contains(step.id),
-      )
-      .toList(growable: false);
+  final String id;
+  final String title;
+  final String rota;
 }
 
-SetupStepCatalogEntry? nextSetupStep(
+SetupSugestao? setupProximaSugestao(
   OnboardingStatusData data, {
-  bool landingCompleta = false,
-  Set<String> hidden = const {},
+  required bool podeCobrar,
+  required bool temLanding,
+  Set<String> dispensadas = const {},
 }) {
-  for (final step in visibleSetupSteps(
-    landingCompleta: landingCompleta,
-    hidden: hidden,
-  )) {
+  final sugestoes = [
+    if (podeCobrar && !data.pagamentoConfigurado)
+      const SetupSugestao(
+        id: 'pagamento',
+        title: 'Receba por PIX pelo app',
+        rota: '/perfil/wallet',
+      ),
+    if (temLanding && !data.linkBioConfigurado)
+      const SetupSugestao(
+        id: 'link-bio',
+        title: 'Crie sua página para captar alunos',
+        rota: '/perfil/landing-editor',
+      ),
+  ];
+  for (final s in sugestoes) {
+    if (!dispensadas.contains(s.id)) return s;
+  }
+  return null;
+}
+
+SetupStepCatalogEntry? nextSetupStep(OnboardingStatusData data) {
+  for (final step in setupStepCatalog) {
     if (!step.isDone(data)) return step;
   }
   return null;

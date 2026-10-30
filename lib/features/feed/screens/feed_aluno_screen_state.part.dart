@@ -2,6 +2,7 @@ part of 'feed_aluno_screen.dart';
 
 class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
   final Map<int, int> _curtidasLocais = {};
+  final Map<int, bool> _curtidosLocais = {};
   final Map<int, int> _comentariosLocais = {};
   final _searchController = TextEditingController();
   final _searchFocus = FocusNode();
@@ -169,6 +170,10 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
   }
 
   Future<void> _curtir(int postId) async {
+    final post = _posts.where((p) => p.id == postId).firstOrNull;
+    final antes = _curtidosLocais[postId] ?? post?.curtidoPorMim ?? false;
+    HapticFeedback.lightImpact();
+    setState(() => _curtidosLocais[postId] = !antes);
     try {
       final novoTotal = await FeedRepository(
         ref.read(apiClientProvider),
@@ -178,6 +183,7 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
       }
     } catch (e) {
       if (mounted) {
+        setState(() => _curtidosLocais[postId] = antes);
         FeedbackHelper.showError(context, friendlyError(e));
       }
     }
@@ -222,7 +228,7 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
                           : 'Nenhuma publicação ainda',
                       subtitle: searching
                           ? 'Ajuste a busca ou o filtro para achar outra publicação.'
-                          : 'Quando seu personal publicar no feed, as novidades aparecem aqui.',
+                          : 'Seu personal ainda não publicou.',
                       action: searching
                           ? FxEmptyAction(label: 'Limpar filtros', secondary: true, onTap: _clearFilters)
                           : FxEmptyAction(
@@ -266,6 +272,7 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
             curtidas: _curtidasLocais[p.id] ?? p.totalCurtidas,
             comentarios: _comentariosLocais[p.id] ?? p.totalComentarios,
             onCurtir: () => _curtir(p.id),
+            curtido: _curtidosLocais[p.id] ?? p.curtidoPorMim,
             onComentar: () => _abrirComentarios(p.id),
             onDenunciar: () => _denunciarPost(p),
             onBloquearAutor: _bloquearAutor,
@@ -346,6 +353,11 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
                   )
                 : Column(
                     children: [
+                      if (feedMostraFiltros(
+                        total: _posts.length,
+                        query: _query,
+                        filtrando: _chip != FeedListChip.todos,
+                      )) ...[
                       Padding(
                         padding: const EdgeInsets.fromLTRB(
                           TokensStrip.s4,
@@ -403,25 +415,35 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
                           TokensStrip.s4,
                           TokensStrip.s2,
                         ),
-                        child: Wrap(
-                          spacing: TokensStrip.s2,
-                          runSpacing: TokensStrip.s2,
-                          children: [
-                            for (final chip in FeedListChip.values)
-                              FxToggleChip(
-                                label: feedListChipLabel(chip),
-                                selected: _chip == chip,
-                                isDark: isDark,
-                                filledWhenSelected: true,
-                                onTap: () {
-                                  if (_chip == chip) return;
-                                  setState(() => _chip = chip);
-                                  _load();
-                                },
-                              ),
-                          ],
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: [
+                                for (final chip in FeedListChip.values)
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                      right: TokensStrip.s2,
+                                    ),
+                                    child: FxToggleChip(
+                                      label: feedListChipLabel(chip),
+                                      selected: _chip == chip,
+                                      isDark: isDark,
+                                      filledWhenSelected: true,
+                                      onTap: () {
+                                        if (_chip == chip) return;
+                                        setState(() => _chip = chip);
+                                        _load();
+                                      },
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
+                      ],
                       Expanded(
                         child: FxContentWidthLimiter(
                           child: _buildBody(primary),

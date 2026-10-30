@@ -61,7 +61,7 @@ void main() {
 
     await tester.tap(locked);
     await tester.pumpAndSettle();
-    expect(find.text('Desbloqueie no Pro'), findsOneWidget);
+    expect(find.text('Assinar Pro'), findsOneWidget);
     expect(find.text('Prioridade do dia com IA'), findsOneWidget);
   });
 

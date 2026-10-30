@@ -175,8 +175,8 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
           isDark: isDark,
           maxHeight:
               MediaQuery.sizeOf(ctx).height * FxHomeSheetChrome.maxHeightFactor,
-          expand: true,
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               FxHomeSheetHandle(isDark: isDark),
@@ -194,7 +194,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                   leading: FxIcon(name: 'article', color: accent, size: 18),
                 ),
               ),
-              Expanded(child: FeedComposerSheet(ref: ref)),
+              Flexible(child: FeedComposerSheet(ref: ref)),
             ],
           ),
         );
@@ -232,7 +232,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                       subtitle:
                           searching
                               ? 'Ajuste a busca para achar outra publicação.'
-                              : 'Compartilhe novidades, vídeos e conquistas com seus alunos.',
+                              : 'Publique a primeira dica para seus alunos.',
                       action: searching
                           ? FxEmptyAction(
                               label: 'Limpar filtros',
@@ -251,11 +251,9 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     }
 
     final showMore = _hasMore;
-    final sparseHint = feedSparseHint(count: visible.length);
     final stickyVisible = true;
     final bottomPad = feedListBottomPad(stickyVisible: stickyVisible);
-    final mute = ShellChrome.of(context).mute;
-    final extra = (showMore ? 1 : 0) + (sparseHint != null ? 1 : 0);
+    final extra = (showMore ? 1 : 0) + 0;
 
     return RefreshIndicator(
       color: primary,
@@ -275,32 +273,6 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
             return FxSatelliteListTile(
               title: _loadingMore ? 'Carregando…' : 'Carregar mais',
               onTap: _loadingMore ? null : _carregarMais,
-            );
-          }
-          if (sparseHint != null && i == visible.length + (showMore ? 1 : 0)) {
-            return Padding(
-              padding: const EdgeInsets.only(top: TokensStrip.s3),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    Icons.lightbulb_outline_rounded,
-                    size: 16,
-                    color: mute,
-                  ),
-                  const SizedBox(width: TokensStrip.s2),
-                  Expanded(
-                    child: Text(
-                      sparseHint,
-                      style: FocuxHubTypography.bodyMuted(
-                        color: mute,
-                        fontWeight: FontWeight.w600,
-                        height: 1.35,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
             );
           }
           final p = visible[i];
@@ -387,6 +359,11 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                   )
                 : Column(
                     children: [
+                      if (feedMostraFiltros(
+                        total: _posts.length,
+                        query: _query,
+                        filtrando: _chip != FeedListChip.todos,
+                      )) ...[
                       Padding(
                         padding: const EdgeInsets.fromLTRB(
                           TokensStrip.s4,
@@ -444,25 +421,35 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                           TokensStrip.s4,
                           TokensStrip.s2,
                         ),
-                        child: Wrap(
-                          spacing: TokensStrip.s2,
-                          runSpacing: TokensStrip.s2,
-                          children: [
-                            for (final chip in FeedListChip.values)
-                              FxToggleChip(
-                                label: feedListChipLabel(chip),
-                                selected: _chip == chip,
-                                isDark: isDark,
-                                filledWhenSelected: true,
-                                onTap: () {
-                                  if (_chip == chip) return;
-                                  setState(() => _chip = chip);
-                                  _load();
-                                },
-                              ),
-                          ],
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: [
+                                for (final chip in FeedListChip.values)
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                      right: TokensStrip.s2,
+                                    ),
+                                    child: FxToggleChip(
+                                      label: feedListChipLabel(chip),
+                                      selected: _chip == chip,
+                                      isDark: isDark,
+                                      filledWhenSelected: true,
+                                      onTap: () {
+                                        if (_chip == chip) return;
+                                        setState(() => _chip = chip);
+                                        _load();
+                                      },
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
+                      ],
                       Expanded(
                         child: FxContentWidthLimiter(
                           child: _buildBody(primary, visible),

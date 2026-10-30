@@ -1,120 +1,20 @@
 part of 'anamnese_screen.dart';
 
-class _AnamneseBody extends StatefulWidget {
-  const _AnamneseBody({
-    required this.anamnese,
-    required this.acting,
-    required this.isDark,
-    required this.primary,
-    required this.alunoId,
-    required this.secao,
-    required this.onSecao,
-    required this.onRevisar,
-  });
+/// Revisão: decisão no topo, depois o que pede cuidado; respostas sob demanda.
+class _AnamneseBody extends StatelessWidget {
+  const _AnamneseBody({required this.anamnese});
 
   final Anamnese anamnese;
-  final bool acting;
-  final bool isDark;
-  final Color primary;
-  final int alunoId;
-  final String secao;
-  final ValueChanged<String> onSecao;
-  final Future<void> Function({
-    required String status,
-    required String title,
-    required String confirmLabel,
-    String? subtitle,
-    bool pedirAtestado,
-  })
-  onRevisar;
-
-  @override
-  State<_AnamneseBody> createState() => _AnamneseBodyState();
-}
-
-class _AnamneseBodyState extends State<_AnamneseBody> {
-  var _fichaExpanded = false;
 
   @override
   Widget build(BuildContext context) {
-    final a = widget.anamnese;
-    final isDark = widget.isDark;
-    final primary = widget.primary;
-    final acting = widget.acting;
+    final a = anamnese;
+    final chrome = ShellChrome.of(context);
+    final treino = anamneseTreinoLinha(a);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SizedBox(height: TokensStrip.s3),
-        Wrap(
-          spacing: TokensStrip.s2,
-          runSpacing: TokensStrip.s2,
-          children: [
-            if (!a.isNaoIniciada && !a.isSolicitada)
-              FxActionChip(
-                label: 'Pedir atestado',
-                accent: primary,
-                isDark: isDark,
-                enabled: !acting,
-                onPressed:
-                    () => widget.onRevisar(
-                      status: AnamneseStatus.precisaAtestado,
-                      title: 'Pedir atestado',
-                      subtitle:
-                          'Oriente o aluno sobre o que o atestado deve cobrir.',
-                      confirmLabel: 'Pedir atestado',
-                      pedirAtestado: true,
-                    ),
-              ),
-            if (a.isPreenchida || a.isPrecisaAtestado)
-              FxActionChip(
-                label: 'Pedir atualização',
-                accent: primary,
-                isDark: isDark,
-                enabled: !acting,
-                onPressed:
-                    () => widget.onRevisar(
-                      status: AnamneseStatus.solicitada,
-                      title: 'Pedir atualização',
-                      subtitle:
-                          'O aluno será notificado para atualizar a ficha.',
-                      confirmLabel: 'Pedir atualização',
-                    ),
-              ),
-            FxActionChip(
-              label: 'Chat',
-              accent: primary,
-              isDark: isDark,
-              onPressed: () => context.push('/alunos/${widget.alunoId}/chat'),
-            ),
-          ],
-        ),
-        if (a.alertas.isNotEmpty || a.parqPositivo == true) ...[
-          const SizedBox(height: TokensStrip.s3),
-          Wrap(
-            spacing: TokensStrip.s2,
-            runSpacing: TokensStrip.s2,
-            children: [
-              if (a.parqPositivo == true)
-                _AlertaChip(
-                  label: 'PAR-Q+ positivo',
-                  isDark: isDark,
-                  warn: true,
-                ),
-              if (a.alertas.length == 1)
-                _AlertaChip(
-                  label: a.alertas.first,
-                  isDark: isDark,
-                  warn: true,
-                )
-              else if (a.alertas.length > 1)
-                _AlertaChip(
-                  label: '${a.alertas.length} alertas clínicos',
-                  isDark: isDark,
-                  warn: true,
-                ),
-            ],
-          ),
-        ],
+        _AnamneseDecisao(anamnese: a),
         if (a.isNaoIniciada) ...[
           const SizedBox(height: TokensStrip.s5),
           // CTA único no sticky S3 — empty sem action (§11 / §13).
@@ -134,22 +34,40 @@ class _AnamneseBodyState extends State<_AnamneseBody> {
             quiet: true,
           ),
         ] else if (a.personalPodeRevisar) ...[
-          const SizedBox(height: TokensStrip.s3),
-          _FichaDisclosureToggle(
-            expanded: _fichaExpanded,
-            primary: primary,
-            onToggle: () => setState(() => _fichaExpanded = !_fichaExpanded),
+          const SizedBox(height: TokensStrip.s4),
+          Text(
+            'Pontos de atenção',
+            style: FocuxHubTypography.sectionTitle(context, color: chrome.ink),
           ),
-          if (_fichaExpanded) ...[
+          const SizedBox(height: TokensStrip.s2),
+          _AnamnesePontos(pontos: anamnesePontosDeAtencao(a)),
+          if (treino.isNotEmpty) ...[
             const SizedBox(height: TokensStrip.s3),
-            AlunoSegmentedChoice(
-              options: anamneseDetalheSecoes,
-              selected: widget.secao,
-              isDark: isDark,
-              onSelect: widget.onSecao,
+            Text(treino, style: FocuxHubTypography.body(color: chrome.ink)),
+          ],
+          const SizedBox(height: TokensStrip.s4),
+          Text(
+            'Respostas',
+            style: FocuxHubTypography.sectionTitle(context, color: chrome.ink),
+          ),
+          const SizedBox(height: TokensStrip.s2),
+          for (final secao in anamneseDetalheSecoes)
+            _AnamneseSecao(
+              titulo: anamneseSecaoTitle(secao.value),
+              respostas: anamneseRespostas(a, secao.value),
             ),
+          if (anamneseNotasDoPersonal(a) case final notas
+              when notas.isNotEmpty) ...[
             const SizedBox(height: TokensStrip.s3),
-            _AnamneseFicha(anamnese: a, secao: widget.secao),
+            Text(
+              'Suas notas',
+              style: FocuxHubTypography.sectionTitle(
+                context,
+                color: chrome.ink,
+              ),
+            ),
+            const SizedBox(height: TokensStrip.s2),
+            _AnamneseLinhas(linhas: notas),
           ],
         ],
       ],
@@ -157,218 +75,162 @@ class _AnamneseBodyState extends State<_AnamneseBody> {
   }
 }
 
-class _FichaDisclosureToggle extends StatelessWidget {
-  const _FichaDisclosureToggle({
-    required this.expanded,
-    required this.primary,
-    required this.onToggle,
-  });
+class _AnamneseDecisao extends StatelessWidget {
+  const _AnamneseDecisao({required this.anamnese});
 
-  final bool expanded;
-  final Color primary;
-  final VoidCallback onToggle;
+  final Anamnese anamnese;
 
   @override
   Widget build(BuildContext context) {
-    final mute = Theme.of(context).colorScheme.onSurfaceVariant;
-    final ink = Theme.of(context).colorScheme.onSurface;
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onToggle,
-        borderRadius: BorderRadius.circular(TokensStrip.rCard),
-        child: Ink(
-          padding: const EdgeInsets.symmetric(
-            horizontal: TokensStrip.s3,
-            vertical: TokensStrip.s3,
+    final chrome = ShellChrome.of(context);
+    return Container(
+      padding: const EdgeInsets.all(TokensStrip.s3),
+      decoration: fxListCardDecoration(context),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            anamneseDecisaoTitulo(anamnese),
+            style: FocuxHubTypography.cardTitle(color: chrome.ink),
           ),
-          decoration: fxListCardDecoration(
-            context,
-            accent: primary,
-            radius: TokensStrip.rCard,
+          const SizedBox(height: 2),
+          Text(
+            anamneseDecisaoApoio(anamnese),
+            style: FocuxHubTypography.bodyMuted(color: chrome.mute),
           ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      expanded ? 'Ocultar detalhes' : 'Ver detalhes da ficha',
-                      style: FocuxHubTypography.body(color: ink).copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      expanded
-                          ? 'PAR-Q+, saúde, hábitos e treino'
-                          : 'Resumo no fold · toque para abrir a ficha',
-                      style: FocuxHubTypography.chip(mute),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                expanded
-                    ? Icons.expand_less_rounded
-                    : Icons.expand_more_rounded,
-                color: primary,
-              ),
-            ],
-          ),
-        ),
+        ],
       ),
     );
   }
 }
 
-class _AnamneseFicha extends StatelessWidget {
-  const _AnamneseFicha({required this.anamnese, required this.secao});
+class _AnamnesePontos extends StatelessWidget {
+  const _AnamnesePontos({required this.pontos});
 
-  final Anamnese anamnese;
-  final String secao;
+  final List<String> pontos;
 
   @override
   Widget build(BuildContext context) {
-    final a = anamnese;
-    final rows = switch (secao) {
-      anamneseSecaoSaude => [
-        ('Histórico médico', anamneseTextOrDash(a.historicoMedico)),
-        ('Cirurgias', anamneseTextOrDash(a.cirurgias)),
-        ('Dores crônicas', anamneseTextOrDash(a.doresCronicas)),
-        ('Lesões / limitações', anamneseTextOrDash(a.lesoes)),
-        ('Medicamentos', anamneseTextOrDash(a.medicamentos)),
-        ('Alergias', anamneseTextOrDash(a.alergias)),
-        ('Gestação / pós-parto', anamneseTextOrDash(a.gestacaoPosParto)),
-        ('Histórico familiar CV', anamneseBoolLabel(a.historicoFamiliarCv)),
-        ('Sintomas CV', anamneseTextOrDash(a.sintomasCv)),
-      ],
-      anamneseSecaoHabitos => [
-        ('Sono', anamneseSonoHorasLabel(a.sonoHoras)),
-        ('Qualidade do sono', anamneseTextOrDash(a.qualidadeSono)),
-        ('Nível de estresse', anamneseTextOrDash(a.nivelEstresse)),
-        ('Tabagismo', anamneseTextOrDash(a.tabagismo)),
-        ('Álcool', anamneseTextOrDash(a.alcool)),
-        ('Observações', anamneseTextOrDash(a.observacoes)),
-        ('Notas', anamneseTextOrDash(a.notasProfissional)),
-        ('Atestado', anamneseTextOrDash(a.atestadoObs)),
-      ],
-      anamneseSecaoTreino => [
-        ('Objetivo', anamneseTextOrDash(a.objetivo)),
-        ('Objetivo detalhado', anamneseTextOrDash(a.objetivoDetalhado)),
-        (
-          'Disponibilidade',
-          a.disponibilidadeSemanal == null
-              ? '—'
-              : anamneseDisponibilidadeLabel(a.disponibilidadeSemanal!),
-        ),
-        ('Preferências de treino', anamneseTextOrDash(a.preferenciasTreino)),
-        ('Restrições alimentares', anamneseTextOrDash(a.restricoesAlimentares)),
-        ('Histórico de atividade', anamneseTextOrDash(a.historicoAtividade)),
-        ('Motivo de interrupções', anamneseTextOrDash(a.motivoInterrupcoes)),
-        ('Motivação atual', anamneseTextOrDash(a.motivacaoAtual)),
-        ('Algo mais', anamneseTextOrDash(a.algoMais)),
-      ],
-      _ => [
-        for (final q in anamneseParqPerguntas)
-          (q.label, anamneseBoolLabel(anamneseParqValue(a, q.key))),
-        if ((a.parqOutraRazaoDetalhe ?? '').trim().isNotEmpty)
-          ('Detalhe (outra razão)', a.parqOutraRazaoDetalhe!.trim()),
-      ],
-    };
-
+    final chrome = ShellChrome.of(context);
+    if (pontos.isEmpty) {
+      return Text(
+        'Nenhum ponto de atenção.',
+        style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+      );
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          anamneseSecaoTitle(secao),
-          style: FocuxHubTypography.sectionTitle(
-            context,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-        ),
-        const SizedBox(height: TokensStrip.s2),
-        Container(
-          padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
-          decoration: fxListCardDecoration(
-            context,
-            accent: Theme.of(context).colorScheme.primary,
-            radius: TokensStrip.rCard,
-          ),
-          child: Column(
-            children: [
-              for (var i = 0; i < rows.length; i++)
-                Padding(
-                  padding: EdgeInsets.only(
-                    bottom: i == rows.length - 1 ? 0 : 10,
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        width: 112,
-                        child: Text(
-                          rows[i].$1,
-                          style: FocuxHubTypography.chip(
-                            Theme.of(context).hintColor,
-                          ).copyWith(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 11,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Text(
-                          rows[i].$2,
-                          style: FocuxHubTypography.body(
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ).copyWith(fontWeight: FontWeight.w600, height: 1.3),
-                        ),
-                      ),
-                    ],
+        for (final ponto in pontos)
+          Padding(
+            padding: const EdgeInsets.only(bottom: TokensStrip.s2),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(
+                  Icons.warning_amber_rounded,
+                  size: 20,
+                  color: EagleTokens.warn,
+                ),
+                const SizedBox(width: TokensStrip.s2),
+                Expanded(
+                  child: Text(
+                    ponto,
+                    style: FocuxHubTypography.body(color: chrome.ink),
                   ),
                 ),
-            ],
+              ],
+            ),
           ),
-        ),
       ],
     );
   }
 }
 
-class _AlertaChip extends StatelessWidget {
-  const _AlertaChip({
-    required this.label,
-    required this.isDark,
-    this.warn = false,
-  });
+class _AnamneseSecao extends StatelessWidget {
+  const _AnamneseSecao({required this.titulo, required this.respostas});
 
-  final String label;
-  final bool isDark;
-  final bool warn;
+  final String titulo;
+  final List<(String, String)> respostas;
 
   @override
   Widget build(BuildContext context) {
-    final color = warn ? EagleTokens.warn : Theme.of(context).colorScheme.primary;
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: TokensStrip.s3,
-        vertical: TokensStrip.s2,
-      ),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: isDark ? 0.18 : 0.12),
-        borderRadius: BorderRadius.circular(TokensStrip.rSm),
-        border: Border.all(color: color.withValues(alpha: 0.35)),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: color,
-          fontSize: 12,
-          fontWeight: FontWeight.w700,
+    final chrome = ShellChrome.of(context);
+    final n = respostas.length;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: TokensStrip.s2),
+      child: Container(
+        decoration: fxListCardDecoration(context),
+        child: Theme(
+          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+          child: ExpansionTile(
+            tilePadding: const EdgeInsets.symmetric(horizontal: TokensStrip.s3),
+            childrenPadding: const EdgeInsets.fromLTRB(
+              TokensStrip.s3,
+              0,
+              TokensStrip.s3,
+              TokensStrip.s3,
+            ),
+            title: Text(
+              titulo,
+              style: FocuxHubTypography.cardTitle(color: chrome.ink),
+            ),
+            subtitle: Text(
+              n == 0
+                  ? 'Não respondeu'
+                  : n == 1
+                  ? '1 resposta'
+                  : '$n respostas',
+              style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+            ),
+            children: [
+              if (n == 0)
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'O aluno deixou esta parte em branco.',
+                    style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                  ),
+                )
+              else
+                _AnamneseLinhas(linhas: respostas),
+            ],
+          ),
         ),
       ),
+    );
+  }
+}
+
+class _AnamneseLinhas extends StatelessWidget {
+  const _AnamneseLinhas({required this.linhas});
+
+  final List<(String, String)> linhas;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final (rotulo, valor) in linhas)
+          Padding(
+            padding: const EdgeInsets.only(bottom: TokensStrip.s2),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  rotulo,
+                  style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                ),
+                Text(
+                  valor,
+                  style: FocuxHubTypography.body(color: chrome.ink),
+                ),
+              ],
+            ),
+          ),
+      ],
     );
   }
 }

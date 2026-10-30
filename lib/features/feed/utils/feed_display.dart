@@ -45,20 +45,9 @@ String feedCountLabel(int count) {
   return '$count publicações';
 }
 
-String feedHubSubtitle(String? freshness, {int? count}) {
-  final base =
-      count == null ? 'Novidades para os seus alunos' : feedCountLabel(count);
-  final stamp = freshness?.trim();
-  if (stamp == null || stamp.isEmpty) return base;
-  return '$base · $stamp';
-}
-
-String feedMidiaCta({required String tipo, required bool hasFile}) {
-  if (hasFile) return 'Trocar arquivo';
-  return tipo.toUpperCase() == 'VIDEO' ? 'Escolher vídeo' : 'Escolher imagem';
-}
-
-bool feedTipoTemMidia(String tipo) {
-  final t = tipo.trim().toUpperCase();
-  return t == 'IMAGEM' || t == 'VIDEO';
-}
+/// Busca e filtros só ajudam com posts suficientes; ativos, ficam à vista.
+bool feedMostraFiltros({
+  required int total,
+  required String query,
+  required bool filtrando,
+}) => total >= 5 || filtrando || query.trim().isNotEmpty;

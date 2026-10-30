@@ -100,7 +100,7 @@ void main() {
     });
 
     test('massa magra fora da faixa também', () {
-      expect(medidasSuspeitas(massaMagra: 900), ['Massa magra 900,0 kg']);
+      expect(medidasSuspeitas(massaMagra: 900), ['Massa magra 900,0%']);
     });
   });
 }

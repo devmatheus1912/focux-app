@@ -3,14 +3,6 @@ import 'package:focux_app/features/anamnese/data/anamnese_repository.dart';
 import 'package:focux_app/features/anamnese/utils/anamnese_display.dart';
 
 void main() {
-  test('anamneseNivelLabel e nulo', () {
-    expect(anamneseNivelLabel('SEDENTARIO'), 'Sedentário');
-    expect(anamneseNivelLabel('MUITO_INTENSO'), 'Muito intenso');
-    expect(anamneseNivelLabel(null), 'Selecionar');
-    expect(anamneseNivelOuNulo('LEVE'), 'LEVE');
-    expect(anamneseNivelOuNulo('x'), isNull);
-  });
-
   test('anamneseDisponibilidade', () {
     expect(anamneseDisponibilidadeLabel(1), '1 dia por semana');
     expect(anamneseDisponibilidadeLabel(3), '3 dias por semana');
@@ -18,21 +10,6 @@ void main() {
     expect(anamneseDisponibilidadeClamp(0), 1);
     expect(anamneseDisponibilidadeClamp(9), 7);
   });
-
-  test('métricas do hub personal', () {
-    final a = Anamnese(
-      status: AnamneseStatus.preenchida,
-      parqCompleto: true,
-      parqPositivo: true,
-      alertas: const ['Dor no peito'],
-      disponibilidadeSemanal: 4,
-    );
-    expect(anamneseParqMetricValue(a), 'Atenção');
-    expect(anamneseAlertasMetricValue(a), '1');
-    expect(anamneseDispMetricValue(a), '4 dias por semana');
-    expect(anamneseDetalheSecoes, hasLength(4));
-  });
-
   test('status labels e flags', () {
     expect(anamneseStatusLabel(AnamneseStatus.solicitada), 'Solicitada');
     expect(anamneseStatusLabel(AnamneseStatus.precisaAtestado), 'Precisa atestado');

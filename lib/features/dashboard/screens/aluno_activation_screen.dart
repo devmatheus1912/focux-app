@@ -84,21 +84,11 @@ class AlunoActivationScreen extends ConsumerWidget {
       data: (home) {
         final aluno = home.aluno;
         final progress = alunoActivationProgress(
-          profileCompletion: alunoActivationProfileCompletion(
-            telefone: aluno.telefone,
-            whatsapp: aluno.whatsapp,
-            objetivo: aluno.objetivo,
-            genero: aluno.genero,
-            peso: aluno.peso?.toString(),
-            altura: aluno.altura?.toString(),
-            dataNascimento: aluno.dataNascimento,
-            fotoUrl: aluno.fotoUrl,
-          ),
-          hasMedidas: home.medidas.isNotEmpty,
+          temFoto: (aluno.fotoUrl ?? '').trim().isNotEmpty,
+          anamneseResolvida: home.anamnesePendente == null,
           hasTreinoConcluido: home.historico.any(
             (item) => item.status.toUpperCase() == 'CONCLUIDO',
           ),
-          hasChat: home.chat.possuiMensagemDoAluno,
         );
         final step = progress.current;
 
@@ -116,22 +106,10 @@ class AlunoActivationScreen extends ConsumerWidget {
                 leading: FxTonalButton(label: wizardFazerDepoisLabel(), onPressed: () => _sair(context, aluno.id), compact: true),
               ),
               bottomNavigationBar: FxWizardStickyBar(
-                secondary:
-                    progress.allDone && !home.chat.possuiMensagemDoAluno
-                        ? FxTonalButton(label: step.cta, onPressed: () async {
-                            await _markSeen(aluno.id);
-                            if (!context.mounted) return;
-                            context.go('/chat/aluno');
-                          }, compact: true)
-                        : null,
                 primary: FxLiquidPrimaryButton(
                   icon: Icons.arrow_forward,
                   label:
-                      progress.allDone
-                          ? (home.chat.possuiMensagemDoAluno
-                              ? 'Entrar no app'
-                              : alunoActivationChatSkipLabel())
-                          : step.cta,
+                      progress.allDone ? 'Entrar no app' : step.cta,
                   onPressed: () async {
                     await _markSeen(aluno.id);
                     if (!context.mounted) return;

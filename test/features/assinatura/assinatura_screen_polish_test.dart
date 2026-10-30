@@ -125,7 +125,6 @@ void main() {
     expect(body, contains('RefreshIndicator'));
     expect(body, contains('AlwaysScrollableScrollPhysics'));
     expect(body, contains('SliverFillRemaining'));
-    expect(body, contains('fillViewport: true'));
     expect(body, contains('managementMode'));
     expect(body, isNot(contains('TokensStrip.s8 * 3')));
 

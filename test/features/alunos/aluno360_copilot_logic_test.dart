@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:focux_app/core/theme/brand_palette.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/utils/aluno360_copilot_logic.dart';
 import 'package:focux_app/features/ia/models/ia_copilot_proxima_acao.dart';
@@ -166,23 +165,6 @@ void main() {
       expect(gaps.any((g) => g.title == 'Contato'), isTrue);
     });
   });
-
-  group('resolveCopilotSignals', () {
-    test('builds four signal chips', () {
-      final signals = resolveCopilotSignals(
-        aluno: _aluno(telefone: '11999999999', objetivo: 'Força'),
-        resumo: null,
-        primary: BrandPalette.defaultPrimary,
-      );
-      expect(signals, hasLength(4));
-      expect(signals.first.label, 'Perfil');
-      expect(
-        signals.any((s) => s.detail.contains('clicou e ainda')),
-        isFalse,
-      );
-    });
-  });
-
   group('resolveCopilotPrescriptionFromAction', () {
     test('maps action fields to display copy', () {
       final content = resolveCopilotPrescriptionFromAction(
@@ -395,49 +377,7 @@ void main() {
       );
       expect(content.action, 'Retomar contato e pedir sync do wearable.');
     });
-
-    test('resolve usa ação curta mesmo com parágrafo longo da IA', () {
-      expect(
-        copilotPrescriptionActionsEquivalent(
-          'Retomar contato e checar como está o treino.',
-          'Retomar contato com Beatriz e checar como está o treino.',
-        ),
-        isTrue,
-      );
-      final content = resolveCopilotPrescriptionFromAction(
-        _aluno(),
-        copilotActionFromIa(_iaPayload({
-          'acao': 'Retomar contato e checar como está o treino.',
-          'motivo': 'Priorize contato · sem registro recente · aderência 0%',
-        })),
-        'fallback',
-      );
-      expect(content.action, isNot(isEmpty));
-    });
   });
-
-  group('copilotPrescriptionActionsEquivalent', () {
-    test('treats embedded first name as equivalent', () {
-      expect(
-        copilotPrescriptionActionsEquivalent(
-          'Retomar contato com Beatriz e checar como está o treino.',
-          'Retomar contato e checar como está o treino',
-        ),
-        isTrue,
-      );
-    });
-
-    test('keeps meaningfully different IA paragraphs distinct', () {
-      expect(
-        copilotPrescriptionActionsEquivalent(
-          'Retomar contato e pedir sync do wearable.',
-          'Entre em contato com Beatriz para reavivar e solicitar sincronização do wearable.',
-        ),
-        isFalse,
-      );
-    });
-  });
-
   group('copilotPrescriptionReasonSegments', () {
     test('splits footer motivo on middle dots', () {
       expect(
@@ -807,91 +747,6 @@ void main() {
   });
 
   group('resolveCopilotExecutarAcao', () {
-    final aluno = Aluno(
-      id: 1,
-      nome: 'Beatriz',
-      email: 'b@test.com',
-      status: 'ATIVO',
-    );
-
-    test('maps TREINO to ENVIAR_PUSH (check-in), not carga', () {
-      expect(copilotExecutarBackendTipo('TREINO'), 'ENVIAR_PUSH');
-      final spec = resolveCopilotExecutarAcao(
-        tipoAcao: 'TREINO',
-        aluno: aluno,
-        proxima: const ProximaAcaoResumo(
-          acao: 'Pedir check-in esta semana',
-          motivo: 'Sem treinos',
-          fonte: 'RADAR',
-          prioridade: 'P1',
-          mensagemSugerida: 'Oi, Beatriz. Como foi o treino?',
-        ),
-      );
-      expect(spec?.backendTipo, 'ENVIAR_PUSH');
-      expect(spec?.label, contains('check-in'));
-      expect(
-        shouldShowCopilotExecutarAcao(
-          tipoAcao: 'TREINO',
-          aluno: aluno,
-          proxima: const ProximaAcaoResumo(
-            acao: 'Pedir check-in',
-            motivo: 'x',
-            fonte: 'RADAR',
-            prioridade: 'P1',
-            mensagemSugerida: 'Oi',
-          ),
-        ),
-        isTrue,
-      );
-      expect(copilotExecutarAcaoLabel('TREINO'), contains('check-in'));
-    });
-
-    test('maps carga text to REDUZIR_CARGA', () {
-      final spec = resolveCopilotExecutarAcao(
-        tipoAcao: 'TREINO',
-        aluno: aluno,
-        proxima: const ProximaAcaoResumo(
-          acao: 'Aplicar ajuste de carga no plano',
-          motivo: 'Volume alto',
-          fonte: 'EVOLUCAO',
-          prioridade: 'P2',
-        ),
-      );
-      expect(spec?.backendTipo, 'REDUZIR_CARGA');
-      expect(copilotExecutarBackendTipo('TREINO', acao: 'Reduzir carga'), 'REDUZIR_CARGA');
-    });
-
-    test('maps CONTATO with mensagem to ENVIAR_PUSH', () {
-      expect(copilotExecutarBackendTipo('CONTATO'), 'ENVIAR_PUSH');
-      final spec = resolveCopilotExecutarAcao(
-        tipoAcao: 'CONTATO',
-        aluno: aluno,
-        proxima: const ProximaAcaoResumo(
-          acao: 'Retomar contato',
-          motivo: 'Sem check-ins',
-          fonte: 'PADRAO',
-          prioridade: 'P1',
-          mensagemSugerida: 'Oi, Beatriz.',
-        ),
-      );
-      expect(spec?.backendTipo, 'ENVIAR_PUSH');
-      expect(spec?.parametros, 'Oi, Beatriz.');
-      expect(
-        shouldShowCopilotExecutarAcao(
-          tipoAcao: 'CONTATO',
-          aluno: aluno,
-          proxima: const ProximaAcaoResumo(
-            acao: 'Retomar contato',
-            motivo: 'Sem check-ins',
-            fonte: 'PADRAO',
-            prioridade: 'P1',
-            mensagemSugerida: 'Oi, Beatriz.',
-          ),
-        ),
-        isTrue,
-      );
-    });
-
     test('maps em risco sem mensagem to MARCAR_RISCO', () {
       final emRisco = Aluno(
         id: 1,

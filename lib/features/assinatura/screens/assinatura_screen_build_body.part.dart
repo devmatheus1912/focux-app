@@ -43,6 +43,12 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
     final tabPlans =
         sortedPlans
             .map((p) => subscriptionPlanFromApi(p.nome))
+            // Quem está no Free não compra Free: a coluna já compara.
+            .where(
+              (p) =>
+                  p != SubscriptionPlan.FREE ||
+                  currentPlan != SubscriptionPlan.FREE,
+            )
             .toList(growable: false);
     if (!tabPlans.contains(selPlan)) {
       selPlan = tabPlans.first;
@@ -145,6 +151,30 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
         storeOk &&
         !managingCurrent;
 
+    final planoSelecionado =
+        sortedPlans
+            .where((p) => subscriptionPlanFromApi(p.nome) == selPlan)
+            .firstOrNull;
+    final precoSelecionado =
+        planoSelecionado == null || managingCurrent
+            ? null
+            : buildPaywallPriceCopy(
+              precoMensal: planoSelecionado.precoMensal,
+              precoAnual: planoSelecionado.precoAnual,
+              precoAnualMensalEquiv:
+                  planoSelecionado.equivMensalNoAnual ??
+                  planoSelecionado.precoAnualMensalEquiv,
+              labelDescontoAnual: planoSelecionado.labelDescontoAnual,
+              labelEconomiaAnual: planoSelecionado.labelEconomiaAnual,
+              period: _billingPeriod,
+              storePrice:
+                  _productDetails[SubscriptionProducts.productIdFor(
+                        selPlan,
+                        _billingPeriod,
+                      )]
+                      ?.price,
+            );
+
     final linhas =
         vitrine?.rowsFor(selPlan) ??
         (selPlan == SubscriptionPlan.ENTERPRISE
@@ -184,9 +214,9 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
                       blockedCapability: widget.blockedCapability,
                       mute: mute,
                     ),
-                  Expanded(
-                    child: PaywallCompareStage(
-                      fillViewport: true,
+                  PaywallCompareStage(
+                      precoPrimario: precoSelecionado?.primary,
+                      precoApoio: precoSelecionado?.secondary,
                       managementMode: managementMode,
                       plans: tabPlans,
                       currentPlan: currentPlan,
@@ -216,7 +246,6 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
                       isDark: isDark,
                       line: line,
                     ),
-                  ),
                   if (paywallLinhasDecisivas(linhas).length < linhas.length)
                     Align(
                       alignment: Alignment.centerLeft,
@@ -256,6 +285,24 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
                       isDark: isDark,
                     ),
                   ],
+                  const SizedBox(height: TokensStrip.s4),
+                  if (subscriptionUsesNativeStore)
+                    Align(
+                      child: FxActionLink(
+                        label:
+                            _restoringPurchases
+                                ? S.of(context).assinaturaRestaurandoCompras
+                                : S.of(context).assinaturaRestaurarCompras,
+                        onTap: _restoringPurchases ? null : _restorePurchases,
+                      ),
+                    ),
+                  const SizedBox(height: TokensStrip.s1),
+                  _PaywallLegalConsentLine(
+                    ink: ink,
+                    mute: mute,
+                    primary: primary,
+                    isUpgrade: !isAcquisition,
+                  ),
                 ],
               ),
             ),

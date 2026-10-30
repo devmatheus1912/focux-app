@@ -1,12 +1,13 @@
 import '../../../core/utils/pt_br_display.dart';
 
-enum MedidaTipo { pesoKg, gorduraPct, alturaM }
+enum MedidaTipo { pesoKg, gorduraPct, massaMagraPct, alturaM }
 
 /// Faixa que um adulto real pode ter. Fora dela, a tela pede para o personal
 /// confirmar o valor em vez de mostrá-lo como normal.
 bool medidaPlausivel(MedidaTipo tipo, double valor) => switch (tipo) {
   MedidaTipo.pesoKg => valor >= 20 && valor <= 300,
   MedidaTipo.gorduraPct => valor >= 3 && valor <= 60,
+  MedidaTipo.massaMagraPct => valor >= 20 && valor <= 95,
   MedidaTipo.alturaM => valor >= 0.5 && valor <= 2.5,
 };
 
@@ -28,6 +29,6 @@ List<String> medidasSuspeitas({
     'Peso ${formatBrDecimal(peso)} kg',
   if (gordura != null && !medidaPlausivel(MedidaTipo.gorduraPct, gordura))
     'Gordura ${formatBrDecimal(gordura)}%',
-  if (massaMagra != null && !medidaPlausivel(MedidaTipo.pesoKg, massaMagra))
-    'Massa magra ${formatBrDecimal(massaMagra)} kg',
+  if (massaMagra != null && !medidaPlausivel(MedidaTipo.massaMagraPct, massaMagra))
+    'Massa magra ${formatBrDecimal(massaMagra)}%',
 ];

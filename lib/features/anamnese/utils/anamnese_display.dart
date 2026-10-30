@@ -26,11 +26,6 @@ String anamneseNivelLabel(String? code) {
   }
 }
 
-String? anamneseNivelOuNulo(String? code) {
-  if (code == null) return null;
-  return anamneseNiveis.contains(code) ? code : null;
-}
-
 String anamneseDisponibilidadeLabel(int dias) {
   if (dias <= 1) return '1 dia por semana';
   return '$dias dias por semana';
@@ -79,11 +74,6 @@ String anamneseStatusSubtitle(String? status) {
 String anamneseBoolLabel(bool? value) {
   if (value == null) return '—';
   return value ? 'Sim' : 'Não';
-}
-
-String anamneseTextOrDash(String? value) {
-  final t = value?.trim() ?? '';
-  return t.isEmpty ? '—' : t;
 }
 
 const anamneseSecaoParq = 'parq';
@@ -137,54 +127,6 @@ String anamneseSecaoTitle(String secao) => switch (secao) {
   anamneseSecaoTreino => 'Treino e objetivos',
   _ => 'PAR-Q+',
 };
-
-String anamneseParqMetricValue(Anamnese a) {
-  if (a.parqPositivo == true) return 'Atenção';
-  if (a.parqCompleto == true) return 'Ok';
-  return '—';
-}
-
-String anamneseParqMetricHint(Anamnese a) {
-  if (a.parqPositivo == true) return 'Resposta positiva no questionário';
-  if (a.parqCompleto == true) return 'Questionário completo';
-  return 'Ainda sem PAR-Q+';
-}
-
-String anamneseAlertasMetricValue(Anamnese a) => '${a.alertas.length}';
-
-String anamneseAlertasMetricHint(Anamnese a) {
-  if (a.alertas.isEmpty) return 'Nenhum alerta na ficha';
-  return 'Pontos de atenção';
-}
-
-String anamneseDispMetricValue(Anamnese a) {
-  if (a.disponibilidadeSemanal == null) return '—';
-  return anamneseDisponibilidadeLabel(a.disponibilidadeSemanal!);
-}
-
-/// Fold compacto (1–2 tiles) — PAR-Q+ e alertas.
-String anamneseClinicoResumoValue(Anamnese a) {
-  final parq = anamneseParqMetricValue(a);
-  final n = a.alertas.length;
-  if (n == 0) return parq;
-  return '$parq · $n alerta${n == 1 ? '' : 's'}';
-}
-
-String anamneseClinicoResumoHint(Anamnese a) {
-  if (a.alertas.isNotEmpty) return anamneseAlertasMetricHint(a);
-  return anamneseParqMetricHint(a);
-}
-
-String anamneseOperacaoResumoValue(Anamnese a) =>
-    anamneseDispMetricValue(a);
-
-String anamneseOperacaoResumoHint(Anamnese a) {
-  final obj = a.objetivo?.trim();
-  if (obj != null && obj.isNotEmpty) {
-    return obj.length > 48 ? '${obj.substring(0, 48)}…' : obj;
-  }
-  return 'Disponibilidade e objetivo';
-}
 
 String anamneseSonoHorasLabel(num? horas) {
   if (horas == null) return '—';
@@ -274,3 +216,101 @@ String anamneseAlunoCtaBody(Anamnese a) {
   }
   return 'Quando o personal solicitar, preencha aqui.';
 }
+
+/// O que o personal precisa ver antes de liberar o treino.
+List<String> anamnesePontosDeAtencao(Anamnese a) => [
+  if (a.parqPositivo == true) 'Respondeu sim em alguma pergunta do PAR-Q+',
+  ...a.alertas,
+  if (a.tabagismo == 'Fumo') 'Fuma',
+];
+
+String anamneseDecisaoTitulo(Anamnese a) {
+  if (a.isRevisada) return 'Revisada';
+  if (a.isPrecisaAtestado) return 'Aguardando atestado';
+  if (a.isPreenchida) {
+    final n = anamnesePontosDeAtencao(a).length;
+    if (n == 0) return 'Revisar · sem pontos de atenção';
+    return n == 1 ? 'Revisar · 1 ponto de atenção' : 'Revisar · $n pontos de atenção';
+  }
+  return anamneseStatusLabel(a.status);
+}
+
+String anamneseDecisaoApoio(Anamnese a) {
+  if (a.isRevisada) {
+    final data = DateTime.tryParse(a.revisadaEm ?? '');
+    if (data == null) return anamneseStatusSubtitle(a.status);
+    String dd(int n) => n.toString().padLeft(2, '0');
+    return 'Revisada em ${dd(data.day)}/${dd(data.month)}/${data.year}';
+  }
+  return anamneseStatusSubtitle(a.status);
+}
+
+String anamneseTreinoLinha(Anamnese a) => [
+  if ((a.objetivo ?? '').trim().isNotEmpty) a.objetivo!.trim(),
+  if (a.disponibilidadeSemanal != null)
+    anamneseDisponibilidadeLabel(a.disponibilidadeSemanal!),
+].join(' · ');
+
+/// Só o que o aluno respondeu: campo vazio não vira linha com traço.
+List<(String, String)> anamneseRespostas(Anamnese a, String secao) {
+  final linhas = switch (secao) {
+    anamneseSecaoSaude => [
+      ('Histórico médico', a.historicoMedico),
+      ('Cirurgias', a.cirurgias),
+      ('Dores crônicas', a.doresCronicas),
+      ('Lesões / limitações', a.lesoes),
+      ('Medicamentos', a.medicamentos),
+      ('Alergias', a.alergias),
+      ('Gestação / pós-parto', a.gestacaoPosParto),
+      (
+        'Histórico familiar CV',
+        a.historicoFamiliarCv == null
+            ? null
+            : anamneseBoolLabel(a.historicoFamiliarCv),
+      ),
+      ('Sintomas CV', a.sintomasCv),
+    ],
+    anamneseSecaoHabitos => [
+      ('Sono', a.sonoHoras == null ? null : anamneseSonoHorasLabel(a.sonoHoras)),
+      ('Qualidade do sono', a.qualidadeSono),
+      ('Nível de estresse', a.nivelEstresse),
+      ('Tabagismo', a.tabagismo),
+      ('Álcool', a.alcool),
+      ('Observações', a.observacoes),
+    ],
+    anamneseSecaoTreino => [
+      ('Objetivo', a.objetivo),
+      ('Objetivo detalhado', a.objetivoDetalhado),
+      (
+        'Disponibilidade',
+        a.disponibilidadeSemanal == null
+            ? null
+            : anamneseDisponibilidadeLabel(a.disponibilidadeSemanal!),
+      ),
+      ('Preferências de treino', a.preferenciasTreino),
+      ('Restrições alimentares', a.restricoesAlimentares),
+      ('Histórico de atividade', a.historicoAtividade),
+      ('Motivo de interrupções', a.motivoInterrupcoes),
+      ('Motivação atual', a.motivacaoAtual),
+      ('Algo mais', a.algoMais),
+    ],
+    _ => [
+      for (final q in anamneseParqPerguntas)
+        if (anamneseParqValue(a, q.key) != null)
+          (q.label, anamneseBoolLabel(anamneseParqValue(a, q.key))),
+      ('Detalhe (outra razão)', a.parqOutraRazaoDetalhe),
+    ],
+  };
+  return [
+    for (final (rotulo, valor) in linhas)
+      if ((valor ?? '').trim().isNotEmpty) (rotulo, valor!.trim()),
+  ];
+}
+
+/// Campos do personal, fora das respostas do aluno.
+List<(String, String)> anamneseNotasDoPersonal(Anamnese a) => [
+  if ((a.notasProfissional ?? '').trim().isNotEmpty)
+    ('Notas', a.notasProfissional!.trim()),
+  if ((a.atestadoObs ?? '').trim().isNotEmpty)
+    ('Atestado', a.atestadoObs!.trim()),
+];

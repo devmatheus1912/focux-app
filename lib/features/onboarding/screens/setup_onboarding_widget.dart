@@ -1,7 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../planos/data/plano_recurso.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_inline_retry_tile.dart';
@@ -34,11 +39,7 @@ class SetupOnboardingWidget extends ConsumerWidget {
         statusFromHome != null
             ? AsyncValue<OnboardingStatusData>.data(statusFromHome!)
             : ref.watch(onboardingStatusProvider);
-    final landingCompleta =
-        ref.watch(planoFeaturesProvider).value?.landingCompleta ?? false;
-    final hidden = setupStepsHiddenFor(
-      ref.watch(planoFeaturesProvider).value?.normalizeForTier(),
-    );
+    final plano = ref.watch(planoFeaturesProvider).value?.normalizeForTier();
 
     return statusAsync.when(
       loading: () => const Padding(
@@ -59,26 +60,17 @@ class SetupOnboardingWidget extends ConsumerWidget {
                     ),
                   ),
       data: (data) {
-        if (data.ativacaoCompleta(
-          includeLinkBio: landingCompleta,
-          hiddenSteps: hidden,
-        )) {
-          return const SizedBox.shrink();
+        if (data.ativacaoCompleta()) {
+          return SetupSugestaoStrip(
+            data: data,
+            podeCobrar: plano?.recurso(PlanoRecursoKeys.carteira).liberado ?? false,
+            temLanding: plano?.recurso(PlanoRecursoKeys.landing).liberado ?? false,
+          );
         }
 
-        final next = nextSetupStep(
-          data,
-          landingCompleta: landingCompleta,
-          hidden: hidden,
-        );
-        final feitas = data.etapasFeitas(
-          includeLinkBio: landingCompleta,
-          hiddenSteps: hidden,
-        );
-        final total = data.etapasTotal(
-          includeLinkBio: landingCompleta,
-          hiddenSteps: hidden,
-        );
+        final next = nextSetupStep(data);
+        final feitas = data.etapasFeitas();
+        final total = data.etapasTotal();
         final nextTitle = next?.title ?? 'Continuar setup';
         final semantics =
             'Sua ativação, $feitas de $total. '
@@ -109,6 +101,73 @@ class SetupOnboardingWidget extends ConsumerWidget {
           ),
         );
       },
+    );
+  }
+}
+
+/// Uma sugestão por vez depois da ativação; dispensada não volta.
+class SetupSugestaoStrip extends ConsumerStatefulWidget {
+  const SetupSugestaoStrip({
+    super.key,
+    required this.data,
+    required this.podeCobrar,
+    required this.temLanding,
+  });
+
+  final OnboardingStatusData data;
+  final bool podeCobrar;
+  final bool temLanding;
+
+  @override
+  ConsumerState<SetupSugestaoStrip> createState() => _SetupSugestaoStripState();
+}
+
+class _SetupSugestaoStripState extends ConsumerState<SetupSugestaoStrip> {
+  static const _chave = 'setup_sugestoes_dispensadas';
+  Set<String>? _dispensadas;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_carregar());
+  }
+
+  Future<void> _carregar() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
+    setState(() => _dispensadas = (prefs.getStringList(_chave) ?? []).toSet());
+  }
+
+  Future<void> _dispensar(String id) async {
+    final novas = {...?_dispensadas, id};
+    setState(() => _dispensadas = novas);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(_chave, novas.toList());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final dispensadas = _dispensadas;
+    if (dispensadas == null) return const SizedBox.shrink();
+    final sugestao = setupProximaSugestao(
+      widget.data,
+      podeCobrar: widget.podeCobrar,
+      temLanding: widget.temLanding,
+      dispensadas: dispensadas,
+    );
+    if (sugestao == null) return const SizedBox.shrink();
+    return Padding(
+      padding: DashboardLayout.foldCard,
+      child: FxSatelliteListTile(
+        title: sugestao.title,
+        titleCase: false,
+        trailing: IconButton(
+          tooltip: 'Dispensar',
+          onPressed: () => _dispensar(sugestao.id),
+          icon: const Icon(Icons.close_rounded),
+        ),
+        onTap: () => pushSetupActionRoute(context, ref, sugestao.rota),
+      ),
     );
   }
 }

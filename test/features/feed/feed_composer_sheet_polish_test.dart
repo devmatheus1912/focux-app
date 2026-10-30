@@ -10,10 +10,7 @@ void main() {
     expect(sheet, contains('FxLiquidPrimaryButton'));
     expect(sheet, contains('feedPublicarTileLabel()'));
     expect(sheet, contains('FxHomeSheetChrome.dismissAndPop'));
-    expect(sheet, contains('showFxInsetPickerSheet'));
     expect(sheet, contains('LengthLimitingTextInputFormatter'));
-    expect(sheet, contains('FxSettingsGroup'));
-    expect(sheet, contains('picker: true'));
     expect(sheet, isNot(contains('ElevatedButton')));
     expect(sheet, isNot(contains('showFxConfirmSheet')));
     expect(sheet, isNot(contains('viewInsets.bottom')));

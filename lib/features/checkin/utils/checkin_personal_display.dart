@@ -16,13 +16,56 @@ String checkinPrimeiroNome(String nome) {
   return trimmed.split(RegExp(r'\s+')).first;
 }
 
-CheckinFocusAction checkinFocusAction(CheckinPersonalHomeBundle home) {
-  if (home.hoje.isEmpty) {
-    return const CheckinFocusAction(label: 'Ver alunos');
+/// Uma linha por aluno: quem fez três treinos não ocupa três linhas.
+class CheckinDoAluno {
+  const CheckinDoAluno({
+    required this.alunoId,
+    required this.alunoNome,
+    required this.fotoUrl,
+    required this.treinos,
+    required this.ultimoEm,
+  });
+
+  final int alunoId;
+  final String alunoNome;
+  final String? fotoUrl;
+  final List<String> treinos;
+  final DateTime? ultimoEm;
+}
+
+List<CheckinDoAluno> checkinPorAluno(List<CheckinPersonalItem> itens) {
+  final grupos = <int, List<CheckinPersonalItem>>{};
+  for (final item in itens) {
+    grupos.putIfAbsent(item.alunoId, () => []).add(item);
   }
-  final focus = home.hoje.first;
-  return CheckinFocusAction(
-    label: home.hoje.length == 1 ? 'Ver aluno' : 'Ver ${checkinPrimeiroNome(focus.alunoNome)}',
-    alunoId: focus.alunoId,
-  );
+  return [
+    for (final lista in grupos.values)
+      CheckinDoAluno(
+        alunoId: lista.first.alunoId,
+        alunoNome: lista.first.alunoNome,
+        fotoUrl: lista.first.fotoUrl,
+        treinos: [for (final i in lista) i.treinoNome],
+        ultimoEm: lista.first.iniciadoEm,
+      ),
+  ];
+}
+
+String checkinDoAlunoLinha(CheckinDoAluno grupo) {
+  final nomes = grupo.treinos.toSet().toList();
+  if (grupo.treinos.length == 1) return nomes.first;
+  return '${grupo.treinos.length} treinos · ${nomes.join(', ')}';
+}
+
+String checkinResumoDoDia(CheckinPersonalHomeBundle home) {
+  final treinos = home.checkinsHoje;
+  final alunos = checkinPorAluno(home.hoje).length;
+  final faltam = home.pendentes.length;
+  return [
+    if (treinos == 0)
+      'Nenhum treino hoje'
+    else
+      '$treinos ${treinos == 1 ? 'treino' : 'treinos'}',
+    if (alunos > 0) '$alunos ${alunos == 1 ? 'aluno' : 'alunos'}',
+    if (faltam > 0) '$faltam ${faltam == 1 ? 'falta' : 'faltam'}',
+  ].join(' · ');
 }

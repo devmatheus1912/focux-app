@@ -155,8 +155,8 @@ class PlanEntitlements {
     final planLabel = plan == SubscriptionPlan.FREE ? 'Pro' : displayPlanName(plan);
 
     final headline = switch (capability) {
-      'financeiro' => 'Cobre seus alunos com controle total',
-      'iaCopiloto' => 'IA Copiloto para escalar sem perder qualidade',
+      'financeiro' => 'Cobre seus alunos sem correr atrás',
+      'iaCopiloto' => 'Saiba o que fazer com cada aluno',
       'landingCompleta' =>
         'Landing page completa — vende 24h com depoimentos, FAQ e leads',
       'whiteLabel' => 'Sua marca em cada touchpoint',
@@ -179,7 +179,7 @@ class PlanEntitlements {
         'Mensalidades, inadimplência e resumo financeiro fazem parte do plano $planLabel. '
             'Você vê quem atrasou e cobra pelo chat ou por PIX sem sair do app.',
       'iaCopiloto' =>
-        'Gere treinos, insights e respostas com IA no plano $planLabel '
+        'Análises e próximos passos com IA no plano $planLabel '
             '(${PlanoIaLimits.pro} interações/mês). '
             'Enterprise: ${PlanoIaLimits.enterprise}/mês.',
       'migracaoFoto' =>
@@ -250,7 +250,7 @@ class PlanEntitlements {
         UpgradeSalesBenefit(
           icon: Icons.task_alt_rounded,
           label: 'Da sugestão à ação em um toque',
-          detail: 'Tarefa, mensagem ou treino prontos',
+          detail: 'Tarefa ou mensagem prontas',
         ),
       ],
       'financeiro' => const [

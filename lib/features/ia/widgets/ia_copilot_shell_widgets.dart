@@ -23,7 +23,7 @@ class IaCopilotResultActionBar extends StatelessWidget {
 
   final Color brand;
   final String? primaryLabel;
-  final VoidCallback? onPrimary;
+  final VoidCallback onPrimary;
   final VoidCallback onMore;
 
   /// Folga de scroll quando a barra está visível (botão + padding + nav).

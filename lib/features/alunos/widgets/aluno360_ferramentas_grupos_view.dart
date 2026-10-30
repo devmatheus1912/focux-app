@@ -279,16 +279,16 @@ class Aluno360FerramentasGrupos extends ConsumerWidget {
           ),
         ),
         Aluno360FerramentasModule.iaProgresso => linha(
-          label: 'IA Progresso',
+          label: 'Ajustar cargas com IA',
           subtitle: iaLocked
               ? 'Disponível no $iaPlan'
-              : 'Sugestão de carga e progressão',
+              : 'Sugestão de carga por exercício',
           locked: iaLocked,
           tier: iaPlan,
           onTap: () => _upgrade(
             context,
             module: Aluno360FerramentasGatedModule.iaProgresso,
-            featureName: 'IA Progresso',
+            featureName: 'Ajustar cargas com IA',
             locked: iaLocked,
             onUnlocked: () =>
                 push('/alunos/$alunoId/ia/progressao', extra: nome),
@@ -313,7 +313,7 @@ class Aluno360FerramentasGrupos extends ConsumerWidget {
         Aluno360FerramentasModule.composicao => linha(
           label: 'Composição corporal',
           subtitle: composicaoSuspeita(bf: bf, massaMagra: massaMagra)
-              ? 'Gordura ${bf ?? '—'}% · Massa magra ${massaMagra ?? '—'} kg'
+              ? 'Gordura ${bf ?? '—'}% · Massa magra ${massaMagra ?? '—'}%'
               : bf != null || massaMagra != null
               ? 'Última avaliação registrada'
               : 'Registrar medidas',

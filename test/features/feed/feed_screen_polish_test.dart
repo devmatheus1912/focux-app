@@ -37,9 +37,7 @@ void main() {
     expect(screen, contains('FeedPostCard'));
     expect(screen, contains('_searchFocus'));
     expect(screen, contains('FxKeyboardDismissScope'));
-    expect(screen, contains('feedSparseHint'));
     expect(screen, contains('feedListBottomPad'));
-    expect(screen, contains('lightbulb_outline_rounded'));
     expect(screen, isNot(contains('label: feedPublicarTileLabel')));
     expect(screen, isNot(contains('feedPublicarTileLabel()')));
     expect(screen, isNot(contains('showFxInsetPickerSheet')));
@@ -48,8 +46,7 @@ void main() {
     expect(screen, isNot(contains('FxSettingsTile')));
     expect(screen, isNot(contains('feedPublicarConfirmTitle')));
     expect(screen, contains('FeedComposerSheet'));
-    expect(screen, contains('expand: true'));
-    expect(screen, contains('Expanded(child: FeedComposerSheet'));
+    expect(screen, contains('Flexible(child: FeedComposerSheet'));
     expect(screen, isNot(contains('OutlinedButton')));
     expect(screen, isNot(contains('showModalBottomSheet')));
     expect(screen, isNot(contains('FloatingActionButton')));

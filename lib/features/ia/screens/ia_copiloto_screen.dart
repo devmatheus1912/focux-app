@@ -20,6 +20,7 @@ import 'package:focux_app/core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../core/widgets/ia_safety_disclaimer.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../alunos/widgets/aluno_avatar.dart';

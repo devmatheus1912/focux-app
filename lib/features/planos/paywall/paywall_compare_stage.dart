@@ -42,7 +42,13 @@ class PaywallCompareStage extends StatelessWidget {
     this.onBillingPeriod,
     this.fillViewport = false,
     this.managementMode = false,
+    this.precoPrimario,
+    this.precoApoio,
   });
+
+  /// Preço do plano escolhido, no topo: é a primeira pergunta de quem compra.
+  final String? precoPrimario;
+  final String? precoApoio;
 
   final List<SubscriptionPlan> plans;
   final SubscriptionPlan currentPlan;
@@ -118,8 +124,10 @@ class PaywallCompareStage extends StatelessWidget {
           switchInCurve: Curves.easeOutCubic,
           switchOutCurve: Curves.easeInCubic,
           child: _CompareHero(
-            key: ValueKey(selectedPlan),
+            key: ValueKey('$selectedPlan-$precoPrimario'),
             view: view,
+            precoPrimario: precoPrimario,
+            precoApoio: precoApoio,
             selectedPlan: selectedPlan,
             accent: accent,
             ink: ink,
@@ -161,8 +169,12 @@ class _CompareHero extends StatelessWidget {
     required this.ink,
     required this.mute,
     required this.isDark,
+    this.precoPrimario,
+    this.precoApoio,
   });
 
+  final String? precoPrimario;
+  final String? precoApoio;
   final PaywallCompareView view;
   final SubscriptionPlan selectedPlan;
   final Color accent;
@@ -182,21 +194,37 @@ class _CompareHero extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Center(
-            child: PaywallTierMedallion(
-              plan: selectedPlan,
-              accent: accent,
-              isDark: isDark,
-              size: TokensStrip.s7,
+          if (precoPrimario == null) ...[
+            Center(
+              child: PaywallTierMedallion(
+                plan: selectedPlan,
+                accent: accent,
+                isDark: isDark,
+                size: TokensStrip.s7,
+              ),
             ),
-          ),
-          const SizedBox(height: TokensStrip.s3),
+            const SizedBox(height: TokensStrip.s3),
+          ],
           Text(
             view.headline,
             textAlign: TextAlign.center,
             style: FocuxHubTypography.sectionTitle(context, color: ink),
           ),
           const SizedBox(height: TokensStrip.s2),
+          if (precoPrimario case final preco?) ...[
+            Text(
+              preco,
+              textAlign: TextAlign.center,
+              style: FocuxHubTypography.metric(color: ink, fontSize: 32),
+            ),
+            if (precoApoio case final apoio?)
+              Text(
+                apoio,
+                textAlign: TextAlign.center,
+                style: FocuxHubTypography.bodyMuted(color: secondary),
+              ),
+            const SizedBox(height: TokensStrip.s1),
+          ],
           Text(
             view.subtitle,
             textAlign: TextAlign.center,

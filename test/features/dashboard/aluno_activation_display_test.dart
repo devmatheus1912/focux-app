@@ -2,71 +2,32 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/dashboard/utils/aluno_activation_display.dart';
 
 void main() {
-  test('próximo passo é o primeiro incompleto', () {
-    final progress = alunoActivationProgress(
-      profileCompletion: 100,
-      hasMedidas: false,
+  test('entrada do aluno tem três passos', () {
+    final p = alunoActivationProgress(
+      temFoto: false,
+      anamneseResolvida: false,
       hasTreinoConcluido: false,
-      hasChat: false,
     );
-
-    expect(progress.doneCount, 1);
-    expect(progress.current.title, 'Registrar a primeira medida');
-    expect(progress.etapaLabel, 'Etapa 2 de 3');
-    expect(progress.allDone, isFalse);
+    expect(p.totalCount, 3);
+    expect(p.current.title, 'Confirmar nome e foto');
   });
 
-  test('tudo feito aponta para o último passo', () {
-    final progress = alunoActivationProgress(
-      profileCompletion: 100,
-      hasMedidas: true,
+  test('próximo passo pula o que já foi feito', () {
+    final p = alunoActivationProgress(
+      temFoto: true,
+      anamneseResolvida: false,
+      hasTreinoConcluido: false,
+    );
+    expect(p.current.route, '/aluno/anamnese');
+    expect(p.etapaLabel, 'Etapa 2 de 3');
+  });
+
+  test('tudo feito', () {
+    final p = alunoActivationProgress(
+      temFoto: true,
+      anamneseResolvida: true,
       hasTreinoConcluido: true,
-      hasChat: true,
     );
-
-    expect(progress.allDone, isTrue);
-    expect(progress.etapaLabel, 'Etapa 3 de 3');
-  });
-
-  test('chat opcional não bloqueia conclusão', () {
-    final progress = alunoActivationProgress(
-      profileCompletion: 100,
-      hasMedidas: true,
-      hasTreinoConcluido: true,
-      hasChat: false,
-    );
-
-    expect(progress.allDone, isTrue);
-    expect(progress.etapaLabel, 'Etapa 3 de 3');
-    expect(alunoActivationQuestion(allDone: false), 'Próximo passo');
-  });
-
-  test('perfil conta campos preenchidos sem exigir foto', () {
-    expect(
-      alunoActivationProfileCompletion(
-        telefone: '11999999999',
-        whatsapp: '11999999999',
-        objetivo: 'Hipertrofia',
-        genero: 'M',
-        peso: '80',
-        altura: '1.80',
-        dataNascimento: '1995-01-01',
-        fotoUrl: null,
-      ),
-      100,
-    );
-    expect(
-      alunoActivationProfileCompletion(
-        telefone: null,
-        whatsapp: ' ',
-        objetivo: null,
-        genero: null,
-        peso: null,
-        altura: null,
-        dataNascimento: null,
-        fotoUrl: null,
-      ),
-      0,
-    );
+    expect(p.allDone, isTrue);
   });
 }

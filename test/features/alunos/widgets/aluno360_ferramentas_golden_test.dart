@@ -124,7 +124,7 @@ void main() {
 
     expect(find.text('Dados do aluno'), findsOneWidget);
     expect(find.text('Mais ferramentas'), findsNothing);
-    expect(find.text('IA Progresso'), findsOneWidget);
+    expect(find.text('Ajustar cargas com IA'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
     await expectFocuxGolden(
@@ -154,7 +154,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Mais ferramentas'), findsNothing);
-    expect(find.text('IA Progresso'), findsOneWidget);
+    expect(find.text('Ajustar cargas com IA'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
     await expectFocuxGolden(

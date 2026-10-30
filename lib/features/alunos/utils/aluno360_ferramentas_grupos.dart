@@ -50,7 +50,7 @@ bool composicaoSuspeita({String? bf, String? massaMagra}) {
   final gordura = lerNumeroDaMedida(bf);
   final massa = lerNumeroDaMedida(massaMagra);
   return (gordura != null && !medidaPlausivel(MedidaTipo.gorduraPct, gordura)) ||
-      (massa != null && !medidaPlausivel(MedidaTipo.pesoKg, massa));
+      (massa != null && !medidaPlausivel(MedidaTipo.massaMagraPct, massa));
 }
 
 /// Este módulo mostra um selo de atenção? (inclui o "ainda não feito").
@@ -186,7 +186,7 @@ bool aluno360DadosIncompletos(Aluno aluno) =>
 /// Valor da linha de composição: o texto do módulo, ou o aviso de valor suspeito.
 String aluno360ComposicaoValor({String? bf, String? massaMagra}) =>
     composicaoSuspeita(bf: bf, massaMagra: massaMagra)
-        ? 'Confirme este valor'
+        ? 'Confira o valor'
         : Aluno360FerramentasLogic.composicaoCorporalValue(
             bf: bf,
             massaMagra: massaMagra,

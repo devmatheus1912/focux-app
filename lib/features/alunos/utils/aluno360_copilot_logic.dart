@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/theme/design_tokens.dart';
 import '../../ia/models/ia_copilot_proxima_acao.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno_display_utils.dart';
@@ -333,40 +332,6 @@ String copilotDisplayAction(Aluno aluno, String acao) {
   return 'Retomar contato e ajustar plano com base na resposta.';
 }
 
-const _copilotComPhraseStopWords = {
-  'urgência',
-  'urgencia',
-  'calma',
-  'base',
-  'foco',
-  'treino',
-  'o',
-  'a',
-};
-
-String _stripCosmeticComPhrase(String key) {
-  return key.replaceAllMapped(RegExp(r'\s+com\s+(\S+)\s+'), (match) {
-    final word = match.group(1)!.toLowerCase();
-    if (_copilotComPhraseStopWords.contains(word)) return match.group(0)!;
-    if (word.length <= 2) return match.group(0)!;
-    return ' ';
-  });
-}
-
-String copilotPrescriptionActionCompareKey(String text) {
-  var key = cleanCopilotText(text).toLowerCase();
-  key = key.replaceAll(RegExp(r'[.!?;:,]'), '').trim();
-  key = key.replaceAll(RegExp(r'\s+com\s+(o\s+)?aluno\s+'), ' ');
-  key = _stripCosmeticComPhrase(key);
-  return key.replaceAll(RegExp(r'\s+'), ' ').trim();
-}
-
-/// Cosmetic-only differences (punctuation, embedded first name) are equivalent.
-bool copilotPrescriptionActionsEquivalent(String a, String b) {
-  if (a.trim() == b.trim()) return true;
-  return copilotPrescriptionActionCompareKey(a) ==
-      copilotPrescriptionActionCompareKey(b);
-}
 
 String copilotPrescriptionFullAction(Aluno aluno, String rawAcao) {
   final normalized = normalizeIaCopilotAcao(rawAcao);
@@ -554,54 +519,6 @@ List<CopilotProfileGap> resolveCopilotProfileGaps(Aluno aluno) {
         detail: 'Gênero e consultoria usados no atendimento.',
         route: 'edit',
       ),
-  ];
-}
-
-List<Aluno360CopilotSignal> resolveCopilotSignals({
-  required Aluno aluno,
-  required AlunoAutonomiaResumo? resumo,
-  required Color primary,
-}) {
-  final profile = copilotProfileCompletion(aluno);
-  final financeiroOk = aluno.statusFinanceiro != 'INADIMPLENTE';
-  final hasAutonomyFriction =
-      resumo != null && resumo.cliques > resumo.concluidos;
-  final hasEquipment = aluno.equipamentosDisponiveis.isNotEmpty;
-  return [
-    Aluno360CopilotSignal(
-      label: 'Perfil',
-      value: '$profile%',
-      detail:
-          profile >= 80 ? 'dados bons para prescrição' : 'perfil incompleto',
-      color: profile >= 80 ? EagleTokens.good : primary,
-    ),
-    Aluno360CopilotSignal(
-      label: 'Financeiro',
-      value: financeiroOk ? 'OK' : 'Atenção',
-      detail: financeiroOk ? 'sem bloqueio operacional' : 'pendência ativa',
-      color: financeiroOk ? EagleTokens.good : EagleTokens.bad,
-    ),
-    Aluno360CopilotSignal(
-      label: 'Autonomia',
-      value:
-          resumo == null
-              ? '--'
-              : '${(resumo.concluidos / (resumo.cliques == 0 ? 1 : resumo.cliques) * 100).clamp(0, 100).round()}%',
-      detail:
-          hasAutonomyFriction
-              ? 'abriu e ainda não concluiu'
-              : 'sem gargalo aberto forte',
-      color: hasAutonomyFriction ? EagleTokens.warn : primary,
-    ),
-    Aluno360CopilotSignal(
-      label: 'Contexto',
-      value: hasEquipment ? 'Rico' : 'Base',
-      detail:
-          hasEquipment
-              ? '${aluno.equipamentosDisponiveis.length} equipamentos'
-              : 'equipamentos não definidos',
-      color: primary,
-    ),
   ];
 }
 

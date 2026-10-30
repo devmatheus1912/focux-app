@@ -289,9 +289,6 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
                           footnote: footnote,
                           enabled: ctaEnabled,
                           loading: _loadingCheckout || _syncingPurchase,
-                          showLegalConsent:
-                              ctaMode == _AssinaturaCtaMode.subscribe,
-                          isUpgrade: isUpgradeSelection,
                           tierAccent: stickyTierAccent,
                           ink: ink,
                           mute: mute,
@@ -305,12 +302,6 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
                               ctaMode == _AssinaturaCtaMode.goHome
                                   ? () => context.go('/dashboard/personal')
                                   : _openSubscriptionManagement,
-                          onRestore:
-                              subscriptionUsesNativeStore &&
-                                      ctaMode != _AssinaturaCtaMode.syncing
-                                  ? _restorePurchases
-                                  : null,
-                          restoringPurchases: _restoringPurchases,
                           onBillingDetails:
                               ctaMode == _AssinaturaCtaMode.manageStore
                                   ? () => _showAssinaturaTermosSheet(

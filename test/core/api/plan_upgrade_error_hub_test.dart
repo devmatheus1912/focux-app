@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/api/plan_upgrade_error_hub.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
@@ -34,7 +35,8 @@ Future<BuildContext> _pumpApp(WidgetTester tester) async {
   addTearDown(tester.view.reset);
   late BuildContext ctx;
   await tester.pumpWidget(
-    MaterialApp(
+    ProviderScope(
+      child: MaterialApp(
       locale: const Locale('pt'),
       supportedLocales: S.supportedLocales,
       localizationsDelegates: S.localizationsDelegates,
@@ -45,6 +47,7 @@ Future<BuildContext> _pumpApp(WidgetTester tester) async {
             return const SizedBox.expand();
           },
         ),
+      ),
       ),
     ),
   );
@@ -133,7 +136,7 @@ void main() {
       find.text('Você chegou ao limite de alunos do plano'),
       findsOneWidget,
     );
-    expect(find.text('Desbloqueie no Pro'), findsOneWidget);
+    expect(find.text('Ver todos os planos'), findsOneWidget);
   });
 
   testWidgets('showApiFailure troca o toast pela sheet', (tester) async {
@@ -147,7 +150,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(SnackBar), findsNothing);
-    expect(find.textContaining('Desbloqueie no'), findsOneWidget);
+    expect(find.text('Ver todos os planos'), findsOneWidget);
   });
 
   testWidgets('aluno recebe o toast, nunca a sheet', (tester) async {
@@ -160,7 +163,7 @@ void main() {
     FeedbackHelper.showApiFailure(ctx, _erro('PLANO_FEATURE_REQUER_UPGRADE'));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('Desbloqueie'), findsNothing);
+    expect(find.text('Ver todos os planos'), findsNothing);
     expect(find.byType(SnackBar), findsOneWidget);
   });
 }

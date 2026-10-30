@@ -25,11 +25,11 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
 
   String get _resultPrimaryLabel =>
       _mensagemEnviada
-          ? S.of(context).copilotoMensagemEnviada
+          ? S.of(context).copilotoAnalisarOutro
           : _applySpec?.label ?? iaCopilotoCriarTarefaLabel();
 
-  VoidCallback? get _resultPrimaryAction {
-    if (_mensagemEnviada) return null;
+  VoidCallback get _resultPrimaryAction {
+    if (_mensagemEnviada) return _voltarAoInicio;
     return _applySpec != null ? _aplicarAcao : _atribuir;
   }
 

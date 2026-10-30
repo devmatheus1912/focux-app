@@ -1,12 +1,30 @@
-String wizardStickyLabel({required bool allDone}) =>
-    allDone ? 'Concluir' : 'Continuar';
+import '../data/onboarding_repository.dart';
+import '../data/setup_steps_catalog.dart';
 
-String wizardFazerDepoisLabel() => 'Fazer depois';
+/// O botão diz o que acontece: "Cadastrar aluno", não "Continuar".
+String wizardStickyLabel({
+  required bool allDone,
+  required List<OnboardingStep> steps,
+}) {
+  if (allDone) return 'Concluir';
+  final atual = steps.where((s) => !s.completed).firstOrNull;
+  if (atual == null) return 'Concluir';
+  return setupStepCatalog
+          .where((e) => e.id == atual.id)
+          .firstOrNull
+          ?.acao ??
+      atual.title;
+}
 
-String wizardDoneTitle() => 'Tudo pronto por aqui';
+String wizardFazerDepoisLabel() => 'Agora não';
 
-String wizardDoneBody() =>
-    'Toque em Concluir para esconder o checklist da Home. O que você já cadastrou fica.';
+String wizardIntroTitle() => 'Seu primeiro aluno treinando';
+
+String wizardIntroBody() => 'Três passos e você já está usando o app de verdade.';
+
+String wizardDoneTitle() => 'Tudo pronto';
+
+String wizardDoneBody() => 'Seu aluno já pode treinar pelo app.';
 
 int wizardEtapaCurrent({
   required int completedCount,
@@ -34,14 +52,6 @@ String wizardEtapaLabel({
   )} de $total';
 }
 
-String wizardTitlesCaption({
-  required String prefix,
-  required List<String> titles,
-}) {
-  if (titles.isEmpty) return '';
-  return '$prefix ${titles.join(', ')}';
-}
-
 String wizardHelpTitle() => 'Primeiros passos';
 
 String wizardHelpSubtitle() =>
@@ -53,16 +63,3 @@ String wizardHelpPassosBody() =>
 String wizardHelpConcluirBody() =>
     'Concluir esconde o checklist da Home. O que você já cadastrou fica.';
 
-String wizardConfirmTitle() => 'Concluir os primeiros passos?';
-
-String wizardConfirmMessage() =>
-    'O checklist some da Home. Você continua usando o app normalmente.';
-
-String wizardConfirmLabel() => 'Concluir';
-
-String wizardLeaveTitle() => 'Sair dos primeiros passos?';
-
-String wizardLeaveMessage() =>
-    'O progresso já salvo fica. Você pode voltar pelo checklist da Home.';
-
-String wizardLeaveConfirm() => 'Sair';

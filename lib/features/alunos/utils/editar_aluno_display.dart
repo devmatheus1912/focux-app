@@ -12,8 +12,6 @@ const editarAlunoTelefoneMax = 20;
 
 String editarAlunoHubSubtitle() => 'Perfil do aluno';
 
-String editarAlunoSalvarTooltip() => 'Salvar';
-
 String editarAlunoConfirmTitle(String firstName) => 'Salvar $firstName?';
 
 String editarAlunoConfirmMessage() =>

@@ -1,42 +1,5 @@
 part of 'aluno360_operacao_logic.dart';
 
-OperacaoDominantMetric resolveOperacaoDominantMetric(Aluno aluno) {
-  if (aluno.emRisco) {
-    final risco = formatRiscoNivel(aluno.riscoNivel);
-    return OperacaoDominantMetric(
-      kind: OperacaoDominantMetricKind.risco,
-      label: 'Foco do dia',
-      value: risco,
-      hint: 'Em risco · priorize contato',
-      semanticsLabel: 'Risco $risco',
-      riscoNivel: aluno.riscoNivel,
-    );
-  }
-
-  final aderencia = aluno.aderenciaPercent;
-  if (aderencia != null) {
-    return OperacaoDominantMetric(
-      kind: OperacaoDominantMetricKind.aderencia,
-      label: 'Aderência · 30 dias',
-      value: '$aderencia%',
-      hint: 'Concluídos / iniciados nos últimos 30 dias',
-      semanticsLabel: 'Aderência $aderencia por cento em 30 dias',
-    );
-  }
-
-  final situacao = aluno.scoreProntidao;
-  return OperacaoDominantMetric(
-    kind: OperacaoDominantMetricKind.prontidao,
-    label: alunoSituacaoLabel,
-    value: situacao == null ? '—' : '$situacao',
-    hint: alunoSituacaoHint,
-    semanticsLabel:
-        situacao == null
-            ? '$alunoSituacaoLabel indisponível'
-            : '$alunoSituacaoLabel $situacao de 100, $alunoSituacaoHint',
-  );
-}
-
 List<AderenciaWeekPoint> parseAderenciaSemanal(
   List<Map<String, dynamic>>? raw,
 ) {
@@ -82,23 +45,6 @@ List<AderenciaWeekPoint> padAderenciaWeekToSevenDays(
     );
   });
 }
-
-/// Check-in vence; sem status do BE nunca pinta falta (vermelho exige agendamento).
-AderenciaDiaStatus resolveAderenciaDiaStatus(AderenciaWeekPoint point) {
-  if (point.checkins > 0) return AderenciaDiaStatus.treinou;
-  final status = point.status;
-  if (status != null) return status;
-  return isIsoDateToday(point.date)
-      ? AderenciaDiaStatus.hoje
-      : AderenciaDiaStatus.semPlano;
-}
-
-String aderenciaDiaStatusLabel(AderenciaDiaStatus status) => switch (status) {
-  AderenciaDiaStatus.treinou => 'treinou',
-  AderenciaDiaStatus.faltou => 'faltou',
-  AderenciaDiaStatus.semPlano => 'sem treino previsto',
-  AderenciaDiaStatus.hoje => 'hoje',
-};
 
 AderenciaWeekSummary summarizeAderenciaWeek(
   List<AderenciaWeekPoint> points, {
@@ -181,49 +127,9 @@ String weekdayNameFromIso(String? isoDate) {
   return labels[parsed.weekday % 7];
 }
 
-/// Whether [isoDate] (yyyy-MM-dd) is today in local time.
-bool isIsoDateToday(String? isoDate) {
-  final parsed = parseIsoDateLocal(isoDate);
-  if (parsed == null) return false;
-  final now = DateTime.now();
-  return parsed.year == now.year &&
-      parsed.month == now.month &&
-      parsed.day == now.day;
-}
-
 /// Label for adherence spark bar (always from local ISO — evita labelDia legado I/X/A).
 String adherenceDayLetter(AderenciaWeekPoint point) =>
     weekdayLetterFromIso(point.date);
-
-/// Compact cell label — dia do mês (cabe em células estreitas).
-String adherenceDayCellLabel(AderenciaWeekPoint point) {
-  final parsed = parseIsoDateLocal(point.date);
-  if (parsed == null) return '';
-  return '${parsed.day}';
-}
-
-/// Staggered entrance delay for Operação sections (finance banner shifts timeline).
-Duration operacaoSectionDelay({
-  required bool financeRisk,
-  required int stepIndex,
-  bool contactPriority = false,
-}) {
-  if (contactPriority) return Duration.zero;
-  const withFinance = [0, 40, 80, 120, 160, 200];
-  const withoutFinance = [0, 0, 40, 80, 120, 160];
-  final table = financeRisk ? withFinance : withoutFinance;
-  final index = stepIndex.clamp(0, table.length - 1);
-  return Duration(milliseconds: table[index]);
-}
-
-/// True when hero already surfaces operational risk (skip duplicate tiles).
-bool operacaoHeroShowsRisco(Aluno aluno) =>
-    alunoHeroPrimarySignal(aluno).label == riscoOperacionalLabel;
-
-bool shouldCompactFollowUpForContactPriority({
-  required bool contactPriority,
-  OperacaoUiHints? uiHints,
-}) => uiHints?.compactFollowUp ?? contactPriority;
 
 /// Prefer BE hints when bundled in /360; fallback to local heuristics.
 bool resolveOperacaoContactPriority({
@@ -300,27 +206,6 @@ bool shouldHideCopilotPrimaryCtaWhenMatchesSticky({
   );
 }
 
-/// Copy for compact follow-up row when contact is the hero priority.
-String alunoFollowUpCompactSubtitle({
-  required String alunoNome,
-  required DateTime? followUpDate,
-  required bool isSnoozed,
-  required DateTime? snoozedUntil,
-  required String Function(DateTime) formatDate,
-}) {
-  if (isSnoozed && snoozedUntil != null) {
-    return 'Adiado até ${formatDate(snoozedUntil)}';
-  }
-  if (followUpDate != null) {
-    return 'Agendado para ${formatDate(followUpDate)}';
-  }
-  final firstName = alunoPrimeiroNome(alunoNome);
-  if (firstName != 'aluno') {
-    return 'Agende depois de falar com $firstName';
-  }
-  return 'Agende o próximo contato após hoje';
-}
-
 /// Hide contact badge when sticky already surfaces the same CTA.
 bool shouldShowCopilotContactBadge({
   required bool contactPriority,
@@ -328,17 +213,6 @@ bool shouldShowCopilotContactBadge({
 }) {
   if (!contactPriority) return false;
   return !sticky.isChatAction;
-}
-
-/// Hide check-in chip when the week has data or S3 sticky already owns P0.
-bool shouldShowOperacaoCheckinCta({
-  required Aluno360OperacaoSnapshot? operacao,
-  required bool weekHasAnyCheckin,
-}) {
-  if (weekHasAnyCheckin) return false;
-  if (operacao == null) return true;
-  // Snapshot = sticky resolvido. Pedir check-in no muro compete com o P0.
-  return false;
 }
 
 /// Sticky primary opens chat — hide duplicate chat CTA in copilot card.

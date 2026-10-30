@@ -164,20 +164,6 @@ String? _copilotExecutarPushMessage({
   return null;
 }
 
-String? copilotExecutarBackendTipo(String? tipoAcao, {String? acao}) {
-  if (_acaoSugereAjusteCarga(acao) || tipoAcao?.toUpperCase() == 'CARGA') {
-    return 'REDUZIR_CARGA';
-  }
-  switch (tipoAcao?.toUpperCase()) {
-    case 'TREINO':
-    case 'CONTATO':
-    case 'WEARABLE':
-      return 'ENVIAR_PUSH';
-    default:
-      return null;
-  }
-}
-
 bool shouldShowCopilotExecutarAcao({
   required String? tipoAcao,
   required Aluno aluno,
@@ -194,17 +180,3 @@ bool shouldShowCopilotExecutarAcao({
     ) !=
     null;
 
-String copilotExecutarAcaoLabel(String? tipoAcao, {String? acao}) {
-  if (_acaoSugereAjusteCarga(acao) || tipoAcao?.toUpperCase() == 'CARGA') {
-    return 'Aplicar ajuste de carga (−15%)';
-  }
-  switch (tipoAcao?.toUpperCase()) {
-    case 'TREINO':
-      return 'Pedir check-in ao aluno';
-    case 'CONTATO':
-    case 'WEARABLE':
-      return 'Enviar notificação ao aluno';
-    default:
-      return 'Aplicar ação';
-  }
-}

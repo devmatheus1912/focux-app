@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
-import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
@@ -14,12 +13,10 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/feedback_helper.dart';
-import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_wizard_chrome.dart';
-import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -29,14 +26,11 @@ import '../../dashboard/providers/dashboard_provider.dart';
 import '../../dashboard/utils/dashboard_home_client_cache.dart';
 import '../../dashboard/utils/dashboard_onboarding_logic.dart';
 import '../../planos/data/plano_features_bff_cache.dart';
-import '../../planos/providers/plano_features_provider.dart';
 import '../data/onboarding_repository.dart';
 import '../data/onboarding_wizard_client_cache.dart';
-import '../data/setup_steps_catalog.dart';
 import '../utils/onboarding_wizard_display.dart';
 import '../utils/onboarding_wizard_normalize.dart';
 import '../utils/setup_action_navigation.dart';
-import '../widgets/setup_step_widgets.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
 
 part 'onboarding_wizard_screen_actions.part.dart';
@@ -75,19 +69,11 @@ class _OnboardingWizardScreenState
   }
 
   Future<void> _load({bool silent = false}) async {
-    final landingCompleta =
-        ref.read(planoFeaturesProvider).value?.landingCompleta ?? false;
     final cachedRaw = OnboardingWizardClientCache.getIfFresh();
     final cached =
         cachedRaw == null
             ? null
-            : normalizeOnboardingWizard(
-              cachedRaw,
-              landingCompleta: landingCompleta,
-              hidden: setupStepsHiddenFor(
-                ref.read(planoFeaturesProvider).value?.normalizeForTier(),
-              ),
-            );
+            : normalizeOnboardingWizard(cachedRaw);
     final keepFold = silent && _wizard != null;
     if (!keepFold) {
       if (cached != null) {
@@ -113,16 +99,7 @@ class _OnboardingWizardScreenState
       final raw =
           await OnboardingRepository(ref.read(apiClientProvider)).wizard();
       if (!mounted) return;
-      final liveLanding =
-          ref.read(planoFeaturesProvider).value?.landingCompleta ??
-          landingCompleta;
-      final w = normalizeOnboardingWizard(
-        raw,
-        landingCompleta: liveLanding,
-        hidden: setupStepsHiddenFor(
-          ref.read(planoFeaturesProvider).value?.normalizeForTier(),
-        ),
-      );
+      final w = normalizeOnboardingWizard(raw);
       OnboardingWizardClientCache.put(raw);
       final completed = w.completedCount;
       if (completed > _previousCompleted && _previousCompleted > 0) {
@@ -208,13 +185,6 @@ class _OnboardingWizardScreenState
 
   Future<void> _sairSemConcluir() async {
     HapticFeedback.selectionClick();
-    final leave = await showFxConfirmSheet(
-      context,
-      title: wizardLeaveTitle(),
-      message: wizardLeaveMessage(),
-      confirmLabel: wizardLeaveConfirm(),
-    );
-    if (!leave || !mounted) return;
     DashboardOnboardingWizardGate.dismissForSession();
     if (!mounted) return;
     context.go('/dashboard/personal');
@@ -262,12 +232,15 @@ class _OnboardingWizardScreenState
             ready
                 ? FxWizardStickyBar(
                     primary: FxLiquidPrimaryButton(
-                      label: wizardStickyLabel(allDone: _allDone),
+                      label: wizardStickyLabel(
+                        allDone: _allDone,
+                        steps: wizard.steps,
+                      ),
                       loading: _concluindo,
                       loadingLabel: 'Concluindo…',
                       onPressed:
                           _allDone
-                              ? _pedirConcluir
+                              ? _concluir
                               : () => _abrirStep(
                                 wizard.nextActionRoute,
                                 fromChip: true,
@@ -319,105 +292,65 @@ class _OnboardingWizardScreenState
     OnboardingWizard wizard,
     ShellPalette chrome,
   ) {
-    final pending = wizard.steps.where((s) => !s.completed).toList();
-    final completed = wizard.steps.where((s) => s.completed).toList();
-    final current = pending.isEmpty ? null : pending.first;
-    final later = pending.length > 1
-        ? pending.skip(1).map((s) => s.title).toList()
-        : const <String>[];
-    final doneCaption = wizardTitlesCaption(
-      prefix: 'Já feito:',
-      titles: completed.map((s) => s.title).toList(),
-    );
-    final laterCaption = wizardTitlesCaption(prefix: 'Depois:', titles: later);
-    final remaining = wizard.remainingMinutes;
-    final title = current?.title ?? wizardDoneTitle();
-    final body =
-        current == null
-            ? wizardDoneBody()
-            : (current.description.trim().isEmpty
-                ? null
-                : current.description.trim());
-    final minutes =
-        current != null && current.estimatedMinutes > 0
-            ? '~${current.estimatedMinutes} min'
-            : remaining > 0 && current != null
-            ? '~$remaining min'
-            : '';
-
-    final brand = BrandPalette.softened(Theme.of(context).colorScheme.primary);
-    // Contexto (Já feito / Depois) fica abaixo do foco — §11/§12.
-    final contextStyle = FocuxHubTypography.bodyMuted(
-      color: chrome.mute,
-      fontWeight: FontWeight.w500,
-      height: 1.35,
-    ).copyWith(fontSize: TokensStrip.fontBodySm);
-    final metaStyle = FocuxHubTypography.bodyMuted(
-      color: chrome.mute,
-      fontWeight: FontWeight.w500,
-    ).copyWith(fontSize: TokensStrip.fontBodySm);
-
+    final primary = Theme.of(context).colorScheme.primary;
+    final atual = wizard.steps.where((s) => !s.completed).firstOrNull;
     return [
-      FxWizardStepDots(
-        current: wizardEtapaCurrent(
-          completedCount: wizard.completedCount,
-          totalCount: wizard.totalCount,
-          allDone: _allDone,
-        ),
-        total: wizard.totalCount <= 0 ? 1 : wizard.totalCount,
-        color: Theme.of(context).colorScheme.primary,
+      Text(
+        _allDone ? wizardDoneTitle() : wizardIntroTitle(),
+        style: FocuxHubTypography.pageTitle(context, color: chrome.ink),
+      ),
+      const SizedBox(height: TokensStrip.s1),
+      Text(
+        _allDone ? wizardDoneBody() : wizardIntroBody(),
+        style: FocuxHubTypography.bodyMuted(color: chrome.mute),
       ),
       const SizedBox(height: TokensStrip.s4),
-      Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          FxIcon(
-            name:
-                current == null
-                    ? 'spark'
-                    : setupStepFxIconName(current.icon),
-            size: FxSettingsLayout.iconSize,
-            color: brand,
+      for (final (i, step) in wizard.steps.indexed)
+        Container(
+          margin: const EdgeInsets.only(bottom: TokensStrip.s2),
+          padding: const EdgeInsets.all(TokensStrip.s3),
+          decoration: fxListCardDecoration(
+            context,
+            accent: step == atual ? primary : null,
           ),
-          const SizedBox(width: FxSettingsLayout.iconGap),
-          Expanded(
-            child: Text(
-              title,
-              style: FocuxHubTypography.sectionTitle(
-                context,
-                color: chrome.ink,
+          child: Row(
+            children: [
+              SizedBox(
+                width: 28,
+                child:
+                    step.completed
+                        ? Icon(Icons.check_rounded, color: primary, size: 22)
+                        : Text(
+                          '${i + 1}',
+                          style: FocuxHubTypography.metric(
+                            color: step == atual ? primary : chrome.mute,
+                            fontSize: TokensStrip.fontBody,
+                          ),
+                        ),
               ),
-            ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      step.title,
+                      style: FocuxHubTypography.cardTitle(
+                        color: step.completed ? chrome.mute : chrome.ink,
+                      ),
+                    ),
+                    if (step == atual && step.description.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        step.description,
+                        style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-      if (body != null && body.isNotEmpty) ...[
-        const SizedBox(height: TokensStrip.s2),
-        Text(body, style: FocuxHubTypography.bodyMuted(color: chrome.mute)),
-      ],
-      if (minutes.isNotEmpty) ...[
-        const SizedBox(height: TokensStrip.s2),
-        Text(minutes, style: metaStyle),
-      ],
-      if (doneCaption.isNotEmpty || laterCaption.isNotEmpty) ...[
-        const SizedBox(height: TokensStrip.s6),
-        if (doneCaption.isNotEmpty)
-          Text(
-            doneCaption,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: contextStyle,
-          ),
-        if (laterCaption.isNotEmpty) ...[
-          if (doneCaption.isNotEmpty) const SizedBox(height: TokensStrip.s2),
-          Text(
-            laterCaption,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: contextStyle,
-          ),
-        ],
-      ],
+        ),
     ];
   }
 }

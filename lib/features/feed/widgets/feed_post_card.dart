@@ -6,7 +6,6 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/fx_utils.dart';
-import '../../../core/utils/pt_br_display.dart';
 import '../../../core/utils/safe_external_launch.dart';
 import '../../../core/widgets/fx_cached_network_image.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
@@ -28,6 +27,7 @@ class FeedPostCard extends StatelessWidget {
     required this.comentarios,
     required this.onComentar,
     this.onCurtir,
+    this.curtido = false,
     this.onFixar,
     this.onExcluir,
     this.onDenunciar,
@@ -40,6 +40,7 @@ class FeedPostCard extends StatelessWidget {
   final int curtidas;
   final int comentarios;
   final VoidCallback? onCurtir;
+  final bool curtido;
   final VoidCallback onComentar;
   final VoidCallback? onFixar;
   final VoidCallback? onExcluir;
@@ -70,30 +71,13 @@ class FeedPostCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              FeedPostAuthorHeader(post: post, primary: primary),
-              const SizedBox(height: 12),
               Row(
                 children: [
-                  if (post.fixado) ...[
-                    Icon(Icons.push_pin, color: primary, size: 18),
-                    const SizedBox(width: 8),
-                  ],
-                  Icon(
-                    feedTipoIcon(post.tipoPost),
-                    size: 20,
-                    color: badgeColor,
-                  ),
-                  const SizedBox(width: 8),
                   Expanded(
-                    child: Text(
-                      post.titulo,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                    ),
+                    child: FeedPostAuthorHeader(post: post, primary: primary),
                   ),
+                  if (post.fixado)
+                    Icon(Icons.push_pin, color: primary, size: 18),
                   if (_canManage)
                     PopupMenuButton<String>(
                       tooltip: 'Ações',
@@ -168,15 +152,28 @@ class FeedPostCard extends StatelessWidget {
                     ),
                 ],
               ),
-              const SizedBox(height: 6),
-              FeedTypeBadge(tipo: post.tipoPost, color: badgeColor),
-              const SizedBox(height: 8),
-              Text(
-                post.conteudo,
-                style: FocuxHubTypography.body(
-                  color: Theme.of(context).colorScheme.onSurface,
+              if (post.titulo.trim().isNotEmpty) ...[
+                const SizedBox(height: TokensStrip.s3),
+                Text(
+                  post.titulo,
+                  style: FocuxHubTypography.cardTitle(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
                 ),
-              ),
+              ],
+              if (post.tipoPost == 'DICA') ...[
+                const SizedBox(height: TokensStrip.s1),
+                FeedTypeBadge(tipo: post.tipoPost, color: badgeColor),
+              ],
+              if (post.conteudo.trim().isNotEmpty) ...[
+                const SizedBox(height: TokensStrip.s2),
+                Text(
+                  post.conteudo,
+                  style: FocuxHubTypography.body(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+              ],
               if (mUrl != null && mUrl.isNotEmpty) ...[
                 const SizedBox(height: 12),
                 post.tipoPost == 'VIDEO'
@@ -201,27 +198,77 @@ class FeedPostCard extends StatelessWidget {
                 const SizedBox(height: 12),
                 FeedImagePlaceholder(primary: primary),
               ],
-              const SizedBox(height: 12),
-              const Divider(height: 1),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 4,
-                crossAxisAlignment: WrapCrossAlignment.center,
+              const SizedBox(height: TokensStrip.s1),
+              Row(
                 children: [
-                  if (onCurtir != null)
-                    FxTonalButton(label: ptCountLabel(curtidas, 'curtida', 'curtidas'), icon: Icons.thumb_up_alt_outlined, onPressed: onCurtir, compact: true)
-                  else
-                    Text(
-                      ptCountLabel(curtidas, 'curtida', 'curtidas'),
-                      style: FocuxHubTypography.bodyMuted(
-                        color: ShellChrome.of(context).mute,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  FxTonalButton(label: ptCountLabel(comentarios, 'comentário', 'comentários'), icon: Icons.comment_outlined, onPressed: onComentar, compact: true),
+                  _FeedAcao(
+                    icon: curtido ? Icons.favorite : Icons.favorite_border,
+                    cor: curtido ? EagleTokens.bad : null,
+                    total: curtidas,
+                    rotulo: curtido ? 'Descurtir' : 'Curtir',
+                    onTap: onCurtir,
+                  ),
+                  const SizedBox(width: TokensStrip.s2),
+                  _FeedAcao(
+                    icon: Icons.chat_bubble_outline_rounded,
+                    total: comentarios,
+                    rotulo: 'Comentários',
+                    onTap: onComentar,
+                  ),
                 ],
               ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FeedAcao extends StatelessWidget {
+  const _FeedAcao({
+    required this.icon,
+    required this.total,
+    required this.rotulo,
+    this.cor,
+    this.onTap,
+  });
+
+  final IconData icon;
+  final int total;
+  final String rotulo;
+  final Color? cor;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final mute = ShellChrome.of(context).mute;
+    return Semantics(
+      button: onTap != null,
+      label: '$rotulo, $total',
+      excludeSemantics: true,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(TokensStrip.rPill),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 44, minWidth: 44),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(width: TokensStrip.s1),
+              Icon(icon, size: 22, color: cor ?? mute),
+              if (total > 0) ...[
+                const SizedBox(width: TokensStrip.s1),
+                Text(
+                  '$total',
+                  style: FocuxHubTypography.metric(
+                    color: mute,
+                    fontSize: TokensStrip.fontBody,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+              const SizedBox(width: TokensStrip.s1),
             ],
           ),
         ),

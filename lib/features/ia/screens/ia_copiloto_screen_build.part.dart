@@ -333,6 +333,12 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                                       ),
                                     const SizedBox(height: TokensStrip.s2),
                                     const IaSafetyDisclaimer(compact: true),
+                                    const SizedBox(height: TokensStrip.s3),
+                                    FxTonalButton(
+                                      label: S.of(context).copilotoAnalisarOutro,
+                                      expanded: true,
+                                      onPressed: _voltarAoInicio,
+                                    ),
                                   ],
                                 ),
                               );

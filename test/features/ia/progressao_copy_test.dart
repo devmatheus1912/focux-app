@@ -8,20 +8,6 @@ void main() {
     expect(progressaoPendingReviewLabel(1), 'Revisar 1 sugestão pendente');
     expect(progressaoPendingReviewLabel(3), 'Revisar 3 sugestões pendentes');
   });
-
-  test('chrome e limites do pedido de progressão', () {
-    expect(progressaoObservacoesMax, 500);
-    expect(progressaoHubSubtitle(''), 'Sugestão de carga, só se você pedir');
-    expect(progressaoHubSubtitle('  Ana  '), 'Ana · só se você pedir');
-    expect(progressaoStickyLabel(hasResult: false), 'Gerar progressão');
-    expect(progressaoStickyLabel(hasResult: true), 'Gerar outra');
-    expect(progressaoPendingMetricHint(0), 'Nada pendente neste aluno');
-    expect(progressaoPendingMetricHint(1), '1 sugestão para revisar');
-    expect(progressaoStickyLoadingLabel(), 'Gerando…');
-    expect(progressaoConfirmTitle(), 'Gerar progressão com IA?');
-    expect(progressaoConfirmLabel(), 'Gerar');
-  });
-
   test('objetivo manda o valor da API', () {
     expect(ProgressaoObjetivo.forca.api, 'FORCA');
     expect(ProgressaoObjetivo.resistencia.label, 'Resistência');

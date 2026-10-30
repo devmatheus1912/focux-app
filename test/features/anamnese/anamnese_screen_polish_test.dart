@@ -17,13 +17,7 @@ void main() {
     expect(screen, contains('friendlyError'));
     expect(screen, contains('FxEmptyState'));
     expect(screen, contains('SkeletonList'));
-    expect(screen, contains('AlunoSegmentedChoice'));
-    expect(screen, contains('OperationalMetricTile'));
-    expect(screen, contains("label: 'Clínico'"));
-    expect(screen, contains('anamneseClinicoResumoValue'));
-    expect(screen, contains('_FichaDisclosureToggle'));
-    expect(screen, contains('Ver detalhes da ficha'));
-    expect(screen, contains('_fichaExpanded'));
+    expect(screen, contains('anamnesePontosDeAtencao'));
     expect(screen, contains('fxListCardDecoration'));
     expect(screen, contains('FocuxHubTypography'));
     expect(screen, isNot(contains('FxSatelliteListTile')));
@@ -39,8 +33,8 @@ void main() {
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('showAnamneseHelpSheet'));
     expect(screen, contains("'Solicitar anamnese'"));
-    expect(screen, contains("label: 'Chat'"));
-    expect(screen, contains("label: 'Pedir atestado'"));
+    expect(screen, contains("rotulo: 'Abrir chat'"));
+    expect(screen, contains("rotulo: 'Pedir atestado'"));
     expect(screen, isNot(contains('TabBar')));
     expect(screen, isNot(contains('DropdownButton')));
     expect(screen, isNot(contains('Slider(')));

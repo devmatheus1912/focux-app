@@ -44,67 +44,33 @@ class AlunoActivationProgress {
   }
 }
 
-int alunoActivationProfileCompletion({
-  required String? telefone,
-  required String? whatsapp,
-  required String? objetivo,
-  required String? genero,
-  required String? peso,
-  required String? altura,
-  required String? dataNascimento,
-  String? fotoUrl,
-}) {
-  final filled = [
-    telefone,
-    whatsapp,
-    objetivo,
-    genero,
-    peso,
-    altura,
-    dataNascimento,
-  ].where((value) => value != null && value.toString().trim().isNotEmpty).length;
-  return (filled / 7 * 100).round();
-}
-
+/// Só o necessário para treinar: nada de formulário longo na entrada.
 AlunoActivationProgress alunoActivationProgress({
-  required int profileCompletion,
-  required bool hasMedidas,
+  required bool temFoto,
+  required bool anamneseResolvida,
   required bool hasTreinoConcluido,
-  required bool hasChat,
 }) {
   final steps = <AlunoActivationStep>[
     AlunoActivationStep(
-      title: 'Completar seu perfil',
-      description:
-          'Objetivo, dados corporais e contato deixam o acompanhamento mais inteligente.',
-      done: profileCompletion >= 80,
-      cta: 'Ir para perfil',
+      title: 'Confirmar nome e foto',
+      description: 'Assim seu personal reconhece você no app.',
+      done: temFoto,
+      cta: 'Abrir perfil',
       route: '/aluno/perfil',
     ),
     AlunoActivationStep(
-      title: 'Registrar a primeira medida',
-      description:
-          'Seu corpo precisa de um ponto de partida para mostrar evolução de verdade.',
-      done: hasMedidas,
-      cta: 'Registrar medida',
-      route: '/aluno/perfil',
+      title: 'Responder a anamnese',
+      description: 'Seu personal usa estas respostas para montar o treino.',
+      done: anamneseResolvida,
+      cta: 'Responder',
+      route: '/aluno/anamnese',
     ),
     AlunoActivationStep(
-      title: 'Fazer o primeiro treino',
-      description:
-          'Quando você treina pelo app, o personal ganha histórico para ajustar carga e frequência.',
+      title: 'Ver o primeiro treino',
+      description: 'Abra o treino e comece quando quiser.',
       done: hasTreinoConcluido,
       cta: 'Abrir treinos',
       route: '/checkin/treinos',
-    ),
-    AlunoActivationStep(
-      title: 'Falar com seu personal',
-      description:
-          'Dúvidas e feedback podem ficar no chat — quando quiser.',
-      done: hasChat,
-      cta: 'Abrir chat',
-      route: '/chat/aluno',
-      optional: true,
     ),
   ];
   final current = steps.firstWhere(
@@ -120,8 +86,6 @@ String alunoActivationLeaveMessage() =>
     'O progresso já feito continua salvo. Você pode voltar depois.';
 
 String alunoActivationLeaveConfirm() => 'Pular';
-
-String alunoActivationChatSkipLabel() => 'Falar depois';
 
 String alunoActivationQuestion({required bool allDone}) =>
     allDone ? 'Tudo pronto para evoluir' : 'Próximo passo';

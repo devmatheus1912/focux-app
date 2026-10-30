@@ -5,19 +5,13 @@ import '../data/setup_steps_catalog.dart';
 /// título/descrição do catálogo (evita copy legado tipo "cor da marca").
 /// Passos fora do catálogo (ou link-bio sem capability) são descartados.
 OnboardingWizard normalizeOnboardingWizard(
-  OnboardingWizard raw, {
-  required bool landingCompleta,
-  Set<String> hidden = const {},
-}) {
+  OnboardingWizard raw,
+) {
   final byId = <String, OnboardingStep>{
     for (final step in raw.steps) step.id: step,
   };
-  final visible = visibleSetupSteps(
-    landingCompleta: landingCompleta,
-    hidden: hidden,
-  );
   final steps = <OnboardingStep>[
-    for (final entry in visible)
+    for (final entry in setupStepCatalog)
       OnboardingStep(
         id: entry.id,
         title: entry.title,

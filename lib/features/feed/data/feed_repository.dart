@@ -14,6 +14,7 @@ class FeedPost {
   final bool fixado;
   final int totalCurtidas;
   final int totalComentarios;
+  final bool curtidoPorMim;
   final String criadoEm;
 
   FeedPost({
@@ -27,11 +28,13 @@ class FeedPost {
     this.autorAvatarUrl,
     this.fixado = false,
     this.totalCurtidas = 0,
+    this.curtidoPorMim = false,
     this.totalComentarios = 0,
     required this.criadoEm,
   });
 
   factory FeedPost.fromJson(Map<String, dynamic> json) => FeedPost(
+    curtidoPorMim: json['curtidoPorMim'] as bool? ?? false,
     id: (json['id'] as num?)?.toInt() ?? 0,
     titulo: json['titulo'] as String? ?? '',
     conteudo: json['conteudo'] as String? ?? '',

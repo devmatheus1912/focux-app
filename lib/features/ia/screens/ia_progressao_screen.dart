@@ -1,3 +1,6 @@
+import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
+import '../../alunos/providers/alunos_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,20 +17,16 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/motion_preferences.dart';
 import '../../../core/widgets/feedback_helper.dart';
-import '../../../core/widgets/fx_action_chip.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
-import '../../../core/widgets/fx_hub_header.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/ia_safety_disclaimer.dart';
-import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../features/alunos/constants/aluno_360_layout.dart';
 import '../../../features/auth/providers/auth_provider.dart';
-import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../moderacao/data/moderacao_repository.dart';
 import '../../moderacao/widgets/denunciar_sheet.dart';
 import '../data/ia_repository.dart';
@@ -71,6 +70,9 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
   @override
   void initState() {
     super.initState();
+    _objetivo = progressaoObjetivoDoAluno(
+      ref.read(alunoProvider(widget.alunoId)).value?.objetivo,
+    );
     WidgetsBinding.instance.addPostFrameCallback((_) => _trackViewIfNeeded());
   }
 
@@ -140,8 +142,8 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
     );
     showFxHelpSheet(
       context,
-      title: 'Progressão de carga',
-      subtitle: progressaoHubSubtitle(widget.alunoNome),
+      title: progressaoTitulo,
+      subtitle: widget.alunoNome,
       tips: const [
         FxHelpTip(
           'Dados reais',
@@ -249,26 +251,26 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final abertas =
         ref.watch(progressaoSugestoesProvider(widget.alunoId)).value ??
         const [];
-    final pending = abertas.where((s) => !s.naoEncontrada).toList();
     final contexto = ref.watch(progressaoContextoProvider(widget.alunoId));
     final semTreino = isSemTreinoAtivo(contexto.error);
+    final semExecucao = contexto.value?.sessoes4Semanas == 0;
     final resultado = _resultado;
 
     return fxScreenA11yScope(
-      label: 'Progressão de Carga',
+      label: progressaoTitulo,
       child: FxKeyboardPopScope(
         child: FxShellScaffold(
           useMesh: true,
           appBar: FxShellAppBar(
-            title: 'Progressão de carga',
+            title: progressaoTitulo,
+            subtitle: widget.alunoNome,
             onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
             actions: [
               FxHelpIconButton(
-                tooltip: 'Como funciona a progressão',
+                tooltip: 'Como funciona o ajuste de cargas',
                 onTap: _showHelp,
               ),
             ],
@@ -291,58 +293,16 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            FxHubHeader(
-                              title: widget.alunoNome,
-                              subtitle: progressaoHubSubtitle(widget.alunoNome),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                top: TokensStrip.s4,
-                                bottom: TokensStrip.s3,
+                            if (abertas.isNotEmpty) ...[
+                              FxTonalButton(
+                                label: progressaoPendingReviewLabel(
+                                  abertas.length,
+                                ),
+                                expanded: true,
+                                onPressed: _abrirAceitar,
                               ),
-                              child: OperationalMetricTile(
-                                label: 'Pendentes',
-                                value: '${pending.length}',
-                                hint: progressaoPendingMetricHint(
-                                  pending.length,
-                                ),
-                                color: primary,
-                                isDark: isDark,
-                              ),
-                            ),
-                            Wrap(
-                              spacing: TokensStrip.s2,
-                              runSpacing: TokensStrip.s2,
-                              children: [
-                                if (abertas.isNotEmpty)
-                                  FxActionChip(
-                                    label: progressaoPendingReviewLabel(
-                                      abertas.length,
-                                    ),
-                                    accent: primary,
-                                    isDark: isDark,
-                                    onPressed: _abrirAceitar,
-                                  ),
-                                FxActionChip(
-                                  label: 'Treinos',
-                                  accent: primary,
-                                  isDark: isDark,
-                                  onPressed: _abrirTreinos,
-                                ),
-                                FxActionChip(
-                                  label: 'Evolução',
-                                  accent: primary,
-                                  isDark: isDark,
-                                  onPressed:
-                                      () => context.push(
-                                        '/alunos/${widget.alunoId}/evolucao',
-                                      ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: TokensStrip.s4),
-                            const DashboardSectionHeader(title: 'Pedido'),
-                            const SizedBox(height: TokensStrip.s2),
+                              const SizedBox(height: TokensStrip.s3),
+                            ],
                             IaProgressaoPedidoCard(
                               contexto: contexto,
                               objetivo: _objetivo,
@@ -350,6 +310,15 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
                                   (o) => setState(() => _objetivo = o),
                               observacoes: _observacoes,
                               enabled: !_loading,
+                            ),
+                            const SizedBox(height: TokensStrip.s3),
+                            Text(
+                              semExecucao
+                                  ? progressaoSemExecucao
+                                  : progressaoNadaMuda,
+                              style: FocuxHubTypography.bodyMuted(
+                                color: chrome.mute,
+                              ),
                             ),
                             const SizedBox(height: TokensStrip.s3),
                             const IaSafetyDisclaimer(compact: true),
@@ -430,6 +399,8 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
                               ? null
                               : semTreino
                               ? _abrirTreinos
+                              : semExecucao
+                              ? null
                               : _gerar,
                     ),
                   ),

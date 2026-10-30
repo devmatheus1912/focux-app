@@ -13,18 +13,6 @@ extension on _OnboardingWizardScreenState {
     );
   }
 
-  Future<void> _pedirConcluir() async {
-    if (_concluindo) return;
-    final ok = await showFxConfirmSheet(
-      context,
-      title: wizardConfirmTitle(),
-      message: wizardConfirmMessage(),
-      confirmLabel: wizardConfirmLabel(),
-    );
-    if (!ok || !mounted) return;
-    await _concluir();
-  }
-
   Future<void> _concluir() async {
     if (_concluindo) return;
     setState(() => _concluindo = true);

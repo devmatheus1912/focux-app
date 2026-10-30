@@ -15,8 +15,6 @@ void main() {
     expect(screen, contains('IaProgressaoLoadingSkeleton'));
     expect(screen, contains('_loading'));
     expect(screen, isNot(contains('FxSettingsGroup')));
-    expect(screen, contains('FxHubHeader'));
-    expect(screen, contains('OperationalMetricTile'));
     expect(screen, contains('IaProgressaoPedidoCard'));
     expect(screen, contains('progressaoContextoProvider'));
     expect(screen, contains('isSemTreinoAtivo'));
@@ -35,9 +33,7 @@ void main() {
     expect(screen, contains('showFxHelpSheet'));
     expect(screen, contains('IaSafetyDisclaimer'));
     expect(screen, contains('IaProgressaoResultView'));
-    expect(screen, contains('FxActionChip'));
     expect(screen, contains('/alunos/\${widget.alunoId}/rotina'));
-    expect(screen, contains('/alunos/\${widget.alunoId}/evolucao'));
     expect(screen, contains('progressaoPendingReviewLabel'));
     expect(screen, isNot(contains('person_add')));
     expect(screen, isNot(contains('DropdownButton')));

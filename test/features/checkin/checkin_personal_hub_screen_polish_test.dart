@@ -15,7 +15,7 @@ void main() {
     expect(screen, contains('FxContentWidthLimiter'));
     expect(screen, contains("safePopOrGo(context, '/dashboard/personal')"));
     expect(screen, contains('FxHelpIconButton'));
-    expect(screen, contains('checkinFocusAction'));
+    expect(screen, contains('checkinPorAluno'));
     expect(screen, contains('showCheckinPersonalCatalogSheet'));
     expect(
       File(
@@ -29,8 +29,6 @@ void main() {
       ).readAsStringSync(),
       allOf(contains('Carregar mais'), contains('onTapOutside')),
     );
-    expect(screen, contains('FxStripCard'));
-    expect(screen, contains('emphasize: true'));
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, contains('take(3)'));
     expect(screen, contains('Ver todos'));
@@ -41,7 +39,7 @@ void main() {
     expect(screen, contains('SkeletonList'));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('checkinHubViewed'));
-    expect(screen, contains('Cobrar treino'));
+    expect(screen, contains('Lembrar'));
     expect(screen, contains('pendentes'));
     expect(screen, isNot(contains('/checkin/executar')));
     expect(screen, isNot(contains('CircularProgressIndicator')));

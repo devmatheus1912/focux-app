@@ -87,20 +87,9 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                 );
 
                 final onboardingFromHome = home.onboardingResumo;
-                final landingCompleta =
-                    planoFromHome?.landingCompleta ??
-                    ref.watch(planoFeaturesProvider).value?.landingCompleta ??
-                    false;
-                final onboardingHidden = setupStepsHiddenFor(
-                  (planoFromHome ?? ref.watch(planoFeaturesProvider).value)
-                      ?.normalizeForTier(),
-                );
                 final onboardingIncomplete =
                     onboardingFromHome != null &&
-                    !onboardingFromHome.ativacaoCompleta(
-                      includeLinkBio: landingCompleta,
-                      hiddenSteps: onboardingHidden,
-                    );
+                    !onboardingFromHome.ativacaoCompleta();
                 final primeiroTreinoCriado =
                     onboardingFromHome?.primeiroTreinoCriado ?? false;
                 return RefreshIndicator(
@@ -147,11 +136,7 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                             proximoPasso:
                                 onboardingFromHome == null
                                     ? null
-                                    : nextSetupStep(
-                                      onboardingFromHome,
-                                      landingCompleta: landingCompleta,
-                                      hidden: onboardingHidden,
-                                    ),
+                                    : nextSetupStep(onboardingFromHome),
                             notificacoesNaoLidasOverride:
                                 home.notificacoesNaoLidas,
                             brandAccent: dashboardParseBrandColor(

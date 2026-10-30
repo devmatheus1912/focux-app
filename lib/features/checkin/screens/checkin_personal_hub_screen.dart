@@ -7,7 +7,6 @@ import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
-import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/fx_utils.dart';
@@ -19,11 +18,9 @@ import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../../alunos/widgets/aluno_avatar.dart';
-import '../../../core/widgets/fx_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../models/checkin_personal_home.dart';
 import '../providers/checkin_provider.dart';
@@ -182,15 +179,15 @@ class _CheckinPersonalHubScreenState
                     TokensStrip.s6,
                   ),
                   children: [
-                    _CheckinTodayCard(home: home, isDark: isDark),
+                    Text(
+                      checkinResumoDoDia(home),
+                      style: FocuxHubTypography.cardTitle(
+                        color: fxScreenInk(context),
+                      ),
+                    ),
                     if (home.pendentes.isNotEmpty) ...[
                       const SizedBox(height: TokensStrip.s4),
-                      DashboardSectionHeader(
-                        title:
-                            home.pendentes.length == 1
-                                ? '1 aluno sem check-in hoje'
-                                : '${home.pendentes.length} sem check-in hoje',
-                      ),
+                      const DashboardSectionHeader(title: 'Faltam treinar hoje'),
                       const SizedBox(height: TokensStrip.s2),
                       for (final pendente in home.pendentes)
                         _CheckinPendenteTile(
@@ -201,14 +198,10 @@ class _CheckinPersonalHubScreenState
                     ],
                     if (home.hoje.isNotEmpty) ...[
                       const SizedBox(height: TokensStrip.s4),
-                      _CheckinSection(
-                        title:
-                            home.checkinsHoje == 1
-                                ? '1 check-in hoje'
-                                : '${home.checkinsHoje} check-ins hoje',
-                        items: home.hoje,
-                        home: home,
-                      ),
+                      const DashboardSectionHeader(title: 'Hoje'),
+                      const SizedBox(height: TokensStrip.s2),
+                      for (final grupo in checkinPorAluno(home.hoje))
+                        _CheckinTile(grupo: grupo),
                     ],
                     if (home.semana.isNotEmpty) ...[
                       const SizedBox(height: TokensStrip.s4),
@@ -224,66 +217,6 @@ class _CheckinPersonalHubScreenState
             );
           },
         ),
-      ),
-    );
-  }
-}
-
-class _CheckinTodayCard extends StatelessWidget {
-  const _CheckinTodayCard({required this.home, required this.isDark});
-
-  final CheckinPersonalHomeBundle home;
-  final bool isDark;
-
-  @override
-  Widget build(BuildContext context) {
-    final chrome = ShellChrome.forBrightness(context, isDark);
-    final count = home.checkinsHoje;
-    return FxStripCard(
-      emphasize: true,
-      semanticsLabel: count == 1 ? '1 check-in hoje' : '$count check-ins hoje',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Hoje', style: FocuxHubTypography.chip(chrome.mute)),
-          const SizedBox(height: 6),
-          Text(
-            '$count',
-            style: FocuxHubTypography.metric(
-              color: chrome.ink,
-              fontSize: FocuxHubTypography.metricLg,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            count == 0
-                ? 'Ninguém concluiu treino ainda'
-                : count == 1
-                ? 'Treino concluído'
-                : 'Treinos concluídos',
-            style: FocuxHubTypography.body(
-              color: chrome.ink,
-            ).copyWith(fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(height: TokensStrip.s3),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: FxActionChip(
-              label: checkinFocusAction(home).label,
-              accent: Theme.of(context).colorScheme.primary,
-              isDark: isDark,
-              onPressed: () {
-                final focus = checkinFocusAction(home);
-                final alunoId = focus.alunoId;
-                if (alunoId != null) {
-                  context.push('/alunos/$alunoId');
-                  return;
-                }
-                goPersonalShellTab(context, '/alunos');
-              },
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -320,38 +253,40 @@ class _CheckinSection extends ConsumerWidget {
                   : null,
         ),
         const SizedBox(height: TokensStrip.s2),
-        for (final item in items.take(3)) _CheckinTile(item: item),
+        for (final grupo in checkinPorAluno(items).take(3))
+          _CheckinTile(grupo: grupo),
       ],
     );
   }
 }
 
 class _CheckinTile extends StatelessWidget {
-  const _CheckinTile({required this.item});
+  const _CheckinTile({required this.grupo});
 
-  final CheckinPersonalItem item;
+  final CheckinDoAluno grupo;
 
   @override
   Widget build(BuildContext context) {
+    final ultimo = grupo.ultimoEm;
     return FxSatelliteListTile(
-      title: item.alunoNome,
-      subtitle: Text(item.treinoNome),
+      title: grupo.alunoNome,
+      subtitle: Text(checkinDoAlunoLinha(grupo)),
       leading: AlunoAvatar(
-        name: item.alunoNome,
-        photoUrl: item.fotoUrl,
+        name: grupo.alunoNome,
+        photoUrl: grupo.fotoUrl,
         variant: AlunoAvatarVariant.strip,
       ),
       trailing:
-          item.iniciadoEm == null
+          ultimo == null
               ? null
               : Text(
-                fxTimeAgo(item.iniciadoEm!),
+                fxTimeAgo(ultimo),
                 style: FocuxHubTypography.bodyMuted(
                   color: fxScreenMute(context),
                   fontWeight: FontWeight.w600,
                 ),
               ),
-      onTap: () => context.push('/alunos/${item.alunoId}'),
+      onTap: () => context.push('/alunos/${grupo.alunoId}'),
     );
   }
 }
@@ -377,7 +312,7 @@ class _CheckinPendenteTile extends StatelessWidget {
         variant: AlunoAvatarVariant.strip,
       ),
       trailing: FxTonalButton(
-        label: loading ? 'Enviando…' : 'Cobrar treino',
+        label: loading ? 'Enviando…' : 'Lembrar',
         compact: true,
         loading: loading,
         onPressed: loading ? null : onCobrar,

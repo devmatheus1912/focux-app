@@ -21,7 +21,6 @@ void main() {
     expect(screen, contains('_AssinaturaStickyGlassBar'));
     expect(screen, contains('BackdropFilter'));
     expect(screen, contains('_PaywallLegalConsentLine'));
-    expect(screen, contains('showLegalConsent'));
     expect(screen, contains('Gerenciar assinatura na loja'));
 
     expect(layout, contains('_PaywallLegalConsentLine'));

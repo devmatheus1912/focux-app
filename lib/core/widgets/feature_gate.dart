@@ -272,21 +272,19 @@ class _LockedScreenState extends ConsumerState<_LockedScreen> {
       featureName: widget.featureName,
       plan: plan,
     );
-    final priceAnchor = switch (plan) {
-      SubscriptionPlan.ENTERPRISE => 'Enterprise · marca, loja e time',
-      SubscriptionPlan.PRO => 'Pro · a partir da assinatura mensal',
-      _ => null,
-    };
+    // Em aba do shell não há para onde voltar.
+    final empilhada = GoRouter.of(context).canPop();
 
     return FxShellScaffold(
       useMesh: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: BackButton(
-          onPressed: () => safePopOr(context, () => goToRoleHome(context, ref)),
-        ),
-      ),
+      appBar:
+          empilhada
+              ? AppBar(
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                leading: BackButton(onPressed: () => context.pop()),
+              )
+              : null,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(
@@ -298,12 +296,12 @@ class _LockedScreenState extends ConsumerState<_LockedScreen> {
           child: Column(
             children: [
               Expanded(
-                child: SingleChildScrollView(
+                child: Center(
+                  child: SingleChildScrollView(
                   child: FxUpgradeSalesPanel(
                     offer: offer,
                     benefits: benefits,
                     plan: plan,
-                    priceAnchor: priceAnchor,
                     onCta: () {
                       AnalyticsService.instance.track(
                         ProductEvents.paywallCtaTapped,
@@ -323,11 +321,9 @@ class _LockedScreenState extends ConsumerState<_LockedScreen> {
                         '/assinatura?plano=${plan.apiName}&source=feature_gate&feature=${Uri.encodeComponent(widget.featureName)}$capQuery',
                       );
                     },
-                    onDismiss:
-                        () => safePopOr(
-                          context,
-                          () => goToRoleHome(context, ref),
-                        ),
+                    onVerPlanos:
+                        () => context.push('/assinatura?source=feature_gate'),
+                  ),
                   ),
                 ),
               ),
