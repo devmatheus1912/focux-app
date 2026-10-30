@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../screens/main_shell.dart';
 import '../../features/dashboard/screens/personal_dashboard_screen.dart';
 import '../../features/alunos/screens/alunos_list_screen.dart';
-import '../../features/treinos/screens/treinos_list_screen.dart';
+import '../../features/treinos/screens/modelos_de_treino_view.dart';
 import '../../features/agenda/screens/agenda_screen.dart';
 import '../../features/ia/screens/ia_copiloto_screen.dart';
 import '../observability/sentry_performance.dart';
@@ -52,7 +52,7 @@ RouteBase buildPersonalShellRoute() {
         routes: [
           GoRoute(
             path: '/treinos',
-            builder: (context, state) => TreinosListScreen(
+            builder: (context, state) => ModelosDeTreinoView(
               abrirNovoModelo: state.uri.queryParameters['novo'] == '1',
             ),
           ),

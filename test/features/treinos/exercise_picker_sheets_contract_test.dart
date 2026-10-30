@@ -40,9 +40,9 @@ void main() {
     expect(prescription, isNot(contains('explorar')));
     expect(
       File(
-        'lib/features/treinos/screens/widgets/exercise_picker_filter_bar.dart',
+        'lib/features/treinos/screens/widgets/exercise_picker_chip.dart',
       ).readAsStringSync(),
-      allOf(contains('SingleChildScrollView('), contains('minHeight: 44')),
+      contains('minHeight: 44'),
     );
   });
 }

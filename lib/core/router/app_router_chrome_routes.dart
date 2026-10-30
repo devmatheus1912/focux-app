@@ -428,7 +428,6 @@ RouteBase buildChromeShellRoute() {
                 treinoId: intPathParam(state, 'id')!,
                 alunoId: extra.alunoId,
                 alunoNome: extra.alunoNome,
-                recemCriado: extra.recemCriado,
                 modeloId: extra.modeloId,
               );
             },
@@ -443,7 +442,6 @@ RouteBase buildChromeShellRoute() {
               return AddExercicioToTreinoScreen(
                 treinoId: intPathParam(state, 'id')!,
                 alunoId: extra.alunoId,
-                recemCriado: extra.recemCriado,
                 bloco: extra.bloco ?? 'TRABALHO',
               );
             },

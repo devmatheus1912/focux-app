@@ -8,7 +8,6 @@ class ExercisePrescriptionMemory {
     required this.tipoSerie,
     this.cargaKg,
     this.observacoes = '',
-    this.grupoSuperset,
   });
 
   final String presetId;
@@ -18,7 +17,6 @@ class ExercisePrescriptionMemory {
   final String tipoSerie;
   final double? cargaKg;
   final String observacoes;
-  final int? grupoSuperset;
 
   String get summary => '$series×$repeticoes · ${descansoSegundos}s descanso';
 }

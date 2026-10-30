@@ -16,9 +16,8 @@ void main() {
       'aluno_list_card.dart',
       "part 'alunos_list_screen_state.part.dart'",
     ],
-    'lib/features/treinos/screens/treinos_list_screen.dart': [
-      'treinos_list_labels.dart',
-      "part 'treinos_list_screen_state.part.dart'",
+    'lib/features/treinos/screens/modelos_de_treino_view.dart': [
+      'ficha_modelos_aba.dart',
     ],
     'lib/features/financeiro/screens/financeiro_screen.dart': [
       'financeiro_mensalidades_tab.dart',
@@ -37,7 +36,6 @@ void main() {
     'lib/features/treinos/utils/treinos_list_labels.dart',
     'lib/features/financeiro/utils/financeiro_hub_display.dart',
     'lib/features/financeiro/screens/financeiro_mensalidades_tab.dart',
-    'lib/features/treinos/screens/treinos_list_screen_state.part.dart',
     'lib/features/ia/screens/ia_copiloto_screen_actions.part.dart',
   ];
 
@@ -75,12 +73,12 @@ void main() {
 
   test('treinos list hub is decomposed under 100 LOC entry file', () {
     final lines = File(
-      'lib/features/treinos/screens/treinos_list_screen.dart',
+      'lib/features/treinos/screens/modelos_de_treino_view.dart',
     ).readAsLinesSync().length;
     expect(lines, lessThan(100));
     final screen = File(
-      'lib/features/treinos/screens/treinos_list_screen.dart',
+      'lib/features/treinos/screens/modelos_de_treino_view.dart',
     ).readAsStringSync();
-    expect(screen, contains("part 'treinos_list_screen_state.part.dart'"));
+    expect(screen, contains('FichaModelosAba'));
   });
 }

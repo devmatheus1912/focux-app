@@ -51,9 +51,8 @@ void main() {
     }
   });
 
-  test('o vídeo e a lista do treino não têm botão destrutivo cheio', () {
+  test('a lista do treino não tem botão destrutivo cheio', () {
     for (final caminho in [
-      'lib/features/treinos/widgets/treino_prescription_video_block.dart',
       'lib/features/treinos/widgets/treino_inset_sheet.dart',
     ]) {
       final fonte = File(caminho).readAsStringSync();

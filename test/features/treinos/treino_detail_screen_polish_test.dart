@@ -189,38 +189,6 @@ void main() {
       ).readAsStringSync(),
       isNot(contains('showChevron: true')),
     );
-    final videoBlock =
-        File(
-          'lib/features/treinos/widgets/treino_prescription_video_block.dart',
-        ).readAsStringSync();
-    expect(
-      videoBlock,
-      allOf(
-        contains('ExerciseVideoSpecTips.open'),
-        contains('FxSettingsGroup'),
-        contains("header: 'Vídeo'"),
-        contains('onHelpTap'),
-        contains('Semantics('),
-        contains('liveRegion: locked'),
-        contains('O vídeo da Focux é fixo'),
-      ),
-    );
-    expect(videoBlock, contains('showFxConfirmSheet'));
-    expect(videoBlock, contains('showFxInsetPickerSheet'));
-    // sem botões cheios: linhas do kit, remover em texto vermelho
-    expect(videoBlock, isNot(contains('ElevatedButton')));
-    expect(videoBlock, contains('FxSettingsTile'));
-    expect(videoBlock, contains('videoEditavel'));
-    expect(videoBlock, contains('Criar meu exercício com meu vídeo'));
-    expect(videoBlock, contains('exerciseVideoUploadConfirmTitle'));
-    expect(videoBlock, contains('exerciseVideoRemoveConfirmTitle'));
-    expect(videoBlock, isNot(contains('TextButton')));
-    expect(videoBlock, isNot(contains('FxLiquidPrimaryButton')));
-    expect(videoBlock, isNot(contains('Celular em pé')));
-    expect(videoBlock, isNot(contains('ExerciseVideoUploadStrip')));
-    expect(videoBlock, isNot(contains('fxStripCardDecoration')));
-    expect(videoBlock, isNot(contains('Ver seu vídeo')));
-    expect(videoBlock, isNot(contains('Opcional · vertical')));
     expect(
       File(
         'lib/features/treinos/widgets/treino_detail_help_sheet.dart',

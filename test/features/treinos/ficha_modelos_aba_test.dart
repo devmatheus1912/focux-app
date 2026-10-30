@@ -165,12 +165,12 @@ void main() {
     expect(const TreinoRouteExtra().toExtra(), isNull);
   });
 
-  test('a lista de treinos tem as abas Semanas e Sessões só para a biblioteca', () {
-    final lista = File('lib/features/treinos/screens/treinos_list_screen_state.part.dart')
+  test('a aba Treinos tem as abas Semanas e Exercícios', () {
+    final lista = File('lib/features/treinos/screens/modelos_de_treino_view.dart')
         .readAsStringSync();
     expect(lista, contains('FichaModelosAba'));
     expect(lista, contains('FxChoiceStrip<int>'));
-    expect(lista, contains('!fromAluno && _aba == 0'));
+    expect(lista, contains('_aba == _semanas'));
   });
 
   group('aba Semanas', () {

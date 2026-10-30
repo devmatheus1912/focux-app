@@ -66,9 +66,7 @@ void main() {
     expect(checkinMediaPreviaAltura(preferida: 228, alturaTela: 900), 216);
   });
 
-  test('checkinSerieKpiLabel e contexto cabem em uma linha', () {
-    expect(checkinSerieKpiLabel(2, 4), '2/4');
-    expect(checkinSerieKpiLabel(1, null), '1');
+  test('séries e contexto cabem em uma linha', () {
     expect(checkinSeriesRepsLabel(3, '12'), '3 × 12');
     expect(
       checkinSerieContextLine(

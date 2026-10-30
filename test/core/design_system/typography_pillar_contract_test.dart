@@ -18,7 +18,8 @@ void main() {
     'lib/features/dashboard/screens/personal_dashboard_screen.dart',
     'lib/features/alunos/screens/aluno_detail_screen.dart',
     'lib/features/alunos/screens/alunos_list_screen.dart',
-    'lib/features/treinos/screens/treinos_list_screen.dart',
+    // Aba Treinos (modelos_de_treino_view) fora: é só a lista do kit (FxTapRow,
+    // FxEmptyState, FxStickyActions), que já tem tipografia e insets próprios.
     'lib/features/financeiro/screens/financeiro_screen.dart',
     'lib/features/ia/screens/ia_copiloto_screen.dart',
   ];

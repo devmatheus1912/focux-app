@@ -200,13 +200,12 @@ void main() {
     },
   );
 
-  test('a aba Treinos tem o seletor com Exercícios, só fora do aluno', () {
+  test('a aba Treinos tem o seletor com Exercícios', () {
     final fonte =
         File(
-          'lib/features/treinos/screens/treinos_list_screen_state.part.dart',
+          'lib/features/treinos/screens/modelos_de_treino_view.dart',
         ).readAsStringSync();
     expect(fonte, contains('modelosAbaExercicios'));
-    expect(fonte, contains('widget.alunoId == null'));
     expect(fonte, contains('ExerciciosListScreen(embedded: true)'));
   });
 }

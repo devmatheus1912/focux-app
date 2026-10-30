@@ -69,11 +69,6 @@ String checkinDurationLabel(Duration d) {
   return '${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
 }
 
-String checkinSerieKpiLabel(int feitas, int? total) {
-  if (total == null || total <= 0) return '$feitas';
-  return '$feitas/$total';
-}
-
 String checkinChromeContextLine(
   S s, {
   required String duration,

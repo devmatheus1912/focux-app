@@ -28,7 +28,6 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
   late final TextEditingController _cargaCtrl;
   late final TextEditingController _rpeAlvoCtrl;
   late final TextEditingController _obsCtrl;
-  late final TextEditingController _supersetCtrl;
   late String _tipoSerie;
   late ParametrosDoMetodo _parametros;
   late String _presetId;
@@ -54,7 +53,6 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
       text: item.rpeAlvo != null ? '${item.rpeAlvo}' : '',
     );
     _obsCtrl = TextEditingController(text: item.observacoes ?? '');
-    _supersetCtrl = TextEditingController(text: '${item.grupoSuperset ?? 1}');
     _tipoSerie = tecnicaParaApi(item.metodo.tecnica);
     _parametros = ParametrosDoMetodo.de(item.metodo);
     _presetId = matchWorkoutBuilderPresetId(
@@ -72,7 +70,6 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
     _cargaCtrl.dispose();
     _rpeAlvoCtrl.dispose();
     _obsCtrl.dispose();
-    _supersetCtrl.dispose();
     super.dispose();
   }
 
@@ -233,7 +230,6 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
       cargaCtrl: _cargaCtrl,
       rpeAlvoCtrl: _rpeAlvoCtrl,
       observacoesCtrl: _obsCtrl,
-      grupoSupersetCtrl: _supersetCtrl,
       onPresetSelected: _applyPreset,
       onTipoSerieChanged: (value) => setState(() => _tipoSerie = value),
       parametrosIniciais: _parametros,

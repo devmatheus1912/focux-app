@@ -6,7 +6,7 @@ import '../../exercicios/data/enums.dart';
 import '../../exercicios/data/exercise_enum_api.dart';
 import '../../exercicios/data/exercicio_taxonomy_labels.dart';
 import '../../exercicios/providers/exercicio_picker_provider.dart';
-import '../screens/widgets/exercise_picker_filter_bar.dart';
+import '../screens/widgets/exercise_picker_chip.dart';
 
 /// Rótulo de um chip de grupo: "Peito" ou, com exercícios no treino, "Peito · 3".
 /// O número é sempre o que já está no treino (o da biblioteca não aparece).

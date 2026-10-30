@@ -20,7 +20,7 @@ import '../../exercicios/data/exercicio_repository.dart';
 import '../../exercicios/providers/exercicios_provider.dart';
 import '../../exercicios/screens/widgets/exercise_media_thumb.dart';
 import '../../exercicios/screens/widgets/exercise_video_preview_sheet.dart';
-import '../screens/widgets/exercise_picker_filter_bar.dart';
+import '../screens/widgets/exercise_picker_chip.dart';
 import '../utils/aluno_restricao_match.dart';
 import '../utils/exercise_library_sections.dart';
 import '../../../core/widgets/fx_link_row.dart';
@@ -575,8 +575,6 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
                 ),
               ExerciseBalanceStrip(
                 balanco: widget.balanco,
-                selecionados: _grupos,
-                onToggle: _alternarGrupo,
                 primary: primary,
                 isDark: isDark,
               ),

@@ -7,7 +7,6 @@ void main() {
     expect(saudeComoCalculamos, contains('passos'));
     expect(saudeComoCalculamos, contains('0 a 100'));
     expect(saudeComoCalculamos, isNot(contains('%')));
-    expect(saudeAtualizarLabel(), 'Atualizar agora');
     expect(saudeDesconectarLabel(), 'Desconectar saúde');
     expect(saudeDesconectarConfirmTitle(), contains('Desconectar'));
     expect(saudeDesconectarConfirmMessage(), contains('Health Connect'));

@@ -10,7 +10,6 @@ Future<void> _dispatchTreinoDetailAction({
   int? modeloId,
   required bool isDark,
   required String action,
-  VoidCallback? onAssigned,
 }) async {
   final repo = ref.read(treinoRepositoryProvider);
 
@@ -66,7 +65,6 @@ Future<void> _dispatchTreinoDetailAction({
         ref.invalidate(treinoProvider(treinoId));
         invalidateTreinosCaches(ref);
         invalidateTreinosDoAluno(ref, selected.alunoId);
-        onAssigned?.call();
         if (context.mounted) {
           ref.invalidate(alunoRotinaProvider(selected.alunoId));
           avisarEntrouNoFim(

@@ -42,7 +42,6 @@ extension _AddExercicioToTreinoScreenActions
       cargaCtrl: _cargaCtrl,
       rpeAlvoCtrl: _rpeAlvoCtrl,
       observacoesCtrl: _observacoesCtrl,
-      grupoSupersetCtrl: _grupoSupersetCtrl,
       onPresetSelected: _applyPreset,
       onTipoSerieChanged: (value) => setState(() => _tipoSerie = value),
       onApplyLastPrescription: _applyLastPrescription,
@@ -110,10 +109,6 @@ extension _AddExercicioToTreinoScreenActions
       tipoSerie: _tipoSerie,
       cargaKg: double.tryParse(_cargaCtrl.text.replaceAll(',', '.')),
       observacoes: _observacoesCtrl.text,
-      grupoSuperset:
-          _tipoSerie == 'SUPERSET'
-              ? int.tryParse(_grupoSupersetCtrl.text)
-              : null,
     );
   }
 
@@ -132,9 +127,6 @@ extension _AddExercicioToTreinoScreenActions
         _cargaCtrl.text = memory.cargaKg!.toString();
       } else {
         _cargaCtrl.clear();
-      }
-      if (memory.grupoSuperset != null) {
-        _grupoSupersetCtrl.text = memory.grupoSuperset.toString();
       }
     });
   }
@@ -182,9 +174,6 @@ extension _AddExercicioToTreinoScreenActions
       _descansoCtrl.text = preset.descansoSegundos.toString();
       _tipoSerie = preset.tipoSerie;
       // Observações ficam com o personal — tip de coaching do preset não polui o sheet.
-      if (preset.grupoSuperset != null) {
-        _grupoSupersetCtrl.text = preset.grupoSuperset.toString();
-      }
     }
 
     if (notify) {
@@ -203,7 +192,6 @@ extension _AddExercicioToTreinoScreenActions
       rpeAlvoText: _rpeAlvoCtrl.text,
       observacoesText: _observacoesCtrl.text,
       tipoSerie: _tipoSerie,
-      grupoSupersetText: _grupoSupersetCtrl.text,
     );
     if (resolved.error != null) {
       setState(() => _error = resolved.error);

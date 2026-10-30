@@ -217,14 +217,11 @@ void main() {
     testWidgets('ExerciseBalanceStrip só mostra o aviso e dispensa', (
       tester,
     ) async {
-      GrupoMuscular? tocado;
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: ExerciseBalanceStrip(
               balanco: const {GrupoMuscular.peito: 4},
-              selecionados: const {},
-              onToggle: (g) => tocado = g,
               primary: Colors.teal,
               isDark: true,
             ),
@@ -235,7 +232,6 @@ void main() {
       // "No treino" agora está nos chips de grupo; a faixa é só o aviso.
       expect(find.text('No treino:'), findsNothing);
       expect(find.text('Peito 4'), findsNothing);
-      expect(tocado, isNull);
       expect(find.text('Sem costas ainda'), findsOneWidget);
       await tester.tap(find.byTooltip('Dispensar aviso'));
       await tester.pump();

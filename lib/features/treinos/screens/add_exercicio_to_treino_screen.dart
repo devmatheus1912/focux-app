@@ -48,7 +48,6 @@ import '../utils/add_exercise_prescription_input.dart';
 import '../utils/exercise_picker_filter.dart';
 import '../utils/prescricao_padrao_bloco.dart';
 import '../utils/prescricao_serie.dart';
-import '../utils/treino_criacao_fluxo.dart';
 import '../utils/workout_prescription_display.dart';
 import '../utils/aluno_restricao_match.dart';
 import '../utils/exercise_balance.dart';
@@ -67,13 +66,11 @@ part 'add_exercicio_to_treino_screen_actions.part.dart';
 class AddExercicioToTreinoScreen extends ConsumerStatefulWidget {
   final int treinoId;
   final int? alunoId;
-  final bool recemCriado;
   final String bloco;
   const AddExercicioToTreinoScreen({
     super.key,
     required this.treinoId,
     this.alunoId,
-    this.recemCriado = false,
     this.bloco = 'TRABALHO',
   });
 
@@ -90,7 +87,6 @@ class _AddExercicioToTreinoScreenState
   final _cargaCtrl = TextEditingController();
   final _rpeAlvoCtrl = TextEditingController();
   final _observacoesCtrl = TextEditingController();
-  final _grupoSupersetCtrl = TextEditingController(text: '1');
   String _presetId = 'hypertrophy';
   String _tipoSerie = 'NORMAL';
   bool _loading = false;
@@ -110,19 +106,7 @@ class _AddExercicioToTreinoScreenState
 
   Future<void> _cancel() async {
     FxKeyboardDismissScope.dismiss();
-    final destino = addExercicioConcluirDestino(
-      treinoId: widget.treinoId,
-      recemCriado: widget.recemCriado,
-      alunoId: widget.alunoId,
-    );
-    if (destino == null) {
-      safePopOrGo(context, '/treinos/${widget.treinoId}');
-      return;
-    }
-    context.pushReplacement(
-      destino,
-      extra: const TreinoRouteExtra(recemCriado: true).toExtra(),
-    );
+    safePopOrGo(context, '/treinos/${widget.treinoId}');
   }
 
   @override
@@ -144,7 +128,6 @@ class _AddExercicioToTreinoScreenState
     _cargaCtrl.dispose();
     _rpeAlvoCtrl.dispose();
     _observacoesCtrl.dispose();
-    _grupoSupersetCtrl.dispose();
     super.dispose();
   }
 

@@ -1,8 +1,6 @@
 const saudeComoCalculamos =
     'Prontidão é um índice de 0 a 100 (não é porcentagem) que compara o seu sono, a sua FC em repouso e a sua variabilidade (HRV) com a sua própria média. Sem sono registrado não calculamos, e passos não entram: medem atividade, não recuperação.';
 
-String saudeAtualizarLabel() => 'Atualizar agora';
-
 String saudeDesconectarLabel() => 'Desconectar saúde';
 
 String saudeDesconectarConfirmTitle() => 'Desconectar saúde?';

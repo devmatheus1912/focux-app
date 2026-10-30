@@ -8,20 +8,15 @@ import '../../exercicios/data/enums.dart';
 import '../utils/exercise_balance.dart';
 
 /// "No treino: Peito 3 · Tríceps 1", com um aviso discreto de antagonista.
-/// Tocar num grupo liga o chip do mesmo grupo na lista.
 class ExerciseBalanceStrip extends StatefulWidget {
   const ExerciseBalanceStrip({
     super.key,
     required this.balanco,
-    required this.selecionados,
-    required this.onToggle,
     required this.primary,
     required this.isDark,
   });
 
   final Map<GrupoMuscular, int> balanco;
-  final Set<GrupoMuscular> selecionados;
-  final ValueChanged<GrupoMuscular> onToggle;
   final Color primary;
   final bool isDark;
 

@@ -5,7 +5,6 @@ void main() {
   group('resolveAddExercisePrescription', () {
     AddExercisePrescriptionInput baseInput({
       String tipoSerie = 'NORMAL',
-      String grupo = '1',
     }) {
       final resolved = resolveAddExercisePrescription(
         seriesText: '4',
@@ -14,7 +13,6 @@ void main() {
         cargaText: '',
         observacoesText: 'Controle',
         tipoSerie: tipoSerie,
-        grupoSupersetText: grupo,
       );
       expect(resolved.error, isNull);
       return resolved.values!;
@@ -35,24 +33,10 @@ void main() {
         cargaText: '',
         observacoesText: '',
         tipoSerie: 'NORMAL',
-        grupoSupersetText: '1',
       );
       expect(resolved.values, isNull);
       expect(resolved.error, contains('1 e 20'));
     });
 
-    test('exige grupo de superset', () {
-      final resolved = resolveAddExercisePrescription(
-        seriesText: '4',
-        repeticoesText: '8-12',
-        descansoText: '75',
-        cargaText: '',
-        observacoesText: '',
-        tipoSerie: 'SUPERSET',
-        grupoSupersetText: '',
-      );
-      expect(resolved.values, isNull);
-      expect(resolved.error, isNotNull);
-    });
   });
 }

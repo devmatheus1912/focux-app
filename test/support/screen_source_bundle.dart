@@ -18,9 +18,11 @@ String readScreenSourceBundle(String mainPath) {
       .where((file) => seen.add(file.resolveSymbolicLinksSync()))
       .map((file) => file.readAsStringSync())
       .join('\n');
-  final extras = baseName == 'personal_dashboard_screen'
-      ? _hojePersonalWidgets.map((p) => File(p).readAsStringSync()).join('\n')
-      : '';
+  final extras = switch (baseName) {
+    'personal_dashboard_screen' => _hojePersonalWidgets,
+    'modelos_de_treino_view' => _modelosDeTreinoWidgets,
+    _ => const <String>[],
+  }.map((p) => File(p).readAsStringSync()).join('\n');
   return '$main\n$parts\n$extras';
 }
 
@@ -29,6 +31,11 @@ const _hojePersonalWidgets = [
   'lib/features/dashboard/widgets/dashboard_home_primary_slivers.dart',
   'lib/features/dashboard/widgets/hoje_agora_secao.dart',
   'lib/features/dashboard/widgets/hoje_base_secao.dart',
+];
+
+/// A aba Treinos é a view dos modelos; a aba Semanas (lista, vazio, erro) conta como a tela.
+const _modelosDeTreinoWidgets = [
+  'lib/features/treinos/widgets/ficha_modelos_aba.dart',
 ];
 
 /// Reads paywall_components and all of its part files.

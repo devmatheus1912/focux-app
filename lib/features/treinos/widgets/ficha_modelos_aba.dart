@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_status_pill.dart';
 import '../../../core/widgets/fx_sticky_actions.dart';
@@ -14,7 +17,6 @@ import '../providers/ficha_modelos_provider.dart';
 import 'ficha_acoes.dart';
 import 'modelo_acoes.dart';
 import 'sessoes_sem_uso_aviso.dart';
-import '../../../core/widgets/fx_tonal_button.dart';
 
 /// Aba "Semanas" de Modelos de treino: um card por modelo e "Novo modelo".
 /// [abas] é a fileira Semanas | Sessões, que o dono da tela desenha.
@@ -38,8 +40,12 @@ class FichaModelosAba extends ConsumerWidget {
         Expanded(
           child: modelos.when(
             loading: () => const Center(child: FxLoading()),
-            error: (_, __) => Center(
-              child: FxTonalButton(label: s.modeloNaoAbriu, onPressed: () => ref.invalidate(fichaModelosProvider), compact: true),
+            error: (erro, _) => FxErrorState(
+              chromeOnDark: ShellChrome.of(context).isDark,
+              primary: Theme.of(context).colorScheme.primary,
+              title: s.modeloNaoAbriu,
+              message: friendlyError(erro),
+              onRetry: () => ref.invalidate(fichaModelosProvider),
             ),
             data: (lista) => lista.isEmpty
                 ? Center(

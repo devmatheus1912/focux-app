@@ -14,7 +14,6 @@ import 'package:focux_app/features/treinos/data/treino_repository.dart';
 import 'package:focux_app/features/treinos/providers/treinos_provider.dart';
 import 'package:focux_app/features/treinos/screens/treino_detail_screen.dart';
 import 'package:focux_app/features/treinos/utils/prescricao_atalhos.dart';
-import 'package:focux_app/features/treinos/widgets/treino_prescription_video_block.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -213,65 +212,6 @@ void main() {
     test('nome da cópia leva (meu) uma vez só', () {
       expect(nomeDaCopia('Supino reto'), 'Supino reto (meu)');
       expect(nomeDaCopia('Supino reto (meu)'), 'Supino reto (meu)');
-    });
-
-    testWidgets(
-      'exercício Focux: sem enviar vídeo, com "Criar meu exercício"',
-      (tester) async {
-        tester.view.physicalSize = const Size(1200, 2400);
-        tester.view.devicePixelRatio = 2;
-        addTearDown(tester.view.reset);
-        await tester.pumpWidget(
-          _app(
-            () => Scaffold(
-              body: TreinoPrescriptionVideoBlock(
-                treinoId: 9,
-                isDark: false,
-                busy: false,
-                exercicio: Exercicio.fromJson({
-                  'id': 2,
-                  'nome': 'Supino Focux',
-                  'videoSource': 'FOCUX_LIBRARY',
-                  'videoUrl': 'https://cdn.test/v.mp4',
-                }),
-              ),
-            ),
-          ),
-        );
-        await _settle(tester);
-        expect(find.text('Criar meu exercício com meu vídeo'), findsOneWidget);
-        expect(find.textContaining('Enviar'), findsNothing);
-        expect(find.textContaining('Remover'), findsNothing);
-        expect(
-          find.text(
-            'O vídeo da Focux é fixo. Para usar o seu, crie o seu exercício.',
-          ),
-          findsOneWidget,
-        );
-      },
-    );
-
-    testWidgets('exercício do personal: enviar vídeo disponível', (
-      tester,
-    ) async {
-      tester.view.physicalSize = const Size(1200, 2400);
-      tester.view.devicePixelRatio = 2;
-      addTearDown(tester.view.reset);
-      await tester.pumpWidget(
-        _app(
-          () => Scaffold(
-            body: TreinoPrescriptionVideoBlock(
-              treinoId: 9,
-              isDark: false,
-              busy: false,
-              exercicio: Exercicio.fromJson({'id': 1, 'nome': 'Meu exercício'}),
-            ),
-          ),
-        ),
-      );
-      await _settle(tester);
-      expect(find.textContaining('Enviar'), findsOneWidget);
-      expect(find.text('Criar meu exercício com meu vídeo'), findsNothing);
     });
   });
 

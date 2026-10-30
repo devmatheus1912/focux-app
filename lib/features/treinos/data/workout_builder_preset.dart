@@ -7,7 +7,6 @@ class WorkoutBuilderPreset {
   final int descansoSegundos;
   final String tipoSerie;
   final String observacoes;
-  final int? grupoSuperset;
 
   const WorkoutBuilderPreset({
     required this.id,
@@ -18,7 +17,6 @@ class WorkoutBuilderPreset {
     required this.descansoSegundos,
     required this.tipoSerie,
     required this.observacoes,
-    this.grupoSuperset,
   });
 }
 
@@ -99,21 +97,5 @@ List<String> workoutBuilderRepShortcuts(String presetId) {
     'strength' => const ['3-6', '4-6', '5'],
     'endurance' => const ['15-20', '12-20', 'AMRAP'],
     _ => const ['8-12', '10-15', '12-15'],
-  };
-}
-
-String workoutTipoSerieLabel(String tipoSerie) {
-  return switch (tipoSerie.trim().toUpperCase()) {
-    'SUPERSET' => 'Superset',
-    'DROPSET' => 'Drop set',
-    _ => 'Normal',
-  };
-}
-
-String? workoutTipoSerieSubtitle(String tipoSerie) {
-  return switch (tipoSerie.trim().toUpperCase()) {
-    'SUPERSET' => 'Dois exercícios sem pausa entre eles.',
-    'DROPSET' => 'Reduza a carga nas observações.',
-    _ => 'Séries isoladas com descanso.',
   };
 }

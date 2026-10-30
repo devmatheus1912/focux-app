@@ -34,7 +34,7 @@ import '../../onboarding/screens/onboarding_screen.dart';
 import '../../perfil/screens/perfil_screen.dart';
 import '../../assinatura/screens/assinatura_screen.dart';
 import '../../suporte/screens/suporte_web_redirect_screen.dart';
-import '../../treinos/screens/treinos_list_screen.dart';
+import '../../treinos/screens/modelos_de_treino_view.dart';
 import 'qa_preview_session.dart';
 
 /// Builds smoke-test screen previews with GoRouter + mesh for QA pumps.
@@ -89,7 +89,7 @@ Widget _buildQaRouteScreen(Uri uri) {
       initialFiltro: _alunoFiltroFromQuery(uri.queryParameters['filtro']),
     ),
     '/alunos/novo' => const AddAlunoScreen(),
-    '/treinos' => const TreinosListScreen(),
+    '/treinos' => const ModelosDeTreinoView(),
     '/financeiro' => const FinanceiroScreen(),
     '/chat/inbox' => const ChatInboxScreen(),
     '/ia/copiloto' => const IaCopilotoScreen(),

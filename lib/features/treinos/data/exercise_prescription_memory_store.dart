@@ -97,7 +97,6 @@ class ExercisePrescriptionMemoryStore {
     'tipoSerie': m.tipoSerie,
     'cargaKg': m.cargaKg,
     'observacoes': m.observacoes,
-    'grupoSuperset': m.grupoSuperset,
   };
 
   static ExercisePrescriptionMemory _fromMap(Map<String, dynamic> map) {
@@ -109,7 +108,6 @@ class ExercisePrescriptionMemoryStore {
       tipoSerie: map['tipoSerie'] as String? ?? 'NORMAL',
       cargaKg: (map['cargaKg'] as num?)?.toDouble(),
       observacoes: map['observacoes'] as String? ?? '',
-      grupoSuperset: map['grupoSuperset'] as int?,
     );
   }
 }

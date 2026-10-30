@@ -9,7 +9,6 @@ Future<void> _openTreinoDetailMenu({
   required String? alunoNome,
   required int? modeloId,
   required bool isDark,
-  required VoidCallback onAssigned,
 }) async {
     AnalyticsService.instance.track(
       ProductEvents.treinoDetailMenuOpened,
@@ -108,7 +107,6 @@ Future<void> _openTreinoDetailMenu({
       modeloId: modeloId,
       isDark: isDark,
       action: action,
-      onAssigned: onAssigned,
     );
 }
 
@@ -119,8 +117,6 @@ class _TreinoDetailBody extends StatelessWidget {
   final String? alunoNome;
   final int? modeloId;
   final bool isDark;
-  final bool atribuirEmDestaque;
-  final VoidCallback onAssigned;
   final Future<void> Function() onRefresh;
   final WidgetRef ref;
   const _TreinoDetailBody({
@@ -130,8 +126,6 @@ class _TreinoDetailBody extends StatelessWidget {
     required this.alunoNome,
     required this.modeloId,
     required this.isDark,
-    required this.atribuirEmDestaque,
-    required this.onAssigned,
     required this.onRefresh,
     required this.ref,
   });
@@ -190,17 +184,6 @@ class _TreinoDetailBody extends StatelessWidget {
         ref.invalidate(treinoProvider(treinoId));
       }
     }
-
-    Future<void> openAssign() => _dispatchTreinoDetailAction(
-      context: context,
-      ref: ref,
-      treino: treino,
-      treinoId: treinoId,
-      alunoId: alunoId,
-      isDark: isDark,
-      action: 'assign',
-      onAssigned: onAssigned,
-    );
 
     return Column(
       children: [
@@ -353,19 +336,6 @@ class _TreinoDetailBody extends StatelessWidget {
                             nomeDaSessao: treino.nome,
                             alreadyInTreinoIds: const {},
                           ), compact: true),
-                      ],
-                    )
-                    : atribuirEmDestaque
-                    ? Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        FxLiquidPrimaryButton(
-                          label: S.of(context).treinoDetalheAtribuirAluno,
-                          onPressed: openAssign,
-                        ),
-                        const SizedBox(height: 8),
-                        FxTonalButton(label: 'Adicionar exercício', onPressed: () => openAdd(), compact: true),
                       ],
                     )
                     : alunoId != null || modeloId != null

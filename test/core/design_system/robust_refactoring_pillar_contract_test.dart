@@ -11,7 +11,7 @@ void main() {
     'lib/features/dashboard/screens/personal_dashboard_screen.dart',
     'lib/features/alunos/screens/aluno_detail_screen.dart',
     'lib/features/alunos/screens/alunos_list_screen.dart',
-    'lib/features/treinos/screens/treinos_list_screen.dart',
+    'lib/features/treinos/screens/modelos_de_treino_view.dart',
     'lib/features/financeiro/screens/financeiro_screen.dart',
     'lib/features/ia/screens/ia_copiloto_screen.dart',
   ];
@@ -216,14 +216,4 @@ void main() {
     expect(source, isNot(contains("part '")));
   });
 
-  test('create treino entry stays decomposed under 100 LOC', () {
-    final lines = File(
-      'lib/features/treinos/screens/create_treino_screen.dart',
-    ).readAsLinesSync().length;
-    expect(lines, lessThan(100));
-    expect(
-      File('lib/features/treinos/screens/create_treino_screen.dart').readAsStringSync(),
-      contains("part 'create_treino_screen_state.part.dart'"),
-    );
-  });
 }

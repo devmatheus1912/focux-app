@@ -10,7 +10,6 @@ class AddExercisePrescriptionInput {
     this.rpeAlvo,
     this.observacoes,
     required this.tipoSerie,
-    this.grupoSuperset,
   });
 
   final int series;
@@ -20,7 +19,6 @@ class AddExercisePrescriptionInput {
   final int? rpeAlvo;
   final String? observacoes;
   final String tipoSerie;
-  final int? grupoSuperset;
 }
 
 /// Resolve e valida prescrição antes do POST — paridade com detalhe do treino.
@@ -32,7 +30,6 @@ class AddExercisePrescriptionInput {
   String rpeAlvoText = '',
   required String observacoesText,
   required String tipoSerie,
-  required String grupoSupersetText,
 }) {
   final series = int.tryParse(seriesText.trim());
   if (series == null) {
@@ -55,17 +52,6 @@ class AddExercisePrescriptionInput {
   final reps = repeticoesText.trim();
   if (reps.isEmpty) {
     return (error: 'Informe as repetições.', values: null);
-  }
-
-  int? grupoSuperset;
-  if (tipoSerie == 'SUPERSET') {
-    grupoSuperset = int.tryParse(grupoSupersetText.trim());
-    if (grupoSuperset == null || grupoSuperset < 1) {
-      return (
-        error: 'Informe o grupo do superset (número a partir de 1).',
-        values: null,
-      );
-    }
   }
 
   final cargaRaw = cargaText.trim();
@@ -98,7 +84,6 @@ class AddExercisePrescriptionInput {
       rpeAlvo: rpeAlvo,
       observacoes: observacoes.isEmpty ? null : observacoes,
       tipoSerie: tipoSerie,
-      grupoSuperset: grupoSuperset,
     ),
   );
 }

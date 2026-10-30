@@ -25,7 +25,6 @@ void main() {
     final descansoCtrl = TextEditingController(text: '75');
     final cargaCtrl = TextEditingController();
     final obsCtrl = TextEditingController();
-    final grupoCtrl = TextEditingController(text: '1');
     var saved = false;
 
     addTearDown(() {
@@ -34,7 +33,6 @@ void main() {
       descansoCtrl.dispose();
       cargaCtrl.dispose();
       obsCtrl.dispose();
-      grupoCtrl.dispose();
     });
 
     await tester.pumpWidget(
@@ -67,7 +65,6 @@ void main() {
                             descansoCtrl: descansoCtrl,
                             cargaCtrl: cargaCtrl,
                             observacoesCtrl: obsCtrl,
-                            grupoSupersetCtrl: grupoCtrl,
                             onPresetSelected: (_) {},
                             onTipoSerieChanged: (_) {},
                             onApplyLastPrescription: () {},
@@ -135,7 +132,6 @@ void main() {
     final descansoCtrl = TextEditingController(text: '60');
     final cargaCtrl = TextEditingController();
     final obsCtrl = TextEditingController();
-    final grupoCtrl = TextEditingController(text: '1');
 
     addTearDown(() {
       seriesCtrl.dispose();
@@ -143,7 +139,6 @@ void main() {
       descansoCtrl.dispose();
       cargaCtrl.dispose();
       obsCtrl.dispose();
-      grupoCtrl.dispose();
     });
 
     await tester.pumpWidget(
@@ -176,7 +171,6 @@ void main() {
                             descansoCtrl: descansoCtrl,
                             cargaCtrl: cargaCtrl,
                             observacoesCtrl: obsCtrl,
-                            grupoSupersetCtrl: grupoCtrl,
                             onPresetSelected: (_) {},
                             onTipoSerieChanged: (_) {},
                             onApplyLastPrescription: () {},

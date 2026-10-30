@@ -94,7 +94,6 @@ class TreinoDetailScreen extends ConsumerStatefulWidget {
   final int treinoId;
   final int? alunoId;
   final String? alunoNome;
-  final bool recemCriado;
 
   /// Aberto por um modelo de ficha (e não pela ficha de um aluno).
   final int? modeloId;
@@ -104,7 +103,6 @@ class TreinoDetailScreen extends ConsumerStatefulWidget {
     required this.treinoId,
     this.alunoId,
     this.alunoNome,
-    this.recemCriado = false,
     this.modeloId,
   });
 
@@ -114,11 +112,6 @@ class TreinoDetailScreen extends ConsumerStatefulWidget {
 
 class _TreinoDetailScreenState extends ConsumerState<TreinoDetailScreen> {
   DateTime? _fetchedAt;
-  bool _atribuido = false;
-
-  void _onAssigned() {
-    if (mounted && !_atribuido) setState(() => _atribuido = true);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -163,7 +156,6 @@ class _TreinoDetailScreenState extends ConsumerState<TreinoDetailScreen> {
                 alunoNome: alunoNome,
                 modeloId: widget.modeloId,
                 isDark: isDark,
-                onAssigned: _onAssigned,
               ),
             ],
           ),
@@ -201,9 +193,6 @@ class _TreinoDetailScreenState extends ConsumerState<TreinoDetailScreen> {
                     alunoNome: alunoNome,
                     modeloId: widget.modeloId,
                     isDark: isDark,
-                    recemCriado: widget.recemCriado,
-                    atribuido: _atribuido,
-                    onAssigned: _onAssigned,
                     onFetched: (value) {
                       if (_fetchedAt == value) return;
                       setState(() => _fetchedAt = value);
@@ -225,9 +214,6 @@ class _TreinoDetailFresh extends ConsumerStatefulWidget {
     required this.alunoNome,
     required this.modeloId,
     required this.isDark,
-    required this.recemCriado,
-    required this.atribuido,
-    required this.onAssigned,
     required this.onFetched,
   });
 
@@ -237,9 +223,6 @@ class _TreinoDetailFresh extends ConsumerStatefulWidget {
   final String? alunoNome;
   final int? modeloId;
   final bool isDark;
-  final bool recemCriado;
-  final bool atribuido;
-  final VoidCallback onAssigned;
   final ValueChanged<DateTime> onFetched;
 
   @override
@@ -270,13 +253,6 @@ class _TreinoDetailFreshState extends ConsumerState<_TreinoDetailFresh> {
       alunoNome: widget.alunoNome,
       modeloId: widget.modeloId,
       isDark: widget.isDark,
-      atribuirEmDestaque: treinoDetailAtribuirEmDestaque(
-        recemCriado: widget.recemCriado,
-        alunoId: widget.alunoId,
-        atribuido: widget.atribuido,
-        temExercicios: treino.exercicios.isNotEmpty,
-      ),
-      onAssigned: widget.onAssigned,
       onRefresh: _refresh,
       ref: ref,
     );
@@ -290,7 +266,6 @@ class _TreinoDetailOverflowButton extends ConsumerWidget {
     required this.alunoNome,
     required this.modeloId,
     required this.isDark,
-    required this.onAssigned,
   });
 
   final int treinoId;
@@ -298,7 +273,6 @@ class _TreinoDetailOverflowButton extends ConsumerWidget {
   final String? alunoNome;
   final int? modeloId;
   final bool isDark;
-  final VoidCallback onAssigned;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -315,7 +289,6 @@ class _TreinoDetailOverflowButton extends ConsumerWidget {
         alunoNome: alunoNome,
         modeloId: modeloId,
         isDark: isDark,
-        onAssigned: onAssigned,
       ),
       icon: const Icon(Icons.more_horiz_rounded),
     );

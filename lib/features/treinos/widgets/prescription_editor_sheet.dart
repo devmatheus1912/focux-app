@@ -48,7 +48,6 @@ Future<void> showPrescriptionEditorSheet(
   required TextEditingController cargaCtrl,
   TextEditingController? rpeAlvoCtrl,
   required TextEditingController observacoesCtrl,
-  required TextEditingController grupoSupersetCtrl,
   required ValueChanged<String> onPresetSelected,
   required ValueChanged<String> onTipoSerieChanged,
   required VoidCallback onApplyLastPrescription,
@@ -71,7 +70,6 @@ Future<void> showPrescriptionEditorSheet(
           cargaCtrl: cargaCtrl,
           rpeAlvoCtrl: rpeAlvoCtrl,
           observacoesCtrl: observacoesCtrl,
-          grupoSupersetCtrl: grupoSupersetCtrl,
           onPresetSelected: onPresetSelected,
           onTipoSerieChanged: onTipoSerieChanged,
           onApplyLastPrescription: onApplyLastPrescription,
@@ -95,7 +93,6 @@ class PrescriptionEditorSheet extends StatefulWidget {
     required this.cargaCtrl,
     this.rpeAlvoCtrl,
     required this.observacoesCtrl,
-    required this.grupoSupersetCtrl,
     required this.onPresetSelected,
     required this.onTipoSerieChanged,
     required this.onApplyLastPrescription,
@@ -133,7 +130,6 @@ class PrescriptionEditorSheet extends StatefulWidget {
   final TextEditingController cargaCtrl;
   final TextEditingController? rpeAlvoCtrl;
   final TextEditingController observacoesCtrl;
-  final TextEditingController grupoSupersetCtrl;
   final ValueChanged<String> onPresetSelected;
   final ValueChanged<String> onTipoSerieChanged;
   final VoidCallback onApplyLastPrescription;

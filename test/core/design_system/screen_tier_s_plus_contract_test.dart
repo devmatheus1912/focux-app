@@ -9,7 +9,7 @@ void main() {
   const allowedWithoutLimiter = {
     'lib/features/dashboard/screens/personal_dashboard_screen.dart',
     'lib/features/alunos/screens/alunos_list_screen.dart',
-    'lib/features/treinos/screens/treinos_list_screen.dart',
+    'lib/features/treinos/screens/modelos_de_treino_view.dart',
     'lib/features/alunos/screens/aluno_detail_screen.dart',
     'lib/features/checkin/screens/checkin_screen.dart',
     'lib/features/checkin/screens/meus_treinos_screen.dart',

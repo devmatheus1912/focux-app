@@ -5,7 +5,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/alunos/widgets/add_aluno_help_sheet.dart';
 import 'package:focux_app/features/alunos/widgets/alunos_list_help_sheet.dart';
 import 'package:focux_app/features/ferramentas/widgets/ferramentas_help_sheet.dart';
-import 'package:focux_app/features/treinos/widgets/create_treino_help_sheet.dart';
 import 'package:focux_app/features/treinos/widgets/ficha_help_sheets.dart';
 import 'package:focux_app/features/treinos/widgets/treino_detail_help_sheet.dart';
 import 'package:focux_app/features/treinos/widgets/treinos_list_help_sheet.dart';
@@ -45,9 +44,8 @@ void main() {
       'Modelo': 'lib/features/treinos/screens/ficha_modelo_screen.dart',
       'Fichas anteriores': 'lib/features/treinos/screens/fichas_anteriores_screen.dart',
       'Ferramentas': 'lib/features/ferramentas/screens/ferramentas_screen.dart',
-      'Modelos de treino': 'lib/features/treinos/screens/treinos_list_screen_state.part.dart',
+      'Modelos de treino': 'lib/features/treinos/screens/modelos_de_treino_view.dart',
       'Treino': 'lib/features/treinos/screens/treino_detail_screen.dart',
-      'Novo treino': 'lib/features/treinos/screens/create_treino_screen_state.part.dart',
       'Lista de alunos': 'lib/features/alunos/screens/alunos_list_screen_state.part.dart',
       'Novo aluno': 'lib/features/alunos/screens/add_aluno_screen.dart',
       'Editar aluno': 'lib/features/alunos/screens/editar_aluno_screen.dart',
@@ -79,7 +77,6 @@ void main() {
       'lib/features/alunos/widgets/editar_aluno_help_sheet.dart',
       'lib/features/treinos/widgets/treinos_list_help_sheet.dart',
       'lib/features/treinos/widgets/treino_detail_help_sheet.dart',
-      'lib/features/treinos/widgets/create_treino_help_sheet.dart',
       'lib/features/treinos/widgets/ficha_help_sheets.dart',
       'lib/features/ferramentas/widgets/ferramentas_help_sheet.dart',
       'lib/features/perfil/screens/perfil_screen_widgets_a.part.dart',
@@ -155,11 +152,6 @@ void main() {
     testWidgets('Treino', (tester) async {
       await _abrir(tester, showTreinoDetailHelpSheet);
       expect(find.text('De onde vem'), findsOneWidget);
-    });
-
-    testWidgets('Novo treino', (tester) async {
-      await _abrir(tester, showCreateTreinoHelpSheet);
-      expect(find.text('Só o nome basta. Os exercícios entram no passo seguinte.'), findsOneWidget);
     });
 
     testWidgets('Lista de alunos', (tester) async {
