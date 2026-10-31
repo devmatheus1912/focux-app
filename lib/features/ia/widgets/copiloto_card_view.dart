@@ -23,8 +23,11 @@ class CopilotoCardView extends StatelessWidget {
     required this.onAnalisarSelecionado,
     required this.onEscolherAluno,
     required this.onVerTarefas,
+    this.podeAnalisar = true,
   });
 
+  /// Cota esgotada: sai todo botão de analisar; a lista continua de leitura.
+  final bool podeAnalisar;
   final List<CopilotoPrioridade> prioridades;
   final int tarefasAbertas;
 
@@ -47,7 +50,7 @@ class CopilotoCardView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (nome.isNotEmpty) ...[
+          if (nome.isNotEmpty && podeAnalisar) ...[
             FxLiquidPrimaryButton(
               label: s.copilotoAnalisar(nome),
               onPressed: onAnalisarSelecionado,
@@ -59,10 +62,13 @@ class CopilotoCardView extends StatelessWidget {
               icon: 'spark',
               title: s.copilotoSemPrioridadesTitulo,
               subtitle: s.copilotoRevisaoFrase,
-              action: FxEmptyAction(
-                label: s.copilotoAnalisarUmAluno,
-                onTap: onEscolherAluno,
-              ),
+              action:
+                  podeAnalisar
+                      ? FxEmptyAction(
+                        label: s.copilotoAnalisarUmAluno,
+                        onTap: onEscolherAluno,
+                      )
+                      : null,
             )
           else ...[
             Text(
@@ -83,18 +89,23 @@ class CopilotoCardView extends StatelessWidget {
                     if (i > 0) const Divider(height: 1),
                     _PrioridadeRow(
                       prioridade: p,
-                      onAnalisar: () => onAnalisar(p.alunoId, p.nome),
+                      onAnalisar:
+                          podeAnalisar
+                              ? () => onAnalisar(p.alunoId, p.nome)
+                              : null,
                     ),
                   ],
                 ],
               ),
             ),
-            const SizedBox(height: TokensStrip.s3),
-            FxTonalButton(
-              label: s.copilotoAnalisarOutro,
-              expanded: true,
-              onPressed: onEscolherAluno,
-            ),
+            if (podeAnalisar) ...[
+              const SizedBox(height: TokensStrip.s3),
+              FxTonalButton(
+                label: s.copilotoAnalisarOutro,
+                expanded: true,
+                onPressed: onEscolherAluno,
+              ),
+            ],
           ],
           if (tarefasAbertas > 0) ...[
             const SizedBox(height: TokensStrip.s2),
@@ -114,7 +125,7 @@ class _PrioridadeRow extends StatelessWidget {
   const _PrioridadeRow({required this.prioridade, required this.onAnalisar});
 
   final CopilotoPrioridade prioridade;
-  final VoidCallback onAnalisar;
+  final VoidCallback? onAnalisar;
 
   @override
   Widget build(BuildContext context) {
@@ -142,13 +153,15 @@ class _PrioridadeRow extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: TokensStrip.s2),
-          FxActionChip(
-            label: s.copilotoAnalisarCurto,
-            accent: Theme.of(context).colorScheme.primary,
-            isDark: chrome.isDark,
-            onPressed: onAnalisar,
-          ),
+          if (onAnalisar case final analisar?) ...[
+            const SizedBox(width: TokensStrip.s2),
+            FxActionChip(
+              label: s.copilotoAnalisarCurto,
+              accent: Theme.of(context).colorScheme.primary,
+              isDark: chrome.isDark,
+              onPressed: analisar,
+            ),
+          ],
         ],
       ),
     );

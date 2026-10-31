@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../growth/utils/migracao_foto_limits.dart';
+import '../ia/utils/ia_cota.dart';
 import '../planos/data/plano_recurso.dart';
 import '../subscription/models/subscription_plan.dart';
 import '../subscription/utils/plano_ia_limits.dart';
@@ -180,7 +181,7 @@ class PlanEntitlements {
             'Você vê quem atrasou e cobra pelo chat ou por PIX sem sair do app.',
       'iaCopiloto' =>
         'Análises e próximos passos com IA no plano $planLabel '
-            '(${PlanoIaLimits.pro} interações/mês). '
+            '(${PlanoIaLimits.pro} usos de IA por mês). '
             'Enterprise: ${PlanoIaLimits.enterprise}/mês.',
       'migracaoFoto' =>
         'Importar alunos por foto/print (OCR gratuito) está no $planLabel '
@@ -362,7 +363,9 @@ class PlanEntitlements {
     required SubscriptionPlan currentPlan,
     SubscriptionPlan? targetPlan,
     int? limiteAtual,
+    DateTime? agora,
   }) {
+    final volta = iaCotaVoltaLabel(agora ?? DateTime.now());
     if (currentPlan == SubscriptionPlan.FREE ||
         targetPlan == SubscriptionPlan.PRO) {
       return lockedOffer(
@@ -373,19 +376,19 @@ class PlanEntitlements {
     }
     if (currentPlan == SubscriptionPlan.ENTERPRISE && targetPlan == null) {
       return LockedOffer(
-        headline: 'Cota de IA esgotada este mês',
+        headline: 'Usos de IA acabaram este mês',
         body:
-            'Você usou todas as ${limiteAtual ?? PlanoIaLimits.enterprise} interações do Enterprise. '
-            'A cota renova no próximo ciclo mensal.',
+            'Seus ${limiteAtual ?? PlanoIaLimits.enterprise} usos de IA acabaram. '
+            'Voltam em $volta.',
         ctaLabel: 'Entendi',
         targetPlan: null,
       );
     }
     return LockedOffer(
-      headline: 'Cota de IA esgotada este mês',
+      headline: 'Usos de IA acabaram este mês',
       body:
-          'Você usou todas as ${limiteAtual ?? PlanoIaLimits.pro} interações do Pro. '
-          'No Enterprise são ${PlanoIaLimits.enterprise} interações/mês — mais espaço para Copiloto, treinos e chat.',
+          'Seus ${limiteAtual ?? PlanoIaLimits.pro} usos de IA acabaram. Voltam em $volta. '
+          'No Enterprise são ${PlanoIaLimits.enterprise} por mês.',
       ctaLabel: 'Ver plano Enterprise',
       targetPlan: targetPlan ?? SubscriptionPlan.ENTERPRISE,
     );
@@ -451,11 +454,11 @@ class PlanEntitlements {
           'Pro libera até ${PlanoAlunosLimits.pro} alunos.';
     }
     if (usage.iaAtLimit) {
-      return 'Cota de IA esgotada (${usage.limiteIaMensal}/mês). '
-          '${usage.plano == SubscriptionPlan.PRO ? 'Enterprise libera até ${PlanoIaLimits.enterprise} interações/mês.' : 'Renova no próximo ciclo.'}';
+      return 'Usos de IA acabaram (${usage.limiteIaMensal}/mês). '
+          '${usage.plano == SubscriptionPlan.PRO ? 'Enterprise libera até ${PlanoIaLimits.enterprise} por mês.' : 'Voltam em ${iaCotaVoltaLabel(DateTime.now())}.'}';
     }
     if (usage.iaNearLimit) {
-      return 'Você usou ${usage.iaUsadaMes} de ${usage.limiteIaMensal} interações de IA este mês. '
+      return 'Você usou ${usage.iaUsadaMes} de ${usage.limiteIaMensal} usos de IA este mês. '
           '${usage.plano == SubscriptionPlan.PRO ? 'Enterprise sobe para ${PlanoIaLimits.enterprise}/mês.' : 'Use com parcimônia até renovar.'}';
     }
     return null;
@@ -524,15 +527,6 @@ class PlanoUsageSnapshot {
     required this.limiteIaMensal,
     this.iaRestantes,
   });
-
-  bool get planMismatch =>
-      serverPlano != null && serverPlano!.level != plano.level;
-
-  int get iaRestantesEfetivos {
-    if (iaRestantes != null) return iaRestantes!.clamp(0, limiteIaMensal);
-    if (limiteIaMensal <= 0) return 0;
-    return (limiteIaMensal - iaUsadaMes).clamp(0, limiteIaMensal);
-  }
 
   String get planoLabel => plano.apiName;
 

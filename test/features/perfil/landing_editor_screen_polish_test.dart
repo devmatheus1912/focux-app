@@ -16,7 +16,8 @@ void main() {
     expect(screen, contains('FxInputDeco'));
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('Entrevista'));
-    expect(screen, contains('FloatingLabelBehavior.always'));
+    expect(screen, contains('_etapasEntrevista'));
+    expect(screen, contains('rotuloFlutuante: true'));
     expect(screen, contains('minLines: 2'));
     expect(screen, contains('maxLines: 4'));
   });

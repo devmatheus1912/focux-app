@@ -25,10 +25,10 @@ String? paywallContextMessage({
   }
   if (usage.iaAtLimit) {
     return 'Você usou ${usage.iaUsadaMes} de ${usage.limiteIaMensal} IA este mês. '
-        'Enterprise libera até ${PlanoIaLimits.enterprise} interações.';
+        'Enterprise libera até ${PlanoIaLimits.enterprise} usos.';
   }
   if (usage.iaNearLimit) {
-    return 'Você usou ${usage.iaUsadaMes} de ${usage.limiteIaMensal} interações de IA. '
+    return 'Você usou ${usage.iaUsadaMes} de ${usage.limiteIaMensal} usos de IA. '
         'Enterprise dá mais folga no Copiloto.';
   }
   if (usage.plano == SubscriptionPlan.FREE) {

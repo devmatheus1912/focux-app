@@ -39,21 +39,6 @@ String engajamentoFxIcon(String? tipo) {
   }
 }
 
-String engajamentoWhenLabel(String dataHora) {
-  try {
-    final dt = DateTime.parse(dataHora).toLocal();
-    final day = dt.day.toString().padLeft(2, '0');
-    final month = dt.month.toString().padLeft(2, '0');
-    final hour = dt.hour.toString().padLeft(2, '0');
-    final minute = dt.minute.toString().padLeft(2, '0');
-    return '$day/$month $hour:$minute';
-  } catch (_) {
-    final raw = dataHora.trim();
-    if (raw.length >= 16) return raw.substring(0, 16);
-    return raw.isEmpty ? '—' : raw;
-  }
-}
-
 String engajamentoEventoLabel(String? descricao, String? tipo) {
   final text = descricao?.trim();
   if (text != null && text.isNotEmpty) {
@@ -72,6 +57,7 @@ String? engajamentoEventoSubtitle({
   required String? tipo,
   required String titulo,
 }) {
+  if ((tipo ?? '').trim().toUpperCase() == 'MENSAGEM') return null;
   final label = engajamentoTipoLabel(tipo);
   return label.toLowerCase() == titulo.trim().toLowerCase() ? null : label;
 }
@@ -118,17 +104,10 @@ List<EngajamentoLinha> engajamentoLinhasPorDia(
   return linhas;
 }
 
-/// Subtítulo do hub: só o período (nome fica no [FxHubHeader]).
-String engajamentoHubSubtitle({required int dias}) =>
-    engajamentoPeriodoLabel(dias);
+enum EngajamentoTreinoEstado { feito, cancelado, aberto }
 
-String engajamentoEventosMetricHint(int count, int dias) {
-  if (count <= 0) return 'Nada em ${engajamentoPeriodoLabel(dias)}';
-  return engajamentoPeriodoLabel(dias);
-}
-
-bool _engajamentoTipoTreino(String? tipo) {
-  switch ((tipo ?? '').trim().toUpperCase()) {
+bool engajamentoEhTreino(EventoEngajamento e) {
+  switch (e.tipo.trim().toUpperCase()) {
     case 'TREINO':
     case 'TREINO_INICIADO':
     case 'CHECKIN_CONCLUIDO':
@@ -138,32 +117,191 @@ bool _engajamentoTipoTreino(String? tipo) {
   }
 }
 
-int engajamentoTreinosCount(Iterable<EventoEngajamento> eventos) =>
-    eventos.where((e) => _engajamentoTipoTreino(e.tipo)).length;
+bool engajamentoEhMensagem(EventoEngajamento e) =>
+    e.tipo.trim().toUpperCase() == 'MENSAGEM';
 
-int engajamentoMensagensCount(Iterable<EventoEngajamento> eventos) =>
-    eventos.where((e) => e.tipo.trim().toUpperCase() == 'MENSAGEM').length;
-
-String engajamentoUltimoValue(Iterable<EventoEngajamento> eventos) {
-  EventoEngajamento? last;
-  for (final evento in eventos) {
-    if (last == null || evento.dataHora.compareTo(last.dataHora) > 0) {
-      last = evento;
-    }
+/// `status` do backend; build contra backend antigo lê o texto.
+EngajamentoTreinoEstado engajamentoTreinoEstado(EventoEngajamento e) {
+  final bruto = (e.status ?? e.descricao).toUpperCase();
+  if (bruto.contains('CANCELADO')) return EngajamentoTreinoEstado.cancelado;
+  if (bruto.contains('EM_ANDAMENTO') || bruto.contains('EM ANDAMENTO')) {
+    return EngajamentoTreinoEstado.aberto;
   }
-  if (last == null) return '—';
-  return engajamentoTipoLabel(last.tipo);
+  return EngajamentoTreinoEstado.feito;
 }
 
-String engajamentoUltimoHint(Iterable<EventoEngajamento> eventos) {
-  EventoEngajamento? last;
-  for (final evento in eventos) {
-    if (last == null || evento.dataHora.compareTo(last.dataHora) > 0) {
-      last = evento;
+bool _treinoFeito(EventoEngajamento e) =>
+    engajamentoEhTreino(e) &&
+    engajamentoTreinoEstado(e) == EngajamentoTreinoEstado.feito;
+
+/// Cancelado e em andamento não contam como treino.
+int engajamentoTreinosCount(Iterable<EventoEngajamento> eventos) =>
+    eventos.where(_treinoFeito).length;
+
+DateTime? _quando(EventoEngajamento e) =>
+    DateTime.tryParse(e.dataHora)?.toLocal();
+
+DateTime _dia(DateTime dt) => DateTime(dt.year, dt.month, dt.day);
+
+String _haDias(DateTime quando, DateTime now) {
+  final dias = _dia(now).difference(_dia(quando)).inDays;
+  if (dias <= 0) return 'hoje';
+  if (dias == 1) return 'ontem';
+  return 'há $dias dias';
+}
+
+/// Resposta curta para "esse aluno está firme?".
+String engajamentoFrase(List<EventoEngajamento> eventos, {DateTime? now}) {
+  final ref = now ?? DateTime.now();
+  final feitos =
+      eventos.where(_treinoFeito).map(_quando).nonNulls.toList()..sort();
+  if (feitos.isEmpty) return 'Nenhum treino feito neste período.';
+  final corte = _dia(ref).subtract(const Duration(days: 6));
+  final semana = feitos.where((d) => !d.isBefore(corte)).length;
+  final vezes = switch (semana) {
+    0 => 'Não treinou nos últimos 7 dias.',
+    1 => 'Treinou 1 vez nos últimos 7 dias.',
+    _ => 'Treinou $semana vezes nos últimos 7 dias.',
+  };
+  return '$vezes Último treino ${_haDias(feitos.last, ref)}.';
+}
+
+/// Treinos feitos nos últimos 7 dias, com hoje.
+int engajamentoTreinosSemana(
+  Iterable<EventoEngajamento> eventos, {
+  DateTime? now,
+}) {
+  final corte = _dia(now ?? DateTime.now()).subtract(const Duration(days: 6));
+  return eventos
+      .where(_treinoFeito)
+      .map(_quando)
+      .nonNulls
+      .where((d) => !d.isBefore(corte))
+      .length;
+}
+
+/// Dias do período mais recente, do mais antigo para hoje.
+List<({DateTime dia, EngajamentoTreinoEstado? estado})> engajamentoCalendario(
+  Iterable<EventoEngajamento> eventos, {
+  DateTime? now,
+  int dias = 35,
+}) {
+  final hoje = _dia(now ?? DateTime.now());
+  final porDia = <DateTime, EngajamentoTreinoEstado>{};
+  for (final e in eventos.where(engajamentoEhTreino)) {
+    final quando = _quando(e);
+    final estado = engajamentoTreinoEstado(e);
+    if (quando == null || estado == EngajamentoTreinoEstado.aberto) continue;
+    // Feito vence cancelado no mesmo dia.
+    if (porDia[_dia(quando)] != EngajamentoTreinoEstado.feito) {
+      porDia[_dia(quando)] = estado;
     }
   }
-  if (last == null) return 'Nenhum evento na janela';
-  return engajamentoWhenLabel(last.dataHora);
+  return [
+    for (var i = dias - 1; i >= 0; i--)
+      (
+        dia: DateTime(hoje.year, hoje.month, hoje.day - i),
+        estado: porDia[DateTime(hoje.year, hoje.month, hoje.day - i)],
+      ),
+  ];
+}
+
+/// Quem falou por último. Nulo sem conversa na janela.
+({String texto, bool semResposta})? engajamentoConversa(
+  List<EventoEngajamento> eventos, {
+  DateTime? now,
+}) {
+  final ref = now ?? DateTime.now();
+  EventoEngajamento? ultima;
+  EventoEngajamento? ultimaDoAluno;
+  for (final e in eventos.where(engajamentoEhMensagem)) {
+    if (ultima == null || e.dataHora.compareTo(ultima.dataHora) > 0) ultima = e;
+    if (_doAluno(e) &&
+        (ultimaDoAluno == null ||
+            e.dataHora.compareTo(ultimaDoAluno.dataHora) > 0)) {
+      ultimaDoAluno = e;
+    }
+  }
+  if (ultima == null) return null;
+  final quandoAluno = ultimaDoAluno == null ? null : _quando(ultimaDoAluno);
+  return (
+    texto:
+        quandoAluno == null
+            ? 'O aluno ainda não respondeu neste período.'
+            : 'Última mensagem do aluno ${_haDias(quandoAluno, ref)}.',
+    semResposta: _doAluno(ultima),
+  );
+}
+
+bool _doAluno(EventoEngajamento e) =>
+    e.remetente == null
+        ? e.descricao.toLowerCase().startsWith('aluno')
+        : e.remetente!.toUpperCase() == 'ALUNO';
+
+enum EngajamentoFiltro { tudo, treinos, medidas, mensagens }
+
+String engajamentoFiltroLabel(EngajamentoFiltro filtro) => switch (filtro) {
+  EngajamentoFiltro.tudo => 'Tudo',
+  EngajamentoFiltro.treinos => 'Treinos',
+  EngajamentoFiltro.medidas => 'Medidas',
+  EngajamentoFiltro.mensagens => 'Mensagens',
+};
+
+int engajamentoCanceladosCount(Iterable<EventoEngajamento> eventos) =>
+    eventos
+        .where(
+          (e) =>
+              engajamentoEhTreino(e) &&
+              engajamentoTreinoEstado(e) == EngajamentoTreinoEstado.cancelado,
+        )
+        .length;
+
+/// Eventos da lista: mensagens do dia viram uma linha e cancelados só a pedido.
+List<EventoEngajamento> engajamentoAtividade(
+  List<EventoEngajamento> eventos, {
+  required EngajamentoFiltro filtro,
+  bool mostrarCancelados = false,
+}) {
+  final porDia = <String, int>{};
+  for (final e in eventos.where(engajamentoEhMensagem)) {
+    final chave = e.dataHora.split('T').first;
+    porDia[chave] = (porDia[chave] ?? 0) + 1;
+  }
+  final vistos = <String>{};
+  final saida = <EventoEngajamento>[];
+  for (final e in eventos) {
+    final tipo = e.tipo.trim().toUpperCase();
+    final treino = engajamentoEhTreino(e);
+    final passa = switch (filtro) {
+      EngajamentoFiltro.tudo => true,
+      EngajamentoFiltro.treinos => treino,
+      EngajamentoFiltro.medidas => tipo == 'MEDIDA',
+      EngajamentoFiltro.mensagens => engajamentoEhMensagem(e),
+    };
+    if (!passa) continue;
+    if (treino &&
+        !mostrarCancelados &&
+        engajamentoTreinoEstado(e) == EngajamentoTreinoEstado.cancelado) {
+      continue;
+    }
+    if (!engajamentoEhMensagem(e)) {
+      saida.add(e);
+      continue;
+    }
+    final chave = e.dataHora.split('T').first;
+    if (!vistos.add(chave)) continue;
+    final total = porDia[chave]!;
+    saida.add(
+      total == 1
+          ? e
+          : EventoEngajamento(
+            tipo: e.tipo,
+            descricao: '$total mensagens',
+            dataHora: e.dataHora,
+          ),
+    );
+  }
+  return saida;
 }
 
 String? engajamentoEventoRota(String? tipo, int alunoId) {

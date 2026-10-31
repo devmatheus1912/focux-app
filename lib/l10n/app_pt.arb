@@ -1060,10 +1060,6 @@
   "@assinaturaTrialRodape": {
     "placeholders": { "preco": { "type": "String" }, "onde": { "type": "String" } }
   },
-  "assinaturaTrialNota": "{dias} dias grátis no {plano}. Depois, renova automaticamente pelo valor acima. Cancele {onde} até 24 horas antes do fim do teste para não ser cobrado.",
-  "@assinaturaTrialNota": {
-    "placeholders": { "dias": { "type": "int" }, "plano": { "type": "String" }, "onde": { "type": "String" } }
-  },
   "trialBannerRenovaLoja": "Renova automaticamente no fim do teste. Cancele {onde}.",
   "@trialBannerRenovaLoja": { "placeholders": { "onde": { "type": "String" } } },
   "registerIndicacaoLabel": "Código de indicação (opcional)",
@@ -1926,7 +1922,6 @@
   "assinaturaUsoLivre": "{usado} · sem limite",
   "@assinaturaUsoLivre": {"placeholders": {"usado": {"type": "int"}}},
   "assinaturaUsoAlunos": "Alunos",
-  "assinaturaUsoIa": "Copiloto no mês",
   "assinaturaVerTudo": "Ver tudo",
   "assinaturaVerMenos": "Ver menos",
   "landingNoAr": "No ar",

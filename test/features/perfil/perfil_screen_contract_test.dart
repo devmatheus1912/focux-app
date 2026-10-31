@@ -1,3 +1,5 @@
+import 'package:focux_app/features/onboarding/data/onboarding_status_data.dart';
+import 'package:focux_app/features/onboarding/providers/onboarding_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -25,6 +27,18 @@ void main() {
       ProviderScope(
         overrides: [
           perfilProvider.overrideWith((ref) async => _perfilFixture),
+          onboardingStatusProvider.overrideWith(
+            (ref) async => OnboardingStatusData(
+              perfilCompleto: false,
+              primeiroAlunoAdicionado: true,
+              primeiroTreinoCriado: true,
+              pagamentoConfigurado: false,
+              pacoteCriado: false,
+              habitoConfigurado: false,
+              linkBioConfigurado: false,
+              treinoEnviado: true,
+            ),
+          ),
         ],
         child: const MaterialApp(
           locale: Locale('pt'),
@@ -46,7 +60,7 @@ void main() {
     expect(find.text('Seu código'), findsOneWidget);
     // O que falta vira cartão abaixo da identidade (fixture sem foto/telefone).
     expect(find.textContaining('% completo'), findsOneWidget);
-    expect(find.textContaining('passos para fechar'), findsOneWidget);
+    expect(find.textContaining('passos no seu perfil'), findsOneWidget);
     expect(find.text('Completar'), findsNothing);
     expect(find.text('Ver ao vivo'), findsNothing);
     expect(find.text('Migração Focux'), findsNothing);
@@ -117,7 +131,7 @@ void main() {
     expect(find.text('Cadastro completo'), findsNothing);
     expect(find.text('Completar'), findsNothing);
     expect(find.text('Perfil completo'), findsOneWidget);
-    expect(find.textContaining('passos para fechar'), findsNothing);
+    expect(find.textContaining('passos no seu perfil'), findsNothing);
 
     await tester.scrollUntilVisible(
       find.text('Negócio'),

@@ -39,6 +39,12 @@ class IaQuotaUpgrade {
       );
     }
     final plano = features?.plano ?? SubscriptionPlan.FREE;
+    if (error != null && error.quotaExhausted) {
+      return PlanEntitlements.iaQuotaUpgradeOffer(
+        currentPlan: SubscriptionPlan.ENTERPRISE,
+        limiteAtual: features?.limiteIaMensal,
+      );
+    }
     if (features == null || !features.iaCopiloto) {
       return PlanEntitlements.lockedOffer(
         featureName: 'IA Copiloto',
@@ -135,7 +141,9 @@ class IaQuotaUpgrade {
     WidgetRef ref,
     Object error,
   ) async {
-    if (error is! IaOperationalException || !shouldPromptUpgrade(error)) {
+    // Enterprise esgotado não tem upgrade, mas também precisa do aviso.
+    if (error is! IaOperationalException ||
+        (!shouldPromptUpgrade(error) && !error.quotaExhausted)) {
       return;
     }
     await showUpgradeDialog(

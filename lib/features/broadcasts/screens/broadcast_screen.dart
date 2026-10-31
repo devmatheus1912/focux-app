@@ -3,22 +3,25 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_choice_strip.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
+import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_form_chrome.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_quick_chips.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
@@ -33,6 +36,17 @@ final _broadcastRepositoryProvider = Provider<BroadcastRepository>(
 
 final _broadcastHistoricoProvider = FutureProvider<List<Broadcast>>((ref) {
   return ref.read(_broadcastRepositoryProvider).listar();
+});
+
+/// Sem alcance a tela segue: só perde a contagem.
+final _broadcastAlcanceProvider = FutureProvider.autoDispose<
+  Map<String, BroadcastAlcance>
+>((ref) async {
+  try {
+    return await ref.read(_broadcastRepositoryProvider).alcance();
+  } catch (_) {
+    return const {};
+  }
 });
 
 class BroadcastScreen extends ConsumerStatefulWidget {
@@ -102,8 +116,8 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
   void _showHelp() {
     showFxHelpSheet(
       context,
-      title: 'Broadcasts',
-      subtitle: 'Avisa a base inteira sem abrir conversa por conversa.',
+      title: 'Avisos',
+      subtitle: 'Fala com todos os alunos sem abrir conversa por conversa.',
       tips: const [
         FxHelpTip(
           'Público',
@@ -112,7 +126,7 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
         ),
         FxHelpTip(
           'Envio',
-          'Confirme no sheet. A notificação vai para os apps dos alunos deste público.',
+          'Você vê quantos recebem antes de enviar. Quem está sem notificação vê ao abrir o app.',
           icon: 'message-circle',
         ),
       ],
@@ -123,10 +137,14 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
     if (_enviando) return;
     if (!_formKey.currentState!.validate()) return;
     HapticFeedback.mediumImpact();
+    final alcance = ref.read(_broadcastAlcanceProvider).value?[_publicoAlvo];
     final ok = await showFxConfirmSheet(
       context,
-      title: broadcastConfirmTitle(_publicoAlvo),
-      message: broadcastConfirmMessage(),
+      title: broadcastConfirmTitle(_publicoAlvo, total: alcance?.total),
+      message: broadcastConfirmMessage(
+        total: alcance?.total,
+        comPush: alcance?.comPush,
+      ),
       icon: Icons.send_rounded,
       confirmLabel: broadcastConfirmLabel(),
     );
@@ -140,11 +158,12 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
             mensagem: _mensagemCtrl.text.trim(),
             tipoConsultoriaAlvo: broadcastTipoApi(_publicoAlvo),
           );
+      if (!mounted) return;
       _tituloCtrl.clear();
       _mensagemCtrl.clear();
       setState(() => _publicoAlvo = 'TODOS');
       ref.invalidate(_broadcastHistoricoProvider);
-      if (!mounted) return;
+      ref.invalidate(_broadcastAlcanceProvider);
       FeedbackHelper.showSuccess(
         context,
         broadcastSendSuccess(
@@ -160,43 +179,56 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
     }
   }
 
+  void _preencher(String titulo, String mensagem) {
+    HapticFeedback.selectionClick();
+    _tituloCtrl.text = titulo;
+    _mensagemCtrl.text = mensagem;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final alcance = ref.watch(_broadcastAlcanceProvider).value ?? const {};
+    final semAlunos = alcance['TODOS']?.total == 0;
+    final prontoParaEnviar =
+        _tituloCtrl.text.trim().isNotEmpty &&
+        _mensagemCtrl.text.trim().isNotEmpty;
     final historicoAsync = ref.watch(_broadcastHistoricoProvider);
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
 
     return fxScreenA11yScope(
-      label: 'Broadcast',
+      label: 'Avisos',
       child: FxFormPopGuard(
         dirty: _isDirty,
         onCancel: _cancel,
         child: FxShellScaffold(
           useMesh: true,
           appBar: FxShellAppBar(
-            title: 'Broadcasts',
-            subtitle: freshnessLabel ?? 'Mensagem para a base',
+            title: 'Avisos',
+            subtitle: freshnessLabel ?? 'Para todos os alunos',
             onBack: () {
               _cancel();
             },
             actions: [
               FxHelpIconButton(
-                tooltip: 'Como funciona o broadcast',
+                tooltip: 'Como funcionam os avisos',
                 onTap: _showHelp,
               ),
             ],
           ),
-          bottomNavigationBar: FxFormStickyBar(
+          bottomNavigationBar: semAlunos
+              ? null
+              : FxFormStickyBar(
             child: Semantics(
               button: true,
               enabled: !_enviando,
-              label: _enviando ? 'Enviando broadcast' : 'Enviar',
+              label: _enviando ? 'Enviando aviso' : 'Enviar',
               child: FxLiquidPrimaryButton(
                 label: 'Enviar',
                 loading: _enviando,
                 loadingLabel: 'Enviando…',
-                onPressed: _enviando ? null : _enviar,
+                onPressed: _enviando || !prontoParaEnviar ? null : _enviar,
               ),
             ),
           ),
@@ -220,9 +252,29 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
                       24,
                     ),
                     children: [
+                    if (semAlunos)
+                      FxEmptyState(
+                        icon: 'users',
+                        title: 'Sem alunos para avisar',
+                        subtitle: 'Cadastre um aluno para enviar o primeiro aviso.',
+                        action: FxEmptyAction(
+                          label: 'Ver alunos',
+                          onTap: () => goPersonalShellTab(context, '/alunos'),
+                        ),
+                      )
+                    else ...[
+                    FxQuickChips<({String nome, String titulo, String mensagem})>(
+                      itens: broadcastAtalhos,
+                      selecionado: null,
+                      rotuloDe: (atalho) => atalho.nome,
+                      onSelecionar:
+                          (atalho) =>
+                              _preencher(atalho.titulo, atalho.mensagem),
+                    ),
+                    const SizedBox(height: TokensStrip.s3),
                     FxSettingsGroup(
-                      header: 'Nova mensagem',
-                      caption: 'Título e texto da notificação push.',
+                      header: 'Novo aviso',
+                      caption: 'Chega como notificação no celular do aluno.',
                       children: [
                       AlunoInsetFormField(
                         controller: _tituloCtrl,
@@ -258,27 +310,38 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
                       ),
                     ],
                   ),
+                  if (prontoParaEnviar) ...[
+                    const SizedBox(height: TokensStrip.s3),
+                    _PreviaNotificacao(
+                      titulo: _tituloCtrl.text.trim(),
+                      mensagem: _mensagemCtrl.text.trim(),
+                    ),
+                  ],
                   const SizedBox(height: FxSettingsLayout.groupGap),
-                  FxSettingsGroup(
-                    header: 'Público',
-                    caption: 'Quem recebe, pelo tipo de consultoria.',
-                    children: [
-                      for (var i = 0; i < broadcastPublicos.length; i++)
-                        FxSettingsTile(
-                          fxIcon: broadcastPublicoFxIcon(broadcastPublicos[i]),
-                          label: broadcastPublicoLabel(broadcastPublicos[i]),
-                          value: broadcastChoiceValue(
-                            _publicoAlvo == broadcastPublicos[i],
+                  Text(
+                    'Quem recebe',
+                    style: FocuxHubTypography.sectionTitle(
+                      context,
+                      color: chrome.ink,
+                    ),
+                  ),
+                  const SizedBox(height: TokensStrip.s2),
+                  FxChoiceStrip<String>(
+                    itens: [
+                      for (final publico in broadcastPublicos)
+                        FxChoiceItem(
+                          value: publico,
+                          label: broadcastPublicoChip(
+                            publico,
+                            alcance[publico]?.total,
                           ),
-                          highlight: _publicoAlvo == broadcastPublicos[i],
-                          showDivider: i != broadcastPublicos.length - 1,
-                          onTap:
-                              () => setState(
-                                () => _publicoAlvo = broadcastPublicos[i],
-                              ),
                         ),
                     ],
+                    selecionado: _publicoAlvo,
+                    onSelecionar:
+                        (publico) => setState(() => _publicoAlvo = publico),
                   ),
+                  ],
                   const SizedBox(height: FxSettingsLayout.groupGap),
                   historicoAsync.when(
                     loading: () => const SkeletonList(count: 4),
@@ -291,7 +354,12 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
                               () =>
                                   ref.invalidate(_broadcastHistoricoProvider),
                         ),
-                    data: (lista) => BroadcastHistorico(itens: lista),
+                    data:
+                        (lista) => BroadcastHistorico(
+                          itens: lista,
+                          onUsarDeNovo:
+                              (item) => _preencher(item.titulo, item.mensagem),
+                        ),
                   ),
                 ],
               ),
@@ -300,6 +368,50 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
         ),
       ),
         ),
+      ),
+    );
+  }
+}
+
+/// Como o aviso aparece no celular do aluno.
+class _PreviaNotificacao extends StatelessWidget {
+  const _PreviaNotificacao({required this.titulo, required this.mensagem});
+
+  final String titulo;
+  final String mensagem;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    return Container(
+      padding: const EdgeInsets.all(TokensStrip.s3),
+      decoration: fxListCardDecoration(context),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.notifications_none_rounded, size: 20, color: chrome.brand),
+          const SizedBox(width: TokensStrip.s2),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  titulo,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: FocuxHubTypography.cardTitle(color: chrome.ink),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  mensagem,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

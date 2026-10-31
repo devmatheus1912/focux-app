@@ -20,6 +20,8 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../../dashboard/utils/dashboard_home_client_cache.dart';
+import '../../onboarding/data/setup_steps_catalog.dart';
+import '../../onboarding/providers/onboarding_provider.dart';
 import '../../planos/data/plano_recurso.dart';
 import '../../planos/providers/plano_features_provider.dart';
 import '../../planos/utils/plan_gate.dart';
@@ -184,6 +186,9 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
   @override
   Widget build(BuildContext context) {
     final perfilAsync = ref.watch(perfilProvider);
+    final onboarding = ref.watch(onboardingStatusProvider).value;
+    final primeirosPassosFeitos =
+        onboarding != null && nextSetupStep(onboarding) == null;
     final cachedPlano = DashboardHomeClientCache.getIfFresh()?.planoFeatures;
     if (cachedPlano != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -211,6 +216,7 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
           return _PerfilBody(
             perfil: perfil,
             uploadingPhoto: _uploadingPhoto,
+            primeirosPassosFeitos: primeirosPassosFeitos,
             showMfa: _mfaAvailable,
             freshnessLabel: freshnessLabel,
             onRefresh: _refreshHub,

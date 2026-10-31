@@ -31,7 +31,8 @@ void main() {
   });
 
   test('broadcastConfirmTitle', () {
-    expect(broadcastConfirmTitle('TODOS'), 'Enviar para toda a base?');
+    expect(broadcastConfirmTitle('TODOS'), 'Enviar para todos os alunos?');
+    expect(broadcastConfirmTitle('TODOS', total: 8), 'Enviar para 8 alunos?');
     expect(broadcastConfirmTitle('PRESENCIAL'), 'Enviar para presencial?');
   });
 

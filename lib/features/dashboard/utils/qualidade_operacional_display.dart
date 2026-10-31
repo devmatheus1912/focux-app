@@ -2,7 +2,13 @@ import '../../../core/money/fx_money.dart';
 import '../data/qualidade_operacional.dart';
 
 const qualidadeComoCalculamos =
-    'Índice 0–100: metade ticket vs um recorte de mercado configurado, metade retenção (ativos / ativos+inativos) vs o mesmo recorte.';
+    'Índice de 0 a 100. Metade vem do ticket médio e metade da retenção (alunos ativos sobre ativos e inativos), comparados à referência Focux.';
+
+/// Abaixo disso o índice oscila com um aluno só.
+const qualidadeAlunosMinimos = 5;
+
+bool qualidadeBasePequena(int? alunosAtivos) =>
+    alunosAtivos != null && alunosAtivos < qualidadeAlunosMinimos;
 
 /// Ticket médio ausente (sem mensalidades / base zerada) — não compete com mercado.
 bool qualidadeTicketUnavailable(double ticketPessoal) => ticketPessoal <= 0;
@@ -24,9 +30,9 @@ String qualidadeTicketHint({
     return 'Indisponível · referência $mercado';
   }
   if (ticketPessoal >= ticketMercado) {
-    return 'Acima do mercado $mercado';
+    return 'Acima da referência $mercado';
   }
-  return 'Mercado $mercado';
+  return 'Referência $mercado';
 }
 
 enum QualidadeScoreBand { excellent, good, attention }
@@ -43,25 +49,13 @@ String qualidadeScoreLabel(int score) => switch (qualidadeScoreBand(score)) {
   QualidadeScoreBand.attention => 'Atenção',
 };
 
-class QualidadeNextAction {
-  const QualidadeNextAction({required this.label, required this.route});
-
-  final String label;
-  final String route;
-}
-
-QualidadeNextAction qualidadeNextAction(QualidadeOperacionalData data) {
-  if (data.retencaoPessoal < data.retencaoMercado) {
-    return const QualidadeNextAction(label: 'Ver retenção', route: '/retencao');
-  }
-  if (data.ticketPessoal < data.ticketMercado) {
-    return const QualidadeNextAction(
-      label: 'Mensalidades',
-      route: '/financeiro',
-    );
-  }
-  return const QualidadeNextAction(label: 'Ver alunos', route: '/alunos');
-}
+String qualidadeRetencaoHint({
+  required int retencaoPessoal,
+  required int retencaoMercado,
+}) =>
+    retencaoPessoal >= retencaoMercado
+        ? 'Acima da referência $retencaoMercado%'
+        : 'Referência $retencaoMercado%';
 
 /// Insight coerente com as métricas do card (não só o texto cru do BE).
 String qualidadeRecomendacaoDisplay(QualidadeOperacionalData data) {

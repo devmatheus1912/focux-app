@@ -20,7 +20,6 @@ void main() {
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
     expect(screen, contains('FxHubHeader'));
-    expect(screen, contains('OperationalMetricTile'));
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('showEngajamentoHelpSheet'));
@@ -34,14 +33,16 @@ void main() {
     expect(screen, contains('engajamentoLinhasPorDia'));
     expect(screen, contains('engajamentoHoraLabel'));
     expect(screen, contains('safeArea: false'));
-    expect(screen, contains('dense: true'));
-    expect(screen, contains('engajamentoUltimoValue'));
     expect(screen, contains('subtitle: freshness'));
     expect(screen, contains('engajamentoEventoRota'));
     expect(screen, contains('showFxInsetPickerSheet'));
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, contains('FxActionChip'));
+    expect(screen, contains('FxMetricStrip'));
+    expect(screen, contains('engajamentoAtividade'));
+    expect(screen, contains('engajamentoFrase'));
+    expect(screen, isNot(contains("label: 'Eventos'")));
     expect(screen, contains('PopScope'));
     expect(screen, contains('ListView.builder'));
     expect(screen, isNot(contains('TabBar')));

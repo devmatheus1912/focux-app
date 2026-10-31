@@ -40,7 +40,6 @@ void main() {
     );
     expect(usage.plano, SubscriptionPlan.ENTERPRISE);
     expect(usage.limiteAlunos, isNull);
-    expect(usage.planMismatch, isTrue);
     expect(usage.limiteIaMensal, 600);
   });
 

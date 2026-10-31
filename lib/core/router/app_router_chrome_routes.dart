@@ -818,7 +818,8 @@ RouteBase buildChromeShellRoute() {
                 plan: args.plan,
                 billingPeriod: args.billingPeriod,
                 priceDisplay: args.priceDisplay,
-                trialNote: args.trialNote,
+                trialDias: args.trialDias,
+                indicacaoNota: args.indicacaoNota,
               );
             },
           ),

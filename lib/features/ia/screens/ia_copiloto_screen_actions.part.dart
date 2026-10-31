@@ -303,6 +303,14 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
   String _erroIaTexto(Object erro) {
     if (erro is IaOperationalException) {
       final refText = erro.reference == null ? '' : ' Ref: ${erro.reference}.';
+      if (erro.quotaExhausted) {
+        return iaCotaEsgotadaTexto(
+          limite:
+              ref.read(planoFeaturesProvider).value?.limiteIaMensal ??
+              PlanoIaLimits.enterprise,
+          agora: DateTime.now(),
+        );
+      }
       if (erro.retryable) {
         return '${erro.message}$refText Tente novamente em alguns instantes.';
       }

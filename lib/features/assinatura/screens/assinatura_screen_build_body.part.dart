@@ -108,14 +108,10 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
                 usado: meFeatures.alunosAtivos,
                 limite: meFeatures.limiteAlunos,
               ),
-              if ((meFeatures.limiteIaMensal ?? 0) > 0)
-                (
-                  rotulo: s.assinaturaUsoIa,
-                  usado: meFeatures.iaUsadaMes,
-                  limite: meFeatures.limiteIaMensal,
-                ),
             ],
           ],
+          iaUsada: meFeatures?.iaUsadaMes ?? 0,
+          iaLimite: meFeatures?.limiteIaMensal ?? 0,
           inclusos: paywallInclusos(
             vitrine?.rowsFor(currentPlan) ??
                 (currentPlan == SubscriptionPlan.ENTERPRISE

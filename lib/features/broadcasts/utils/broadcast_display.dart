@@ -9,13 +9,35 @@ String broadcastPublicoLabel(String? raw) =>
     };
 
 String broadcastPublicoFxIcon(String raw) => switch (raw.trim().toUpperCase()) {
-  'ONLINE' => 'sun',
+  'ONLINE' => 'message-circle',
   'PRESENCIAL' => 'home',
   'HIBRIDO' => 'users',
-  _ => 'message-circle',
+  _ => 'users',
 };
 
-String broadcastChoiceValue(bool selected) => selected ? 'Ativo' : '';
+/// Rótulo do público com o alcance, quando já chegou.
+String broadcastPublicoChip(String publico, int? total) {
+  final label = broadcastPublicoLabel(publico);
+  return total == null ? label : '$label $total';
+}
+
+const broadcastAtalhos = <({String nome, String titulo, String mensagem})>[
+  (
+    nome: 'Lembrete de treino',
+    titulo: 'Lembrete de treino',
+    mensagem: 'Seu treino de hoje já está no app. Bora?',
+  ),
+  (
+    nome: 'Feriado',
+    titulo: 'Atendimento no feriado',
+    mensagem: 'No feriado não terei atendimento. Volto no dia seguinte.',
+  ),
+  (
+    nome: 'Mudança de horário',
+    titulo: 'Mudança de horário',
+    mensagem: 'Meus horários mudaram. Confira a agenda no app.',
+  ),
+];
 
 String? broadcastTipoApi(String publico) =>
     publico == 'TODOS' ? null : publico;
@@ -44,13 +66,23 @@ String broadcastAlunosValue(int count, {int? comPush}) {
   return '$base · ${broadcastComPushLabel(comPush)}';
 }
 
-String broadcastConfirmTitle(String publico) {
-  if (publico == 'TODOS') return 'Enviar para toda a base?';
+String broadcastAlunosLabel(int total) =>
+    total == 1 ? '1 aluno' : '$total alunos';
+
+String broadcastConfirmTitle(String publico, {int? total}) {
+  if (total != null) return 'Enviar para ${broadcastAlunosLabel(total)}?';
+  if (publico == 'TODOS') return 'Enviar para todos os alunos?';
   return 'Enviar para ${broadcastPublicoLabel(publico).toLowerCase()}?';
 }
 
-String broadcastConfirmMessage() =>
-    'A notificação chega de uma vez nos apps dos alunos deste público.';
+String broadcastConfirmMessage({int? total, int? comPush}) {
+  if (total == null || comPush == null) {
+    return 'O aviso chega de uma vez no app dos alunos deste público.';
+  }
+  if (comPush >= total) return 'Todos recebem no celular.';
+  if (comPush <= 0) return 'Eles veem ao abrir o app.';
+  return '$comPush recebem no celular; os outros veem ao abrir o app.';
+}
 
 String broadcastConfirmLabel() => 'Enviar';
 
@@ -62,10 +94,10 @@ String broadcastEnviosCaption(int count) {
 
 String broadcastHistoricoHeader() => 'Histórico';
 
-String broadcastEmptyTitle() => 'Nenhum broadcast enviado';
+String broadcastEmptyTitle() => 'Nenhum aviso enviado';
 
 String broadcastEmptySubtitle() =>
-    'Escreva a primeira mensagem acima para avisar sua base de uma vez.';
+    'Escreva o primeiro aviso acima para falar com seus alunos de uma vez.';
 
 String broadcastFormatDate(DateTime dt) {
   final dia = dt.day.toString().padLeft(2, '0');

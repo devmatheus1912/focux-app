@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_action_link.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_status_pill.dart';
+import '../../../core/widgets/fx_strip_card.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../ia/widgets/ia_uso_linha.dart';
 
 /// Uma linha de consumo: nulo em [limite] é ilimitado.
 typedef AssinaturaUso = ({String rotulo, int usado, int? limite});
@@ -18,12 +21,14 @@ String? assinaturaAcessoAte(DateTime? data) {
   return '${dois(data.day)}/${dois(data.month)}/${data.year}';
 }
 
-class AssinaturaGestaoView extends StatelessWidget {
+class AssinaturaGestaoView extends StatefulWidget {
   const AssinaturaGestaoView({
     super.key,
     required this.planoNome,
     this.validoAte,
     required this.usos,
+    this.iaUsada = 0,
+    this.iaLimite = 0,
     required this.inclusos,
     required this.gerenciarLabel,
     required this.onGerenciar,
@@ -34,9 +39,14 @@ class AssinaturaGestaoView extends StatelessWidget {
     this.onSuperior,
   });
 
+  /// Inclusos à vista antes de "Ver tudo".
+  static const inclusosVisiveis = 4;
+
   final String planoNome;
   final DateTime? validoAte;
   final List<AssinaturaUso> usos;
+  final int iaUsada;
+  final int iaLimite;
   final List<String> inclusos;
   final String gerenciarLabel;
   final VoidCallback? onGerenciar;
@@ -49,10 +59,25 @@ class AssinaturaGestaoView extends StatelessWidget {
   final VoidCallback? onSuperior;
 
   @override
+  State<AssinaturaGestaoView> createState() => _AssinaturaGestaoViewState();
+}
+
+class _AssinaturaGestaoViewState extends State<AssinaturaGestaoView> {
+  var _verTudo = false;
+
+  @override
   Widget build(BuildContext context) {
     final s = S.of(context);
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
+    final usos = widget.usos;
+    final temIa = widget.iaLimite > 0;
+    final inclusos = widget.inclusos;
+    final cabeTudo = inclusos.length <= AssinaturaGestaoView.inclusosVisiveis;
+    final visiveis =
+        _verTudo || cabeTudo
+            ? inclusos
+            : inclusos.take(AssinaturaGestaoView.inclusosVisiveis);
 
     Widget grupo(String titulo, List<Widget> filhos) => Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -82,45 +107,55 @@ class AssinaturaGestaoView extends StatelessWidget {
         TokensStrip.s5,
       ),
       children: [
-        Container(
-          padding: const EdgeInsets.all(TokensStrip.s3),
-          decoration: fxListCardDecoration(context, accent: primary),
+        FxStripCard(
+          emphasize: true,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                s.assinaturaSeuPlano,
-                style: FocuxHubTypography.bodyMuted(color: chrome.mute),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                planoNome,
-                style: FocuxHubTypography.pageTitle(context, color: chrome.ink),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      s.assinaturaSeuPlano,
+                      style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                    ),
+                  ),
+                  FxStatusPill(
+                    label: s.assinaturaAtiva,
+                    tone: FxPillTone.success,
+                  ),
+                ],
               ),
               const SizedBox(height: TokensStrip.s1),
               Text(
-                s.assinaturaAtiva,
-                style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                widget.planoNome,
+                style: FocuxHubTypography.pageTitle(context, color: chrome.ink),
               ),
-              if (assinaturaAcessoAte(validoAte) case final data?)
+              if (assinaturaAcessoAte(widget.validoAte) case final data?) ...[
+                const SizedBox(height: TokensStrip.s1),
                 Text(
                   s.assinaturaAcessoAte(data),
                   style: FocuxHubTypography.bodyMuted(color: chrome.mute),
                 ),
+              ],
             ],
           ),
         ),
         const SizedBox(height: TokensStrip.s4),
-        if (usos.isNotEmpty)
+        if (usos.isNotEmpty || temIa)
           grupo(s.assinaturaSeuUso, [
             for (final (i, uso) in usos.indexed) ...[
               if (i > 0) const SizedBox(height: TokensStrip.s3),
               _UsoLinha(uso: uso),
             ],
+            if (temIa) ...[
+              if (usos.isNotEmpty) const SizedBox(height: TokensStrip.s3),
+              IaUsoLinha(usado: widget.iaUsada, limite: widget.iaLimite),
+            ],
           ]),
         if (inclusos.isNotEmpty)
           grupo(s.assinaturaIncluso, [
-            for (final item in inclusos)
+            for (final item in visiveis)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: TokensStrip.s1),
                 child: Row(
@@ -137,33 +172,45 @@ class AssinaturaGestaoView extends StatelessWidget {
                   ],
                 ),
               ),
+            if (!cabeTudo) ...[
+              const SizedBox(height: TokensStrip.s1),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: FxActionLink(
+                  label: _verTudo ? s.assinaturaVerMenos : s.assinaturaVerTudo,
+                  onTap: () => setState(() => _verTudo = !_verTudo),
+                ),
+              ),
+            ],
           ]),
-        if (onGerenciar != null) ...[
-          FxLiquidPrimaryButton(label: gerenciarLabel, onPressed: onGerenciar),
-          const SizedBox(height: TokensStrip.s3),
-        ],
-        if (onSuperior != null && superiorNome != null)
+        if (widget.onSuperior != null && widget.superiorNome != null)
           FxSatelliteListTile(
-            title: s.assinaturaConhecer(superiorNome!),
+            title: s.assinaturaConhecer(widget.superiorNome!),
             titleCase: false,
-            onTap: onSuperior,
+            onTap: widget.onSuperior,
           ),
-        if (onRestaurar != null)
+        if (widget.onGerenciar != null)
+          FxSatelliteListTile(
+            title: widget.gerenciarLabel,
+            titleCase: false,
+            onTap: widget.onGerenciar,
+          ),
+        if (widget.onRestaurar != null)
           FxSatelliteListTile(
             title: s.assinaturaRestaurar,
             titleCase: false,
-            onTap: onRestaurar,
+            onTap: widget.onRestaurar,
           ),
-        if (onTermos != null)
+        if (widget.onTermos != null)
           FxSatelliteListTile(
             title: s.assinaturaTermos,
             titleCase: false,
-            onTap: onTermos,
+            onTap: widget.onTermos,
           ),
         FxSatelliteListTile(
           title: s.assinaturaCancelar,
           titleCase: false,
-          onTap: onCancelar,
+          onTap: widget.onCancelar,
         ),
       ],
     );

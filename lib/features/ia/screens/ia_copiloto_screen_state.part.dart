@@ -48,12 +48,33 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
   @override
   Widget build(BuildContext context) => buildIaCopilotoBody(context);
 
-  /// Cota só aparece quando pede atenção.
-  String? _quotaHeaderLabel(PlanoFeatures? features) {
-    if (features == null) return null;
-    if (features.iaQuotaEsgotada) return 'Cota esgotada';
-    final limite = features.limiteIaMensal ?? 0;
-    if (limite <= 0 || features.iaRestantes * 5 > limite) return null;
-    return ptCountLabel(features.iaRestantes, 'restante', 'restantes');
+  /// Sem cota não há botão de analisar: o cartão já diz quando volta.
+  Widget _cotaEsgotadaCard(PlanoFeatures plano) {
+    final chrome = ShellChrome.of(context);
+    final offer = IaQuotaUpgrade.offerFor(features: plano);
+    return Container(
+      padding: const EdgeInsets.all(TokensStrip.s3),
+      decoration: fxListCardDecoration(context),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            iaCotaEsgotadaTexto(
+              limite: plano.limiteIaMensal ?? 0,
+              agora: DateTime.now(),
+            ),
+            style: FocuxHubTypography.body(color: chrome.ink),
+          ),
+          if (offer.targetPlan case final alvo?) ...[
+            const SizedBox(height: TokensStrip.s3),
+            FxTonalButton(
+              label: offer.ctaLabel,
+              expanded: true,
+              onPressed: () => context.push('/assinatura', extra: alvo.apiName),
+            ),
+          ],
+        ],
+      ),
+    );
   }
 }

@@ -54,13 +54,7 @@ String identidadeHelpMarcaBody() =>
 String identidadeHelpSalvarBody() =>
     'Confirme antes de gravar. Restaurar cores aplica o padrão Focux na hora.';
 
-String identidadeLogoSloganSubtitle() =>
-    'Logo no topo da home (sua e do aluno). Slogan na home do aluno.';
-
 String identidadeAlunoVisibilityLabel() => 'Visível no app do aluno';
-
-String identidadePaletteSubtitle() =>
-    'Acento visível no claro e no escuro — o login é sempre escuro.';
 
 String identidadeLightPreviewLabel() => 'Modo claro';
 

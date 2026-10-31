@@ -35,9 +35,11 @@ import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../data/landing_studio_repository.dart';
+import '../providers/perfil_provider.dart';
 import '../utils/landing_link_actions.dart';
 import '../utils/landing_studio_guidance.dart';
 import 'landing_preview_screen.dart';
@@ -93,6 +95,7 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
   bool _needsProof = false;
   bool _podePublicar = false;
   int _step = 0; // 0 entrevista · 1 revisar
+  int _etapa = 0; // etapa da entrevista
   String? _slug;
   String? _publicUrl;
   bool _publicado = false;
@@ -229,11 +232,29 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
                             loadingLabel: 'Publicando…',
                             onPressed: _canPublish ? _publicar : null,
                           )
-                        : FxLiquidPrimaryButton(
-                            label: _busy ? 'Gerando…' : 'Gerar página',
-                            loading: _busy,
-                            loadingLabel: 'Gerando…',
-                            onPressed: _canGenerate ? _gerar : null,
+                        : Row(
+                            children: [
+                              if (_etapa > 0) ...[
+                                FxTonalButton(
+                                  label: 'Voltar',
+                                  onPressed: _busy ? null : _etapaAnterior,
+                                ),
+                                const SizedBox(width: TokensStrip.s2),
+                              ],
+                              Expanded(
+                                child: _etapa < _etapasEntrevista - 1
+                                    ? FxLiquidPrimaryButton(
+                                        label: 'Continuar',
+                                        onPressed: _proximaEtapa,
+                                      )
+                                    : FxLiquidPrimaryButton(
+                                        label: 'Gerar página',
+                                        loading: _busy,
+                                        loadingLabel: 'Gerando…',
+                                        onPressed: _busy ? null : _gerar,
+                                      ),
+                              ),
+                            ],
                           ),
                   ),
             body: SafeArea(

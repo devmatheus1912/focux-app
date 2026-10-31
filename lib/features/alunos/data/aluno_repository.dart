@@ -211,10 +211,15 @@ class AlunoRepository {
     int alunoId, {
     int limit = 40,
     int offset = 0,
+    String? tipo,
   }) async {
     final response = await _dio.get(
       '/api/alunos/$alunoId/timeline-360/page',
-      queryParameters: {'limit': limit, 'offset': offset},
+      queryParameters: {
+        'limit': limit,
+        'offset': offset,
+        if (tipo != null) 'tipo': tipo,
+      },
     );
     return Timeline360Page.fromJson(response.data as Map<String, dynamic>);
   }

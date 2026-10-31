@@ -24,7 +24,7 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
         }
       });
     }
-    final quotaLabel = _quotaHeaderLabel(planoFromHome);
+    final cotaEsgotada = planoFromHome?.iaQuotaEsgotada ?? false;
 
     if (home != null && !_viewTracked) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -77,15 +77,6 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                   showIaCopilotoHelpSheet(context);
                 },
               ),
-              if (quotaLabel != null) ...[
-                SizedBox(width: FxHelpChrome.gap),
-                IaCopilotHeaderStatus(
-                  dark: dark,
-                  brand: brand,
-                  ink: ink,
-                  quotaLabel: quotaLabel,
-                ),
-              ],
             ],
           ),
           body: SafeArea(
@@ -110,6 +101,29 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                     SizedBox(height: TokensStrip.s3),
 
                     if (!_gerado) ...[
+                      if (planoFromHome case final plano?
+                          when (plano.limiteIaMensal ?? 0) > 0)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            FxSettingsLayout.pageInset,
+                            0,
+                            FxSettingsLayout.pageInset,
+                            TokensStrip.s4,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              IaUsoLinha(
+                                usado: plano.iaUsadaMes,
+                                limite: plano.limiteIaMensal!,
+                              ),
+                              if (cotaEsgotada) ...[
+                                const SizedBox(height: TokensStrip.s3),
+                                _cotaEsgotadaCard(plano),
+                              ],
+                            ],
+                          ),
+                        ),
                       if (homeAsync.hasError)
                         Padding(
                           padding: const EdgeInsets.fromLTRB(
@@ -143,6 +157,7 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                             ),
                             tarefasAbertas: tarefas?.totalItens ?? 0,
                             alunoNome: _selectedAlunoNome,
+                            podeAnalisar: !cotaEsgotada,
                             onAnalisar: _analisar,
                             onAnalisarSelecionado: _gerar,
                             onEscolherAluno: _selecionarAluno,

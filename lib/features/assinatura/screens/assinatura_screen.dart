@@ -652,30 +652,23 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
       final billingPlan = subscriptionPlanFromApi(
         ref.read(perfilProvider).value?.plano,
       );
-      final trialNote =
-          paywallShowsTrial(
-                selected: plan,
-                current: billingPlan,
-                trialEligible: _paywallTrialEligible,
-                period: _billingPeriod,
-              )
-              ? S.of(context).assinaturaTrialNota(
-                  kTrialDays,
-                  PaywallCatalog.displayPlanName(plan),
-                  subscriptionCancelWhere(),
-                )
-              : null;
-      final referralNote = _referralApplies(productId)
+      final comTrial = paywallShowsTrial(
+        selected: plan,
+        current: billingPlan,
+        trialEligible: _paywallTrialEligible,
+        period: _billingPeriod,
+      );
+      final indicacaoNota = _referralApplies(productId)
           ? '${S.of(context).assinaturaIndicacaoSelo(_referralPct!)}.'
           : null;
-      final reviewNote = [trialNote, referralNote].nonNulls.join(' ');
       final confirmed = await context.push<bool>(
         '/assinatura/review',
         extra: AssinaturaReviewRouteArgs(
           plan: plan,
           billingPeriod: _billingPeriod,
           priceDisplay: priceDisplay,
-          trialNote: reviewNote.isEmpty ? null : reviewNote,
+          trialDias: comTrial ? kTrialDays : null,
+          indicacaoNota: indicacaoNota,
         ),
       );
       if (!mounted || confirmed != true) return;

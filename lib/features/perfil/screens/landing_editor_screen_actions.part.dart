@@ -38,6 +38,11 @@ extension on _LandingEditorScreenState {
     _duvida3.text = e.duvidas.length > 2 ? e.duvidas[2] : '';
     _whatsapp.text = BrPhone.formatDisplay(e.whatsapp);
     _instagram.text = e.instagram;
+    final perfil = ref.read(perfilProvider).value;
+    if (_nomeMarca.text.trim().isEmpty) _nomeMarca.text = perfil?.nome ?? '';
+    if (_nicho.text.trim().isEmpty) {
+      _nicho.text = perfil?.especialidades ?? perfil?.especialidade ?? '';
+    }
 
     _applyGerado(state.gerado);
     _heroImageUrl = state.midia.heroImageUrl;
@@ -101,7 +106,7 @@ extension on _LandingEditorScreenState {
     if (!entrevista.isReadyToGenerate) {
       FeedbackHelper.showWarn(
         context,
-        'Preencha marca, nicho, promessa, oferta e CTA.',
+        'Preencha marca, nicho, promessa, oferta e texto do botão.',
       );
       return;
     }
@@ -308,6 +313,10 @@ extension on _LandingEditorScreenState {
 
   Future<void> _onBack() async {
     FocusScope.of(context).unfocus();
+    if (_step == 0 && _etapa > 0 && !_busy) {
+      _etapaAnterior();
+      return;
+    }
     if (_step == 0 && _heroTitle.text.trim().isNotEmpty && !_busy) {
       setState(() => _step = 1);
       return;
@@ -326,9 +335,12 @@ extension on _LandingEditorScreenState {
     safePopOrGo(context, '/perfil');
   }
 
-  bool get _canGenerate {
-    final e = _entrevistaFromFields();
-    return e.isReadyToGenerate && !_busy && !_loading;
+  void _etapaAnterior() => setState(() => _etapa--);
+
+  void _proximaEtapa() {
+    FocusScope.of(context).unfocus();
+    if (_formKey.currentState?.validate() != true) return;
+    setState(() => _etapa++);
   }
 
   List<LandingPendencia> get _pendencias => landingPendencias(
@@ -356,7 +368,10 @@ extension on _LandingEditorScreenState {
     return _dirty ? s.landingPublicarAlteracoes : s.landingTudoPublicado;
   }
 
-  void _voltarParaEntrevista() => setState(() => _step = 0);
+  void _voltarParaEntrevista() => setState(() {
+    _step = 0;
+    _etapa = 0;
+  });
 
   /// Altera uma lista da página e marca que há o que publicar.
   void _mudarLista(VoidCallback mudanca) {
@@ -436,7 +451,7 @@ extension on _LandingEditorScreenState {
 
   String get _appBarSubtitle {
     return _step == 0
-        ? 'Entrevista'
+        ? 'Entrevista · ${_etapa + 1} de $_etapasEntrevista'
         : _publicado
             ? 'No ar'
             : 'Rascunho';

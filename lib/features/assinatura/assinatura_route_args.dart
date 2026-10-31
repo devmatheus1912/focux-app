@@ -7,13 +7,17 @@ class AssinaturaReviewRouteArgs {
     required this.plan,
     required this.billingPeriod,
     required this.priceDisplay,
-    this.trialNote,
+    this.trialDias,
+    this.indicacaoNota,
   });
 
   final SubscriptionPlan plan;
   final SubscriptionBillingPeriod billingPeriod;
   final String priceDisplay;
-  final String? trialNote;
+
+  /// Dias de teste grátis; nulo cobra hoje.
+  final int? trialDias;
+  final String? indicacaoNota;
 }
 
 /// Payload para `/assinatura/success` via GoRouter `extra`.

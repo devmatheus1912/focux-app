@@ -540,6 +540,37 @@ String formatTimeline360Date(DateTime? value) {
   return '$day/$month às $hour:$minute';
 }
 
+String formatTimeline360Hora(DateTime? value) {
+  if (value == null) return '';
+  final hour = value.hour.toString().padLeft(2, '0');
+  final minute = value.minute.toString().padLeft(2, '0');
+  return '$hour:$minute';
+}
+
+String timeline360DiaLabel(DateTime? value, {DateTime? now}) {
+  if (value == null) return 'Sem data';
+  final ref = now ?? DateTime.now();
+  final hoje = DateTime(ref.year, ref.month, ref.day);
+  final dia = DateTime(value.year, value.month, value.day);
+  final diff = hoje.difference(dia).inDays;
+  if (diff == 0) return 'Hoje';
+  if (diff == 1) return 'Ontem';
+  final d = value.day.toString().padLeft(2, '0');
+  final m = value.month.toString().padLeft(2, '0');
+  return '$d/$m';
+}
+
+const timeline360Filtros = <String?, String>{
+  null: 'Todos',
+  'TREINOS': 'Treinos',
+  'CHAT': 'Chat',
+  'MEDIDAS': 'Medidas',
+  'ALERTAS': 'Alertas',
+};
+
+/// Passou disso, carregar mais vira botão: rolagem sem fim não ajuda a achar nada.
+const timeline360RolagemAutomatica = 120;
+
 /// Personal app: never push aluno-shell routes from Aluno 360 timeline.
 String resolveTimeline360DeepLinkForPersonal({
   required String? link,

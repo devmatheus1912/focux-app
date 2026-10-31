@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/api/pagina.dart';
 
 /// Modelo de um broadcast enviado.
 class Broadcast {
@@ -41,6 +42,9 @@ class Broadcast {
   }
 }
 
+/// Quantos alunos um público alcança agora, pela regra do envio.
+typedef BroadcastAlcance = ({int total, int comPush});
+
 /// Repositório de broadcasts — envia notificações push em massa e lista histórico.
 class BroadcastRepository {
   final Dio _dio;
@@ -69,11 +73,21 @@ class BroadcastRepository {
   /// Lista o histórico de broadcasts enviados pelo personal autenticado.
   Future<List<Broadcast>> listar() async {
     final response = await _dio.get('/api/broadcasts');
-    final raw = response.data;
-    if (raw is! List) return const [];
-    return raw
-        .whereType<Map>()
-        .map((e) => Broadcast.fromJson(Map<String, dynamic>.from(e)))
-        .toList();
+    return Pagina<Broadcast>.fromJson(
+      Map<String, dynamic>.from(response.data as Map),
+      (e) => Broadcast.fromJson(Map<String, dynamic>.from(e as Map)),
+    ).content;
+  }
+
+  /// Por público: TODOS, ONLINE, PRESENCIAL e HIBRIDO.
+  Future<Map<String, BroadcastAlcance>> alcance() async {
+    final response = await _dio.get('/api/broadcasts/alcance');
+    return {
+      for (final item in (response.data as List).whereType<Map>())
+        '${item['publico']}': (
+          total: (item['total'] as num).toInt(),
+          comPush: (item['comPush'] as num).toInt(),
+        ),
+    };
   }
 }

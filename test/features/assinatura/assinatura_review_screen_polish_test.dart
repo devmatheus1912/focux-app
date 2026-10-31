@@ -10,7 +10,8 @@ void main() {
     expect(screen, contains('fxScreenA11yScope'));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, contains('FxShellScaffold'));
-    expect(screen, contains('FxConversionLockup'));
+    expect(screen, isNot(contains('FxConversionLockup')));
+    expect(screen, contains('assinaturaReviewLinhas'));
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('FxConversionTextLink'));
     expect(screen, isNot(contains('FilledButton')));

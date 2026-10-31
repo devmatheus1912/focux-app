@@ -434,8 +434,11 @@ class Timeline360Tile extends StatelessWidget {
     this.onRouteTap,
     this.showSpineBelow = false,
     this.inkWell = true,
+    this.soHora = false,
   });
 
+  /// Lista agrupada por dia: a data já está no cabeçalho.
+  final bool soHora;
   final Timeline360Item item;
   final bool isDark;
   final Color accent;
@@ -493,7 +496,8 @@ class Timeline360Tile extends StatelessWidget {
     final chrome = ShellChrome.of(context);
     final mute = chrome.mute;
     final ink = chrome.ink;
-    final date = formatTimeline360Date(item.at);
+    final date =
+        soHora ? formatTimeline360Hora(item.at) : formatTimeline360Date(item.at);
     final spoken =
         expandable
             ? '$label. ${timeline360ExpandLinkLabel(kind: item.kind)}'

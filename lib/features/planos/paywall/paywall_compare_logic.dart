@@ -78,12 +78,24 @@ List<PaywallComparisonRow> paywallLinhasDecisivas(
   int limite = 6,
 }) => rows.where((r) => r.free.trim() != r.paid.trim()).take(limite).toList();
 
-/// O que o plano traz, em texto corrido, sem o que ele não tem.
-List<String> paywallInclusos(List<PaywallComparisonRow> rows) => [
-  for (final r in rows)
-    if (paywallCompareCellIncluded(r.paid))
-      PaywallCatalog.parseFeatureLabel(r.feature).label,
-];
+/// O que o plano traz, com o valor junto; linhas com número vêm primeiro.
+List<String> paywallInclusos(List<PaywallComparisonRow> rows) {
+  final inclusas = rows.where((r) => paywallCompareCellIncluded(r.paid));
+  return [
+    ...inclusas.where((r) => r.paid.trim() != '✓'),
+    ...inclusas.where((r) => r.paid.trim() == '✓'),
+  ].map(_inclusoTexto).toList(growable: false);
+}
+
+String _inclusoTexto(PaywallComparisonRow row) {
+  final bruto = PaywallCatalog.parseFeatureLabel(row.feature).label;
+  final porMes = bruto.endsWith(' / mês');
+  final label = porMes ? bruto.substring(0, bruto.length - 6) : bruto;
+  final valor = row.paid.trim();
+  if (valor == '✓') return label;
+  if (valor == '∞') return '$label sem limite';
+  return porMes ? '$label: $valor por mês' : '$label: $valor';
+}
 
 PaywallCompareView buildPaywallCompareView({
   required SubscriptionPlan selected,

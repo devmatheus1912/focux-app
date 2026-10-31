@@ -74,16 +74,27 @@ class RecordePessoal {
 class EventoEngajamento {
   final String tipo, descricao;
   final String dataHora;
+
+  /// Só em TREINO. Backend antigo não manda: aí vale o texto de [descricao].
+  final String? status;
+
+  /// Só em MENSAGEM: ALUNO ou PERSONAL.
+  final String? remetente;
+
   EventoEngajamento({
     required this.tipo,
     required this.descricao,
     required this.dataHora,
+    this.status,
+    this.remetente,
   });
   factory EventoEngajamento.fromJson(Map<String, dynamic> j) =>
       EventoEngajamento(
         tipo: j['tipo'] as String,
         descricao: j['descricao'] as String,
         dataHora: j['dataHora'] as String,
+        status: j['status'] as String?,
+        remetente: j['remetente'] as String?,
       );
 }
 
@@ -223,7 +234,7 @@ class EvolucaoRepository {
   }) async {
     final r = await _dio.get(
       '/api/alunos/$alunoId/engajamento',
-      queryParameters: {'dias': dias},
+      queryParameters: {'dias': dias, 'limit': 200},
     );
     final data = r.data;
     final eventos =

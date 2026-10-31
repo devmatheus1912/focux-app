@@ -1,16 +1,26 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/focux_hub_typography.dart';
+import '../../../../core/theme/shell_chrome.dart';
+import '../../../../core/theme/tokens_strip.dart';
 import '../../../../core/widgets/fx_empty_state.dart';
-import '../../../../core/widgets/fx_help.dart';
+import '../../../../core/widgets/fx_home_sheet.dart';
 import '../../../../core/widgets/fx_settings_group.dart';
 import '../../../../core/widgets/fx_settings_tile.dart';
+import '../../../../core/widgets/fx_sheet_frame.dart';
+import '../../../../core/widgets/fx_tonal_button.dart';
 import '../../data/broadcast_repository.dart';
 import '../../utils/broadcast_display.dart';
 
 class BroadcastHistorico extends StatelessWidget {
-  const BroadcastHistorico({super.key, required this.itens});
+  const BroadcastHistorico({
+    super.key,
+    required this.itens,
+    required this.onUsarDeNovo,
+  });
 
   final List<Broadcast> itens;
+  final ValueChanged<Broadcast> onUsarDeNovo;
 
   @override
   Widget build(BuildContext context) {
@@ -43,15 +53,33 @@ class BroadcastHistorico extends StatelessWidget {
     );
   }
 
-  void _abrir(BuildContext context, Broadcast item) {
-    showFxHelpSheet(
+  Future<void> _abrir(BuildContext context, Broadcast item) async {
+    final reusar = await showFxHomeSheet<bool>(
       context,
-      title: item.titulo,
-      subtitle:
-          '${broadcastPublicoLabel(item.tipoConsultoriaAlvo)} · ${broadcastAlunosValue(item.totalEnviados, comPush: item.totalComPush)} · ${broadcastFormatDate(item.enviadoEm)}',
-      tips: [
-        FxHelpTip('Mensagem', item.mensagem, icon: 'message-circle'),
-      ],
+      builder: (ctx) {
+        final chrome = ShellChrome.of(ctx);
+        return FxSheetFrame(
+          title: item.titulo,
+          subtitle:
+              '${broadcastPublicoLabel(item.tipoConsultoriaAlvo)} · ${broadcastAlunosValue(item.totalEnviados, comPush: item.totalComPush)} · ${broadcastFormatDate(item.enviadoEm)}',
+          footer: Padding(
+            padding: const EdgeInsets.all(TokensStrip.s3),
+            child: FxTonalButton(
+              label: 'Usar de novo',
+              expanded: true,
+              onPressed: () => Navigator.pop(ctx, true),
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(TokensStrip.s3),
+            child: Text(
+              item.mensagem,
+              style: FocuxHubTypography.body(color: chrome.ink),
+            ),
+          ),
+        );
+      },
     );
+    if (reusar == true) onUsarDeNovo(item);
   }
 }

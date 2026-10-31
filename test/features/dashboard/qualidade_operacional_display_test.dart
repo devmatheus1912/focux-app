@@ -27,20 +27,11 @@ void main() {
     expect(qualidadeScoreBand(49), QualidadeScoreBand.attention);
   });
 
-  test('próxima ação prioriza retenção, depois ticket', () {
-    expect(qualidadeNextAction(data(retencao: 60)).route, '/retencao');
-    expect(
-      qualidadeNextAction(data(ticket: 200, retencao: 80)).route,
-      '/financeiro',
-    );
-    expect(
-      qualidadeNextAction(data(ticket: 200, retencao: 80)).label,
-      'Mensalidades',
-    );
-    expect(qualidadeNextAction(data()).route, '/alunos');
-    expect(qualidadeComoCalculamos, contains('ticket'));
-    expect(qualidadeComoCalculamos, contains('recorte'));
-    expect(qualidadeComoCalculamos, contains('retenção'));
+  test('base pequena avisa que o índice oscila', () {
+    expect(qualidadeBasePequena(4), isTrue);
+    expect(qualidadeBasePequena(5), isFalse);
+    expect(qualidadeBasePequena(null), isFalse);
+    expect(qualidadeComoCalculamos, contains('referência'));
   });
 
   test('recomendação segue as métricas, não o texto cru do BE', () {
@@ -72,11 +63,11 @@ void main() {
     expect(qualidadeTicketValueLabel(300), 'R\$ 300');
     expect(
       qualidadeTicketHint(ticketPessoal: 300, ticketMercado: 250),
-      'Acima do mercado R\$ 250',
+      'Acima da referência R\$ 250',
     );
     expect(
       qualidadeTicketHint(ticketPessoal: 200, ticketMercado: 250),
-      'Mercado R\$ 250',
+      'Referência R\$ 250',
     );
   });
 

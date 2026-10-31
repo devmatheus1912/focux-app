@@ -38,9 +38,12 @@ class Timeline360PagedState {
 
 class Timeline360PagedNotifier
     extends Notifier<AsyncValue<Timeline360PagedState>> {
-  Timeline360PagedNotifier(this.alunoId);
+  Timeline360PagedNotifier(this.alunoId, [this.tipo]);
 
   final int alunoId;
+
+  /// Filtro do servidor; nulo traz tudo.
+  final String? tipo;
   static const int _pageSize = 40;
 
   AlunoRepository get _repo => AlunoRepository(ref.read(apiClientProvider));
@@ -59,6 +62,7 @@ class Timeline360PagedNotifier
         alunoId,
         limit: _pageSize,
         offset: 0,
+        tipo: tipo,
       );
       if (!ref.mounted) return;
       state = AsyncValue.data(
@@ -85,6 +89,7 @@ class Timeline360PagedNotifier
         alunoId,
         limit: _pageSize,
         offset: offset,
+        tipo: tipo,
       );
       if (!ref.mounted) return;
       state = AsyncValue.data(
@@ -110,6 +115,13 @@ final alunoTimeline360PagedProvider = NotifierProvider.autoDispose
     .family<Timeline360PagedNotifier, AsyncValue<Timeline360PagedState>, int>(
       Timeline360PagedNotifier.new,
     );
+
+/// Mesma paginação com filtro: a lista sem filtro segue sendo a do Evolução.
+final alunoTimeline360FiltradoProvider = NotifierProvider.autoDispose.family<
+  Timeline360PagedNotifier,
+  AsyncValue<Timeline360PagedState>,
+  ({int alunoId, String tipo})
+>((chave) => Timeline360PagedNotifier(chave.alunoId, chave.tipo));
 
 /// Backwards-compatible event list for Evolução tab.
 final alunoTimeline360ApiProvider =

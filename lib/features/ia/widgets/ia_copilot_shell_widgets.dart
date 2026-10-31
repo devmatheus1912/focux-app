@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../l10n/app_localizations.dart';
@@ -56,48 +55,6 @@ class IaCopilotResultActionBar extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class IaCopilotHeaderStatus extends StatelessWidget {
-  const IaCopilotHeaderStatus({
-    super.key,
-    required this.dark,
-    required this.brand,
-    required this.ink,
-    this.quotaLabel = 'Pronto',
-  });
-
-  final bool dark;
-  final Color brand;
-  final Color ink;
-  final String quotaLabel;
-
-  @override
-  Widget build(BuildContext context) {
-    final chrome = ShellChrome.forBrightness(context, dark);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: chrome.headerAction(radius: 999),
-      child: Row(
-        children: [
-          Container(
-            width: 7,
-            height: 7,
-            decoration: BoxDecoration(color: brand, shape: BoxShape.circle),
-          ),
-          const SizedBox(width: 7),
-          Text(
-            quotaLabel,
-            style: TextStyle(
-              color: ink,
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ],
       ),
     );
   }

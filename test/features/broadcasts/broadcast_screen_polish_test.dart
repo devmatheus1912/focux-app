@@ -14,7 +14,9 @@ void main() {
     expect(screen, contains('friendlyError'));
     expect(screen, contains('SkeletonList'));
     expect(screen, contains('FxSettingsGroup'));
-    expect(screen, contains('FxSettingsTile'));
+    expect(screen, contains('FxChoiceStrip'));
+    expect(screen, contains('FxQuickChips'));
+    expect(screen, contains('_PreviaNotificacao'));
     expect(screen, contains('FxSettingsLayout'));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('AlunoInsetFormField'));
@@ -42,6 +44,8 @@ void main() {
     expect(historico, contains('FxSettingsGroup'));
     expect(historico, contains('FxSettingsTile'));
     expect(historico, contains('FxEmptyState'));
+    expect(historico, contains('FxSheetFrame'));
+    expect(historico, isNot(contains('showFxHelpSheet')));
     expect(historico, isNot(contains('Icons.people_outline_rounded')));
     expect(historico, isNot(contains('FxLiquidPrimaryButton')));
   });

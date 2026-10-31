@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,6 +13,7 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
+import '../../../core/widgets/fx_action_row.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
@@ -20,10 +22,9 @@ import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_strip_card.dart';
-import '../../../core/widgets/operational_metric_tile.dart';
+import '../../planos/providers/plano_features_provider.dart';
 import '../data/qualidade_operacional.dart';
 import '../utils/qualidade_operacional_display.dart';
-import '../../../core/widgets/fx_action_chip.dart';
 import '../widgets/dashboard_section_header.dart';
 
 class QualidadeOperacionalScreen extends ConsumerStatefulWidget {
@@ -112,16 +113,16 @@ class _QualidadeOperacionalScreenState
                 showFxHelpSheet(
                   context,
                   title: 'Qualidade',
-                  subtitle: 'Como a operação se compara ao mercado.',
+                  subtitle: 'Como sua operação se compara à referência Focux.',
                   tips: const [
                     FxHelpTip('Como calculamos', qualidadeComoCalculamos),
                     FxHelpTip(
                       'Índice',
-                      'O card do topo é o recorte do dia.',
+                      'Calculado na hora, com seus alunos e mensalidades.',
                     ),
                     FxHelpTip(
                       'Ticket',
-                      'Compare o seu ticket médio com o mercado.',
+                      'Valor médio das suas mensalidades.',
                     ),
                     FxHelpTip(
                       'Retenção',
@@ -207,7 +208,13 @@ class _QualidadeOperacionalScreenState
                     TokensStrip.s4,
                     TokensStrip.s6,
                   ),
-                  children: [_QualidadeBody(data: data, isDark: isDark)],
+                  children: [
+                    _QualidadeBody(
+                      data: data,
+                      alunosAtivos:
+                          ref.watch(planoFeaturesProvider).value?.alunosAtivos,
+                    ),
+                  ],
                 ),
               ),
             );
@@ -219,25 +226,30 @@ class _QualidadeOperacionalScreenState
 }
 
 class _QualidadeBody extends StatelessWidget {
-  const _QualidadeBody({required this.data, required this.isDark});
+  const _QualidadeBody({required this.data, required this.alunosAtivos});
 
   final QualidadeOperacionalData data;
-  final bool isDark;
+  final int? alunosAtivos;
 
   @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.forBrightness(context, isDark);
-    final next = qualidadeNextAction(data);
-    final band = qualidadeScoreBand(data.score);
-    final scoreColor = switch (band) {
+    final chrome = ShellChrome.of(context);
+    final basePequena = qualidadeBasePequena(alunosAtivos);
+    final corIndice = switch (qualidadeScoreBand(data.score)) {
+      _ when basePequena => chrome.mute,
       QualidadeScoreBand.excellent => EagleTokens.good,
       QualidadeScoreBand.good => EagleTokens.warn,
       QualidadeScoreBand.attention => EagleTokens.bad,
     };
     final ticketUnavailable = qualidadeTicketUnavailable(data.ticketPessoal);
-    final ticketAbove =
-        !ticketUnavailable && data.ticketPessoal >= data.ticketMercado;
-    final retencaoAbove = data.retencaoPessoal >= data.retencaoMercado;
+    final ticketHint = qualidadeTicketHint(
+      ticketPessoal: data.ticketPessoal,
+      ticketMercado: data.ticketMercado,
+    );
+    final retencaoHint = qualidadeRetencaoHint(
+      retencaoPessoal: data.retencaoPessoal,
+      retencaoMercado: data.retencaoMercado,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -246,87 +258,194 @@ class _QualidadeBody extends StatelessWidget {
           emphasize: true,
           semanticsLabel:
               'Índice ${data.score} de 100. ${qualidadeScoreLabel(data.score)}',
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
             children: [
-              Text('Índice Focux', style: FocuxHubTypography.chip(chrome.mute)),
-              const SizedBox(height: 4),
-              Text(
-                '${data.score}',
-                style: FocuxHubTypography.metric(
-                  color: scoreColor,
-                  fontSize: FocuxHubTypography.metricLg,
+              SizedBox.square(
+                dimension: 88,
+                child: CustomPaint(
+                  painter: _AnelPainter(
+                    fracao: data.score / 100,
+                    cor: corIndice,
+                    fundo: chrome.line,
+                  ),
+                  child: Center(
+                    child: Text(
+                      '${data.score}',
+                      style: FocuxHubTypography.metric(
+                        color: chrome.ink,
+                        fontSize: FocuxHubTypography.metricLg,
+                      ),
+                    ),
+                  ),
                 ),
               ),
-              const SizedBox(height: 2),
-              Text(
-                qualidadeScoreLabel(data.score),
-                style: FocuxHubTypography.body(
-                  color: chrome.ink,
-                ).copyWith(fontWeight: FontWeight.w700),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                qualidadeRecomendacaoDisplay(data),
-                style: FocuxHubTypography.bodyMuted(color: chrome.mute),
-              ),
-              const SizedBox(height: TokensStrip.s2),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: FxActionChip(
-                  label: next.label,
-                  accent: Theme.of(context).colorScheme.primary,
-                  isDark: isDark,
-                  onPressed: () => openPersonalRoute(context, next.route),
+              const SizedBox(width: TokensStrip.s4),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Índice Focux',
+                      style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      basePequena
+                          ? 'Poucos alunos para medir bem'
+                          : qualidadeScoreLabel(data.score),
+                      style: FocuxHubTypography.cardTitle(color: chrome.ink),
+                    ),
+                    const SizedBox(height: TokensStrip.s1),
+                    Text(
+                      qualidadeRecomendacaoDisplay(data),
+                      style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
         ),
-        const SizedBox(height: TokensStrip.s3),
-        const DashboardSectionHeader(title: 'Comparado ao mercado'),
+        const SizedBox(height: TokensStrip.s4),
+        const DashboardSectionHeader(title: 'Referência Focux'),
         const SizedBox(height: TokensStrip.s2),
-        InkWell(
-          onTap: () => context.push('/financeiro'),
-          borderRadius: BorderRadius.circular(12),
-          child: OperationalMetricTile(
-            label: 'Ticket médio',
-            value: qualidadeTicketValueLabel(data.ticketPessoal),
-            hint: qualidadeTicketHint(
-              ticketPessoal: data.ticketPessoal,
-              ticketMercado: data.ticketMercado,
-            ),
-            color:
-                ticketUnavailable
-                    ? EagleTokens.warn
-                    : (ticketAbove ? EagleTokens.good : EagleTokens.warn),
-            isDark: isDark,
-            emphasis:
-                ticketUnavailable
-                    ? OperationalMetricEmphasis.muted
-                    : OperationalMetricEmphasis.normal,
+        Container(
+          padding: const EdgeInsets.all(TokensStrip.s3),
+          decoration: fxListCardDecoration(context),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _LinhaReferencia(
+                rotulo: 'Ticket médio',
+                valor: qualidadeTicketValueLabel(data.ticketPessoal),
+                apoio: ticketHint,
+                fracao:
+                    ticketUnavailable || data.ticketMercado <= 0
+                        ? 0
+                        : data.ticketPessoal / data.ticketMercado,
+              ),
+              const SizedBox(height: TokensStrip.s3),
+              _LinhaReferencia(
+                rotulo: 'Alunos que ficaram',
+                valor: '${data.retencaoPessoal}%',
+                apoio: retencaoHint,
+                fracao:
+                    data.retencaoMercado <= 0
+                        ? 0
+                        : data.retencaoPessoal / data.retencaoMercado,
+              ),
+            ],
           ),
         ),
+        const SizedBox(height: TokensStrip.s3),
+        FxActionRow(
+          titulo: 'Revisar mensalidades',
+          motivo: ticketHint,
+          verbo: 'Abrir',
+          onTap: () => context.push('/financeiro'),
+        ),
         const SizedBox(height: TokensStrip.s2),
-        InkWell(
+        FxActionRow(
+          titulo: 'Ver alunos em risco',
+          motivo: retencaoHint,
+          verbo: 'Abrir',
           onTap: () => context.push('/retencao'),
-          borderRadius: BorderRadius.circular(12),
-          child: OperationalMetricTile(
-            label: 'Retenção',
-            value: '${data.retencaoPessoal}%',
-            hint:
-                retencaoAbove
-                    ? 'Acima do mercado ${data.retencaoMercado}%'
-                    : 'Mercado ${data.retencaoMercado}%',
-            color: retencaoAbove ? EagleTokens.good : EagleTokens.warn,
-            isDark: isDark,
-            emphasis:
-                retencaoAbove
-                    ? OperationalMetricEmphasis.normal
-                    : OperationalMetricEmphasis.alert,
-          ),
         ),
       ],
     );
   }
+}
+
+/// Barra cheia = bateu a referência.
+class _LinhaReferencia extends StatelessWidget {
+  const _LinhaReferencia({
+    required this.rotulo,
+    required this.valor,
+    required this.apoio,
+    required this.fracao,
+  });
+
+  final String rotulo;
+  final String valor;
+  final String apoio;
+  final double fracao;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    final primary = Theme.of(context).colorScheme.primary;
+    return Semantics(
+      label: '$rotulo, $valor. $apoio',
+      excludeSemantics: true,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  rotulo,
+                  style: FocuxHubTypography.body(color: chrome.ink),
+                ),
+              ),
+              Text(
+                valor,
+                style: FocuxHubTypography.metric(
+                  color: chrome.ink,
+                  fontSize: FocuxHubTypography.metricEm,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: TokensStrip.s1),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(TokensStrip.s1),
+            child: LinearProgressIndicator(
+              minHeight: 6,
+              value: fracao.clamp(0.0, 1.0),
+              color: primary,
+              backgroundColor: primary.withValues(alpha: 0.12),
+            ),
+          ),
+          const SizedBox(height: TokensStrip.s1),
+          Text(apoio, style: FocuxHubTypography.bodyMuted(color: chrome.mute)),
+        ],
+      ),
+    );
+  }
+}
+
+class _AnelPainter extends CustomPainter {
+  const _AnelPainter({
+    required this.fracao,
+    required this.cor,
+    required this.fundo,
+  });
+
+  final double fracao;
+  final Color cor;
+  final Color fundo;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const espessura = 8.0;
+    final area = (Offset.zero & size).deflate(espessura / 2);
+    final traco =
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = espessura
+          ..strokeCap = StrokeCap.round;
+    canvas.drawArc(area, 0, 2 * math.pi, false, traco..color = fundo);
+    canvas.drawArc(
+      area,
+      -math.pi / 2,
+      2 * math.pi * fracao.clamp(0.0, 1.0),
+      false,
+      traco..color = cor,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_AnelPainter old) =>
+      old.fracao != fracao || old.cor != cor || old.fundo != fundo;
 }

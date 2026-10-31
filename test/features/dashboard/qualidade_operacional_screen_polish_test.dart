@@ -16,8 +16,9 @@ void main() {
     expect(screen, contains('Como calculamos'));
     expect(screen, contains('FxStripCard'));
     expect(screen, contains('emphasize: true'));
-    expect(screen, contains('OperationalMetricTile'));
-    expect(screen, contains('FxActionChip'));
+    expect(screen, contains('FxActionRow'));
+    expect(screen, contains('Referência Focux'));
+    expect(screen, isNot(contains('Comparado ao mercado')));
     expect(screen, contains('FxEmptyAction'));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('relatoriosHubViewed'));
@@ -27,7 +28,6 @@ void main() {
     expect(screen, contains('qualidadeTicketValueLabel'));
     expect(screen, contains('qualidadeTicketHint'));
     expect(screen, contains('qualidadeTicketUnavailable'));
-    expect(screen, contains('OperationalMetricEmphasis.muted'));
     expect(screen, contains('TokensStrip.s6'));
     expect(screen, isNot(contains('formatBrlCurrency')));
   });

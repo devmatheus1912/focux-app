@@ -10,10 +10,12 @@ class _PerfilBody extends StatefulWidget {
   final VoidCallback onEditPerfil;
   final Future<void> Function() onLogout;
   final VoidCallback onOpenLandingEditor;
+  final bool primeirosPassosFeitos;
 
   const _PerfilBody({
     required this.perfil,
     required this.uploadingPhoto,
+    required this.primeirosPassosFeitos,
     this.showMfa = false,
     this.freshnessLabel,
     required this.onRefresh,
@@ -38,12 +40,6 @@ class _PerfilBodyState extends State<_PerfilBody> {
         onPickPhoto();
       case PerfilChecklistAction.editProfile:
         onEditPerfil();
-      case PerfilChecklistAction.brand:
-        context.push('/identidade-visual');
-      case PerfilChecklistAction.wallet:
-        context.push('/perfil/wallet');
-      case PerfilChecklistAction.convites:
-        context.push('/convites');
     }
   }
 
@@ -70,7 +66,8 @@ class _PerfilBodyState extends State<_PerfilBody> {
     final profileComplete = profileScore >= 100;
     // O que falta aparece num cartão logo abaixo da identidade, não numa chip flutuante.
     const scrollBottomPad = TokensStrip.s5;
-    final nextStep = readiness.nextStep;
+    // Uma cobrança por vez: Primeiros passos vem antes do perfil.
+    final nextStep = widget.primeirosPassosFeitos ? readiness.nextStep : null;
 
     return FxShellScaffold(
       useMesh: true,
@@ -298,7 +295,7 @@ class _PerfilBodyState extends State<_PerfilBody> {
                                 PerfilOperacaoSection(
                                   mute: mute,
                                   line: line,
-                                  pixDone: readiness.isPixDone,
+                                  pixDone: perfilHasWallet(perfil),
                                   planoLabel: perfilPlanRowValue(
                                     perfil.plano,
                                   ),

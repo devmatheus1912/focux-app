@@ -2,7 +2,6 @@ import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/api/offline_sync_service.dart';
-import '../../../core/api/payment_api_client.dart';
 import '../../planos/data/planos_repository.dart';
 import '../../planos/paywall/paywall_vitrine.dart';
 
@@ -22,12 +21,9 @@ class PaywallHomeBundle {
 
 class AssinaturaRepository {
   final Dio _dio;
-  final Dio _paymentDio;
   static const _legacyVitrineCacheKey = 'focux_paywall_vitrine_cache_v1';
 
-  AssinaturaRepository(ApiClient client, PaymentApiClient payment)
-    : _dio = client.dio,
-      _paymentDio = payment.dio;
+  AssinaturaRepository(ApiClient client) : _dio = client.dio;
 
   /// BFF first paint — planos + vitrine + me em um round-trip.
   Future<PaywallHomeBundle> getPaywallHome() async {
@@ -64,10 +60,4 @@ class AssinaturaRepository {
     await LocalCache.invalidate('/api/planos/paywall/home');
   }
 
-  Future<String> criarPreferencia(int planoId) async {
-    final response = await _paymentDio.post(
-      '/api/pagamentos/preferencia/$planoId',
-    );
-    return response.data['checkoutUrl'] as String;
-  }
 }

@@ -36,8 +36,6 @@ void main() {
     expect(identidadeRestaurarConfirmTitle(), contains('cores padrão'));
     expect(identidadeLogoConfirmMessage(), contains('rascunho'));
     expect(identidadeHelpSubtitle(), contains('Editar perfil'));
-    expect(identidadeLogoSloganSubtitle(), contains('home do aluno'));
-    expect(identidadePaletteSubtitle(), contains('login é sempre escuro'));
     expect(identidadeLightPreviewLabel(), 'Modo claro');
     expect(identidadeDarkPreviewLabel(), contains('Modo escuro'));
     expect(identidadeAlunoVisibilityLabel(), contains('aluno'));

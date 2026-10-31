@@ -3,19 +3,23 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/fx_action_link.dart';
+import '../../../core/widgets/fx_choice_strip.dart';
+import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
-import '../providers/aluno_detail_providers.dart';
+import '../providers/aluno_timeline360_paged_provider.dart';
 import '../utils/aluno360_timeline_logic.dart';
 import 'aluno360_timeline_card.dart';
 import 'aluno360_timeline_sheet_motion.dart';
 
 /// Full Histórico 360 sheet with cursor pagination (load-more).
-class Aluno360TimelineFullSheet extends ConsumerWidget {
+class Aluno360TimelineFullSheet extends ConsumerStatefulWidget {
   const Aluno360TimelineFullSheet({
     super.key,
     required this.aluno,
@@ -27,10 +31,24 @@ class Aluno360TimelineFullSheet extends ConsumerWidget {
   final bool isDark;
   final Color primary;
 
+  @override
+  ConsumerState<Aluno360TimelineFullSheet> createState() =>
+      _Aluno360TimelineFullSheetState();
+}
+
+class _Aluno360TimelineFullSheetState
+    extends ConsumerState<Aluno360TimelineFullSheet> {
+  String? _tipo;
+
   List<Timeline360Item> _itemsFromEvents(List<Timeline360Event> events) {
     final mapped =
         events
-            .map((e) => Aluno360TimelineCard.itemFromApi(e, primary: primary))
+            .map(
+              (e) => Aluno360TimelineCard.itemFromApi(
+                e,
+                primary: widget.primary,
+              ),
+            )
             .toList();
     final filtered = mapped
         .where(
@@ -56,8 +74,16 @@ class Aluno360TimelineFullSheet extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final pagedAsync = ref.watch(alunoTimeline360PagedProvider(aluno.id));
+  Widget build(BuildContext context) {
+    final aluno = widget.aluno;
+    final isDark = widget.isDark;
+    final primary = widget.primary;
+    final tipo = _tipo;
+    final provider =
+        tipo == null
+            ? alunoTimeline360PagedProvider(aluno.id)
+            : alunoTimeline360FiltradoProvider((alunoId: aluno.id, tipo: tipo));
+    final pagedAsync = ref.watch(provider);
     final maxHeight =
         MediaQuery.sizeOf(context).height *
         FxHomeSheetChrome.expandHeightFactor;
@@ -89,6 +115,15 @@ class Aluno360TimelineFullSheet extends ConsumerWidget {
             leading: Icon(Icons.timeline_rounded, color: primary, size: 18),
           ),
           SizedBox(height: TokensStrip.s3),
+          FxChoiceStrip<String?>(
+            itens: [
+              for (final filtro in timeline360Filtros.entries)
+                FxChoiceItem(value: filtro.key, label: filtro.value),
+            ],
+            selecionado: _tipo,
+            onSelecionar: (tipo) => setState(() => _tipo = tipo),
+          ),
+          SizedBox(height: TokensStrip.s3),
           Expanded(
             child: pagedAsync.when(
               loading: () => const SkeletonList(count: 6),
@@ -100,41 +135,75 @@ class Aluno360TimelineFullSheet extends ConsumerWidget {
                       e,
                       fallback: 'Não foi possível carregar o histórico.',
                     ),
-                    onRetry:
-                        () =>
-                            ref
-                                .read(
-                                  alunoTimeline360PagedProvider(
-                                    aluno.id,
-                                  ).notifier,
-                                )
-                                .refresh(),
+                    onRetry: () => ref.read(provider.notifier).refresh(),
                     title: 'Não conseguimos carregar o histórico',
                   ),
               data: (state) {
                 final items = _itemsFromEvents(state.events);
-                final itemCount = items.length + (state.loadingMore ? 1 : 0);
+                final automatico =
+                    state.events.length < timeline360RolagemAutomatica;
+                final comBotao = state.hasMore && !automatico;
+                if (items.isEmpty && !state.hasMore) {
+                  return FxEmptyState(
+                    icon: 'trend',
+                    title: 'Nada neste filtro',
+                    subtitle: 'Escolha outro filtro para ver mais sinais.',
+                  );
+                }
+                final linhas = <Timeline360Item?>[];
+                final dias = <int, String>{};
+                String? atual;
+                for (final item in items) {
+                  final dia = timeline360DiaLabel(item.at);
+                  if (dia != atual) {
+                    dias[linhas.length] = dia;
+                    linhas.add(null);
+                    atual = dia;
+                  }
+                  linhas.add(item);
+                }
+                final rodape = state.loadingMore || comBotao ? 1 : 0;
                 return NotificationListener<ScrollNotification>(
                   onNotification: (notification) {
-                    if (notification.metrics.pixels <
-                        notification.metrics.maxScrollExtent - 120) {
+                    if (!automatico ||
+                        notification.metrics.pixels <
+                            notification.metrics.maxScrollExtent - 120) {
                       return false;
                     }
-                    ref
-                        .read(alunoTimeline360PagedProvider(aluno.id).notifier)
-                        .loadMore();
+                    ref.read(provider.notifier).loadMore();
                     return false;
                   },
-                  child: ListView.separated(
-                    itemCount: itemCount,
-                    separatorBuilder: (_, __) => const SizedBox(height: 10),
+                  child: ListView.builder(
+                    itemCount: linhas.length + rodape,
                     itemBuilder: (context, index) {
-                      if (index >= items.length) {
-                        return const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 12),
+                      if (index >= linhas.length) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
                           child: Center(
-                            child: FxLoading(size: 22, strokeWidth: 2),
+                            child:
+                                state.loadingMore
+                                    ? const FxLoading(size: 22, strokeWidth: 2)
+                                    : FxActionLink(
+                                      label: 'Carregar mais',
+                                      onTap:
+                                          () =>
+                                              ref
+                                                  .read(provider.notifier)
+                                                  .loadMore(),
+                                    ),
                           ),
+                        );
+                      }
+                      final item = linhas[index];
+                      if (item == null) {
+                        return Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            TokensStrip.s3,
+                            TokensStrip.s3,
+                            TokensStrip.s3,
+                            TokensStrip.s1,
+                          ),
+                          child: DashboardSectionHeader(title: dias[index]!),
                         );
                       }
                       return Aluno360TimelineTileEntrance(
@@ -146,12 +215,15 @@ class Aluno360TimelineFullSheet extends ConsumerWidget {
                                 isDark: isDark,
                               ),
                           child: Timeline360Tile(
-                            item: items[index],
+                            item: item,
                             isDark: isDark,
                             accent: primary,
                             alunoFirstName: aluno.nome.split(' ').first,
-                            showSpineBelow: index < items.length - 1,
+                            showSpineBelow:
+                                index < linhas.length - 1 &&
+                                linhas[index + 1] != null,
                             inkWell: true,
+                            soHora: true,
                             onExpandableTap: (tileContext, item) {
                               final host = context;
                               Navigator.of(tileContext).pop();
