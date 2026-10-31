@@ -217,6 +217,7 @@ extension _CheckinCorpo on _CheckinScreenState {
       ee: current,
       index: currentIndex,
       total: exercicios.length,
+      proximoNome: proximo?.exercicioNome,
       draftCargaKg: draft.cargaKg,
       draftReps: draft.reps,
       concluidoFrase:

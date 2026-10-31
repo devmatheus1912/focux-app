@@ -40,7 +40,9 @@ BoxDecoration fxMarcaDecoration(
     borderRadius: BorderRadius.circular(radius),
     boxShadow: [
       BoxShadow(
-        color: cor.fundo.withValues(alpha: 0.22),
+        color: cor.fundo.withValues(
+          alpha: Theme.of(context).brightness == Brightness.dark ? 0.30 : 0.22,
+        ),
         blurRadius: 18,
         offset: const Offset(0, 8),
       ),
@@ -49,9 +51,26 @@ BoxDecoration fxMarcaDecoration(
 }
 
 /// Paleta do texto sobre o bloco: a marca pode ser clara ou escura.
-ShellPalette fxPaletaSobreMarca(BuildContext context, {Color? accent}) {
-  final sobre = _cardDeMarca(context, accent).sobre;
-  return ShellPalette(sobre.computeLuminance() > 0.5, brand: sobre);
+ShellPalette fxPaletaSobreMarca(BuildContext context, {Color? accent}) =>
+    _PaletaSobreMarca(_cardDeMarca(context, accent));
+
+class _PaletaSobreMarca extends ShellPalette {
+  _PaletaSobreMarca(this.cor)
+    : super(cor.sobre.computeLuminance() > 0.5, brand: cor.sobre);
+
+  final CardDeMarca cor;
+
+  @override
+  Color get ink => cor.sobre;
+
+  @override
+  Color get mute => cor.sobreSuave;
+
+  @override
+  Color get line => cor.sobre.withValues(alpha: 0.20);
+
+  @override
+  Color get lineStrong => cor.sobre.withValues(alpha: 0.35);
 }
 
 /// Tema de quem está sobre o bloco: botões e chips acompanham a [fxPaletaSobreMarca].
@@ -61,7 +80,10 @@ ThemeData fxTemaSobreMarca(BuildContext context, {Color? accent}) {
   final brilho = paleta.isDark ? Brightness.dark : Brightness.light;
   return base.copyWith(
     brightness: brilho,
-    colorScheme: base.colorScheme.copyWith(brightness: brilho, primary: paleta.brand),
+    colorScheme: base.colorScheme.copyWith(
+      brightness: brilho,
+      primary: paleta.brand,
+    ),
   );
 }
 

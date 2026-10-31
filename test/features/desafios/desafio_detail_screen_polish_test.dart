@@ -36,7 +36,7 @@ void main() {
     expect(screen, contains('AlunoSegmentedChoice'));
     expect(screen, contains('alunoMeProvider'));
     expect(screen, contains('desafioMeuLugarValue'));
-    expect(screen, contains('emphasize: false'));
+    expect(screen, contains('marca: true'));
     expect(screen, isNot(contains('emphasize: true')));
     expect(screen, contains('desafioStickyAlunoPath'));
     expect(screen, isNot(contains('FxSettingsGroup')));

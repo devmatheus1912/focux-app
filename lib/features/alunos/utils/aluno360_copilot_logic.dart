@@ -1,3 +1,4 @@
+import '../../../l10n/pt.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -329,8 +330,13 @@ List<String> copilotoFatos(Aluno aluno, {String? motivo}) {
   final dias = aluno.diasSemTreino;
   final texto = motivo?.trim() ?? '';
   return [
-    if (aderencia != null && aderencia > 0) 'Aderência em $aderencia% do previsto',
-    if (dias != null) dias == 0 ? 'Treinou hoje' : 'Último treino há $dias ${dias == 1 ? 'dia' : 'dias'}',
+    if (aderencia != null && aderencia > 0) ptS.copilotoFatoAderencia(aderencia),
+    if (dias != null)
+      switch (dias) {
+        0 => ptS.copilotoFatoTreinouHoje,
+        1 => ptS.copilotoFatoUltimoTreinoUm,
+        _ => ptS.copilotoFatoUltimoTreinoN(dias),
+      },
     if (texto.isNotEmpty) texto,
   ].take(3).toList();
 }

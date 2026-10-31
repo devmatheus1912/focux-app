@@ -33,6 +33,7 @@ class FxSettingsTile extends StatelessWidget {
     this.upgradeTierLabel,
     this.semanticsLabel,
     this.accessory,
+    this.iconeComFundo = false,
   }) : assert(icon != null || fxIcon != null),
        assert(!(picker && disclosure));
 
@@ -58,6 +59,9 @@ class FxSettingsTile extends StatelessWidget {
   final String? upgradeTierLabel;
   final String? semanticsLabel;
   final Widget? accessory;
+
+  /// Ícone sobre um fundo leve da marca: Perfil, Ferramentas e atalhos.
+  final bool iconeComFundo;
 
   @override
   Widget build(BuildContext context) {
@@ -92,6 +96,18 @@ class FxSettingsTile extends StatelessWidget {
     final showChevron =
         interactive && !danger && !locked && !disclosure && !picker;
 
+    final Widget icone = fxIcon != null
+    ? FxIcon(
+      name: fxIcon!,
+      size: FxSettingsLayout.iconSize,
+      color: iconColor,
+    )
+    : Icon(
+      icon!,
+      size: FxSettingsLayout.iconSize,
+      color: iconColor,
+    );
+
     return Semantics(
       button: interactive,
       label: a11y,
@@ -121,17 +137,18 @@ class FxSettingsTile extends StatelessWidget {
           ),
           child: Row(
             children: [
-              fxIcon != null
-                  ? FxIcon(
-                    name: fxIcon!,
-                    size: FxSettingsLayout.iconSize,
-                    color: iconColor,
+              iconeComFundo
+                  ? DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: iconColor.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(6),
+                      child: icone,
+                    ),
                   )
-                  : Icon(
-                    icon!,
-                    size: FxSettingsLayout.iconSize,
-                    color: iconColor,
-                  ),
+                  : icone,
               const SizedBox(width: FxSettingsLayout.iconGap),
               Expanded(
                 child: DecoratedBox(

@@ -59,6 +59,7 @@ class DashboardToolShortcutGroup extends ConsumerWidget {
       children: [
         for (var i = 0; i < shortcuts.length; i++)
           FxSettingsTile(
+            iconeComFundo: true,
             fxIcon: shortcuts[i].icon,
             label: shortcuts[i].label,
             subtitle:

@@ -26,16 +26,15 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/widgets/fx_action_chip.dart';
 import '../../../core/widgets/fx_action_link.dart';
-import '../../../core/widgets/fx_anel.dart';
 import '../../../core/widgets/fx_choice_strip.dart';
 import '../../../core/widgets/fx_metric_strip.dart';
-import '../../../core/widgets/fx_status_pill.dart';
-import '../../../core/widgets/fx_strip_card.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 import '../../alunos/providers/aluno_detail_providers.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/evolucao_repository.dart';
 import '../utils/engajamento_display.dart';
+import '../widgets/engajamento_card_aderencia.dart';
 import '../widgets/engajamento_help_sheet.dart';
 import '../../../l10n/pt.dart';
 
@@ -237,6 +236,17 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
       ),
     );
 
+    final dias = <(String, List<EventoEngajamento>)>[];
+    for (final linha in linhas) {
+      final evento = linha.evento;
+      if (evento == null) {
+        dias.add((linha.dia!, []));
+      } else {
+        if (dias.isEmpty) dias.add(('', []));
+        dias.last.$2.add(evento);
+      }
+    }
+
     final topo = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -245,7 +255,7 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
           subtitle: engajamentoPeriodoLabel(_dias),
         ),
         const SizedBox(height: TokensStrip.s4),
-        _CardAderencia(
+        EngajamentoCardAderencia(
           resumo: _aderencia,
           aderenciaCadastro: aderencia,
           frase: engajamentoFrase(_eventos),
@@ -287,9 +297,10 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
                 ),
               ),
               if (conversa.semResposta)
-                FxStatusPill(
-                  label: ptS.engajamentoSemRespostaSua,
-                  tone: FxPillTone.warning,
+                FxTonalButton(
+                  label: ptS.engajamentoResponder,
+                  compact: true,
+                  onPressed: _abrirChat,
                 ),
             ],
           ),
@@ -363,10 +374,10 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
               : ListView.builder(
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: padding,
-                itemCount: linhas.length + 2,
+                itemCount: dias.length + 2,
                 itemBuilder: (context, i) {
                   if (i == 0) return topo;
-                  if (i == linhas.length + 1) {
+                  if (i == dias.length + 1) {
                     if (cancelados == 0) return const SizedBox.shrink();
                     return Padding(
                       padding: const EdgeInsets.only(top: TokensStrip.s3),
@@ -387,49 +398,109 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
                       ),
                     );
                   }
-                  final linha = linhas[i - 1];
-                  final evento = linha.evento;
-                  if (evento == null) {
-                    return Padding(
-                      padding: const EdgeInsets.only(
-                        top: TokensStrip.s5,
-                        bottom: TokensStrip.s3,
+                  final (dia, eventos) = dias[i - 1];
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (dia.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            top: TokensStrip.s5,
+                            bottom: TokensStrip.s3,
+                          ),
+                          child: DashboardSectionHeader(title: dia),
+                        ),
+                      Container(
+                        decoration: fxListCardDecoration(context),
+                        child: Column(
+                          children: [
+                            for (final (j, evento) in eventos.indexed) ...[
+                              if (j > 0) const Divider(height: 1),
+                              _LinhaAtividade(
+                                evento: evento,
+                                onTap:
+                                    engajamentoEventoRota(
+                                              evento.tipo,
+                                              widget.alunoId,
+                                            ) ==
+                                            null
+                                        ? null
+                                        : () => _abrirEvento(evento),
+                              ),
+                            ],
+                          ],
+                        ),
                       ),
-                      child: DashboardSectionHeader(title: linha.dia!),
-                    );
-                  }
-                  final titulo = engajamentoEventoLabel(
-                    evento.descricao,
-                    evento.tipo,
-                  );
-                  final apoio = engajamentoEventoSubtitle(
-                    tipo: evento.tipo,
-                    titulo: titulo,
-                  );
-                  return FxSatelliteListTile(
-                    title: titulo,
-                    titleCase: false,
-                    onTap:
-                        engajamentoEventoRota(evento.tipo, widget.alunoId) ==
-                                null
-                            ? null
-                            : () => _abrirEvento(evento),
-                    subtitle: apoio == null ? null : Text(apoio),
-                    leading: FxIcon(
-                      name: engajamentoFxIcon(evento.tipo),
-                      size: 18,
-                      color: primary,
-                    ),
-                    trailing: Text(
-                      engajamentoHoraLabel(evento.dataHora),
-                      style: FocuxHubTypography.bodyMuted(
-                        color: fxScreenMute(context),
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+                    ],
                   );
                 },
               ),
+    );
+  }
+}
+
+/// Uma linha do cartão de Atividade: ícone, o que houve e a hora.
+class _LinhaAtividade extends StatelessWidget {
+  const _LinhaAtividade({required this.evento, required this.onTap});
+
+  final EventoEngajamento evento;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    final titulo = engajamentoEventoLabel(evento.descricao, evento.tipo);
+    final apoio = engajamentoEventoSubtitle(tipo: evento.tipo, titulo: titulo);
+    return InkWell(
+      onTap: onTap,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 56),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: TokensStrip.s3,
+            vertical: TokensStrip.s2,
+          ),
+          child: Row(
+            children: [
+              FxIcon(
+                name: engajamentoFxIcon(evento.tipo),
+                size: 18,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(width: TokensStrip.s3),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      titulo,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: FocuxHubTypography.cardTitle(color: chrome.ink),
+                    ),
+                    if (apoio != null)
+                      Text(
+                        apoio,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: TokensStrip.s2),
+              Text(
+                engajamentoHoraLabel(evento.dataHora),
+                style: FocuxHubTypography.bodyMuted(
+                  color: chrome.mute,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -512,103 +583,6 @@ class _CalendarioTreinos extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-/// Topo da tela: o número com anel, ou "Começando" enquanto não há base justa.
-class _CardAderencia extends StatelessWidget {
-  const _CardAderencia({
-    required this.resumo,
-    required this.aderenciaCadastro,
-    required this.frase,
-    required this.tendencia,
-  });
-
-  final AderenciaResumo? resumo;
-  final int aderenciaCadastro;
-  final String frase;
-  final ({int diferenca, String texto})? tendencia;
-
-  @override
-  Widget build(BuildContext context) {
-    final sobre = fxPaletaSobreMarca(context);
-    final r = resumo;
-    final percent =
-        r == null
-            ? (aderenciaCadastro > 0 ? aderenciaCadastro : null)
-            : r.percent;
-    final previstos = r?.previstos ?? 0;
-    final fracao =
-        percent != null
-            ? percent / 100
-            : previstos > 0
-            ? (r!.feitos / previstos).clamp(0.0, 1.0).toDouble()
-            : 0.0;
-    final centro =
-        percent != null
-            ? '$percent%'
-            : previstos > 0
-            ? '${r!.feitos}/$previstos'
-            : '—';
-    final titulo =
-        r?.comecando == true
-            ? 'Começando'
-            : previstos == 0 && percent == null
-            ? 'Sem ficha'
-            : 'Aderência';
-    final tend = tendencia;
-    return FxStripCard(
-      marca: true,
-      child: Row(
-        children: [
-          FxAnel(
-            fracao: fracao,
-            cor: sobre.ink,
-            fundo: sobre.ink.withValues(alpha: 0.2),
-            child: Text(
-              centro,
-              style: FocuxHubTypography.metric(
-                color: sobre.ink,
-                fontSize: FocuxHubTypography.metricMd,
-              ),
-            ),
-          ),
-          const SizedBox(width: TokensStrip.s4),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  titulo,
-                  style: FocuxHubTypography.cardTitle(color: sobre.ink),
-                ),
-                if (previstos > 0)
-                  Text(
-                    '${r!.feitos} de $previstos treinos previstos',
-                    style: FocuxHubTypography.bodyMuted(color: sobre.mute),
-                  ),
-                const SizedBox(height: TokensStrip.s1),
-                Text(
-                  frase,
-                  style: FocuxHubTypography.bodyMuted(color: sobre.ink),
-                ),
-                if (tend != null) ...[
-                  const SizedBox(height: TokensStrip.s1),
-                  Text(
-                    '${tend.diferenca > 0
-                        ? '↑ '
-                        : tend.diferenca < 0
-                        ? '↓ '
-                        : ''}${tend.texto}',
-                    style: FocuxHubTypography.bodyMuted(color: sobre.mute),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }

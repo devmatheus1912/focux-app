@@ -37,7 +37,7 @@ void main() {
     expect(screen, contains('engajamentoEventoRota'));
     expect(screen, contains('showFxInsetPickerSheet'));
     expect(screen, isNot(contains('FxSettingsGroup')));
-    expect(screen, contains('FxSatelliteListTile'));
+    expect(screen, contains('_LinhaAtividade'));
     expect(screen, contains('FxActionChip'));
     expect(screen, contains('FxMetricStrip'));
     expect(screen, contains('engajamentoAtividade'));

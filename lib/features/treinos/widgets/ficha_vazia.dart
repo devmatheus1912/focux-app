@@ -225,6 +225,14 @@ class _FichaVaziaState extends State<FichaVazia> {
         selecionado: escolhida.id,
         onSelecionar: (id) => escolher(sugeridas.firstWhere((d) => d.id == id)),
       ),
+      if (escolhida.apoio case final apoio?)
+        Padding(
+          padding: const EdgeInsets.only(top: TokensStrip.s1),
+          child: Text(
+            apoio,
+            style: FocuxHubTypography.bodyMuted(color: chrome.ink),
+          ),
+        ),
       if (sugeridas.isNotEmpty)
         Padding(
           padding: const EdgeInsets.only(top: TokensStrip.s1),

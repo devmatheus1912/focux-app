@@ -9,6 +9,7 @@ import '../../alunos/widgets/aluno_avatar.dart';
 import '../data/agenda_repository.dart';
 import '../utils/agenda_schedule.dart';
 import '../utils/agenda_status.dart';
+import '../../../l10n/pt.dart';
 
 class AgendaEventCard extends StatelessWidget {
   const AgendaEventCard({
@@ -51,7 +52,7 @@ class AgendaEventCard extends StatelessWidget {
       final sobre = fxPaletaSobreMarca(context);
       return Semantics(
         button: true,
-        label: 'Próximo atendimento $title, $status, $time',
+        label: ptS.agendaProximoAtendimento(title, status, time),
         excludeSemantics: true,
         child: Padding(
           padding: const EdgeInsets.only(bottom: TokensStrip.s2),

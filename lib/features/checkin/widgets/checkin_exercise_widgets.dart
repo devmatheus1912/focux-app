@@ -47,6 +47,9 @@ class CheckinSerieCard extends StatelessWidget {
   final ValueChanged<int>? onEditarReps;
   final String? concluidoFrase;
 
+  /// Próximo exercício: aparece só em tela alta, onde sobra espaço.
+  final String? proximoNome;
+
   const CheckinSerieCard({
     super.key,
     required this.ee,
@@ -62,6 +65,7 @@ class CheckinSerieCard extends StatelessWidget {
     this.onEditarCarga,
     this.onEditarReps,
     this.concluidoFrase,
+    this.proximoNome,
   });
 
   /// Abaixo disso (dp) não cabem topo, mídia e base juntos.
@@ -69,6 +73,9 @@ class CheckinSerieCard extends StatelessWidget {
 
   /// Mídia menor que isso vira o botão "Ver vídeo".
   static const double alturaMinimaMidia = 96;
+
+  /// A partir daqui cabe a linha "Depois: próximo exercício".
+  static const double alturaMinimaDepois = 640;
 
   @override
   Widget build(BuildContext context) {
@@ -164,6 +171,15 @@ class CheckinSerieCard extends StatelessWidget {
                         ? _midia(context, brand: brand, dark: chrome.isDark)
                         : const SizedBox.shrink(),
               ),
+              if (proximoNome != null && c.maxHeight >= alturaMinimaDepois) ...[
+                const SizedBox(height: TokensStrip.s2),
+                Text(
+                  s.checkinDepois(proximoNome!),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                ),
+              ],
               const SizedBox(height: TokensStrip.s3),
               base,
             ],

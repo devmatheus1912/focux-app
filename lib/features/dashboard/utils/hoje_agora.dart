@@ -1,3 +1,4 @@
+import '../../../l10n/pt.dart';
 import '../../../core/money/fx_money.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../data/command_center_data.dart';
@@ -169,11 +170,10 @@ String _dinheiro(double reais) {
 
 /// Linha abaixo do "Olá": o dia antes da hora do dado. Zero não aparece.
 String? hojeLinhaUtil({required int atendimentos, String? freshness}) {
-  final dia =
-      atendimentos == 0
-          ? null
-          : atendimentos == 1
-          ? '1 atendimento hoje'
-          : '$atendimentos atendimentos hoje';
+  final dia = switch (atendimentos) {
+    0 => null,
+    1 => ptS.hojeUmAtendimento,
+    _ => ptS.hojeNAtendimentos(atendimentos),
+  };
   return [if (dia != null) dia, if (freshness != null) freshness].join(' · ');
 }

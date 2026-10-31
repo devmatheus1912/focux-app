@@ -201,12 +201,15 @@ int engajamentoTreinosSemana(
   }
   if (atuais == 0 && antes == 0) return null;
   final d = atuais - antes;
-  if (d == 0) return (diferenca: 0, texto: 'Igual à semana anterior');
+  if (d == 0) return (diferenca: 0, texto: ptS.engajamentoTendenciaIgual);
   final n = d.abs();
-  final treinos = n == 1 ? '1 treino' : '$n treinos';
+  final treinos = n == 1 ? ptS.engajamentoUmTreino : ptS.engajamentoNTreinos(n);
   return (
     diferenca: d,
-    texto: d > 0 ? '$treinos a mais que na semana anterior' : '$treinos a menos que na semana anterior',
+    texto:
+        d > 0
+            ? ptS.engajamentoTendenciaMais(treinos)
+            : ptS.engajamentoTendenciaMenos(treinos),
   );
 }
 

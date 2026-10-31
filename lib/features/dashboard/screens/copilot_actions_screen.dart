@@ -13,20 +13,21 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_grouped_action_sheet.dart';
-import '../../../core/widgets/fx_status_pill.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../alunos/widgets/aluno_avatar.dart';
+import '../../alunos/providers/alunos_provider.dart';
 import '../../alunos/widgets/aluno_form_choices.dart';
 import '../../ia/providers/ia_copilot_providers.dart';
 import '../data/command_center_data.dart';
 import '../providers/dashboard_provider.dart';
 import '../widgets/dashboard_section_header.dart';
+import '../widgets/tarefa_row.dart';
 import '../utils/copilot_actions_display.dart';
+import '../../../l10n/pt.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 import 'package:focux_app/core/widgets/skeleton_loader.dart';
@@ -208,7 +209,7 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
                           ),
                           children: [
                             if (abertas)
-                              _NadaPendente(
+                              TarefasNadaPendente(
                                 titulo: copilotActionsEmptyTitle(_status),
                                 ultima:
                                     concluidas.isEmpty
@@ -270,8 +271,9 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
                                   for (final (i, action)
                                       in doGrupo.indexed) ...[
                                     if (i > 0) const Divider(height: 1),
-                                    _TarefaRow(
+                                    TarefaRow(
                                       action: action,
+                                      fotoUrl: _fotoDe(action.alunoId),
                                       concluida:
                                           _status ==
                                           copilotActionsStatusConcluido,
@@ -392,16 +394,13 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
       context,
       title: copilotActionsHelpTitle(),
       subtitle: copilotActionsHelpSubtitle(),
-      tips: const [
-        FxHelpTip('Como calculamos', copilotActionsComoCalculamos),
-        FxHelpTip(
+      tips: [
+        const FxHelpTip('Como calculamos', copilotActionsComoCalculamos),
+        const FxHelpTip(
           'O que aparece aqui',
           'Tarefas salvas do Copiloto e alertas automáticos. Abrir o aluno não conclui a tarefa.',
         ),
-        FxHelpTip(
-          'Adiar e concluir',
-          'Conclua pelo check. Adiar fica no "⋯". Por alguns segundos dá para desfazer.',
-        ),
+        FxHelpTip('Adiar e concluir', ptS.tarefasAjudaAdiarConcluir),
       ],
     );
   }
@@ -413,6 +412,15 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
     ref.invalidate(iaActionsProvider(_queryKey));
     ref.invalidate(iaActionsContagemProvider(_query));
     await ref.read(iaActionsProvider(_queryKey).future);
+  }
+
+  String? _fotoDe(int? alunoId) {
+    final alunos = ref.watch(alunosProvider).value;
+    if (alunoId == null || alunos == null) return null;
+    for (final aluno in alunos) {
+      if (aluno.id == alunoId) return aluno.fotoUrl;
+    }
+    return null;
   }
 
   void _openAction(BuildContext context, FilaAcaoResumo action) {

@@ -61,6 +61,14 @@ class _CopilotFolha extends ConsumerWidget {
   final ProximaAcaoResumo? proxima;
   final bool tarefaCriada;
 
+  /// Gerar custa um uso de IA: fica à parte, com a conta do mês à vista.
+  void _abrirGerarIa(BuildContext context) {
+    showFxHomeSheet<void>(
+      context,
+      builder: (_) => _GerarComIaFolha(aluno: aluno),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final s = S.of(context);
@@ -76,7 +84,6 @@ class _CopilotFolha extends ConsumerWidget {
             ? ia!.rawAcaoOrFallback.trim()
             : acao;
     final fatos = copilotoFatos(aluno, motivo: ia?.motivo ?? motivo);
-    final plano = ref.watch(planoFeaturesProvider).value;
 
     Widget titulo(String t) => Text(
       t,
@@ -90,7 +97,7 @@ class _CopilotFolha extends ConsumerWidget {
       footer: Padding(
         padding: const EdgeInsets.all(TokensStrip.s3),
         child: FxLiquidPrimaryButton(
-          label: tarefaCriada ? 'Tarefa criada' : snapshot.stickyAction.label,
+          label: tarefaCriada ? s.copilotoFolhaTarefaCriada : snapshot.stickyAction.label,
           onPressed:
               tarefaCriada
                   ? null
@@ -119,7 +126,7 @@ class _CopilotFolha extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             if (fatos.isNotEmpty) ...[
-              titulo('O que vimos'),
+              titulo(s.copilotoFolhaOQueVimos),
               const SizedBox(height: TokensStrip.s2),
               for (final fato in fatos)
                 Padding(
@@ -133,34 +140,55 @@ class _CopilotFolha extends ConsumerWidget {
             ],
             Row(
               children: [
-                Expanded(child: titulo('O que fazer')),
+                Expanded(child: titulo(s.copilotoFolhaOQueFazer)),
                 if (ia != null)
-                  const FxStatusPill(label: 'IA', tone: FxPillTone.accent),
+                  FxStatusPill(
+                    label: s.copilotoFolhaSeloIa,
+                    tone: FxPillTone.accent,
+                  ),
+                IconButton(
+                  tooltip: s.copilotoFolhaMaisOpcoes,
+                  icon: Icon(Icons.more_horiz_rounded, color: chrome.mute),
+                  onPressed: () => _abrirGerarIa(context),
+                ),
               ],
             ),
             const SizedBox(height: TokensStrip.s2),
             Text(texto, style: FocuxHubTypography.body(color: chrome.ink)),
-            const SizedBox(height: TokensStrip.s4),
-            if ((plano?.limiteIaMensal ?? 0) > 0) ...[
-              IaUsoLinha(
-                usado: plano!.iaUsadaMes,
-                limite: plano.limiteIaMensal!,
-              ),
-              const SizedBox(height: TokensStrip.s2),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _GerarComIaFolha extends ConsumerWidget {
+  const _GerarComIaFolha({required this.aluno});
+
+  final Aluno aluno;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final s = S.of(context);
+    final plano = ref.watch(planoFeaturesProvider).value;
+    final limite = plano?.limiteIaMensal ?? 0;
+    return FxSheetFrame(
+      title: s.copilotoFolhaGerarIa,
+      subtitle: s.copilotoFolhaGerarIaCusto,
+      child: Padding(
+        padding: const EdgeInsets.all(TokensStrip.s3),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (limite > 0) ...[
+              IaUsoLinha(usado: plano!.iaUsadaMes, limite: limite),
+              const SizedBox(height: TokensStrip.s3),
             ],
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    'Gerar com IA usa 1 uso',
-                    style: FocuxHubTypography.bodyMuted(color: chrome.mute),
-                  ),
-                ),
-                Aluno360CopilotIaRefreshButton(
-                  alunoId: aluno.id,
-                  primary: primary,
-                ),
-              ],
+            Aluno360CopilotIaRefreshButton(
+              alunoId: aluno.id,
+              primary: Theme.of(context).colorScheme.primary,
+              prominent: true,
             ),
           ],
         ),

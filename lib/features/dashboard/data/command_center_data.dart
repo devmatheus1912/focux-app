@@ -194,7 +194,7 @@ class AutonomiaGargaloResumo {
         vistos: (json['vistos'] as num?)?.toInt() ?? 0,
         cliques: (json['cliques'] as num?)?.toInt() ?? 0,
         concluidos: (json['concluidos'] as num?)?.toInt() ?? 0,
-        ultimaAcao: json['ultimaAcao'] as String? ?? 'CLICKED',
+        ultimaAcao: json['ultimaAcao'] as String? ?? '',
         ultimoEventoEm: json['ultimoEventoEm'] as String?,
         acaoUrl: json['acaoUrl'] as String? ?? '/alunos',
       );

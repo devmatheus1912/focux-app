@@ -28,6 +28,7 @@ import '../../auth/providers/auth_provider.dart';
 import '../../../core/widgets/fx_action_chip.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../data/desafio_repository.dart';
+import '../../../l10n/pt.dart';
 import '../utils/desafio_display.dart';
 
 class DesafioDetailScreen extends ConsumerStatefulWidget {
@@ -255,6 +256,7 @@ class _DesafioDetailBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
+    final sobre = fxPaletaSobreMarca(context, accent: primary);
     final descricao = desafio.descricao?.trim();
     final first = ranking.isEmpty ? null : ranking.first;
     final atingiram = desafioAtingiramMeta(
@@ -291,37 +293,41 @@ class _DesafioDetailBody extends StatelessWidget {
                       fim: desafio.fim,
                     ),
                   ),
-                  if (forAluno) ...[
+                  if (forAluno || first != null) ...[
                     const SizedBox(height: TokensStrip.s4),
                     FxStripCard(
-                      emphasize: false,
+                      marca: true,
                       accent: primary,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Sua posição',
-                            style: FocuxHubTypography.chip(
-                              fxScreenMute(context),
-                            ),
+                            forAluno ? 'Sua posição' : ptS.desafioLider,
+                            style: FocuxHubTypography.chip(sobre.mute),
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            desafioMeuLugarValue(meuIndex),
+                            forAluno
+                                ? desafioMeuLugarValue(meuIndex)
+                                : first!.alunoNome,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: FocuxHubTypography.metric(
-                              color: fxScreenInk(context),
+                              color: sobre.ink,
                               fontSize: FocuxHubTypography.metricLg,
                             ),
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            desafioMeuLugarHint(
-                              index: meuIndex,
-                              pontos: meusPontos,
-                              metaPontos: desafio.metaPontos,
-                            ),
+                            forAluno
+                                ? desafioMeuLugarHint(
+                                  index: meuIndex,
+                                  pontos: meusPontos,
+                                  metaPontos: desafio.metaPontos,
+                                )
+                                : ptS.desafioPontosLider(first!.pontos),
                             style: FocuxHubTypography.bodyMuted(
-                              color: fxScreenMute(context),
+                              color: sobre.mute,
                               fontWeight: FontWeight.w600,
                             ),
                           ),

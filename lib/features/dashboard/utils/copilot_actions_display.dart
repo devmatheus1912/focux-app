@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/pt.dart';
 import '../data/command_center_data.dart';
 import 'dashboard_command_copy.dart';
 
@@ -55,7 +56,7 @@ String copilotActionsEmptyTitle(String status) {
   return switch (status) {
     copilotActionsStatusAdiado => 'Nenhuma tarefa adiada',
     copilotActionsStatusConcluido => 'Nenhuma tarefa concluída',
-    _ => 'Nada pendente',
+    _ => ptS.tarefasNadaPendente,
   };
 }
 
@@ -115,9 +116,10 @@ String copilotActionsDestino(FilaAcaoResumo action) {
 String copilotActionsResumo(List<FilaAcaoResumo> acoes, {int? abertas}) {
   final urgentes = acoes.where(_urgente).length;
   final n = abertas ?? acoes.length;
-  final total = n == 1 ? '1 aberta' : '$n abertas';
+  final total = n == 1 ? ptS.tarefasUmaAberta : ptS.tarefasNAbertas(n);
   if (urgentes == 0) return total;
-  return '$total · $urgentes ${urgentes == 1 ? 'urgente' : 'urgentes'}';
+  final texto = urgentes == 1 ? ptS.tarefasUmaUrgente : ptS.tarefasNUrgentes(urgentes);
+  return '$total · $texto';
 }
 
 bool _urgente(FilaAcaoResumo a) => a.prioridade.toUpperCase() == 'P0';
@@ -132,9 +134,9 @@ List<(String, List<FilaAcaoResumo>)> copilotActionsPorGrupo(
   final depois =
       ordem.where((a) => !_urgente(a) && a.prioridade.toUpperCase() != 'P1').toList();
   return [
-    if (urgentes.isNotEmpty) ('Urgente', urgentes),
-    if (hoje.isNotEmpty) ('Hoje', hoje),
-    if (depois.isNotEmpty) ('Depois', depois),
+    if (urgentes.isNotEmpty) (ptS.tarefasGrupoUrgente, urgentes),
+    if (hoje.isNotEmpty) (ptS.tarefasGrupoHoje, hoje),
+    if (depois.isNotEmpty) (ptS.tarefasGrupoDepois, depois),
   ];
 }
 
@@ -166,4 +168,10 @@ IconData copilotActionsIcone(FilaAcaoResumo a) {
   }
   if (tipo.contains('AGENDA')) return Icons.event_outlined;
   return Icons.checklist_rounded;
+}
+
+/// O verbo da linha, vindo da tarefa ("Responder", "Cobrar").
+String copilotActionsVerbo(FilaAcaoResumo a) {
+  final cta = a.ctaLabel.trim();
+  return cta.isEmpty ? ptS.tarefasVerboAbrir : cta;
 }

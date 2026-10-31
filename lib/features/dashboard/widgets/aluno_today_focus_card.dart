@@ -98,7 +98,7 @@ class AlunoTodayFocusCard extends StatelessWidget {
             : null;
     final sobre = solido?.sobre;
     final chrome = ShellChrome.forBrightness(context, sobre != null || isDark);
-    final mute = sobre?.withValues(alpha: 0.80) ?? chrome.mute;
+    final mute = solido?.sobreSuave ?? chrome.mute;
     final tinta = sobre ?? chrome.ink;
     final nomeAssinatura = assinatura?.trim() ?? '';
     final eyebrow =
@@ -184,32 +184,12 @@ class AlunoTodayFocusCard extends StatelessWidget {
     );
 
     if (solido != null) {
-      // Cinematográfico: card sólido na cor da marca, com tudo por dentro em
-      // tema escuro (texto, selo e faixa da semana claros sobre o fundo).
-      final base = Theme.of(context);
-      final escuro = base.copyWith(
-        brightness: Brightness.dark,
-        colorScheme: base.colorScheme.copyWith(
-          brightness: Brightness.dark,
-          primary: solido.sobre,
-        ),
-      );
-      return DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: solido.degrade,
-          borderRadius: BorderRadius.circular(TokensStrip.rCard),
-          boxShadow: [
-            BoxShadow(
-              color: solido.fundo.withValues(alpha: isDark ? 0.30 : 0.22),
-              blurRadius: 18,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(TokensStrip.s4),
-          child: Theme(data: escuro, child: conteudo),
-        ),
+      // Cinematográfico: o bloco de marca do kit, com a cor da marca do personal.
+      return FxStripCard(
+        marca: true,
+        accent: primaria,
+        padding: const EdgeInsets.all(TokensStrip.s4),
+        child: conteudo,
       );
     }
     if (estilo == BrandStyle.minimalista) {

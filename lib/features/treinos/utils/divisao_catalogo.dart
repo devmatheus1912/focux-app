@@ -1,5 +1,6 @@
 import '../../exercicios/data/enums.dart';
 import '../../exercicios/data/template_splits.dart';
+import '../../../l10n/pt.dart';
 
 /// Uma divisão da ficha: as letras (sessões) que o personal monta.
 /// Com menos letras que dias de treino, os dias que sobram seguem a sequência.
@@ -9,6 +10,7 @@ class Divisao {
     required this.rotulo,
     required this.sessoes,
     this.splitId,
+    this.apoio,
   });
 
   final String id;
@@ -21,6 +23,9 @@ class Divisao {
 
   /// Modelo de exercícios (`templateSplits`) usado para sugerir por letra.
   final String? splitId;
+
+  /// O que a sigla quer dizer, abaixo dos chips.
+  final String? apoio;
 
   int get letras => sessoes.length;
 }
@@ -51,14 +56,19 @@ Divisao _generica(int n, {String? rotulo}) => Divisao(
   sessoes: _genericas(n),
 );
 
-Divisao _split(String splitId, String rotulo) =>
-    Divisao(id: splitId, rotulo: rotulo, sessoes: _doSplit(splitId), splitId: splitId);
+Divisao _split(String splitId, String rotulo, {String? apoio}) => Divisao(
+  id: splitId,
+  rotulo: rotulo,
+  sessoes: _doSplit(splitId),
+  splitId: splitId,
+  apoio: apoio,
+);
 
 Divisao get _fullBody => _split('fullbody-iniciante', 'Full body');
 Divisao get _fullBodyAb => _split('fullbody-ab', 'AB · Full body');
 Divisao get _superiorInferior => _split('upper-lower', 'AB · Superior/Inferior');
 Divisao get _abc => _split('bro-split', 'ABC');
-Divisao get _ppl => _split('ppl', 'PPL');
+Divisao get _ppl => _split('ppl', 'PPL', apoio: ptS.divisaoPplApoio);
 
 /// Sugeridas por número de dias. A primeira é a recomendada.
 List<Divisao> divisoesSugeridas(int dias) => switch (dias) {

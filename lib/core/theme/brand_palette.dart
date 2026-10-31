@@ -12,6 +12,7 @@ class BrandPalette {
   static const Color defaultPrimary = Color(0xFF0B4F5C);
   static const Color defaultSecondary = Color(0xFF3D9AAD);
   static const Color defaultInk = Color(0xFF083D47);
+
   /// Fundos de referência (claro/escuro) para checar contraste e pintar prévias.
   static const Color fundoClaroReferencia = Color(0xFFF6F4FA);
   static const Color fundoEscuroReferencia = Color(0xFF14161A);
@@ -172,9 +173,17 @@ class BrandPalette {
     final saturacao = hsl.saturation.clamp(0.0, 0.85).toDouble();
 
     Color cor(double l) =>
-        hsl.withSaturation(saturacao).withLightness(l.clamp(0.0, 1.0)).toColor();
+        hsl
+            .withSaturation(saturacao)
+            .withLightness(l.clamp(0.0, 1.0))
+            .toColor();
+    // O texto secundário é o mais fraco: se ele passa, o principal também.
     bool passa(Color c) =>
-        FocuxContrast.meetsWcagAa(Colors.white, c);
+        FocuxContrast.meetsWcagAa(Colors.white, c) &&
+        FocuxContrast.meetsWcagAa(
+          Color.lerp(c, Colors.white, cardDeMarcaSuave)!,
+          c,
+        );
 
     var fundo = cor(topo);
     while (!passa(fundo) && topo > 0.05) {
@@ -187,6 +196,9 @@ class BrandPalette {
 
   /// Quanto a luminosidade (HSL) pode variar do topo ao fim do card sólido.
   static const double cardDeMarcaVariacao = 0.06;
+
+  /// Quanto o texto secundário fica perto do principal, sobre o card.
+  static const double cardDeMarcaSuave = 0.85;
 
   /// Tinta de superfície a 4% (claro) / 6% (escuro): fundos que sentem a marca
   /// sem virar cor chapada.
@@ -225,6 +237,10 @@ class CardDeMarca {
 
   final Color fundo;
   final Color fundoFim;
+
+  /// Texto secundário: mistura sólida, para o contraste ser conta e não opacidade.
+  Color get sobreSuave =>
+      Color.lerp(fundo, sobre, BrandPalette.cardDeMarcaSuave)!;
   final Color sobre;
 
   LinearGradient get degrade => LinearGradient(
