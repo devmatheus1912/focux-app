@@ -1,4 +1,5 @@
 import '../data/evolucao_repository.dart';
+import '../../../l10n/pt.dart';
 
 const engajamentoPeriodos = [30, 60, 90];
 
@@ -8,17 +9,17 @@ String engajamentoTipoLabel(String? tipo) {
   switch ((tipo ?? '').trim().toUpperCase()) {
     case 'TREINO':
     case 'TREINO_INICIADO':
-      return 'Treino';
+      return ptS.aluno360FerramentasGrupoTreino;
     case 'CHECKIN_CONCLUIDO':
-      return 'Check-in';
+      return ptS.engajamentoCheckIn;
     case 'MEDIDA':
-      return 'Medida';
+      return ptS.engajamentoMedida;
     case 'MENSAGEM':
-      return 'Mensagem';
+      return ptS.copilotoMensagemCampo;
     case 'EM_ANDAMENTO':
-      return 'Em andamento';
+      return ptS.historicoDetalheEmAndamento;
     case '':
-      return 'Evento';
+      return ptS.engajamentoEvento;
     default:
       return tipo!.trim();
   }
@@ -44,7 +45,7 @@ String engajamentoEventoLabel(String? descricao, String? tipo) {
   if (text != null && text.isNotEmpty) {
     return text
         .replaceAll(' - ', ' · ')
-        .replaceAll('EM_ANDAMENTO', 'em andamento')
+        .replaceAll('EM_ANDAMENTO', ptS.engajamentoEmAndamento)
         .replaceAll('CONCLUIDO', 'concluído')
         .replaceAll('CANCELADO', 'cancelado')
         .replaceAll('_', ' ');
@@ -72,13 +73,13 @@ String engajamentoHoraLabel(String dataHora) {
 
 String engajamentoDiaLabel(String dataHora, {DateTime? now}) {
   final dt = DateTime.tryParse(dataHora)?.toLocal();
-  if (dt == null) return 'Sem data';
+  if (dt == null) return ptS.engajamentoSemData;
   final ref = now ?? DateTime.now();
   final hoje = DateTime(ref.year, ref.month, ref.day);
   final dia = DateTime(dt.year, dt.month, dt.day);
   final diff = hoje.difference(dia).inDays;
-  if (diff == 0) return 'Hoje';
-  if (diff == 1) return 'Ontem';
+  if (diff == 0) return ptS.dockHoje;
+  if (diff == 1) return ptS.treinosDiaOntem;
   final d = dt.day.toString().padLeft(2, '0');
   final m = dt.month.toString().padLeft(2, '0');
   return '$d/$m';
@@ -148,7 +149,7 @@ String _haDias(DateTime quando, DateTime now) {
   final dias = _dia(now).difference(_dia(quando)).inDays;
   if (dias <= 0) return 'hoje';
   if (dias == 1) return 'ontem';
-  return 'há $dias dias';
+  return ptS.engajamentoHaDias(dias);
 }
 
 /// Resposta curta para "esse aluno está firme?".
@@ -156,15 +157,15 @@ String engajamentoFrase(List<EventoEngajamento> eventos, {DateTime? now}) {
   final ref = now ?? DateTime.now();
   final feitos =
       eventos.where(_treinoFeito).map(_quando).nonNulls.toList()..sort();
-  if (feitos.isEmpty) return 'Nenhum treino feito neste período.';
+  if (feitos.isEmpty) return ptS.engajamentoNenhumTreinoFeitoNestePeriodo;
   final corte = _dia(ref).subtract(const Duration(days: 6));
   final semana = feitos.where((d) => !d.isBefore(corte)).length;
   final vezes = switch (semana) {
-    0 => 'Não treinou nos últimos 7 dias.',
-    1 => 'Treinou 1 vez nos últimos 7 dias.',
-    _ => 'Treinou $semana vezes nos últimos 7 dias.',
+    0 => ptS.engajamentoNaoTreinouNosUltimos7,
+    1 => ptS.engajamentoTreinou1VezNosUltimos,
+    _ => ptS.engajamentoTreinouVezesNosUltimos7(semana),
   };
-  return '$vezes Último treino ${_haDias(feitos.last, ref)}.';
+  return ptS.engajamentoUltimoTreino(vezes, _haDias(feitos.last, ref));
 }
 
 /// Treinos feitos nos últimos 7 dias, com hoje.
@@ -229,8 +230,8 @@ List<({DateTime dia, EngajamentoTreinoEstado? estado})> engajamentoCalendario(
   return (
     texto:
         quandoAluno == null
-            ? 'O aluno ainda não respondeu neste período.'
-            : 'Última mensagem do aluno ${_haDias(quandoAluno, ref)}.',
+            ? ptS.engajamentoOAlunoAindaNaoRespondeu
+            : ptS.engajamentoUltimaMensagemDoAluno(_haDias(quandoAluno, ref)),
     semResposta: _doAluno(ultima),
   );
 }
@@ -243,10 +244,10 @@ bool _doAluno(EventoEngajamento e) =>
 enum EngajamentoFiltro { tudo, treinos, medidas, mensagens }
 
 String engajamentoFiltroLabel(EngajamentoFiltro filtro) => switch (filtro) {
-  EngajamentoFiltro.tudo => 'Tudo',
-  EngajamentoFiltro.treinos => 'Treinos',
-  EngajamentoFiltro.medidas => 'Medidas',
-  EngajamentoFiltro.mensagens => 'Mensagens',
+  EngajamentoFiltro.tudo => ptS.engajamentoTudo,
+  EngajamentoFiltro.treinos => ptS.dockTreinos,
+  EngajamentoFiltro.medidas => ptS.engajamentoMedidas,
+  EngajamentoFiltro.mensagens => ptS.engajamentoMensagens,
 };
 
 int engajamentoCanceladosCount(Iterable<EventoEngajamento> eventos) =>

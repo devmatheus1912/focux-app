@@ -360,7 +360,7 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
       }
       if (!mounted) return;
       setState(() => _proximaAcao = acao);
-      ref.invalidate(dashboardHomeProvider);
+      invalidatePersonalDashboardHome(ref);
       ref.invalidate(commandCenterProvider);
       ref.invalidate(copilotoTarefasAbertasProvider);
       FeedbackHelper.showSuccess(

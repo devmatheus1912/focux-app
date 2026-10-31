@@ -27,12 +27,15 @@ import '../utils/evolucao_fotos_display.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
 
 class EvolucaoFotosScreen extends ConsumerStatefulWidget {
+  /// Aba da Evolução: sem cabeçalho próprio.
+  final bool embutida;
   final int alunoId;
   final String alunoNome;
   const EvolucaoFotosScreen({
     super.key,
     required this.alunoId,
     required this.alunoNome,
+    this.embutida = false,
   });
   @override
   ConsumerState<EvolucaoFotosScreen> createState() => _State();
@@ -105,10 +108,7 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
       if (!mounted) return;
       final seen = _fotos.map((f) => f.id).toSet();
       setState(() {
-        _fotos = [
-          ..._fotos,
-          ...pagina.content.where((f) => seen.add(f.id)),
-        ];
+        _fotos = [..._fotos, ...pagina.content.where((f) => seen.add(f.id))];
         _hasNext = pagina.hasNext;
         _page = pagina.page ?? (_page + 1);
         _total = pagina.totalElements ?? _fotos.length;
@@ -198,80 +198,88 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
           if (didPop) return;
           FxKeyboardDismissScope.dismiss();
         },
-        child: FxShellScaffold(
-          useMesh: true,
-          appBar: FxShellAppBar(
-            title: 'Fotos',
-            subtitle: FxHubFreshness.joinCount(
-              evolucaoFotosCountLabel(_loading ? 0 : _total),
-              _loading ? null : FxHubFreshness.fromFetchedAt(_fetchedAt),
-            ),
-            onBack: _leave,
-          ),
-          body: Column(
-            children: [
-              Expanded(
-                child: _loading
-                    ? const Padding(
-                        padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-                        child: SkeletonList(count: 4),
-                      )
-                    : _erro != null
-                    ? FxErrorState(
-                        chromeOnDark: chrome.isDark,
-                        primary: primary,
-                        message: _erro!,
-                        onRetry: _load,
-                        title: 'Não conseguimos carregar as fotos',
-                      )
-                    : RefreshIndicator(
-                        color: primary,
-                        onRefresh: _load,
-                        child: _fotos.isEmpty
-                            ? ListView(
-                                physics: const AlwaysScrollableScrollPhysics(),
-                                keyboardDismissBehavior:
-                                    ScrollViewKeyboardDismissBehavior.onDrag,
-                                children: [
-                                  FxEmptyState(
-                                    icon: 'spark',
-                                    title: 'Nenhuma foto de evolução',
-                                    subtitle:
-                                        'Tire a primeira foto para acompanhar ${satelliteFirstName(widget.alunoNome)}.',
-                                    action: FxEmptyAction(
-                                      label: 'Adicionar foto',
-                                      onTap: _addFoto,
-                                    ),
-                                  ),
-                                ],
-                              )
-                            : _content(chrome, primary),
-                      ),
-              ),
-              if (!_loading && _erro == null && _fotos.isNotEmpty)
-                SafeArea(
-                  top: false,
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      FxSettingsLayout.pageInset,
-                      TokensStrip.s2,
-                      FxSettingsLayout.pageInset,
-                      TokensStrip.s3 +
-                          MediaQuery.viewInsetsOf(context).bottom,
+        child:
+            widget.embutida
+                ? _corpo(chrome, primary)
+                : FxShellScaffold(
+                  useMesh: true,
+                  appBar: FxShellAppBar(
+                    title: 'Fotos',
+                    subtitle: FxHubFreshness.joinCount(
+                      evolucaoFotosCountLabel(_loading ? 0 : _total),
+                      _loading
+                          ? null
+                          : FxHubFreshness.fromFetchedAt(_fetchedAt),
                     ),
-                    child: FxLiquidPrimaryButton(
-                      label: _uploading ? 'Enviando…' : 'Adicionar foto',
-                      loading: _uploading,
-                      onPressed: _uploading ? null : _addFoto,
-                    ),
+                    onBack: _leave,
                   ),
+                  body: _corpo(chrome, primary),
                 ),
-            ],
-          ),
-        ),
       ),
     );
   }
+
+  Widget _corpo(ShellPalette chrome, Color primary) => Column(
+    children: [
+      Expanded(
+        child:
+            _loading
+                ? const Padding(
+                  padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                  child: SkeletonList(count: 4),
+                )
+                : _erro != null
+                ? FxErrorState(
+                  chromeOnDark: chrome.isDark,
+                  primary: primary,
+                  message: _erro!,
+                  onRetry: _load,
+                  title: 'Não conseguimos carregar as fotos',
+                )
+                : RefreshIndicator(
+                  color: primary,
+                  onRefresh: _load,
+                  child:
+                      _fotos.isEmpty
+                          ? ListView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            keyboardDismissBehavior:
+                                ScrollViewKeyboardDismissBehavior.onDrag,
+                            children: [
+                              FxEmptyState(
+                                icon: 'spark',
+                                title: 'Nenhuma foto de evolução',
+                                subtitle:
+                                    'Tire a primeira foto para acompanhar ${satelliteFirstName(widget.alunoNome)}.',
+                                action: FxEmptyAction(
+                                  label: 'Adicionar foto',
+                                  onTap: _addFoto,
+                                ),
+                              ),
+                            ],
+                          )
+                          : _content(chrome, primary),
+                ),
+      ),
+      if (!_loading && _erro == null && _fotos.isNotEmpty)
+        SafeArea(
+          top: false,
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(
+              FxSettingsLayout.pageInset,
+              TokensStrip.s2,
+              FxSettingsLayout.pageInset,
+              TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
+            ),
+            child: FxLiquidPrimaryButton(
+              label: _uploading ? 'Enviando…' : 'Adicionar foto',
+              loading: _uploading,
+              onPressed: _uploading ? null : _addFoto,
+            ),
+          ),
+        ),
+    ],
+  );
 
   Widget _content(ShellPalette chrome, Color primary) => CustomScrollView(
     physics: const AlwaysScrollableScrollPhysics(),
@@ -304,10 +312,15 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
                         color: chrome.mute,
                       ),
                     ),
-                    FxTonalButton(label: 'Limpar', onPressed: () => setState(() {
-                        _selBefore = null;
-                        _selAfter = null;
-                      }), compact: true),
+                    FxTonalButton(
+                      label: 'Limpar',
+                      onPressed:
+                          () => setState(() {
+                            _selBefore = null;
+                            _selAfter = null;
+                          }),
+                      compact: true,
+                    ),
                     Text(
                       'Depois',
                       style: TextStyle(
@@ -334,101 +347,99 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
             mainAxisSpacing: TokensStrip.s2,
             crossAxisSpacing: TokensStrip.s2,
           ),
-          delegate: SliverChildBuilderDelegate(
-            (ctx, i) {
-              if (i >= _fotos.length) {
-                return Material(
-                  color: chrome.cardFill,
+          delegate: SliverChildBuilderDelegate((ctx, i) {
+            if (i >= _fotos.length) {
+              return Material(
+                color: chrome.cardFill,
+                borderRadius: BorderRadius.circular(TokensStrip.rCard),
+                child: InkWell(
+                  onTap: _loadingMore ? null : _carregarMais,
                   borderRadius: BorderRadius.circular(TokensStrip.rCard),
-                  child: InkWell(
-                    onTap: _loadingMore ? null : _carregarMais,
-                    borderRadius: BorderRadius.circular(TokensStrip.rCard),
-                    child: Center(
-                      child: Text(
-                        _loadingMore ? 'Carregando…' : 'Mais',
-                        textAlign: TextAlign.center,
-                      ),
+                  child: Center(
+                    child: Text(
+                      _loadingMore ? 'Carregando…' : 'Mais',
+                      textAlign: TextAlign.center,
                     ),
-                  ),
-                );
-              }
-              final f = _fotos[i];
-              final isB = _selBefore == i;
-              final isA = _selAfter == i;
-              final surface = Theme.of(ctx).colorScheme.surface;
-              return GestureDetector(
-                onTap: () {
-                  HapticFeedback.selectionClick();
-                  if (_selBefore == null) {
-                    setState(() => _selBefore = i);
-                  } else if (_selAfter == null && _selBefore != i) {
-                    setState(() => _selAfter = i);
-                  } else {
-                    setState(() {
-                      _selBefore = i;
-                      _selAfter = null;
-                    });
-                  }
-                },
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(TokensStrip.rCard),
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      FxCachedNetworkImage(
-                        imageUrl: f.url,
-                        fit: BoxFit.cover,
-                        memCacheWidth: 480,
-                      ),
-                      if (isB || isA)
-                        DecoratedBox(
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: isB ? EagleTokens.warn : EagleTokens.good,
-                              width: 3,
-                            ),
-                            borderRadius: BorderRadius.circular(
-                              TokensStrip.rCard,
-                            ),
-                          ),
-                        ),
-                      Positioned(
-                        bottom: 4,
-                        left: 4,
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            color: surface.withValues(alpha: 0.82),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
-                            ),
-                            child: Text(
-                              evolucaoFotosDateLabel(f.data),
-                              style: TextStyle(
-                                color: Theme.of(ctx).colorScheme.onSurface,
-                                fontSize: 10,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
                   ),
                 ),
               );
-            },
-            childCount: _fotos.length + (_hasNext ? 1 : 0),
-          ),
+            }
+            final f = _fotos[i];
+            final isB = _selBefore == i;
+            final isA = _selAfter == i;
+            final surface = Theme.of(ctx).colorScheme.surface;
+            return GestureDetector(
+              onTap: () {
+                HapticFeedback.selectionClick();
+                if (_selBefore == null) {
+                  setState(() => _selBefore = i);
+                } else if (_selAfter == null && _selBefore != i) {
+                  setState(() => _selAfter = i);
+                } else {
+                  setState(() {
+                    _selBefore = i;
+                    _selAfter = null;
+                  });
+                }
+              },
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(TokensStrip.rCard),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    FxCachedNetworkImage(
+                      imageUrl: f.url,
+                      fit: BoxFit.cover,
+                      memCacheWidth: 480,
+                    ),
+                    if (isB || isA)
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: isB ? EagleTokens.warn : EagleTokens.good,
+                            width: 3,
+                          ),
+                          borderRadius: BorderRadius.circular(
+                            TokensStrip.rCard,
+                          ),
+                        ),
+                      ),
+                    Positioned(
+                      bottom: 4,
+                      left: 4,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: surface.withValues(alpha: 0.82),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          child: Text(
+                            evolucaoFotosDateLabel(f.data),
+                            style: TextStyle(
+                              color: Theme.of(ctx).colorScheme.onSurface,
+                              fontSize: 10,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }, childCount: _fotos.length + (_hasNext ? 1 : 0)),
         ),
       ),
     ],
   );
 
   Widget _comparison(ShellPalette chrome) {
-    final w = MediaQuery.sizeOf(context).width - (FxSettingsLayout.pageInset * 2);
+    final w =
+        MediaQuery.sizeOf(context).width - (FxSettingsLayout.pageInset * 2);
     return ClipRRect(
       borderRadius: BorderRadius.circular(TokensStrip.rCard),
       child: SizedBox(
@@ -457,7 +468,10 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
               left: w * _slider - 1,
               top: 0,
               bottom: 0,
-              child: ColoredBox(color: chrome.cardFill, child: const SizedBox(width: 3)),
+              child: ColoredBox(
+                color: chrome.cardFill,
+                child: const SizedBox(width: 3),
+              ),
             ),
           ],
         ),

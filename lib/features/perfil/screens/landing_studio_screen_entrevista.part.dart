@@ -11,7 +11,7 @@ void _showLandingTip(
 const _etapasEntrevista = 4;
 
 String? _obrigatorio(String? v) =>
-    (v == null || v.trim().isEmpty) ? 'Obrigatório' : null;
+    (v == null || v.trim().isEmpty) ? ptS.landingObrigatorio : null;
 
 /// Quatro etapas, como a Anamnese: `Form` só valida o que está na tela.
 class _LandingStudioEntrevistaBody extends StatelessWidget {
@@ -45,7 +45,7 @@ class _LandingStudioEntrevistaBody extends StatelessWidget {
         ),
         const SizedBox(height: TokensStrip.s3),
         Text(
-          'Responda em linguagem simples. O Focux escreve a página.',
+          ptS.landingRespondaEmLinguagemSimplesO,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             color: chrome.mute,
           ),
@@ -68,13 +68,13 @@ class _LandingStudioEntrevistaBody extends StatelessWidget {
   };
 
   Widget _marca() => FxSettingsGroup(
-    header: 'Sua marca',
-    caption: 'Como você aparece e o que muda na vida do aluno, sem milagre.',
+    header: ptS.landingSuaMarca,
+    caption: ptS.landingComoVoceApareceEO,
     children: [
       AlunoInsetFormField(
         controller: state._nomeMarca,
-        label: 'Nome de marca',
-        hint: 'Ex.: Marina Costa',
+        label: ptS.landingNomeDeMarca,
+        hint: ptS.landingExMarinaCosta,
         icon: Icons.badge_outlined,
         textCapitalization: TextCapitalization.words,
         rotuloFlutuante: true,
@@ -82,8 +82,8 @@ class _LandingStudioEntrevistaBody extends StatelessWidget {
       ),
       AlunoInsetFormField(
         controller: state._nicho,
-        label: 'Nicho',
-        hint: 'Ex.: Hipertrofia online para iniciantes',
+        label: ptS.landingNicho,
+        hint: ptS.landingExHipertrofiaOnlineParaIniciantes,
         icon: Icons.track_changes_outlined,
         textCapitalization: TextCapitalization.sentences,
         rotuloFlutuante: true,
@@ -91,8 +91,8 @@ class _LandingStudioEntrevistaBody extends StatelessWidget {
       ),
       AlunoInsetFormField(
         controller: state._promessa,
-        label: 'Promessa em 1 frase',
-        hint: 'Ganhe massa com método claro em 12 semanas',
+        label: ptS.landingPromessaEm1Frase,
+        hint: ptS.landingGanheMassaComMetodoClaro,
         icon: Icons.auto_awesome_outlined,
         textCapitalization: TextCapitalization.sentences,
         maxLines: 2,
@@ -101,8 +101,8 @@ class _LandingStudioEntrevistaBody extends StatelessWidget {
       ),
       AlunoInsetFormField(
         controller: state._antiPersona,
-        label: 'Pra quem não é (opcional)',
-        hint: 'Ex.: quem busca milagre sem treinar',
+        label: ptS.landingPraQuemNaoEOpcional,
+        hint: ptS.landingExQuemBuscaMilagreSem,
         icon: Icons.block_outlined,
         textCapitalization: TextCapitalization.sentences,
         rotuloFlutuante: true,
@@ -112,9 +112,9 @@ class _LandingStudioEntrevistaBody extends StatelessWidget {
   );
 
   Widget _prova(BuildContext context) => FxSettingsGroup(
-    header: 'Por que confiar em você',
-    caption: 'Resultado, depoimento ou histórico, não só CREF.',
-    helpTooltip: 'Prova que convence',
+    header: ptS.landingPorQueConfiarEmVoce,
+    caption: ptS.landingResultadoDepoimentoOuHistoricoNao,
+    helpTooltip: ptS.landingProvaQueConvence,
     onHelpTap: () => _showLandingTip(
       context,
       title: LandingStudioGuidance.provaTitle,
@@ -123,8 +123,8 @@ class _LandingStudioEntrevistaBody extends StatelessWidget {
     children: [
       AlunoInsetFormField(
         controller: state._prova,
-        label: 'Sua prova (opcional)',
-        hint: 'Ex.: 8 anos, 120 alunos, 40 kg perdidos por uma aluna',
+        label: ptS.landingSuaProvaOpcional,
+        hint: ptS.landingEx8Anos120Alunos,
         icon: Icons.verified_outlined,
         textCapitalization: TextCapitalization.sentences,
         maxLines: 3,
@@ -135,9 +135,9 @@ class _LandingStudioEntrevistaBody extends StatelessWidget {
   );
 
   Widget _oferta(BuildContext context) => FxSettingsGroup(
-    header: 'Sua oferta',
-    caption: 'O plano principal da página.',
-    helpTooltip: 'Oferta clara',
+    header: ptS.landingSuaOferta,
+    caption: ptS.landingOPlanoPrincipalDaPagina,
+    helpTooltip: ptS.landingOfertaClara,
     onHelpTap: () => _showLandingTip(
       context,
       title: LandingStudioGuidance.ofertaTitle,
@@ -146,8 +146,8 @@ class _LandingStudioEntrevistaBody extends StatelessWidget {
     children: [
       AlunoInsetFormField(
         controller: state._ofertaNome,
-        label: 'Nome da oferta',
-        hint: 'Acompanhamento completo',
+        label: ptS.landingOfertaNome,
+        hint: ptS.landingAcompanhamentoCompleto,
         icon: Icons.sell_outlined,
         textCapitalization: TextCapitalization.sentences,
         rotuloFlutuante: true,
@@ -155,8 +155,8 @@ class _LandingStudioEntrevistaBody extends StatelessWidget {
       ),
       AlunoInsetFormField(
         controller: state._ofertaInclui,
-        label: 'O que inclui (opcional)',
-        hint: 'Treino no app, check-ins e ajustes',
+        label: ptS.landingOQueIncluiOpcional,
+        hint: ptS.landingTreinoNoAppCheckIns,
         icon: Icons.checklist_outlined,
         textCapitalization: TextCapitalization.sentences,
         maxLines: 2,
@@ -164,15 +164,15 @@ class _LandingStudioEntrevistaBody extends StatelessWidget {
       ),
       AlunoInsetFormField(
         controller: state._ofertaPreco,
-        label: 'Preço (opcional)',
-        hint: 'Ex.: R\$ 297/mês',
+        label: ptS.landingPrecoOpcional,
+        hint: ptS.landingExR297Mes,
         icon: Icons.payments_outlined,
         rotuloFlutuante: true,
       ),
       AlunoInsetFormField(
         controller: state._cta,
-        label: 'Texto do botão',
-        hint: 'Quero minha avaliação',
+        label: ptS.landingTextoBotao,
+        hint: ptS.landingQueroMinhaAvaliacao,
         icon: Icons.touch_app_outlined,
         textCapitalization: TextCapitalization.sentences,
         rotuloFlutuante: true,
@@ -186,29 +186,29 @@ class _LandingStudioEntrevistaBody extends StatelessWidget {
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
       FxSettingsGroup(
-        header: 'Dúvidas frequentes',
-        caption: 'Até 3 perguntas que sempre te fazem (opcional).',
+        header: ptS.landingDuvidasFrequentes,
+        caption: ptS.landingAte3PerguntasQueSempre,
         children: [
           AlunoInsetFormField(
             controller: state._duvida1,
-            label: 'Dúvida 1',
-            hint: 'Serve para iniciante?',
+            label: ptS.landingDuvida1,
+            hint: ptS.landingServeParaIniciante,
             icon: Icons.help_outline_rounded,
             textCapitalization: TextCapitalization.sentences,
             rotuloFlutuante: true,
           ),
           AlunoInsetFormField(
             controller: state._duvida2,
-            label: 'Dúvida 2',
-            hint: 'Como funciona online?',
+            label: ptS.landingDuvida2,
+            hint: ptS.landingComoFuncionaOnline,
             icon: Icons.help_outline_rounded,
             textCapitalization: TextCapitalization.sentences,
             rotuloFlutuante: true,
           ),
           AlunoInsetFormField(
             controller: state._duvida3,
-            label: 'Dúvida 3',
-            hint: 'Preciso de academia completa?',
+            label: ptS.landingDuvida3,
+            hint: ptS.landingPrecisoDeAcademiaCompleta,
             icon: Icons.help_outline_rounded,
             textCapitalization: TextCapitalization.sentences,
             rotuloFlutuante: true,
@@ -218,13 +218,13 @@ class _LandingStudioEntrevistaBody extends StatelessWidget {
       ),
       const SizedBox(height: FxSettingsLayout.groupGap),
       FxSettingsGroup(
-        header: 'Contato da página',
+        header: ptS.landingContatoDaPagina,
         caption:
-            'Só na página pública. Telefone e Instagram do app ficam em Editar perfil.',
+            ptS.landingSoNaPaginaPublicaTelefone,
         children: [
           AlunoInsetFormField(
             controller: state._whatsapp,
-            label: 'WhatsApp do botão',
+            label: ptS.landingWhatsappDoBotao,
             hint: '(11) 99999-9999',
             icon: Icons.chat_outlined,
             keyboardType: TextInputType.phone,
@@ -233,7 +233,7 @@ class _LandingStudioEntrevistaBody extends StatelessWidget {
           ),
           AlunoInsetFormField(
             controller: state._instagram,
-            label: 'Instagram da página',
+            label: ptS.landingInstagramDaPagina,
             hint: 'seu.usuario',
             icon: Icons.camera_alt_outlined,
             rotuloFlutuante: true,

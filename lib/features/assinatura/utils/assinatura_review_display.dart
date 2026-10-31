@@ -4,22 +4,23 @@ import '../../planos/paywall/paywall_catalog.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../../subscription/store_subscription_policy.dart';
 import '../../subscription/subscription_products.dart';
+import '../../../l10n/pt.dart';
 
-String assinaturaReviewTitle() => 'Confirmar assinatura';
+String assinaturaReviewTitle() => ptS.assinaturaConfirmarAssinatura;
 
 /// O botão diz o que acontece ao tocar.
 String assinaturaReviewConfirmLabel({required String price, int? trialDias}) =>
-    trialDias == null ? 'Assinar por $price' : 'Começar $trialDias dias grátis';
+    trialDias == null ? ptS.assinaturaAssinarPor(price) : ptS.assinaturaComecarDiasGratis(trialDias);
 
-String assinaturaReviewBackLabel() => 'Voltar';
+String assinaturaReviewBackLabel() => ptS.anamneseAlunoVoltar;
 
-String assinaturaReviewEmptyTitle() => 'Preço indisponível';
+String assinaturaReviewEmptyTitle() => ptS.assinaturaPrecoIndisponivel;
 
 String assinaturaReviewEmptySubtitle() =>
-    'Não encontramos o valor deste plano na loja. Volte e tente de novo.';
+    ptS.assinaturaNaoEncontramosOValorDeste;
 
 String assinaturaReviewFrequency(SubscriptionBillingPeriod period) =>
-    period == SubscriptionBillingPeriod.yearly ? 'Anual' : 'Mensal';
+    period == SubscriptionBillingPeriod.yearly ? ptS.assinaturaAnual : ptS.assinaturaMensal;
 
 String _data(DateTime dia) {
   final d = dia.day.toString().padLeft(2, '0');
@@ -50,13 +51,13 @@ List<({String quando, String valor})> assinaturaReviewLinhas({
   );
   if (trialDias != null) {
     return [
-      (quando: 'Hoje', valor: 'R\$ 0,00'),
+      (quando: ptS.dockHoje, valor: ptS.assinaturaR000),
       (quando: proxima, valor: price),
     ];
   }
   return [
-    (quando: 'Hoje', valor: price),
-    (quando: 'Renova em $proxima', valor: price),
+    (quando: ptS.dockHoje, valor: price),
+    (quando: ptS.assinaturaRenovaEm(proxima), valor: price),
   ];
 }
 
@@ -64,8 +65,8 @@ List<({String quando, String valor})> assinaturaReviewLinhas({
 String assinaturaReviewResumo({int? trialDias}) {
   final onde = subscriptionCancelWhere();
   return trialDias == null
-      ? 'Renova sozinha até você cancelar. Cancele $onde até 24 horas antes da renovação.'
-      : 'Depois do teste, renova sozinha. Cancele $onde até 24 horas antes do fim do teste para não ser cobrado.';
+      ? ptS.assinaturaRenovaSozinhaAteVoceCancelar(onde)
+      : ptS.assinaturaDepoisDoTesteRenovaSozinha(onde);
 }
 
 String assinaturaReviewPlanLabel(SubscriptionPlan plan) =>
@@ -73,17 +74,17 @@ String assinaturaReviewPlanLabel(SubscriptionPlan plan) =>
 
 List<String> assinaturaReviewTopFeatures(SubscriptionPlan plan) =>
     switch (plan) {
-      SubscriptionPlan.ENTERPRISE => const [
-        'Alunos sem limite e 600 usos de IA por mês',
-        'Landing page completa com depoimentos e FAQ',
-        'Marca própria no app e na landing',
+      SubscriptionPlan.ENTERPRISE => [
+        ptS.assinaturaAlunosSemLimiteE600,
+        ptS.assinaturaLandingPageCompletaComDepoimentos,
+        ptS.assinaturaMarcaPropriaNoAppE,
       ],
       SubscriptionPlan.PRO => [
-        'Até ${PlanoAlunosLimits.pro} alunos ativos',
-        'PIX e financeiro no app',
-        'IA Copiloto e ${FocuxMicrocopy.commandCenter}',
+        ptS.assinaturaAteAlunosAtivos(PlanoAlunosLimits.pro),
+        ptS.assinaturaPixEFinanceiroNoApp,
+        ptS.assinaturaIaCopilotoE(FocuxMicrocopy.commandCenter),
       ],
-      _ => const ['Recursos do plano selecionado'],
+      _ => [ptS.assinaturaRecursosDoPlanoSelecionado],
     };
 
 String assinaturaReviewLegalBody({
@@ -91,13 +92,13 @@ String assinaturaReviewLegalBody({
   required SubscriptionBillingPeriod period,
 }) {
   final freq = assinaturaReviewFrequency(period);
-  return 'Ao confirmar, você autoriza a cobrança de $price na forma de pagamento '
-      '${subscriptionChannelWith(ChannelPreposition.de)}. A assinatura renova automaticamente ($freq) até ser cancelada. '
-      'Cancele quando quiser ${subscriptionCancelWhere()}, até 24 horas antes da renovação.\n\n'
-      'Base legal (LGPD): execução de contrato para processar pagamento e entregar o serviço. '
-      'Dados de pagamento são processados ${subscriptionChannelWith(ChannelPreposition.por)} — a Focux não armazena número de cartão.';
+  return ptS.assinaturaAoConfirmarVoceAutorizaA(price) +
+      ptS.assinaturaAAssinaturaRenovaAutomaticamenteAte(subscriptionChannelWith(ChannelPreposition.de), freq) +
+      ptS.assinaturaCanceleQuandoQuiserAte24(subscriptionCancelWhere()) +
+      ptS.assinaturaBaseLegalLgpdExecucaoDe +
+      ptS.assinaturaDadosDePagamentoSaoProcessados(subscriptionChannelWith(ChannelPreposition.por));
 }
 
 /// Copy de falha da loja. Nunca ecoa `PurchaseError.message` cru.
 String assinaturaStoreFailureCopy() =>
-    'Não foi possível concluir a compra na loja. Tente de novo.';
+    ptS.assinaturaNaoFoiPossivelConcluirA;

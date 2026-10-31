@@ -18,6 +18,7 @@ import '../providers/aluno_timeline360_paged_provider.dart';
 import '../utils/aluno360_timeline_logic.dart';
 import 'aluno360_timeline_card.dart';
 import 'aluno360_timeline_sheet_motion.dart';
+import '../../../l10n/pt.dart';
 
 /// Full Histórico 360 sheet with cursor pagination (load-more).
 class Aluno360TimelineFullSheet extends ConsumerStatefulWidget {
@@ -111,7 +112,7 @@ class _Aluno360TimelineFullSheetState
           SizedBox(height: TokensStrip.s4),
           FxHomeSheetHeader(
             isDark: isDark,
-            title: 'Histórico',
+            title: ptS.anamneseAlunoHistorico,
             subtitle: headerSubtitle,
             leading: Icon(Icons.timeline_rounded, color: primary, size: 18),
           ),
@@ -134,10 +135,10 @@ class _Aluno360TimelineFullSheetState
                     primary: primary,
                     message: friendlyError(
                       e,
-                      fallback: 'Não foi possível carregar o histórico.',
+                      fallback: ptS.aluno360NaoFoiPossivelCarregarO,
                     ),
                     onRetry: () => ref.read(provider.notifier).refresh(),
-                    title: 'Não conseguimos carregar o histórico',
+                    title: ptS.aluno360NaoConseguimosCarregarOHistorico,
                   ),
               data: (state) {
                 final items = _itemsFromEvents(state.events);
@@ -147,8 +148,8 @@ class _Aluno360TimelineFullSheetState
                 if (items.isEmpty && !state.hasMore) {
                   return FxEmptyState(
                     icon: 'trend',
-                    title: 'Nada neste filtro',
-                    subtitle: 'Escolha outro filtro para ver mais sinais.',
+                    title: ptS.financeiroVazioFiltroTitulo,
+                    subtitle: ptS.aluno360EscolhaOutroFiltroParaVer,
                   );
                 }
                 final dias = <(String, List<Timeline360Item>)>[];
@@ -207,7 +208,7 @@ class _Aluno360TimelineFullSheetState
                                   state.loadingMore
                                       ? const FxLoading(size: 22, strokeWidth: 2)
                                       : FxActionLink(
-                                        label: 'Carregar mais',
+                                        label: ptS.retencaoCarregarMais,
                                         onTap:
                                             () =>
                                                 ref

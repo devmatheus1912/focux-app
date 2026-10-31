@@ -1,11 +1,13 @@
-const broadcastPublicos = ['TODOS', 'ONLINE', 'PRESENCIAL', 'HIBRIDO'];
+import '../../../l10n/pt.dart';
+
+final broadcastPublicos = ['TODOS', 'ONLINE', 'PRESENCIAL', 'HIBRIDO'];
 
 String broadcastPublicoLabel(String? raw) =>
     switch ((raw ?? 'TODOS').trim().toUpperCase()) {
-      'ONLINE' => 'Online',
-      'PRESENCIAL' => 'Presencial',
-      'HIBRIDO' => 'Híbrido',
-      _ => 'Todos',
+      'ONLINE' => ptS.broadcastOnline,
+      'PRESENCIAL' => ptS.broadcastPresencial,
+      'HIBRIDO' => ptS.broadcastHibrido,
+      _ => ptS.retencaoFiltroTodos,
     };
 
 String broadcastPublicoFxIcon(String raw) => switch (raw.trim().toUpperCase()) {
@@ -31,87 +33,87 @@ String? broadcastSemTipoAviso(Map<String, int> totais) {
   final semTipo = todos - comTipo;
   if (semTipo <= 0) return null;
   return semTipo == 1
-      ? '1 aluno está sem tipo de consultoria e só recebe em Todos.'
-      : '$semTipo alunos estão sem tipo de consultoria e só recebem em Todos.';
+      ? ptS.broadcast1AlunoEstaSemTipo
+      : ptS.broadcastAlunosEstaoSemTipoDe(semTipo);
 }
 
-const broadcastAtalhos = <({String nome, String titulo, String mensagem})>[
+final broadcastAtalhos = <({String nome, String titulo, String mensagem})>[
   (
-    nome: 'Lembrete de treino',
-    titulo: 'Lembrete de treino',
-    mensagem: 'Seu treino de hoje já está no app. Bora?',
+    nome: ptS.broadcastLembreteDeTreino,
+    titulo: ptS.broadcastLembreteDeTreino,
+    mensagem: ptS.broadcastSeuTreinoDeHojeJa,
   ),
   (
-    nome: 'Feriado',
-    titulo: 'Atendimento no feriado',
-    mensagem: 'No feriado não terei atendimento. Volto no dia seguinte.',
+    nome: ptS.broadcastFeriado,
+    titulo: ptS.broadcastAtendimentoNoFeriado,
+    mensagem: ptS.broadcastNoFeriadoNaoTereiAtendimento,
   ),
   (
-    nome: 'Mudança de horário',
-    titulo: 'Mudança de horário',
-    mensagem: 'Meus horários mudaram. Confira a agenda no app.',
+    nome: ptS.broadcastMudancaDeHorario,
+    titulo: ptS.broadcastMudancaDeHorario,
+    mensagem: ptS.broadcastMeusHorariosMudaramConfiraA,
   ),
 ];
 
 String? broadcastTipoApi(String publico) =>
     publico == 'TODOS' ? null : publico;
 
-String broadcastRequiredTitulo() => 'Informe o título';
+String broadcastRequiredTitulo() => ptS.broadcastInformeOTitulo;
 
-String broadcastRequiredMensagem() => 'Informe a mensagem';
+String broadcastRequiredMensagem() => ptS.broadcastInformeAMensagem;
 
 String broadcastSendSuccess(int count, {int? comPush}) {
-  if (count <= 0) return 'Nenhum aluno no público escolhido.';
-  final base = count == 1 ? 'Enviado para 1 aluno' : 'Enviado para $count alunos';
+  if (count <= 0) return ptS.broadcastNenhumAlunoNoPublicoEscolhido;
+  final base = count == 1 ? ptS.broadcastEnviadoPara1Aluno : ptS.broadcastEnviadoParaAlunos(count);
   if (comPush == null) return '$base.';
-  if (comPush >= count) return '$base, com notificação no celular.';
+  if (comPush >= count) return ptS.broadcastComNotificacaoNoCelular(base);
   if (comPush <= 0) {
-    return '$base. Nenhum tem notificação ativa; eles veem ao abrir o app.';
+    return ptS.broadcastNenhumTemNotificacaoAtivaEles(base);
   }
-  return '$base. ${broadcastComPushLabel(comPush)}; os demais veem ao abrir o app.';
+  return ptS.broadcastOsDemaisVeemAoAbrir(base, broadcastComPushLabel(comPush));
 }
 
 String broadcastComPushLabel(int comPush) =>
-    comPush == 1 ? '1 com notificação' : '$comPush com notificação';
+    comPush == 1 ? ptS.broadcast1ComNotificacao : ptS.broadcastComNotificacao(comPush);
 
 String broadcastAlunosValue(int count, {int? comPush}) {
-  final base = count == 1 ? '1 aluno' : '$count alunos';
+  final base = count == 1 ? ptS.broadcast1Aluno : '$count alunos';
   if (comPush == null) return base;
   return '$base · ${broadcastComPushLabel(comPush)}';
 }
 
 String broadcastAlunosLabel(int total) =>
-    total == 1 ? '1 aluno' : '$total alunos';
+    total == 1 ? ptS.broadcast1Aluno : '$total alunos';
 
 String broadcastConfirmTitle(String publico, {int? total}) {
-  if (total != null) return 'Enviar para ${broadcastAlunosLabel(total)}?';
+  if (total != null) return ptS.broadcastEnviarPara(broadcastAlunosLabel(total));
   if (publico == 'TODOS') return 'Enviar para todos os alunos?';
-  return 'Enviar para ${broadcastPublicoLabel(publico).toLowerCase()}?';
+  return ptS.broadcastEnviarPara(broadcastPublicoLabel(publico).toLowerCase());
 }
 
 String broadcastConfirmMessage({int? total, int? comPush}) {
   if (total == null || comPush == null) {
-    return 'O aviso chega de uma vez no app dos alunos deste público.';
+    return ptS.broadcastOAvisoChegaDeUma;
   }
-  if (comPush >= total) return 'Todos recebem no celular.';
-  if (comPush <= 0) return 'Eles veem ao abrir o app.';
-  return '$comPush recebem no celular; os outros veem ao abrir o app.';
+  if (comPush >= total) return ptS.broadcastTodosRecebemNoCelular;
+  if (comPush <= 0) return ptS.broadcastElesVeemAoAbrirO;
+  return ptS.broadcastRecebemNoCelularOsOutros(comPush);
 }
 
-String broadcastConfirmLabel() => 'Enviar';
+String broadcastConfirmLabel() => ptS.npsPromptEnviar;
 
 String broadcastEnviosCaption(int count) {
-  if (count <= 0) return 'Nenhum envio ainda';
-  if (count == 1) return '1 envio';
+  if (count <= 0) return ptS.winbackVazioTitulo;
+  if (count == 1) return ptS.broadcast1Envio;
   return '$count envios';
 }
 
-String broadcastHistoricoHeader() => 'Histórico';
+String broadcastHistoricoHeader() => ptS.anamneseAlunoHistorico;
 
-String broadcastEmptyTitle() => 'Nenhum aviso enviado';
+String broadcastEmptyTitle() => ptS.broadcastNenhumAvisoEnviado;
 
 String broadcastEmptySubtitle() =>
-    'Escreva o primeiro aviso acima para falar com seus alunos de uma vez.';
+    ptS.broadcastEscrevaOPrimeiroAvisoAcima;
 
 String broadcastFormatDate(DateTime dt) {
   final dia = dt.day.toString().padLeft(2, '0');

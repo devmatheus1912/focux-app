@@ -65,7 +65,7 @@ class _OnboardingWizardScreenState
     DashboardHomeClientCache.clear();
     PlanoFeaturesBffCache.clear();
     OnboardingWizardClientCache.clear();
-    ref.invalidate(dashboardHomeProvider);
+    invalidatePersonalDashboardHome(ref);
   }
 
   Future<void> _load({bool silent = false}) async {

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 import '../../../core/router/safe_navigation.dart';
@@ -36,7 +35,10 @@ import '../data/evolucao_repository.dart';
 import '../utils/evolucao_display.dart';
 import '../providers/evolucao_home_provider.dart';
 import '../utils/evolucao_home_client_cache.dart';
+import '../../avaliacao/screens/evolucao_comparativo_screen.dart';
+import '../widgets/escolher_exercicio_campo.dart';
 import '../widgets/evolucao_help_sheet.dart';
+import 'evolucao_fotos_screen.dart';
 
 part 'evolucao_screen_widgets.part.dart';
 
@@ -62,17 +64,6 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
     } else {
       _mostrarDialogRecorde();
     }
-  }
-
-  void _abrirFotos() {
-    context.push('/alunos/${widget.alunoId}/fotos', extra: widget.alunoNome);
-  }
-
-  void _abrirComparativo() {
-    context.push(
-      '/alunos/${widget.alunoId}/evolucao-comparativo',
-      extra: widget.alunoNome,
-    );
   }
 
   Future<void> _compartilharNoChat() async {
@@ -168,26 +159,6 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                                   _EvolucaoPesoHero(
                                     medidas: medidas ?? const [],
                                   ),
-                                  const SizedBox(height: TokensStrip.s2),
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: _EvolucaoAtalho(
-                                          icon: Icons.photo_library_outlined,
-                                          label: 'Fotos',
-                                          onTap: _abrirFotos,
-                                        ),
-                                      ),
-                                      const SizedBox(width: TokensStrip.s2),
-                                      Expanded(
-                                        child: _EvolucaoAtalho(
-                                          icon: Icons.compare_arrows_rounded,
-                                          label: 'Comparativo',
-                                          onTap: _abrirComparativo,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
                                   const SizedBox(height: TokensStrip.s4),
                                   AlunoSegmentedChoice(
                                     options: evolucaoDetalheSecoes,
@@ -232,6 +203,16 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                                       );
                                     },
                                   ),
+                                  EvolucaoFotosScreen(
+                                    alunoId: widget.alunoId,
+                                    alunoNome: widget.alunoNome,
+                                    embutida: true,
+                                  ),
+                                  EvolucaoComparativoScreen(
+                                    alunoId: widget.alunoId,
+                                    alunoNome: widget.alunoNome,
+                                    embutida: true,
+                                  ),
                                 ],
                               ),
                             ),
@@ -240,7 +221,8 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                       ),
                 ),
               ),
-              if (homeAsync.hasValue)
+              // Fotos e Comparar têm a própria ação no rodapé.
+              if (homeAsync.hasValue && _view.index < 2)
                 SafeArea(
                   top: false,
                   child: Padding(
@@ -447,6 +429,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            EscolherExercicioCampo(controller: exercicioCtrl),
             AlunoInsetFormField(
               rotuloVisivel: true,
               controller: exercicioCtrl,

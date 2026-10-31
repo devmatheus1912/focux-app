@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'api_client_connection_pool.dart';
 import 'api_etag_store.dart';
+import 'mutacao_recente.dart';
 import 'api_transport_circuit.dart';
 import '../auth/session_invalidator.dart';
 import '../auth/session_refresh_coordinator.dart';
@@ -82,6 +83,10 @@ class ApiClient {
         onResponse: (response, handler) {
           ApiTransportCircuit.recordSuccess();
           final method = response.requestOptions.method.toUpperCase();
+          MutacaoRecente.registrar(
+            metodo: method,
+            caminho: response.requestOptions.path,
+          );
           if (method == 'GET') {
             final etag = response.headers.value('etag');
             if (etag != null && etag.isNotEmpty) {

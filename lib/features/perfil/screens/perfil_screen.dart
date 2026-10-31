@@ -91,7 +91,7 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
 
   Future<void> _refreshHub() async {
     ref.invalidate(perfilProvider);
-    ref.invalidate(dashboardHomeProvider);
+    invalidatePersonalDashboardHome(ref);
     invalidatePacotesCaches(ref);
     unawaited(AnalyticsService.instance.track(ProductEvents.perfilRefreshed));
     setState(() => _fetchedAt = DateTime.now());
@@ -134,7 +134,7 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
 
       await ref.read(perfilRepositoryProvider).atualizar(logoUrl: logoUrl);
       ref.invalidate(perfilProvider);
-      ref.invalidate(dashboardHomeProvider);
+      invalidatePersonalDashboardHome(ref);
       invalidatePacotesCaches(ref);
 
       if (!mounted) return;
@@ -156,7 +156,7 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
     final updated = await context.push<bool>('/perfil/editar', extra: perfil);
     if (updated == true) {
       ref.invalidate(perfilProvider);
-      ref.invalidate(dashboardHomeProvider);
+      invalidatePersonalDashboardHome(ref);
       invalidatePacotesCaches(ref);
       if (!mounted) return;
       FeedbackHelper.showSuccess(

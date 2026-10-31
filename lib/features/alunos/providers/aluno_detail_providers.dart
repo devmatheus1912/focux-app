@@ -10,6 +10,7 @@ import '../../dashboard/providers/dashboard_provider.dart';
 import '../../health/data/health_repository.dart';
 import '../../ia/data/ia_repository.dart';
 import '../../ia/models/ia_copilot_proxima_acao.dart';
+import '../../ia/providers/ia_copilot_providers.dart';
 import '../data/aluno_copilot_ia_cache_store.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno360_copilot_logic.dart';
@@ -341,9 +342,14 @@ final alunoPesoHistoricoProvider = FutureProvider.autoDispose.family<List<double
   ).listarPesoHistorico(alunoId);
 });
 
+/// Tudo que mostra este aluno, inclusive Home, lista e sugestão da IA.
 Future<void> invalidateAluno360Providers(WidgetRef ref, int alunoId) async {
   Aluno360ClientCache.invalidate(alunoId);
   EvolucaoHomeClientCache.invalidate(alunoId);
+  await AlunoCopilotIaCacheStore.clear(alunoId);
+  invalidatePersonalDashboardHome(ref);
+  invalidateAlunosListCaches(ref);
+  ref.invalidate(copilotoTarefasAbertasProvider);
   ref.invalidate(evolucaoHomeProvider(alunoId));
   ref.invalidate(aluno360OperacaoBundleProvider(alunoId));
   ref.invalidate(aluno360EvolucaoBundleProvider(alunoId));

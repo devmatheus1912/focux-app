@@ -70,7 +70,7 @@ void main() {
     ).readAsStringSync();
     expect(personalHeader, contains('NotificacaoBadgeButton'));
     expect(personalDashboard, contains('notificacoesNaoLidasProvider'));
-    expect(screen, contains('Ler todas'));
+    expect(screen, contains('notificacoesLerTodas'));
     expect(repo, contains('/api/notificacoes'));
   });
 }

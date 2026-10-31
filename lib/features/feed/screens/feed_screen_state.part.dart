@@ -165,7 +165,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     );
   }
 
-  void _abrirFormulario() {
+  void _abrirFormulario({FeedPost? post}) {
     showFxHomeSheet<bool>(
       context,
       builder: (ctx) {
@@ -189,12 +189,12 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                 ),
                 child: FxHomeSheetHeader(
                   isDark: isDark,
-                  title: 'Nova publicação',
+                  title: post == null ? 'Nova publicação' : 'Editar publicação',
                   subtitle: 'Os alunos veem no feed deles.',
                   leading: FxIcon(name: 'article', color: accent, size: 18),
                 ),
               ),
-              Flexible(child: FeedComposerSheet(ref: ref)),
+              Flexible(child: FeedComposerSheet(ref: ref, post: post)),
             ],
           ),
         );
@@ -203,7 +203,10 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       if (created != true || !mounted) return;
       await _load();
       if (!mounted) return;
-      FeedbackHelper.showSuccess(context, 'Publicação criada com sucesso!');
+      FeedbackHelper.showSuccess(
+        context,
+        post == null ? 'Publicação criada com sucesso!' : 'Publicação atualizada.',
+      );
     });
   }
 
@@ -284,6 +287,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
             comentarios: _comentariosLocais[p.id] ?? p.totalComentarios,
             onCurtir: null,
             onComentar: () => _abrirComentarios(p.id),
+            onEditar: () => _abrirFormulario(post: p),
             onFixar: () => _toggleFixar(p.id),
             onExcluir: () => _confirmarExclusao(p.id),
           );

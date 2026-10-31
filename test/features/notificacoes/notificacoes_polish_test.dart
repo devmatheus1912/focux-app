@@ -10,13 +10,13 @@ void main() {
 
     expect(screen, contains('FxHubFreshness'));
     expect(screen, contains('notificacaoNomeLimpo'));
-    expect(screen, contains('Todas marcadas como lidas.'));
+    expect(screen, contains('notificacoesTodasMarcadasComoLidas'));
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, isNot(contains('FxSettingsGroupedList')));
     expect(screen, contains('showFxHelpSheet'));
     expect(screen, contains('roleHomePath'));
     expect(screen, contains('Semantics('));
-    expect(screen, contains('Marcar todas as notificações como lidas'));
+    expect(screen, contains('notificacoesMarcarTodasAsNotificacoesComo'));
     expect(screen, contains('radarSignalDedupeKey'));
     expect(screen, isNot(contains('Abrir sinais do Radar Focux')));
     expect(screen, isNot(contains("freshnessLabel ?? 'INBOX'")));

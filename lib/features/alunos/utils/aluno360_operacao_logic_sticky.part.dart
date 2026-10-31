@@ -29,7 +29,11 @@ Map<String, String> alunoChatRouteExtra({required String nome, String? draft}) {
 String stickyLabelCompactFallback(String label) {
   final lower = label.toLowerCase();
   if (lower.contains('contato') || lower.contains('wearable')) return 'Contato';
-  if (lower.contains('mapa') || lower.contains('corporal')) return 'Mapa';
+  if (lower.contains('cadastro') ||
+      lower.contains('mapa') ||
+      lower.contains('corporal')) {
+    return 'Cadastro';
+  }
   if (lower.contains('objetivo')) return 'Objetivo';
   if (lower.contains('treino')) return 'Treino';
   if (lower.contains('financeir')) return 'Financeiro';

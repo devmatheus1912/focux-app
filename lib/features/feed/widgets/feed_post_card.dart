@@ -28,6 +28,7 @@ class FeedPostCard extends StatelessWidget {
     required this.onComentar,
     this.onCurtir,
     this.curtido = false,
+    this.onEditar,
     this.onFixar,
     this.onExcluir,
     this.onDenunciar,
@@ -42,12 +43,14 @@ class FeedPostCard extends StatelessWidget {
   final VoidCallback? onCurtir;
   final bool curtido;
   final VoidCallback onComentar;
+  final VoidCallback? onEditar;
   final VoidCallback? onFixar;
   final VoidCallback? onExcluir;
   final VoidCallback? onDenunciar;
   final VoidCallback? onBloquearAutor;
 
   bool get _canManage =>
+      onEditar != null ||
       onFixar != null ||
       onExcluir != null ||
       onDenunciar != null ||
@@ -82,12 +85,24 @@ class FeedPostCard extends StatelessWidget {
                     PopupMenuButton<String>(
                       tooltip: 'Ações',
                       onSelected: (val) {
+                        if (val == 'editar') onEditar?.call();
                         if (val == 'fixar') onFixar?.call();
                         if (val == 'excluir') onExcluir?.call();
                         if (val == 'denunciar') onDenunciar?.call();
                         if (val == 'bloquear') onBloquearAutor?.call();
                       },
                       itemBuilder: (ctx) => [
+                        if (onEditar != null)
+                          const PopupMenuItem(
+                            value: 'editar',
+                            child: Row(
+                              children: [
+                                Icon(Icons.edit_outlined, size: 20),
+                                SizedBox(width: 8),
+                                Text('Editar'),
+                              ],
+                            ),
+                          ),
                         if (onFixar != null)
                           PopupMenuItem(
                             value: 'fixar',

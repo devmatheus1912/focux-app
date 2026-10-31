@@ -36,7 +36,7 @@ void main() {
     expect(screen, contains('ProductEvents.landingViewed'));
     expect(screen, contains('copyLandingLink'));
     expect(screen, contains('openLandingPreviewScreen'));
-    expect(screen, contains('Contato da página'));
+    expect(screen, contains('landingContatoDaPagina'));
     expect(screen, isNot(contains('AnimatedPadding')));
   });
 }

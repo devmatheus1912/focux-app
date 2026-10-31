@@ -11,6 +11,7 @@ import '../../../../core/widgets/fx_sheet_frame.dart';
 import '../../../../core/widgets/fx_tonal_button.dart';
 import '../../data/broadcast_repository.dart';
 import '../../utils/broadcast_display.dart';
+import '../../../../l10n/pt.dart';
 
 class BroadcastHistorico extends StatelessWidget {
   const BroadcastHistorico({
@@ -65,7 +66,7 @@ class BroadcastHistorico extends StatelessWidget {
           footer: Padding(
             padding: const EdgeInsets.all(TokensStrip.s3),
             child: FxTonalButton(
-              label: 'Usar de novo',
+              label: ptS.broadcastUsarDeNovo,
               expanded: true,
               onPressed: () => Navigator.pop(ctx, true),
             ),

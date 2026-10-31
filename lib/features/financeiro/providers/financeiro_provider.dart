@@ -28,5 +28,5 @@ final financeiroCobrancaAutoProvider =
 /// Invalida BFF Financeiro + Home Personal (mesmo SSOT de dashboard).
 void invalidateFinanceiroCaches(WidgetRef ref) {
   ref.invalidate(financeiroHomeProvider);
-  ref.invalidate(dashboardHomeProvider);
+  invalidatePersonalDashboardHome(ref);
 }

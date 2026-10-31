@@ -1,8 +1,9 @@
 import '../../../core/money/fx_money.dart';
 import '../data/qualidade_operacional.dart';
+import '../../../l10n/pt.dart';
 
-const qualidadeComoCalculamos =
-    'Índice de 0 a 100. Metade vem do ticket médio e metade da retenção (alunos ativos sobre ativos e inativos), comparados à referência Focux.';
+final qualidadeComoCalculamos =
+    ptS.qualidadeIndiceDe0A100;
 
 /// Abaixo disso o índice oscila com um aluno só.
 const qualidadeAlunosMinimos = 5;
@@ -17,7 +18,7 @@ String _qualidadeMoneyLabel(double reais) =>
     formatBrlCompact((reais * 100).round());
 
 String qualidadeTicketValueLabel(double ticketPessoal) {
-  if (qualidadeTicketUnavailable(ticketPessoal)) return 'Sem ticket';
+  if (qualidadeTicketUnavailable(ticketPessoal)) return ptS.qualidadeSemTicket;
   return _qualidadeMoneyLabel(ticketPessoal);
 }
 
@@ -27,12 +28,12 @@ String qualidadeTicketHint({
 }) {
   final mercado = _qualidadeMoneyLabel(ticketMercado);
   if (qualidadeTicketUnavailable(ticketPessoal)) {
-    return 'Indisponível · referência $mercado';
+    return ptS.qualidadeIndisponivelReferencia(mercado);
   }
   if (ticketPessoal >= ticketMercado) {
-    return 'Acima da referência $mercado';
+    return ptS.qualidadeAcimaDaReferencia(mercado);
   }
-  return 'Referência $mercado';
+  return ptS.qualidadeReferencia(mercado);
 }
 
 enum QualidadeScoreBand { excellent, good, attention }
@@ -44,9 +45,9 @@ QualidadeScoreBand qualidadeScoreBand(int score) {
 }
 
 String qualidadeScoreLabel(int score) => switch (qualidadeScoreBand(score)) {
-  QualidadeScoreBand.excellent => 'Excelente',
-  QualidadeScoreBand.good => 'Bom',
-  QualidadeScoreBand.attention => 'Atenção',
+  QualidadeScoreBand.excellent => ptS.qualidadeExcelente,
+  QualidadeScoreBand.good => ptS.qualidadeBom,
+  QualidadeScoreBand.attention => ptS.retencaoMetAtencao,
 };
 
 String qualidadeRetencaoHint({
@@ -54,26 +55,26 @@ String qualidadeRetencaoHint({
   required int retencaoMercado,
 }) =>
     retencaoPessoal >= retencaoMercado
-        ? 'Acima da referência $retencaoMercado%'
-        : 'Referência $retencaoMercado%';
+        ? ptS.qualidadeAcimaDaReferencia2(retencaoMercado)
+        : ptS.qualidadeReferencia2(retencaoMercado);
 
 /// Insight coerente com as métricas do card (não só o texto cru do BE).
 String qualidadeRecomendacaoDisplay(QualidadeOperacionalData data) {
   final retencaoOk = data.retencaoPessoal >= data.retencaoMercado;
   final ticketOk = data.ticketPessoal >= data.ticketMercado;
   if (data.ticketPessoal <= 0 && retencaoOk) {
-    return 'Retenção forte. Cadastre mensalidades para medir o ticket.';
+    return ptS.qualidadeRetencaoForteCadastreMensalidadesPara;
   }
   if (retencaoOk && !ticketOk) {
-    return 'Retenção forte. Foque em precificação e ticket médio.';
+    return ptS.qualidadeRetencaoForteFoqueEmPrecificacao;
   }
   if (!retencaoOk && ticketOk) {
-    return 'Atenção à retenção. Veja quem está em risco na base.';
+    return ptS.qualidadeAtencaoARetencaoVejaQuem;
   }
   if (!retencaoOk && !ticketOk) {
-    return 'Atenção à retenção e precificação. Comece pela base em risco.';
+    return ptS.qualidadeAtencaoARetencaoEPrecificacao;
   }
   final be = data.recomendacao.trim();
   if (be.isNotEmpty) return be;
-  return 'Operação saudável. Continue acompanhando a base.';
+  return ptS.qualidadeOperacaoSaudavelContinueAcompanhandoA;
 }

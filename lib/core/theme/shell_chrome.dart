@@ -145,7 +145,8 @@ class ShellHeaderIconButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
     final brand = Theme.of(context).colorScheme.primary;
-    final radius = size / 2;
+    // Mesmo canto da seta de voltar: botões do cabeçalho são uma família.
+    final radius = size / 2 < 12 ? size / 2 : 12.0;
     final compact = size <= 38;
     final dotSize = compact ? 7.0 : 8.0;
 

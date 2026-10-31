@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -87,11 +88,15 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
     final l10n = S.of(context);
     HapticFeedback.selectionClick();
     await AnalyticsService.instance.track(ProductEvents.referralLinkShared);
-    await copySensitiveToClipboard(
-      referralInviteText(l10n, info),
-    );
-    if (!mounted) return;
-    FeedbackHelper.showSuccess(context, l10n.referralInviteCopied);
+    final texto = referralInviteText(l10n, info);
+    try {
+      await SharePlus.instance.share(ShareParams(text: texto));
+    } catch (_) {
+      // Sem folha de compartilhar no aparelho: copiar ainda resolve.
+      await copySensitiveToClipboard(texto);
+      if (!mounted) return;
+      FeedbackHelper.showSuccess(context, l10n.referralInviteCopied);
+    }
   }
 
   Future<void> _copiarLink() async {

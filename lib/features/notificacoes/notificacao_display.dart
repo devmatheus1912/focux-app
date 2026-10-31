@@ -1,23 +1,24 @@
 import 'data/notificacoes_repository.dart';
+import '../../l10n/pt.dart';
 
-const notificacaoComoCalculamos =
-    'Avisos operacionais do estúdio: mensalidade, feed, trial e Radar. Mensagens de chat ficam só na inbox de chat.';
+final notificacaoComoCalculamos =
+    ptS.notificacaoAvisosOperacionaisDoEstudioMensalidade;
 
 String notificacaoNaoLidasLabel(int unread) {
-  if (unread <= 0) return 'Tudo lido';
-  if (unread == 1) return '1 não lida';
-  return '$unread não lidas';
+  if (unread <= 0) return ptS.notificacaoTudoLido;
+  if (unread == 1) return ptS.notificacao1NaoLida;
+  return ptS.notificacaoNaoLidas(unread);
 }
 
 String notificacaoSearchEmptyTitle(String query) =>
-    query.trim().isEmpty ? 'Tudo em ordem' : 'Nenhum aviso encontrado';
+    query.trim().isEmpty ? ptS.notificacaoTudoEmOrdem : ptS.notificacaoNenhumAvisoEncontrado;
 
 String notificacaoSearchEmptySubtitle(String query) => query.trim().isEmpty
-    ? 'Alertas financeiros, novidades do feed e sinais do Radar aparecem aqui.'
-    : 'Nada com esse texto nesta caixa.';
+    ? ptS.notificacaoAlertasFinanceirosNovidadesDoFeed
+    : ptS.notificacaoNadaComEsseTextoNesta;
 
 String notificacaoVazioTitle({required String query, required bool soNaoLidas}) {
-  if (query.trim().isEmpty && soNaoLidas) return 'Nada pendente';
+  if (query.trim().isEmpty && soNaoLidas) return ptS.notificacaoNadaPendente;
   return notificacaoSearchEmptyTitle(query);
 }
 
@@ -26,15 +27,15 @@ String notificacaoVazioSubtitle({
   required bool soNaoLidas,
 }) {
   if (query.trim().isEmpty && soNaoLidas) {
-    return 'Você leu todos os avisos. As lidas continuam em Todas.';
+    return ptS.notificacaoVoceLeuTodosOsAvisos;
   }
   return notificacaoSearchEmptySubtitle(query);
 }
 
 String notificacaoRemovidasLabel(int n) {
-  if (n <= 0) return 'Nada para limpar.';
-  if (n == 1) return '1 notificação apagada.';
-  return '$n notificações apagadas.';
+  if (n <= 0) return ptS.notificacaoNadaParaLimpar;
+  if (n == 1) return ptS.notificacao1NotificacaoApagada;
+  return ptS.notificacaoNotificacoesApagadas(n);
 }
 
 /// Com a lista inteira na tela, o número é o das linhas (avisos iguais viram
@@ -49,7 +50,7 @@ int notificacaoNaoLidasDaTela({
 const notificacaoBuscaAPartirDe = 15;
 
 String notificacaoFiltroNaoLidasLabel(int unread) =>
-    unread > 0 ? 'Não lidas · $unread' : 'Não lidas';
+    unread > 0 ? ptS.notificacaoNaoLidas2(unread) : ptS.notificacaoNaoLidas3;
 
 List<NotificacaoApp> notificacoesVisiveis(
   List<NotificacaoApp> items, {

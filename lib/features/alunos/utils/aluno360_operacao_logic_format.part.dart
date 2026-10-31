@@ -38,9 +38,12 @@ OperacaoStickyDestination resolveOperacaoStickyDestination(
   required bool followUpDue,
 }) {
   final lower = cleanCopilotText(acao).toLowerCase();
-  if (lower.contains('mapa') ||
-      lower.contains('corporal') ||
-      lower.contains('medida')) {
+  if (lower.contains('cadastro') ||
+      lower.contains('mapa') ||
+      lower.contains('corporal')) {
+    return OperacaoStickyDestination.editAluno;
+  }
+  if (lower.contains('medida')) {
     return OperacaoStickyDestination.evolucao;
   }
   if (lower.contains('financeir') ||

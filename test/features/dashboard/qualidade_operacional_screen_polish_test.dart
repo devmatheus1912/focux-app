@@ -13,11 +13,11 @@ void main() {
     expect(screen, contains('FxContentWidthLimiter'));
     expect(screen, contains("safePopOrGo(context, '/dashboard/personal')"));
     expect(screen, contains('FxHelpIconButton'));
-    expect(screen, contains('Como calculamos'));
+    expect(screen, contains('alunoHomeAjudaCalculoTitulo'));
     expect(screen, contains('FxStripCard'));
     expect(screen, contains('emphasize: true'));
     expect(screen, contains('FxActionRow'));
-    expect(screen, contains('Referência Focux'));
+    expect(screen, contains('qualidadeReferenciaFocux'));
     expect(screen, isNot(contains('Comparado ao mercado')));
     expect(screen, contains('FxEmptyAction'));
     expect(screen, contains('RefreshIndicator'));

@@ -410,7 +410,7 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
   void _recarregar() {
     ref.invalidate(iaActionsProvider(_queryKey));
     ref.invalidate(iaActionsContagemProvider(_query));
-    ref.invalidate(dashboardHomeProvider);
+    invalidatePersonalDashboardHome(ref);
     ref.invalidate(commandCenterProvider);
     ref.invalidate(copilotoTarefasAbertasProvider);
   }

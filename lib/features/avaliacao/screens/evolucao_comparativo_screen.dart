@@ -37,10 +37,14 @@ import '../widgets/evolucao_comparativo_table.dart';
 class EvolucaoComparativoScreen extends ConsumerStatefulWidget {
   final int alunoId;
   final String alunoNome;
+
+  /// Aba da Evolução: sem cabeçalho próprio.
+  final bool embutida;
   const EvolucaoComparativoScreen({
     super.key,
     required this.alunoId,
     this.alunoNome = 'Aluno',
+    this.embutida = false,
   });
   @override
   ConsumerState<EvolucaoComparativoScreen> createState() =>
@@ -259,25 +263,7 @@ class _EvolucaoComparativoScreenState
     final isDark = chrome.isDark;
     final showSticky = !_loading && _erro == null;
     final empty = _semAvaliacao || _comparativo == null;
-    return fxScreenA11yScope(
-      label: 'Evolução de ${widget.alunoNome}',
-      child: PopScope(
-        canPop: false,
-        onPopInvokedWithResult: (didPop, _) {
-          if (didPop) return;
-          safePopOrGo(context, '/alunos/${widget.alunoId}');
-        },
-        child: FxShellScaffold(
-          useMesh: true,
-          appBar: FxShellAppBar(
-            title: 'Comparativo',
-            subtitle: FxHubFreshness.fromFetchedAt(_fetchedAt),
-            onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
-            actions: [
-              FxHelpIconButton(tooltip: 'Como comparar', onTap: _showHelp),
-            ],
-          ),
-          body: Column(
+    final corpo = Column(
             children: [
               Expanded(
                 child:
@@ -320,7 +306,26 @@ class _EvolucaoComparativoScreenState
                   ),
                 ),
             ],
+          );
+    return fxScreenA11yScope(
+      label: 'Evolução de ${widget.alunoNome}',
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          safePopOrGo(context, '/alunos/${widget.alunoId}');
+        },
+        child: widget.embutida ? corpo : FxShellScaffold(
+          useMesh: true,
+          appBar: FxShellAppBar(
+            title: 'Comparativo',
+            subtitle: FxHubFreshness.fromFetchedAt(_fetchedAt),
+            onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
+            actions: [
+              FxHelpIconButton(tooltip: 'Como comparar', onTap: _showHelp),
+            ],
           ),
+          body: corpo,
         ),
       ),
     );

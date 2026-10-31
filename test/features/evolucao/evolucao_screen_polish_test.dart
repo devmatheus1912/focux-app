@@ -33,8 +33,8 @@ void main() {
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('showEvolucaoHelpSheet'));
-    expect(screen, contains("'/alunos/\${widget.alunoId}/fotos'"));
-    expect(screen, contains("'/alunos/\${widget.alunoId}/evolucao-comparativo'"));
+    expect(screen, contains('EvolucaoFotosScreen'));
+    expect(screen, contains('EvolucaoComparativoScreen'));
     expect(screen, contains('compartilharEvolucao'));
     expect(screen, contains('AlunoInsetFormField'));
     expect(screen, contains('FxErrorState'));

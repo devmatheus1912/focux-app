@@ -127,7 +127,7 @@ RouteBase buildChromeShellRoute() {
         routes: [
           GoRoute(
             path: '/dashboard/qualidade',
-            builder: (context, state) => const QualidadeOperacionalScreen(),
+            builder: (context, state) => QualidadeOperacionalScreen(),
           ),
           GoRoute(
             path: '/dashboard/command-center/copiloto',
@@ -1012,7 +1012,7 @@ RouteBase buildChromeShellRoute() {
           ),
           GoRoute(
             path: '/notificacoes',
-            builder: (context, state) => const NotificacoesScreen(),
+            builder: (context, state) => NotificacoesScreen(),
           ),
           GoRoute(
             path: '/suporte',
@@ -1020,7 +1020,7 @@ RouteBase buildChromeShellRoute() {
           ),
           GoRoute(
             path: '/broadcasts',
-            builder: (context, state) => const BroadcastScreen(),
+            builder: (context, state) => BroadcastScreen(),
           ),
           GoRoute(
             path: '/depoimentos-aluno',

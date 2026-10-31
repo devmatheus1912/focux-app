@@ -27,7 +27,7 @@ void main() {
     expect(screen, isNot(contains("safePopOrGo(context, '/evolucao')")));
     expect(screen, contains("'/alunos/\${widget.alunoId}/evolucao'"));
     expect(screen, contains("'/alunos/\${widget.alunoId}/chat'"));
-    expect(screen, contains("label: 'Escrever'"));
+    expect(screen, contains('label: ptS.engajamentoEscrever'));
     expect(screen, contains('onPressed: _abrirChat'));
     expect(screen, isNot(contains("label: 'Chat'")));
     expect(screen, contains('engajamentoLinhasPorDia'));

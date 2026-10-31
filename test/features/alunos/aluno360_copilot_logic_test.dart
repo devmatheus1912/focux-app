@@ -50,7 +50,7 @@ void main() {
   group('resolveCopilotProximaAcaoResumo', () {
     test('prefers IA action when forceIa succeeds', () {
       const seed = ProximaAcaoResumo(
-        acao: 'Completar mapa corporal no radar',
+        acao: 'Completar cadastro no radar',
         motivo: '360',
         fonte: 'RADAR',
         prioridade: 'P1',
@@ -69,7 +69,7 @@ void main() {
 
     test('falls back to 360 when forceIa is false', () {
       const seed = ProximaAcaoResumo(
-        acao: 'Completar mapa corporal no radar',
+        acao: 'Completar cadastro no radar',
         motivo: '360',
         fonte: 'RADAR',
         prioridade: 'P1',
@@ -186,12 +186,12 @@ void main() {
         _aluno(),
         const {
           'titulo': 'Radar Focux',
-          'acao': 'Completar mapa corporal',
+          'acao': 'Completar cadastro',
           'motivo': 'Ação humana hoje',
         },
         'fallback',
       );
-      expect(content.action, contains('mapa corporal'));
+      expect(content.action, contains('cadastro'));
     });
   });
 
@@ -473,8 +473,8 @@ void main() {
 
     test('aligns sticky and prescription for mapa corporal', () {
       expect(
-        copilotStickyLabel(_aluno(), 'Completar mapa corporal'),
-        'Completar mapa corporal',
+        copilotStickyLabel(_aluno(), 'Completar cadastro'),
+        'Completar cadastro',
       );
     });
 

@@ -33,6 +33,7 @@ import '../../../core/widgets/skeleton_loader.dart';
 import '../data/notificacoes_repository.dart';
 import '../notificacao_display.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../l10n/pt.dart';
 
 part 'notificacoes_screen_widgets.part.dart';
 
@@ -63,7 +64,7 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
 
   void _onQueryChanged(String value) {
     _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 350), () {
+    _debounce = Timer(Duration(milliseconds: 350), () {
       final next = value.trim();
       if (next == ref.read(notificacoesQueryProvider)) return;
       ref.read(notificacoesQueryProvider.notifier).value = next;
@@ -189,7 +190,7 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
       setState(() => _ocultas.addAll(ids));
       final desfeito = await FeedbackHelper.showUndo(
         context,
-        'Notificação apagada.',
+        ptS.notificacoesNotificacaoApagada,
       );
       if (desfeito) {
         if (mounted) setState(() => _ocultas.removeAll(ids));
@@ -214,9 +215,9 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
     Future<void> limparLidas() async {
       final ok = await showFxConfirmSheet(
         context,
-        title: 'Limpar lidas?',
-        message: 'As notificações já lidas saem da lista. As não lidas ficam.',
-        confirmLabel: 'Limpar lidas',
+        title: ptS.notificacoesLimparLidas,
+        message: ptS.notificacoesAsNotificacoesJaLidasSaem,
+        confirmLabel: ptS.notificacoesLimparLidas2,
         icon: Icons.delete_sweep_outlined,
         destructive: true,
       );
@@ -239,21 +240,21 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
       AnalyticsService.instance.track(ProductEvents.notificacoesHelpOpened);
       showFxHelpSheet(
         context,
-        title: 'Notificações',
-        subtitle: 'O que pediu ação. O destino abre no toque.',
-        tips: const [
-          FxHelpTip('Como calculamos', notificacaoComoCalculamos),
+        title: ptS.notifications,
+        subtitle: ptS.notificacoesOQuePediuAcaoO,
+        tips: [
+          FxHelpTip(ptS.alunoHomeAjudaCalculoTitulo, notificacaoComoCalculamos),
           FxHelpTip(
-            'Lista',
-            'Hoje, ontem, esta semana e anteriores. Toque abre o aluno, o treino ou o aviso.',
+            ptS.notificacoesLista,
+            ptS.notificacoesHojeOntemEstaSemanaE,
           ),
           FxHelpTip(
-            'Não lidas',
-            'Têm ponto e título em negrito. Ler todas zera o sino da Home.',
+            ptS.notificacaoNaoLidas3,
+            ptS.notificacoesTemPontoETituloEm,
           ),
           FxHelpTip(
-            'Apagar',
-            'Arraste para a esquerda para apagar uma. Limpar lidas tira todas as já vistas.',
+            ptS.notificacoesApagar,
+            ptS.notificacoesArrasteParaAEsquerdaPara,
           ),
         ],
       );
@@ -267,7 +268,7 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
 
     final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
     return fxScreenA11yScope(
-      label: 'Notificações',
+      label: ptS.notifications,
       child: PopScope(
         canPop: !keyboardOpen && !_searchFocus.hasFocus,
         onPopInvokedWithResult: (didPop, _) {
@@ -283,7 +284,7 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
         useMesh: true,
         constrainWidth: false,
         appBar: FxShellAppBar(
-          title: 'Notificações',
+          title: ptS.notifications,
           subtitle: async.maybeWhen(
             data: (inbox) => FxHubFreshness.joinCount(
               notificacaoNaoLidasLabel(unreadCount),
@@ -299,8 +300,8 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
             if (unreadCount > 0)
               Semantics(
                 button: true,
-                label: 'Marcar todas as notificações como lidas',
-                child: FxTonalButton(label: 'Ler todas', onPressed: () async {
+                label: ptS.notificacoesMarcarTodasAsNotificacoesComo,
+                child: FxTonalButton(label: ptS.notificacoesLerTodas, onPressed: () async {
                     AnalyticsService.instance.track(
                       ProductEvents.notificacoesMarkedAllRead,
                       props: {'unread': unreadCount},
@@ -317,28 +318,28 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
                     if (!context.mounted) return;
                     FeedbackHelper.showSuccess(
                       context,
-                      'Todas marcadas como lidas.',
+                      ptS.notificacoesTodasMarcadasComoLidas,
                     );
                   }, compact: true),
               ),
             IconButton(
-              tooltip: 'Mais opções',
+              tooltip: ptS.agendaAlunoMaisOpcoes,
               icon: const Icon(Icons.more_horiz_rounded),
               onPressed: () async {
                 final escolha = await showFxGroupedActionSheet<String>(
                   context,
-                  titulo: 'Notificações',
+                  titulo: ptS.notifications,
                   grupos: [
                     FxActionGroup<String>(null, [
-                      const FxActionItem(
+                      FxActionItem(
                         valor: 'ajuda',
-                        rotulo: 'Como usar as notificações',
+                        rotulo: ptS.notificacoesComoUsarAsNotificacoes,
                         icone: Icons.help_outline_rounded,
                       ),
                       if (lidasCount > 0)
-                        const FxActionItem(
+                        FxActionItem(
                           valor: 'limpar',
-                          rotulo: 'Limpar lidas',
+                          rotulo: ptS.notificacoesLimparLidas2,
                           icone: Icons.delete_sweep_outlined,
                         ),
                     ]),
@@ -379,10 +380,10 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
                     ref.read(notificacoesQueryProvider.notifier).value = next;
                   },
                   onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     filled: false,
                     isDense: true,
-                    hintText: 'Buscar aviso',
+                    hintText: ptS.notificacoesBuscarAviso,
                     border: InputBorder.none,
                     contentPadding: EdgeInsets.symmetric(
                       horizontal: 12,
@@ -405,7 +406,7 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
                 child: FxChoiceStrip<bool>(
                   key: const ValueKey('notificacoes-filtros'),
                   itens: [
-                    const FxChoiceItem(value: false, label: 'Todas'),
+                    FxChoiceItem(value: false, label: ptS.financeiroFiltroTodas),
                     FxChoiceItem(
                       value: true,
                       label: notificacaoFiltroNaoLidasLabel(unreadCount),
@@ -456,10 +457,10 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
                     ),
                     action: FxEmptyAction(
                       label: verTodas
-                          ? 'Ver todas'
+                          ? ptS.notificacoesVerTodas
                           : query.isEmpty
-                          ? 'Ir para o Hoje'
-                          : 'Limpar busca',
+                          ? ptS.notificacoesIrParaOHoje
+                          : ptS.notificacoesLimparBusca,
                       onTap: verTodas
                           ? () => ref.read(notificacoesSoNaoLidasProvider.notifier).value = false
                           : query.isEmpty
@@ -502,12 +503,12 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
                       padding: const EdgeInsets.only(top: TokensStrip.s3),
                       child: FxSatelliteListTile(
                         title: inbox.loadingMore
-                            ? 'Carregando…'
-                            : 'Carregar mais',
+                            ? ptS.agendaAlunoCarregando
+                            : ptS.retencaoCarregarMais,
                         subtitle: inbox.loadingMore
                             ? null
                             : Text(
-                              'Mais ${inbox.total - items.length} nesta caixa.',
+                              ptS.notificacoesMaisNestaCaixa(inbox.total - items.length),
                             ),
                         onTap: inbox.loadingMore
                             ? null

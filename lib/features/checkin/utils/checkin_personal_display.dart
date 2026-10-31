@@ -1,7 +1,8 @@
 import '../models/checkin_personal_home.dart';
+import '../../../l10n/pt.dart';
 
-const checkinComoCalculamos =
-    'Hoje conta só treinos concluídos hoje, igual ao pulso da Home. Semana são os 6 dias anteriores. Pendentes são alunos ativos com treino e sem check-in concluído hoje. O catálogo pagina o recorte de 7 dias.';
+final checkinComoCalculamos =
+    ptS.checkinHojeContaSoTreinosConcluidos;
 
 class CheckinFocusAction {
   const CheckinFocusAction({required this.label, this.alunoId});
@@ -58,11 +59,11 @@ String checkinDoAlunoLinha(CheckinDoAluno grupo) {
   final linha =
       grupo.treinos.length == 1
           ? nomes.first
-          : '${grupo.treinos.length} treinos · ${nomes.join(', ')}';
+          : ptS.checkinTreinos(grupo.treinos.length, nomes.join(', '));
   return switch (grupo.parciais) {
     0 => linha,
-    1 when grupo.treinos.length == 1 => '$linha · parcial',
-    final n => '$linha · $n parciais',
+    1 when grupo.treinos.length == 1 => ptS.checkinParcial(linha),
+    final n => ptS.checkinParciais(linha, n),
   };
 }
 
@@ -80,8 +81,8 @@ List<(String, List<CheckinDoAluno>)> checkinPorDia(
     porDia.putIfAbsent(dia, () => []).add(item);
   }
   String rotulo(DateTime? dia) {
-    if (dia == null) return 'Sem data';
-    if (hoje.difference(dia).inDays == 1) return 'Ontem';
+    if (dia == null) return ptS.engajamentoSemData;
+    if (hoje.difference(dia).inDays == 1) return ptS.treinosDiaOntem;
     final d = dia.day.toString().padLeft(2, '0');
     final m = dia.month.toString().padLeft(2, '0');
     return '$d/$m';
@@ -102,7 +103,7 @@ String checkinResumoDoDia(CheckinPersonalHomeBundle home) {
   final faltam = home.pendentes.length;
   return [
     if (treinos == 0)
-      'Nenhum treino hoje'
+      ptS.checkinNenhumTreinoHoje
     else
       '$treinos ${treinos == 1 ? 'treino' : 'treinos'}',
     if (alunos > 0) '$alunos ${alunos == 1 ? 'aluno' : 'alunos'}',

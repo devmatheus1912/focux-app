@@ -57,7 +57,7 @@ Future<bool> criarTarefaCopilotoFromAluno360({
           .getIaCommandActions(status: 'ABERTO', alunoId: aluno.id);
       persisted = abertas.any((item) => item.actionKey == actionKey);
     }
-    ref.invalidate(dashboardHomeProvider);
+    invalidatePersonalDashboardHome(ref);
     ref.invalidate(commandCenterProvider);
     ref.invalidate(alunoOpenIaActionsProvider(aluno.id));
     if (context.mounted) {

@@ -31,6 +31,7 @@ import 'features/subscription/widgets/upgrade_prompt_sheet.dart';
 import 'core/health/home_widget_service.dart';
 import 'core/widgets/fx_connectivity_banner.dart';
 import 'core/router/app_router.dart';
+import 'core/router/atualiza_ao_voltar_scope.dart';
 import 'core/storage/secure_storage.dart';
 import 'core/utils/motion_preferences.dart';
 import 'core/theme/app_theme.dart';
@@ -387,7 +388,7 @@ class _FocuxAppState extends ConsumerState<FocuxApp>
     if (away > DashboardHomeClientCache.ttl) {
       DashboardHomeClientCache.clear();
     }
-    ref.invalidate(dashboardHomeProvider);
+    invalidatePersonalDashboardHome(ref);
     // SWR do aluno: pinta o bundle anterior e revalida com ETag.
     ref.invalidate(alunoDashboardHomeProvider);
     ref.invalidate(perfilProvider);
@@ -568,7 +569,9 @@ class _FocuxAppState extends ConsumerState<FocuxApp>
             child: FxConnectivityBanner(
               child: CheckinFilaSyncScope(
                 child: IapPurchaseSyncScope(
-                  child: child ?? const SizedBox.shrink(),
+                  child: AtualizaAoVoltarScope(
+                    child: child ?? const SizedBox.shrink(),
+                  ),
                 ),
               ),
             ),

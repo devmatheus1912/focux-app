@@ -73,9 +73,9 @@ Widget? buildFerramentasTabScreen(String? rotaApp) {
     case '/onboarding/wizard':
       return const OnboardingWizardScreen();
     case '/dashboard/qualidade':
-      return const QualidadeOperacionalScreen();
+      return QualidadeOperacionalScreen();
     case '/broadcasts':
-      return const BroadcastScreen();
+      return BroadcastScreen();
     default:
       return null;
   }

@@ -15,11 +15,15 @@ import '../../../core/widgets/fx_motion.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/feed_repository.dart';
 import '../utils/feed_display.dart';
+import '../../../l10n/pt.dart';
 
 class FeedComposerSheet extends StatefulWidget {
-  const FeedComposerSheet({super.key, required this.ref});
+  const FeedComposerSheet({super.key, required this.ref, this.post});
 
   final WidgetRef ref;
+
+  /// Com post, edita só o texto: mídia e tipo ficam como foram publicados.
+  final FeedPost? post;
 
   @override
   State<FeedComposerSheet> createState() => _FeedComposerSheetState();
@@ -34,6 +38,18 @@ class _FeedComposerSheetState extends State<FeedComposerSheet> {
   XFile? _midiaSelecionada;
   bool _salvando = false;
   bool _escolhendoMidia = false;
+
+  bool get _editando => widget.post != null;
+
+  @override
+  void initState() {
+    super.initState();
+    final post = widget.post;
+    if (post == null) return;
+    _tituloCtrl.text = post.titulo;
+    _conteudoCtrl.text = post.conteudo;
+    _comTitulo = post.titulo.trim().isNotEmpty;
+  }
 
   @override
   void dispose() {
@@ -71,6 +87,15 @@ class _FeedComposerSheetState extends State<FeedComposerSheet> {
     HapticFeedback.mediumImpact();
     setState(() => _salvando = true);
     try {
+      if (widget.post case final post?) {
+        await FeedRepository(widget.ref.read(apiClientProvider)).editar(
+          post.id,
+          _tituloCtrl.text.trim(),
+          _conteudoCtrl.text.trim(),
+        );
+        if (mounted) FxHomeSheetChrome.dismissAndPop(context, true);
+        return;
+      }
       String? midiaUrl;
       if (_midiaSelecionada != null) {
         midiaUrl = await MediaUploadService(
@@ -107,7 +132,9 @@ class _FeedComposerSheetState extends State<FeedComposerSheet> {
   }
 
   bool get _podePublicar =>
-      _conteudoCtrl.text.trim().isNotEmpty || _midiaSelecionada != null;
+      _conteudoCtrl.text.trim().isNotEmpty ||
+      _midiaSelecionada != null ||
+      (widget.post?.midiaUrl?.trim().isNotEmpty ?? false);
 
   @override
   Widget build(BuildContext context) {
@@ -135,8 +162,8 @@ class _FeedComposerSheetState extends State<FeedComposerSheet> {
             inputFormatters: [LengthLimitingTextInputFormatter(feedConteudoMax)],
             onChanged: (_) => setState(() {}),
             style: FocuxHubTypography.body(color: chrome.ink),
-            decoration: const InputDecoration(
-              hintText: 'O que você quer contar aos alunos?',
+            decoration: InputDecoration(
+              hintText: ptS.feedOQueVoceQuerContar,
               border: InputBorder.none,
               filled: false,
               isDense: true,
@@ -148,8 +175,8 @@ class _FeedComposerSheetState extends State<FeedComposerSheet> {
               textCapitalization: TextCapitalization.sentences,
               inputFormatters: [LengthLimitingTextInputFormatter(feedTituloMax)],
               style: FocuxHubTypography.cardTitle(color: chrome.ink),
-              decoration: const InputDecoration(
-                hintText: 'Título',
+              decoration: InputDecoration(
+                hintText: ptS.agendaTituloGrupo,
                 border: InputBorder.none,
                 filled: false,
                 isDense: true,
@@ -176,7 +203,7 @@ class _FeedComposerSheetState extends State<FeedComposerSheet> {
                   ),
                 ),
                 IconButton(
-                  tooltip: 'Remover',
+                  tooltip: ptS.landingRemover,
                   onPressed:
                       _salvando
                           ? null
@@ -189,8 +216,9 @@ class _FeedComposerSheetState extends State<FeedComposerSheet> {
           const SizedBox(height: TokensStrip.s2),
           Row(
             children: [
+              if (!_editando) ...[
               IconButton(
-                tooltip: 'Foto',
+                tooltip: ptS.perfilFoto,
                 onPressed:
                     _salvando || _escolhendoMidia
                         ? null
@@ -198,32 +226,34 @@ class _FeedComposerSheetState extends State<FeedComposerSheet> {
                 icon: Icon(Icons.image_outlined, color: primary),
               ),
               IconButton(
-                tooltip: 'Vídeo',
+                tooltip: ptS.feedVideo,
                 onPressed:
                     _salvando || _escolhendoMidia
                         ? null
                         : () => _escolherMidia('VIDEO'),
                 icon: Icon(Icons.videocam_outlined, color: primary),
               ),
+              ],
               IconButton(
-                tooltip: 'Título',
+                tooltip: ptS.agendaTituloGrupo,
                 onPressed: () => setState(() => _comTitulo = !_comTitulo),
                 icon: Icon(Icons.title_rounded, color: primary),
               ),
               const Spacer(),
-              FilterChip(
-                label: const Text('Dica'),
-                selected: _dica,
-                onSelected:
-                    midia != null ? null : (v) => setState(() => _dica = v),
-              ),
+              if (!_editando)
+                FilterChip(
+                  label: Text(ptS.feedDica),
+                  selected: _dica,
+                  onSelected:
+                      midia != null ? null : (v) => setState(() => _dica = v),
+                ),
             ],
           ),
           const SizedBox(height: TokensStrip.s2),
           FxLiquidPrimaryButton(
-            label: feedPublicarTileLabel(),
+            label: _editando ? ptS.save : feedPublicarTileLabel(),
             loading: _salvando,
-            loadingLabel: 'Publicando…',
+            loadingLabel: _editando ? ptS.checkinSalvandoSerie : ptS.feedPublicando,
             onPressed: _salvando || !_podePublicar ? null : _publicar,
           ),
         ],

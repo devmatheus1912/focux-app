@@ -29,6 +29,7 @@ import '../../auth/providers/auth_provider.dart';
 import '../data/broadcast_repository.dart';
 import '../utils/broadcast_display.dart';
 import 'widgets/broadcast_historico.dart';
+import '../../../l10n/pt.dart';
 
 final _broadcastRepositoryProvider = Provider<BroadcastRepository>(
   (ref) => BroadcastRepository(ref.read(apiClientProvider)),
@@ -93,9 +94,9 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
     if (_isDirty) {
       final ok = await showFxConfirmSheet(
         context,
-        title: 'Descartar rascunho?',
-        message: 'O título e a mensagem não serão enviados.',
-        confirmLabel: 'Descartar',
+        title: ptS.broadcastDescartarRascunho,
+        message: ptS.broadcastOTituloEAMensagem,
+        confirmLabel: ptS.chatDescartarNaoEnviada,
         discard: true,
       );
       if (!ok || !mounted) return;
@@ -116,17 +117,17 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
   void _showHelp() {
     showFxHelpSheet(
       context,
-      title: 'Avisos',
-      subtitle: 'Fala com todos os alunos sem abrir conversa por conversa.',
-      tips: const [
+      title: ptS.broadcastAvisos,
+      subtitle: ptS.broadcastFalaComTodosOsAlunos,
+      tips: [
         FxHelpTip(
-          'Público',
-          'Todos, online, presencial ou híbrido — o filtro usa o tipo de consultoria do aluno.',
+          ptS.broadcastPublico,
+          ptS.broadcastTodosOnlinePresencialOuHibrido,
           icon: 'users',
         ),
         FxHelpTip(
-          'Envio',
-          'Você vê quantos recebem antes de enviar. Quem está sem notificação vê ao abrir o app.',
+          ptS.broadcastEnvio,
+          ptS.broadcastVoceVeQuantosRecebemAntes,
           icon: 'message-circle',
         ),
       ],
@@ -198,21 +199,21 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
 
     return fxScreenA11yScope(
-      label: 'Avisos',
+      label: ptS.broadcastAvisos,
       child: FxFormPopGuard(
         dirty: _isDirty,
         onCancel: _cancel,
         child: FxShellScaffold(
           useMesh: true,
           appBar: FxShellAppBar(
-            title: 'Avisos',
-            subtitle: freshnessLabel ?? 'Para todos os alunos',
+            title: ptS.broadcastAvisos,
+            subtitle: freshnessLabel ?? ptS.broadcastParaTodosOsAlunos,
             onBack: () {
               _cancel();
             },
             actions: [
               FxHelpIconButton(
-                tooltip: 'Como funcionam os avisos',
+                tooltip: ptS.broadcastComoFuncionamOsAvisos,
                 onTap: _showHelp,
               ),
             ],
@@ -223,11 +224,11 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
             child: Semantics(
               button: true,
               enabled: !_enviando,
-              label: _enviando ? 'Enviando aviso' : 'Enviar',
+              label: _enviando ? ptS.broadcastEnviandoAviso : ptS.npsPromptEnviar,
               child: FxLiquidPrimaryButton(
-                label: 'Enviar',
+                label: ptS.npsPromptEnviar,
                 loading: _enviando,
-                loadingLabel: 'Enviando…',
+                loadingLabel: ptS.anamneseAlunoEnviando,
                 onPressed: _enviando || !prontoParaEnviar ? null : _enviar,
               ),
             ),
@@ -255,10 +256,10 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
                     if (semAlunos)
                       FxEmptyState(
                         icon: 'users',
-                        title: 'Sem alunos para avisar',
-                        subtitle: 'Cadastre um aluno para enviar o primeiro aviso.',
+                        title: ptS.broadcastSemAlunosParaAvisar,
+                        subtitle: ptS.broadcastCadastreUmAlunoParaEnviar,
                         action: FxEmptyAction(
-                          label: 'Ver alunos',
+                          label: ptS.broadcastVerAlunos,
                           onTap: () => goPersonalShellTab(context, '/alunos'),
                         ),
                       )
@@ -273,13 +274,13 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
                     ),
                     const SizedBox(height: TokensStrip.s3),
                     FxSettingsGroup(
-                      header: 'Novo aviso',
-                      caption: 'Chega como notificação no celular do aluno.',
+                      header: ptS.broadcastNovoAviso,
+                      caption: ptS.broadcastChegaComoNotificacaoNoCelular,
                       children: [
                       AlunoInsetFormField(
                         controller: _tituloCtrl,
-                        label: 'Título',
-                        hint: 'Ex.: Lembrete de treino',
+                        label: ptS.agendaTituloGrupo,
+                        hint: ptS.broadcastExLembreteDeTreino,
                         icon: Icons.title_outlined,
                         textCapitalization: TextCapitalization.sentences,
                         inputFormatters: [
@@ -293,8 +294,8 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
                       ),
                       AlunoInsetFormField(
                         controller: _mensagemCtrl,
-                        label: 'Mensagem',
-                        hint: 'O que os alunos vão ler no aviso.',
+                        label: ptS.copilotoMensagemCampo,
+                        hint: ptS.broadcastOQueOsAlunosVao,
                         icon: Icons.notes_outlined,
                         maxLines: 4,
                         textCapitalization: TextCapitalization.sentences,
@@ -319,7 +320,7 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
                   ],
                   const SizedBox(height: FxSettingsLayout.groupGap),
                   Text(
-                    'Quem recebe',
+                    ptS.broadcastQuemRecebe,
                     style: FocuxHubTypography.sectionTitle(
                       context,
                       color: chrome.ink,

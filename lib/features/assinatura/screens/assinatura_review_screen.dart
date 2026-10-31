@@ -19,6 +19,7 @@ import '../../planos/paywall/paywall_catalog.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../../subscription/subscription_products.dart';
 import '../utils/assinatura_review_display.dart';
+import '../../../l10n/pt.dart';
 
 /// Revisão honesta antes da compra na loja (App Store / Play compliant).
 class AssinaturaReviewScreen extends StatefulWidget {
@@ -123,7 +124,7 @@ class _AssinaturaReviewScreenState extends State<AssinaturaReviewScreen> {
                     children: [
                       Semantics(
                         button: true,
-                        label: 'Confirmar plano $planLabel',
+                        label: ptS.assinaturaConfirmarPlano(planLabel),
                         child: FxLiquidPrimaryButton(
                           label: assinaturaReviewConfirmLabel(
                             price: price,
@@ -227,7 +228,7 @@ class _AssinaturaReviewScreenState extends State<AssinaturaReviewScreen> {
                     Align(
                       alignment: Alignment.centerLeft,
                       child: FxActionLink(
-                        label: 'Detalhes da cobrança',
+                        label: ptS.assinaturaDetalhesDaCobranca,
                         onTap: () => setState(() => _detalhes = !_detalhes),
                       ),
                     ),
@@ -249,14 +250,14 @@ class _AssinaturaReviewScreenState extends State<AssinaturaReviewScreen> {
                       children: [
                         FxConversionTextLink(
                           text: '',
-                          actionText: 'Privacidade',
+                          actionText: ptS.assinaturaPrivacidade,
                           onTap: () {
                             FocuxLegal.openPrivacy();
                           },
                         ),
                         FxConversionTextLink(
                           text: '',
-                          actionText: 'Termos',
+                          actionText: ptS.assinaturaTermos2,
                           onTap: () {
                             FocuxLegal.openTerms();
                           },

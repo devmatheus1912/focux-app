@@ -48,7 +48,7 @@ class _NotificacaoTile extends StatelessWidget {
     return Semantics(
       button: true,
       label: [
-        if (unread) 'Não lida',
+        if (unread) ptS.notificacoesNaoLida,
         titulo,
         apoio,
         if (temDestino && cta.isNotEmpty) cta,
@@ -134,11 +134,11 @@ class _ApagarFundo extends StatelessWidget {
         color: EagleTokens.bad,
         borderRadius: BorderRadius.circular(TokensStrip.rCard),
       ),
-      child: const Row(
+      child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Apagar',
+            ptS.notificacoesApagar,
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
           ),
           SizedBox(width: TokensStrip.s2),
@@ -218,7 +218,7 @@ bool _isRadar(NotificacaoApp item) {
 
 String _radarName(NotificacaoApp item) {
   final title = item.titulo.trim();
-  if (title.toLowerCase().startsWith('radar focux:')) {
+  if (title.toLowerCase().startsWith(ptS.notificacoesRadarFocux)) {
     return notificacaoNomeLimpo(title.split(':').skip(1).join(':'));
   }
   return notificacaoNomeLimpo(title);
@@ -248,21 +248,21 @@ String _radarSummary(NotificacaoApp item) {
 /// A ação do Radar como título: diz o que fazer, não só "precisa de ação".
 String _radarTitulo(NotificacaoApp item) {
   final acao = _radarSummary(item);
-  if (acao.isEmpty) return 'Aluno precisa de atenção';
+  if (acao.isEmpty) return ptS.notificacoesAlunoPrecisaDeAtencao;
   final frase = '${acao[0].toUpperCase()}${acao.substring(1)}';
   return acao.toLowerCase() == 'mapa corporal' ? '$frase pendente' : frase;
 }
 
 String notificationGroupLabel(DateTime? date) {
-  if (date == null) return 'Anteriores';
+  if (date == null) return ptS.agendaAlunoAnteriores;
   final now = DateTime.now();
   final local = date.toLocal();
   final today = DateTime(now.year, now.month, now.day);
   final day = DateTime(local.year, local.month, local.day);
-  if (day == today) return 'Hoje';
-  if (day == today.subtract(const Duration(days: 1))) return 'Ontem';
-  if (today.difference(day).inDays < 7) return 'Esta semana';
-  return 'Anteriores';
+  if (day == today) return ptS.dockHoje;
+  if (day == today.subtract(const Duration(days: 1))) return ptS.treinosDiaOntem;
+  if (today.difference(day).inDays < 7) return ptS.alunoSemanaFaixaTitulo;
+  return ptS.agendaAlunoAnteriores;
 }
 
 String notificationTimeLabel(DateTime? date) {
@@ -272,9 +272,9 @@ String notificationTimeLabel(DateTime? date) {
   final diff = now.difference(local);
   if (DateUtils.isSameDay(now, local)) {
     if (diff.inMinutes < 60) {
-      return 'há ${diff.inMinutes <= 0 ? 1 : diff.inMinutes}min';
+      return ptS.notificacoesHaMin(diff.inMinutes <= 0 ? 1 : diff.inMinutes);
     }
-    return 'há ${diff.inHours}h';
+    return ptS.notificacoesHaH(diff.inHours);
   }
   if (DateUtils.isSameDay(local, now.subtract(const Duration(days: 1)))) {
     return 'ontem';
@@ -288,7 +288,7 @@ String notificationHumanTitle(NotificacaoApp item) {
   if (_isRadar(item)) return _radarTitulo(item);
   if (title.isNotEmpty) return title;
   if (msg.isNotEmpty) return msg;
-  return 'Nova notificação';
+  return ptS.notificacoesNovaNotificacao;
 }
 
 String notificationSubtitle(NotificacaoApp item) {

@@ -110,7 +110,15 @@ void invalidateAlunoDashboardHome(WidgetRef ref) {
 }
 
 /// Personal: write que muda a Home (ex.: ler notificações → sino).
+///
+/// Único jeito de atualizar a Home: `invalidate` sozinho lê o cache do cliente
+/// e devolve o dado velho por até 90 s.
 void invalidatePersonalDashboardHome(WidgetRef ref) {
+  DashboardHomeClientCache.clear();
+  ref.invalidate(dashboardHomeProvider);
+}
+
+void invalidatePersonalDashboardHomeRef(Ref ref) {
   DashboardHomeClientCache.clear();
   ref.invalidate(dashboardHomeProvider);
 }

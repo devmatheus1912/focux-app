@@ -23,7 +23,7 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                     primary: primary,
                     message: friendlyError(e),
                     onRetry: () {
-                      ref.invalidate(dashboardHomeProvider);
+                      invalidatePersonalDashboardHome(ref);
                     },
                   ),
               data: (home) {
@@ -96,7 +96,7 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                   onRefresh: () async {
                     DashboardHomeClientCache.clear();
                     PlanoFeaturesBffCache.clear();
-                    ref.invalidate(dashboardHomeProvider);
+                    invalidatePersonalDashboardHome(ref);
                     ref.invalidate(notificacoesProvider);
                     ref.invalidate(notificacoesNaoLidasProvider);
                     try {

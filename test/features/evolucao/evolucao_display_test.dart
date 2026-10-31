@@ -61,7 +61,7 @@ void main() {
     expect(evolucaoRecordeSubtitle(recorde), '80,0 kg · 5 reps · 01/09');
     expect(evolucaoRecordeValue(recorde), '80,0 kg');
     expect(evolucaoHubViewFromSecao('recordes'), EvolucaoHubView.recordes);
-    expect(evolucaoDetalheSecoes, hasLength(2));
+    expect(evolucaoDetalheSecoes, hasLength(4));
   });
 
   test('KPI de medidas conta só registros com conteúdo', () {

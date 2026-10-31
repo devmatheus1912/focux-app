@@ -8,7 +8,7 @@ Future<void> showCheckinPersonalHelpSheet(BuildContext context) {
     context,
     title: 'Como usar os check-ins',
     subtitle: 'Quem treinou. O live continua no app do aluno.',
-    tips: const [
+    tips: [
       FxHelpTip('Como calculamos', checkinComoCalculamos),
       FxHelpTip(
         'Hoje',

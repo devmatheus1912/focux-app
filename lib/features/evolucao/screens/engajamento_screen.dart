@@ -36,6 +36,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/evolucao_repository.dart';
 import '../utils/engajamento_display.dart';
 import '../widgets/engajamento_help_sheet.dart';
+import '../../../l10n/pt.dart';
 
 class EngajamentoScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -98,7 +99,7 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
     HapticFeedback.selectionClick();
     final picked = await showFxInsetPickerSheet<int>(
       context,
-      title: 'Período',
+      title: ptS.engajamentoPeriodo,
       selected: _dias,
       items: [
         for (final d in engajamentoPeriodos)
@@ -158,7 +159,7 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
     final freshness = FxHubFreshness.fromFetchedAt(_fetchedAt);
     final showSticky = !_loading && _erro == null;
     return fxScreenA11yScope(
-      label: 'Aderência — ${widget.alunoNome}',
+      label: ptS.engajamentoAderencia(widget.alunoNome),
       child: PopScope(
         canPop: false,
         onPopInvokedWithResult: (didPop, _) {
@@ -169,12 +170,12 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
         useMesh: true,
         safeArea: false,
         appBar: FxShellAppBar(
-          title: 'Aderência',
+          title: ptS.engajamentoAderencia2,
           subtitle: freshness,
           onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
           actions: [
             FxHelpIconButton(
-              tooltip: 'Como ler a aderência',
+              tooltip: ptS.engajamentoComoLerAAderencia,
               onTap: () => showEngajamentoHelpSheet(context),
             ),
           ],
@@ -194,7 +195,7 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
                         primary: primary,
                         message: _erro!,
                         onRetry: _load,
-                        title: 'Não conseguimos carregar a aderência',
+                        title: ptS.engajamentoNaoConseguimosCarregarAAderencia,
                       )
                       : FxContentWidthLimiter(child: _buildBody()),
             ),
@@ -209,7 +210,7 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
                     TokensStrip.s2 + MediaQuery.viewInsetsOf(context).bottom,
                   ),
                   child: FxLiquidPrimaryButton(
-                    label: 'Escrever',
+                    label: ptS.engajamentoEscrever,
                     onPressed: _abrirChat,
                   ),
                 ),
@@ -251,12 +252,12 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Aderência em 30 dias',
+                ptS.engajamentoAderenciaEm30Dias,
                 style: FocuxHubTypography.bodyMuted(color: chrome.mute),
               ),
               const SizedBox(height: TokensStrip.s1),
               Text(
-                aderencia > 0 ? '$aderencia%' : 'Sem treinos ainda',
+                aderencia > 0 ? '$aderencia%' : ptS.engajamentoSemTreinosAinda,
                 style: FocuxHubTypography.metric(
                   color: chrome.ink,
                   fontSize:
@@ -280,15 +281,15 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
             metricas: [
               FxMetric(
                 valor: engajamentoTreinosCount(_eventos),
-                rotulo: 'Treinos feitos',
+                rotulo: ptS.engajamentoTreinosFeitos,
               ),
               FxMetric(
                 valor: aluno?.diasSemTreino ?? 0,
-                rotulo: 'Dias sem treino',
+                rotulo: ptS.alunoResumoMetricaDiasSemTreino,
               ),
               FxMetric(
                 valor: engajamentoTreinosSemana(_eventos),
-                rotulo: 'Sessões 7 dias',
+                rotulo: ptS.alunoResumoMetricaCheckins,
               ),
             ],
           ),
@@ -306,8 +307,8 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
                 ),
               ),
               if (conversa.semResposta)
-                const FxStatusPill(
-                  label: 'Sem resposta sua',
+                FxStatusPill(
+                  label: ptS.engajamentoSemRespostaSua,
                   tone: FxPillTone.warning,
                 ),
             ],
@@ -325,7 +326,7 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
               onPressed: _pickPeriodo,
             ),
             FxActionChip(
-              label: 'Evolução',
+              label: ptS.alunoEvolucaoTitulo,
               accent: primary,
               isDark: isDark,
               onPressed: _abrirEvolucao,
@@ -366,14 +367,14 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
                 const SizedBox(height: TokensStrip.s5),
                 FxEmptyState(
                   icon: 'trend',
-                  title: 'Nada neste período',
+                  title: ptS.engajamentoNadaNestePeriodo,
                   subtitle:
-                      'Treinos, medidas e mensagens do aluno aparecem aqui.',
+                      ptS.engajamentoTreinosMedidasEMensagensDo,
                   action:
                       _dias == 90
                           ? null
                           : FxEmptyAction(
-                            label: 'Ver 90 dias',
+                            label: ptS.engajamentoVer90Dias,
                             onTap: _verNoventaDias,
                           ),
                 ),
@@ -394,8 +395,8 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
                       child: FxActionLink(
                         label:
                             _mostrarCancelados
-                                ? 'Esconder canceladas'
-                                : 'Mostrar canceladas ($cancelados)',
+                                ? ptS.engajamentoEsconderCanceladas
+                                : ptS.engajamentoMostrarCanceladas(cancelados),
                         onTap:
                             () => setState(
                               () => _mostrarCancelados = !_mostrarCancelados,
@@ -481,7 +482,7 @@ class _CalendarioTreinos extends StatelessWidget {
     );
 
     return Semantics(
-      label: 'Últimas 5 semanas: $feitos dias com treino',
+      label: ptS.engajamentoUltimas5SemanasDiasCom(feitos),
       excludeSemantics: true,
       child: Container(
         padding: const EdgeInsets.all(TokensStrip.s3),
@@ -506,11 +507,11 @@ class _CalendarioTreinos extends StatelessWidget {
             const SizedBox(height: TokensStrip.s3),
             Row(
               children: [
-                legenda(primary, 'Treinou'),
+                legenda(primary, ptS.engajamentoTreinou),
                 const SizedBox(width: TokensStrip.s3),
-                legenda(parcial, 'Parcial'),
+                legenda(parcial, ptS.historicoParcial),
                 const SizedBox(width: TokensStrip.s3),
-                legenda(cor, 'Cancelou'),
+                legenda(cor, ptS.engajamentoCancelou),
               ],
             ),
           ],

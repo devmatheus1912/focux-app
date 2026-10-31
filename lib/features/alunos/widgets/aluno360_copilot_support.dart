@@ -126,7 +126,7 @@ class _Aluno360CopilotActionRowState
           .completeCommandAction(task.actionKey);
       ref.invalidate(alunoOpenIaActionsProvider(widget.aluno.id));
       ref.invalidate(commandCenterProvider);
-      ref.invalidate(dashboardHomeProvider);
+      invalidatePersonalDashboardHome(ref);
       if (!mounted) return;
       FeedbackHelper.showSuccess(context, 'Tarefa concluída.');
     } catch (e) {

@@ -41,51 +41,6 @@ class _EvolucaoPesoHero extends StatelessWidget {
   }
 }
 
-class _EvolucaoAtalho extends StatelessWidget {
-  const _EvolucaoAtalho({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(TokensStrip.rCard),
-        child: Ink(
-          padding: const EdgeInsets.all(TokensStrip.s3),
-          decoration: fxListCardDecoration(context),
-          child: Row(
-            children: [
-              Icon(
-                icon,
-                size: 20,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              const SizedBox(width: TokensStrip.s2),
-              Expanded(
-                child: Text(
-                  label,
-                  style: FocuxHubTypography.cardTitle(color: chrome.ink),
-                ),
-              ),
-              Icon(Icons.chevron_right_rounded, size: 20, color: chrome.mute),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _TabMedidas extends StatelessWidget {
   final String alunoNome;
   final AsyncValue<List<MedidaCorporal>> medidasAsync;

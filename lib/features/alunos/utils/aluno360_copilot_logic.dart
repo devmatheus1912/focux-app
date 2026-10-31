@@ -313,8 +313,10 @@ String copilotDisplayAction(Aluno aluno, String acao) {
     final label = copilotChatActionLabel(normalized);
     return firstName == null ? '$label com o aluno.' : '$label com $firstName.';
   }
-  if (lower.contains('mapa') || lower.contains('corporal')) {
-    return 'Completar mapa corporal para orientar a prescrição.';
+  if (lower.contains('cadastro') ||
+      lower.contains('mapa') ||
+      lower.contains('corporal')) {
+    return 'Completar cadastro para orientar a prescrição.';
   }
   if (lower.contains('objetivo')) {
     return 'Definir objetivo para alinhar prescrição e Copiloto.';
@@ -412,8 +414,10 @@ String copilotStickyLabel(
     return 'Retomar contato';
   }
   final lower = cleaned.toLowerCase();
-  if (lower.contains('mapa') || lower.contains('corporal')) {
-    return 'Completar mapa corporal';
+  if (lower.contains('cadastro') ||
+      lower.contains('mapa') ||
+      lower.contains('corporal')) {
+    return 'Completar cadastro';
   }
   if (lower.contains('objetivo')) return 'Definir objetivo';
   if (lower.contains('financeir') || lower.contains('inadimpl')) {

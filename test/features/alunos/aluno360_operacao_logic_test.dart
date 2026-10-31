@@ -166,11 +166,11 @@ void main() {
       expect(action.destination, OperacaoStickyDestination.treino);
     });
 
-    test('routes mapa corporal to evolucao with aligned label', () {
+    test('routes cadastro to editar aluno with aligned label', () {
       final action = resolveOperacaoStickyAction(
         aluno: _aluno(),
         proximaAcao: const ProximaAcaoResumo(
-          acao: 'Completar mapa corporal',
+          acao: 'Completar cadastro',
           motivo: 'Radar',
           fonte: 'RADAR',
           prioridade: 'P1',
@@ -178,8 +178,8 @@ void main() {
         hasOpenTask: false,
         followUpDue: false,
       );
-      expect(action.label, 'Completar mapa corporal');
-      expect(action.destination, OperacaoStickyDestination.evolucao);
+      expect(action.label, 'Completar cadastro');
+      expect(action.destination, OperacaoStickyDestination.editAluno);
     });
 
     test('maps IA contate phrasing to chat sticky', () {
@@ -223,7 +223,7 @@ void main() {
           sticky: const OperacaoStickyAction(
             label: 'Completar mapa',
             icon: Icons.person_outline,
-            destination: OperacaoStickyDestination.evolucao,
+            destination: OperacaoStickyDestination.editAluno,
           ),
         ),
         isTrue,
@@ -336,9 +336,9 @@ void main() {
           Aluno(id: 1, nome: 'Beatriz', email: 'b@test.com', status: 'ATIVO'),
           50,
           sticky: const OperacaoStickyAction(
-            label: 'Completar mapa corporal',
+            label: 'Completar cadastro',
             icon: Icons.monitor_weight_outlined,
-            destination: OperacaoStickyDestination.evolucao,
+            destination: OperacaoStickyDestination.editAluno,
           ),
         ),
         isFalse,
@@ -415,15 +415,15 @@ void main() {
       () {
         final aluno = _aluno();
         const sticky = OperacaoStickyAction(
-          label: 'Completar mapa corporal',
+          label: 'Completar cadastro',
           icon: Icons.monitor_weight_outlined,
-          destination: OperacaoStickyDestination.evolucao,
+          destination: OperacaoStickyDestination.editAluno,
         );
         expect(
           shouldShowCopilotPrescriptionBlock(
             sticky: sticky,
             aluno: aluno,
-            proximaAcaoRaw: 'Completar mapa corporal no radar',
+            proximaAcaoRaw: 'Completar cadastro no radar',
           ),
           isFalse,
         );
@@ -433,15 +433,15 @@ void main() {
     test('hides duplicate when sticky matches 360', () {
       final aluno = _aluno();
       const sticky = OperacaoStickyAction(
-        label: 'Completar mapa corporal',
+        label: 'Completar cadastro',
         icon: Icons.monitor_weight_outlined,
-        destination: OperacaoStickyDestination.evolucao,
+        destination: OperacaoStickyDestination.editAluno,
       );
       expect(
         shouldShowCopilotPrescriptionBlock(
           sticky: sticky,
           aluno: aluno,
-          proximaAcaoRaw: 'Completar mapa corporal no radar',
+          proximaAcaoRaw: 'Completar cadastro no radar',
         ),
         isFalse,
       );
@@ -470,15 +470,15 @@ void main() {
     test('hides when sticky label matches proxima acao', () {
       final aluno = _aluno();
       const sticky = OperacaoStickyAction(
-        label: 'Completar mapa corporal',
+        label: 'Completar cadastro',
         icon: Icons.monitor_weight_outlined,
-        destination: OperacaoStickyDestination.evolucao,
+        destination: OperacaoStickyDestination.editAluno,
       );
       expect(
         shouldHideCopilotPrescriptionWhenMatchesSticky(
           sticky: sticky,
           aluno: aluno,
-          proximaAcaoRaw: 'Completar mapa corporal no radar',
+          proximaAcaoRaw: 'Completar cadastro no radar',
         ),
         isTrue,
       );
@@ -495,7 +495,7 @@ void main() {
         shouldHideCopilotPrescriptionWhenMatchesSticky(
           sticky: sticky,
           aluno: aluno,
-          proximaAcaoRaw: 'Completar mapa corporal no radar',
+          proximaAcaoRaw: 'Completar cadastro no radar',
         ),
         isFalse,
       );
@@ -651,20 +651,20 @@ void main() {
       expect(
         resolveStickyDisplayLabel(
           sticky: const OperacaoStickyAction(
-            label: 'Completar mapa corporal',
+            label: 'Completar cadastro',
             icon: Icons.chat_bubble_outline_rounded,
             destination: OperacaoStickyDestination.chat,
           ),
           compact: true,
           proximaAcao: const ProximaAcaoResumo(
-            acao: 'Completar mapa corporal',
+            acao: 'Completar cadastro',
             motivo: 'Sem medidas',
             fonte: 'RADAR',
             prioridade: 'P2',
-            stickyLabel: 'Completar mapa corporal',
+            stickyLabel: 'Completar cadastro',
           ),
         ),
-        'Mapa',
+        'Cadastro',
       );
     });
 
@@ -672,20 +672,20 @@ void main() {
       expect(
         resolveStickyDisplayLabel(
           sticky: const OperacaoStickyAction(
-            label: 'Completar mapa corporal',
+            label: 'Completar cadastro',
             icon: Icons.chat_bubble_outline_rounded,
             destination: OperacaoStickyDestination.chat,
           ),
           compact: true,
           proximaAcao: const ProximaAcaoResumo(
-            acao: 'Completar mapa corporal',
+            acao: 'Completar cadastro',
             motivo: 'Sem medidas',
             fonte: 'RADAR',
             prioridade: 'P2',
-            stickyLabelCompact: 'Completar mapa corporal',
+            stickyLabelCompact: 'Completar cadastro',
           ),
         ),
-        'Mapa',
+        'Cadastro',
       );
     });
 
@@ -699,11 +699,11 @@ void main() {
           ),
           compact: true,
           proximaAcao: const ProximaAcaoResumo(
-            acao: 'Completar mapa corporal',
+            acao: 'Completar cadastro',
             motivo: 'Sem medidas',
             fonte: 'RADAR',
             prioridade: 'P2',
-            stickyLabelCompact: 'Mapa',
+            stickyLabelCompact: 'Cadastro',
           ),
         ),
         'Contato',
@@ -791,7 +791,7 @@ void main() {
       final snapshot = resolveAluno360OperacaoSnapshot(
         aluno: _aluno(emRisco: true),
         proximaAcao360: const ProximaAcaoResumo(
-          acao: 'Completar mapa corporal',
+          acao: 'Completar cadastro',
           motivo: 'Sem medidas',
           fonte: 'RADAR',
           prioridade: 'P2',
@@ -815,8 +815,8 @@ void main() {
           motivo: 'Sem resposta',
           fonte: 'IA',
           prioridade: 'P1',
-          stickyLabel: 'Completar mapa corporal',
-          stickyLabelCompact: 'Mapa',
+          stickyLabel: 'Completar cadastro',
+          stickyLabelCompact: 'Cadastro',
         ),
         forceIa: false,
         iaAsync: null,
@@ -833,7 +833,7 @@ void main() {
         ),
         isTrue,
       );
-      expect(snapshot.stickyDisplayLabel, 'Mapa');
+      expect(snapshot.stickyDisplayLabel, 'Cadastro');
     });
   });
   group('AderenciaDiaStatus', () {

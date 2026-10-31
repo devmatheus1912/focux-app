@@ -136,23 +136,44 @@ class PaywallCompareStage extends StatelessWidget {
           ),
         ),
         const SizedBox(height: TokensStrip.s3),
-        _PlanTabs(
-          plans: plans,
-          selected: selectedPlan,
-          current: currentPlan,
-          mute: mute,
-          accent: accent,
-          onSelect: onSelectPlan,
+        Row(
+          children: [
+            Expanded(
+              flex: 3,
+              child: _PlanTabs(
+                plans: plans,
+                selected: selectedPlan,
+                current: currentPlan,
+                mute: mute,
+                accent: accent,
+                onSelect: onSelectPlan,
+              ),
+            ),
+            if (view.showBillingToggle && onBillingPeriod != null) ...[
+              const SizedBox(width: TokensStrip.s2),
+              Expanded(
+                flex: 2,
+                child: _BillingTabs(
+                  period: billingPeriod,
+                  accent: accent,
+                  mute: mute,
+                  onChanged: onBillingPeriod!,
+                ),
+              ),
+            ],
+          ],
         ),
-        if (view.showBillingToggle && onBillingPeriod != null) ...[
-          const SizedBox(height: TokensStrip.s2),
-          _BillingTabs(
-            period: billingPeriod,
-            accent: accent,
-            mute: mute,
-            onChanged: onBillingPeriod!,
+        if (view.showBillingToggle && onBillingPeriod != null)
+          Align(
+            alignment: Alignment.centerRight,
+            child: Padding(
+              padding: const EdgeInsets.only(top: TokensStrip.s1),
+              child: Text(
+                '2 meses grátis',
+                style: FocuxHubTypography.bodyMuted(color: mute),
+              ),
+            ),
           ),
-        ],
         const SizedBox(height: TokensStrip.s3),
         if (fillViewport) Expanded(child: card) else card,
       ],
@@ -337,7 +358,6 @@ class _BillingTabs extends StatelessWidget {
             Expanded(
               child: _TabChip(
                 label: 'Anual',
-                caption: '2 meses grátis',
                 semanticLabel: 'Cobrança anual, 2 meses grátis',
                 selected: period == SubscriptionBillingPeriod.yearly,
                 accent: accent,
@@ -364,11 +384,9 @@ class _TabChip extends StatelessWidget {
     required this.accent,
     required this.mute,
     required this.onTap,
-    this.caption,
   });
 
   final String label;
-  final String? caption;
   final String semanticLabel;
   final bool selected;
   final Color accent;
@@ -409,18 +427,6 @@ class _TabChip extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: labelStyle,
                 ),
-                if (caption != null)
-                  Text(
-                    caption!,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                    style: labelStyle.copyWith(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                      height: 1.1,
-                    ),
-                  ),
               ],
             ),
           ),

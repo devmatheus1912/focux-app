@@ -171,6 +171,15 @@ class FeedRepository {
     return FeedPost.fromJson(r.data);
   }
 
+  Future<FeedPost> editar(int id, String titulo, String conteudo) async {
+    final r = await _client.dio.put(
+      '/api/feed/$id',
+      data: {'titulo': titulo, 'conteudo': conteudo},
+    );
+    throwIfQueuedOffline(r);
+    return FeedPost.fromJson(r.data);
+  }
+
   Future<void> deletar(int id) async =>
       throwIfQueuedOffline(await _client.dio.delete('/api/feed/$id'));
 

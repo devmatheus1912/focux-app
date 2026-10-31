@@ -26,6 +26,7 @@ import '../../planos/providers/plano_features_provider.dart';
 import '../data/qualidade_operacional.dart';
 import '../utils/qualidade_operacional_display.dart';
 import '../widgets/dashboard_section_header.dart';
+import '../../../l10n/pt.dart';
 
 class QualidadeOperacionalScreen extends ConsumerStatefulWidget {
   const QualidadeOperacionalScreen({super.key});
@@ -92,17 +93,17 @@ class _QualidadeOperacionalScreenState
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
 
     return fxScreenA11yScope(
-      label: 'Qualidade operacional',
+      label: ptS.qualidadeQualidadeOperacional,
       child: FxShellScaffold(
         useMesh: true,
         constrainWidth: false,
         appBar: FxShellAppBar(
-          title: 'Qualidade',
+          title: ptS.qualidadeQualidade,
           subtitle: freshnessLabel,
           onBack: () => safePopOrGo(context, '/dashboard/personal'),
           actions: [
             FxHelpIconButton(
-              tooltip: 'Como usar Qualidade',
+              tooltip: ptS.qualidadeComoUsarQualidade,
               onTap: () {
                 unawaited(
                   AnalyticsService.instance.track(
@@ -112,21 +113,21 @@ class _QualidadeOperacionalScreenState
                 );
                 showFxHelpSheet(
                   context,
-                  title: 'Qualidade',
-                  subtitle: 'Como sua operação se compara à referência Focux.',
-                  tips: const [
-                    FxHelpTip('Como calculamos', qualidadeComoCalculamos),
+                  title: ptS.qualidadeQualidade,
+                  subtitle: ptS.qualidadeComoSuaOperacaoSeCompara,
+                  tips: [
+                    FxHelpTip(ptS.alunoHomeAjudaCalculoTitulo, qualidadeComoCalculamos),
                     FxHelpTip(
-                      'Índice',
-                      'Calculado na hora, com seus alunos e mensalidades.',
+                      ptS.qualidadeIndice,
+                      ptS.qualidadeCalculadoNaHoraComSeus,
                     ),
                     FxHelpTip(
-                      'Ticket',
-                      'Valor médio das suas mensalidades.',
+                      ptS.qualidadeTicket,
+                      ptS.qualidadeValorMedioDasSuasMensalidades,
                     ),
                     FxHelpTip(
-                      'Retenção',
-                      'Se a base cair, abra Alunos em risco.',
+                      ptS.qualidadeRetencao,
+                      ptS.qualidadeSeABaseCairAbra,
                     ),
                   ],
                 );
@@ -175,11 +176,11 @@ class _QualidadeOperacionalScreenState
                     const SizedBox(height: 48),
                     FxEmptyState(
                       icon: 'bar-chart-2',
-                      title: 'Sem dados ainda',
+                      title: ptS.qualidadeSemDadosAinda,
                       subtitle:
-                          'Cadastre alunos e registre mensalidades para ver o índice da operação.',
+                          ptS.qualidadeCadastreAlunosERegistreMensalidades,
                       action: FxEmptyAction(
-                        label: 'Ver alunos',
+                        label: ptS.broadcastVerAlunos,
                         onTap: () {
                           unawaited(
                             AnalyticsService.instance.track(
@@ -257,7 +258,7 @@ class _QualidadeBody extends StatelessWidget {
         FxStripCard(
           emphasize: true,
           semanticsLabel:
-              'Índice ${data.score} de 100. ${qualidadeScoreLabel(data.score)}',
+              ptS.qualidadeIndiceDe100(data.score, qualidadeScoreLabel(data.score)),
           child: Row(
             children: [
               SizedBox.square(
@@ -285,13 +286,13 @@ class _QualidadeBody extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Índice Focux',
+                      ptS.qualidadeIndiceFocux,
                       style: FocuxHubTypography.bodyMuted(color: chrome.mute),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       basePequena
-                          ? 'Poucos alunos para medir bem'
+                          ? ptS.qualidadePoucosAlunosParaMedirBem
                           : qualidadeScoreLabel(data.score),
                       style: FocuxHubTypography.cardTitle(color: chrome.ink),
                     ),
@@ -307,7 +308,7 @@ class _QualidadeBody extends StatelessWidget {
           ),
         ),
         const SizedBox(height: TokensStrip.s4),
-        const DashboardSectionHeader(title: 'Referência Focux'),
+        DashboardSectionHeader(title: ptS.qualidadeReferenciaFocux),
         const SizedBox(height: TokensStrip.s2),
         Container(
           padding: const EdgeInsets.all(TokensStrip.s3),
@@ -316,7 +317,7 @@ class _QualidadeBody extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               _LinhaReferencia(
-                rotulo: 'Ticket médio',
+                rotulo: ptS.qualidadeTicketMedio,
                 valor: qualidadeTicketValueLabel(data.ticketPessoal),
                 apoio: ticketHint,
                 fracao:
@@ -326,7 +327,7 @@ class _QualidadeBody extends StatelessWidget {
               ),
               const SizedBox(height: TokensStrip.s3),
               _LinhaReferencia(
-                rotulo: 'Alunos que ficaram',
+                rotulo: ptS.qualidadeAlunosQueFicaram,
                 valor: '${data.retencaoPessoal}%',
                 apoio: retencaoHint,
                 fracao:
@@ -339,16 +340,16 @@ class _QualidadeBody extends StatelessWidget {
         ),
         const SizedBox(height: TokensStrip.s3),
         FxActionRow(
-          titulo: 'Revisar mensalidades',
+          titulo: ptS.qualidadeRevisarMensalidades,
           motivo: ticketHint,
-          verbo: 'Abrir',
+          verbo: ptS.aluno360EvolucaoAjustarTreinoVerbo,
           onTap: () => context.push('/financeiro'),
         ),
         const SizedBox(height: TokensStrip.s2),
         FxActionRow(
-          titulo: 'Ver alunos em risco',
+          titulo: ptS.winbackVerEmRisco,
           motivo: retencaoHint,
-          verbo: 'Abrir',
+          verbo: ptS.aluno360EvolucaoAjustarTreinoVerbo,
           onTap: () => context.push('/retencao'),
         ),
       ],

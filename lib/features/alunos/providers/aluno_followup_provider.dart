@@ -70,7 +70,7 @@ class AlunoFollowUpActions {
     invalidateAlunosListCachesRef(_ref);
     _ref.invalidate(alunoProvider(alunoId));
     _ref.invalidate(aluno360OperacaoBundleProvider(alunoId));
-    _ref.invalidate(dashboardHomeProvider);
+    invalidatePersonalDashboardHomeRef(_ref);
   }
 }
 

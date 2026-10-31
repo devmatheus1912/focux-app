@@ -15,6 +15,7 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../l10n/pt.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';

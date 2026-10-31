@@ -80,6 +80,19 @@ class FxShellScaffold extends StatelessWidget {
     if (!embedded) {
       content = FxPremiumEntrance(child: content);
     }
+    if (!embedded && appBar != null) {
+      // O conteúdo some aos poucos sob o cabeçalho, sem corte seco ao rolar.
+      content = ShaderMask(
+        blendMode: BlendMode.dstIn,
+        shaderCallback: (bounds) => LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: const [Colors.transparent, Colors.black],
+          stops: [0, bounds.height <= 0 ? 1 : 8 / bounds.height],
+        ).createShader(bounds),
+        child: content,
+      );
+    }
 
     final scaffold = Scaffold(
       extendBody: extendBody,

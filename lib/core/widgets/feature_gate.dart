@@ -370,8 +370,7 @@ class _LockedScreenState extends ConsumerState<_LockedScreen> {
     try {
       await OnboardingRepository(ref.read(apiClientProvider)).marcarCompleto();
       OnboardingWizardClientCache.clear();
-      DashboardHomeClientCache.clear();
-      ref.invalidate(dashboardHomeProvider);
+      invalidatePersonalDashboardHome(ref);
       ref.invalidate(onboardingStatusProvider);
       AnalyticsService.instance.track(
         ProductEvents.setupWizardCompleted,
