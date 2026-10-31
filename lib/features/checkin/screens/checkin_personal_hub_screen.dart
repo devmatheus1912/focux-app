@@ -253,8 +253,22 @@ class _CheckinSection extends ConsumerWidget {
                   : null,
         ),
         const SizedBox(height: TokensStrip.s2),
-        for (final grupo in checkinPorAluno(items).take(3))
-          _CheckinTile(grupo: grupo),
+        for (final (dia, grupos) in checkinPorDia(items)) ...[
+          Padding(
+            padding: const EdgeInsets.only(
+              top: TokensStrip.s1,
+              bottom: TokensStrip.s1,
+            ),
+            child: Text(
+              dia,
+              style: FocuxHubTypography.bodyMuted(
+                color: fxScreenMute(context),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          for (final grupo in grupos) _CheckinTile(grupo: grupo),
+        ],
       ],
     );
   }

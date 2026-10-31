@@ -36,6 +36,18 @@ void main() {
     expect(broadcastConfirmTitle('PRESENCIAL'), 'Enviar para presencial?');
   });
 
+  test('avisa quem está sem tipo de consultoria', () {
+    expect(broadcastSemTipoAviso(const {}), isNull);
+    expect(
+      broadcastSemTipoAviso(const {'TODOS': 3, 'ONLINE': 3}),
+      isNull,
+    );
+    expect(
+      broadcastSemTipoAviso(const {'TODOS': 4, 'ONLINE': 2}),
+      contains('2 alunos'),
+    );
+  });
+
   test('broadcastEnviosCaption', () {
     expect(broadcastEnviosCaption(0), 'Nenhum envio ainda');
     expect(broadcastEnviosCaption(1), '1 envio');

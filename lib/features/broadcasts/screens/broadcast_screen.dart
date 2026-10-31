@@ -341,6 +341,15 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
                     onSelecionar:
                         (publico) => setState(() => _publicoAlvo = publico),
                   ),
+                  if (broadcastSemTipoAviso({
+                    for (final e in alcance.entries) e.key: e.value.total,
+                  }) case final aviso?) ...[
+                    const SizedBox(height: TokensStrip.s2),
+                    Text(
+                      aviso,
+                      style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                    ),
+                  ],
                   ],
                   const SizedBox(height: FxSettingsLayout.groupGap),
                   historicoAsync.when(

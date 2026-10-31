@@ -123,7 +123,7 @@ abstract final class Aluno360Layout {
       color:
           isDark
               ? Colors.white.withValues(alpha: 0.04)
-              : chrome.cardFill.withValues(alpha: 0.85),
+              : chrome.cardFill,
       borderRadius: BorderRadius.circular(12),
     );
   }

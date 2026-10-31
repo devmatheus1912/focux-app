@@ -21,6 +21,20 @@ String broadcastPublicoChip(String publico, int? total) {
   return total == null ? label : '$label $total';
 }
 
+/// "Todos" inclui quem ainda está sem tipo de consultoria.
+String? broadcastSemTipoAviso(Map<String, int> totais) {
+  final todos = totais['TODOS'];
+  if (todos == null) return null;
+  final comTipo = totais.entries
+      .where((e) => e.key != 'TODOS')
+      .fold<int>(0, (soma, e) => soma + e.value);
+  final semTipo = todos - comTipo;
+  if (semTipo <= 0) return null;
+  return semTipo == 1
+      ? '1 aluno está sem tipo de consultoria e só recebe em Todos.'
+      : '$semTipo alunos estão sem tipo de consultoria e só recebem em Todos.';
+}
+
 const broadcastAtalhos = <({String nome, String titulo, String mensagem})>[
   (
     nome: 'Lembrete de treino',

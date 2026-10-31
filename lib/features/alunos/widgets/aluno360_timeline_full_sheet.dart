@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_action_link.dart';
@@ -150,19 +151,12 @@ class _Aluno360TimelineFullSheetState
                     subtitle: 'Escolha outro filtro para ver mais sinais.',
                   );
                 }
-                final linhas = <Timeline360Item?>[];
-                final dias = <int, String>{};
-                String? atual;
+                final dias = <(String, List<Timeline360Item>)>[];
                 for (final item in items) {
                   final dia = timeline360DiaLabel(item.at);
-                  if (dia != atual) {
-                    dias[linhas.length] = dia;
-                    linhas.add(null);
-                    atual = dia;
-                  }
-                  linhas.add(item);
+                  if (dias.isEmpty || dias.last.$1 != dia) dias.add((dia, []));
+                  dias.last.$2.add(item);
                 }
-                final rodape = state.loadingMore || comBotao ? 1 : 0;
                 return NotificationListener<ScrollNotification>(
                   onNotification: (notification) {
                     if (!automatico ||
@@ -173,94 +167,119 @@ class _Aluno360TimelineFullSheetState
                     ref.read(provider.notifier).loadMore();
                     return false;
                   },
-                  child: ListView.builder(
-                    itemCount: linhas.length + rodape,
-                    itemBuilder: (context, index) {
-                      if (index >= linhas.length) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          child: Center(
-                            child:
-                                state.loadingMore
-                                    ? const FxLoading(size: 22, strokeWidth: 2)
-                                    : FxActionLink(
-                                      label: 'Carregar mais',
-                                      onTap:
-                                          () =>
-                                              ref
-                                                  .read(provider.notifier)
-                                                  .loadMore(),
-                                    ),
-                          ),
-                        );
-                      }
-                      final item = linhas[index];
-                      if (item == null) {
-                        return Padding(
-                          padding: const EdgeInsets.fromLTRB(
-                            TokensStrip.s3,
-                            TokensStrip.s3,
-                            TokensStrip.s3,
-                            TokensStrip.s1,
-                          ),
-                          child: DashboardSectionHeader(title: dias[index]!),
-                        );
-                      }
-                      return Aluno360TimelineTileEntrance(
-                        index: index,
-                        child: DecoratedBox(
-                          decoration:
-                              Aluno360Layout.timelineModalTileDecoration(
-                                context,
-                                isDark: isDark,
+                  child: CustomScrollView(
+                    slivers: [
+                      for (final (dia, doDia) in dias)
+                        SliverMainAxisGroup(
+                          slivers: [
+                            PinnedHeaderSliver(
+                              child: ColoredBox(
+                                color: ShellChrome.of(context).sheetFill,
+                                child: Padding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                    TokensStrip.s3,
+                                    TokensStrip.s3,
+                                    TokensStrip.s3,
+                                    TokensStrip.s1,
+                                  ),
+                                  child: DashboardSectionHeader(title: dia),
+                                ),
                               ),
-                          child: Timeline360Tile(
-                            item: item,
-                            isDark: isDark,
-                            accent: primary,
-                            alunoFirstName: aluno.nome.split(' ').first,
-                            showSpineBelow:
-                                index < linhas.length - 1 &&
-                                linhas[index + 1] != null,
-                            inkWell: true,
-                            soHora: true,
-                            onExpandableTap: (tileContext, item) {
-                              final host = context;
-                              Navigator.of(tileContext).pop();
-                              WidgetsBinding.instance.addPostFrameCallback((_) {
-                                if (!host.mounted) return;
-                                showTimeline360BodySheet(
-                                  host,
-                                  item,
-                                  accent: primary,
-                                  isDark: isDark,
-                                  alunoId: aluno.id,
-                                );
-                              });
-                            },
-                            onRouteTap: (tileContext, item) {
-                              final link = resolveTimeline360DeepLinkForPersonal(
-                                link: item.deepLink,
-                                alunoId: aluno.id,
-                              );
-                              if (link.isEmpty) return;
-                              final host = context;
-                              Navigator.of(tileContext).pop();
-                              WidgetsBinding.instance.addPostFrameCallback((_) {
-                                if (!host.mounted) return;
-                                host.push(link);
-                              });
-                            },
+                            ),
+                            SliverList.builder(
+                              itemCount: doDia.length,
+                              itemBuilder:
+                                  (context, i) => _linha(
+                                    context,
+                                    doDia[i],
+                                    index: i,
+                                    separador: i < doDia.length - 1,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      if (state.loadingMore || comBotao)
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            child: Center(
+                              child:
+                                  state.loadingMore
+                                      ? const FxLoading(size: 22, strokeWidth: 2)
+                                      : FxActionLink(
+                                        label: 'Carregar mais',
+                                        onTap:
+                                            () =>
+                                                ref
+                                                    .read(provider.notifier)
+                                                    .loadMore(),
+                                      ),
+                            ),
                           ),
                         ),
-                      );
-                    },
+                    ],
                   ),
                 );
               },
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _linha(
+    BuildContext context,
+    Timeline360Item item, {
+    required int index,
+    required bool separador,
+  }) {
+    final aluno = widget.aluno;
+    final primary = widget.primary;
+    final isDark = widget.isDark;
+    return Aluno360TimelineTileEntrance(
+      index: index,
+      child: DecoratedBox(
+        decoration: Aluno360Layout.timelineModalTileDecoration(
+          context,
+          isDark: isDark,
+        ),
+        child: Timeline360Tile(
+          item: item,
+          isDark: isDark,
+          accent: primary,
+          alunoFirstName: aluno.nome.split(' ').first,
+          showSpineBelow: separador,
+          inkWell: true,
+          soHora: true,
+          onExpandableTap: (tileContext, item) {
+            final host = context;
+            Navigator.of(tileContext).pop();
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!host.mounted) return;
+              showTimeline360BodySheet(
+                host,
+                item,
+                accent: primary,
+                isDark: isDark,
+                alunoId: aluno.id,
+              );
+            });
+          },
+          onRouteTap: (tileContext, item) {
+            final link = resolveTimeline360DeepLinkForPersonal(
+              link: item.deepLink,
+              alunoId: aluno.id,
+            );
+            if (link.isEmpty) return;
+            final host = context;
+            Navigator.of(tileContext).pop();
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!host.mounted) return;
+              host.push(link);
+            });
+          },
+        ),
       ),
     );
   }

@@ -104,7 +104,7 @@ List<EngajamentoLinha> engajamentoLinhasPorDia(
   return linhas;
 }
 
-enum EngajamentoTreinoEstado { feito, cancelado, aberto }
+enum EngajamentoTreinoEstado { feito, parcial, cancelado, aberto }
 
 bool engajamentoEhTreino(EventoEngajamento e) {
   switch (e.tipo.trim().toUpperCase()) {
@@ -124,6 +124,7 @@ bool engajamentoEhMensagem(EventoEngajamento e) =>
 EngajamentoTreinoEstado engajamentoTreinoEstado(EventoEngajamento e) {
   final bruto = (e.status ?? e.descricao).toUpperCase();
   if (bruto.contains('CANCELADO')) return EngajamentoTreinoEstado.cancelado;
+  if (bruto.contains('PARCIAL')) return EngajamentoTreinoEstado.parcial;
   if (bruto.contains('EM_ANDAMENTO') || bruto.contains('EM ANDAMENTO')) {
     return EngajamentoTreinoEstado.aberto;
   }
@@ -134,7 +135,7 @@ bool _treinoFeito(EventoEngajamento e) =>
     engajamentoEhTreino(e) &&
     engajamentoTreinoEstado(e) == EngajamentoTreinoEstado.feito;
 
-/// Cancelado e em andamento não contam como treino.
+/// Parcial, cancelado e em andamento ficam fora, como na aderência.
 int engajamentoTreinosCount(Iterable<EventoEngajamento> eventos) =>
     eventos.where(_treinoFeito).length;
 
@@ -192,8 +193,9 @@ List<({DateTime dia, EngajamentoTreinoEstado? estado})> engajamentoCalendario(
     final quando = _quando(e);
     final estado = engajamentoTreinoEstado(e);
     if (quando == null || estado == EngajamentoTreinoEstado.aberto) continue;
-    // Feito vence cancelado no mesmo dia.
-    if (porDia[_dia(quando)] != EngajamentoTreinoEstado.feito) {
+    // Vale o melhor do dia: feito, depois parcial, depois cancelado.
+    final atual = porDia[_dia(quando)];
+    if (atual == null || estado.index < atual.index) {
       porDia[_dia(quando)] = estado;
     }
   }

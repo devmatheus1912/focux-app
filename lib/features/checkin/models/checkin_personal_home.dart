@@ -6,6 +6,7 @@ class CheckinPersonalItem {
     required this.treinoNome,
     this.fotoUrl,
     this.iniciadoEm,
+    this.parcial = false,
   });
 
   final int id;
@@ -14,6 +15,7 @@ class CheckinPersonalItem {
   final String treinoNome;
   final String? fotoUrl;
   final DateTime? iniciadoEm;
+  final bool parcial;
 
   factory CheckinPersonalItem.fromJson(Map<String, dynamic> json) {
     return CheckinPersonalItem(
@@ -23,6 +25,7 @@ class CheckinPersonalItem {
       treinoNome: json['treinoNome'] as String? ?? '',
       fotoUrl: json['fotoUrl'] as String?,
       iniciadoEm: DateTime.tryParse(json['iniciadoEm']?.toString() ?? ''),
+      parcial: json['parcial'] as bool? ?? false,
     );
   }
 }

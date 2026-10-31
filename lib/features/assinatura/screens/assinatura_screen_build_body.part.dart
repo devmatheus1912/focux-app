@@ -93,6 +93,9 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
       final s = S.of(context);
       final proximo = paywallNextTier;
       final loja = subscriptionUsesNativeStore;
+      // Acesso dado por fora da loja não tem assinatura para gerenciar.
+      final daLoja =
+          (ref.read(perfilProvider).value?.iapPlatform ?? '').trim().isNotEmpty;
       return RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(paywallHomeProvider);
@@ -119,7 +122,10 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
                     : PaywallCatalog.comparisonFreeVsPro),
           ),
           gerenciarLabel: 'Gerenciar assinatura na loja',
-          onGerenciar: loja && !_loadingCheckout ? _openSubscriptionManagement : null,
+          onGerenciar:
+              loja && daLoja && !_loadingCheckout
+                  ? _openSubscriptionManagement
+                  : null,
           onRestaurar: loja ? _restorePurchases : null,
           onTermos:
               () => _showAssinaturaTermosSheet(

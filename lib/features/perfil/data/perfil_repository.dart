@@ -120,6 +120,9 @@ class PerfilPersonal {
   /// Vincula a compra na loja a esta conta (appAccountToken / obfuscatedAccountId).
   final String? iapAccountToken;
 
+  /// Loja da assinatura; nulo = acesso que não veio da loja.
+  final String? iapPlatform;
+
   PerfilPersonal({
     required this.id,
     required this.nome,
@@ -175,6 +178,7 @@ class PerfilPersonal {
     this.needsBrandPublicIdentity = false,
     this.resumoMensal,
     this.iapAccountToken,
+    this.iapPlatform,
   });
 
   factory PerfilPersonal.fromJson(Map<String, dynamic> json) => PerfilPersonal(
@@ -254,6 +258,7 @@ class PerfilPersonal {
             )
             : null,
     iapAccountToken: json['iapAccountToken'] as String?,
+    iapPlatform: json['iapPlatform'] as String?,
   );
 }
 

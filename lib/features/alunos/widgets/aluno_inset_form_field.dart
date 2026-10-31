@@ -28,7 +28,7 @@ class AlunoInsetFormField extends StatelessWidget {
     this.rotuloVisivel = false,
     this.obrigatorio = false,
     this.ajuda,
-    this.rotuloFlutuante = false,
+    this.rotuloFlutuante = true,
   });
 
   /// Rótulo pequeno acima do valor, dentro da linha: o campo cheio continua

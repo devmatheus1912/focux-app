@@ -24,6 +24,7 @@ class CheckinDoAluno {
     required this.fotoUrl,
     required this.treinos,
     required this.ultimoEm,
+    this.parciais = 0,
   });
 
   final int alunoId;
@@ -31,6 +32,7 @@ class CheckinDoAluno {
   final String? fotoUrl;
   final List<String> treinos;
   final DateTime? ultimoEm;
+  final int parciais;
 }
 
 List<CheckinDoAluno> checkinPorAluno(List<CheckinPersonalItem> itens) {
@@ -46,14 +48,52 @@ List<CheckinDoAluno> checkinPorAluno(List<CheckinPersonalItem> itens) {
         fotoUrl: lista.first.fotoUrl,
         treinos: [for (final i in lista) i.treinoNome],
         ultimoEm: lista.first.iniciadoEm,
+        parciais: lista.where((i) => i.parcial).length,
       ),
   ];
 }
 
 String checkinDoAlunoLinha(CheckinDoAluno grupo) {
   final nomes = grupo.treinos.toSet().toList();
-  if (grupo.treinos.length == 1) return nomes.first;
-  return '${grupo.treinos.length} treinos · ${nomes.join(', ')}';
+  final linha =
+      grupo.treinos.length == 1
+          ? nomes.first
+          : '${grupo.treinos.length} treinos · ${nomes.join(', ')}';
+  return switch (grupo.parciais) {
+    0 => linha,
+    1 when grupo.treinos.length == 1 => '$linha · parcial',
+    final n => '$linha · $n parciais',
+  };
+}
+
+/// Dias da semana, do mais recente, cada um com uma linha por aluno.
+List<(String, List<CheckinDoAluno>)> checkinPorDia(
+  List<CheckinPersonalItem> itens, {
+  DateTime? now,
+}) {
+  final ref = now ?? DateTime.now();
+  final hoje = DateTime(ref.year, ref.month, ref.day);
+  final porDia = <DateTime?, List<CheckinPersonalItem>>{};
+  for (final item in itens) {
+    final dt = item.iniciadoEm?.toLocal();
+    final dia = dt == null ? null : DateTime(dt.year, dt.month, dt.day);
+    porDia.putIfAbsent(dia, () => []).add(item);
+  }
+  String rotulo(DateTime? dia) {
+    if (dia == null) return 'Sem data';
+    if (hoje.difference(dia).inDays == 1) return 'Ontem';
+    final d = dia.day.toString().padLeft(2, '0');
+    final m = dia.month.toString().padLeft(2, '0');
+    return '$d/$m';
+  }
+
+  final dias = porDia.keys.toList()
+    ..sort((a, b) {
+      if (a == null) return 1;
+      if (b == null) return -1;
+      return b.compareTo(a);
+    });
+  return [for (final dia in dias) (rotulo(dia), checkinPorAluno(porDia[dia]!))];
 }
 
 String checkinResumoDoDia(CheckinPersonalHomeBundle home) {

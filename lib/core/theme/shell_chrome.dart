@@ -22,8 +22,8 @@ class ShellPalette {
 
   Color get sheetFill =>
       isDark
-          ? EagleTokens.darkBg.withValues(alpha: 0.96)
-          : Colors.white.withValues(alpha: 0.98);
+          ? EagleTokens.darkBg
+          : Colors.white;
 
   BoxDecoration panel({
     double radius = TokensStrip.rCard,

@@ -30,7 +30,7 @@ void main() {
       allOf(contains('Carregar mais'), contains('onTapOutside')),
     );
     expect(screen, contains('FxSatelliteListTile'));
-    expect(screen, contains('take(3)'));
+    expect(screen, contains('checkinPorDia'));
     expect(screen, contains('Ver todos'));
     expect(screen, contains('keyboardDismissBehavior'));
     expect(screen, isNot(contains('FxSettingsGroupedList')));

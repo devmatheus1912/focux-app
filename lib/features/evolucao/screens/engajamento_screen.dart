@@ -464,6 +464,7 @@ class _CalendarioTreinos extends StatelessWidget {
     final feitos =
         dias.where((d) => d.estado == EngajamentoTreinoEstado.feito).length;
     final cor = chrome.isDark ? EagleTokens.warnDark : EagleTokens.warn;
+    final parcial = primary.withValues(alpha: 0.4);
 
     Widget ponto(Color fundo) => Container(
       width: 14,
@@ -495,6 +496,7 @@ class _CalendarioTreinos extends StatelessWidget {
                   for (final d in dias.skip(semana * 7).take(7))
                     ponto(switch (d.estado) {
                       EngajamentoTreinoEstado.feito => primary,
+                      EngajamentoTreinoEstado.parcial => parcial,
                       EngajamentoTreinoEstado.cancelado => cor,
                       _ => chrome.line,
                     }),
@@ -505,6 +507,8 @@ class _CalendarioTreinos extends StatelessWidget {
             Row(
               children: [
                 legenda(primary, 'Treinou'),
+                const SizedBox(width: TokensStrip.s3),
+                legenda(parcial, 'Parcial'),
                 const SizedBox(width: TokensStrip.s3),
                 legenda(cor, 'Cancelou'),
               ],

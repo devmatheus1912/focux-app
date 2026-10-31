@@ -115,6 +115,16 @@ void main() {
     expect(dias.first.estado, isNull);
   });
 
+  test('parcial aparece no calendário e não conta como treino', () {
+    final now = DateTime(2026, 9, 10, 18);
+    final eventos = [treino('2026-09-10T08:00:00', 'PARCIAL')];
+    expect(engajamentoTreinosCount(eventos), 0);
+    expect(
+      engajamentoCalendario(eventos, now: now).last.estado,
+      EngajamentoTreinoEstado.parcial,
+    );
+  });
+
   test('conversa avisa quando o aluno falou por último', () {
     final now = DateTime(2026, 9, 10, 18);
     EventoEngajamento msg(String dataHora, String remetente) =>
