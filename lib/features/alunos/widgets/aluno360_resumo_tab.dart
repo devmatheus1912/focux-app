@@ -6,7 +6,6 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_action_row.dart';
-import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_metric_strip.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../health/data/health_repository.dart';
@@ -16,7 +15,7 @@ import '../data/aluno_followup_store.dart';
 import '../providers/aluno_detail_providers.dart';
 import '../utils/aluno360_operacao_logic.dart';
 import '../utils/aluno360_resumo_agora.dart';
-import 'aluno360_copilot_card.dart';
+import 'aluno360_copilot_folha.dart';
 import 'aluno360_ficha_card.dart';
 import 'aluno360_follow_up_card.dart';
 import 'aluno360_acao_sticky.dart';
@@ -58,33 +57,6 @@ class Aluno360ResumoTab extends ConsumerWidget {
 
   /// Para teste (golden estável); por padrão, agora.
   final DateTime? hoje;
-
-  void _abrirCopiloto(BuildContext context) {
-    showFxHomeSheet<void>(
-      context,
-      builder: (ctx) {
-        final escuro = Theme.of(ctx).brightness == Brightness.dark;
-        return FxHomeSheetSurface(
-          isDark: escuro,
-          child: ListView(
-            shrinkWrap: true,
-            children: [
-              FxHomeSheetHandle(isDark: escuro),
-              const SizedBox(height: TokensStrip.s4),
-              Aluno360CopilotCard(
-                aluno: aluno,
-                alunoId: alunoId,
-                resumoAsync: autonomiaResumoAsync,
-                proximaAcao360: proximaAcao360,
-                hasOpenCopilotTask360: hasOpenCopilotTask360,
-                isDark: escuro,
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
 
   List<FxMetric> _metricas(
     BuildContext context,
@@ -179,7 +151,15 @@ class Aluno360ResumoTab extends ConsumerWidget {
           titulo: s.alunoResumoCopilotoTitulo,
           motivo: acaoCopiloto,
           verbo: s.alunoResumoCopilotoVerbo,
-          onTap: () => _abrirCopiloto(context),
+          onTap: () => showAluno360CopilotFolha(
+            context,
+            aluno: aluno,
+            snapshot: snapshot!,
+            acao: acaoCopiloto,
+            motivo: snapshot.effectiveProxima?.motivo,
+            proxima: snapshot.effectiveProxima,
+            tarefaCriada: hasOpenCopilotTask360,
+          ),
         ),
       if (temRecuperacao)
         Aluno360RecoveryInsightCard(

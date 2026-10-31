@@ -225,11 +225,18 @@ class CheckinSerieCard extends StatelessWidget {
         if (m.maxHeight < alturaMinimaMidia) {
           return Center(child: _botaoVerVideo(context));
         }
-        // Na proporção do vídeo, sem corte; o que sobra vira respiro abaixo.
+        // Na proporção do vídeo, sem corte: fica centrado num palco que ocupa
+        // todo o espaço livre, sem vão entre o vídeo e o cartão.
         return Stack(
           children: [
             Positioned.fill(
-              child: _inlineDemoPreview(ee: ee, brand: brand, dark: dark),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: brand.withValues(alpha: dark ? 0.14 : 0.06),
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: _inlineDemoPreview(ee: ee, brand: brand, dark: dark),
+              ),
             ),
             if (onDicas != null)
               Positioned(

@@ -27,7 +27,9 @@ void main() {
       expect(divisoesSugeridas(3).first.rotulo, 'ABC');
       expect(divisoesSugeridas(4).first.rotulo, 'AB · Superior/Inferior');
       expect(divisoesSugeridas(5).first.rotulo, 'ABC');
-      expect(divisoesSugeridas(6).first.rotulo, 'ABC · Empurrar/Puxar/Pernas');
+      expect(divisoesSugeridas(6).first.rotulo, 'PPL');
+      expect(divisoesSugeridas(3)[1].rotulo, 'PPL');
+      expect(divisoesSugeridas(5)[1].rotulo, 'PPL');
       expect(divisoesSugeridas(7).first.rotulo, 'ABC');
       expect(divisoesSugeridas(1), isEmpty);
     });
@@ -49,7 +51,7 @@ void main() {
       expect(divisoesSugeridas(4).first.sessoes, ['A · Superior', 'B · Inferior']);
       expect(divisoesSugeridas(2).first.sessoes, ['Treino A', 'Treino B']);
       expect(divisoesSugeridas(2)[1].sessoes, ['Full body']);
-      expect(divisoesSugeridas(5)[2].sessoes, ['Treino A', 'Treino B', 'Treino C', 'Treino D', 'Treino E']);
+      expect(divisoesSugeridas(5)[3].sessoes, ['Treino A', 'Treino B', 'Treino C', 'Treino D', 'Treino E']);
     });
 
     test('outras divisões trazem as de foco', () {

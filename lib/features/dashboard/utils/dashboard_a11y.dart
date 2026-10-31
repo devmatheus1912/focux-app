@@ -17,14 +17,3 @@ String dashboardShortcutSemanticsLabel(DashboardToolShortcut shortcut) {
     _ => shortcut.displayFeatureName,
   };
 }
-
-String dashboardAttentionItemSemantics({
-  required int index,
-  required int total,
-  required String nome,
-  required String titulo,
-  required String subt,
-  required String acao,
-}) {
-  return '$index de $total. $nome, $titulo. $subt. Toque para $acao';
-}

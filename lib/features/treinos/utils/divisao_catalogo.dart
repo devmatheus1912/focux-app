@@ -58,14 +58,14 @@ Divisao get _fullBody => _split('fullbody-iniciante', 'Full body');
 Divisao get _fullBodyAb => _split('fullbody-ab', 'AB · Full body');
 Divisao get _superiorInferior => _split('upper-lower', 'AB · Superior/Inferior');
 Divisao get _abc => _split('bro-split', 'ABC');
-Divisao get _ppl => _split('ppl', 'ABC · Empurrar/Puxar/Pernas');
+Divisao get _ppl => _split('ppl', 'PPL');
 
 /// Sugeridas por número de dias. A primeira é a recomendada.
 List<Divisao> divisoesSugeridas(int dias) => switch (dias) {
   2 => [_fullBodyAb, _fullBody],
-  3 => [_abc, _generica(3, rotulo: 'ABC · Full body'), _fullBodyAb],
+  3 => [_abc, _ppl, _generica(3, rotulo: 'ABC · Full body'), _fullBodyAb],
   4 => [_superiorInferior, _generica(4), _abc],
-  5 => [_abc, _generica(4), _generica(5)],
+  5 => [_abc, _ppl, _generica(4), _generica(5)],
   6 => [_ppl, _generica(4), _generica(6)],
   7 => [_abc, _generica(4)],
   _ => const [],

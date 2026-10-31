@@ -36,9 +36,7 @@ String _alunoDetailLibrarySource() {
   const outreachSheetFile =
       'lib/features/alunos/widgets/aluno_outreach_message_sheet.dart';
   const copilotCardFile =
-      'lib/features/alunos/widgets/aluno360_copilot_card.dart';
-  const copilotSupportFile =
-      'lib/features/alunos/widgets/aluno360_copilot_support.dart';
+      'lib/features/alunos/widgets/aluno360_copilot_folha.dart';
   const stickyCtaFile =
       'lib/features/alunos/widgets/aluno360_acao_sticky.dart';
   const followUpFile =
@@ -57,12 +55,8 @@ String _alunoDetailLibrarySource() {
       'lib/features/alunos/widgets/aluno_delete_confirm_sheet.dart';
   const evolucaoCardFile =
       'lib/features/alunos/widgets/aluno360_evolucao_inteligente_card.dart';
-  const profileGapsSheetFile =
-      'lib/features/alunos/widgets/aluno360_copilot_profile_gaps_sheet.dart';
   const copilotTaskActionsFile =
       'lib/features/alunos/utils/aluno360_copilot_task_actions.dart';
-  const executarButtonFile =
-      'lib/features/alunos/widgets/aluno360_copilot_executar_button.dart';
   const iaRepositoryFile = 'lib/features/ia/data/ia_repository.dart';
   const detailEvolucaoTabFile =
       'lib/features/alunos/widgets/aluno360_detail_evolucao_tab.dart';
@@ -98,19 +92,16 @@ String _alunoDetailLibrarySource() {
   final fichaCard = File(fichaCardFile).readAsStringSync();
   final resumoAgora = File(resumoAgoraFile).readAsStringSync();
   final menuAcoes = File(menuAcoesFile).readAsStringSync();
-  final copilotSupport = File(copilotSupportFile).readAsStringSync();
   final stickyCta = File(stickyCtaFile).readAsStringSync();
   final followUp = File(followUpFile).readAsStringSync();
   final commitmentSheet = File(commitmentSheetFile).readAsStringSync();
   final copilotTaskActions = File(copilotTaskActionsFile).readAsStringSync();
-  final executarButton = File(executarButtonFile).readAsStringSync();
   final ferramentasModules = File(ferramentasModulesFile).readAsStringSync();
   final timelineCard = File(timelineCardFile).readAsStringSync();
   final insetEmptyActions = File(insetEmptyActionsFile).readAsStringSync();
   final alunoActions = File(alunoActionsFile).readAsStringSync();
   final deleteConfirmSheet = File(deleteConfirmSheetFile).readAsStringSync();
   final evolucaoCard = File(evolucaoCardFile).readAsStringSync();
-  final profileGapsSheet = File(profileGapsSheetFile).readAsStringSync();
   final iaRepository = File(iaRepositoryFile).readAsStringSync();
   final detailEvolucaoTab = File(detailEvolucaoTabFile).readAsStringSync();
   final detailFerramentasTab =
@@ -123,14 +114,14 @@ String _alunoDetailLibrarySource() {
   final alunoCoreModels = File(alunoCoreModelsFile).readAsStringSync();
   final aluno360Models = File(aluno360ModelsFile).readAsStringSync();
   final alunoHomeModels = File(alunoHomeModelsFile).readAsStringSync();
-  return '$main\n$statePart\n$providers\n$heroWidget\n$heroRiskStyle\n$headerWidget\n$operacaoTab\n$operacaoLogic\n$copilotLogic\n$copilotExecutarLogic\n$copilotOutreachLogic\n$copilotTextLogic\n$outreachDisplay\n$outreachSheet\n$copilotCard\n$fichaCard\n$resumoAgora\n$menuAcoes\n$copilotSupport\n$stickyCta\n$followUp\n$commitmentSheet\n$copilotTaskActions\n$executarButton\n$ferramentasModules\n$timelineCard\n$insetEmptyActions\n$alunoActions\n$deleteConfirmSheet\n$evolucaoCard\n$profileGapsSheet\n$iaRepository\n$detailEvolucaoTab\n$detailFerramentasTab\n$recoveryInsight\n$weightActivity\n$detailLoadingSkeleton\n$alunoRepository\n$alunoCoreModels\n$aluno360Models\n$alunoHomeModels';
+  return '$main\n$statePart\n$providers\n$heroWidget\n$heroRiskStyle\n$headerWidget\n$operacaoTab\n$operacaoLogic\n$copilotLogic\n$copilotExecutarLogic\n$copilotOutreachLogic\n$copilotTextLogic\n$outreachDisplay\n$outreachSheet\n$copilotCard\n$fichaCard\n$resumoAgora\n$menuAcoes\n$stickyCta\n$followUp\n$commitmentSheet\n$copilotTaskActions\n$ferramentasModules\n$timelineCard\n$insetEmptyActions\n$alunoActions\n$deleteConfirmSheet\n$evolucaoCard\n$iaRepository\n$detailEvolucaoTab\n$detailFerramentasTab\n$recoveryInsight\n$weightActivity\n$detailLoadingSkeleton\n$alunoRepository\n$alunoCoreModels\n$aluno360Models\n$alunoHomeModels';
 }
 
 void main() {
   test('aluno detail exposes 360 view and prescriptive copilot actions', () {
     final screen = _alunoDetailLibrarySource();
 
-    expect(screen, contains('class Aluno360CopilotCard'));
+    expect(screen, contains('showAluno360CopilotFolha'));
     expect(screen, contains('Aluno 360'));
     expect(screen, contains('class Aluno360TimelineCard'));
     expect(screen, contains("'Linha do tempo'"));
@@ -148,25 +139,6 @@ void main() {
     expect(screen, contains('proximaAcao(alunoId)'));
     expect(screen, contains('salvarAcaoCopiloto'));
     expect(screen, contains('commandCenterProvider'));
-    expect(screen, contains('class Aluno360CopilotSignalTile'));
-    expect(
-      File(
-        'lib/features/alunos/widgets/aluno360_copilot_card.dart',
-      ).readAsStringSync(),
-      isNot(contains('Aluno360CopilotSignalsGrid')),
-    );
-    expect(
-      File(
-        'lib/features/alunos/widgets/aluno360_copilot_prescription.dart',
-      ).readAsStringSync(),
-      contains('class Aluno360CopilotPrescription'),
-    );
-    expect(
-      File(
-        'lib/features/alunos/utils/aluno360_copilot_logic.dart',
-      ).readAsStringSync(),
-      contains('resolveCopilotAcao'),
-    );
     expect(
       File(
         'lib/features/alunos/utils/aluno360_copilot_outreach_logic.dart',
@@ -213,7 +185,6 @@ void main() {
       ),
     );
     expect(screen, contains('executarAcaoCopiloto'));
-    expect(screen, contains('resolveCopilotExecutarAcao'));
     expect(
       File(
         'lib/features/alunos/widgets/aluno360_copilot_executar_confirm.dart',
@@ -488,12 +459,6 @@ void main() {
     );
     expect(
       File(
-        'lib/features/alunos/widgets/aluno360_copilot_executar_button.dart',
-      ).readAsStringSync(),
-      contains('class Aluno360CopilotExecutarAcaoButton'),
-    );
-    expect(
-      File(
         'lib/features/alunos/utils/aluno360_copilot_task_actions.dart',
       ).readAsStringSync(),
       contains('criarTarefaCopilotoFromAluno360'),
@@ -588,13 +553,6 @@ void main() {
         contains('Contato feito'),
         contains('Combinar sono'),
       ),
-    );
-    expect(screen, contains('showAluno360CopilotProfileGapsSheet'));
-    expect(
-      File(
-        'lib/features/alunos/widgets/aluno360_copilot_profile_gaps_sheet.dart',
-      ).readAsStringSync(),
-      contains('showFxInsetPickerSheet'),
     );
     expect(screen, contains('Peça um check-in'));
     expect(screen, contains('Quando houver check-in ou chat'));

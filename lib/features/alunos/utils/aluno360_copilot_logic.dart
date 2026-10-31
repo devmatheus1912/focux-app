@@ -3,8 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../ia/models/ia_copilot_proxima_acao.dart';
 import '../data/aluno_repository.dart';
-import '../utils/aluno_display_utils.dart';
-import 'aluno_hero_signal.dart';
 
 export 'aluno360_copilot_executar_logic.dart';
 export 'aluno360_copilot_outreach_logic.dart';
@@ -55,71 +53,20 @@ class CopilotPrescriptionContent {
   final String reason;
 }
 
-/// Contato prioritário esconde título e ação; sem motivo, o card fica vazio.
-bool copilotPrescriptionHasVisibleContent(
-  CopilotPrescriptionContent content, {
-  required bool showTitle,
-  required bool showAction,
-  bool hasPrepareMessage = false,
-}) {
-  if (showTitle && content.title.trim().isNotEmpty) return true;
-  if (showAction && (content.action.trim().isNotEmpty || hasPrepareMessage)) {
-    return true;
-  }
-  return content.reason.trim().isNotEmpty;
-}
-
+/// Os mesmos 8 campos de `FocuxScoreCalculator.cadastroFaltando` no backend.
 int copilotProfileCompletion(Aluno aluno) {
+  bool tem(String? valor) => (valor ?? '').trim().isNotEmpty;
   final fields = [
-    aluno.nome,
-    aluno.email,
-    aluno.telefone,
-    aluno.whatsapp,
-    aluno.objetivo,
-    aluno.genero,
-    aluno.tipoConsultoria,
+    tem(aluno.telefone),
+    tem(aluno.whatsapp),
+    tem(aluno.objetivo),
+    tem(aluno.genero),
+    aluno.peso != null,
+    aluno.altura != null,
+    aluno.dataNascimento != null,
+    tem(aluno.fotoUrl),
   ];
-  final filled =
-      fields.where((value) {
-        if (value == null) return false;
-        return value.trim().isNotEmpty;
-      }).length;
-  return ((filled / fields.length) * 100).round().clamp(0, 100);
-}
-
-String copilotCardTitle({required bool contactPriority}) =>
-    contactPriority ? 'Prioridade do dia' : 'Próxima melhor ação';
-
-Map<String, dynamic> copilotActionFrom360(ProximaAcaoResumo proxima) => {
-  'titulo':
-      proxima.fonte == 'RADAR'
-          ? 'Radar Focux'
-          : proxima.fonte == 'EVOLUCAO'
-          ? 'Evolução inteligente'
-          : proxima.fonte == 'AUTONOMIA'
-          ? 'Autonomia'
-          : proxima.fonte == 'IA'
-          ? 'Sugestão IA'
-          : 'Próxima melhor ação',
-  'acao': proxima.acao,
-  'motivo': proxima.motivo,
-  'fonte': proxima.fonte,
-  'prioridade': proxima.prioridade,
-};
-
-Map<String, dynamic> copilotActionFromIa(IaCopilotProximaAcao action) {
-  final raw = action.rawAcaoOrFallback;
-  final acao = normalizeIaCopilotAcao(raw);
-  final motivoRaw =
-      action.motivo.isEmpty
-          ? 'Gerado com base nos sinais atuais do aluno.'
-          : action.motivo;
-  return {
-    'titulo': 'Sugestão IA',
-    'acao': acao.isEmpty ? cleanCopilotText(raw) : acao,
-    'motivo': formatCopilotIaMotivo(motivoRaw),
-    'fonte': 'IA',
-  };
+  return ((fields.where((ok) => ok).length / fields.length) * 100).round();
 }
 
 /// Merges IA refresh result over Aluno 360 seed for sticky + prescription.
@@ -220,85 +167,6 @@ enum CopilotPriorityCardState {
   errorAi,
 }
 
-bool _copilotSeedHasAction(Map<String, dynamic>? seed360) {
-  final acao = seed360?['acao']?.toString().trim() ?? '';
-  return acao.isNotEmpty;
-}
-
-/// Resolves exclusive display state for the prescription card body.
-CopilotPriorityCardState resolveCopilotPriorityCardState({
-  required Map<String, dynamic>? seed360,
-  required bool forceIa,
-  required AsyncValue<IaCopilotProximaAcao>? iaAsync,
-  required bool iaRefreshing,
-}) {
-  final iaInFlight =
-      iaRefreshing ||
-      (forceIa && iaAsync != null && iaAsync.isLoading && !iaAsync.hasValue);
-
-  if (iaInFlight) {
-    return CopilotPriorityCardState.refreshingAi;
-  }
-
-  if (forceIa && iaAsync != null) {
-    if (iaAsync.hasError && !iaAsync.hasValue) {
-      return CopilotPriorityCardState.errorAi;
-    }
-    if (iaAsync.hasValue) {
-      return CopilotPriorityCardState.showingAi;
-    }
-    return CopilotPriorityCardState.refreshingAi;
-  }
-
-  if (_copilotSeedHasAction(seed360)) {
-    return CopilotPriorityCardState.showingDeterministic;
-  }
-  return CopilotPriorityCardState.idle;
-}
-
-/// Skeleton only when there is no prescription to keep on screen.
-bool copilotPriorityCardAllowsSkeleton(CopilotPriorityCardState state) {
-  return state == CopilotPriorityCardState.idle;
-}
-
-String copilotCardSubtitle({
-  required bool forceIa,
-  required AsyncValue<IaCopilotProximaAcao>? iaAsync,
-  required bool resumoLoading,
-  bool compact = false,
-  bool iaRefreshing = false,
-  bool bundleLoading = false,
-  bool bundleRefreshing = false,
-}) {
-  if (bundleLoading) {
-    return compact ? 'Sincronizando…' : 'Sincronizando Aluno 360…';
-  }
-  if (bundleRefreshing) {
-    return compact ? 'Atualizando 360…' : 'Atualizando sinais do Aluno 360…';
-  }
-  if (iaRefreshing) {
-    return compact ? 'Atualizando IA…' : 'Atualizando sugestão com IA…';
-  }
-  if (forceIa && iaAsync != null) {
-    return iaAsync.when(
-      loading: () => compact ? 'Gerando com IA…' : 'Gerando sugestão com IA…',
-      error:
-          (_, __) =>
-              compact
-                  ? 'Aluno 360 · IA indisponível'
-                  : 'Sugestão do Aluno 360 · IA indisponível agora',
-      data:
-          (_) =>
-              compact
-                  ? 'Sugestão IA · toque em atualizar'
-                  : 'Atualizado com IA · toque em atualizar para regenerar',
-    );
-  }
-  if (resumoLoading) {
-    return compact ? 'Carregando perfil…' : 'Carregando sinais do perfil…';
-  }
-  return 'Sugestão com base no perfil de hoje.';
-}
 
 String copilotDisplayAction(Aluno aluno, String acao) {
   final normalized = normalizeIaCopilotAcao(acao);
@@ -341,36 +209,6 @@ String copilotPrescriptionFullAction(Aluno aluno, String rawAcao) {
   return copilotDisplayAction(aluno, rawAcao);
 }
 
-String copilotPrescriptionDisplayAction(
-  Aluno aluno,
-  String rawAcao, {
-  bool wearableRelevant = true,
-}) {
-  final sanitized = sanitizeCopilotAcaoWearable(
-    rawAcao,
-    wearableRelevant: wearableRelevant,
-  );
-  final full = copilotPrescriptionFullAction(aluno, sanitized);
-  final lower = full.toLowerCase();
-
-  if (wearableRelevant &&
-      copilotAcaoMencionaWearable(full) &&
-      (acaoSugereChat(full) || isRoboticCopilotContactCopy(full))) {
-    return 'Retomar contato e pedir sync do wearable.';
-  }
-  if (acaoSugereChat(full) ||
-      isRoboticCopilotContactCopy(full) ||
-      lower.contains('paralisa') ||
-      lower.contains('paralis')) {
-    return copilotCoachContactPrescription(aluno, acao: full);
-  }
-
-  final templated = copilotDisplayAction(aluno, sanitized);
-  if (isRoboticCopilotContactCopy(full)) return templated;
-  if (templated != full && full.length > 72) return templated;
-  if (full.length <= 72) return full;
-  return templated;
-}
 
 const _stickyLabelMax = 32;
 
@@ -446,54 +284,13 @@ String copilotStickyLabel(
   return truncateCopilotStickyLabel(copilotDisplayAction(aluno, cleaned));
 }
 
-List<CopilotProfileGap> copilotProfileGapsForCard(Aluno aluno) {
-  final gaps = resolveCopilotProfileGaps(aluno);
-  if (alunoObjectiveIsDefined(aluno.objetivo)) return gaps;
-  return gaps.where((gap) => gap.title != 'Objetivo').toList(growable: false);
-}
-
-String copilotProfileGapsButtonLabel(Aluno aluno) {
-  final gaps = copilotProfileGapsForCard(aluno);
-  if (gaps.length > 1) return 'Resolver lacunas';
-  if (gaps.isEmpty) return 'Completar perfil';
-  return 'Completar ${gaps.first.title.toLowerCase()}';
-}
-
-CopilotPrescriptionContent contactPriorityPrescriptionContent(
-  Aluno aluno, {
-  bool statusMetricsVisible = false,
-  bool hideMetricFooter = false,
-}) {
-  final firstName =
-      aluno.nome.trim().isEmpty
-          ? 'o aluno'
-          : aluno.nome.trim().split(' ').first;
-  final aderencia = aluno.aderenciaPercent;
-  final reason = sanitizeCopilotPrescriptionReason(
-    aluno.emRisco
-        ? '$riscoOperacionalLabel · aderência ${aderencia ?? 0}% nos últimos 30 dias.'
-        : aderencia != null && aderencia <= 0
-        ? 'Sem check-ins recentes · priorize contato antes de evoluir o plano.'
-        : 'Sinais do perfil pedem contato direto hoje.',
-    statusMetricsVisible: statusMetricsVisible,
-    hideMetricFooter: hideMetricFooter,
-  );
-  return CopilotPrescriptionContent(
-    title: 'Prioridade do dia',
-    action: 'Retomar contato com $firstName e checar como está.',
-    reason: reason,
-  );
-}
 
 String copilotFallbackAction(Aluno aluno, AlunoAutonomiaResumo? resumo) {
   if (aluno.statusFinanceiro == 'INADIMPLENTE') {
     return 'Regularizar financeiro antes que isso vire atrito de acesso.';
   }
-  if (copilotProfileCompletion(aluno) < 80) {
+  if (copilotProfileCompletion(aluno) < 60) {
     return 'Completar perfil do aluno e remover lacunas de prescrição.';
-  }
-  if (resumo != null && resumo.cliques > resumo.concluidos) {
-    return 'Resolver o gargalo de autonomia: ${resumo.gargaloTitulo ?? "tarefa aberta"}.';
   }
   return 'Revisar treino e propor a próxima evolução de ${aluno.objetivo ?? "objetivo"}.';
 }
@@ -526,98 +323,14 @@ List<CopilotProfileGap> resolveCopilotProfileGaps(Aluno aluno) {
   ];
 }
 
-String resolveCopilotAcao({
-  required Map<String, dynamic>? seed360,
-  required bool forceIa,
-  required AsyncValue<IaCopilotProximaAcao>? iaAsync,
-  required String fallback,
-}) {
-  if (forceIa && iaAsync != null) {
-    return iaAsync.maybeWhen(
-      data: (action) {
-        final raw =
-            action.rawAcaoOrFallback.isEmpty
-                ? fallback
-                : action.rawAcaoOrFallback;
-        final normalized = normalizeIaCopilotAcao(raw);
-        return cleanCopilotText(normalized.isEmpty ? raw : normalized);
-      },
-      orElse: () => fallback,
-    );
-  }
-  if (seed360 != null) {
-    return cleanCopilotText((seed360['acao'] ?? fallback).toString());
-  }
-  return fallback;
-}
-
-CopilotPrescriptionContent resolveCopilotPrescriptionFromAction(
-  Aluno aluno,
-  Map<String, dynamic> action,
-  String fallback, {
-  bool wearableRelevant = true,
-  bool contactPriority = false,
-  bool statusMetricsVisible = false,
-  bool hideMetricFooter = false,
-}) {
-  final rawAcao =
-      (action['acao'] ?? action['mensagem'] ?? action['descricao'] ?? fallback)
-          .toString();
-  final motivoRaw =
-      (action['motivo'] ?? 'Baseado nos sinais atuais.').toString();
-  final isIa = (action['fonte'] ?? '').toString().toUpperCase() == 'IA';
-  final sanitizedAcao = sanitizeCopilotAcaoWearable(
-    rawAcao,
-    wearableRelevant: wearableRelevant,
-  );
-  final displayAction = copilotPrescriptionDisplayAction(
-    aluno,
-    sanitizedAcao,
-    wearableRelevant: wearableRelevant,
-  );
-  final reason = sanitizeCopilotPrescriptionReason(
-    isIa ? formatCopilotIaMotivo(motivoRaw) : motivoRaw,
-    statusMetricsVisible: statusMetricsVisible,
-    hideMetricFooter: hideMetricFooter,
-  );
-  return CopilotPrescriptionContent(
-    title:
-        contactPriority
-            ? 'Prioridade do dia'
-            : (action['titulo'] ?? action['tipo'] ?? 'Próxima melhor ação')
-                .toString(),
-    action: displayAction,
-    reason: reason,
-  );
-}
-
-CopilotPrescriptionContent offlineCopilotPrescription(String fallback) {
-  return CopilotPrescriptionContent(
-    title: 'Sugestão offline',
-    action: fallback,
-    reason: 'Baseado nos sinais atuais do perfil.',
-  );
-}
-
-CopilotPrescriptionContent iaErrorCopilotPrescription(String fallback) {
-  return CopilotPrescriptionContent(
-    title: 'Sugestão offline',
-    action: fallback,
-    reason: 'IA indisponível agora; usando sinais do Aluno 360.',
-  );
-}
-
-/// Card “Prioridade do dia” has something to show (deterministic and/or IA).
-///
-/// Deterministic seed comes from GET /360/operacao — not from copiloto IA.
-bool aluno360CopilotHasPriorityCardContent({
-  required ProximaAcaoResumo? proximaAcao360,
-  required bool forceIa,
-  required bool iaHasValue,
-  required bool hasOpenTask,
-}) {
-  if (hasOpenTask) return true;
-  if (forceIa && iaHasValue) return true;
-  final acao = proximaAcao360?.acao.trim() ?? '';
-  return acao.isNotEmpty;
+/// "O que vimos": só fato com dado real. Sem dado, a linha não existe.
+List<String> copilotoFatos(Aluno aluno, {String? motivo}) {
+  final aderencia = aluno.aderenciaPercent;
+  final dias = aluno.diasSemTreino;
+  final texto = motivo?.trim() ?? '';
+  return [
+    if (aderencia != null && aderencia > 0) 'Aderência em $aderencia% do previsto',
+    if (dias != null) dias == 0 ? 'Treinou hoje' : 'Último treino há $dias ${dias == 1 ? 'dia' : 'dias'}',
+    if (texto.isNotEmpty) texto,
+  ].take(3).toList();
 }

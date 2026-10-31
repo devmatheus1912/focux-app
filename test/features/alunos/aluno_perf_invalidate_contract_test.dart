@@ -9,7 +9,6 @@ void main() {
     ).readAsStringSync();
     expect(src, contains('invalidateAlunosListCachesRef'));
     expect(src, contains('Aluno360ClientCache.invalidate(alunoId)'));
-    expect(src, isNot(contains('invalidateAlunosCachesRef')));
     expect(src, isNot(contains('Aluno360ClientCache.clear()')));
   });
 

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,13 +6,13 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/fx_action_row.dart';
+import '../../../core/widgets/fx_anel.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
@@ -234,14 +233,8 @@ class _QualidadeBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
     final basePequena = qualidadeBasePequena(alunosAtivos);
-    final corIndice = switch (qualidadeScoreBand(data.score)) {
-      _ when basePequena => chrome.mute,
-      QualidadeScoreBand.excellent => EagleTokens.good,
-      QualidadeScoreBand.good => EagleTokens.warn,
-      QualidadeScoreBand.attention => EagleTokens.bad,
-    };
+    final sobre = fxPaletaSobreMarca(context);
     final ticketUnavailable = qualidadeTicketUnavailable(data.ticketPessoal);
     final ticketHint = qualidadeTicketHint(
       ticketPessoal: data.ticketPessoal,
@@ -256,27 +249,20 @@ class _QualidadeBody extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         FxStripCard(
-          emphasize: true,
+          marca: true,
           semanticsLabel:
               ptS.qualidadeIndiceDe100(data.score, qualidadeScoreLabel(data.score)),
           child: Row(
             children: [
-              SizedBox.square(
-                dimension: 88,
-                child: CustomPaint(
-                  painter: _AnelPainter(
-                    fracao: data.score / 100,
-                    cor: corIndice,
-                    fundo: chrome.line,
-                  ),
-                  child: Center(
-                    child: Text(
-                      '${data.score}',
-                      style: FocuxHubTypography.metric(
-                        color: chrome.ink,
-                        fontSize: FocuxHubTypography.metricLg,
-                      ),
-                    ),
+              FxAnel(
+                fracao: data.score / 100,
+                cor: sobre.ink,
+                fundo: sobre.ink.withValues(alpha: 0.2),
+                child: Text(
+                  '${data.score}',
+                  style: FocuxHubTypography.metric(
+                    color: sobre.ink,
+                    fontSize: FocuxHubTypography.metricLg,
                   ),
                 ),
               ),
@@ -287,19 +273,19 @@ class _QualidadeBody extends StatelessWidget {
                   children: [
                     Text(
                       ptS.qualidadeIndiceFocux,
-                      style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                      style: FocuxHubTypography.bodyMuted(color: sobre.mute),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       basePequena
                           ? ptS.qualidadePoucosAlunosParaMedirBem
                           : qualidadeScoreLabel(data.score),
-                      style: FocuxHubTypography.cardTitle(color: chrome.ink),
+                      style: FocuxHubTypography.cardTitle(color: sobre.ink),
                     ),
                     const SizedBox(height: TokensStrip.s1),
                     Text(
                       qualidadeRecomendacaoDisplay(data),
-                      style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                      style: FocuxHubTypography.bodyMuted(color: sobre.mute),
                     ),
                   ],
                 ),
@@ -414,39 +400,4 @@ class _LinhaReferencia extends StatelessWidget {
       ),
     );
   }
-}
-
-class _AnelPainter extends CustomPainter {
-  const _AnelPainter({
-    required this.fracao,
-    required this.cor,
-    required this.fundo,
-  });
-
-  final double fracao;
-  final Color cor;
-  final Color fundo;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    const espessura = 8.0;
-    final area = (Offset.zero & size).deflate(espessura / 2);
-    final traco =
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = espessura
-          ..strokeCap = StrokeCap.round;
-    canvas.drawArc(area, 0, 2 * math.pi, false, traco..color = fundo);
-    canvas.drawArc(
-      area,
-      -math.pi / 2,
-      2 * math.pi * fracao.clamp(0.0, 1.0),
-      false,
-      traco..color = cor,
-    );
-  }
-
-  @override
-  bool shouldRepaint(_AnelPainter old) =>
-      old.fracao != fracao || old.cor != cor || old.fundo != fundo;
 }

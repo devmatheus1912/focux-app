@@ -26,6 +26,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/widgets/fx_action_chip.dart';
 import '../../../core/widgets/fx_action_link.dart';
+import '../../../core/widgets/fx_anel.dart';
 import '../../../core/widgets/fx_choice_strip.dart';
 import '../../../core/widgets/fx_metric_strip.dart';
 import '../../../core/widgets/fx_status_pill.dart';
@@ -56,6 +57,7 @@ class EngajamentoScreen extends ConsumerStatefulWidget {
 class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
   int _dias = 30;
   List<EventoEngajamento> _eventos = [];
+  AderenciaResumo? _aderencia;
   bool _loading = true;
   String? _erro;
   DateTime? _fetchedAt;
@@ -79,7 +81,8 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
       final eventos = await repo.engajamento(widget.alunoId, dias: _dias);
       if (mounted) {
         setState(() {
-          _eventos = eventos;
+          _eventos = eventos.eventos;
+          _aderencia = eventos.aderencia;
           _loading = false;
           _fetchedAt = DateTime.now();
         });
@@ -118,17 +121,11 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
   }
 
   void _abrirEvolucao() {
-    context.push(
-      '/alunos/${widget.alunoId}/evolucao',
-      extra: widget.alunoNome,
-    );
+    context.push('/alunos/${widget.alunoId}/evolucao', extra: widget.alunoNome);
   }
 
   void _abrirChat() {
-    context.push(
-      '/alunos/${widget.alunoId}/chat',
-      extra: widget.alunoNome,
-    );
+    context.push('/alunos/${widget.alunoId}/chat', extra: widget.alunoNome);
   }
 
   void _scrollToInitialSectionIfNeeded() {
@@ -167,57 +164,58 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
           safePopOrGo(context, '/alunos/${widget.alunoId}');
         },
         child: FxShellScaffold(
-        useMesh: true,
-        safeArea: false,
-        appBar: FxShellAppBar(
-          title: ptS.engajamentoAderencia2,
-          subtitle: freshness,
-          onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
-          actions: [
-            FxHelpIconButton(
-              tooltip: ptS.engajamentoComoLerAAderencia,
-              onTap: () => showEngajamentoHelpSheet(context),
-            ),
-          ],
-        ),
-        body: Column(
-          children: [
-            Expanded(
-              child:
-                  _loading
-                      ? const Padding(
-                        padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-                        child: SkeletonList(count: 6),
-                      )
-                      : _erro != null
-                      ? FxErrorState(
-                        chromeOnDark: chrome.isDark,
-                        primary: primary,
-                        message: _erro!,
-                        onRetry: _load,
-                        title: ptS.engajamentoNaoConseguimosCarregarAAderencia,
-                      )
-                      : FxContentWidthLimiter(child: _buildBody()),
-            ),
-            if (showSticky)
-              SafeArea(
-                top: false,
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    FxSettingsLayout.pageInset,
-                    TokensStrip.s2,
-                    FxSettingsLayout.pageInset,
-                    TokensStrip.s2 + MediaQuery.viewInsetsOf(context).bottom,
-                  ),
-                  child: FxLiquidPrimaryButton(
-                    label: ptS.engajamentoEscrever,
-                    onPressed: _abrirChat,
+          useMesh: true,
+          safeArea: false,
+          appBar: FxShellAppBar(
+            title: ptS.engajamentoAderencia2,
+            subtitle: freshness,
+            onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
+            actions: [
+              FxHelpIconButton(
+                tooltip: ptS.engajamentoComoLerAAderencia,
+                onTap: () => showEngajamentoHelpSheet(context),
+              ),
+            ],
+          ),
+          body: Column(
+            children: [
+              Expanded(
+                child:
+                    _loading
+                        ? const Padding(
+                          padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                          child: SkeletonList(count: 6),
+                        )
+                        : _erro != null
+                        ? FxErrorState(
+                          chromeOnDark: chrome.isDark,
+                          primary: primary,
+                          message: _erro!,
+                          onRetry: _load,
+                          title:
+                              ptS.engajamentoNaoConseguimosCarregarAAderencia,
+                        )
+                        : FxContentWidthLimiter(child: _buildBody()),
+              ),
+              if (showSticky)
+                SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      FxSettingsLayout.pageInset,
+                      TokensStrip.s2,
+                      FxSettingsLayout.pageInset,
+                      TokensStrip.s2 + MediaQuery.viewInsetsOf(context).bottom,
+                    ),
+                    child: FxLiquidPrimaryButton(
+                      label: ptS.engajamentoEscrever,
+                      onPressed: _abrirChat,
+                    ),
                   ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
-      ),
       ),
     );
   }
@@ -226,7 +224,8 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
     final chrome = ShellChrome.of(context);
     final isDark = chrome.isDark;
     final primary = Theme.of(context).colorScheme.primary;
-    final aluno = ref.watch(aluno360OperacaoBundleProvider(widget.alunoId)).value?.aluno;
+    final aluno =
+        ref.watch(aluno360OperacaoBundleProvider(widget.alunoId)).value?.aluno;
     final aderencia = aluno?.aderenciaPercent ?? 0;
     final conversa = engajamentoConversa(_eventos);
     final cancelados = engajamentoCanceladosCount(_eventos);
@@ -246,33 +245,11 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
           subtitle: engajamentoPeriodoLabel(_dias),
         ),
         const SizedBox(height: TokensStrip.s4),
-        FxStripCard(
-          emphasize: true,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                ptS.engajamentoAderenciaEm30Dias,
-                style: FocuxHubTypography.bodyMuted(color: chrome.mute),
-              ),
-              const SizedBox(height: TokensStrip.s1),
-              Text(
-                aderencia > 0 ? '$aderencia%' : ptS.engajamentoSemTreinosAinda,
-                style: FocuxHubTypography.metric(
-                  color: chrome.ink,
-                  fontSize:
-                      aderencia > 0
-                          ? FocuxHubTypography.metricLg
-                          : FocuxHubTypography.metricMd,
-                ),
-              ),
-              const SizedBox(height: TokensStrip.s2),
-              Text(
-                engajamentoFrase(_eventos),
-                style: FocuxHubTypography.body(color: chrome.ink),
-              ),
-            ],
-          ),
+        _CardAderencia(
+          resumo: _aderencia,
+          aderenciaCadastro: aderencia,
+          frase: engajamentoFrase(_eventos),
+          tendencia: engajamentoTendencia(_eventos),
         ),
         const SizedBox(height: TokensStrip.s3),
         KeyedSubtree(
@@ -295,7 +272,10 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
           ),
         ),
         const SizedBox(height: TokensStrip.s3),
-        _CalendarioTreinos(dias: engajamentoCalendario(_eventos)),
+        _CalendarioTreinos(
+          dias: engajamentoCalendario(_eventos),
+          diasDescanso: _aderencia?.diasDescanso ?? const [],
+        ),
         if (conversa != null) ...[
           const SizedBox(height: TokensStrip.s3),
           Row(
@@ -358,105 +338,110 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
 
     return RefreshIndicator(
       onRefresh: _load,
-      child: _eventos.isEmpty
-          ? ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: padding,
-              children: [
-                topo,
-                const SizedBox(height: TokensStrip.s5),
-                FxEmptyState(
-                  icon: 'trend',
-                  title: ptS.engajamentoNadaNestePeriodo,
-                  subtitle:
-                      ptS.engajamentoTreinosMedidasEMensagensDo,
-                  action:
-                      _dias == 90
-                          ? null
-                          : FxEmptyAction(
-                            label: ptS.engajamentoVer90Dias,
-                            onTap: _verNoventaDias,
-                          ),
-                ),
-              ],
-            )
-          : ListView.builder(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: padding,
-              itemCount: linhas.length + 2,
-              itemBuilder: (context, i) {
-                if (i == 0) return topo;
-                if (i == linhas.length + 1) {
-                  if (cancelados == 0) return const SizedBox.shrink();
-                  return Padding(
-                    padding: const EdgeInsets.only(top: TokensStrip.s3),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: FxActionLink(
-                        label:
-                            _mostrarCancelados
-                                ? ptS.engajamentoEsconderCanceladas
-                                : ptS.engajamentoMostrarCanceladas(cancelados),
-                        onTap:
-                            () => setState(
-                              () => _mostrarCancelados = !_mostrarCancelados,
+      child:
+          _eventos.isEmpty
+              ? ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: padding,
+                children: [
+                  topo,
+                  const SizedBox(height: TokensStrip.s5),
+                  FxEmptyState(
+                    icon: 'trend',
+                    title: ptS.engajamentoNadaNestePeriodo,
+                    subtitle: ptS.engajamentoTreinosMedidasEMensagensDo,
+                    action:
+                        _dias == 90
+                            ? null
+                            : FxEmptyAction(
+                              label: ptS.engajamentoVer90Dias,
+                              onTap: _verNoventaDias,
                             ),
+                  ),
+                ],
+              )
+              : ListView.builder(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: padding,
+                itemCount: linhas.length + 2,
+                itemBuilder: (context, i) {
+                  if (i == 0) return topo;
+                  if (i == linhas.length + 1) {
+                    if (cancelados == 0) return const SizedBox.shrink();
+                    return Padding(
+                      padding: const EdgeInsets.only(top: TokensStrip.s3),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: FxActionLink(
+                          label:
+                              _mostrarCancelados
+                                  ? ptS.engajamentoEsconderCanceladas
+                                  : ptS.engajamentoMostrarCanceladas(
+                                    cancelados,
+                                  ),
+                          onTap:
+                              () => setState(
+                                () => _mostrarCancelados = !_mostrarCancelados,
+                              ),
+                        ),
+                      ),
+                    );
+                  }
+                  final linha = linhas[i - 1];
+                  final evento = linha.evento;
+                  if (evento == null) {
+                    return Padding(
+                      padding: const EdgeInsets.only(
+                        top: TokensStrip.s5,
+                        bottom: TokensStrip.s3,
+                      ),
+                      child: DashboardSectionHeader(title: linha.dia!),
+                    );
+                  }
+                  final titulo = engajamentoEventoLabel(
+                    evento.descricao,
+                    evento.tipo,
+                  );
+                  final apoio = engajamentoEventoSubtitle(
+                    tipo: evento.tipo,
+                    titulo: titulo,
+                  );
+                  return FxSatelliteListTile(
+                    title: titulo,
+                    titleCase: false,
+                    onTap:
+                        engajamentoEventoRota(evento.tipo, widget.alunoId) ==
+                                null
+                            ? null
+                            : () => _abrirEvento(evento),
+                    subtitle: apoio == null ? null : Text(apoio),
+                    leading: FxIcon(
+                      name: engajamentoFxIcon(evento.tipo),
+                      size: 18,
+                      color: primary,
+                    ),
+                    trailing: Text(
+                      engajamentoHoraLabel(evento.dataHora),
+                      style: FocuxHubTypography.bodyMuted(
+                        color: fxScreenMute(context),
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   );
-                }
-                final linha = linhas[i - 1];
-                final evento = linha.evento;
-                if (evento == null) {
-                  return Padding(
-                    padding: const EdgeInsets.only(
-                      top: TokensStrip.s5,
-                      bottom: TokensStrip.s3,
-                    ),
-                    child: DashboardSectionHeader(title: linha.dia!),
-                  );
-                }
-                final titulo = engajamentoEventoLabel(
-                  evento.descricao,
-                  evento.tipo,
-                );
-                final apoio = engajamentoEventoSubtitle(
-                  tipo: evento.tipo,
-                  titulo: titulo,
-                );
-                return FxSatelliteListTile(
-                  title: titulo,
-                  titleCase: false,
-                  onTap:
-                      engajamentoEventoRota(evento.tipo, widget.alunoId) ==
-                              null
-                          ? null
-                          : () => _abrirEvento(evento),
-                  subtitle: apoio == null ? null : Text(apoio),
-                  leading: FxIcon(
-                    name: engajamentoFxIcon(evento.tipo),
-                    size: 18,
-                    color: primary,
-                  ),
-                  trailing: Text(
-                    engajamentoHoraLabel(evento.dataHora),
-                    style: FocuxHubTypography.bodyMuted(
-                      color: fxScreenMute(context),
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                );
-              },
-            ),
+                },
+              ),
     );
   }
 }
 
 /// Cinco semanas, um ponto por dia. Hoje é o último ponto.
 class _CalendarioTreinos extends StatelessWidget {
-  const _CalendarioTreinos({required this.dias});
+  const _CalendarioTreinos({required this.dias, required this.diasDescanso});
 
   final List<({DateTime dia, EngajamentoTreinoEstado? estado})> dias;
+
+  /// Fora daqui, dia sem treino é falta: aparece em contorno.
+  final List<int> diasDescanso;
 
   @override
   Widget build(BuildContext context) {
@@ -495,12 +480,23 @@ class _CalendarioTreinos extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   for (final d in dias.skip(semana * 7).take(7))
-                    ponto(switch (d.estado) {
-                      EngajamentoTreinoEstado.feito => primary,
-                      EngajamentoTreinoEstado.parcial => parcial,
-                      EngajamentoTreinoEstado.cancelado => cor,
-                      _ => chrome.line,
-                    }),
+                    d.estado == null &&
+                            diasDescanso.isNotEmpty &&
+                            !diasDescanso.contains(d.dia.weekday)
+                        ? Container(
+                          width: 14,
+                          height: 14,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(color: chrome.lineStrong),
+                          ),
+                        )
+                        : ponto(switch (d.estado) {
+                          EngajamentoTreinoEstado.feito => primary,
+                          EngajamentoTreinoEstado.parcial => parcial,
+                          EngajamentoTreinoEstado.cancelado => cor,
+                          _ => chrome.line,
+                        }),
                 ],
               ),
             ],
@@ -516,6 +512,103 @@ class _CalendarioTreinos extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Topo da tela: o número com anel, ou "Começando" enquanto não há base justa.
+class _CardAderencia extends StatelessWidget {
+  const _CardAderencia({
+    required this.resumo,
+    required this.aderenciaCadastro,
+    required this.frase,
+    required this.tendencia,
+  });
+
+  final AderenciaResumo? resumo;
+  final int aderenciaCadastro;
+  final String frase;
+  final ({int diferenca, String texto})? tendencia;
+
+  @override
+  Widget build(BuildContext context) {
+    final sobre = fxPaletaSobreMarca(context);
+    final r = resumo;
+    final percent =
+        r == null
+            ? (aderenciaCadastro > 0 ? aderenciaCadastro : null)
+            : r.percent;
+    final previstos = r?.previstos ?? 0;
+    final fracao =
+        percent != null
+            ? percent / 100
+            : previstos > 0
+            ? (r!.feitos / previstos).clamp(0.0, 1.0).toDouble()
+            : 0.0;
+    final centro =
+        percent != null
+            ? '$percent%'
+            : previstos > 0
+            ? '${r!.feitos}/$previstos'
+            : '—';
+    final titulo =
+        r?.comecando == true
+            ? 'Começando'
+            : previstos == 0 && percent == null
+            ? 'Sem ficha'
+            : 'Aderência';
+    final tend = tendencia;
+    return FxStripCard(
+      marca: true,
+      child: Row(
+        children: [
+          FxAnel(
+            fracao: fracao,
+            cor: sobre.ink,
+            fundo: sobre.ink.withValues(alpha: 0.2),
+            child: Text(
+              centro,
+              style: FocuxHubTypography.metric(
+                color: sobre.ink,
+                fontSize: FocuxHubTypography.metricMd,
+              ),
+            ),
+          ),
+          const SizedBox(width: TokensStrip.s4),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  titulo,
+                  style: FocuxHubTypography.cardTitle(color: sobre.ink),
+                ),
+                if (previstos > 0)
+                  Text(
+                    '${r!.feitos} de $previstos treinos previstos',
+                    style: FocuxHubTypography.bodyMuted(color: sobre.mute),
+                  ),
+                const SizedBox(height: TokensStrip.s1),
+                Text(
+                  frase,
+                  style: FocuxHubTypography.bodyMuted(color: sobre.ink),
+                ),
+                if (tend != null) ...[
+                  const SizedBox(height: TokensStrip.s1),
+                  Text(
+                    '${tend.diferenca > 0
+                        ? '↑ '
+                        : tend.diferenca < 0
+                        ? '↓ '
+                        : ''}${tend.texto}',
+                    style: FocuxHubTypography.bodyMuted(color: sobre.mute),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

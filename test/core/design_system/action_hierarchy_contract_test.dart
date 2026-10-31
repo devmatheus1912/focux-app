@@ -8,7 +8,6 @@ const _migradas = <String>[
   'lib/features/alunos/widgets/aluno_detail_hero_card.dart',
   'lib/features/alunos/widgets/aluno360_timeline_card.dart',
   'lib/features/alunos/widgets/aluno360_ficha_card.dart',
-  'lib/features/alunos/widgets/aluno360_copilot_card.dart',
   'lib/features/alunos/widgets/aluno360_copilot_ia_refresh_button.dart',
   'lib/features/treinos/screens/treino_detail_screen_exercises.part.dart',
   'lib/features/exercicios/screens/exercicios_list_screen.dart',

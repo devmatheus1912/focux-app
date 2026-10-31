@@ -99,39 +99,3 @@ Future<void> showAluno360FerramentasHelpSheet(BuildContext context) {
     ],
   );
 }
-
-/// Ajuda da sugestão do copiloto (folha aberta pelo Resumo).
-Future<void> showAluno360CopilotHelpSheet(BuildContext context) {
-  return showFxHelpSheet(
-    context,
-    title: 'Sugestão do copiloto',
-    subtitle: 'Leitura rápida antes de agir, sem substituir seu julgamento.',
-    tips: const [
-      FxHelpTip(
-        'Perfil',
-        'Quanto do cadastro está pronto para prescrever treino com segurança.',
-        icon: 'user',
-      ),
-      FxHelpTip(
-        'Financeiro',
-        'Bloqueio operacional por mensalidade. Vermelho = resolver cobrança antes.',
-        icon: 'dollar-sign',
-      ),
-      FxHelpTip(
-        'Autonomia',
-        'Engajamento com tarefas e conteúdos enviados pelo app.',
-        icon: 'users',
-      ),
-      FxHelpTip(
-        'Contexto',
-        'Equipamentos, wearable e gaps que influenciam a sugestão.',
-        icon: 'zap',
-      ),
-      FxHelpTip(
-        'Atualizar IA',
-        'Regenera a sugestão. Plano PRO necessário; o upgrade aparece sozinho se faltar.',
-        icon: 'spark',
-      ),
-    ],
-  );
-}

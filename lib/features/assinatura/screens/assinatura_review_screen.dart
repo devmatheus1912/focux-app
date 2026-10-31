@@ -15,6 +15,7 @@ import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_strip_card.dart';
 import '../../planos/paywall/paywall_catalog.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../../subscription/subscription_products.dart';
@@ -81,6 +82,7 @@ class _AssinaturaReviewScreenState extends State<AssinaturaReviewScreen> {
     final chrome = ShellChrome.of(context);
     final ink = chrome.ink;
     final mute = chrome.mute;
+    final sobre = fxPaletaSobreMarca(context);
     final accent = BrandPalette.softened(
       PaywallCatalog.accentForPlan(widget.plan),
     );
@@ -155,13 +157,12 @@ class _AssinaturaReviewScreenState extends State<AssinaturaReviewScreen> {
                       style: TokensStrip.h1(color: ink),
                     ),
                     const SizedBox(height: TokensStrip.s4),
-                    Container(
-                      padding: const EdgeInsets.all(TokensStrip.s4),
-                      decoration: chrome.accentPanel(accent: accent),
+                    FxStripCard(
+                      marca: true,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Text(price, style: TokensStrip.h1(color: ink)),
+                          Text(price, style: TokensStrip.h1(color: sobre.ink)),
                           const SizedBox(height: TokensStrip.s3),
                           for (final (i, linha) in linhas.indexed) ...[
                             if (i > 0) const SizedBox(height: TokensStrip.s2),
@@ -171,7 +172,7 @@ class _AssinaturaReviewScreenState extends State<AssinaturaReviewScreen> {
                                   child: Text(
                                     linha.quando,
                                     style: TokensStrip.body(
-                                      color: i == 0 ? ink : mute,
+                                      color: i == 0 ? sobre.ink : sobre.mute,
                                     ).copyWith(
                                       fontWeight:
                                           i == 0 ? FontWeight.w700 : null,
@@ -181,7 +182,7 @@ class _AssinaturaReviewScreenState extends State<AssinaturaReviewScreen> {
                                 Text(
                                   linha.valor,
                                   style: TokensStrip.body(
-                                    color: i == 0 ? ink : mute,
+                                    color: i == 0 ? sobre.ink : sobre.mute,
                                   ).copyWith(
                                     fontWeight:
                                         i == 0 ? FontWeight.w700 : null,
@@ -192,12 +193,12 @@ class _AssinaturaReviewScreenState extends State<AssinaturaReviewScreen> {
                           ],
                           if (widget.indicacaoNota case final nota?) ...[
                             const SizedBox(height: TokensStrip.s3),
-                            Text(nota, style: TokensStrip.body(color: ink)),
+                            Text(nota, style: TokensStrip.body(color: sobre.ink)),
                           ],
                           const SizedBox(height: TokensStrip.s3),
                           Text(
                             assinaturaReviewResumo(trialDias: widget.trialDias),
-                            style: TokensStrip.bodyMuted(color: mute),
+                            style: TokensStrip.bodyMuted(color: sobre.mute),
                           ),
                         ],
                       ),

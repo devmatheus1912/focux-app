@@ -152,14 +152,6 @@ void invalidateAlunosCaches(WidgetRef ref) {
   ref.invalidate(iaCopilotoHomeProvider);
 }
 
-void invalidateAlunosCachesRef(Ref ref) {
-  AlunosHomeClientCache.clear();
-  Aluno360ClientCache.clear();
-  ref.read(alunosHomeTailProvider.notifier).clear();
-  ref.invalidate(alunosHomeProvider);
-  ref.invalidate(iaCopilotoHomeProvider);
-}
-
 /// Lista + chips — sem apagar o cache 360 de todos os alunos.
 void invalidateAlunosListCaches(WidgetRef ref) {
   AlunosHomeClientCache.clear();

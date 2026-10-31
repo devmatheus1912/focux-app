@@ -8,6 +8,7 @@ import '../../../core/widgets/fx_action_chip.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../l10n/app_localizations.dart';
 import '../utils/ia_copiloto_display.dart';
@@ -73,7 +74,10 @@ class CopilotoCardView extends StatelessWidget {
           else ...[
             Text(
               s.copilotoQuemPrecisa,
-              style: FocuxHubTypography.sectionTitle(context, color: chrome.ink),
+              style: FocuxHubTypography.sectionTitle(
+                context,
+                color: chrome.ink,
+              ),
             ),
             const SizedBox(height: TokensStrip.s1),
             Text(
@@ -81,23 +85,42 @@ class CopilotoCardView extends StatelessWidget {
               style: FocuxHubTypography.bodyMuted(color: chrome.mute),
             ),
             const SizedBox(height: TokensStrip.s3),
-            Container(
-              decoration: fxListCardDecoration(context),
-              child: Column(
-                children: [
-                  for (final (i, p) in prioridades.indexed) ...[
-                    if (i > 0) const Divider(height: 1),
-                    _PrioridadeRow(
-                      prioridade: p,
-                      onAnalisar:
-                          podeAnalisar
-                              ? () => onAnalisar(p.alunoId, p.nome)
-                              : null,
-                    ),
-                  ],
-                ],
+            // O primeiro é quem mais precisa: bloco da marca, fora da lista.
+            FxStripCard(
+              marca: true,
+              padding: EdgeInsets.zero,
+              child: _PrioridadeRow(
+                prioridade: prioridades.first,
+                sobreMarca: true,
+                onAnalisar:
+                    podeAnalisar
+                        ? () => onAnalisar(
+                          prioridades.first.alunoId,
+                          prioridades.first.nome,
+                        )
+                        : null,
               ),
             ),
+            if (prioridades.length > 1) ...[
+              const SizedBox(height: TokensStrip.s2),
+              Container(
+                decoration: fxListCardDecoration(context),
+                child: Column(
+                  children: [
+                    for (final (i, p) in prioridades.skip(1).indexed) ...[
+                      if (i > 0) const Divider(height: 1),
+                      _PrioridadeRow(
+                        prioridade: p,
+                        onAnalisar:
+                            podeAnalisar
+                                ? () => onAnalisar(p.alunoId, p.nome)
+                                : null,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
             if (podeAnalisar) ...[
               const SizedBox(height: TokensStrip.s3),
               FxTonalButton(
@@ -122,15 +145,21 @@ class CopilotoCardView extends StatelessWidget {
 }
 
 class _PrioridadeRow extends StatelessWidget {
-  const _PrioridadeRow({required this.prioridade, required this.onAnalisar});
+  const _PrioridadeRow({
+    required this.prioridade,
+    required this.onAnalisar,
+    this.sobreMarca = false,
+  });
 
   final CopilotoPrioridade prioridade;
   final VoidCallback? onAnalisar;
+  final bool sobreMarca;
 
   @override
   Widget build(BuildContext context) {
     final s = S.of(context);
-    final chrome = ShellChrome.of(context);
+    final chrome =
+        sobreMarca ? fxPaletaSobreMarca(context) : ShellChrome.of(context);
     return Padding(
       padding: const EdgeInsets.all(TokensStrip.s3),
       child: Row(

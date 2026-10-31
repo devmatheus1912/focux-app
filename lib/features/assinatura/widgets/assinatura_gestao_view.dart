@@ -70,6 +70,7 @@ class _AssinaturaGestaoViewState extends State<AssinaturaGestaoView> {
     final s = S.of(context);
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
+    final sobre = fxPaletaSobreMarca(context);
     final usos = widget.usos;
     final temIa = widget.iaLimite > 0;
     final inclusos = widget.inclusos;
@@ -108,7 +109,7 @@ class _AssinaturaGestaoViewState extends State<AssinaturaGestaoView> {
       ),
       children: [
         FxStripCard(
-          emphasize: true,
+          marca: true,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -117,25 +118,25 @@ class _AssinaturaGestaoViewState extends State<AssinaturaGestaoView> {
                   Expanded(
                     child: Text(
                       s.assinaturaSeuPlano,
-                      style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                      style: FocuxHubTypography.bodyMuted(color: sobre.mute),
                     ),
                   ),
                   FxStatusPill(
                     label: s.assinaturaAtiva,
-                    tone: FxPillTone.success,
+                    tone: FxPillTone.accent,
                   ),
                 ],
               ),
               const SizedBox(height: TokensStrip.s1),
               Text(
                 widget.planoNome,
-                style: FocuxHubTypography.pageTitle(context, color: chrome.ink),
+                style: FocuxHubTypography.pageTitle(context, color: sobre.ink),
               ),
               if (assinaturaAcessoAte(widget.validoAte) case final data?) ...[
                 const SizedBox(height: TokensStrip.s1),
                 Text(
                   s.assinaturaAcessoAte(data),
-                  style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                  style: FocuxHubTypography.bodyMuted(color: sobre.mute),
                 ),
               ],
             ],

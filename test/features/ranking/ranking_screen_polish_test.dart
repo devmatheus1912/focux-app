@@ -27,7 +27,7 @@ void main() {
     expect(screen, contains('rankingBuscarHint'));
     expect(screen, contains('onTapOutside'));
     expect(screen, contains('FxStripCard'));
-    expect(screen, contains('emphasize: true'));
+    expect(screen, contains('marca: true'));
     expect(screen, contains('rankingCrescerBase'));
     expect(screen, contains('rankingAssinatura'));
     expect(screen, contains('rankingAlunosLabel'));

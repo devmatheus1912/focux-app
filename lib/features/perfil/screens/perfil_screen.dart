@@ -54,6 +54,7 @@ import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/fx_strip_card.dart';
 
 part 'perfil_screen_widgets_a.part.dart';
 part 'perfil_screen_widgets_b.part.dart';

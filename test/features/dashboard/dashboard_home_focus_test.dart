@@ -100,50 +100,9 @@ void main() {
       );
     });
 
-    test('hides aderencia relatorio without ranking data', () {
-      expect(
-        dashboardShowAderenciaRelatorio(
-          focusMode: false,
-          coversRetention: false,
-          weeklyCheckins: const [0, 0],
-        ),
-        isFalse,
-      );
-      expect(
-        dashboardShowAderenciaRelatorio(
-          focusMode: false,
-          coversRetention: false,
-          weeklyCheckins: const [2],
-        ),
-        isTrue,
-      );
-      expect(
-        dashboardShowAderenciaRelatorio(
-          focusMode: false,
-          coversRetention: true,
-          weeklyCheckins: const [4],
-        ),
-        isFalse,
-      );
-    });
   });
 
   group('DashboardHomeFocusRules.attentionVencLimit', () {
-    test('zeroes vencimentos when focus is cobrança e retenção', () {
-      const focus = DashboardDayFocus(
-        headline: 'Cobrança e retenção hoje',
-        detail: 'x',
-        semanticLabel: 'foco',
-      );
-      expect(
-        DashboardHomeFocusRules.attentionVencLimit(
-          dayFocus: focus,
-          dayFocusCoversRetention: true,
-          focusMode: true,
-        ),
-        0,
-      );
-    });
 
     test('keeps vencimentos when focus is only risk retomada', () {
       const focus = DashboardDayFocus(

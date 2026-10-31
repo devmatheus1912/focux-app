@@ -49,7 +49,10 @@ List<Widget> buildDashboardHomePrimarySlivers({
     notificacoesCountOverride: notificacoesNaoLidasOverride,
     onQuickSearch: onQuickSearch,
     onHelp: onHelp,
-    freshnessLabel: freshnessLabel,
+    freshnessLabel: hojeLinhaUtil(
+      atendimentos: commandCenter.agendaHojeCount,
+      freshness: freshnessLabel,
+    ),
     onConversas: () => context.push('/chat/inbox'),
     conversasCount: snap.unreadCount,
   );

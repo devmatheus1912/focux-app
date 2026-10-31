@@ -325,9 +325,6 @@ class _BlocoQuantoEntrou extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = S.of(context);
-    final mute = fxScreenMute(context);
-    final ink = fxScreenInk(context);
-    final primary = Theme.of(context).colorScheme.primary;
     final variacao = variacaoPct;
     final apoio = [
       s.resultadosDeLancado(resumo.totalPrevisto.formatCompact()),
@@ -342,12 +339,13 @@ class _BlocoQuantoEntrou extends StatelessWidget {
       if (resultadosRecebidoMaiorQueLancado(resumo)) s.resultadosExplicaRecebido,
     ];
     final valor = resumo.totalRecebido.formatCompact();
+    final sobre = fxPaletaSobreMarca(context);
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: FxSettingsLayout.pageInset,
       ),
       child: FxStripCard(
-        emphasize: true,
+        marca: true,
         padding: const EdgeInsets.all(TokensStrip.s3),
         semanticsLabel: '${s.resultadosQuantoEntrou} $valor. ${apoio.join('. ')}',
         child: Column(
@@ -355,7 +353,7 @@ class _BlocoQuantoEntrou extends StatelessWidget {
           children: [
             Text(
               s.resultadosQuantoEntrou,
-              style: FocuxHubTypography.chip(mute),
+              style: FocuxHubTypography.chip(sobre.mute),
             ),
             const SizedBox(height: TokensStrip.s1),
             FittedBox(
@@ -364,7 +362,7 @@ class _BlocoQuantoEntrou extends StatelessWidget {
               child: Text(
                 valor,
                 style: FocuxHubTypography.metric(
-                  color: ink,
+                  color: sobre.ink,
                   fontSize: FocuxHubTypography.metricLg,
                 ).copyWith(
                   letterSpacing: 0,
@@ -378,13 +376,13 @@ class _BlocoQuantoEntrou extends StatelessWidget {
               child: LinearProgressIndicator(
                 minHeight: 6,
                 value: resultadosProgresso(resumo),
-                color: primary,
-                backgroundColor: primary.withValues(alpha: 0.12),
+                color: sobre.brand,
+                backgroundColor: sobre.brand.withValues(alpha: 0.12),
               ),
             ),
             for (final linha in apoio) ...[
               const SizedBox(height: TokensStrip.s1),
-              Text(linha, style: FocuxHubTypography.bodyMuted(color: mute)),
+              Text(linha, style: FocuxHubTypography.bodyMuted(color: sobre.mute)),
             ],
           ],
         ),

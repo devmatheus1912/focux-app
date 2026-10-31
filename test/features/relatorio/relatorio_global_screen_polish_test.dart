@@ -25,7 +25,7 @@ void main() {
     expect(screen, contains('constrainWidth: false'));
     expect(screen, contains('FxContentWidthLimiter'));
     expect(screen, contains('FxStripCard'));
-    expect(screen, contains('emphasize: true'));
+    expect(screen, contains('marca: true'));
     expect(screen, contains('FxActionChip'));
     expect(screen, contains('Ver retenção'));
     expect(screen, contains("context.push('/retencao')"));

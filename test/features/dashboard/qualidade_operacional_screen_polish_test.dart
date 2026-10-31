@@ -15,7 +15,7 @@ void main() {
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('alunoHomeAjudaCalculoTitulo'));
     expect(screen, contains('FxStripCard'));
-    expect(screen, contains('emphasize: true'));
+    expect(screen, contains('marca: true'));
     expect(screen, contains('FxActionRow'));
     expect(screen, contains('qualidadeReferenciaFocux'));
     expect(screen, isNot(contains('Comparado ao mercado')));

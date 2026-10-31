@@ -327,7 +327,7 @@ class _CheckinExerciseVideoPreviewState
               aspectRatio: video.aspectRatio,
             );
         return Align(
-          alignment: Alignment.topCenter,
+          alignment: Alignment.center,
           child: SizedBox(
             key: const ValueKey('checkin-video-caixa'),
             width: math.min(constraints.maxWidth, altura * proporcao),

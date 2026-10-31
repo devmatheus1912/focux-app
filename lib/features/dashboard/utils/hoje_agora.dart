@@ -166,3 +166,14 @@ String _dinheiro(double reais) {
   final cents = (reais * 100).round();
   return formatBrlCents(cents, showDecimals: cents % 100 != 0);
 }
+
+/// Linha abaixo do "Olá": o dia antes da hora do dado. Zero não aparece.
+String? hojeLinhaUtil({required int atendimentos, String? freshness}) {
+  final dia =
+      atendimentos == 0
+          ? null
+          : atendimentos == 1
+          ? '1 atendimento hoje'
+          : '$atendimentos atendimentos hoje';
+  return [if (dia != null) dia, if (freshness != null) freshness].join(' · ');
+}

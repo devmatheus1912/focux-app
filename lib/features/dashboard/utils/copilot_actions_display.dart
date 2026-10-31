@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 import '../data/command_center_data.dart';
 import 'dashboard_command_copy.dart';
 
@@ -53,7 +55,7 @@ String copilotActionsEmptyTitle(String status) {
   return switch (status) {
     copilotActionsStatusAdiado => 'Nenhuma tarefa adiada',
     copilotActionsStatusConcluido => 'Nenhuma tarefa concluída',
-    _ => 'Nenhuma tarefa aberta',
+    _ => 'Nada pendente',
   };
 }
 
@@ -107,4 +109,61 @@ String copilotActionsDestino(FilaAcaoResumo action) {
     return '/alunos/$id/chat';
   }
   return action.acaoUrl;
+}
+
+/// Resumo em uma linha: "3 abertas · 1 urgente".
+String copilotActionsResumo(List<FilaAcaoResumo> acoes, {int? abertas}) {
+  final urgentes = acoes.where(_urgente).length;
+  final n = abertas ?? acoes.length;
+  final total = n == 1 ? '1 aberta' : '$n abertas';
+  if (urgentes == 0) return total;
+  return '$total · $urgentes ${urgentes == 1 ? 'urgente' : 'urgentes'}';
+}
+
+bool _urgente(FilaAcaoResumo a) => a.prioridade.toUpperCase() == 'P0';
+
+/// Urgente, Hoje e Depois, na ordem da lista. Grupo vazio não aparece.
+List<(String, List<FilaAcaoResumo>)> copilotActionsPorGrupo(
+  List<FilaAcaoResumo> acoes,
+) {
+  final ordem = copilotActionsOrdenadas(acoes);
+  final hoje = ordem.where((a) => a.prioridade.toUpperCase() == 'P1').toList();
+  final urgentes = ordem.where(_urgente).toList();
+  final depois =
+      ordem.where((a) => !_urgente(a) && a.prioridade.toUpperCase() != 'P1').toList();
+  return [
+    if (urgentes.isNotEmpty) ('Urgente', urgentes),
+    if (hoje.isNotEmpty) ('Hoje', hoje),
+    if (depois.isNotEmpty) ('Depois', depois),
+  ];
+}
+
+/// Concluídas hoje, da mais recente para a mais antiga.
+List<FilaAcaoResumo> copilotActionsFeitasHoje(
+  List<FilaAcaoResumo> concluidas, {
+  DateTime? now,
+}) {
+  final hoje = now ?? DateTime.now();
+  DateTime? quando(FilaAcaoResumo a) =>
+      DateTime.tryParse(a.resolvedAt ?? '')?.toLocal();
+  final feitas =
+      concluidas.where((a) {
+        final q = quando(a);
+        return q != null &&
+            q.year == hoje.year &&
+            q.month == hoje.month &&
+            q.day == hoje.day;
+      }).toList();
+  feitas.sort((a, b) => quando(b)!.compareTo(quando(a)!));
+  return feitas;
+}
+
+/// Ícone da tarefa sem aluno, pelo tipo.
+IconData copilotActionsIcone(FilaAcaoResumo a) {
+  final tipo = a.tipo.toUpperCase();
+  if (tipo.contains('FINANC') || tipo.contains('COBRAN')) {
+    return Icons.payments_outlined;
+  }
+  if (tipo.contains('AGENDA')) return Icons.event_outlined;
+  return Icons.checklist_rounded;
 }

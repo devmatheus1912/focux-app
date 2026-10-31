@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
@@ -57,13 +58,10 @@ class ConviteLinkCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = S.of(context);
-    final chrome = ShellChrome.of(context);
-    return Container(
+    final chrome = fxPaletaSobreMarca(context);
+    return FxStripCard(
+      marca: true,
       padding: const EdgeInsets.all(TokensStrip.s3),
-      decoration: fxListCardDecoration(
-        context,
-        accent: Theme.of(context).colorScheme.primary,
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

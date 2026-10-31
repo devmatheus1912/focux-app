@@ -19,7 +19,7 @@ void main() {
     expect(copilotActionsStatusLabel(copilotActionsStatusAberto), 'Abertas');
     expect(copilotActionsStatusLabel(copilotActionsStatusAdiado), 'Adiadas');
     expect(copilotActionsStatusLabel(copilotActionsStatusConcluido), 'Concluídas');
-    expect(copilotActionsEmptyTitle(copilotActionsStatusAberto), contains('aberta'));
+    expect(copilotActionsEmptyTitle(copilotActionsStatusAberto), 'Nada pendente');
     expect(copilotActionsComoCalculamos, contains('alertas'));
   });
 }

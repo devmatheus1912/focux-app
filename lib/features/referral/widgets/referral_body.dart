@@ -205,12 +205,12 @@ class _ReferralCodeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = S.of(context);
-    final chrome = ShellChrome.forBrightness(context, isDark);
+    final chrome = fxPaletaSobreMarca(context);
     final codigo = referralCodigoLabel(info.codigo);
     final headline = referralRewardHeadline(l10n, info);
     final desconto = referralDiscountLine(l10n, info);
     return FxStripCard(
-      emphasize: true,
+      marca: true,
       semanticsLabel: l10n.referralCodeSemantics(codigo),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

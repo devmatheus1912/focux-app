@@ -123,13 +123,3 @@ abstract final class DashboardAderenciaCopy {
     return 'Acione alunos sem treino nos últimos 7 dias pela agenda ou pela base.';
   }
 }
-
-/// CTA "Relatório" só quando o ranking tem dado real — some no empty/retenção.
-bool dashboardShowAderenciaRelatorio({
-  required bool focusMode,
-  required bool coversRetention,
-  required Iterable<int> weeklyCheckins,
-}) {
-  if (focusMode || coversRetention) return false;
-  return weeklyCheckins.any((n) => n > 0);
-}

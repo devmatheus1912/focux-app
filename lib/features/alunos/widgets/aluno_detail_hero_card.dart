@@ -4,6 +4,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_strip_card.dart';
 import '../constants/aluno_360_layout.dart';
 import '../data/aluno_contact_utils.dart';
 import '../data/aluno_repository.dart';
@@ -40,8 +41,9 @@ class AlunoDetailHeroCard extends StatelessWidget {
     final signal = alunoHeroPrimarySignal(aluno);
     final caption = alunoHeroCaption(aluno, signal);
     final contextLine = alunoHeroContextLine(signal, caption);
-    final ink = fxScreenInk(context);
-    final mute = fxScreenMute(context);
+    final sobre = fxPaletaSobreMarca(context, accent: primary);
+    final ink = sobre.ink;
+    final mute = sobre.mute;
     final showRiskNotice =
         aluno.emRisco && signal.label == riscoOperacionalLabel;
     // O aviso de risco abaixo já carrega a frase ("Priorize contato hoje"):
@@ -65,12 +67,13 @@ class AlunoDetailHeroCard extends StatelessWidget {
           '${signal.label} ${signal.value}${signal.suffix ?? ''}',
       child: MediaQuery.withClampedTextScaling(
         maxScaleFactor: 1.25,
-        child: Container(
+        child: FxStripCard(
           key: const ValueKey('aluno360_hero_card'),
-          width: double.infinity,
+          marca: true,
+          accent: primary,
           padding: EdgeInsets.symmetric(
-            horizontal: 4,
-            vertical: compactContactPriority ? 4 : 8,
+            horizontal: TokensStrip.s3,
+            vertical: compactContactPriority ? 8 : 14,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,

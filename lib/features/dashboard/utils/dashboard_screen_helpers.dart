@@ -50,44 +50,6 @@ Aluno alunoFromAlertaResumo(AlertaResumo alerta) {
 
 typedef PulseMetricCopy = ({String hint, String semantics});
 
-PulseMetricCopy pulseAtivosCopy(int alunosAtivos) =>
-    alunosAtivos == 0
-        ? (hint: 'Nenhum aluno ativo', semantics: '0 alunos ativos')
-        : (hint: 'Base ativa', semantics: '$alunosAtivos ativos');
-
-PulseMetricCopy pulseCheckinsCopy(int checkinsHoje) =>
-    checkinsHoje == 0
-        ? (hint: 'Sem movimento hoje', semantics: '0 check-ins, sem movimento hoje')
-        : (hint: 'Check-ins de hoje', semantics: '$checkinsHoje check-ins');
-
-/// Contagem do modelo de alertas (Risco operacional), não do churn da retenção.
-PulseMetricCopy pulseRiscoCopy(int riscoAlto) =>
-    riscoAlto == 0
-        ? (
-          hint: 'Nenhum aluno em risco',
-          semantics: 'Nenhum aluno em risco operacional',
-        )
-        : (
-          hint: 'Alunos pedem contato',
-          semantics:
-              '$riscoAlto ${riscoAlto == 1 ? 'aluno' : 'alunos'} em risco operacional',
-        );
-
-/// Copy de empty do pulso — BFF manda `emptyHint`; FE replica se o payload for legado.
-String? dashboardPulseEmptyHint({
-  required int checkinsHoje,
-  required List<double> checkinsTrend,
-  String? fromApi,
-}) {
-  final api = fromApi?.trim();
-  if (api != null && api.isNotEmpty) return api;
-  if (checkinsHoje > 0) return null;
-  final weekEmpty =
-      checkinsTrend.isEmpty || checkinsTrend.every((v) => v <= 0);
-  if (weekEmpty) return 'Sem treinos';
-  return 'Nenhum check-in hoje';
-}
-
 /// Cor primária do personal (BFF) — soft branding no chrome da Home.
 /// Remapeia cyan legado (#13C2C2) → petróleo, igual tema/perfil.
 Color? dashboardParseBrandColor(String? raw) {

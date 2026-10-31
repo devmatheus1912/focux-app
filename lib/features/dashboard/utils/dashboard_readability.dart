@@ -7,14 +7,6 @@ import '../../../core/theme/tokens_strip.dart';
 export '../../../core/theme/focux_hub_typography.dart';
 export '../../../core/theme/hero_teal.dart';
 
-/// Texto secundário do dashboard com contraste ≥ 4.5:1 (WCAG AA).
-Color dashboardReadableMuted(BuildContext context, {required bool isDark}) {
-  if (isDark) {
-    return Color.lerp(EagleTokens.darkInkMute, EagleTokens.darkInk, 0.62)!;
-  }
-  return TokensStrip.textPrimary.withValues(alpha: 0.88);
-}
-
 Color dashboardReadableCaption(BuildContext context, {required bool isDark}) {
   if (isDark) {
     return Color.lerp(EagleTokens.darkInkMute, EagleTokens.darkInk, 0.68)!;
@@ -22,7 +14,6 @@ Color dashboardReadableCaption(BuildContext context, {required bool isDark}) {
   return TokensStrip.textPrimary.withValues(alpha: 0.88);
 }
 
-Color dashboardHeroMutedOnTeal() => Colors.white.withValues(alpha: 0.90);
 
 ({Color background, Color foreground}) dashboardPriorityBadgeColors({
   required bool isDark,
@@ -62,14 +53,6 @@ Color dashboardHeroMutedOnTeal() => Colors.white.withValues(alpha: 0.90);
 
 TextStyle dashboardPageTitleStyle(BuildContext context, {required Color color}) =>
     FocuxHubTypography.pageTitle(context, color: color);
-
-TextStyle dashboardHeroMutedOnTealStyle({
-  FontWeight fontWeight = FontWeight.w700,
-}) => FocuxHubTypography.bodyMuted(
-  color: dashboardHeroMutedOnTeal(),
-  fontWeight: fontWeight,
-  height: 1.2,
-);
 
 TextStyle dashboardCardSubtitleStyle(
   BuildContext context, {

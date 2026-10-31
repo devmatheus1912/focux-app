@@ -20,10 +20,12 @@ import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../alunos/widgets/aluno_avatar.dart';
 import '../../alunos/widgets/aluno_form_choices.dart';
 import '../../ia/providers/ia_copilot_providers.dart';
 import '../data/command_center_data.dart';
 import '../providers/dashboard_provider.dart';
+import '../widgets/dashboard_section_header.dart';
 import '../utils/copilot_actions_display.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
@@ -97,6 +99,21 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
     final mute = dark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final actionsAsync = ref.watch(iaActionsProvider(_queryKey));
     final contagem = ref.watch(iaActionsContagemProvider(_query)).value;
+    final abertas = _status == copilotActionsStatusAberto;
+    final concluidas =
+        abertas
+            ? ref
+                    .watch(
+                      iaActionsProvider((
+                        status: copilotActionsStatusConcluido,
+                        q: _query,
+                      )),
+                    )
+                    .value
+                    ?.itens ??
+                const <FilaAcaoResumo>[]
+            : const <FilaAcaoResumo>[];
+    final feitasHoje = copilotActionsFeitasHoje(concluidas);
 
     return fxScreenA11yScope(
       label: 'Tarefas',
@@ -105,8 +122,7 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
         constrainWidth: false,
         appBar: FxShellAppBar(
           title: 'Tarefas',
-          subtitle:
-              FxHubFreshness.fromFetchedAt(_fetchedAt),
+          subtitle: FxHubFreshness.fromFetchedAt(_fetchedAt),
           onBack: () => safePopOrGo(context, '/ia/copiloto'),
           actions: [
             FxHelpIconButton(
@@ -117,66 +133,105 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
         ),
         body: FxContentWidthLimiter(
           child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                FxSettingsLayout.pageInset,
-                2,
-                FxSettingsLayout.pageInset,
-                TokensStrip.s2,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  AlunoSegmentedChoice(
-                    options: [
-                      for (final status in copilotActionsStatusValues)
-                        (
-                          value: status,
-                          label: copilotActionsStatusChoiceLabel(
-                            status,
-                            contagem,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  FxSettingsLayout.pageInset,
+                  2,
+                  FxSettingsLayout.pageInset,
+                  TokensStrip.s2,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    AlunoSegmentedChoice(
+                      options: [
+                        for (final status in copilotActionsStatusValues)
+                          (
+                            value: status,
+                            label: copilotActionsStatusChoiceLabel(
+                              status,
+                              contagem,
+                            ),
                           ),
-                        ),
+                      ],
+                      selected: _status,
+                      isDark: dark,
+                      onSelect: _selecionarStatus,
+                    ),
+                    if (_query.isNotEmpty || _totalNaLista(contagem) > 10) ...[
+                      const SizedBox(height: TokensStrip.s2),
+                      TextField(
+                        controller: _search,
+                        textInputAction: TextInputAction.search,
+                        onChanged: _onSearchChanged,
+                        onSubmitted: _onSearchSubmitted,
+                        onTapOutside:
+                            (_) =>
+                                FocusManager.instance.primaryFocus?.unfocus(),
+                        decoration: FxInputDeco.build(context, 'Buscar tarefa'),
+                      ),
                     ],
-                    selected: _status,
-                    isDark: dark,
-                    onSelect: _selecionarStatus,
-                  ),
-                  if (_query.isNotEmpty || _totalNaLista(contagem) > 10) ...[
-                    const SizedBox(height: TokensStrip.s2),
-                    TextField(
-                      controller: _search,
-                      textInputAction: TextInputAction.search,
-                      onChanged: _onSearchChanged,
-                      onSubmitted: _onSearchSubmitted,
-                      onTapOutside:
-                          (_) => FocusManager.instance.primaryFocus?.unfocus(),
-                      decoration: FxInputDeco.build(context, 'Buscar tarefa'),
-                    ),
                   ],
-                ],
+                ),
               ),
-            ),
-            Expanded(
-              child: actionsAsync.when(
-                loading: () => const SkeletonList(count: 6),
-                error:
-                    (e, _) => FxErrorState(
-                      chromeOnDark: dark,
-                      primary: brand,
-                      message: friendlyError(e),
-                      onRetry: _refresh,
-                    ),
-                data: (page) {
-                  final seen = page.itens.map((item) => item.actionKey).toSet();
-                  final actions = [
-                    ...page.itens,
-                    ..._extra.where((item) => seen.add(item.actionKey)),
-                  ];
-                  final hasNext =
-                      _extra.isEmpty ? page.hasNext : _extraHasNext;
-                  if (actions.isEmpty) {
+              Expanded(
+                child: actionsAsync.when(
+                  loading: () => const SkeletonList(count: 6),
+                  error:
+                      (e, _) => FxErrorState(
+                        chromeOnDark: dark,
+                        primary: brand,
+                        message: friendlyError(e),
+                        onRetry: _refresh,
+                      ),
+                  data: (page) {
+                    final seen =
+                        page.itens.map((item) => item.actionKey).toSet();
+                    final actions = [
+                      ...page.itens,
+                      ..._extra.where((item) => seen.add(item.actionKey)),
+                    ];
+                    final hasNext =
+                        _extra.isEmpty ? page.hasNext : _extraHasNext;
+                    if (actions.isEmpty) {
+                      return RefreshIndicator(
+                        onRefresh: _refresh,
+                        child: ListView(
+                          keyboardDismissBehavior:
+                              ScrollViewKeyboardDismissBehavior.onDrag,
+                          padding: const EdgeInsets.fromLTRB(
+                            FxSettingsLayout.pageInset,
+                            TokensStrip.s4,
+                            FxSettingsLayout.pageInset,
+                            120,
+                          ),
+                          children: [
+                            if (abertas)
+                              _NadaPendente(
+                                titulo: copilotActionsEmptyTitle(_status),
+                                ultima:
+                                    concluidas.isEmpty
+                                        ? null
+                                        : copilotActionsNome(concluidas.first),
+                                ink: ink,
+                                mute: mute,
+                              )
+                            else
+                              FxEmptyState(
+                                icon: 'circle-check',
+                                title: copilotActionsEmptyTitle(_status),
+                                subtitle: copilotActionsEmptySubtitle(_status),
+                                action: FxEmptyAction(
+                                  label: copilotActionsAtualizarLabel(),
+                                  onTap: _refresh,
+                                ),
+                              ),
+                          ],
+                        ),
+                      );
+                    }
+
                     return RefreshIndicator(
                       onRefresh: _refresh,
                       child: ListView(
@@ -184,77 +239,88 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
                             ScrollViewKeyboardDismissBehavior.onDrag,
                         padding: const EdgeInsets.fromLTRB(
                           FxSettingsLayout.pageInset,
-                          TokensStrip.s4,
+                          10,
                           FxSettingsLayout.pageInset,
                           120,
                         ),
                         children: [
-                          FxEmptyState(
-                            icon: 'circle-check',
-                            title: copilotActionsEmptyTitle(_status),
-                            subtitle: copilotActionsEmptySubtitle(_status),
-                            action: FxEmptyAction(
-                              label: copilotActionsAtualizarLabel(),
-                              onTap: _refresh,
+                          if (abertas)
+                            Text(
+                              copilotActionsResumo(
+                                actions,
+                                abertas: contagem?.abertas,
+                              ),
+                              style: FocuxHubTypography.bodyMuted(color: mute),
                             ),
-                          ),
+                          for (final (grupo, doGrupo)
+                              in abertas
+                                  ? copilotActionsPorGrupo(actions)
+                                  : [
+                                    ('', copilotActionsOrdenadas(actions)),
+                                  ]) ...[
+                            if (grupo.isNotEmpty) ...[
+                              const SizedBox(height: TokensStrip.s3),
+                              DashboardSectionHeader(title: grupo),
+                              const SizedBox(height: TokensStrip.s2),
+                            ],
+                            Container(
+                              decoration: fxListCardDecoration(context),
+                              child: Column(
+                                children: [
+                                  for (final (i, action)
+                                      in doGrupo.indexed) ...[
+                                    if (i > 0) const Divider(height: 1),
+                                    _TarefaRow(
+                                      action: action,
+                                      concluida:
+                                          _status ==
+                                          copilotActionsStatusConcluido,
+                                      ink: ink,
+                                      mute: mute,
+                                      onOpen:
+                                          () => _openAction(context, action),
+                                      onConcluir: () => _concluir(action),
+                                      onMais: () => _abrirAcoes(action),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+                          ],
+                          if (feitasHoje.isNotEmpty) ...[
+                            const SizedBox(height: TokensStrip.s3),
+                            _FeitasHoje(
+                              acoes: feitasHoje,
+                              ink: ink,
+                              mute: mute,
+                            ),
+                          ],
+                          const SizedBox(height: TokensStrip.s2),
+                          if (hasNext)
+                            FxSatelliteListTile(
+                              title:
+                                  _loadingMore
+                                      ? 'Carregando…'
+                                      : 'Carregar mais',
+                              subtitle:
+                                  _loadingMore
+                                      ? null
+                                      : Text(
+                                        'Mais ${(page.totalItens - actions.length).clamp(0, 999)} nesta lista.',
+                                      ),
+                              onTap:
+                                  _loadingMore
+                                      ? null
+                                      : () => _carregarMais(page),
+                            ),
                         ],
                       ),
                     );
-                  }
-
-                  return RefreshIndicator(
-                    onRefresh: _refresh,
-                    child: ListView(
-                      keyboardDismissBehavior:
-                          ScrollViewKeyboardDismissBehavior.onDrag,
-                      padding: const EdgeInsets.fromLTRB(
-                        FxSettingsLayout.pageInset,
-                        10,
-                        FxSettingsLayout.pageInset,
-                        120,
-                      ),
-                      children: [
-                        Container(
-                          decoration: fxListCardDecoration(context),
-                          child: Column(
-                            children: [
-                              for (final (i, action)
-                                  in copilotActionsOrdenadas(actions).indexed) ...[
-                                if (i > 0) const Divider(height: 1),
-                                _TarefaRow(
-                                  action: action,
-                                  concluida:
-                                      _status == copilotActionsStatusConcluido,
-                                  ink: ink,
-                                  mute: mute,
-                                  onOpen: () => _openAction(context, action),
-                                  onMais: () => _abrirAcoes(action),
-                                ),
-                              ],
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: TokensStrip.s2),
-                        if (hasNext)
-                          FxSatelliteListTile(
-                            title: _loadingMore ? 'Carregando…' : 'Carregar mais',
-                            subtitle:
-                                _loadingMore
-                                    ? null
-                                    : Text(
-                                      'Mais ${(page.totalItens - actions.length).clamp(0, 999)} nesta lista.',
-                                    ),
-                            onTap: _loadingMore ? null : () => _carregarMais(page),
-                          ),
-                      ],
-                    ),
-                  );
-                },
+                  },
+                ),
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
         ),
       ),
     );
@@ -334,7 +400,7 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
         ),
         FxHelpTip(
           'Adiar e concluir',
-          'Toque em "⋯". Por alguns segundos dá para desfazer.',
+          'Conclua pelo check. Adiar fica no "⋯". Por alguns segundos dá para desfazer.',
         ),
       ],
     );
@@ -353,6 +419,14 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
     final destino = copilotActionsDestino(action);
     if (destino.startsWith('/')) context.push(destino);
   }
+
+  Future<void> _concluir(FilaAcaoResumo action) => _runAction(
+    () => ref
+        .read(dashboardRepositoryProvider)
+        .completeCommandAction(action.actionKey),
+    'Tarefa concluída',
+    undo: action,
+  );
 
   Future<void> _abrirAcoes(FilaAcaoResumo action) async {
     final concluida = _status == copilotActionsStatusConcluido;
@@ -388,11 +462,7 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
     final repo = ref.read(dashboardRepositoryProvider);
     switch (escolha) {
       case 'concluir':
-        await _runAction(
-          () => repo.completeCommandAction(action.actionKey),
-          'Tarefa concluída',
-          undo: action,
-        );
+        await _concluir(action);
       case 'adiar':
         await _runAction(
           () => repo.snoozeCommandAction(action.actionKey, hours: 24),
@@ -435,7 +505,9 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
         duration: const Duration(seconds: 6),
       );
       if (!desfazer || !mounted) return;
-      await ref.read(dashboardRepositoryProvider).reopenCommandAction(undo.actionKey);
+      await ref
+          .read(dashboardRepositoryProvider)
+          .reopenCommandAction(undo.actionKey);
       if (mounted) _recarregar();
     } catch (e) {
       if (!mounted) return;

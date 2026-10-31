@@ -55,11 +55,11 @@ class _PerfilBodyState extends State<_PerfilBody> {
     final onOpenLandingEditor = widget.onOpenLandingEditor;
     final chrome = ShellChrome.of(context);
     final isDark = chrome.isDark;
-    final ink = chrome.ink;
     final mute = chrome.mute;
     final line = chrome.line;
 
     final primaryColor = BrandPalette.resolveStoredPrimary(perfil.corPrimaria);
+    final sobre = fxPaletaSobreMarca(context, accent: primaryColor);
     final accent = BrandPalette.softened(primaryColor);
     final readiness = PerfilReadinessView.from(perfil);
     final profileScore = readiness.score;
@@ -156,7 +156,10 @@ class _PerfilBodyState extends State<_PerfilBody> {
                         FxSettingsLayout.pageInset,
                         0,
                       ),
-                      child: Column(
+                      child: FxStripCard(
+                        marca: true,
+                        accent: primaryColor,
+                        child: Column(
                         children: [
                           _Avatar(
                             nome: perfil.nome,
@@ -178,7 +181,7 @@ class _PerfilBodyState extends State<_PerfilBody> {
                             overflow: TextOverflow.ellipsis,
                             style: FxSettingsLayout.profileName(
                               context,
-                              color: ink,
+                              color: sobre.ink,
                             ),
                           ),
                           if (perfil.slogan != null &&
@@ -191,7 +194,7 @@ class _PerfilBodyState extends State<_PerfilBody> {
                               textAlign: TextAlign.center,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
-                              style: FxSettingsLayout.subhead(color: mute),
+                              style: FxSettingsLayout.subhead(color: sobre.mute),
                             ),
                           ],
                           const SizedBox(height: TokensStrip.s1),
@@ -200,7 +203,7 @@ class _PerfilBodyState extends State<_PerfilBody> {
                             textAlign: TextAlign.center,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: FxSettingsLayout.subhead(color: mute),
+                            style: FxSettingsLayout.subhead(color: sobre.mute),
                           ),
                           const SizedBox(height: TokensStrip.s1),
                           Text(
@@ -208,10 +211,10 @@ class _PerfilBodyState extends State<_PerfilBody> {
                                 ? 'Perfil completo'
                                 : 'Perfil $profileScore% completo',
                             textAlign: TextAlign.center,
-                            style: FxSettingsLayout.subhead(color: mute),
+                            style: FxSettingsLayout.subhead(color: sobre.mute),
                           ),
-                          const SizedBox(height: TokensStrip.s3),
                         ],
+                      ),
                       ),
                     ),
                   ),

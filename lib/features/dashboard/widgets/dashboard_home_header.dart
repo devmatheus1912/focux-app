@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/fx_settings_layout.dart';
-import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/fx_help.dart';
-import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_strip_card.dart';
 import '../../notificacoes/widgets/notificacao_badge_button.dart';
 import '../constants/dashboard_layout.dart';
 import '../utils/dashboard_microcopy.dart';
@@ -56,8 +54,8 @@ class DashboardHomeHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = dashboardReadableCaption(context, isDark: isDark);
+    final sobre = fxPaletaSobreMarca(context, accent: primary);
+    final mute = sobre.mute;
     final firstName = dashboardPersonalFirstName(nomePersonal);
     final fullName = (nomePersonal ?? '').trim();
     final a11yName =
@@ -74,94 +72,89 @@ class DashboardHomeHeader extends StatelessWidget {
     return Padding(
       padding: DashboardLayout.foldFirst,
       child: DecoratedBox(
-        decoration: fxStripCardDecoration(
+        decoration: fxMarcaDecoration(
           context,
           accent: primary,
           radius: FxSettingsLayout.groupRadius,
-          glowStrength: 0.04,
         ),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(12, 11, 10, 11),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Semantics(
-                button: true,
-                label: '$a11yName. Abrir perfil',
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    DashboardHeaderProfileAvatar(
-                      primary: primary,
-                      isDark: isDark,
-                      photoUrl: logoUrl,
-                      initials: fxInitials(nomePersonal ?? 'F'),
-                      size: 44,
-                      onTap: onProfileTap,
-                    ),
-                    Positioned(
-                      right: 0,
-                      bottom: 0,
-                      child: Container(
-                        width: 10,
-                        height: 10,
-                        decoration: BoxDecoration(
-                          color: primary,
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color:
-                                isDark
-                                    ? EagleTokens.darkCard
-                                    : TokensStrip.cardBg,
-                            width: 1.75,
+        child: Theme(
+          data: fxTemaSobreMarca(context, accent: primary),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 11, 10, 11),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Semantics(
+                  button: true,
+                  label: '$a11yName. Abrir perfil',
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      DashboardHeaderProfileAvatar(
+                        primary: primary,
+                        isDark: isDark,
+                        photoUrl: logoUrl,
+                        initials: fxInitials(nomePersonal ?? 'F'),
+                        size: 44,
+                        onTap: onProfileTap,
+                      ),
+                      Positioned(
+                        right: 0,
+                        bottom: 0,
+                        child: Container(
+                          width: 10,
+                          height: 10,
+                          decoration: BoxDecoration(
+                            color: sobre.ink,
+                            shape: BoxShape.circle,
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Olá, $firstName',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: dashboardPageTitleStyle(
-                        context,
-                        color: ink,
-                      ).copyWith(fontWeight: FontWeight.w800, height: 1.12),
-                    ),
-                    const SizedBox(height: 2),
-                    Semantics(
-                      liveRegion: true,
-                      child: Text(
-                        freshness,
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Olá, $firstName',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: dashboardCardSubtitleStyle(
+                        style: dashboardPageTitleStyle(
                           context,
-                          isDark: isDark,
-                        ).copyWith(color: mute, height: 1.2),
+                          color: sobre.ink,
+                        ).copyWith(fontWeight: FontWeight.w800, height: 1.12),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 2),
+                      Semantics(
+                        liveRegion: true,
+                        child: Text(
+                          freshness,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: dashboardCardSubtitleStyle(
+                            context,
+                            isDark: isDark,
+                          ).copyWith(color: mute, height: 1.2),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(width: 4),
-              _HeaderChromeCluster(
-                // <360: busca cai (catálogo/tools cobrem).
-                onQuickSearch: compactChrome ? null : onQuickSearch,
-                onHelp: onHelp,
-                notificacoesCountOverride: notificacoesCountOverride,
-                onConversas: onConversas,
-                conversasCount: conversasCount,
-              ),
-            ],
+                const SizedBox(width: 4),
+                _HeaderChromeCluster(
+                  // <360: busca cai (catálogo/tools cobrem).
+                  onQuickSearch: compactChrome ? null : onQuickSearch,
+                  onHelp: onHelp,
+                  notificacoesCountOverride: notificacoesCountOverride,
+                  onConversas: onConversas,
+                  conversasCount: conversasCount,
+                ),
+              ],
+            ),
           ),
         ),
       ),

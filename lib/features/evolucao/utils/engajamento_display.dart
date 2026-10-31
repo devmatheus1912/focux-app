@@ -182,6 +182,34 @@ int engajamentoTreinosSemana(
       .length;
 }
 
+/// Últimos 7 dias contra os 7 anteriores. Nulo quando não há o que comparar.
+({int diferenca, String texto})? engajamentoTendencia(
+  Iterable<EventoEngajamento> eventos, {
+  DateTime? now,
+}) {
+  final hoje = _dia(now ?? DateTime.now());
+  final corte = hoje.subtract(const Duration(days: 6));
+  final anterior = hoje.subtract(const Duration(days: 13));
+  var atuais = 0;
+  var antes = 0;
+  for (final quando in eventos.where(_treinoFeito).map(_quando).nonNulls) {
+    if (!quando.isBefore(corte)) {
+      atuais++;
+    } else if (!quando.isBefore(anterior)) {
+      antes++;
+    }
+  }
+  if (atuais == 0 && antes == 0) return null;
+  final d = atuais - antes;
+  if (d == 0) return (diferenca: 0, texto: 'Igual à semana anterior');
+  final n = d.abs();
+  final treinos = n == 1 ? '1 treino' : '$n treinos';
+  return (
+    diferenca: d,
+    texto: d > 0 ? '$treinos a mais que na semana anterior' : '$treinos a menos que na semana anterior',
+  );
+}
+
 /// Dias do período mais recente, do mais antigo para hoje.
 List<({DateTime dia, EngajamentoTreinoEstado? estado})> engajamentoCalendario(
   Iterable<EventoEngajamento> eventos, {

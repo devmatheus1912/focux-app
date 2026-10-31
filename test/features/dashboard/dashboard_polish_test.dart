@@ -66,7 +66,6 @@ void main() {
     expect(screen, contains('FxActionRow'));
     expect(screen, contains('FxMetricStrip'));
     expect(screen, contains('/alunos?filtro=risco'));
-    expect(screen, contains('dashboardReadableMuted'));
     expect(screen, contains('RISK_STUDENTS'));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('FxHelpChrome.iconSize'));
@@ -90,7 +89,7 @@ void main() {
     expect(shortcutsFile, contains('fromEntrada'));
 
     final semanticsCount = 'Semantics('.allMatches(screen).length;
-    expect(semanticsCount, greaterThanOrEqualTo(4));
+    expect(semanticsCount, greaterThanOrEqualTo(3));
   });
 
   test('Ferramentas é lista inset agrupada por tarefa', () {

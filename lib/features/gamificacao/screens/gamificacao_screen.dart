@@ -6,7 +6,6 @@ import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
-import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
@@ -258,10 +257,10 @@ class _StreakCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.forBrightness(context, isDark);
+    final chrome = fxPaletaSobreMarca(context);
     final streak = data.streak.streakAtual;
     return FxStripCard(
-      emphasize: true,
+      marca: true,
       semanticsLabel: 'Sequência ${gamificacaoStreakLabel(streak)}',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

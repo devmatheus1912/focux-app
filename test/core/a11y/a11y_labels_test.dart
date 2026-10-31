@@ -19,18 +19,5 @@ void main() {
     );
   });
 
-  test('dashboard attention item semantics includes rank', () {
-    expect(
-      dashboardAttentionItemSemantics(
-        index: 1,
-        total: 2,
-        nome: 'Ana',
-        titulo: 'Inadimplente',
-        subt: 'R\$ 200 pendente',
-        acao: 'Cobrar',
-      ),
-      '1 de 2. Ana, Inadimplente. R\$ 200 pendente. Toque para Cobrar',
-    );
-  });
 
 }

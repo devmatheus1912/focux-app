@@ -98,6 +98,36 @@ class EventoEngajamento {
       );
 }
 
+/// Aderência sobre o previsto na ficha. `percent` nulo: começando ou sem ficha.
+class AderenciaResumo {
+  const AderenciaResumo({
+    this.percent,
+    this.feitos = 0,
+    this.previstos = 0,
+    this.comecando = false,
+    this.diasDescanso = const [],
+  });
+
+  final int? percent;
+  final int feitos;
+  final int previstos;
+  final bool comecando;
+
+  /// 1 (segunda) a 7 (domingo).
+  final List<int> diasDescanso;
+
+  factory AderenciaResumo.fromJson(Map<String, dynamic> j) => AderenciaResumo(
+    percent: (j['percent'] as num?)?.toInt(),
+    feitos: (j['feitos'] as num?)?.toInt() ?? 0,
+    previstos: (j['previstos'] as num?)?.toInt() ?? 0,
+    comecando: j['comecando'] as bool? ?? false,
+    diasDescanso:
+        ((j['diasDescanso'] as List?) ?? const [])
+            .map((e) => (e as num).toInt())
+            .toList(),
+  );
+}
+
 /// BFF `GET /api/alunos/{id}/evolucao/home` — medidas + recordes.
 class EvolucaoHomeBundle {
   final List<MedidaCorporal> medidas;
@@ -228,20 +258,25 @@ class EvolucaoRepository {
     );
   }
 
-  Future<List<EventoEngajamento>> engajamento(
-    int alunoId, {
-    int dias = 30,
-  }) async {
+  Future<({List<EventoEngajamento> eventos, AderenciaResumo? aderencia})>
+  engajamento(int alunoId, {int dias = 30}) async {
     final r = await _dio.get(
       '/api/alunos/$alunoId/engajamento',
       queryParameters: {'dias': dias, 'limit': 200},
     );
     final data = r.data;
-    final eventos =
-        data is Map ? (data['eventos'] as List?) ?? [] : data as List;
-    return eventos
-        .map((e) => EventoEngajamento.fromJson(e as Map<String, dynamic>))
-        .toList();
+    final eventos = data is Map ? (data['eventos'] as List?) ?? [] : data as List;
+    final aderencia = data is Map ? data['aderencia'] : null;
+    return (
+      eventos:
+          eventos
+              .map((e) => EventoEngajamento.fromJson(e as Map<String, dynamic>))
+              .toList(),
+      aderencia:
+          aderencia is Map
+              ? AderenciaResumo.fromJson(Map<String, dynamic>.from(aderencia))
+              : null,
+    );
   }
 
   Future<void> compartilharEvolucao(int alunoId) async {

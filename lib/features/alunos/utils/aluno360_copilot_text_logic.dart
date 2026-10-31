@@ -79,27 +79,6 @@ bool isRedundantCopilotReasonSegment(
       lower.contains('contato direto hoje');
 }
 
-/// Hides metric bullets already visible in the status grid (non-focus mode).
-String sanitizeCopilotPrescriptionReason(
-  String reason, {
-  required bool statusMetricsVisible,
-  bool hideMetricFooter = false,
-}) {
-  if (reason.trim().isEmpty) return '';
-  if (hideMetricFooter) return '';
-  if (!statusMetricsVisible) return reason.trim();
-  final segments = copilotPrescriptionReasonSegments(reason)
-      .where(
-        (segment) =>
-            !isRedundantCopilotReasonSegment(
-              segment,
-              statusMetricsVisible: true,
-            ),
-      )
-      .toList(growable: false);
-  if (segments.isEmpty) return '';
-  return segments.join(' · ');
-}
 
 /// Strips LLM preambles so UI shows the actionable sentence, not boilerplate.
 String normalizeIaCopilotAcao(String raw) {

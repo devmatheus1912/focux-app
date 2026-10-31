@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../theme/brand_palette.dart';
+import '../theme/shell_chrome.dart';
+
 import '../theme/tokens_strip.dart';
 import 'fx_shell_scaffold.dart';
 
@@ -17,6 +20,51 @@ import 'fx_shell_scaffold.dart';
 /// Quando NÃO usar:
 /// - Linhas de lista com ink splash → [fxListTileCardShell]
 /// - Bottom sheets → `showFxHomeSheet` / `FxHomeSheetSurface`
+CardDeMarca _cardDeMarca(BuildContext context, Color? accent) {
+  final theme = Theme.of(context);
+  return BrandPalette.cardDeMarca(
+    accent ?? theme.colorScheme.primary,
+    dark: theme.brightness == Brightness.dark,
+  );
+}
+
+/// Degradê do bloco de identidade.
+BoxDecoration fxMarcaDecoration(
+  BuildContext context, {
+  Color? accent,
+  double radius = TokensStrip.rCard,
+}) {
+  final cor = _cardDeMarca(context, accent);
+  return BoxDecoration(
+    gradient: cor.degrade,
+    borderRadius: BorderRadius.circular(radius),
+    boxShadow: [
+      BoxShadow(
+        color: cor.fundo.withValues(alpha: 0.22),
+        blurRadius: 18,
+        offset: const Offset(0, 8),
+      ),
+    ],
+  );
+}
+
+/// Paleta do texto sobre o bloco: a marca pode ser clara ou escura.
+ShellPalette fxPaletaSobreMarca(BuildContext context, {Color? accent}) {
+  final sobre = _cardDeMarca(context, accent).sobre;
+  return ShellPalette(sobre.computeLuminance() > 0.5, brand: sobre);
+}
+
+/// Tema de quem está sobre o bloco: botões e chips acompanham a [fxPaletaSobreMarca].
+ThemeData fxTemaSobreMarca(BuildContext context, {Color? accent}) {
+  final base = Theme.of(context);
+  final paleta = fxPaletaSobreMarca(context, accent: accent);
+  final brilho = paleta.isDark ? Brightness.dark : Brightness.light;
+  return base.copyWith(
+    brightness: brilho,
+    colorScheme: base.colorScheme.copyWith(brightness: brilho, primary: paleta.brand),
+  );
+}
+
 class FxStripCard extends StatelessWidget {
   const FxStripCard({
     super.key,
@@ -28,7 +76,12 @@ class FxStripCard extends StatelessWidget {
     this.padding = const EdgeInsets.all(TokensStrip.s4),
     this.onTap,
     this.semanticsLabel,
+    this.marca = false,
   });
+
+  /// Bloco de identidade: degradê na cor da marca. Um por tela, no card mais
+  /// importante. O texto de dentro usa [fxPaletaSobreMarca].
+  final bool marca;
 
   final Widget child;
 
@@ -57,14 +110,23 @@ class FxStripCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget surface = DecoratedBox(
-      decoration: fxStripCardDecoration(
-        context,
-        accent: accent,
-        radius: radius,
-        glowStrength: glowStrength,
-        emphasize: emphasize,
-      ),
-      child: Padding(padding: padding, child: child),
+      decoration:
+          marca
+              ? fxMarcaDecoration(context, accent: accent, radius: radius)
+              : fxStripCardDecoration(
+                context,
+                accent: accent,
+                radius: radius,
+                glowStrength: glowStrength,
+                emphasize: emphasize,
+              ),
+      child:
+          marca
+              ? Theme(
+                data: fxTemaSobreMarca(context, accent: accent),
+                child: Padding(padding: padding, child: child),
+              )
+              : Padding(padding: padding, child: child),
     );
 
     if (onTap == null) return surface;

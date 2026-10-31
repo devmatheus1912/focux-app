@@ -35,7 +35,6 @@ void main() {
     expect(global, contains('FxHelpIconButton'));
     expect(global, contains('relatoriosHubViewed'));
     expect(global, isNot(contains('dashboardHeroCaptionOnTeal')));
-    expect(global, isNot(contains('dashboardHeroMutedOnTealStyle')));
     expect(global, isNot(contains('Colors.white70')));
   });
 }

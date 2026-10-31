@@ -36,15 +36,6 @@ Aluno _aluno({
 
 void main() {
   group('copilotActionFromIa', () {
-    test('maps IA payload to display action', () {
-      final action = copilotActionFromIa(_iaPayload({
-        'acao': 'Enviar mensagem curta pedindo retorno ao treino',
-        'motivo': '14 dias sem atividade',
-      }));
-      expect(action['titulo'], 'Sugestão IA');
-      expect(action['fonte'], 'IA');
-      expect(action['acao'], contains('mensagem'));
-    });
   });
 
   group('resolveCopilotProximaAcaoResumo', () {
@@ -84,7 +75,7 @@ void main() {
   });
 
   group('copilotProfileCompletion', () {
-    test('returns 100 when all profile fields filled', () {
+    test('conta os 8 campos do backend: faltam peso, altura, nascimento e foto', () {
       expect(
         copilotProfileCompletion(
           _aluno(
@@ -95,7 +86,7 @@ void main() {
             tipoConsultoria: 'ONLINE',
           ),
         ),
-        100,
+        50,
       );
     });
 
@@ -109,18 +100,6 @@ void main() {
   });
 
   group('copilotActionFrom360', () {
-    test('maps radar fonte to titulo', () {
-      final action = copilotActionFrom360(
-        const ProximaAcaoResumo(
-          acao: 'Retomar contato',
-          motivo: 'Risco',
-          fonte: 'RADAR',
-          prioridade: 'P1',
-        ),
-      );
-      expect(action['titulo'], 'Radar Focux');
-      expect(action['acao'], 'Retomar contato');
-    });
   });
 
   group('cleanCopilotText', () {
@@ -166,231 +145,28 @@ void main() {
     });
   });
   group('resolveCopilotPrescriptionFromAction', () {
-    test('maps action fields to display copy', () {
-      final content = resolveCopilotPrescriptionFromAction(
-        _aluno(),
-        const {
-          'titulo': 'Radar Focux',
-          'acao': 'Retomar contato e ajustar plano',
-          'motivo': 'Aluno em risco',
-        },
-        'fallback',
-      );
-      expect(content.title, 'Radar Focux');
-      expect(content.action, contains('Retomar contato'));
-      expect(content.reason, 'Aluno em risco');
-    });
 
-    test('maps mapa corporal to specific copy', () {
-      final content = resolveCopilotPrescriptionFromAction(
-        _aluno(),
-        const {
-          'titulo': 'Radar Focux',
-          'acao': 'Completar cadastro',
-          'motivo': 'Ação humana hoje',
-        },
-        'fallback',
-      );
-      expect(content.action, contains('cadastro'));
-    });
   });
 
   group('copilotCardSubtitle', () {
-    test('shows IA loading copy', () {
-      expect(
-        copilotCardSubtitle(
-          forceIa: true,
-          iaAsync: const AsyncValue.loading(),
-          resumoLoading: false,
-        ),
-        'Gerando sugestão com IA…',
-      );
-    });
 
-    test('shows IA success copy', () {
-      expect(
-        copilotCardSubtitle(
-          forceIa: true,
-          iaAsync: AsyncValue.data(_iaPayload({'acao': 'Teste'})),
-          resumoLoading: false,
-        ),
-        'Atualizado com IA · toque em atualizar para regenerar',
-      );
-    });
 
-    test('falls back to profile copy', () {
-      expect(
-        copilotCardSubtitle(
-          forceIa: false,
-          iaAsync: null,
-          resumoLoading: false,
-        ),
-        'Sugestão com base no perfil de hoje.',
-      );
-    });
 
-    test('compact copy on narrow headers', () {
-      expect(
-        copilotCardSubtitle(
-          forceIa: true,
-          iaAsync: AsyncValue.data(_iaPayload({'acao': 'Teste'})),
-          resumoLoading: false,
-          compact: true,
-        ),
-        'Sugestão IA · toque em atualizar',
-      );
-    });
 
-    test('shows refreshing copy while IA reloads', () {
-      expect(
-        copilotCardSubtitle(
-          forceIa: true,
-          iaAsync: AsyncValue.data(_iaPayload({'acao': 'Teste'})),
-          resumoLoading: false,
-          iaRefreshing: true,
-        ),
-        'Atualizando sugestão com IA…',
-      );
-    });
 
-    test('shows bundle sync copy while 360 loads', () {
-      expect(
-        copilotCardSubtitle(
-          forceIa: false,
-          iaAsync: null,
-          resumoLoading: false,
-          bundleLoading: true,
-        ),
-        'Sincronizando Aluno 360…',
-      );
-      expect(
-        copilotCardSubtitle(
-          forceIa: false,
-          iaAsync: null,
-          resumoLoading: false,
-          bundleRefreshing: true,
-          compact: true,
-        ),
-        'Atualizando 360…',
-      );
-    });
   });
 
   group('resolveCopilotPriorityCardState', () {
-    test('shows deterministic seed without forcing IA', () {
-      expect(
-        resolveCopilotPriorityCardState(
-          seed360: const {'acao': 'Retomar contato com Nathalia'},
-          forceIa: false,
-          iaAsync: null,
-          iaRefreshing: false,
-        ),
-        CopilotPriorityCardState.showingDeterministic,
-      );
-    });
 
-    test('refreshingAi keeps exclusive state even with seed', () {
-      expect(
-        resolveCopilotPriorityCardState(
-          seed360: const {'acao': 'Retomar contato com Nathalia'},
-          forceIa: true,
-          iaAsync: const AsyncValue.loading(),
-          iaRefreshing: true,
-        ),
-        CopilotPriorityCardState.refreshingAi,
-      );
-      expect(
-        copilotPriorityCardAllowsSkeleton(
-          CopilotPriorityCardState.refreshingAi,
-        ),
-        isFalse,
-      );
-    });
 
-    test('showingAi after successful IA response', () {
-      expect(
-        resolveCopilotPriorityCardState(
-          seed360: const {'acao': 'Retomar contato'},
-          forceIa: true,
-          iaAsync: AsyncValue.data(_iaPayload({'acao': 'Mensagem IA'})),
-          iaRefreshing: false,
-        ),
-        CopilotPriorityCardState.showingAi,
-      );
-    });
 
-    test('errorAi when IA fails without prior value', () {
-      expect(
-        resolveCopilotPriorityCardState(
-          seed360: const {'acao': 'Retomar contato'},
-          forceIa: true,
-          iaAsync: AsyncValue.error('timeout', StackTrace.empty),
-          iaRefreshing: false,
-        ),
-        CopilotPriorityCardState.errorAi,
-      );
-    });
 
-    test('idle allows skeleton only without seed', () {
-      expect(
-        resolveCopilotPriorityCardState(
-          seed360: null,
-          forceIa: false,
-          iaAsync: null,
-          iaRefreshing: false,
-        ),
-        CopilotPriorityCardState.idle,
-      );
-      expect(
-        copilotPriorityCardAllowsSkeleton(CopilotPriorityCardState.idle),
-        isTrue,
-      );
-    });
   });
 
   group('copilotPrescriptionDisplayAction', () {
-    test('shortens contact plus wearable IA paragraph', () {
-      final aluno = _aluno();
-      const raw =
-          'Entre em contato com Beatriz Carvalho para reavivar o interesse no treinamento e solicitar a sincronização dos dados do wearable.';
-      expect(
-        copilotPrescriptionDisplayAction(aluno, raw),
-        'Retomar contato e pedir sync do wearable.',
-      );
-      expect(
-        copilotPrescriptionFullAction(aluno, raw),
-        contains('Beatriz Carvalho'),
-      );
-    });
 
-    test('resolveCopilotPrescriptionFromAction expand usa o mesmo texto', () {
-      final aluno = _aluno();
-      const raw =
-          'Entre em contato com Beatriz Carvalho para reavivar o interesse no treinamento e solicitar a sincronização dos dados do wearable.';
-      final content = resolveCopilotPrescriptionFromAction(
-        aluno,
-        copilotActionFromIa(_iaPayload({
-          'acao': raw,
-          'motivo': 'Última atividade há 999 dia(s), aderência de 0%',
-        })),
-        'fallback',
-      );
-      expect(content.action, 'Retomar contato e pedir sync do wearable.');
-    });
   });
   group('copilotPrescriptionReasonSegments', () {
-    test('splits footer motivo on middle dots', () {
-      expect(
-        copilotPrescriptionReasonSegments(
-          'Priorize contato · sem registro recente · aderência 0%',
-        ),
-        [
-          'Priorize contato',
-          'sem registro recente',
-          'aderência 0%',
-        ],
-      );
-    });
   });
 
   group('normalizeIaCopilotAcao', () {
@@ -415,13 +191,7 @@ void main() {
   });
 
   group('copilotCardTitle', () {
-    test('uses Prioridade do dia when contact priority', () {
-      expect(copilotCardTitle(contactPriority: true), 'Prioridade do dia');
-    });
 
-    test('uses Próxima melhor ação otherwise', () {
-      expect(copilotCardTitle(contactPriority: false), 'Próxima melhor ação');
-    });
   });
 
   group('formatCopilotIaMotivo', () {
@@ -533,49 +303,10 @@ void main() {
   });
 
   group('copilotPrescriptionDisplayAction', () {
-    test('uses contact copy instead of wearable when no history', () {
-      expect(
-        copilotPrescriptionDisplayAction(
-          _aluno(),
-          'Pedir sync do wearable',
-          wearableRelevant: false,
-        ),
-        'Retomar contato com Beatriz e checar como está o treino.',
-      );
-    });
 
-    test('rewrites robotic IA paralisação prompt to coach prescription', () {
-      expect(
-        copilotPrescriptionDisplayAction(
-          _aluno(nome: 'Nathalia', genero: 'Feminino'),
-          'Entre em contato com Nathalia para entender os motivos da paralisação e discutir um plano de retomada de treino personalizado.',
-        ),
-        'Retomar contato com Nathalia e checar como está o treino.',
-      );
-      expect(
-        copilotDisplayAction(
-          _aluno(nome: 'Nathalia', genero: 'Feminino'),
-          'Entre em contato com Nathalia para entender os motivos da paralisação e discutir um plano de retomada de treino personalizado.',
-        ),
-        'Retomar contato com Nathalia e checar como está o treino.',
-      );
-    });
   });
 
   group('resolveCopilotPrescriptionFromAction', () {
-    test('action curta quando IA manda contato robótico', () {
-      final content = resolveCopilotPrescriptionFromAction(
-        _aluno(nome: 'Nathalia'),
-        {
-          'acao':
-              'Entre em contato com Nathalia para entender os motivos da paralisação e discutir um plano de retomada de treino personalizado.',
-          'motivo': 'Sem atividade recente',
-          'fonte': 'IA',
-        },
-        'fallback',
-      );
-      expect(content.action, 'Retomar contato com Nathalia e checar como está o treino.');
-    });
   });
 
   group('resolveOutreachMessage', () {
@@ -643,55 +374,12 @@ void main() {
   });
 
   group('contactPriorityPrescriptionContent', () {
-    test('surfaces risk and adherence in reason when status hidden', () {
-      final content = contactPriorityPrescriptionContent(
-        _aluno(emRisco: true, aderenciaPercent: 0),
-      );
-      expect(content.title, 'Prioridade do dia');
-      expect(content.action, contains('Retomar contato'));
-      expect(content.reason, contains('Risco operacional'));
-    });
 
-    test('dedupes metrics when status grid is visible', () {
-      final content = contactPriorityPrescriptionContent(
-        _aluno(emRisco: true, aderenciaPercent: 0),
-        statusMetricsVisible: true,
-      );
-      expect(content.reason, isEmpty);
-    });
   });
 
   group('sanitizeCopilotPrescriptionReason', () {
-    test('returns empty when all segments duplicate status grid', () {
-      expect(
-        sanitizeCopilotPrescriptionReason(
-          'Risco operacional · aderência 0% nos últimos 30 dias.',
-          statusMetricsVisible: true,
-        ),
-        isEmpty,
-      );
-    });
 
-    test('keeps unique segments when status visible', () {
-      expect(
-        sanitizeCopilotPrescriptionReason(
-          'Wearable desconectado · priorize contato',
-          statusMetricsVisible: true,
-        ),
-        'Wearable desconectado',
-      );
-    });
 
-    test('hideMetricFooter suppresses entire footer', () {
-      expect(
-        sanitizeCopilotPrescriptionReason(
-          'Wearable desconectado · priorize contato',
-          statusMetricsVisible: false,
-          hideMetricFooter: true,
-        ),
-        isEmpty,
-      );
-    });
   });
 
   group('copilotExecutarConfirmBody', () {
@@ -732,34 +420,8 @@ void main() {
   });
 
   group('copilotProfileGapsForCard', () {
-    test('drops objective gap when hero already prompts it', () {
-      final gaps = copilotProfileGapsForCard(
-        Aluno(
-          id: 1,
-          nome: 'Beatriz',
-          email: 'b@test.com',
-          status: 'ATIVO',
-        ),
-      );
-      expect(gaps.any((g) => g.title == 'Objetivo'), isFalse);
-      expect(gaps.any((g) => g.title == 'Contato'), isTrue);
-    });
   });
 
   group('resolveCopilotExecutarAcao', () {
-    test('maps em risco sem mensagem to MARCAR_RISCO', () {
-      final emRisco = Aluno(
-        id: 1,
-        nome: 'Beatriz',
-        email: 'b@test.com',
-        status: 'ATIVO',
-        emRisco: true,
-      );
-      final spec = resolveCopilotExecutarAcao(
-        tipoAcao: 'CONTATO',
-        aluno: emRisco,
-      );
-      expect(spec?.backendTipo, 'MARCAR_RISCO');
-    });
   });
 }

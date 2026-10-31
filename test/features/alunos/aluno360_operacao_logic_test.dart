@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
-import 'package:focux_app/features/alunos/utils/aluno360_copilot_logic.dart';
 import 'package:focux_app/features/alunos/utils/aluno360_operacao_logic.dart';
 import 'package:focux_app/features/dashboard/data/command_center_data.dart';
 
@@ -216,33 +215,7 @@ void main() {
     });
   });
   group('shouldShowCopilotContactBadge', () {
-    test('shows when contact priority and sticky is not chat', () {
-      expect(
-        shouldShowCopilotContactBadge(
-          contactPriority: true,
-          sticky: const OperacaoStickyAction(
-            label: 'Completar mapa',
-            icon: Icons.person_outline,
-            destination: OperacaoStickyDestination.editAluno,
-          ),
-        ),
-        isTrue,
-      );
-    });
 
-    test('hides when sticky already opens chat', () {
-      expect(
-        shouldShowCopilotContactBadge(
-          contactPriority: true,
-          sticky: const OperacaoStickyAction(
-            label: 'Contato',
-            icon: Icons.chat_rounded,
-            destination: OperacaoStickyDestination.chat,
-          ),
-        ),
-        isFalse,
-      );
-    });
   });
   group('aderencia week parsing', () {
     test('summarize empty week', () {
@@ -302,63 +275,9 @@ void main() {
   });
 
   group('shouldShowCopilotProfileGapsButton', () {
-    test('hides when only objective gap and hero covers it', () {
-      expect(
-        shouldShowCopilotProfileGapsButton(
-          Aluno(
-            id: 1,
-            nome: 'Beatriz',
-            email: 'b@test.com',
-            status: 'ATIVO',
-            telefone: '11999999999',
-            genero: 'F',
-            tipoConsultoria: 'PRESENCIAL',
-          ),
-          70,
-        ),
-        isFalse,
-      );
-    });
 
-    test('shows when contact gap remains after hero objective cta', () {
-      expect(
-        shouldShowCopilotProfileGapsButton(
-          Aluno(id: 1, nome: 'Teste', email: 't@test.com', status: 'ATIVO'),
-          50,
-        ),
-        isTrue,
-      );
-    });
 
-    test('hides when sticky already routes to evolucao (mapa corporal)', () {
-      expect(
-        shouldShowCopilotProfileGapsButton(
-          Aluno(id: 1, nome: 'Beatriz', email: 'b@test.com', status: 'ATIVO'),
-          50,
-          sticky: const OperacaoStickyAction(
-            label: 'Completar cadastro',
-            icon: Icons.monitor_weight_outlined,
-            destination: OperacaoStickyDestination.editAluno,
-          ),
-        ),
-        isFalse,
-      );
-    });
 
-    test('hides when sticky routes to edit for perfil gaps', () {
-      expect(
-        shouldShowCopilotProfileGapsButton(
-          Aluno(id: 1, nome: 'Teste', email: 't@test.com', status: 'ATIVO'),
-          50,
-          sticky: const OperacaoStickyAction(
-            label: 'Definir objetivo',
-            icon: Icons.edit_outlined,
-            destination: OperacaoStickyDestination.editAluno,
-          ),
-        ),
-        isFalse,
-      );
-    });
   });
   group('operacao sticky secondary CTAs', () {
     test('hides copilot chat when sticky is chat action', () {
@@ -410,148 +329,16 @@ void main() {
   });
 
   group('shouldShowCopilotPrescriptionBlock', () {
-    test(
-      'hides clone even after IA refresh when sticky already owns the action',
-      () {
-        final aluno = _aluno();
-        const sticky = OperacaoStickyAction(
-          label: 'Completar cadastro',
-          icon: Icons.monitor_weight_outlined,
-          destination: OperacaoStickyDestination.editAluno,
-        );
-        expect(
-          shouldShowCopilotPrescriptionBlock(
-            sticky: sticky,
-            aluno: aluno,
-            proximaAcaoRaw: 'Completar cadastro no radar',
-          ),
-          isFalse,
-        );
-      },
-    );
 
-    test('hides duplicate when sticky matches 360', () {
-      final aluno = _aluno();
-      const sticky = OperacaoStickyAction(
-        label: 'Completar cadastro',
-        icon: Icons.monitor_weight_outlined,
-        destination: OperacaoStickyDestination.editAluno,
-      );
-      expect(
-        shouldShowCopilotPrescriptionBlock(
-          sticky: sticky,
-          aluno: aluno,
-          proximaAcaoRaw: 'Completar cadastro no radar',
-        ),
-        isFalse,
-      );
-    });
 
-    test('keeps prescription for contact priority even with chat sticky', () {
-      final aluno = _aluno(emRisco: true);
-      const sticky = OperacaoStickyAction(
-        label: 'Retomar contato',
-        icon: Icons.chat_rounded,
-        destination: OperacaoStickyDestination.chat,
-      );
-      expect(
-        shouldShowCopilotPrescriptionBlock(
-          sticky: sticky,
-          aluno: aluno,
-          proximaAcaoRaw: 'Retomar contato com Thales e checar o treino.',
-          contactPriority: true,
-        ),
-        isTrue,
-      );
-    });
   });
 
   group('shouldHideCopilotPrescriptionWhenMatchesSticky', () {
-    test('hides when sticky label matches proxima acao', () {
-      final aluno = _aluno();
-      const sticky = OperacaoStickyAction(
-        label: 'Completar cadastro',
-        icon: Icons.monitor_weight_outlined,
-        destination: OperacaoStickyDestination.editAluno,
-      );
-      expect(
-        shouldHideCopilotPrescriptionWhenMatchesSticky(
-          sticky: sticky,
-          aluno: aluno,
-          proximaAcaoRaw: 'Completar cadastro no radar',
-        ),
-        isTrue,
-      );
-    });
 
-    test('shows when sticky differs from proxima acao', () {
-      final aluno = _aluno();
-      const sticky = OperacaoStickyAction(
-        label: 'Abrir chat',
-        icon: Icons.chat_bubble_outline_rounded,
-        destination: OperacaoStickyDestination.chat,
-      );
-      expect(
-        shouldHideCopilotPrescriptionWhenMatchesSticky(
-          sticky: sticky,
-          aluno: aluno,
-          proximaAcaoRaw: 'Completar cadastro no radar',
-        ),
-        isFalse,
-      );
-    });
   });
 
   group('shouldHideCopilotPrimaryCtaWhenMatchesSticky', () {
-    test('hides when sticky command center matches proxima acao', () {
-      final aluno = _aluno();
-      const acao = 'Reforçar aderência semanal do aluno';
-      final sticky = resolveOperacaoStickyAction(
-        aluno: aluno,
-        proximaAcao: ProximaAcaoResumo(
-          acao: acao,
-          motivo: 'teste',
-          fonte: 'PADRAO',
-          prioridade: 'MEDIA',
-        ),
-        hasOpenTask: false,
-        followUpDue: false,
-      );
-      expect(sticky.destination, OperacaoStickyDestination.commandCenter);
-      expect(
-        shouldHideCopilotPrimaryCtaWhenMatchesSticky(
-          sticky: sticky,
-          aluno: aluno,
-          proximaAcaoRaw: acao,
-        ),
-        isTrue,
-      );
-    });
 
-    test('hides when sticky commitment matches sono acao', () {
-      final aluno = _aluno();
-      const acao = 'Combinar sono desta semana';
-      final sticky = resolveOperacaoStickyAction(
-        aluno: aluno,
-        proximaAcao: const ProximaAcaoResumo(
-          acao: acao,
-          motivo: 'teste',
-          fonte: 'PADRAO',
-          prioridade: 'MEDIA',
-        ),
-        hasOpenTask: false,
-        followUpDue: false,
-      );
-      expect(sticky.destination, OperacaoStickyDestination.commitment);
-      expect(
-        shouldHideCopilotPrimaryCtaWhenMatchesSticky(
-          sticky: sticky,
-          aluno: aluno,
-          proximaAcaoRaw: acao,
-        ),
-        isTrue,
-      );
-    });
   });
 
   group('parseAlunoDetailTabIndex', () {
@@ -877,34 +664,7 @@ void main() {
   });
 
   group('aluno360CopilotHasPriorityCardContent', () {
-    test('true for deterministic proximaAcao from /360', () {
-      expect(
-        aluno360CopilotHasPriorityCardContent(
-          proximaAcao360: ProximaAcaoResumo(
-            acao: 'Retomar contato',
-            motivo: 'teste',
-            fonte: 'RADAR',
-            prioridade: 'P1',
-          ),
-          forceIa: false,
-          iaHasValue: false,
-          hasOpenTask: false,
-        ),
-        isTrue,
-      );
-    });
 
-    test('false when there is no action yet', () {
-      expect(
-        aluno360CopilotHasPriorityCardContent(
-          proximaAcao360: null,
-          forceIa: false,
-          iaHasValue: false,
-          hasOpenTask: false,
-        ),
-        isFalse,
-      );
-    });
   });
   group('weekdayNameFromIso', () {
     test('returns weekday name for valid iso', () {
