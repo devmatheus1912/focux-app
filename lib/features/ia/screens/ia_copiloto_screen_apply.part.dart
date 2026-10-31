@@ -102,9 +102,14 @@ extension IaCopilotScreenApply on _IaCopilotoScreenState {
   }
 
   Future<void> _denunciar() async {
-    final insights = ref
-        .read(insightsProvider(InsightsQuery(alunoId: _selectedAlunoId, mode: _mode)))
-        .value;
+    final insights =
+        ref
+            .read(
+              insightsProvider(
+                InsightsQuery(alunoId: _selectedAlunoId, mode: _mode),
+              ),
+            )
+            .value;
     await showDenunciarSheet(
       context,
       repo: ModeracaoRepository(ref.read(apiClientProvider)),

@@ -26,13 +26,3 @@ String _buildSubtitle(PerfilPersonal perfil) {
   return specialty;
 }
 
-String _initials(String nome) {
-  final parts = nome
-      .trim()
-      .split(RegExp(r'\s+'))
-      .where((item) => item.isNotEmpty);
-  if (parts.isEmpty) return 'FP';
-  if (parts.length == 1) return parts.first.substring(0, 1).toUpperCase();
-  return (parts.first.substring(0, 1) + parts.last.substring(0, 1))
-      .toUpperCase();
-}

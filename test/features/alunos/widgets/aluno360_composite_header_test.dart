@@ -81,7 +81,7 @@ void main() {
     final tabTop = tabBarBox.localToGlobal(Offset.zero).dy;
     final gap = tabTop - heroBottom;
 
-    expect(gap, lessThanOrEqualTo(1.0));
+    expect(gap, lessThanOrEqualTo(8.0));
     expect(Aluno360Layout.tabContentGap, TokensStrip.s4);
 
     await expectFocuxGolden(

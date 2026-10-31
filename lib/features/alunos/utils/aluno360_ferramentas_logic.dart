@@ -18,7 +18,6 @@ enum Aluno360FerramentasModule {
   aderencia,
   planoSucesso,
   trilhas,
-  engajamento,
   anamnese,
   mensalidades,
   recorrencia,
@@ -39,8 +38,6 @@ abstract final class Aluno360FerramentasLogic {
       Aluno360FerramentasModule.aderencia => Icons.event_available_outlined,
       Aluno360FerramentasModule.planoSucesso => Icons.flag_outlined,
       Aluno360FerramentasModule.trilhas => Icons.route_outlined,
-      Aluno360FerramentasModule.engajamento =>
-        Icons.local_fire_department_outlined,
       Aluno360FerramentasModule.anamnese => Icons.assignment_outlined,
       Aluno360FerramentasModule.mensalidades => Icons.payments_outlined,
       Aluno360FerramentasModule.recorrencia => Icons.autorenew_rounded,

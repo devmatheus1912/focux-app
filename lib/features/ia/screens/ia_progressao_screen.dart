@@ -6,17 +6,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 import 'package:go_router/go_router.dart';
-import 'package:printing/printing.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
-import '../../../core/theme/theme_provider.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
-import '../../../core/utils/motion_preferences.dart';
-import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_error_state.dart';
@@ -24,23 +20,18 @@ import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_strip_card.dart';
+import '../../../l10n/pt.dart';
 import '../../../core/widgets/ia_safety_disclaimer.dart';
 import '../../../features/alunos/constants/aluno_360_layout.dart';
 import '../../../features/auth/providers/auth_provider.dart';
-import '../../moderacao/data/moderacao_repository.dart';
-import '../../moderacao/widgets/denunciar_sheet.dart';
 import '../data/ia_repository.dart';
-import '../models/ia_progressao_carga_result.dart';
 import '../providers/progressao_sugestoes_provider.dart';
 import '../utils/progressao_aceitar_route_args.dart';
 import '../utils/progressao_copy.dart';
-import '../utils/progressao_pdf_builder.dart';
-import '../../../core/pdf/focux_pdf_kit.dart';
 import '../widgets/ia_progressao_loading_skeleton.dart';
 import '../widgets/ia_progressao_pedido_card.dart';
-import '../widgets/ia_progressao_result_view.dart';
 import '../widgets/ia_quota_upgrade.dart';
-import '../../../core/pdf/focux_pdf_brand_loader.dart';
 
 class IaProgressaoScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -57,13 +48,9 @@ class IaProgressaoScreen extends ConsumerStatefulWidget {
 
 class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
   final _observacoes = TextEditingController();
-  final _scrollController = ScrollController();
-  final _resultKey = GlobalKey();
   final _openedAt = DateTime.now();
   var _objetivo = ProgressaoObjetivo.hipertrofia;
   bool _loading = false;
-  bool _exportando = false;
-  IaProgressaoCargaResult? _resultado;
   String? _erro;
   var _viewTracked = false;
 
@@ -90,49 +77,6 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
         'ms': DateTime.now().difference(_openedAt).inMilliseconds,
       },
     );
-  }
-
-  Future<void> _exportarPdf(IaProgressaoCargaResult resultado) async {
-    if (_exportando) return;
-    setState(() => _exportando = true);
-    try {
-      final agora = resultado.geradoEm ?? DateTime.now();
-      final bytes = await buildProgressaoPdf(
-        result: resultado,
-        alunoNome: widget.alunoNome,
-        personalNome: ref.read(personalNameProvider),
-        assets: await FocuxPdfAssets.load(),
-        brand: await carregarMarcaDoPdf(ref),
-        agora: agora,
-      );
-      await Printing.sharePdf(
-        bytes: bytes,
-        filename: progressaoPdfFileName(widget.alunoNome, agora),
-      );
-    } catch (e) {
-      if (mounted) {
-        FeedbackHelper.showError(
-          context,
-          friendlyError(e, fallback: 'Não consegui gerar o PDF agora.'),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _exportando = false);
-    }
-  }
-
-  void _scrollToResult() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      final ctx = _resultKey.currentContext;
-      if (ctx == null) return;
-      Scrollable.ensureVisible(
-        ctx,
-        duration: fxMotionDuration(context),
-        curve: Curves.easeOutCubic,
-        alignment: 0.05,
-      );
-    });
   }
 
   void _showHelp() {
@@ -167,19 +111,17 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
   void _abrirAceitar() {
     context.push(
       '/ia/progressao/aceitar',
-      extra: ProgressaoAceitarRouteArgs(
-        returnTo: '/alunos/${widget.alunoId}',
-        alunoId: widget.alunoId,
-        alunoNome: widget.alunoNome,
-      ).toExtra(),
+      extra:
+          ProgressaoAceitarRouteArgs(
+            returnTo: '/alunos/${widget.alunoId}',
+            alunoId: widget.alunoId,
+            alunoNome: widget.alunoNome,
+          ).toExtra(),
     );
   }
 
   void _abrirTreinos() {
-    context.push(
-      '/alunos/${widget.alunoId}/rotina',
-      extra: widget.alunoNome,
-    );
+    context.push('/alunos/${widget.alunoId}/rotina', extra: widget.alunoNome);
   }
 
   Future<void> _gerar() async {
@@ -211,14 +153,11 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
         observacoes: _observacoes.text.trim(),
       );
       if (!mounted) return;
-      setState(() => _resultado = r);
-      _scrollToResult();
       ref.invalidate(progressaoSugestoesProvider(widget.alunoId));
       if (r.sugestoesRegistradas > 0) {
-        FeedbackHelper.showSuccess(
-          context,
-          progressaoSavedForReviewSnack(r.sugestoesRegistradas),
-        );
+        _abrirAceitar();
+      } else {
+        setState(() => _erro = progressaoNadaParaAjustar);
       }
     } catch (e) {
       if (mounted) {
@@ -231,9 +170,6 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
                       'Não consegui falar com a IA agora. Tente novamente em alguns segundos.',
                 );
         setState(() => _erro = message);
-        if (_resultado != null) {
-          FeedbackHelper.showInfo(context, progressaoErroManteveResultado);
-        }
         await IaQuotaUpgrade.handleError(context, ref, e);
       }
     }
@@ -243,7 +179,6 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
   @override
   void dispose() {
     _observacoes.dispose();
-    _scrollController.dispose();
     super.dispose();
   }
 
@@ -257,7 +192,7 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
     final contexto = ref.watch(progressaoContextoProvider(widget.alunoId));
     final semTreino = isSemTreinoAtivo(contexto.error);
     final semExecucao = contexto.value?.sessoes4Semanas == 0;
-    final resultado = _resultado;
+    final pendentes = abertas.length;
 
     return fxScreenA11yScope(
       label: progressaoTitulo,
@@ -281,7 +216,6 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
                 child: SafeArea(
                   bottom: false,
                   child: SingleChildScrollView(
-                    controller: _scrollController,
                     padding: const EdgeInsets.fromLTRB(
                       FxSettingsLayout.pageInset,
                       TokensStrip.s4,
@@ -293,34 +227,37 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            if (abertas.isNotEmpty) ...[
-                              FxTonalButton(
-                                label: progressaoPendingReviewLabel(
-                                  abertas.length,
+                            if (pendentes > 0) ...[
+                              FxStripCard(
+                                marca: true,
+                                child: Text(
+                                  pendentes == 1
+                                      ? ptS.cargasEsperandoUma
+                                      : ptS.cargasEsperando(pendentes),
+                                  style: FocuxHubTypography.cardTitle(
+                                    color: fxPaletaSobreMarca(context).ink,
+                                  ),
                                 ),
-                                expanded: true,
-                                onPressed: _abrirAceitar,
                               ),
                               const SizedBox(height: TokensStrip.s3),
                             ],
                             IaProgressaoPedidoCard(
                               contexto: contexto,
                               objetivo: _objetivo,
-                              onObjetivo:
-                                  (o) => setState(() => _objetivo = o),
+                              onObjetivo: (o) => setState(() => _objetivo = o),
                               observacoes: _observacoes,
                               enabled: !_loading,
                             ),
                             const SizedBox(height: TokensStrip.s3),
-                            Text(
-                              semExecucao
-                                  ? progressaoSemExecucao
-                                  : progressaoNadaMuda,
-                              style: FocuxHubTypography.bodyMuted(
-                                color: chrome.mute,
+                            if (semExecucao) ...[
+                              Text(
+                                progressaoSemExecucao,
+                                style: FocuxHubTypography.bodyMuted(
+                                  color: chrome.mute,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: TokensStrip.s3),
+                              const SizedBox(height: TokensStrip.s3),
+                            ],
                             const IaSafetyDisclaimer(compact: true),
                             if (_erro != null) ...[
                               const SizedBox(height: TokensStrip.s4),
@@ -332,32 +269,6 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
                               ),
                             ],
                             if (_loading) const IaProgressaoLoadingSkeleton(),
-                            if (resultado != null && !_loading)
-                              KeyedSubtree(
-                                key: _resultKey,
-                                child: Padding(
-                                  padding: const EdgeInsets.only(
-                                    top: TokensStrip.s5,
-                                  ),
-                                  child: IaProgressaoResultView(
-                                    result: resultado,
-                                    alunoNome: widget.alunoNome,
-                                    onExportPdf:
-                                        _exportando
-                                            ? null
-                                            : () => _exportarPdf(resultado),
-                                    onReviewSuggestions: _abrirAceitar,
-                                    onReport: () => showDenunciarSheet(
-                                      context,
-                                      repo: ModeracaoRepository(
-                                        ref.read(apiClientProvider),
-                                      ),
-                                      tipo: DenunciaTipo.iaResposta,
-                                      conteudo: resultado.resposta,
-                                    ),
-                                  ),
-                                ),
-                              ),
                           ],
                         ),
                       ),
@@ -374,35 +285,47 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
                     FxSettingsLayout.pageInset,
                     TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
                   ),
-                  child: Semantics(
-                    button: true,
-                    enabled: !_loading,
-                    label:
-                        _loading
-                            ? 'Gerando progressão com IA'
-                            : semTreino
-                            ? progressaoAbrirTreino
-                            : progressaoStickyLabel(
-                              hasResult: resultado != null,
-                            ),
-                    child: FxLiquidPrimaryButton(
-                      label:
-                          semTreino
-                              ? progressaoAbrirTreino
-                              : progressaoStickyLabel(
-                                hasResult: resultado != null,
-                              ),
-                      loading: _loading,
-                      loadingLabel: progressaoStickyLoadingLabel(),
-                      onPressed:
-                          _loading
-                              ? null
-                              : semTreino
-                              ? _abrirTreinos
-                              : semExecucao
-                              ? null
-                              : _gerar,
-                    ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (pendentes > 0 && !semTreino) ...[
+                        FxLiquidPrimaryButton(
+                          label: ptS.cargasRevisar,
+                          onPressed: _loading ? null : _abrirAceitar,
+                        ),
+                        const SizedBox(height: TokensStrip.s2),
+                        FxTonalButton(
+                          label: ptS.cargasGerarDeNovo,
+                          expanded: true,
+                          onPressed: _loading || semExecucao ? null : _gerar,
+                        ),
+                        const SizedBox(height: TokensStrip.s1),
+                        Text(
+                          ptS.cargasSubstitui,
+                          textAlign: TextAlign.center,
+                          style: FocuxHubTypography.bodyMuted(
+                            color: chrome.mute,
+                          ),
+                        ),
+                      ] else
+                        FxLiquidPrimaryButton(
+                          label:
+                              semTreino
+                                  ? progressaoAbrirTreino
+                                  : progressaoGerarSugestoes,
+                          loading: _loading,
+                          loadingLabel: progressaoStickyLoadingLabel(),
+                          onPressed:
+                              _loading
+                                  ? null
+                                  : semTreino
+                                  ? _abrirTreinos
+                                  : semExecucao
+                                  ? null
+                                  : _gerar,
+                        ),
+                    ],
                   ),
                 ),
               ),

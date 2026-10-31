@@ -18,8 +18,6 @@ void main() {
     expect(screen, contains('IaProgressaoPedidoCard'));
     expect(screen, contains('progressaoContextoProvider'));
     expect(screen, contains('isSemTreinoAtivo'));
-    expect(screen, contains('buildProgressaoPdf'));
-    expect(screen, contains('progressaoPdfFileName'));
     expect(screen, isNot(contains('historicoTreinos')));
     expect(screen, isNot(contains('_resultado = null')));
     expect(screen, contains('FxKeyboardPopScope'));
@@ -27,14 +25,11 @@ void main() {
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('iaProgressaoViewed'));
     expect(screen, contains('iaProgressaoCtaTapped'));
-    expect(screen, contains('progressaoStickyLabel'));
     expect(screen, isNot(contains('ShellHeaderIconButton')));
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('showFxHelpSheet'));
     expect(screen, contains('IaSafetyDisclaimer'));
-    expect(screen, contains('IaProgressaoResultView'));
     expect(screen, contains('/alunos/\${widget.alunoId}/rotina'));
-    expect(screen, contains('progressaoPendingReviewLabel'));
     expect(screen, isNot(contains('person_add')));
     expect(screen, isNot(contains('DropdownButton')));
     expect(screen, isNot(contains('FloatingActionButton')));

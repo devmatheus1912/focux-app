@@ -37,6 +37,8 @@ import '../../features/treinos/screens/add_exercicio_to_treino_screen.dart';
 import '../../features/treinos/utils/treino_criacao_fluxo.dart';
 import '../../features/financeiro/screens/financeiro_screen.dart';
 import '../../features/financeiro/utils/financeiro_hub_display.dart';
+import '../../features/evolucao/data/evolucao_repository.dart';
+import '../../features/evolucao/screens/engajamento_historico_screen.dart';
 import '../../features/relatorio/screens/relatorio_screen.dart';
 import '../../features/feed/screens/feed_screen.dart';
 import '../../features/feed/screens/feed_aluno_screen.dart';
@@ -323,6 +325,28 @@ RouteBase buildChromeShellRoute() {
                   alunoId: intPathParam(state, 'id')!,
                   alunoNome: stringRouteExtra(state) ?? 'Aluno',
                 ),
+          ),
+          GoRoute(
+            path: '/alunos/:id/engajamento/historico',
+            redirect: (context, state) =>
+                intPathParam(state, 'id') == null ||
+                        state.extra is! ({
+                          String alunoNome,
+                          List<EventoEngajamento> eventos,
+                        })
+                    ? '/alunos'
+                    : null,
+            builder: (context, state) {
+              final args = state.extra! as ({
+                String alunoNome,
+                List<EventoEngajamento> eventos,
+              });
+              return EngajamentoHistoricoScreen(
+                alunoId: intPathParam(state, 'id')!,
+                alunoNome: args.alunoNome,
+                eventos: args.eventos,
+              );
+            },
           ),
           GoRoute(
             path: '/alunos/:id/engajamento',

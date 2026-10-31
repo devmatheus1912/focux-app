@@ -77,9 +77,7 @@ class _IaChatScreenState extends ConsumerState<IaChatScreen> {
             () => _msgs.add(
               _IaMsg(
                 texto:
-                    e is IaOperationalException
-                        ? e.message
-                        : friendlyError(e),
+                    e is IaOperationalException ? e.message : friendlyError(e),
                 isUser: false,
               ),
             ),
@@ -130,18 +128,19 @@ class _IaChatScreenState extends ConsumerState<IaChatScreen> {
           actions: [
             FxHelpIconButton(
               tooltip: 'Como usar o assistente',
-              onTap: () => showFxHelpSheet(
-                context,
-                title: 'Assistente IA',
-                subtitle: 'Pergunte. Nada entra no aluno sem você.',
-                tips: const [
-                  FxHelpTip('Como calculamos', iaChatComoCalculamos),
-                  FxHelpTip(
-                    'Copiloto',
-                    'Para gerar treino ou progresso, use o Copiloto.',
+              onTap:
+                  () => showFxHelpSheet(
+                    context,
+                    title: 'Assistente IA',
+                    subtitle: 'Pergunte. Nada entra no aluno sem você.',
+                    tips: const [
+                      FxHelpTip('Como calculamos', iaChatComoCalculamos),
+                      FxHelpTip(
+                        'Copiloto',
+                        'Para gerar treino ou progresso, use o Copiloto.',
+                      ),
+                    ],
                   ),
-                ],
-              ),
             ),
           ],
         ),
@@ -180,8 +179,7 @@ class _IaChatScreenState extends ConsumerState<IaChatScreen> {
                                 'Pergunte ao seu assistente de fitness sobre treino ou negócio.',
                             action: FxEmptyAction(
                               label: 'Abrir Copiloto',
-                              onTap: () =>
-                                  safePopOrGo(context, '/ia/copiloto'),
+                              onTap: () => safePopOrGo(context, '/ia/copiloto'),
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -190,70 +188,78 @@ class _IaChatScreenState extends ConsumerState<IaChatScreen> {
                       )
                       : FxContentWidthLimiter(
                         child: ListView.builder(
-                        controller: _scroll,
-                        keyboardDismissBehavior:
-                            ScrollViewKeyboardDismissBehavior.onDrag,
-                        padding: const EdgeInsets.all(12),
-                        itemCount: _msgs.length + (_loading ? 1 : 0),
-                        itemBuilder: (_, i) {
-                          if (i == _msgs.length) {
-                            return const Padding(
-                              padding: EdgeInsets.all(8),
-                              child: FxLoading(),
-                            );
-                          }
-                          final m = _msgs[i];
-                          final bubble = Align(
-                            alignment:
-                                m.isUser
-                                    ? Alignment.centerRight
-                                    : Alignment.centerLeft,
-                            child: Container(
-                              margin: const EdgeInsets.symmetric(vertical: 4),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 8,
-                              ),
-                              constraints: BoxConstraints(
-                                maxWidth:
-                                    MediaQuery.of(context).size.width * 0.75,
-                              ),
-                              decoration: BoxDecoration(
-                                color:
-                                    m.isUser
-                                        ? Theme.of(context).colorScheme.primary
-                                        : Theme.of(
-                                          context,
-                                        ).colorScheme.surfaceContainerHigh,
-                                borderRadius: BorderRadius.circular(
-                                  TokensStrip.rCard,
+                          controller: _scroll,
+                          keyboardDismissBehavior:
+                              ScrollViewKeyboardDismissBehavior.onDrag,
+                          padding: const EdgeInsets.all(12),
+                          itemCount: _msgs.length + (_loading ? 1 : 0),
+                          itemBuilder: (_, i) {
+                            if (i == _msgs.length) {
+                              return const Padding(
+                                padding: EdgeInsets.all(8),
+                                child: FxLoading(),
+                              );
+                            }
+                            final m = _msgs[i];
+                            final bubble = Align(
+                              alignment:
+                                  m.isUser
+                                      ? Alignment.centerRight
+                                      : Alignment.centerLeft,
+                              child: Container(
+                                margin: const EdgeInsets.symmetric(vertical: 4),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 8,
                                 ),
-                              ),
-                              child: Text(
-                                m.texto,
-                                style: TextStyle(
-                                  color: m.isUser ? Colors.white : null,
+                                constraints: BoxConstraints(
+                                  maxWidth:
+                                      MediaQuery.of(context).size.width * 0.75,
                                 ),
-                              ),
-                            ),
-                          );
-                          if (!m.fromIa) return bubble;
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              bubble,
-                              FxTonalButton(label: S.of(context).moderacaoDenunciarIa, icon: Icons.flag_outlined, onPressed: () => showDenunciarSheet(
-                                  context,
-                                  repo: ModeracaoRepository(
-                                    ref.read(apiClientProvider),
+                                decoration: BoxDecoration(
+                                  color:
+                                      m.isUser
+                                          ? Theme.of(
+                                            context,
+                                          ).colorScheme.primary
+                                          : Theme.of(
+                                            context,
+                                          ).colorScheme.surfaceContainerHigh,
+                                  borderRadius: BorderRadius.circular(
+                                    TokensStrip.rCard,
                                   ),
-                                  tipo: DenunciaTipo.iaResposta,
-                                  conteudo: m.texto,
-                                ), compact: true),
-                            ],
-                          );
-                        },
-                      ),
+                                ),
+                                child: Text(
+                                  m.texto,
+                                  style: TextStyle(
+                                    color: m.isUser ? Colors.white : null,
+                                  ),
+                                ),
+                              ),
+                            );
+                            if (!m.fromIa) return bubble;
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                bubble,
+                                FxTonalButton(
+                                  label: S.of(context).moderacaoDenunciarIa,
+                                  icon: Icons.flag_outlined,
+                                  onPressed:
+                                      () => showDenunciarSheet(
+                                        context,
+                                        repo: ModeracaoRepository(
+                                          ref.read(apiClientProvider),
+                                        ),
+                                        tipo: DenunciaTipo.iaResposta,
+                                        conteudo: m.texto,
+                                      ),
+                                  compact: true,
+                                ),
+                              ],
+                            );
+                          },
+                        ),
                       ),
             ),
             if (_msgs.isNotEmpty && _threadError == null)

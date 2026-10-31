@@ -5,6 +5,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:printing/printing.dart';
+
+import '../../../core/pdf/focux_pdf_brand_loader.dart';
+import '../../../core/pdf/focux_pdf_kit.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
@@ -14,24 +18,32 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_grouped_action_sheet.dart';
+import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_number_pad_sheet.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/widgets/ia_safety_disclaimer.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/alunos/constants/aluno_360_layout.dart';
 import '../../../features/alunos/utils/satellite_screen_utils.dart';
-import '../../../features/alunos/widgets/aluno_avatar.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../../l10n/pt.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
+import '../../moderacao/data/moderacao_repository.dart';
+import '../../moderacao/widgets/denunciar_sheet.dart';
 import '../../treinos/providers/treinos_provider.dart';
 import '../data/ia_repository.dart';
+import '../models/ia_progressao_carga_result.dart';
 import '../models/progressao_sugestao.dart';
 import '../providers/progressao_sugestoes_provider.dart';
 import '../utils/progressao_aceitar_route_args.dart';
+import '../utils/progressao_pdf_builder.dart';
+import '../widgets/progressao_revisao_linha.dart';
 import '../utils/progressao_copy.dart';
-import '../widgets/ia_progressao_card_entrance.dart';
-import '../widgets/ia_progressao_exercise_card.dart';
-import '../../../core/widgets/fx_tonal_button.dart';
 
 class ProgressaoAceitarScreen extends ConsumerStatefulWidget {
   const ProgressaoAceitarScreen({super.key});
@@ -45,9 +57,18 @@ class _ProgressaoAceitarScreenState
     extends ConsumerState<ProgressaoAceitarScreen> {
   int? _actingOnId;
   bool _aceitandoTodas = false;
+  bool _exportando = false;
   String? _successBanner;
 
+  /// Marcação que difere do padrão: "com mudança" nasce marcada.
+  final _alternadas = <int>{};
+  final _cargas = <int, double>{};
+  final _abertas = <int>{};
+
   bool get _busy => _actingOnId != null || _aceitandoTodas;
+
+  bool _selecionada(ProgressaoSugestao s) =>
+      progressaoMudaCarga(s) != _alternadas.contains(s.id);
 
   void _refreshAfterApply(int? alunoId) {
     ref.invalidate(progressaoSugestoesProvider(alunoId));
@@ -56,10 +77,247 @@ class _ProgressaoAceitarScreenState
     }
   }
 
+  IaProgressaoCargaResult _resultado(List<ProgressaoSugestao> lista) {
+    return IaProgressaoCargaResult(
+      resposta: '',
+      geradoEm: lista.isEmpty ? null : lista.first.criadoEm,
+      exercises: [
+        for (final s in lista)
+          IaProgressaoExerciseRow(
+            exercicio: s.exercicio,
+            cargaAtual: s.cargaAtual,
+            cargaSugerida: s.cargaSugerida,
+            justificativa: s.justificativa ?? '',
+            deltaLabel: s.deltaLabel,
+            treinoExercicioId: s.treinoExercicioId,
+          ),
+      ],
+    );
+  }
+
+  Future<void> _maisOpcoes(
+    ProgressaoAceitarRouteArgs args,
+    List<ProgressaoSugestao> lista,
+  ) async {
+    final escolha = await showFxGroupedActionSheet<String>(
+      context,
+      titulo: ptS.cargasMais,
+      grupos: [
+        FxActionGroup<String>(null, [
+          FxActionItem(
+            valor: 'copiar',
+            rotulo: ptS.cargasCopiar,
+            icone: Icons.copy_rounded,
+          ),
+          FxActionItem(
+            valor: 'pdf',
+            rotulo: ptS.cargasPdf,
+            icone: Icons.picture_as_pdf_outlined,
+          ),
+          FxActionItem(
+            valor: 'denunciar',
+            rotulo: ptS.cargasDenunciar,
+            icone: Icons.flag_outlined,
+          ),
+        ]),
+      ],
+    );
+    if (escolha == null || !mounted) return;
+    final nome = args.alunoNome ?? 'Aluno';
+    final resultado = _resultado(lista);
+    switch (escolha) {
+      case 'copiar':
+        await Clipboard.setData(
+          ClipboardData(text: resultado.toPlainText(alunoNome: nome)),
+        );
+        if (mounted) FeedbackHelper.showSuccess(context, ptS.cargasCopiado);
+      case 'pdf':
+        await _exportarPdf(resultado, nome);
+      case 'denunciar':
+        await showDenunciarSheet(
+          context,
+          repo: ModeracaoRepository(ref.read(apiClientProvider)),
+          tipo: DenunciaTipo.iaResposta,
+          conteudo: resultado.toPlainText(alunoNome: nome),
+        );
+    }
+  }
+
+  Future<void> _exportarPdf(
+    IaProgressaoCargaResult resultado,
+    String nome,
+  ) async {
+    if (_exportando) return;
+    setState(() => _exportando = true);
+    try {
+      final agora = resultado.geradoEm ?? DateTime.now();
+      final bytes = await buildProgressaoPdf(
+        result: resultado,
+        alunoNome: nome,
+        personalNome: ref.read(personalNameProvider),
+        assets: await FocuxPdfAssets.load(),
+        brand: await carregarMarcaDoPdf(ref),
+        agora: agora,
+      );
+      await Printing.sharePdf(
+        bytes: bytes,
+        filename: progressaoPdfFileName(nome, agora),
+      );
+    } catch (e) {
+      if (mounted) {
+        FeedbackHelper.showError(
+          context,
+          friendlyError(e, fallback: 'Não consegui gerar o PDF agora.'),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _exportando = false);
+    }
+  }
+
+  Future<void> _editarCarga(ProgressaoSugestao s) async {
+    final r = await showFxNumberPadSheet(
+      context,
+      titulo: s.exercicio,
+      confirmarLabel: ptS.cargasConfirmarCarga,
+      sufixo: 'kg',
+      inicial: _cargas[s.id] ?? s.cargaSugeridaKg,
+    );
+    final valor = r?.valor;
+    if (valor == null || valor <= 0 || !mounted) return;
+    setState(() {
+      _cargas[s.id] = valor;
+      if (!_selecionada(s)) _alternadas.remove(s.id);
+      if (!_selecionada(s)) _alternadas.add(s.id);
+    });
+  }
+
+  Future<void> _aplicarSelecionadas(
+    ProgressaoAceitarRouteArgs args,
+    List<ProgressaoSugestao> selecionadas,
+  ) async {
+    if (_busy) return;
+    final ok = await showFxConfirmSheet(
+      context,
+      title: ptS.cargasAplicarConfirmaTitulo,
+      message: ptS.cargasAplicarConfirma,
+      icon: Icons.done_all_rounded,
+      confirmLabel: ptS.cargasAplicarBotao,
+    );
+    if (!ok || !mounted) return;
+    setState(() => _aceitandoTodas = true);
+    var aplicadas = 0;
+    try {
+      final repo = IaRepository(ref.read(apiClientProvider));
+      for (final s in selecionadas) {
+        final r = await repo.aceitarSugestao(s.id, cargaKg: _cargas[s.id]);
+        if (r.cargaAplicada) aplicadas++;
+      }
+      unawaited(HapticFeedback.mediumImpact());
+    } catch (e) {
+      if (mounted) {
+        FeedbackHelper.showError(
+          context,
+          friendlyError(e, fallback: 'Não foi possível aplicar as sugestões.'),
+        );
+      }
+    } finally {
+      for (final alunoId in {
+        args.alunoId,
+        ...selecionadas.map((s) => s.alunoId),
+      }) {
+        _refreshAfterApply(alunoId);
+      }
+      ref.invalidate(progressaoSugestoesProvider(args.alunoId));
+      if (mounted) {
+        setState(() {
+          _aceitandoTodas = false;
+          _alternadas.clear();
+          _cargas.clear();
+          if (aplicadas > 0) {
+            _successBanner =
+                aplicadas == 1
+                    ? ptS.cargasAplicadaUma
+                    : ptS.cargasAplicadas(aplicadas);
+          }
+        });
+      }
+    }
+  }
+
   void _abrirTreinos(ProgressaoAceitarRouteArgs args, int alunoId) {
-    context.push(
-      '/alunos/$alunoId/rotina',
-      extra: args.alunoNome ?? 'Aluno',
+    context.push('/alunos/$alunoId/rotina', extra: args.alunoNome ?? 'Aluno');
+  }
+
+  Widget _grupo(
+    ProgressaoAceitarRouteArgs args,
+    List<ProgressaoSugestao> sugestoes,
+  ) {
+    final grupos = progressaoPorTreino(sugestoes);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final (treino, itens) in grupos) ...[
+          if (grupos.length > 1) ...[
+            const SizedBox(height: TokensStrip.s2),
+            DashboardSectionHeader(title: treino ?? ptS.cargasGrupoOutros),
+            const SizedBox(height: TokensStrip.s2),
+          ],
+          Container(
+            decoration: fxListCardDecoration(context),
+            child: Column(
+              children: [
+                for (final (i, s) in itens.indexed) ...[
+                  if (i > 0) const Divider(height: 1),
+                  ProgressaoRevisaoLinha(
+                    key: ValueKey(s.id),
+                    sugestao: s,
+                    selecionada: _selecionada(s),
+                    aberta: _abertas.contains(s.id),
+                    cargaEditada: _cargas[s.id],
+                    alunoNome: args.alunoId == null ? s.alunoNome : null,
+                    onEditarCarga:
+                        s.cargaSugeridaKg == null
+                            ? null
+                            : () => _editarCarga(s),
+                    onSelecionar:
+                        (_) => setState(() {
+                          if (!_alternadas.remove(s.id)) _alternadas.add(s.id);
+                        }),
+                    onAbrir:
+                        () => setState(() {
+                          if (!_abertas.remove(s.id)) _abertas.add(s.id);
+                        }),
+                    onDescartar: () => _confirmarRejeicao(args, s),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _linhaFora(ProgressaoAceitarRouteArgs args, ProgressaoSugestao s) {
+    final chrome = ShellChrome.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(top: TokensStrip.s2),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              s.exercicio,
+              style: FocuxHubTypography.body(color: chrome.ink),
+            ),
+          ),
+          FxTonalButton(
+            label: progressaoAbrirTreino,
+            compact: true,
+            onPressed: _busy ? null : () => _abrirTreinos(args, s.alunoId),
+          ),
+        ],
+      ),
     );
   }
 
@@ -70,6 +328,7 @@ class _ProgressaoAceitarScreenState
     final firstName = satelliteFirstName(args.alunoNome, fallback: 'aluno');
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
+    final bruta = sugestoesAsync.value ?? const <ProgressaoSugestao>[];
 
     return fxScreenA11yScope(
       label: 'Sugestões pendentes de progressão',
@@ -80,21 +339,12 @@ class _ProgressaoAceitarScreenState
           subtitle: args.alunoNome,
           onBack: () => safePopOrGo(context, args.returnTo ?? '/ia/copiloto'),
           actions: [
-            Semantics(
-              button: true,
-              enabled: !_busy,
-              label: 'Atualizar sugestões pendentes',
-              child: IconButton(
-                tooltip: 'Atualizar',
-                icon: const Icon(Icons.refresh_rounded),
-                onPressed:
-                    _busy
-                        ? null
-                        : () => ref.invalidate(
-                          progressaoSugestoesProvider(args.alunoId),
-                        ),
+            if (bruta.isNotEmpty)
+              IconButton(
+                tooltip: ptS.cargasMais,
+                icon: const Icon(Icons.more_horiz_rounded),
+                onPressed: _busy ? null : () => _maisOpcoes(args, bruta),
               ),
-            ),
           ],
         ),
         body: sugestoesAsync.when(
@@ -118,74 +368,100 @@ class _ProgressaoAceitarScreenState
             if (bruta.isEmpty) return _empty(args, firstName);
 
             final alunoId = args.alunoId;
-            final lista = [
-              ...bruta.where((s) => !s.naoEncontrada),
-              ...bruta.where((s) => s.naoEncontrada),
-            ];
-            final pendentes = lista.where((s) => !s.naoEncontrada).length;
-            final fora = lista.length - pendentes;
-            return Aluno360Layout.operacaoContentWidthLimiter(
-              child: ListView(
-                padding: const EdgeInsets.all(TokensStrip.s4),
-                children: [
-                  if (_successBanner != null) ...[
-                    _SuccessBanner(message: _successBanner!),
-                    const SizedBox(height: TokensStrip.s3),
-                  ],
-                  if (alunoId != null) ...[
-                    _AlunoHeader(
-                      nome: args.alunoNome ?? lista.first.alunoNome ?? 'Aluno',
-                      fotoUrl: args.alunoFotoUrl,
-                    ),
-                    const SizedBox(height: TokensStrip.s3),
-                    if (pendentes > 0) ...[
-                      Semantics(
-                        button: true,
-                        enabled: !_busy,
-                        label: progressaoAceitarTodasLabel(pendentes),
-                        child: FilledButton.icon(
-                          onPressed:
-                              _busy
-                                  ? null
-                                  : () => _aceitarTodas(args, alunoId, pendentes),
-                          icon:
-                              _aceitandoTodas
-                                  ? FxLoading(
-                                    size: 18,
-                                    strokeWidth: 2,
-                                    color:
-                                        Theme.of(context).colorScheme.onPrimary,
-                                  )
-                                  : const Icon(Icons.done_all_rounded, size: 18),
-                          label: Text(progressaoAceitarTodasLabel(pendentes)),
-                          style: FilledButton.styleFrom(
-                            backgroundColor: primary,
-                            minimumSize: const Size.fromHeight(48),
+            final ativas = bruta.where((s) => !s.naoEncontrada).toList();
+            final fora = bruta.where((s) => s.naoEncontrada).toList();
+            final comMudanca = ativas.where(progressaoMudaCarga).toList();
+            final semMudanca =
+                ativas.where((s) => !progressaoMudaCarga(s)).toList();
+            final selecionadas = ativas.where(_selecionada).toList();
+            final n = selecionadas.length;
+            return Column(
+              children: [
+                Expanded(
+                  child: Aluno360Layout.operacaoContentWidthLimiter(
+                    child: ListView(
+                      padding: const EdgeInsets.all(TokensStrip.s4),
+                      children: [
+                        if (_successBanner != null) ...[
+                          _SuccessBanner(message: _successBanner!),
+                          const SizedBox(height: TokensStrip.s3),
+                        ],
+                        if (ativas.isNotEmpty)
+                          Text(
+                            ptS.cargasSelecionadas(n, ativas.length),
+                            style: FocuxHubTypography.bodyMuted(
+                              color: chrome.mute,
+                            ),
                           ),
-                        ),
+                        if (comMudanca.isNotEmpty) ...[
+                          const SizedBox(height: TokensStrip.s3),
+                          DashboardSectionHeader(title: ptS.cargasGrupoMudanca),
+                          const SizedBox(height: TokensStrip.s2),
+                          _grupo(args, comMudanca),
+                        ],
+                        if (semMudanca.isNotEmpty) ...[
+                          const SizedBox(height: TokensStrip.s3),
+                          Theme(
+                            data: Theme.of(
+                              context,
+                            ).copyWith(dividerColor: Colors.transparent),
+                            child: ExpansionTile(
+                              tilePadding: EdgeInsets.zero,
+                              childrenPadding: EdgeInsets.zero,
+                              initiallyExpanded: comMudanca.isEmpty,
+                              title: Text(
+                                '${ptS.cargasGrupoSemMudanca} · ${semMudanca.length}',
+                                style: FocuxHubTypography.cardTitle(
+                                  color: chrome.ink,
+                                ),
+                              ),
+                              children: [_grupo(args, semMudanca)],
+                            ),
+                          ),
+                        ],
+                        if (fora.isNotEmpty && alunoId != null) ...[
+                          const SizedBox(height: TokensStrip.s4),
+                          _ForaDoTreinoPanel(
+                            count: fora.length,
+                            busy: _busy,
+                            onRetry: () => _aplicarTodas(alunoId),
+                            onDiscard:
+                                () => _descartarFora(alunoId, fora.length),
+                          ),
+                          for (final s in fora) _linhaFora(args, s),
+                        ],
+                        const SizedBox(height: TokensStrip.s3),
+                        const IaSafetyDisclaimer(compact: true),
+                      ],
+                    ),
+                  ),
+                ),
+                if (ativas.isNotEmpty)
+                  SafeArea(
+                    top: false,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        TokensStrip.s4,
+                        TokensStrip.s2,
+                        TokensStrip.s4,
+                        TokensStrip.s3,
                       ),
-                      const SizedBox(height: TokensStrip.s4),
-                    ],
-                    if (fora > 0) ...[
-                      _ForaDoTreinoPanel(
-                        count: fora,
-                        busy: _busy,
-                        onRetry: () => _aplicarTodas(alunoId),
-                        onDiscard: () => _descartarFora(alunoId, fora),
-                      ),
-                      const SizedBox(height: TokensStrip.s4),
-                    ],
-                  ],
-                  for (final (i, sugestao) in lista.indexed)
-                    IaProgressaoCardEntrance(
-                      index: i,
-                      child: Padding(
-                        padding: const EdgeInsets.only(bottom: TokensStrip.s3),
-                        child: _card(args, sugestao, primary),
+                      child: FxLiquidPrimaryButton(
+                        label: switch (n) {
+                          0 => ptS.cargasAplicarNenhuma,
+                          1 => ptS.cargasAplicarUma,
+                          _ => ptS.cargasAplicar(n),
+                        },
+                        loading: _aceitandoTodas,
+                        onPressed:
+                            n == 0 || _busy
+                                ? null
+                                : () =>
+                                    _aplicarSelecionadas(args, selecionadas),
                       ),
                     ),
-                ],
-              ),
+                  ),
+              ],
             );
           },
         ),
@@ -208,7 +484,9 @@ class _ProgressaoAceitarScreenState
         FxEmptyState(
           icon: 'circle-check',
           title:
-              _successBanner != null ? 'Tudo em dia' : 'Nenhuma sugestão pendente',
+              _successBanner != null
+                  ? 'Tudo em dia'
+                  : 'Nenhuma sugestão pendente',
           subtitle:
               args.alunoId == null
                   ? 'Quando a IA sugerir progressão de carga, ela aparecerá aqui para você revisar e aplicar.'
@@ -229,157 +507,19 @@ class _ProgressaoAceitarScreenState
         ),
         if (args.alunoId != null)
           Center(
-            child: FxTonalButton(label: 'Voltar ao Aluno 360', icon: Icons.arrow_back_rounded, onPressed: () => safePopOrGo(
+            child: FxTonalButton(
+              label: 'Voltar ao Aluno 360',
+              icon: Icons.arrow_back_rounded,
+              onPressed:
+                  () => safePopOrGo(
                     context,
                     args.returnTo ?? '/alunos/${args.alunoId}',
-                  ), compact: true),
+                  ),
+              compact: true,
+            ),
           ),
       ],
     );
-  }
-
-  Widget _card(
-    ProgressaoAceitarRouteArgs args,
-    ProgressaoSugestao sugestao,
-    Color primary,
-  ) {
-    final busy = _actingOnId == sugestao.id;
-    final buttonShape = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(TokensStrip.rCard),
-    );
-    final rejeitar = Semantics(
-      button: true,
-      label: 'Rejeitar sugestão de ${sugestao.exercicio}',
-      child: OutlinedButton.icon(
-        onPressed: _busy ? null : () => _confirmarRejeicao(args, sugestao),
-        icon:
-            busy && sugestao.naoEncontrada
-                ? const FxLoading(size: 18, strokeWidth: 2)
-                : const Icon(Icons.close_rounded, size: 18),
-        label: Text(sugestao.naoEncontrada ? 'Descartar' : 'Rejeitar'),
-        style: OutlinedButton.styleFrom(
-          foregroundColor: EagleTokens.bad,
-          side: BorderSide(color: EagleTokens.bad.withValues(alpha: 0.55)),
-          minimumSize: const Size(48, 48),
-          shape: buttonShape,
-        ),
-      ),
-    );
-
-    final Widget acoes;
-    if (sugestao.naoEncontrada) {
-      acoes = Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              const Icon(
-                Icons.search_off_rounded,
-                size: 16,
-                color: EagleTokens.warn,
-              ),
-              const SizedBox(width: TokensStrip.s2),
-              Expanded(
-                child: Text(
-                  '$progressaoNaoEncontrada. $progressaoNaoEncontradaHint',
-                  style: FocuxHubTypography.bodyMuted(
-                    color: TokensStrip.textSecondary,
-                    height: 1.35,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: TokensStrip.s3),
-          Row(
-            children: [
-              Expanded(child: rejeitar),
-              const SizedBox(width: TokensStrip.s3),
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed:
-                      _busy
-                          ? null
-                          : () => _abrirTreinos(args, sugestao.alunoId),
-                  icon: const Icon(Icons.fitness_center_rounded, size: 18),
-                  label: const Text(progressaoAbrirTreino),
-                  style: OutlinedButton.styleFrom(
-                    minimumSize: const Size(48, 48),
-                    shape: buttonShape,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      );
-    } else {
-      acoes = Row(
-        children: [
-          Expanded(child: rejeitar),
-          const SizedBox(width: TokensStrip.s3),
-          Expanded(
-            child: Semantics(
-              button: true,
-              label:
-                  'Aceitar sugestão de ${sugestao.exercicio} e aplicar no treino',
-              child: FilledButton.icon(
-                onPressed:
-                    _busy ? null : () => _acao(args, sugestao, aceitar: true),
-                icon:
-                    busy
-                        ? FxLoading(
-                          size: 18,
-                          strokeWidth: 2,
-                          color: Theme.of(context).colorScheme.onPrimary,
-                        )
-                        : const Icon(Icons.check_rounded, size: 18),
-                label: const Text('Aceitar'),
-                style: FilledButton.styleFrom(
-                  backgroundColor: primary,
-                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                  minimumSize: const Size(48, 48),
-                  shape: buttonShape,
-                ),
-              ),
-            ),
-          ),
-        ],
-      );
-    }
-
-    return IaProgressaoExerciseCard(
-      exercicio: sugestao.exercicio,
-      cargaAtual: sugestao.cargaAtual,
-      cargaSugerida: sugestao.cargaSugerida,
-      justificativa: sugestao.justificativa,
-      deltaLabel: sugestao.deltaLabel,
-      padding: const EdgeInsets.all(TokensStrip.s3),
-      header:
-          args.alunoId == null
-              ? _AlunoHeader(
-                nome: sugestao.alunoNome ?? args.alunoNome ?? 'Aluno',
-                fotoUrl: args.alunoFotoUrl,
-              )
-              : null,
-      footerActions: acoes,
-    );
-  }
-
-  Future<void> _aceitarTodas(
-    ProgressaoAceitarRouteArgs args,
-    int alunoId,
-    int pendentes,
-  ) async {
-    final ok = await showFxConfirmSheet(
-      context,
-      title: progressaoAceitarTodasLabel(pendentes),
-      message: progressaoAceitarTodasConfirm(pendentes),
-      icon: Icons.done_all_rounded,
-      confirmLabel: 'Aplicar',
-    );
-    if (!ok || !mounted) return;
-    await _aplicarTodas(alunoId);
   }
 
   Future<void> _aplicarTodas(int alunoId) async {
@@ -435,7 +575,10 @@ class _ProgressaoAceitarScreenState
       if (mounted) {
         FeedbackHelper.showError(
           context,
-          friendlyError(e, fallback: 'Não foi possível descartar as sugestões.'),
+          friendlyError(
+            e,
+            fallback: 'Não foi possível descartar as sugestões.',
+          ),
         );
       }
     } finally {
@@ -501,35 +644,6 @@ class _ProgressaoAceitarScreenState
   }
 }
 
-class _AlunoHeader extends StatelessWidget {
-  const _AlunoHeader({required this.nome, this.fotoUrl});
-
-  final String nome;
-  final String? fotoUrl;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        AlunoAvatar(
-          name: nome,
-          photoUrl: fotoUrl,
-          variant: AlunoAvatarVariant.strip,
-        ),
-        const SizedBox(width: TokensStrip.s2),
-        Expanded(
-          child: Text(
-            nome,
-            style: FocuxHubTypography.body(
-              color: ShellChrome.of(context).ink,
-            ).copyWith(fontWeight: FontWeight.w700),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class _ForaDoTreinoPanel extends StatelessWidget {
   const _ForaDoTreinoPanel({
     required this.count,
@@ -557,7 +671,11 @@ class _ForaDoTreinoPanel extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.search_off_rounded, size: 18, color: EagleTokens.warn),
+              const Icon(
+                Icons.search_off_rounded,
+                size: 18,
+                color: EagleTokens.warn,
+              ),
               const SizedBox(width: TokensStrip.s2),
               Expanded(
                 child: Text(
@@ -579,7 +697,9 @@ class _ForaDoTreinoPanel extends StatelessWidget {
                   label: const Text(progressaoDescartarTodas),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: EagleTokens.bad,
-                    side: BorderSide(color: EagleTokens.bad.withValues(alpha: 0.55)),
+                    side: BorderSide(
+                      color: EagleTokens.bad.withValues(alpha: 0.55),
+                    ),
                     minimumSize: const Size(48, 48),
                   ),
                 ),
@@ -590,7 +710,9 @@ class _ForaDoTreinoPanel extends StatelessWidget {
                   onPressed: busy ? null : onRetry,
                   icon: const Icon(Icons.refresh_rounded, size: 18),
                   label: const Text(progressaoTentarDeNovo),
-                  style: OutlinedButton.styleFrom(minimumSize: const Size(48, 48)),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size(48, 48),
+                  ),
                 ),
               ),
             ],
@@ -625,7 +747,10 @@ class _SuccessBanner extends StatelessWidget {
             Expanded(
               child: Text(
                 message,
-                style: const TextStyle(fontWeight: FontWeight.w600, height: 1.35),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  height: 1.35,
+                ),
               ),
             ),
           ],

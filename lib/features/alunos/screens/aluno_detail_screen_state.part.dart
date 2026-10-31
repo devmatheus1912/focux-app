@@ -264,7 +264,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                     final topInset = MediaQuery.paddingOf(context).top;
                     final heroBodyHeight = Aluno360Layout.heroBodyHeight(
                       context,
-                      compactContactPriority: compactHero,
+                      comAvisoDeRisco: AlunoDetailHeroCard.mostraAvisoDeRisco(aluno),
                     );
                     final displayName = fxTitleCaseName(aluno.nome);
 

@@ -172,10 +172,6 @@ class Aluno360FerramentasGrupos extends ConsumerWidget {
         PlanoRecursoKeys.recorrencia,
         PlanGate.watch(ref, PlanoRecursoKeys.recorrencia),
       ),
-      Aluno360FerramentasModule.aderencia: (
-        PlanoRecursoKeys.relatorios,
-        PlanGate.watch(ref, PlanoRecursoKeys.relatorios),
-      ),
     };
     final secoes = secoesDeFerramentas(
       aluno: aluno,
@@ -271,12 +267,7 @@ class Aluno360FerramentasGrupos extends ConsumerWidget {
                         aderenciaSemanal,
                       ),
                 ),
-          locked: planLocked,
-          tier: planLocked ? PlanGate.tierLabel(planLock.$2.planoMinimo) : null,
-          onTap: () => goPlan(
-            'Relatório de aderência',
-            () => push('/alunos/$alunoId/relatorio', extra: nome),
-          ),
+          onTap: () => push('/alunos/$alunoId/engajamento', extra: nome),
         ),
         Aluno360FerramentasModule.iaProgresso => linha(
           label: 'Ajustar cargas com IA',
@@ -330,11 +321,6 @@ class Aluno360FerramentasGrupos extends ConsumerWidget {
           label: 'Trilhas',
           subtitle: 'Metas com etapas e progresso',
           onTap: () => push('/alunos/$alunoId/trilhas', extra: nome),
-        ),
-        Aluno360FerramentasModule.engajamento => linha(
-          label: 'Engajamento',
-          subtitle: 'Treinos, medidas e mensagens',
-          onTap: () => push('/alunos/$alunoId/engajamento', extra: nome),
         ),
         Aluno360FerramentasModule.anamnese => linha(
           label: 'Anamnese',

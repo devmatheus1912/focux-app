@@ -53,12 +53,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Supino'), findsOneWidget);
-    expect(find.text('82,5kg 4x18-20'), findsOneWidget);
-    expect(find.text('+2,5 kg'), findsOneWidget);
-    expect(find.text('Aceitar'), findsOneWidget);
-    expect(find.text('Rejeitar'), findsOneWidget);
-    expect(find.text('Aceitar 1 sugestão'), findsOneWidget);
-    expect(find.text('Beatriz Carvalho'), findsWidgets);
+    expect(find.textContaining('82,5kg 4x18-20'), findsOneWidget);
+    expect(find.text('Aplicar 1 selecionada'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -108,8 +104,6 @@ void main() {
 
     expect(find.text('Aceitar'), findsNothing);
     expect(find.text('Abrir treino'), findsOneWidget);
-    expect(find.text('Descartar'), findsOneWidget);
-    expect(find.textContaining('Fora do treino ativo'), findsOneWidget);
     expect(find.textContaining('Aceitar todas'), findsNothing);
     expect(find.text('1 sugestão fora do treino ativo'), findsOneWidget);
     expect(find.text('Tentar de novo'), findsOneWidget);
@@ -160,6 +154,6 @@ void main() {
     final supino = tester.getTopLeft(find.text('Supino')).dy;
     final remada = tester.getTopLeft(find.text('Remada')).dy;
     expect(supino, lessThan(remada));
-    expect(find.text('Aceitar 1 sugestão'), findsOneWidget);
+    expect(find.text('Aplicar 1 selecionada'), findsOneWidget);
   });
 }

@@ -114,7 +114,6 @@ const _modulos = [
   'Composição corporal',
   'Plano de sucesso',
   'Trilhas',
-  'Engajamento',
   'Anamnese',
   'Chat',
   'Mensalidades',

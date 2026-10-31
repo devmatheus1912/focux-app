@@ -36,6 +36,7 @@ import '../utils/relatorio_aluno_display.dart';
 import '../utils/relatorio_global_display.dart';
 import '../utils/relatorio_pdf_export.dart';
 import '../widgets/relatorio_aluno_help_sheet.dart';
+import '../../../l10n/pt.dart';
 import '../../../core/pdf/focux_pdf_brand_loader.dart';
 
 part 'relatorio_screen_metrics.part.dart';

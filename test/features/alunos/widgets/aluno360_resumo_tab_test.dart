@@ -170,12 +170,12 @@ void main() {
     await _abrir(tester, _hugo(dias: null, ader: 0));
     // a linha solta saiu: o cartão da ficha já diz que não há ficha
     expect(find.text('Sem treinos ainda.'), findsNothing);
-    expect(find.text('Aderência 30 dias'), findsNothing);
+    expect(find.text('Aderência'), findsNothing);
   });
 
   testWidgets('números: com histórico aparecem as três métricas', (tester) async {
     await _abrir(tester, _hugo());
-    expect(find.text('Aderência 30 dias'), findsOneWidget);
+    expect(find.text('Aderência'), findsOneWidget);
     expect(find.text('Dias sem treino'), findsOneWidget);
     expect(find.text('Sessões 7 dias'), findsOneWidget);
     await tester.tap(find.text('Dias sem treino'));

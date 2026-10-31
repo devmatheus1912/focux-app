@@ -121,6 +121,10 @@
             android:taskAffinity=""
             tools:replace="android:taskAffinity" />
         <!-- Health Connect: rationale e uso de permissões abrem a política de privacidade (MainActivity). -->
+        <activity
+            android:name="com.yalantis.ucrop.UCropActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <activity-alias
             android:name="ShowPermissionsRationaleActivity"
             android:exported="true"

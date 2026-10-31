@@ -167,16 +167,13 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
   }
 
   Future<void> _pickFoto() async {
-    final file = await ImagePicker().pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 86,
-    );
-    if (file == null) return;
+    final foto = await escolherFotoDePerfil(context);
+    if (foto == null || !mounted) return;
     setState(() => _uploading = true);
     try {
       final url = await ref.read(alunoRepositoryProvider).uploadMinhaFoto(
-        bytes: await file.readAsBytes(),
-        filename: file.name,
+        bytes: foto.bytes,
+        filename: foto.filename,
       );
       if (!mounted) return;
       setState(() => _fotoUrl = url);

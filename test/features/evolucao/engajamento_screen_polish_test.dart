@@ -30,14 +30,13 @@ void main() {
     expect(screen, contains('label: ptS.engajamentoEscrever'));
     expect(screen, contains('onPressed: _abrirChat'));
     expect(screen, isNot(contains("label: 'Chat'")));
-    expect(screen, contains('engajamentoLinhasPorDia'));
-    expect(screen, contains('engajamentoHoraLabel'));
+    expect(screen, contains('engajamentoPorDia'));
     expect(screen, contains('safeArea: false'));
     expect(screen, contains('subtitle: freshness'));
     expect(screen, contains('engajamentoEventoRota'));
     expect(screen, contains('showFxInsetPickerSheet'));
     expect(screen, isNot(contains('FxSettingsGroup')));
-    expect(screen, contains('_LinhaAtividade'));
+    expect(screen, contains('EngajamentoAtividadeDia'));
     expect(screen, contains('FxActionChip'));
     expect(screen, contains('FxMetricStrip'));
     expect(screen, contains('engajamentoAtividade'));

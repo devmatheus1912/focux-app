@@ -26,6 +26,8 @@ class ProgressaoSugestao {
     this.seriesSugeridas,
     this.repeticoesSugeridas,
     this.status = statusPendente,
+    this.treinoNome,
+    this.cargaSugeridaKg,
   });
 
   static const statusPendente = 'PENDENTE';
@@ -46,6 +48,10 @@ class ProgressaoSugestao {
   final int? seriesSugeridas;
   final String? repeticoesSugeridas;
   final String status;
+
+  /// Sessão do exercício, para agrupar a revisão.
+  final String? treinoNome;
+  final double? cargaSugeridaKg;
 
   bool get naoEncontrada => status == statusNaoEncontrada;
 
@@ -77,6 +83,8 @@ class ProgressaoSugestao {
       seriesSugeridas: _parseApiInt(json['seriesSugeridas']),
       repeticoesSugeridas: json['repeticoesSugeridas'] as String?,
       status: json['status'] as String? ?? statusPendente,
+      treinoNome: json['treinoNome'] as String?,
+      cargaSugeridaKg: _asDouble(json['cargaSugeridaKg']),
     );
   }
 

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../ia/models/ia_copilot_proxima_acao.dart';
+import 'aluno360_operacao_logic.dart';
 import '../data/aluno_repository.dart';
 
 export 'aluno360_copilot_executar_logic.dart';
@@ -204,11 +205,6 @@ String copilotDisplayAction(Aluno aluno, String acao) {
 }
 
 
-String copilotPrescriptionFullAction(Aluno aluno, String rawAcao) {
-  final normalized = normalizeIaCopilotAcao(rawAcao);
-  if (normalized.isNotEmpty) return normalized;
-  return copilotDisplayAction(aluno, rawAcao);
-}
 
 
 const _stickyLabelMax = 32;
@@ -296,47 +292,55 @@ String copilotFallbackAction(Aluno aluno, AlunoAutonomiaResumo? resumo) {
   return 'Revisar treino e propor a próxima evolução de ${aluno.objetivo ?? "objetivo"}.';
 }
 
-List<CopilotProfileGap> resolveCopilotProfileGaps(Aluno aluno) {
-  return [
-    if ((aluno.telefone ?? '').trim().isEmpty &&
-        (aluno.whatsapp ?? '').trim().isEmpty)
-      const CopilotProfileGap(
-        icon: Icons.call_outlined,
-        title: 'Contato',
-        detail: 'Telefone ou WhatsApp para acionar o aluno.',
-        route: 'edit',
-      ),
-    if ((aluno.objetivo ?? '').trim().isEmpty)
-      const CopilotProfileGap(
-        icon: Icons.flag_outlined,
-        title: 'Objetivo',
-        detail: 'Define foco da prescrição e do Copiloto.',
-        route: 'edit',
-      ),
-    if ((aluno.genero ?? '').trim().isEmpty ||
-        (aluno.tipoConsultoria ?? '').trim().isEmpty)
-      const CopilotProfileGap(
-        icon: Icons.badge_outlined,
-        title: 'Perfil do aluno',
-        detail: 'Gênero e consultoria usados no atendimento.',
-        route: 'edit',
-      ),
-  ];
-}
 
-/// "O que vimos": só fato com dado real. Sem dado, a linha não existe.
+/// "Por quê": o motivo do backend em linhas, com a mesma conta de "Agora".
+/// Sem motivo, só o que há de dado real no aluno.
 List<String> copilotoFatos(Aluno aluno, {String? motivo}) {
+  final texto = motivo?.trim() ?? '';
+  if (texto.isNotEmpty) {
+    return [
+      for (final parte in texto.split(' · '))
+        if (parte.trim().isNotEmpty)
+          '${parte.trim()[0].toUpperCase()}${parte.trim().substring(1)}',
+    ].take(3).toList();
+  }
   final aderencia = aluno.aderenciaPercent;
   final dias = aluno.diasSemTreino;
-  final texto = motivo?.trim() ?? '';
   return [
-    if (aderencia != null && aderencia > 0) ptS.copilotoFatoAderencia(aderencia),
+    if (aderencia != null) ptS.copilotoFatoAderencia(aderencia),
     if (dias != null)
       switch (dias) {
         0 => ptS.copilotoFatoTreinouHoje,
         1 => ptS.copilotoFatoUltimoTreinoUm,
         _ => ptS.copilotoFatoUltimoTreinoN(dias),
       },
-    if (texto.isNotEmpty) texto,
-  ].take(3).toList();
+  ];
 }
+
+/// A ação da folha sai do tipo da sugestão, para o botão combinar com o texto.
+OperacaoStickyAction copilotoAcaoDaSugestao(
+  String? tipoAcao, {
+  required OperacaoStickyAction padrao,
+}) => switch (tipoAcao) {
+  'CONTATO' || 'WEARABLE' => OperacaoStickyAction(
+    label: ptS.copilotoEnviarMensagem,
+    icon: Icons.chat_bubble_outline_rounded,
+    destination: OperacaoStickyDestination.chat,
+  ),
+  'PERFIL' => OperacaoStickyAction(
+    label: ptS.copilotoCompletarCadastro,
+    icon: Icons.badge_outlined,
+    destination: OperacaoStickyDestination.editAluno,
+  ),
+  'TREINO' => OperacaoStickyAction(
+    label: ptS.copilotoAbrirFicha,
+    icon: Icons.fitness_center_rounded,
+    destination: OperacaoStickyDestination.treino,
+  ),
+  'FINANCEIRO' => OperacaoStickyAction(
+    label: ptS.copilotoVerFinanceiro,
+    icon: Icons.payments_outlined,
+    destination: OperacaoStickyDestination.financeiro,
+  ),
+  _ => padrao,
+};

@@ -83,6 +83,7 @@ ThemeData fxTemaSobreMarca(BuildContext context, {Color? accent}) {
     colorScheme: base.colorScheme.copyWith(
       brightness: brilho,
       primary: paleta.brand,
+      onPrimary: _cardDeMarca(context, accent).fundo,
     ),
   );
 }

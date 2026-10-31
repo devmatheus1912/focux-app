@@ -10,7 +10,7 @@ import '../../../core/widgets/fx_cached_network_image.dart';
 import '../utils/aluno_display_utils.dart';
 import '../utils/aluno_media_utils.dart';
 
-enum AlunoAvatarVariant { list, hero, strip, profile }
+enum AlunoAvatarVariant { list, hero, strip, bloco, profile }
 
 class AlunoAvatar extends StatelessWidget {
   const AlunoAvatar({
@@ -24,6 +24,7 @@ class AlunoAvatar extends StatelessWidget {
   static const double heroSize = 44;
   static const double listSize = 48;
   static const double stripSize = 40;
+  static const double blocoSize = 64;
   static const double profileSize = FxSettingsLayout.avatarSize;
   static const double _ring = 2;
   static const double _gap = 2;
@@ -36,11 +37,14 @@ class AlunoAvatar extends StatelessWidget {
   double get _size => switch (variant) {
     AlunoAvatarVariant.hero => heroSize,
     AlunoAvatarVariant.strip => stripSize,
+    AlunoAvatarVariant.bloco => blocoSize,
     AlunoAvatarVariant.list => listSize,
     AlunoAvatarVariant.profile => profileSize,
   };
 
-  bool get _perfilStyle => variant == AlunoAvatarVariant.profile;
+  bool get _perfilStyle =>
+      variant == AlunoAvatarVariant.profile ||
+      variant == AlunoAvatarVariant.bloco;
 
   @override
   Widget build(BuildContext context) {

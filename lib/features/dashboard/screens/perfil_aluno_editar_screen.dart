@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../../core/media/escolher_foto_de_perfil.dart';
 import '../../../core/utils/br_phone.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/api/media_upload_service.dart';

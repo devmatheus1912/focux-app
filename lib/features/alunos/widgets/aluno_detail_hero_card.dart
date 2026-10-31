@@ -32,6 +32,11 @@ class AlunoDetailHeroCard extends StatelessWidget {
   final bool compactContactPriority;
   final VoidCallback? onDefineObjective;
 
+  /// O aviso de risco aumenta o card: a altura do cabeçalho depende disso.
+  static bool mostraAvisoDeRisco(Aluno aluno) =>
+      aluno.emRisco &&
+      alunoHeroPrimarySignal(aluno).label == riscoOperacionalLabel;
+
   @override
   Widget build(BuildContext context) {
     final displayName = fxTitleCaseName(aluno.nome);
@@ -44,8 +49,7 @@ class AlunoDetailHeroCard extends StatelessWidget {
     final sobre = fxPaletaSobreMarca(context, accent: primary);
     final ink = sobre.ink;
     final mute = sobre.mute;
-    final showRiskNotice =
-        aluno.emRisco && signal.label == riscoOperacionalLabel;
+    final showRiskNotice = mostraAvisoDeRisco(aluno);
     // O aviso de risco abaixo já carrega a frase ("Priorize contato hoje"):
     // o subtítulo não a repete.
     final subtitle = alunoHeroIdentitySubtitle(
@@ -71,58 +75,79 @@ class AlunoDetailHeroCard extends StatelessWidget {
           key: const ValueKey('aluno360_hero_card'),
           marca: true,
           accent: primary,
-          padding: EdgeInsets.symmetric(
-            horizontal: TokensStrip.s3,
-            vertical: compactContactPriority ? 8 : 14,
-          ),
+          padding: const EdgeInsets.all(TokensStrip.s3),
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              AlunoAvatar(
-                name: displayName,
-                photoUrl: aluno.fotoUrl,
-                variant: AlunoAvatarVariant.profile,
-              ),
-              SizedBox(height: compactContactPriority ? 8 : 12),
-              Text(
-                displayName,
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: FxSettingsLayout.profileName(context, color: ink),
-              ),
-              SizedBox(height: compactContactPriority ? 3 : 5),
-              if (!objectiveDefined && onDefineObjective != null)
-                _IdentityObjectiveRow(
-                  status: showStatusBadge && !showRiskNotice
-                      ? _IdentityStatusChip(status: status, isDark: isDark)
-                      : null,
-                  onDefineObjective: onDefineObjective!,
-                )
-              else if (subtitle.isNotEmpty)
-                Text(
-                  subtitle,
-                  textAlign: TextAlign.center,
-                  maxLines: compactContactPriority ? 1 : 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: FxSettingsLayout.subhead(color: mute).copyWith(
-                    fontWeight: FontWeight.w600,
-                    height: 1.3,
+              Row(
+                children: [
+                  AlunoAvatar(
+                    name: displayName,
+                    photoUrl: aluno.fotoUrl,
+                    variant: AlunoAvatarVariant.bloco,
                   ),
-                ),
+                  const SizedBox(width: TokensStrip.s3),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          displayName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: FxSettingsLayout.profileName(
+                            context,
+                            color: ink,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        if (!objectiveDefined && onDefineObjective != null)
+                          _IdentityObjectiveRow(
+                            status:
+                                showStatusBadge && !showRiskNotice
+                                    ? _IdentityStatusChip(
+                                      status: status,
+                                      isDark: isDark,
+                                    )
+                                    : null,
+                            onDefineObjective: onDefineObjective!,
+                          )
+                        else ...[
+                          if (subtitle.isNotEmpty)
+                            Text(
+                              subtitle,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: FxSettingsLayout.subhead(
+                                color: mute,
+                              ).copyWith(
+                                fontWeight: FontWeight.w600,
+                                height: 1.3,
+                              ),
+                            ),
+                          if (showStatusBadge && !showRiskNotice) ...[
+                            const SizedBox(height: TokensStrip.s1),
+                            _IdentityStatusChip(status: status, isDark: isDark),
+                          ],
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
+              ),
               if (showRiskNotice) ...[
-                SizedBox(height: compactContactPriority ? 6 : 10),
+                const SizedBox(height: TokensStrip.s2),
                 _HeroRiskNotice(
                   nivel: nivel,
-                  detail: compactContactPriority
-                      ? (motivoDeContato(S.of(context), aluno) ?? '')
-                      : contextLine,
+                  detail:
+                      compactContactPriority
+                          ? (motivoDeContato(S.of(context), aluno) ?? '')
+                          : contextLine,
                   isDark: isDark,
-                  compact: compactContactPriority,
+                  compact: true,
                 ),
-              ] else if (showStatusBadge && (objectiveDefined || onDefineObjective == null)) ...[
-                SizedBox(height: compactContactPriority ? 6 : 8),
-                _IdentityStatusChip(status: status, isDark: isDark),
               ],
             ],
           ),
@@ -214,10 +239,9 @@ class _HeroRiskNotice extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.center,
-                  style: Aluno360Layout.metaStyle(context).copyWith(
-                    color: mute,
-                    fontSize: compact ? 11 : 12,
-                  ),
+                  style: Aluno360Layout.metaStyle(
+                    context,
+                  ).copyWith(color: mute, fontSize: compact ? 11 : 12),
                 ),
               ),
             ],
@@ -241,7 +265,6 @@ class _IdentityObjectiveRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Wrap(
-      alignment: WrapAlignment.center,
       crossAxisAlignment: WrapCrossAlignment.center,
       spacing: TokensStrip.s2,
       runSpacing: TokensStrip.s1,
@@ -270,7 +293,9 @@ class _IdentityStatusChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         color:
-            isDark ? status.background.withValues(alpha: 0.35) : status.background,
+            isDark
+                ? status.background.withValues(alpha: 0.35)
+                : status.background,
         borderRadius: BorderRadius.circular(999),
         border: Border.all(color: status.foreground.withValues(alpha: 0.35)),
       ),

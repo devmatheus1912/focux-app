@@ -144,7 +144,10 @@ class FxLiquidPrimaryButton extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     // Saturated brand teals use light onPrimary in theme; labels stay white
     // (same rule as FilledButtonTheme in app_theme.dart).
-    const labelColor = Colors.white;
+    final labelColor =
+        primary.computeLuminance() > 0.5
+            ? Theme.of(context).colorScheme.onPrimary
+            : Colors.white;
     final enabled = onPressed != null && !loading;
 
     final button = FxInteractiveGlow(
@@ -160,7 +163,7 @@ class FxLiquidPrimaryButton extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: TokensStrip.primaryButtonGradient(primary),
               borderRadius: BorderRadius.circular(TokensStrip.rButton),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.22)),
+              border: Border.all(color: labelColor.withValues(alpha: 0.22)),
             ),
             padding: const EdgeInsets.symmetric(
               horizontal: TokensStrip.s5,
@@ -172,19 +175,19 @@ class FxLiquidPrimaryButton extends StatelessWidget {
                       ? Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const SizedBox(
+                          SizedBox(
                             width: 20,
                             height: 20,
                             child: FxLoading(
                               strokeWidth: 2,
-                              color: Colors.white,
+                              color: labelColor,
                             ),
                           ),
                           if (loadingLabel != null) ...[
                             const SizedBox(width: 10),
                             Text(
                               loadingLabel!,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: labelColor,
                                 fontWeight: FontWeight.w700,
                                 fontSize: 15,
@@ -207,7 +210,7 @@ class FxLiquidPrimaryButton extends StatelessWidget {
                                 label,
                                 maxLines: 1,
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   color: labelColor,
                                   fontWeight: FontWeight.w700,
                                   fontSize: 15,

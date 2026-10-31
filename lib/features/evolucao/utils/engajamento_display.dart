@@ -352,3 +352,54 @@ String? engajamentoEventoRota(String? tipo, int alunoId) {
       return null;
   }
 }
+
+/// Treino com início e conclusão no mesmo dia vira uma linha só.
+List<EventoEngajamento> engajamentoSemRepetir(List<EventoEngajamento> eventos) {
+  final vistos = <String>{};
+  return [
+    for (final e in eventos)
+      if (vistos.add(
+        '${e.dataHora.length >= 10 ? e.dataHora.substring(0, 10) : e.dataHora}'
+        '|${e.tipo}|${e.descricao}',
+      ))
+        e,
+  ];
+}
+
+/// Quantos eventos a tela de Aderência mostra; o resto fica em "Ver tudo".
+const engajamentoEventosNaTela = 10;
+const engajamentoDiasNaTela = 7;
+
+/// Só o recente: o calendário já conta os treinos do período.
+List<EventoEngajamento> engajamentoRecentes(
+  List<EventoEngajamento> eventos, {
+  DateTime? now,
+}) {
+  final corte = (now ?? DateTime.now()).subtract(
+    const Duration(days: engajamentoDiasNaTela),
+  );
+  return eventos
+      .where((e) {
+        final quando = DateTime.tryParse(e.dataHora);
+        return quando == null || quando.isAfter(corte);
+      })
+      .take(engajamentoEventosNaTela)
+      .toList();
+}
+
+/// Agrupa eventos em (dia, eventos), na ordem recebida.
+List<(String, List<EventoEngajamento>)> engajamentoPorDia(
+  List<EventoEngajamento> eventos, {
+  DateTime? now,
+}) {
+  final dias = <(String, List<EventoEngajamento>)>[];
+  for (final linha in engajamentoLinhasPorDia(eventos, now: now)) {
+    final evento = linha.evento;
+    if (evento == null) {
+      dias.add((linha.dia!, []));
+    } else {
+      dias.last.$2.add(evento);
+    }
+  }
+  return dias;
+}

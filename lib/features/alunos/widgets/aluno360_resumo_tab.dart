@@ -64,14 +64,14 @@ class Aluno360ResumoTab extends ConsumerWidget {
     int checkins,
     VoidCallback abrirEngajamento,
   ) {
-    final ader = aluno.aderenciaPercent ?? 0;
+    final ader = aluno.aderenciaPercent;
     final dias = aluno.diasSemTreino ?? 0;
     return [
       FxMetric(
-        valor: ader,
-        texto: ader > 0 ? '$ader%' : null,
+        valor: ader ?? 0,
+        texto: ader == null ? '—' : '$ader%',
         rotulo: s.alunoResumoMetricaAderencia,
-        alerta: ader > 0 && ader < 50,
+        alerta: ader != null && ader < 50,
         onTap: abrirEngajamento,
       ),
       FxMetric(

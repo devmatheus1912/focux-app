@@ -348,7 +348,8 @@ class Aluno360CompositeHeaderDelegate extends SliverPersistentHeaderDelegate {
             ? 1.0
             : (shrinkOffset / heroBodyHeight).clamp(0.0, 1.0);
     final collapsed = collapseT >= 0.92;
-    final heroOpacity = (1.0 - collapseT * 1.1).clamp(0.0, 1.0);
+    // Some antes de ser cortado: card de cor pela metade fica quebrado.
+    final heroOpacity = (1.0 - collapseT * 2.2).clamp(0.0, 1.0);
     final showHero = heroOpacity > 0.02 && heroSlot > 6;
     final tabBackdropOpaque = collapseT > 0.04 || overlapsContent;
 
@@ -395,10 +396,16 @@ class Aluno360CompositeHeaderDelegate extends SliverPersistentHeaderDelegate {
                         child: Opacity(
                           opacity: heroOpacity,
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: Aluno360Layout.screenPadding,
+                            padding: const EdgeInsets.fromLTRB(
+                              Aluno360Layout.screenPadding,
+                              TokensStrip.s1,
+                              Aluno360Layout.screenPadding,
+                              TokensStrip.s2,
                             ),
-                            child: heroChild,
+                            child: SizedBox(
+                              width: double.infinity,
+                              child: heroChild,
+                            ),
                           ),
                         ),
                       ),

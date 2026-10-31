@@ -277,8 +277,14 @@ class IaRepository {
         .toList(growable: false);
   }
 
-  Future<ProgressaoAceitarResponse> aceitarSugestao(int id) async {
-    final r = await _dio.post('/api/ia/progressao/sugestoes/$id/aceitar');
+  Future<ProgressaoAceitarResponse> aceitarSugestao(
+    int id, {
+    double? cargaKg,
+  }) async {
+    final r = await _dio.post(
+      '/api/ia/progressao/sugestoes/$id/aceitar',
+      queryParameters: {if (cargaKg != null) 'cargaKg': cargaKg},
+    );
     final data = r.data;
     if (data is Map) {
       return ProgressaoAceitarResponse.fromApi(Map<String, dynamic>.from(data));

@@ -16,7 +16,6 @@ enum ProgressaoObjetivo {
 
 const progressaoTitulo = 'Ajustar cargas';
 const progressaoAdicionarObservacao = 'Adicionar observação';
-const progressaoNadaMuda = 'Nada muda no treino até você aceitar.';
 const progressaoSemExecucao =
     'Falta um treino concluído nas últimas 4 semanas para sugerir cargas.';
 
@@ -28,8 +27,9 @@ ProgressaoObjetivo progressaoObjetivoDoAluno(String? objetivo) {
   return ProgressaoObjetivo.hipertrofia;
 }
 
-String progressaoStickyLabel({required bool hasResult}) =>
-    hasResult ? 'Gerar outra' : 'Gerar sugestões';
+const progressaoGerarSugestoes = 'Gerar sugestões';
+const progressaoNadaParaAjustar =
+    'A IA não encontrou ajuste para este treino agora.';
 
 String progressaoStickyLoadingLabel() => 'Gerando…';
 
@@ -40,33 +40,15 @@ String progressaoConfirmMessage() =>
 
 String progressaoConfirmLabel() => 'Gerar';
 
-String progressaoPendingReviewLabel(int count) {
-  if (count <= 0) return 'Revisar sugestões pendentes';
-  if (count == 1) return 'Revisar 1 sugestão pendente';
-  return 'Revisar $count sugestões pendentes';
-}
-
-String progressaoSavedForReviewSnack(int count) {
-  if (count == 1) return '1 sugestão salva para revisão.';
-  return '$count sugestões salvas para revisão.';
-}
-
-String progressaoAceitarSemanticsLabel(int count) =>
-    count > 0
-        ? 'Revisar $count sugestões pendentes de progressão'
-        : 'Revisar sugestões pendentes de progressão';
-
 String progressaoContextoLine(ProgressaoContextoResumo resumo) {
-  final partes = <String>[
-    if (resumo.treinos.isNotEmpty) resumo.treinos.join(', '),
+  return [
     resumo.exercicios == 1 ? '1 exercício' : '${resumo.exercicios} exercícios',
     switch (resumo.sessoes4Semanas) {
-      0 => 'sem treinos concluídos em 4 semanas',
-      1 => '1 treino concluído em 4 semanas',
-      final n => '$n treinos concluídos em 4 semanas',
+      0 => 'sem treinos em 4 semanas',
+      1 => '1 treino em 4 semanas',
+      final n => '$n treinos em 4 semanas',
     },
-  ];
-  return partes.join(' · ');
+  ].join(' · ');
 }
 
 const progressaoContextoTitulo = 'A IA vai ler';
@@ -74,21 +56,7 @@ const progressaoSemTreinoAtivo =
     'Sem treino ativo. Monte um treino para pedir progressão.';
 const progressaoObservacoesLabel = 'Observações (opcional)';
 const progressaoObservacoesHint = 'Ex.: dor no ombro, semana de deload';
-const progressaoNaoEncontrada = 'Fora do treino ativo';
-const progressaoNaoEncontradaHint =
-    'O exercício mudou ou saiu do treino. Ajuste no treino ou descarte.';
 const progressaoAbrirTreino = 'Abrir treino';
-const progressaoRevisarAplicar = 'Revisar e aplicar';
-const progressaoErroManteveResultado =
-    'Mantive a sugestão anterior na tela.';
-
-String progressaoAceitarTodasLabel(int count) =>
-    count == 1 ? 'Aceitar 1 sugestão' : 'Aceitar todas ($count)';
-
-String progressaoAceitarTodasConfirm(int count) =>
-    count == 1
-        ? 'Carga, séries e repetições vão para o treino ativo.'
-        : 'As $count sugestões vão para o treino ativo (carga, séries e repetições).';
 
 String progressaoAceitarTodasSnack(ProgressaoAceitarTodasResponse r) {
   final aplicadas = switch (r.aplicadas) {
@@ -142,3 +110,24 @@ String progressaoSlug(String value) {
 String progressaoPdfFileName(String alunoNome, DateTime d) =>
     'progressao_${progressaoSlug(alunoNome)}_'
     '${d.year}-${_doisDigitos(d.month)}-${_doisDigitos(d.day)}.pdf';
+
+/// Mudou a carga de verdade: vem marcada e aparece primeiro na revisão.
+bool progressaoMudaCarga(ProgressaoSugestao s) =>
+    s.deltaKg != null && s.deltaKg != 0;
+
+/// Grupos da revisão por sessão, na ordem em que aparecem. Sem sessão fica por último.
+List<(String?, List<ProgressaoSugestao>)> progressaoPorTreino(
+  List<ProgressaoSugestao> sugestoes,
+) {
+  final grupos = <String?, List<ProgressaoSugestao>>{};
+  for (final s in sugestoes) {
+    grupos.putIfAbsent(s.treinoNome, () => []).add(s);
+  }
+  final nomes =
+      grupos.keys.toList()..sort((a, b) {
+        if (a == null) return 1;
+        if (b == null) return -1;
+        return a.compareTo(b);
+      });
+  return [for (final n in nomes) (n, grupos[n]!)];
+}

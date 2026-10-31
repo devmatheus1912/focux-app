@@ -18,7 +18,7 @@ import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_hub_header.dart';
-import '../../../core/widgets/fx_icon.dart';
+import '../../../core/widgets/fx_grouped_action_sheet.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
@@ -30,10 +30,13 @@ import '../../../core/widgets/fx_choice_strip.dart';
 import '../../../core/widgets/fx_metric_strip.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
 import '../../alunos/providers/aluno_detail_providers.dart';
-import '../../dashboard/widgets/dashboard_section_header.dart';
+import '../../planos/data/plano_recurso.dart';
+import '../../planos/utils/plan_gate.dart';
+import '../../subscription/widgets/upgrade_prompt_sheet.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/evolucao_repository.dart';
 import '../utils/engajamento_display.dart';
+import '../widgets/engajamento_atividade.dart';
 import '../widgets/engajamento_card_aderencia.dart';
 import '../widgets/engajamento_help_sheet.dart';
 import '../../../l10n/pt.dart';
@@ -142,6 +145,41 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
     });
   }
 
+  /// O Relatório tem outra conta e o PDF: mora aqui, com a trava do plano.
+  Future<void> _maisOpcoes() async {
+    final escolha = await showFxGroupedActionSheet<String>(
+      context,
+      titulo: ptS.engajamentoMaisOpcoes,
+      grupos: [
+        FxActionGroup<String>(null, [
+          FxActionItem(
+            valor: 'relatorio',
+            rotulo: ptS.engajamentoRelatorioPdf,
+            descricao: ptS.engajamentoRelatorioApoio,
+            icone: Icons.picture_as_pdf_outlined,
+          ),
+        ]),
+      ],
+    );
+    if (escolha == null || !mounted) return;
+    final plano = PlanGate.read(ref, PlanoRecursoKeys.relatorios);
+    if (!plano.liberado) {
+      await UpgradePromptSheet.show(
+        context: context,
+        featureName: ptS.engajamentoRelatorioPdf,
+        capability: PlanoRecursoKeys.relatorios,
+        requiredPlan: plano.planoMinimo,
+        upgradePlano: plano.planoMinimo,
+        source: 'engajamento_relatorio',
+      );
+      return;
+    }
+    context.push(
+      '/alunos/${widget.alunoId}/relatorio',
+      extra: widget.alunoNome,
+    );
+  }
+
   void _abrirEvento(EventoEngajamento evento) {
     final rota = engajamentoEventoRota(evento.tipo, widget.alunoId);
     if (rota == null) return;
@@ -170,6 +208,11 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
             subtitle: freshness,
             onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
             actions: [
+              IconButton(
+                tooltip: ptS.engajamentoMaisOpcoes,
+                icon: const Icon(Icons.more_horiz_rounded),
+                onPressed: _maisOpcoes,
+              ),
               FxHelpIconButton(
                 tooltip: ptS.engajamentoComoLerAAderencia,
                 onTap: () => showEngajamentoHelpSheet(context),
@@ -228,24 +271,15 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
     final aderencia = aluno?.aderenciaPercent ?? 0;
     final conversa = engajamentoConversa(_eventos);
     final cancelados = engajamentoCanceladosCount(_eventos);
-    final linhas = engajamentoLinhasPorDia(
+    final atividade = engajamentoSemRepetir(
       engajamentoAtividade(
         _eventos,
         filtro: _filtro,
         mostrarCancelados: _mostrarCancelados,
       ),
     );
-
-    final dias = <(String, List<EventoEngajamento>)>[];
-    for (final linha in linhas) {
-      final evento = linha.evento;
-      if (evento == null) {
-        dias.add((linha.dia!, []));
-      } else {
-        if (dias.isEmpty) dias.add(('', []));
-        dias.last.$2.add(evento);
-      }
-    }
+    final recentes = engajamentoRecentes(atividade);
+    final dias = engajamentoPorDia(recentes);
 
     final topo = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -378,129 +412,66 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
                 itemBuilder: (context, i) {
                   if (i == 0) return topo;
                   if (i == dias.length + 1) {
-                    if (cancelados == 0) return const SizedBox.shrink();
-                    return Padding(
-                      padding: const EdgeInsets.only(top: TokensStrip.s3),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: FxActionLink(
-                          label:
-                              _mostrarCancelados
-                                  ? ptS.engajamentoEsconderCanceladas
-                                  : ptS.engajamentoMostrarCanceladas(
-                                    cancelados,
-                                  ),
-                          onTap:
-                              () => setState(
-                                () => _mostrarCancelados = !_mostrarCancelados,
+                    final verTudo =
+                        atividade.length > recentes.length
+                            ? Padding(
+                              padding: const EdgeInsets.only(
+                                top: TokensStrip.s3,
                               ),
+                              child: FxTonalButton(
+                                label: ptS.engajamentoVerTudo,
+                                expanded: true,
+                                onPressed:
+                                    () => context.push(
+                                      '/alunos/${widget.alunoId}/engajamento/historico',
+                                      extra: (
+                                        alunoNome: widget.alunoNome,
+                                        eventos: atividade,
+                                      ),
+                                    ),
+                              ),
+                            )
+                            : const SizedBox.shrink();
+                    if (cancelados == 0) return verTudo;
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        verTudo,
+                        Padding(
+                          padding: const EdgeInsets.only(top: TokensStrip.s3),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: FxActionLink(
+                              label:
+                                  _mostrarCancelados
+                                      ? ptS.engajamentoEsconderCanceladas
+                                      : ptS.engajamentoMostrarCanceladas(
+                                        cancelados,
+                                      ),
+                              onTap:
+                                  () => setState(
+                                    () =>
+                                        _mostrarCancelados =
+                                            !_mostrarCancelados,
+                                  ),
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
                     );
                   }
                   final (dia, eventos) = dias[i - 1];
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      if (dia.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(
-                            top: TokensStrip.s5,
-                            bottom: TokensStrip.s3,
-                          ),
-                          child: DashboardSectionHeader(title: dia),
-                        ),
-                      Container(
-                        decoration: fxListCardDecoration(context),
-                        child: Column(
-                          children: [
-                            for (final (j, evento) in eventos.indexed) ...[
-                              if (j > 0) const Divider(height: 1),
-                              _LinhaAtividade(
-                                evento: evento,
-                                onTap:
-                                    engajamentoEventoRota(
-                                              evento.tipo,
-                                              widget.alunoId,
-                                            ) ==
-                                            null
-                                        ? null
-                                        : () => _abrirEvento(evento),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-                    ],
+                  return EngajamentoAtividadeDia(
+                    dia: dia,
+                    eventos: eventos,
+                    onEvento: _abrirEvento,
+                    podeAbrir:
+                        (e) =>
+                            engajamentoEventoRota(e.tipo, widget.alunoId) !=
+                            null,
                   );
                 },
               ),
-    );
-  }
-}
-
-/// Uma linha do cartão de Atividade: ícone, o que houve e a hora.
-class _LinhaAtividade extends StatelessWidget {
-  const _LinhaAtividade({required this.evento, required this.onTap});
-
-  final EventoEngajamento evento;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
-    final titulo = engajamentoEventoLabel(evento.descricao, evento.tipo);
-    final apoio = engajamentoEventoSubtitle(tipo: evento.tipo, titulo: titulo);
-    return InkWell(
-      onTap: onTap,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minHeight: 56),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: TokensStrip.s3,
-            vertical: TokensStrip.s2,
-          ),
-          child: Row(
-            children: [
-              FxIcon(
-                name: engajamentoFxIcon(evento.tipo),
-                size: 18,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              const SizedBox(width: TokensStrip.s3),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      titulo,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: FocuxHubTypography.cardTitle(color: chrome.ink),
-                    ),
-                    if (apoio != null)
-                      Text(
-                        apoio,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: FocuxHubTypography.bodyMuted(color: chrome.mute),
-                      ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: TokensStrip.s2),
-              Text(
-                engajamentoHoraLabel(evento.dataHora),
-                style: FocuxHubTypography.bodyMuted(
-                  color: chrome.mute,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

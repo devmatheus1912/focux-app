@@ -32,8 +32,6 @@ void main() {
         contains('_loading'),
       ),
     );
-    expect(screen, contains('backgroundColor: primary'));
-    expect(screen, contains("label: const Text('Aceitar')"));
     expect(screen, contains('FocuxHubTypography'));
     expect(screen, isNot(contains('backgroundColor: EagleTokens.good')));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));

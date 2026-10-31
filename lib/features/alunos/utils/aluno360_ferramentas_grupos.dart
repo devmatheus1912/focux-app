@@ -21,7 +21,6 @@ const aluno360ModulosDoGrupo = <Aluno360FerramentasGrupo, List<Aluno360Ferrament
     Aluno360FerramentasModule.composicao,
     Aluno360FerramentasModule.planoSucesso,
     Aluno360FerramentasModule.trilhas,
-    Aluno360FerramentasModule.engajamento,
     Aluno360FerramentasModule.anamnese,
   ],
   Aluno360FerramentasGrupo.relacao: [Aluno360FerramentasModule.chat],

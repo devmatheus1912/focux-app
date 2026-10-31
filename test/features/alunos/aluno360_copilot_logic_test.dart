@@ -138,11 +138,6 @@ void main() {
   });
 
   group('resolveCopilotProfileGaps', () {
-    test('returns contact and profile gaps for empty aluno', () {
-      final gaps = resolveCopilotProfileGaps(_aluno());
-      expect(gaps.length, greaterThanOrEqualTo(2));
-      expect(gaps.any((g) => g.title == 'Contato'), isTrue);
-    });
   });
   group('resolveCopilotPrescriptionFromAction', () {
 

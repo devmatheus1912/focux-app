@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/api/media_upload_service.dart';
@@ -16,6 +15,7 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/br_phone.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/media/escolher_foto_de_perfil.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_error_state.dart';
@@ -156,21 +156,16 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
 
   Future<void> _pickAndUploadPhoto() async {
     HapticFeedback.selectionClick();
-    final picker = ImagePicker();
-    final file = await picker.pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 80,
-      maxWidth: 800,
-    );
-    if (file == null || !mounted) return;
+    final foto = await escolherFotoDePerfil(context);
+    if (foto == null || !mounted) return;
 
     setState(() => _uploadingPhoto = true);
     try {
       final url = await MediaUploadService(
         ref.read(apiClientProvider),
       ).uploadBytes(
-        bytes: await file.readAsBytes(),
-        filename: file.name,
+        bytes: foto.bytes,
+        filename: foto.filename,
         folder: 'perfil',
         resourceType: 'image',
       );

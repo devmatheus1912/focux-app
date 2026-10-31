@@ -342,8 +342,7 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
         motivo: draft.motivo,
         modo: _mode,
         source: 'COPILOT',
-        recommendationId:
-            'COPILOT_TREINO_STUDENT_${_selectedAlunoId!}',
+        recommendationId: 'COPILOT_TREINO_STUDENT_${_selectedAlunoId!}',
         createdFromInsight: true,
       );
       final actionKey = acao.actionKey ?? '';
@@ -365,7 +364,9 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
       ref.invalidate(copilotoTarefasAbertasProvider);
       FeedbackHelper.showSuccess(
         context,
-        persisted ? S.of(context).copilotoTarefaSalva : S.of(context).copilotoTarefaConfirme,
+        persisted
+            ? S.of(context).copilotoTarefaSalva
+            : S.of(context).copilotoTarefaConfirme,
       );
     } catch (_) {
       if (!mounted) return;

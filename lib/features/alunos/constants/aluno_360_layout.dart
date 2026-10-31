@@ -44,11 +44,11 @@ abstract final class Aluno360Layout {
   /// Identity strip height (compact strip + padding at textScale ≤ 1.25).
   static double heroBodyHeight(
     BuildContext context, {
-    bool compactContactPriority = false,
+    bool comAvisoDeRisco = false,
   }) {
     final textScale = MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 2.0);
-    final base = compactContactPriority ? 196.0 : 220.0;
-    return base + ((textScale - 1) * 32);
+    final base = comAvisoDeRisco ? 176.0 : 116.0;
+    return base + ((textScale - 1) * 40);
   }
 
   /// Bottom padding so Operação content clears the sticky overlay CTA.

@@ -100,6 +100,8 @@ class FxTonalButton extends StatelessWidget {
         constraints: BoxConstraints(minHeight: alturaToque),
         child: Align(
           widthFactor: expanded ? null : 1,
+          // Sem isto, numa barra inferior o botão toma a altura toda da tela.
+          heightFactor: 1,
           alignment: Alignment.center,
           child: Material(
             color: enabled ? bg : bg.withValues(alpha: 0.5),

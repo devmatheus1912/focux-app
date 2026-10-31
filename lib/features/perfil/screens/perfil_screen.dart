@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
 import '../../../core/account/excluir_conta_flow.dart';
 import '../../../core/account/excluir_conta_sheet.dart';
 import '../../../core/analytics/analytics_service.dart';
@@ -14,7 +13,6 @@ import '../../../core/api/api_client.dart';
 import '../../../core/api/media_upload_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -43,7 +41,6 @@ import '../widgets/perfil_loading_scaffold.dart';
 import '../widgets/perfil_error_scaffold.dart';
 import 'package:focux_app/core/widgets/fx_action_row.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
-import 'package:focux_app/core/widgets/fx_cached_network_image.dart';
 import 'package:focux_app/core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/fx_settings_group.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
@@ -54,7 +51,9 @@ import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/media/escolher_foto_de_perfil.dart';
 import '../../../core/widgets/fx_strip_card.dart';
+import '../../alunos/widgets/aluno_avatar.dart';
 
 part 'perfil_screen_widgets_a.part.dart';
 part 'perfil_screen_widgets_b.part.dart';
@@ -114,21 +113,16 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
   }
 
   Future<void> _pickAndUploadPhoto() async {
-    final picker = ImagePicker();
-    final file = await picker.pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 80,
-      maxWidth: 800,
-    );
-    if (file == null || !mounted) return;
+    final foto = await escolherFotoDePerfil(context);
+    if (foto == null || !mounted) return;
 
     setState(() => _uploadingPhoto = true);
     try {
       final logoUrl = await MediaUploadService(
         ref.read(apiClientProvider),
       ).uploadBytes(
-        bytes: await file.readAsBytes(),
-        filename: file.name,
+        bytes: foto.bytes,
+        filename: foto.filename,
         folder: 'perfil',
         resourceType: 'image',
       );

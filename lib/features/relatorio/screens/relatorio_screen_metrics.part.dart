@@ -13,7 +13,7 @@ extension on _RelatorioScreenState {
           children: [
             Expanded(
               child: OperationalMetricTile(
-                label: 'Taxa',
+                label: ptS.relatorioTaxaConclusao,
                 value: '—',
                 hint: 'Sem treinos neste recorte',
                 color: primary,
@@ -78,7 +78,7 @@ extension on _RelatorioScreenState {
           children: [
             Expanded(
               child: OperationalMetricTile(
-                label: 'Taxa',
+                label: ptS.relatorioTaxaConclusao,
                 value: relatorioAderenciaMediaLabel(dados.taxaAderenciaPercent),
                 hint: relatorioAlunoAderenciaStatus(dados.taxaAderenciaPercent),
                 color:

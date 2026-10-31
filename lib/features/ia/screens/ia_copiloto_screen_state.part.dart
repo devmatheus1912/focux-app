@@ -19,9 +19,9 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
   bool _ttvTracked = false;
 
   IaCopilotoApplySpec? get _applySpec => iaCopilotoApplySpec(
-        tipoAcao: _proximaAcao?.tipoAcao,
-        mensagemSugerida: _proximaAcao?.mensagemSugerida,
-      );
+    tipoAcao: _proximaAcao?.tipoAcao,
+    mensagemSugerida: _proximaAcao?.mensagemSugerida,
+  );
 
   String get _resultPrimaryLabel =>
       _mensagemEnviada
