@@ -25,33 +25,6 @@ void main() {
     );
   });
 
-  test('contagem e filtro de destaque', () {
-    expect(pacoteCountLabel(0), 'Nenhum plano');
-    expect(pacoteCountLabel(1), '1 plano');
-    expect(pacoteCountLabel(3), '3 planos');
-    expect(pacoteChipLabel(PacoteChip.todos), 'Todos');
-    expect(pacoteChipLabel(PacoteChip.destaque), 'Destaque');
-    expect(
-      pacoteMatches(
-        titulo: 'Consultoria',
-        descricao: 'Mensal',
-        destaque: false,
-        query: 'consul',
-        chip: PacoteChip.todos,
-      ),
-      isTrue,
-    );
-    expect(
-      pacoteMatches(
-        titulo: 'Consultoria',
-        descricao: 'Mensal',
-        destaque: false,
-        query: '',
-        chip: PacoteChip.destaque,
-      ),
-      isFalse,
-    );
-  });
 
   test('criar e desativar confirmam', () {
     expect(pacoteTituloMax, 120);

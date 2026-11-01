@@ -15,20 +15,6 @@ String alertaListSubtitle({
   String? freshness,
 }) => FxHubFreshness.joinCount(alertaCountLabel(totalRiscos), freshness);
 
-bool alertaMatchesQuery({
-  required String alunoNome,
-  required List<String> motivos,
-  required String query,
-}) {
-  final q = query.trim().toLowerCase();
-  if (q.isEmpty) return true;
-  if (alunoNome.toLowerCase().contains(q)) return true;
-  for (final motivo in motivos) {
-    if (motivo.toLowerCase().contains(q)) return true;
-  }
-  return false;
-}
-
 String alertaAdiarCtaLabel() => 'Adiar 24h';
 
 String alertaAdiadoSuccessMessage() => 'Alerta adiado por 24h.';

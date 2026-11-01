@@ -56,16 +56,4 @@ void main() {
     expect(feedbackVideoTamanhoErro(feedbackVideoMaxBytes + 1), contains('120 MB'));
   });
 
-  test('feedbackVideoCountLabel e query', () {
-    expect(feedbackVideoCountLabel(1), '1 feedback');
-    expect(feedbackVideoCountLabel(2), '2 feedbacks');
-    expect(
-      feedbackVideoMatchesQuery(comentario: 'Joelhada alta', query: 'joel'),
-      isTrue,
-    );
-    expect(
-      feedbackVideoMatchesQuery(comentario: 'Joelhada', query: 'ombro'),
-      isFalse,
-    );
-  });
 }

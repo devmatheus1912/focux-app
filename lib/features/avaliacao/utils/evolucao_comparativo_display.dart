@@ -155,7 +155,7 @@ String evolucaoComparativoFmtData(String? iso) {
 
 String evolucaoComparativoFmtNum(double? value, {int decimais = 1}) {
   if (value == null) return '—';
-  return value.toStringAsFixed(decimais);
+  return formatBrDecimal(value, digits: decimais);
 }
 
 String evolucaoComparativoFmtValor(double? value, String unidade) {
@@ -177,7 +177,7 @@ EvolucaoComparativoDelta evolucaoComparativoDelta({
     );
   }
   final diff = atual - primeira;
-  final text = '${diff >= 0 ? '+' : ''}${diff.toStringAsFixed(decimais)}';
+  final text = '${diff >= 0 ? '+' : ''}${formatBrDecimal(diff, digits: decimais)}';
   if (diff == 0) {
     return EvolucaoComparativoDelta(
       text: text,

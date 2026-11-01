@@ -1,14 +1,6 @@
 import '../data/anamnese_repository.dart';
 import '../../../core/utils/pt_br_display.dart';
 
-const anamneseNiveis = [
-  'SEDENTARIO',
-  'LEVE',
-  'MODERADO',
-  'INTENSO',
-  'MUITO_INTENSO',
-];
-
 String anamneseNivelLabel(String? code) {
   switch (code) {
     case 'SEDENTARIO':

@@ -12,12 +12,19 @@ enum ProgressaoObjetivo {
 
   final String api;
   final String label;
+
+  String get descricao => switch (this) {
+    ProgressaoObjetivo.forca => 'Mais carga, menos repetições.',
+    ProgressaoObjetivo.hipertrofia => 'Carga e repetições para crescer.',
+    ProgressaoObjetivo.resistencia => 'Mais repetições, carga moderada.',
+  };
 }
 
 const progressaoTitulo = 'Ajustar cargas';
-const progressaoAdicionarObservacao = 'Adicionar observação';
+const progressaoAdicionarObservacao = 'Algo para considerar? (opcional)';
+const progressaoAtalhosObservacao = ['Dor', 'Semana leve', 'Pouco tempo'];
 const progressaoSemExecucao =
-    'Falta um treino concluído nas últimas 4 semanas para sugerir cargas.';
+    'Sem treino concluído em 4 semanas. As sugestões precisam de pelo menos um.';
 
 /// Parte do objetivo do aluno; o personal pode trocar na tela.
 ProgressaoObjetivo progressaoObjetivoDoAluno(String? objetivo) {
@@ -33,13 +40,6 @@ const progressaoNadaParaAjustar =
 
 String progressaoStickyLoadingLabel() => 'Gerando…';
 
-String progressaoConfirmTitle() => 'Gerar sugestões de carga?';
-
-String progressaoConfirmMessage() =>
-    'A IA lê o treino ativo e as últimas execuções. Nada entra no treino sem você aceitar.';
-
-String progressaoConfirmLabel() => 'Gerar';
-
 String progressaoContextoLine(ProgressaoContextoResumo resumo) {
   return [
     resumo.exercicios == 1 ? '1 exercício' : '${resumo.exercicios} exercícios',
@@ -51,12 +51,31 @@ String progressaoContextoLine(ProgressaoContextoResumo resumo) {
   ].join(' · ');
 }
 
-const progressaoContextoTitulo = 'A IA vai ler';
+const progressaoContextoTitulo = 'Sugestões com base no que foi treinado';
 const progressaoSemTreinoAtivo =
     'Sem treino ativo. Monte um treino para pedir progressão.';
-const progressaoObservacoesLabel = 'Observações (opcional)';
 const progressaoObservacoesHint = 'Ex.: dor no ombro, semana de deload';
 const progressaoAbrirTreino = 'Abrir treino';
+
+/// "18 kg · 4×8-10" vira a carga e a prescrição.
+({String carga, String prescricao}) progressaoPartes(String texto) {
+  final m = RegExp(r'^(.*?kg)\s*[·\s]*(.*)$').firstMatch(texto.trim());
+  if (m == null) return (carga: texto.trim(), prescricao: '');
+  return (carga: m.group(1)!.trim(), prescricao: m.group(2)!.trim());
+}
+
+String progressaoKg(double kg) =>
+    '${kg.toStringAsFixed(kg % 1 == 0 ? 0 : 1).replaceAll('.', ',')} kg';
+
+/// "+1,5 kg" ou "−1,5 kg", já com a carga editada. Nulo sem mudança ou sem número.
+String? progressaoDiferenca(ProgressaoSugestao s, double? editada) {
+  final delta =
+      editada != null && s.cargaSugeridaKg != null
+          ? (s.deltaKg ?? 0) + editada - s.cargaSugeridaKg!
+          : s.deltaKg;
+  if (delta == null || delta == 0) return null;
+  return '${delta > 0 ? '+' : '−'}${progressaoKg(delta.abs())}';
+}
 
 String progressaoAceitarTodasSnack(ProgressaoAceitarTodasResponse r) {
   final aplicadas = switch (r.aplicadas) {

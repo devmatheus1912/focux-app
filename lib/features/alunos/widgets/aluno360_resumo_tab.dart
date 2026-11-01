@@ -20,6 +20,7 @@ import 'aluno360_ficha_card.dart';
 import 'aluno360_follow_up_card.dart';
 import 'aluno360_acao_sticky.dart';
 import 'aluno360_recovery_insight_card.dart';
+import '../utils/aluno360_ferramentas_grupos.dart';
 
 /// Aba Resumo do perfil 360: o que fazer agora, os números, a ficha, o
 /// dinheiro, o próximo contato e a sugestão do copiloto. Sem folha para o
@@ -66,11 +67,12 @@ class Aluno360ResumoTab extends ConsumerWidget {
   ) {
     final ader = aluno.aderenciaPercent;
     final dias = aluno.diasSemTreino ?? 0;
+    final card = aderenciaDoCard(aluno);
     return [
       FxMetric(
-        valor: ader ?? 0,
-        texto: ader == null ? '—' : '$ader%',
-        rotulo: s.alunoResumoMetricaAderencia,
+        valor: ader ?? aluno.treinosJanela ?? 0,
+        texto: card.texto,
+        rotulo: card.rotulo,
         alerta: ader != null && ader < 50,
         onTap: abrirEngajamento,
       ),

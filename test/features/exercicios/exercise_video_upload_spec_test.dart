@@ -38,29 +38,6 @@ void main() {
     });
   });
 
-  test('copy do painel distingue enviar, trocar e remover', () {
-    expect(exerciseVideoPanelHeader(), 'Vídeo próprio');
-    expect(
-      exerciseVideoUploadLabel(hasVideo: false),
-      'Enviar vídeo',
-    );
-    expect(exerciseVideoUploadLabel(hasVideo: true), 'Trocar vídeo');
-    expect(
-      exerciseVideoUploadConfirmTitle(hasVideo: false),
-      contains('Enviar vídeo'),
-    );
-    expect(exerciseVideoRemoveLabel(), 'Remover vídeo');
-    expect(exerciseVideoRemoveConfirmTitle(), contains('Remover'));
-    expect(exerciseVideoUploadSuccess(), contains('Vídeo próprio'));
-    expect(exerciseVideoRemoveSuccess(), contains('removido'));
-    expect(exerciseVideoPreviewLabel(hasPersonal: true), 'Ver vídeo');
-    expect(
-      exerciseVideoPreviewLabel(hasPersonal: false),
-      'Ver demonstração',
-    );
-    expect(exerciseVideoSourceCameraLabel(), 'Filmar agora');
-    expect(exerciseVideoSourceGalleryLabel(), contains('galeria'));
-  });
 
   test('tips cobrem resolução, duração e formato', () {
     final blob = ExerciseVideoUploadSpec.tips

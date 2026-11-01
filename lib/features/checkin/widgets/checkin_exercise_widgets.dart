@@ -20,6 +20,7 @@ import '../utils/checkin_execucao_display.dart';
 import '../utils/checkin_execucao_estado.dart';
 import '../utils/checkin_exercise_tips.dart';
 import 'checkin_media_widgets.dart';
+import '../../../core/widgets/fx_video_em_breve.dart';
 
 part 'checkin_serie_steppers.part.dart';
 
@@ -84,6 +85,7 @@ class CheckinSerieCard extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final brand = chrome.isDark ? BrandPalette.accent(primary) : primary;
     final hasDemo = checkinExerciseHasDemo(ee);
+    final emBreve = checkinVideoEmBreve(ee);
     final done = !checkinPodeRegistrar(ee);
 
     final topo = _topo(context, brand: brand);
@@ -151,6 +153,9 @@ class CheckinSerieCard extends StatelessWidget {
                     alignment: Alignment.centerLeft,
                     child: _botaoVerVideo(context),
                   ),
+                ] else if (emBreve) ...[
+                  const SizedBox(height: TokensStrip.s2),
+                  const FxVideoEmBreve.linha(),
                 ],
                 const SizedBox(height: TokensStrip.s3),
                 base,
@@ -167,9 +172,9 @@ class CheckinSerieCard extends StatelessWidget {
               const SizedBox(height: TokensStrip.s3),
               Expanded(
                 child:
-                    hasDemo
+                    hasDemo || emBreve
                         ? _midia(context, brand: brand, dark: chrome.isDark)
-                        : const SizedBox.shrink(),
+                        : _soDicas(context),
               ),
               if (proximoNome != null && c.maxHeight >= alturaMinimaDepois) ...[
                 const SizedBox(height: TokensStrip.s2),
@@ -186,6 +191,19 @@ class CheckinSerieCard extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  /// Sem mídia nenhuma, Dicas continua à mão.
+  Widget _soDicas(BuildContext context) {
+    if (onDicas == null) return const SizedBox.shrink();
+    return Align(
+      alignment: Alignment.topRight,
+      child: FxTonalButton(
+        label: S.of(context).checkinDicasChip,
+        compact: true,
+        onPressed: onDicas,
+      ),
     );
   }
 
@@ -238,8 +256,12 @@ class CheckinSerieCard extends StatelessWidget {
   }) {
     return LayoutBuilder(
       builder: (context, m) {
+        final emBreve = checkinVideoEmBreve(ee);
         if (m.maxHeight < alturaMinimaMidia) {
-          return Center(child: _botaoVerVideo(context));
+          return Center(
+            child:
+                emBreve ? const FxVideoEmBreve.linha() : _botaoVerVideo(context),
+          );
         }
         // Na proporção do vídeo, sem corte: fica centrado num palco que ocupa
         // todo o espaço livre, sem vão entre o vídeo e o cartão.
@@ -251,7 +273,13 @@ class CheckinSerieCard extends StatelessWidget {
                   color: brand.withValues(alpha: dark ? 0.14 : 0.06),
                   borderRadius: BorderRadius.circular(18),
                 ),
-                child: _inlineDemoPreview(ee: ee, brand: brand, dark: dark),
+                child:
+                    emBreve
+                        ? FxVideoEmBreve(
+                          apoio: S.of(context).videoEmBreveApoioAluno,
+                          semCartao: true,
+                        )
+                        : _inlineDemoPreview(ee: ee, brand: brand, dark: dark),
               ),
             ),
             if (onDicas != null)

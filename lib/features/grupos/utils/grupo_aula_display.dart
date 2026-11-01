@@ -98,21 +98,6 @@ String? grupoAulaStatusLabel({required bool inscrito, required bool lotada}) {
   return null;
 }
 
-String grupoAulaFxIcon({
-  required int inscritos,
-  required int capacidadeMax,
-}) =>
-    grupoAulaLotada(inscritos: inscritos, capacidadeMax: capacidadeMax)
-        ? 'alert-triangle'
-        : 'calendar';
-
-String grupoAulaHubSubtitle(String? freshness) {
-  const base = 'Turmas abertas e vagas';
-  final stamp = freshness?.trim();
-  if (stamp == null || stamp.isEmpty) return base;
-  return '$base · $stamp';
-}
-
 enum GrupoAulaChip { todas, abertas, lotadas }
 
 String grupoAulaCountLabel(int count) {
@@ -132,23 +117,3 @@ String? grupoAulaChipQuery(GrupoAulaChip chip) => switch (chip) {
   GrupoAulaChip.abertas => 'ABERTAS',
   GrupoAulaChip.lotadas => 'LOTADAS',
 };
-
-bool grupoAulaMatches({
-  required String titulo,
-  required String? localAula,
-  required bool lotada,
-  required String query,
-  required GrupoAulaChip chip,
-}) {
-  final matchesChip = switch (chip) {
-    GrupoAulaChip.todas => true,
-    GrupoAulaChip.abertas => !lotada,
-    GrupoAulaChip.lotadas => lotada,
-  };
-  if (!matchesChip) return false;
-  final q = query.trim().toLowerCase();
-  if (q.isEmpty) return true;
-  if (titulo.toLowerCase().contains(q)) return true;
-  final local = localAula?.toLowerCase() ?? '';
-  return local.contains(q);
-}

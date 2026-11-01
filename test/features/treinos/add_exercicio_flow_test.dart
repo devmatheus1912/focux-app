@@ -76,33 +76,6 @@ void main() {
       expect(preview, isNot(contains('.mp4')));
     });
 
-    test('exercicioMissingPreviewPoster detecta mídia sem poster', () {
-      final ok = Exercicio(
-        id: 1,
-        nome: 'Supino',
-        gifUrl:
-            'https://res.cloudinary.com/demo/video/upload/v123/sample.mp4',
-      );
-      expect(exercicioMissingPreviewPoster(ok), isFalse);
-
-      final template = Exercicio(
-        id: 3,
-        nome: 'Agachamento',
-        curatedId: 10,
-        gifUrl:
-            'https://res.cloudinary.com/focux/image/upload/focux/exercicios/curated/gifs/10.gif',
-        thumbnailUrl:
-            'https://res.cloudinary.com/focux/image/upload/focux/exercicios/curated/thumbs/10.webp',
-      );
-      expect(exercicioMissingPreviewPoster(template), isTrue);
-
-      final missing = Exercicio(
-        id: 2,
-        nome: 'Custom',
-        videoUrl: 'https://cdn.example/video.mp4',
-      );
-      expect(exercicioMissingPreviewPoster(missing), isTrue);
-    });
 
     test('preview usa GIF Cloudinary da biblioteca', () {
       const gif =

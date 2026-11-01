@@ -48,8 +48,6 @@ Aluno alunoFromAlertaResumo(AlertaResumo alerta) {
   );
 }
 
-typedef PulseMetricCopy = ({String hint, String semantics});
-
 /// Cor primária do personal (BFF) — soft branding no chrome da Home.
 /// Remapeia cyan legado (#13C2C2) → petróleo, igual tema/perfil.
 Color? dashboardParseBrandColor(String? raw) {

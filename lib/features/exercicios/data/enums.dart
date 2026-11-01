@@ -45,6 +45,8 @@ enum GrupoMuscular {
   lombar,
   trapezio,
   fullBody,
+  cardio,
+  mobilidade,
 }
 
 enum Equipamento {

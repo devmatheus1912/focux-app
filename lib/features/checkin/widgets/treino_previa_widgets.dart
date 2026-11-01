@@ -9,6 +9,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../l10n/app_localizations.dart';
 import '../models/treino_previa.dart';
 import '../utils/treino_previa_view.dart';
+import '../../../core/widgets/fx_video_em_breve.dart';
 
 class TreinoPreviaCabecalho extends StatelessWidget {
   const TreinoPreviaCabecalho({super.key, required this.texto});
@@ -55,6 +56,7 @@ class TreinoPreviaExercicioTile extends StatelessWidget {
         '$numero. ${exercicio.exercicioNome}',
         if (prescricao.isNotEmpty) prescricao,
         if (exercicio.temVideo) s.treinoPreviaComVideo,
+        if (exercicio.videoEmBreve) s.videoEmBreve,
         if (obs != null) obs,
       ].join(', '),
       excludeSemantics: true,
@@ -91,6 +93,10 @@ class TreinoPreviaExercicioTile extends StatelessWidget {
                       prescricao,
                       style: FocuxHubTypography.bodyMuted(color: chrome.mute),
                     ),
+                  ],
+                  if (exercicio.videoEmBreve) ...[
+                    const SizedBox(height: TokensStrip.s1),
+                    const FxVideoEmBreve.linha(),
                   ],
                   if (exercicio.temVideo) ...[
                     const SizedBox(height: TokensStrip.s1),

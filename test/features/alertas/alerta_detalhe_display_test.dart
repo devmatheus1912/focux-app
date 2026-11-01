@@ -121,30 +121,4 @@ void main() {
     );
   });
 
-  test('alertaMatchesQuery filtra por nome ou motivo', () {
-    expect(
-      alertaMatchesQuery(
-        alunoNome: 'Ana Silva',
-        motivos: const ['Sem treino há 10 dias'],
-        query: 'ana',
-      ),
-      isTrue,
-    );
-    expect(
-      alertaMatchesQuery(
-        alunoNome: 'Ana Silva',
-        motivos: const ['Sem treino há 10 dias'],
-        query: 'aderência',
-      ),
-      isFalse,
-    );
-    expect(
-      alertaMatchesQuery(
-        alunoNome: 'Ana Silva',
-        motivos: const ['Sem treino há 10 dias'],
-        query: 'treino',
-      ),
-      isTrue,
-    );
-  });
 }

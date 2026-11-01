@@ -55,6 +55,3 @@ bool leadPublicoHasActiveFilter({
 }) => query.trim().isNotEmpty || chip != LeadPublicoChip.todos;
 
 String leadPublicoValue(bool convertido) => convertido ? 'Virou aluno' : 'Novo';
-
-String leadPublicoFxIcon(bool convertido) =>
-    convertido ? 'circle-check' : 'users';

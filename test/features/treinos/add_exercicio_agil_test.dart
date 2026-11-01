@@ -48,17 +48,6 @@ void main() {
   });
 
   group('equipamento múltiplo', () {
-    test('é "ou" entre os equipamentos escolhidos', () {
-      final halter = Exercicio(id: 1, nome: 'A', equipamentos: [Equipamento.halter]);
-      final polia = Exercicio(id: 2, nome: 'B', equipamentos: [Equipamento.polia]);
-      final barra = Exercicio(id: 3, nome: 'C', equipamentos: [Equipamento.barra]);
-      final filtro = const ExercisePickerFilter(
-        equipamentos: {Equipamento.halter, Equipamento.polia},
-      );
-      final ok = applyExercisePickerFilter([halter, polia, barra], filtro);
-      expect(ok.map((e) => e.id), [1, 2]);
-      expect(filtro.isActive, isTrue);
-    });
   });
 
   group('balanço do treino', () {

@@ -37,8 +37,8 @@ import 'package:focux_app/core/widgets/feedback_helper.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
+import '../../../l10n/pt.dart';
 part 'perfil_aluno_editar_screen_state.part.dart';
-
 class PerfilAlunoEditarScreen extends ConsumerStatefulWidget {
   const PerfilAlunoEditarScreen({super.key, this.acao});
   final PerfilEditarAcao? acao;

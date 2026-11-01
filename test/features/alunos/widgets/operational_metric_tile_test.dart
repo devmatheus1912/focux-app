@@ -72,44 +72,4 @@ void main() {
     expect(find.text('3'), findsOneWidget);
   });
 
-  for (final scale in [1.3, 2.0]) {
-    testWidgets('OperationalMetricTile layout survives textScaler $scale', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        _wrap(
-          Row(
-            children: [
-              Expanded(
-                child: OperationalMetricTile(
-                  label: 'Aderência',
-                  value: '74%',
-                  hint: 'Semana atual',
-                  color: EagleTokens.good,
-                  isDark: false,
-                  semanticsLabel: 'Aderência 74 por cento',
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: OperationalMetricTile(
-                  label: 'Risco',
-                  value: 'Alto',
-                  hint: 'Em risco',
-                  color: EagleTokens.warn,
-                  isDark: false,
-                  leadingIcon: riscoMetricIcon('ALTO'),
-                  semanticsLabel: 'Risco Alto',
-                ),
-              ),
-            ],
-          ),
-          textScaleFactor: scale,
-        ),
-      );
-
-      expect(tester.takeException(), isNull);
-      expect(find.byType(OperationalMetricTile), findsNWidgets(2));
-    });
-  }
 }

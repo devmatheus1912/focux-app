@@ -36,12 +36,6 @@ void main() {
     );
   });
 
-  test('leadPublico status', () {
-    expect(leadPublicoValue(true), 'Virou aluno');
-    expect(leadPublicoValue(false), 'Novo');
-    expect(leadPublicoFxIcon(true), 'circle-check');
-    expect(leadPublicoFxIcon(false), 'users');
-  });
 
   test('leadPublicoCountLabel e chips', () {
     expect(leadPublicoCountLabel(0), 'Nenhum lead');

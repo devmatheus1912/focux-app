@@ -38,6 +38,7 @@ import '../utils/relatorio_pdf_export.dart';
 import '../widgets/relatorio_aluno_help_sheet.dart';
 import '../../../l10n/pt.dart';
 import '../../../core/pdf/focux_pdf_brand_loader.dart';
+import '../../alunos/providers/aluno_detail_providers.dart';
 
 part 'relatorio_screen_metrics.part.dart';
 
@@ -194,10 +195,20 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
     }
   }
 
+  /// Sem base justa ainda: a taxa não vira "Baixa".
+  bool get _alunoComecando =>
+      ref
+          .read(aluno360OperacaoBundleProvider(widget.alunoId))
+          .value
+          ?.aluno
+          .aderenciaEstado ==
+      'COMECANDO';
+
   Future<void> _abrirMaisAcoes() async {
     final baixa =
         _dados != null &&
         _dados!.treinosTotal > 0 &&
+        !_alunoComecando &&
         relatorioAlunoAderenciaBaixa(_dados!.taxaAderenciaPercent);
     final chosen = await showFxInsetPickerSheet<String>(
       context,

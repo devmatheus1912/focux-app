@@ -44,6 +44,9 @@ import '../utils/progressao_aceitar_route_args.dart';
 import '../utils/progressao_pdf_builder.dart';
 import '../widgets/progressao_revisao_linha.dart';
 import '../utils/progressao_copy.dart';
+import '../../../core/widgets/fx_action_link.dart';
+import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_strip_card.dart';
 
 class ProgressaoAceitarScreen extends ConsumerStatefulWidget {
   const ProgressaoAceitarScreen({super.key});
@@ -335,10 +338,24 @@ class _ProgressaoAceitarScreenState
       child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
-          title: 'Sugestões pendentes',
+          title: ptS.cargasRevisarTitulo,
           subtitle: args.alunoNome,
           onBack: () => safePopOrGo(context, args.returnTo ?? '/ia/copiloto'),
           actions: [
+            FxHelpIconButton(
+              tooltip: ptS.cargasComoRevisar,
+              onTap:
+                  () => showFxHelpSheet(
+                    context,
+                    title: ptS.cargasRevisarTitulo,
+                    subtitle: args.alunoNome ?? ptS.cargasComoRevisar,
+                    tips: [
+                      FxHelpTip(ptS.cargasComoRevisar, ptS.cargasAjudaDiferenca, icon: 'trend'),
+                      FxHelpTip(ptS.cargasSoOAplicado, ptS.cargasAjudaSelecao, icon: 'circle-check'),
+                      FxHelpTip(ptS.cargasMais, ptS.cargasAjudaEditar, icon: 'spark'),
+                    ],
+                  ),
+            ),
             if (bruta.isNotEmpty)
               IconButton(
                 tooltip: ptS.cargasMais,
@@ -386,16 +403,40 @@ class _ProgressaoAceitarScreenState
                           _SuccessBanner(message: _successBanner!),
                           const SizedBox(height: TokensStrip.s3),
                         ],
-                        if (ativas.isNotEmpty)
-                          Text(
-                            ptS.cargasSelecionadas(n, ativas.length),
-                            style: FocuxHubTypography.bodyMuted(
-                              color: chrome.mute,
-                            ),
-                          ),
-                        if (comMudanca.isNotEmpty) ...[
+                        if (ativas.isNotEmpty) ...[
+                          _ResumoDaRevisao(sugestoes: ativas),
                           const SizedBox(height: TokensStrip.s3),
-                          DashboardSectionHeader(title: ptS.cargasGrupoMudanca),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  ptS.cargasSelecionadasN(n),
+                                  style: FocuxHubTypography.bodyMuted(
+                                    color: chrome.mute,
+                                  ),
+                                ),
+                              ),
+                              FxActionLink(
+                                label:
+                                    n == ativas.length
+                                        ? ptS.cargasDesmarcarTodas
+                                        : ptS.cargasMarcarTodas,
+                                onTap:
+                                    () => setState(() {
+                                      final marcar = n != ativas.length;
+                                      _alternadas
+                                        ..clear()
+                                        ..addAll([
+                                          for (final s in ativas)
+                                            if (progressaoMudaCarga(s) != marcar)
+                                              s.id,
+                                        ]);
+                                    }),
+                              ),
+                            ],
+                          ),
+                        ],
+                        if (comMudanca.isNotEmpty) ...[
                           const SizedBox(height: TokensStrip.s2),
                           _grupo(args, comMudanca),
                         ],
@@ -431,7 +472,10 @@ class _ProgressaoAceitarScreenState
                           for (final s in fora) _linhaFora(args, s),
                         ],
                         const SizedBox(height: TokensStrip.s3),
-                        const IaSafetyDisclaimer(compact: true),
+                        IaSafetyDisclaimer(
+                          compact: true,
+                          customText: ptS.cargasSoOAplicado,
+                        ),
                       ],
                     ),
                   ),
@@ -644,6 +688,45 @@ class _ProgressaoAceitarScreenState
   }
 }
 
+/// O que a revisão tem pela frente, em uma olhada.
+class _ResumoDaRevisao extends StatelessWidget {
+  const _ResumoDaRevisao({required this.sugestoes});
+
+  final List<ProgressaoSugestao> sugestoes;
+
+  @override
+  Widget build(BuildContext context) {
+    final sobre = fxPaletaSobreMarca(context);
+    final sobe = sugestoes.where((s) => (s.deltaKg ?? 0) > 0).length;
+    final desce = sugestoes.where((s) => (s.deltaKg ?? 0) < 0).length;
+    final mantem = sugestoes.length - sobe - desce;
+    return FxStripCard(
+      marca: true,
+      padding: const EdgeInsets.all(TokensStrip.s3),
+      child: SizedBox(
+        width: double.infinity,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              ptS.cargasParaRevisar(sugestoes.length),
+              style: FocuxHubTypography.cardTitle(color: sobre.ink),
+            ),
+            Text(
+              [
+                if (sobe > 0) ptS.cargasResumoSobe(sobe),
+                if (desce > 0) ptS.cargasResumoDesce(desce),
+                if (mantem > 0) ptS.cargasResumoMantem(mantem),
+              ].join(' · '),
+              style: FocuxHubTypography.bodyMuted(color: sobre.mute),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _ForaDoTreinoPanel extends StatelessWidget {
   const _ForaDoTreinoPanel({
     required this.count,
@@ -691,28 +774,19 @@ class _ForaDoTreinoPanel extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: OutlinedButton.icon(
+                child: FxTonalButton(
+                  label: progressaoDescartarTodas,
+                  danger: true,
+                  expanded: true,
                   onPressed: busy ? null : onDiscard,
-                  icon: const Icon(Icons.delete_sweep_rounded, size: 18),
-                  label: const Text(progressaoDescartarTodas),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: EagleTokens.bad,
-                    side: BorderSide(
-                      color: EagleTokens.bad.withValues(alpha: 0.55),
-                    ),
-                    minimumSize: const Size(48, 48),
-                  ),
                 ),
               ),
               const SizedBox(width: TokensStrip.s3),
               Expanded(
-                child: OutlinedButton.icon(
+                child: FxTonalButton(
+                  label: progressaoTentarDeNovo,
+                  expanded: true,
                   onPressed: busy ? null : onRetry,
-                  icon: const Icon(Icons.refresh_rounded, size: 18),
-                  label: const Text(progressaoTentarDeNovo),
-                  style: OutlinedButton.styleFrom(
-                    minimumSize: const Size(48, 48),
-                  ),
                 ),
               ),
             ],

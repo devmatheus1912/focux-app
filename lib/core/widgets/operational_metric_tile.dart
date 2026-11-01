@@ -158,13 +158,3 @@ class OperationalMetricTile extends StatelessWidget {
     );
   }
 }
-
-IconData riscoMetricIcon(String? raw) {
-  final value = (raw ?? '').trim().toUpperCase();
-  return switch (value) {
-    'ALTO' || 'HIGH' => Icons.warning_amber_rounded,
-    'MEDIO' || 'MÉDIO' || 'MEDIUM' => Icons.error_outline_rounded,
-    'BAIXO' || 'LOW' => Icons.check_circle_outline_rounded,
-    _ => Icons.help_outline_rounded,
-  };
-}

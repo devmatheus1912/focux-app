@@ -22,6 +22,10 @@ class Aluno {
   final String? dataNascimento;
   final Set<Equipamento> equipamentosDisponiveis;
   final int? aderenciaPercent;
+
+  /// MEDIDA, COMECANDO ou SEM_FICHA. Nulo em backend antigo.
+  final String? aderenciaEstado;
+  final int? treinosJanela;
   final int? diasSemTreino;
   final String? riscoNivel;
   final String? proximoContato;
@@ -52,6 +56,8 @@ class Aluno {
     this.dataNascimento,
     this.equipamentosDisponiveis = const {},
     this.aderenciaPercent,
+    this.aderenciaEstado,
+    this.treinosJanela,
     this.diasSemTreino,
     this.riscoNivel,
     this.proximoContato,
@@ -113,6 +119,8 @@ class Aluno {
     altura: json['altura']?.toDouble(),
     dataNascimento: json['dataNascimento'] as String?,
     aderenciaPercent: (json['aderenciaPercent'] as num?)?.toInt(),
+    aderenciaEstado: json['aderenciaEstado'] as String?,
+    treinosJanela: (json['treinosJanela'] as num?)?.toInt(),
     diasSemTreino: (json['diasSemTreino'] as num?)?.toInt(),
     riscoNivel: json['riscoNivel'] as String?,
     proximoContato: json['proximoContato'] as String?,

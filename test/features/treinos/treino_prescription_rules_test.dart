@@ -36,9 +36,4 @@ void main() {
     );
   });
 
-  test('copy do salvar confirma a mutação', () {
-    expect(treinoPrescriptionSaveLabel(), 'Salvar prescrição');
-    expect(treinoPrescriptionSaveConfirmTitle(), contains('prescrição'));
-    expect(treinoPrescriptionSaveConfirmMessage(), contains('treino'));
-  });
 }

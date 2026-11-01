@@ -1,5 +1,6 @@
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/utils/pt_br_display.dart';
+import '../../../l10n/pt.dart';
 import '../data/evolucao_repository.dart';
 
 enum EvolucaoHubView { medidas, recordes, fotos, comparativo }
@@ -13,40 +14,6 @@ const evolucaoDetalheSecoes = [
 
 EvolucaoHubView evolucaoHubViewFromSecao(String value) =>
     EvolucaoHubView.values.asNameMap()[value] ?? EvolucaoHubView.medidas;
-
-List<MedidaCorporal> evolucaoMedidasComConteudo(List<MedidaCorporal> medidas) {
-  final ordenada = [...medidas.where(evolucaoMedidaTemConteudo)]
-    ..sort((a, b) => b.data.compareTo(a.data));
-  return ordenada;
-}
-
-String evolucaoUltimaMedidaHint(List<MedidaCorporal> medidas) {
-  if (medidas.isEmpty) return 'Nenhuma medida ainda';
-  final ordenada = [...medidas]..sort((a, b) => a.data.compareTo(b.data));
-  try {
-    return 'Última em ${fxDateShort(DateTime.parse(ordenada.last.data))}';
-  } catch (_) {
-    return 'Última em ${ordenada.last.data}';
-  }
-}
-
-String evolucaoPesoAtual(List<MedidaCorporal> medidas) {
-  final comPeso = [...medidas.where((m) => m.peso != null)]
-    ..sort((a, b) => a.data.compareTo(b.data));
-  if (comPeso.isEmpty) return '—';
-  return formatBrKg(comPeso.last.peso!);
-}
-
-String evolucaoVariacaoPeso(List<MedidaCorporal> medidas) {
-  final comPeso = medidas.where((m) => m.peso != null).toList();
-  if (comPeso.length < 2) return '';
-  comPeso.sort((a, b) => a.data.compareTo(b.data));
-  final primeiro = comPeso.first.peso!;
-  final ultimo = comPeso.last.peso!;
-  final diff = ultimo - primeiro;
-  final sinal = diff >= 0 ? '+' : '';
-  return '$sinal${formatBrKg(diff)} desde o início';
-}
 
 String evolucaoMedidaLabel(MedidaCorporal medida) {
   try {
@@ -69,7 +36,7 @@ String evolucaoMedidaSubtitle(MedidaCorporal medida) {
     parts.add(formatBrKg(medida.peso!));
   }
   if (medida.cintura != null) {
-    parts.add('Abdômen ${formatBrCm(medida.cintura!)}');
+    parts.add('Cintura ${formatBrCm(medida.cintura!)}');
   }
   if (medida.quadril != null) {
     parts.add('Quadril ${formatBrCm(medida.quadril!)}');
@@ -98,29 +65,15 @@ String evolucaoRecordeSubtitle(RecordePessoal recorde) {
   return parts.join(' · ');
 }
 
-String evolucaoRecordeValue(RecordePessoal recorde) {
-  if (recorde.cargaKg != null) {
-    return formatBrKg(recorde.cargaKg!);
-  }
-  if (recorde.repeticoes != null) return '${recorde.repeticoes} reps';
-  return '';
-}
+String? evolucaoAutorLabel(String? autor) => switch (autor) {
+  'ALUNO' => ptS.evolucaoAutorAluno,
+  'PERSONAL' => ptS.evolucaoAutorPersonal,
+  _ => null,
+};
 
-List<double> evolucaoPesosOrdenados(List<MedidaCorporal> medidas) {
-  final pesos = [...medidas]..sort((a, b) => a.data.compareTo(b.data));
-  return pesos.where((m) => m.peso != null).map((m) => m.peso!).toList();
-}
+const _meses = [
+  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho',
+  'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro',
+];
 
-/// Maior carga de cada exercício, a maior em cima.
-List<RecordePessoal> evolucaoMelhoresRecordes(List<RecordePessoal> lista) {
-  final melhor = <String, RecordePessoal>{};
-  for (final r in lista) {
-    final chave = r.exercicioNome.trim().toLowerCase();
-    final atual = melhor[chave];
-    if (atual == null || (r.cargaKg ?? 0) > (atual.cargaKg ?? 0)) {
-      melhor[chave] = r;
-    }
-  }
-  return melhor.values.toList()
-    ..sort((a, b) => (b.cargaKg ?? 0).compareTo(a.cargaKg ?? 0));
-}
+String evolucaoMesAno(DateTime d) => '${_meses[d.month - 1]} de ${d.year}';

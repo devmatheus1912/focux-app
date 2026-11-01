@@ -27,6 +27,7 @@ import '../../features/subscription/models/subscription_plan.dart';
 import '../widgets/feature_gate.dart';
 import '../widgets/fx_route_chrome.dart';
 import 'fx_lazy_shell_container.dart';
+import '../../features/dashboard/screens/meu_progresso_screen.dart';
 
 /// Aluno shell and push routes.
 List<RouteBase> buildAlunoRoutes({
@@ -170,6 +171,13 @@ List<RouteBase> buildAlunoRoutes({
                     child: AlunoFeedbackVideoScreen(),
                   ),
                 ),
+      ),
+      GoRoute(
+        path: '/aluno/progresso',
+        parentNavigatorKey: rootNavigatorKey,
+        builder:
+            (context, state) =>
+                const FxRouteChrome(child: MeuProgressoScreen()),
       ),
       GoRoute(
         path: '/aluno/perfil/editar',

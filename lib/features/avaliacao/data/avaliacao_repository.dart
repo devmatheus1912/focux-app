@@ -99,7 +99,7 @@ class SnapshotAvaliacao {
         massaMuscular: (j['massaMuscular'] as num?)?.toDouble(),
         circCintura: (j['circCintura'] ?? j['cinturaCm'] as num?)?.toDouble(),
         circQuadril: (j['circQuadril'] ?? j['quadrilCm'] as num?)?.toDouble(),
-        circBraco: (j['circBraco'] as num?)?.toDouble(),
+        circBraco: (j['circBraco'] ?? j['bracoCm'] as num?)?.toDouble(),
         circCoxa: (j['circCoxa'] as num?)?.toDouble(),
         avaliadoEm: j['avaliadoEm'] as String?,
       );

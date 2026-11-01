@@ -136,8 +136,9 @@ abstract final class Aluno360FerramentasLogic {
     required Aluno aluno,
     List<Map<String, dynamic>>? aderenciaSemanal,
   }) {
-    final percent = aluno.aderenciaPercent ?? 0;
-    if (percent > 0) return false;
+    if (aluno.aderenciaEstado == 'COMECANDO') return false;
+    final percent = aluno.aderenciaPercent;
+    if (percent != null && percent > 0) return false;
     final summary = summarizeAderenciaWeek(
       parseAderenciaSemanal(aderenciaSemanal),
     );

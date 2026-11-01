@@ -241,6 +241,7 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
                                 label: 'Vídeo',
                                 value: exercicioVideoMetric(
                                   hasVideo: ex.videoUrl?.isNotEmpty == true,
+                                  emBreve: ex.videoEmBreve,
                                 ),
                                 hint: 'Demo do exercício',
                                 color: primary,
@@ -295,7 +296,12 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
                                     ),
                                 onRemove: () => _removeOwnVideo(context),
                               ),
-                              if (ex.videoUrl?.isNotEmpty == true) ...[
+                              if (ex.videoEmBreve) ...[
+                                const SizedBox(height: 12),
+                                FxVideoEmBreve(
+                                  apoio: ptS.videoEmBreveApoioPersonal,
+                                ),
+                              ] else if (ex.videoUrl?.isNotEmpty == true) ...[
                                 const SizedBox(height: 12),
                                 _VideoPlayer(url: ex.videoUrl!),
                               ] else if (exercicioHasPublishedLibraryMedia(

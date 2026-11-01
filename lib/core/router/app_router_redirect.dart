@@ -102,6 +102,7 @@ bool isAlunoOnlyLocation(String path) {
     '/aluno/ativacao',
     '/aluno/perfil',
     '/aluno/perfil/editar',
+    '/aluno/progresso',
     '/aluno/definir-senha',
     '/aluno/anamnese',
     '/aluno/ferramentas',

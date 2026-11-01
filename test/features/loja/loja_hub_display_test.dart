@@ -19,25 +19,6 @@ void main() {
     );
   });
 
-  test('busca de vitrine e pedidos', () {
-    expect(
-      lojaPacoteMatches(titulo: 'Anual', descricao: '12 meses', query: 'anual'),
-      isTrue,
-    );
-    expect(
-      lojaPacoteMatches(titulo: 'Anual', descricao: '12 meses', query: 'pix'),
-      isFalse,
-    );
-    expect(
-      lojaPedidoMatches(
-        buyerNome: 'Ana',
-        buyerEmail: 'ana@ex.com',
-        status: 'PENDENTE',
-        query: 'pendente',
-      ),
-      isTrue,
-    );
-  });
 
   test('lojaPacoteSubtitle prefere descricao', () {
     expect(

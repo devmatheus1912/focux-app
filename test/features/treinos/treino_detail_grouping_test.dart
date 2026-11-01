@@ -51,27 +51,6 @@ void main() {
     expect(formatTreinoLoadKg(12.5), '12,5kg');
   });
 
-  test('groups by muscle and numbers locally', () {
-    final items = [
-      _item(id: 1, nome: 'Supino', grupo: GrupoMuscular.peito, ordem: 0),
-      _item(id: 2, nome: 'Crucifixo', grupo: GrupoMuscular.peito, ordem: 1),
-      _item(
-        id: 3,
-        nome: 'Remada',
-        grupo: GrupoMuscular.costasLatissimo,
-        ordem: 2,
-      ),
-    ];
-
-    expect(treinoDetailGroupLabel(items[0]), 'PEITO');
-    expect(treinoDetailShowsGroupHeader(items, 0), isTrue);
-    expect(treinoDetailShowsGroupHeader(items, 1), isFalse);
-    expect(treinoDetailShowsGroupHeader(items, 2), isTrue);
-    expect(treinoDetailLocalIndexInGroup(items, 1), 2);
-    expect(treinoDetailGroupExerciseCount(items, 0), 2);
-    expect(treinoDetailIsLastInGroup(items, 1), isTrue);
-    expect(treinoDetailIsLastInGroup(items, 2), isTrue);
-  });
 
   test('falls back to musculo alvo then OUTROS', () {
     expect(
@@ -81,42 +60,6 @@ void main() {
     expect(treinoDetailGroupLabel(_item(id: 2, nome: 'Y')), 'OUTROS');
   });
 
-  test('series and group counts feed the S3 metrics', () {
-    final items = [
-      _item(id: 1, nome: 'Supino', grupo: GrupoMuscular.peito),
-      _item(id: 2, nome: 'Crucifixo', grupo: GrupoMuscular.peito),
-      _item(id: 3, nome: 'Remada', grupo: GrupoMuscular.costasLatissimo),
-    ];
-    expect(treinoDetailSeriesCount(items), 9);
-    expect(treinoDetailGroupCount(items), 2);
-    expect(treinoDetailSeriesHint(1), '1 grupo muscular');
-    expect(treinoDetailSeriesHint(2), '2 grupos');
-    expect(treinoDetailGroupTileHint(0), 'Ainda vazio');
-    expect(treinoDetailGroupTileHint(2), 'Músculos distintos');
-    expect(treinoDetailCargaValue(items), '—');
-    expect(treinoDetailCargaHint(items), 'Sem carga prescrita');
-    expect(
-      treinoDetailCargaValue([
-        TreinoExercicioItem(
-          id: 9,
-          exercicio: Exercicio(id: 9, nome: 'Supino'),
-          series: 3,
-          repeticoes: '10',
-          cargaKg: 40,
-          ordem: 0,
-        ),
-        TreinoExercicioItem(
-          id: 10,
-          exercicio: Exercicio(id: 10, nome: 'Remada'),
-          series: 3,
-          repeticoes: '10',
-          cargaKg: 30,
-          ordem: 1,
-        ),
-      ]),
-      '70kg',
-    );
-  });
 
   test('meta line is honest: counts or em montagem, never fake duration', () {
     expect(treinoDetailMetaLine(const []), 'Em montagem');

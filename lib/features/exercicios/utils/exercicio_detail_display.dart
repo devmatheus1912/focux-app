@@ -1,5 +1,9 @@
-String exercicioVideoMetric({required bool hasVideo}) =>
-    hasVideo ? 'Com vídeo' : 'Sem vídeo';
+String exercicioVideoMetric({required bool hasVideo, bool emBreve = false}) =>
+    hasVideo
+        ? 'Com vídeo'
+        : emBreve
+        ? 'Em breve'
+        : 'Sem vídeo';
 
 String exercicioDificuldadeHint(String? dificuldade) {
   final value = dificuldade?.trim();

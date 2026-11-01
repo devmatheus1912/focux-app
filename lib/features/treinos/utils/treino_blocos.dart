@@ -5,17 +5,6 @@ import 'treino_detail_grouping.dart';
 /// quando já existe exercício salvo nele (a opção de criar saiu da interface).
 const blocosDoTreino = ['AQUECIMENTO', 'TRABALHO', 'ALONGAMENTO', 'AJUSTE'];
 
-/// Blocos que têm exercício, na ordem de [blocosDoTreino], cada um com seus itens.
-List<(String, List<TreinoExercicioItem>)> blocosComExercicio(
-  List<TreinoExercicioItem> exercicios,
-) {
-  return [
-    for (final bloco in blocosDoTreino)
-      if (exercicios.any((e) => e.bloco == bloco))
-        (bloco, exercicios.where((e) => e.bloco == bloco).toList()),
-  ];
-}
-
 /// Seções que sempre aparecem na tela, mesmo vazias, para "+ Adicionar" ficar
 /// ao alcance. O legado AJUSTE só aparece quando já tem exercício.
 const blocosFixos = ['AQUECIMENTO', 'TRABALHO', 'ALONGAMENTO'];

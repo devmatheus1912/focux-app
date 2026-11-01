@@ -7,6 +7,9 @@ class MedidaCorporal {
   final String data;
   final double? peso, cintura, quadril, braco;
   final String? fotoUrl;
+
+  /// ALUNO ou PERSONAL. Nulo em medida antiga.
+  final String? registradoPor;
   MedidaCorporal({
     required this.id,
     required this.data,
@@ -15,6 +18,7 @@ class MedidaCorporal {
     this.quadril,
     this.braco,
     this.fotoUrl,
+    this.registradoPor,
   });
   factory MedidaCorporal.fromJson(Map<String, dynamic> j) => MedidaCorporal(
     id: (j['id'] as num?)?.toInt() ?? 0,
@@ -24,6 +28,7 @@ class MedidaCorporal {
     quadril: (j['quadril'] as num?)?.toDouble(),
     braco: (j['braco'] as num?)?.toDouble(),
     fotoUrl: j['fotoUrl'] as String?,
+    registradoPor: j['registradoPor'] as String?,
   );
 }
 
@@ -106,6 +111,7 @@ class AderenciaResumo {
     this.previstos = 0,
     this.comecando = false,
     this.diasDescanso = const [],
+    this.diaDaFicha = 0,
   });
 
   final int? percent;
@@ -116,6 +122,9 @@ class AderenciaResumo {
   /// 1 (segunda) a 7 (domingo).
   final List<int> diasDescanso;
 
+  /// Dias desde o início da ficha, contando hoje.
+  final int diaDaFicha;
+
   factory AderenciaResumo.fromJson(Map<String, dynamic> j) => AderenciaResumo(
     percent: (j['percent'] as num?)?.toInt(),
     feitos: (j['feitos'] as num?)?.toInt() ?? 0,
@@ -125,6 +134,7 @@ class AderenciaResumo {
         ((j['diasDescanso'] as List?) ?? const [])
             .map((e) => (e as num).toInt())
             .toList(),
+    diaDaFicha: (j['diaDaFicha'] as num?)?.toInt() ?? 0,
   );
 }
 
@@ -165,6 +175,84 @@ class EvolucaoRepository {
   Future<EvolucaoHomeBundle> getHome(int alunoId) async {
     final r = await _dio.get('/api/alunos/$alunoId/evolucao/home');
     return EvolucaoHomeBundle.fromJson(r.data as Map<String, dynamic>);
+  }
+
+  /// Evolução do próprio aluno: medidas e recordes.
+  Future<EvolucaoHomeBundle> minhaEvolucao() async {
+    final r = await _dio.get('/api/aluno/evolucao');
+    return EvolucaoHomeBundle.fromJson(r.data as Map<String, dynamic>);
+  }
+
+  Map<String, dynamic> _corpoDaMedida(
+    MedidaCorporal medida, {
+    double? peso,
+    double? cintura,
+    double? quadril,
+    double? braco,
+  }) => {
+    'data': medida.data,
+    'peso': peso,
+    'cintura': cintura,
+    'quadril': quadril,
+    'braco': braco,
+  };
+
+  Future<void> editarMedida(
+    int alunoId,
+    MedidaCorporal medida, {
+    double? peso,
+    double? cintura,
+    double? quadril,
+    double? braco,
+  }) => _dio.put(
+    '/api/alunos/$alunoId/medidas/${medida.id}',
+    data: _corpoDaMedida(
+      medida,
+      peso: peso,
+      cintura: cintura,
+      quadril: quadril,
+      braco: braco,
+    ),
+  );
+
+  Future<void> editarMinhaMedida(
+    MedidaCorporal medida, {
+    double? peso,
+    double? cintura,
+    double? quadril,
+    double? braco,
+  }) => _dio.put(
+    '/api/aluno/medidas/${medida.id}',
+    data: _corpoDaMedida(
+      medida,
+      peso: peso,
+      cintura: cintura,
+      quadril: quadril,
+      braco: braco,
+    ),
+  );
+
+  Future<void> excluirMedida(int alunoId, int medidaId) =>
+      _dio.delete('/api/alunos/$alunoId/medidas/$medidaId');
+
+  Future<void> excluirMinhaMedida(int medidaId) =>
+      _dio.delete('/api/aluno/medidas/$medidaId');
+
+  Future<void> excluirFoto(int alunoId, int fotoId) =>
+      _dio.delete('/api/alunos/$alunoId/fotos/$fotoId');
+
+  Future<void> excluirMinhaFoto(int fotoId) =>
+      _dio.delete('/api/aluno/fotos/$fotoId');
+
+  Future<Pagina<FotoEvolucao>> minhasFotos({int page = 0}) async {
+    final r = await _dio.get(
+      '/api/aluno/fotos',
+      queryParameters: {'page': page, 'size': 30},
+    );
+    return Pagina.fromJson(
+      Map<String, dynamic>.from(r.data as Map),
+      (item) => FotoEvolucao.fromJson(Map<String, dynamic>.from(item as Map)),
+    );
   }
 
   Future<MedidaCorporal> adicionarMinhaMedida({
@@ -319,16 +407,19 @@ class FotoEvolucao {
   final int id;
   final String url;
   final String data;
+  final String? registradoPor;
 
   const FotoEvolucao({
     required this.id,
     required this.url,
     required this.data,
+    this.registradoPor,
   });
 
   factory FotoEvolucao.fromJson(Map<String, dynamic> j) => FotoEvolucao(
     id: (j['id'] as num?)?.toInt() ?? 0,
     url: j['url'] as String? ?? j['fotoUrl'] as String? ?? '',
     data: j['data'] as String? ?? j['createdAt'] as String? ?? '',
+    registradoPor: j['registradoPor'] as String?,
   );
 }

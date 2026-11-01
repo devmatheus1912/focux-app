@@ -11,20 +11,6 @@ String pacoteChipLabel(PacoteChip chip) => switch (chip) {
   PacoteChip.destaque => 'Destaque',
 };
 
-bool pacoteMatches({
-  required String titulo,
-  required String? descricao,
-  required bool destaque,
-  required String query,
-  required PacoteChip chip,
-}) {
-  if (chip == PacoteChip.destaque && !destaque) return false;
-  final q = query.trim().toLowerCase();
-  if (q.isEmpty) return true;
-  if (titulo.toLowerCase().contains(q)) return true;
-  return (descricao ?? '').toLowerCase().contains(q);
-}
-
 const pacoteDuracaoMesesValues = [1, 3, 6, 12];
 const pacoteTituloMax = 120;
 const pacoteDescricaoMax = 4000;

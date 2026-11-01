@@ -136,10 +136,6 @@ bool _treinoFeito(EventoEngajamento e) =>
     engajamentoEhTreino(e) &&
     engajamentoTreinoEstado(e) == EngajamentoTreinoEstado.feito;
 
-/// Parcial, cancelado e em andamento ficam fora, como na aderência.
-int engajamentoTreinosCount(Iterable<EventoEngajamento> eventos) =>
-    eventos.where(_treinoFeito).length;
-
 DateTime? _quando(EventoEngajamento e) =>
     DateTime.tryParse(e.dataHora)?.toLocal();
 
@@ -159,7 +155,7 @@ String engajamentoFrase(List<EventoEngajamento> eventos, {DateTime? now}) {
       eventos.where(_treinoFeito).map(_quando).nonNulls.toList()..sort();
   if (feitos.isEmpty) return ptS.engajamentoNenhumTreinoFeitoNestePeriodo;
   final corte = _dia(ref).subtract(const Duration(days: 6));
-  final semana = feitos.where((d) => !d.isBefore(corte)).length;
+  final semana = feitos.where((d) => !d.isBefore(corte)).map(_dia).toSet().length;
   final vezes = switch (semana) {
     0 => ptS.engajamentoNaoTreinouNosUltimos7,
     1 => ptS.engajamentoTreinou1VezNosUltimos,
@@ -179,6 +175,8 @@ int engajamentoTreinosSemana(
       .map(_quando)
       .nonNulls
       .where((d) => !d.isBefore(corte))
+      .map(_dia)
+      .toSet()
       .length;
 }
 
@@ -190,15 +188,17 @@ int engajamentoTreinosSemana(
   final hoje = _dia(now ?? DateTime.now());
   final corte = hoje.subtract(const Duration(days: 6));
   final anterior = hoje.subtract(const Duration(days: 13));
-  var atuais = 0;
-  var antes = 0;
+  final atuaisDias = <DateTime>{};
+  final antesDias = <DateTime>{};
   for (final quando in eventos.where(_treinoFeito).map(_quando).nonNulls) {
     if (!quando.isBefore(corte)) {
-      atuais++;
+      atuaisDias.add(_dia(quando));
     } else if (!quando.isBefore(anterior)) {
-      antes++;
+      antesDias.add(_dia(quando));
     }
   }
+  final atuais = atuaisDias.length;
+  final antes = antesDias.length;
   if (atuais == 0 && antes == 0) return null;
   final d = atuais - antes;
   if (d == 0) return (diferenca: 0, texto: ptS.engajamentoTendenciaIgual);
@@ -239,6 +239,125 @@ List<({DateTime dia, EngajamentoTreinoEstado? estado})> engajamentoCalendario(
       ),
   ];
 }
+
+enum EngajamentoDiaEstado {
+  treinou,
+  parcial,
+  cancelou,
+  faltou,
+  descanso,
+  semRegistro,
+  futuro,
+}
+
+class EngajamentoDia {
+  const EngajamentoDia({
+    required this.dia,
+    required this.estado,
+    required this.hoje,
+  });
+
+  final DateTime dia;
+  final EngajamentoDiaEstado estado;
+  final bool hoje;
+}
+
+class EngajamentoSemana {
+  const EngajamentoSemana({required this.inicio, required this.dias});
+
+  final DateTime inicio;
+  final List<EngajamentoDia> dias;
+}
+
+/// Semanas de segunda a domingo, a de hoje por último. Sem [diasDescanso] o app
+/// não sabe o que era previsto: dia sem treino fica "sem registro", nunca falta.
+List<EngajamentoSemana> engajamentoSemanas(
+  Iterable<EventoEngajamento> eventos, {
+  required List<int> diasDescanso,
+  DateTime? now,
+  int semanas = 5,
+}) {
+  final hoje = _dia(now ?? DateTime.now());
+  final segunda = DateTime(hoje.year, hoje.month, hoje.day - hoje.weekday + 1);
+  final porDia = {
+    for (final d in engajamentoCalendario(eventos, now: hoje, dias: semanas * 7))
+      d.dia: d.estado,
+  };
+  EngajamentoDiaEstado estado(DateTime dia) {
+    if (dia.isAfter(hoje)) return EngajamentoDiaEstado.futuro;
+    switch (porDia[dia]) {
+      case EngajamentoTreinoEstado.feito:
+        return EngajamentoDiaEstado.treinou;
+      case EngajamentoTreinoEstado.parcial:
+        return EngajamentoDiaEstado.parcial;
+      case EngajamentoTreinoEstado.cancelado:
+        return EngajamentoDiaEstado.cancelou;
+      default:
+    }
+    if (diasDescanso.contains(dia.weekday)) return EngajamentoDiaEstado.descanso;
+    if (diasDescanso.isEmpty) return EngajamentoDiaEstado.semRegistro;
+    // Hoje ainda pode treinar.
+    return dia == hoje
+        ? EngajamentoDiaEstado.semRegistro
+        : EngajamentoDiaEstado.faltou;
+  }
+
+  return [
+    for (var s = semanas - 1; s >= 0; s--)
+      EngajamentoSemana(
+        inicio: DateTime(segunda.year, segunda.month, segunda.day - s * 7),
+        dias: [
+          for (var d = 0; d < 7; d++)
+            () {
+              final dia = DateTime(
+                segunda.year,
+                segunda.month,
+                segunda.day - s * 7 + d,
+              );
+              return EngajamentoDia(
+                dia: dia,
+                estado: estado(dia),
+                hoje: dia == hoje,
+              );
+            }(),
+        ],
+      ),
+  ];
+}
+
+/// Dias de treino feitos e dias esperados no quadro, sem contar o futuro.
+({int feitos, int previstos}) engajamentoContagemQuadro(
+  List<EngajamentoSemana> semanas,
+) {
+  var feitos = 0;
+  var faltas = 0;
+  for (final dia in semanas.expand((s) => s.dias)) {
+    if (dia.estado == EngajamentoDiaEstado.treinou) feitos++;
+    if (dia.estado == EngajamentoDiaEstado.faltou) faltas++;
+  }
+  return (feitos: feitos, previstos: feitos + faltas);
+}
+
+/// "2" dias com treino na semana de hoje.
+int engajamentoDiasNaSemana(EngajamentoSemana semana) =>
+    semana.dias.where((d) => d.estado == EngajamentoDiaEstado.treinou).length;
+
+String engajamentoDataCurta(DateTime d) =>
+    '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}';
+
+String engajamentoDiaCompleto(DateTime d) {
+  const dias = [
+    'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo',
+  ];
+  return '${dias[d.weekday - 1]}, ${engajamentoDataCurta(d)}';
+}
+
+String engajamentoUltimoTreino(int? diasSemTreino) => switch (diasSemTreino) {
+  null => '—',
+  0 => ptS.engajamentoHoje,
+  1 => ptS.engajamentoOntem,
+  final n => ptS.engajamentoHaNDias(n),
+};
 
 /// Quem falou por último. Nulo sem conversa na janela.
 ({String texto, bool semResposta})? engajamentoConversa(

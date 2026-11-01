@@ -13,6 +13,7 @@ import '../../utils/biblioteca_aba.dart';
 import '../../data/exercicio_taxonomy_labels.dart';
 import '../../providers/exercicios_provider.dart';
 import 'exercise_media_thumb.dart';
+import '../../../../l10n/pt.dart';
 
 class ExercicioCard extends ConsumerWidget {
   final Exercicio exercicio;
@@ -65,6 +66,7 @@ class ExercicioCard extends ConsumerWidget {
       _equipamentoLabel(exercicio),
     ].where((s) => s != null && s.isNotEmpty).join(' · ');
     final meu = !videoFocuxIntocado(exercicio);
+    final emBreve = exercicio.videoEmBreve;
     final semVideo = !hasDemo;
 
     return GestureDetector(
@@ -92,13 +94,17 @@ class ExercicioCard extends ConsumerWidget {
             children: [
               FxStatusPill(
                 label:
-                    semVideo
+                    emBreve
+                        ? ptS.videoEmBreve
+                        : semVideo
                         ? 'Sem vídeo'
                         : hasPersonalVideo
                         ? 'Seu vídeo'
                         : 'Vídeo da Focux',
                 tone:
-                    semVideo
+                    emBreve
+                        ? FxPillTone.neutral
+                        : semVideo
                         ? FxPillTone.warning
                         : hasPersonalVideo
                         ? FxPillTone.success
@@ -118,7 +124,7 @@ class ExercicioCard extends ConsumerWidget {
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (exercicio.hasPlayableMedia)
+          if (exercicio.hasPlayableMedia || emBreve)
             Padding(
               padding: const EdgeInsets.only(right: 2),
               child: ExerciseMediaThumb.fromExercicio(

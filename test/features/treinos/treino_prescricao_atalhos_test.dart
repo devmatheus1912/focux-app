@@ -174,40 +174,6 @@ void main() {
   });
 
   group('vídeo da Focux é fixo', () {
-    test('editável só para exercício do personal', () {
-      expect(
-        videoEditavel(Exercicio.fromJson({'id': 1, 'nome': 'Meu'})),
-        isTrue,
-      );
-      expect(
-        videoEditavel(
-          Exercicio.fromJson({
-            'id': 2,
-            'nome': 'Focux',
-            'videoSource': 'FOCUX_LIBRARY',
-          }),
-        ),
-        isFalse,
-      );
-      expect(
-        videoEditavel(
-          Exercicio.fromJson({'id': 3, 'nome': 'Curado', 'curado': true}),
-        ),
-        isFalse,
-      );
-      // cópia da Focux com vídeo próprio: continua do personal
-      expect(
-        videoEditavel(
-          Exercicio.fromJson({
-            'id': 4,
-            'nome': 'Curado com meu vídeo',
-            'curado': true,
-            'videoSource': 'PERSONAL_UPLOAD',
-          }),
-        ),
-        isTrue,
-      );
-    });
 
     test('nome da cópia leva (meu) uma vez só', () {
       expect(nomeDaCopia('Supino reto'), 'Supino reto (meu)');

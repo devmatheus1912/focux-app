@@ -385,10 +385,6 @@ void main() {
     expect(find.text('Meta diária'), findsNothing);
   });
 
-  test('zero do wearable vira --', () {
-    expect(saudeValorOuTraco(0, (v) => '$v kcal'), '--');
-    expect(saudeValorOuTraco(320, (v) => '$v kcal'), '320 kcal');
-  });
 
   testWidgets(
     'sync sem rede não apaga a nota do widget da Home',

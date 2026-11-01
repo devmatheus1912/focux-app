@@ -92,9 +92,6 @@ String exerciseVideoUploadSuccess() =>
 
 String exerciseVideoRemoveSuccess() => 'Vídeo próprio removido.';
 
-String exerciseVideoPreviewLabel({required bool hasPersonal}) =>
-    hasPersonal ? 'Ver vídeo' : 'Ver demonstração';
-
 String exerciseVideoSourceSheetTitle() => 'Vídeo do exercício';
 
 String exerciseVideoSourceSheetSubtitle() =>

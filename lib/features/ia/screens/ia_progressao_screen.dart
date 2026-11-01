@@ -13,14 +13,12 @@ import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
-import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../../core/widgets/fx_strip_card.dart';
 import '../../../l10n/pt.dart';
 import '../../../core/widgets/ia_safety_disclaimer.dart';
 import '../../../features/alunos/constants/aluno_360_layout.dart';
@@ -79,6 +77,14 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
     );
   }
 
+  /// Quem abre pelo Copiloto não manda o nome na rota.
+  String get _nome {
+    final doCadastro = ref.watch(alunoProvider(widget.alunoId)).value?.nome;
+    return widget.alunoNome == 'Aluno' && doCadastro != null
+        ? doCadastro
+        : widget.alunoNome;
+  }
+
   void _showHelp() {
     AnalyticsService.instance.track(
       ProductEvents.iaProgressaoHelpOpened,
@@ -87,7 +93,7 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
     showFxHelpSheet(
       context,
       title: progressaoTitulo,
-      subtitle: widget.alunoNome,
+      subtitle: ref.read(alunoProvider(widget.alunoId)).value?.nome ?? widget.alunoNome,
       tips: const [
         FxHelpTip(
           'Dados reais',
@@ -95,7 +101,7 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
           icon: 'target',
         ),
         FxHelpTip(
-          'Opt-in',
+          'Você decide',
           'Nada é gerado sozinho. A cota só é usada quando a sugestão chega.',
           icon: 'spark',
         ),
@@ -115,7 +121,9 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
           ProgressaoAceitarRouteArgs(
             returnTo: '/alunos/${widget.alunoId}',
             alunoId: widget.alunoId,
-            alunoNome: widget.alunoNome,
+            alunoNome:
+                ref.read(alunoProvider(widget.alunoId)).value?.nome ??
+                widget.alunoNome,
           ).toExtra(),
     );
   }
@@ -129,14 +137,6 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
     if (!await IaQuotaUpgrade.guardBeforeRequest(context, ref)) return;
     if (!mounted) return;
     HapticFeedback.mediumImpact();
-    final ok = await showFxConfirmSheet(
-      context,
-      title: progressaoConfirmTitle(),
-      message: progressaoConfirmMessage(),
-      icon: Icons.auto_awesome_outlined,
-      confirmLabel: progressaoConfirmLabel(),
-    );
-    if (!ok || !mounted) return;
     AnalyticsService.instance.track(
       ProductEvents.iaProgressaoCtaTapped,
       props: {'alunoId': widget.alunoId, 'objetivo': _objetivo.api},
@@ -201,7 +201,7 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
           useMesh: true,
           appBar: FxShellAppBar(
             title: progressaoTitulo,
-            subtitle: widget.alunoNome,
+            subtitle: _nome,
             onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
             actions: [
               FxHelpIconButton(
@@ -228,15 +228,12 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             if (pendentes > 0) ...[
-                              FxStripCard(
-                                marca: true,
-                                child: Text(
-                                  pendentes == 1
-                                      ? ptS.cargasEsperandoUma
-                                      : ptS.cargasEsperando(pendentes),
-                                  style: FocuxHubTypography.cardTitle(
-                                    color: fxPaletaSobreMarca(context).ink,
-                                  ),
+                              Text(
+                                pendentes == 1
+                                    ? ptS.cargasEsperandoUma
+                                    : ptS.cargasEsperando(pendentes),
+                                style: FocuxHubTypography.cardTitle(
+                                  color: chrome.ink,
                                 ),
                               ),
                               const SizedBox(height: TokensStrip.s3),
@@ -258,7 +255,10 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
                               ),
                               const SizedBox(height: TokensStrip.s3),
                             ],
-                            const IaSafetyDisclaimer(compact: true),
+                            IaSafetyDisclaimer(
+                              compact: true,
+                              customText: ptS.cargasNadaMudaSemAprovacao,
+                            ),
                             if (_erro != null) ...[
                               const SizedBox(height: TokensStrip.s4),
                               FxErrorState(
@@ -289,6 +289,16 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: TokensStrip.s2),
+                        child: Text(
+                          ptS.cargasCustoUmUso,
+                          textAlign: TextAlign.center,
+                          style: FocuxHubTypography.bodyMuted(
+                            color: chrome.mute,
+                          ),
+                        ),
+                      ),
                       if (pendentes > 0 && !semTreino) ...[
                         FxLiquidPrimaryButton(
                           label: ptS.cargasRevisar,

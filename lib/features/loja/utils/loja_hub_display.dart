@@ -16,30 +16,6 @@ String lojaCountLabel({required LojaHubView view, required int count}) {
   return '$count pedidos';
 }
 
-bool lojaPacoteMatches({
-  required String titulo,
-  required String? descricao,
-  required String query,
-}) {
-  final q = query.trim().toLowerCase();
-  if (q.isEmpty) return true;
-  if (titulo.toLowerCase().contains(q)) return true;
-  return (descricao ?? '').toLowerCase().contains(q);
-}
-
-bool lojaPedidoMatches({
-  required String? buyerNome,
-  required String buyerEmail,
-  required String status,
-  required String query,
-}) {
-  final q = query.trim().toLowerCase();
-  if (q.isEmpty) return true;
-  if ((buyerNome ?? '').toLowerCase().contains(q)) return true;
-  if (buyerEmail.toLowerCase().contains(q)) return true;
-  return lojaPedidoStatusLabel(status).toLowerCase().contains(q);
-}
-
 String lojaPacoteSubtitle({String? descricao, required int duracaoMeses}) {
   final desc = descricao?.trim();
   if (desc != null && desc.isNotEmpty) return desc;

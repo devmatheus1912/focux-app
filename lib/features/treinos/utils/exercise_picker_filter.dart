@@ -1,5 +1,4 @@
 import '../../exercicios/data/enums.dart';
-import '../../exercicios/data/exercicio_repository.dart';
 import '../../exercicios/data/exercicio_taxonomy_labels.dart';
 
 class ExercisePickerFilter {
@@ -80,34 +79,6 @@ class ExercisePickerFilter {
     somenteComVideo,
     Object.hashAll(equipamentosAluno.map((e) => e.name).toList()..sort()),
   );
-}
-
-List<Exercicio> applyExercisePickerFilter(
-  Iterable<Exercicio> items,
-  ExercisePickerFilter filter, {
-  bool serverFiltered = false,
-}) {
-  return items.where((exercicio) {
-    if (!serverFiltered) {
-      if (filter.somenteFavoritos && !exercicio.favoritado) return false;
-      if (filter.somenteComVideo && !exercicio.hasPlayableMedia) return false;
-      if (filter.espaco != null &&
-          !exercicio.espacosCompativeis.contains(filter.espaco)) {
-        return false;
-      }
-      if (filter.equipamentos.isNotEmpty &&
-          !exercicio.equipamentos.any(filter.equipamentos.contains)) {
-        return false;
-      }
-      if (filter.filtrarPorAluno && filter.equipamentosAluno.isNotEmpty) {
-        final compativel =
-            exercicio.equipamentos.isEmpty ||
-            exercicio.equipamentos.any(filter.equipamentosAluno.contains);
-        if (!compativel) return false;
-      }
-    }
-    return true;
-  }).toList();
 }
 
 /// Rótulo do chip "Equipamento" da fileira: "Equipamento" sem filtro,

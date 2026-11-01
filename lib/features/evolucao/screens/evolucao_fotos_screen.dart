@@ -25,6 +25,9 @@ import '../../auth/providers/auth_provider.dart';
 import '../data/evolucao_repository.dart';
 import '../utils/evolucao_fotos_display.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
+import '../../../core/theme/focux_hub_typography.dart';
+import '../../../l10n/pt.dart';
 
 class EvolucaoFotosScreen extends ConsumerStatefulWidget {
   /// Aba da Evolução: sem cabeçalho próprio.
@@ -265,11 +268,11 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
         SafeArea(
           top: false,
           child: Padding(
-            padding: EdgeInsets.fromLTRB(
+            padding: const EdgeInsets.fromLTRB(
               FxSettingsLayout.pageInset,
               TokensStrip.s2,
               FxSettingsLayout.pageInset,
-              TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
+              TokensStrip.s3,
             ),
             child: FxLiquidPrimaryButton(
               label: _uploading ? 'Enviando…' : 'Adicionar foto',
@@ -334,6 +337,20 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
             ),
           ),
         ),
+      SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            FxSettingsLayout.pageInset,
+            TokensStrip.s3,
+            FxSettingsLayout.pageInset,
+            0,
+          ),
+          child: Text(
+            ptS.evolucaoFotoDica,
+            style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+          ),
+        ),
+      ),
       SliverPadding(
         padding: EdgeInsets.fromLTRB(
           FxSettingsLayout.pageInset,
@@ -369,6 +386,7 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
             final isA = _selAfter == i;
             final surface = Theme.of(ctx).colorScheme.surface;
             return GestureDetector(
+              onLongPress: () => _excluirFoto(f),
               onTap: () {
                 HapticFeedback.selectionClick();
                 if (_selBefore == null) {
@@ -436,6 +454,24 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
       ),
     ],
   );
+
+  Future<void> _excluirFoto(FotoEvolucao foto) async {
+    final ok = await showFxConfirmSheet(
+      context,
+      title: ptS.evolucaoExcluirFotoTitulo,
+      message: ptS.evolucaoExcluirFotoMensagem,
+      icon: Icons.delete_outline_rounded,
+      confirmLabel: ptS.evolucaoExcluir,
+      destructive: true,
+    );
+    if (!ok || !mounted) return;
+    try {
+      await _repo.excluirFoto(widget.alunoId, foto.id);
+      await _load();
+    } catch (e) {
+      if (mounted) FeedbackHelper.showError(context, friendlyError(e));
+    }
+  }
 
   Widget _comparison(ShellPalette chrome) {
     final w =

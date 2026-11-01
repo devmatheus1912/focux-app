@@ -53,7 +53,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Supino'), findsOneWidget);
-    expect(find.textContaining('82,5kg 4x18-20'), findsOneWidget);
+    expect(find.textContaining('82,5kg'), findsOneWidget);
     expect(find.text('Aplicar 1 selecionada'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });

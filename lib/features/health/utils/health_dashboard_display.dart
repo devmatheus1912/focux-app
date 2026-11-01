@@ -12,14 +12,6 @@ String saudeDesconectarConfirmMessage() =>
 String saudeSyncSoftError([Object? _]) =>
     'Não sincronizamos com o servidor. Mostrando dados deste aparelho.';
 
-String saudeConectarCtaLabel() => 'Conectar';
-
-const saudeGerenciarConexaoLabel = 'Gerenciar conexão';
-
-/// Sincronizou, mas sem sono nem FC o servidor não dá nota.
-const saudeSemScoreMensagem =
-    'Precisamos do seu sono para calcular a prontidão.';
-
 const saudeSemScoreAcao = 'Como liberar';
 
 const saudeLiberarIosSubtitulo =
@@ -36,8 +28,3 @@ const saudeLiberarIosPassos = [
 
 const saudeSemDadosHoje = 'Sem dados hoje';
 const saudeSemBatimento = 'Sem dados de batimento';
-const saudeSemSono = 'Use o relógio para dormir';
-
-/// Zero do wearable é ausência de leitura, não medida: mostra "--".
-String saudeValorOuTraco(num valor, String Function(num v) formatar) =>
-    valor > 0 ? formatar(valor) : '--';

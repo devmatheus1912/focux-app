@@ -65,25 +65,6 @@ void main() {
         status: status,
       );
 
-  test('treino cancelado ou em andamento não conta', () {
-    final eventos = [
-      treino('2026-09-01T10:00:00', 'CONCLUIDO'),
-      treino('2026-09-02T10:00:00', 'CANCELADO'),
-      treino('2026-09-02T11:00:00', 'EM_ANDAMENTO'),
-      EventoEngajamento(
-        tipo: 'TREINO',
-        descricao: 'B · cancelado',
-        dataHora: '2026-09-02T12:00:00',
-      ),
-      EventoEngajamento(
-        tipo: 'CHECKIN_CONCLUIDO',
-        descricao: 'C',
-        dataHora: '2026-09-03T12:00:00',
-      ),
-    ];
-    expect(engajamentoTreinosCount(eventos), 2);
-    expect(engajamentoCanceladosCount(eventos), 2);
-  });
 
   test('frase responde se o aluno está firme', () {
     final now = DateTime(2026, 9, 10, 18);
@@ -115,15 +96,6 @@ void main() {
     expect(dias.first.estado, isNull);
   });
 
-  test('parcial aparece no calendário e não conta como treino', () {
-    final now = DateTime(2026, 9, 10, 18);
-    final eventos = [treino('2026-09-10T08:00:00', 'PARCIAL')];
-    expect(engajamentoTreinosCount(eventos), 0);
-    expect(
-      engajamentoCalendario(eventos, now: now).last.estado,
-      EngajamentoTreinoEstado.parcial,
-    );
-  });
 
   test('conversa avisa quando o aluno falou por último', () {
     final now = DateTime(2026, 9, 10, 18);

@@ -79,16 +79,32 @@ extension on _RelatorioScreenState {
             Expanded(
               child: OperationalMetricTile(
                 label: ptS.relatorioTaxaConclusao,
-                value: relatorioAderenciaMediaLabel(dados.taxaAderenciaPercent),
-                hint: relatorioAlunoAderenciaStatus(dados.taxaAderenciaPercent),
+                value:
+                    _alunoComecando
+                        ? ptS.relatorioComecando
+                        : relatorioAderenciaMediaLabel(
+                          dados.taxaAderenciaPercent,
+                        ),
+                hint:
+                    _alunoComecando
+                        ? ptS.relatorioComecandoApoio
+                        : relatorioAlunoAderenciaStatus(
+                          dados.taxaAderenciaPercent,
+                        ),
                 color:
-                    relatorioAlunoAderenciaBaixa(dados.taxaAderenciaPercent)
+                    !_alunoComecando &&
+                            relatorioAlunoAderenciaBaixa(
+                              dados.taxaAderenciaPercent,
+                            )
                         ? EagleTokens.bad
                         : primary,
                 isDark: isDark,
                 dense: true,
                 emphasis:
-                    relatorioAlunoAderenciaBaixa(dados.taxaAderenciaPercent)
+                    !_alunoComecando &&
+                            relatorioAlunoAderenciaBaixa(
+                              dados.taxaAderenciaPercent,
+                            )
                         ? OperationalMetricEmphasis.alert
                         : OperationalMetricEmphasis.normal,
               ),

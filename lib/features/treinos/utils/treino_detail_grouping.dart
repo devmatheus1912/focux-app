@@ -27,44 +27,11 @@ String treinoDetailGroupLabel(TreinoExercicioItem te) {
   return 'OUTROS';
 }
 
-bool treinoDetailShowsGroupHeader(List<TreinoExercicioItem> items, int index) {
-  if (index <= 0) return true;
-  return treinoDetailGroupLabel(items[index]) !=
-      treinoDetailGroupLabel(items[index - 1]);
-}
-
-int treinoDetailLocalIndexInGroup(List<TreinoExercicioItem> items, int index) {
-  final group = treinoDetailGroupLabel(items[index]);
-  var local = 1;
-  for (var i = index - 1; i >= 0; i--) {
-    if (treinoDetailGroupLabel(items[i]) != group) break;
-    local++;
-  }
-  return local;
-}
-
-int treinoDetailGroupExerciseCount(List<TreinoExercicioItem> items, int index) {
-  final group = treinoDetailGroupLabel(items[index]);
-  return items.where((item) => treinoDetailGroupLabel(item) == group).length;
-}
-
-bool treinoDetailIsLastInGroup(List<TreinoExercicioItem> items, int index) {
-  if (index >= items.length - 1) return true;
-  return treinoDetailGroupLabel(items[index]) !=
-      treinoDetailGroupLabel(items[index + 1]);
-}
-
 int treinoDetailSeriesCount(List<TreinoExercicioItem> items) =>
     items.fold<int>(0, (sum, item) => sum + item.series);
 
 int treinoDetailGroupCount(List<TreinoExercicioItem> items) =>
     items.map(treinoDetailGroupLabel).toSet().length;
-
-String treinoDetailSeriesHint(int groups) =>
-    groups == 1 ? '1 grupo muscular' : '$groups grupos';
-
-String treinoDetailGroupTileHint(int groups) =>
-    groups == 0 ? 'Ainda vazio' : 'Músculos distintos';
 
 double? treinoDetailCargaTotalKg(List<TreinoExercicioItem> items) {
   var sum = 0.0;
@@ -77,14 +44,6 @@ double? treinoDetailCargaTotalKg(List<TreinoExercicioItem> items) {
   }
   return any ? sum : null;
 }
-
-String treinoDetailCargaValue(List<TreinoExercicioItem> items) =>
-    formatTreinoLoadKg(treinoDetailCargaTotalKg(items));
-
-String treinoDetailCargaHint(List<TreinoExercicioItem> items) =>
-    treinoDetailCargaTotalKg(items) == null
-        ? 'Sem carga prescrita'
-        : 'Soma das prescrições';
 
 /// Contagens reais da prescrição — sem duração inventada.
 String treinoDetailMetaLine(List<TreinoExercicioItem> items) {

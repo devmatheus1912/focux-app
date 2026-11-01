@@ -52,6 +52,8 @@ class TaxonomyLabels {
     GrupoMuscular.lombar: 'Lombar',
     GrupoMuscular.trapezio: 'Trapézio',
     GrupoMuscular.fullBody: 'Corpo inteiro',
+    GrupoMuscular.cardio: 'Cardio',
+    GrupoMuscular.mobilidade: 'Mobilidade',
   };
 
   static const equipamento = {

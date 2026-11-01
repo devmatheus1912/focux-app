@@ -448,6 +448,13 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
                         ],
                       ),
                     ),
+                    Text(
+                      ptS.evolucaoFotoAlunoVe,
+                      style: FocuxHubTypography.bodyMuted(
+                        color: ShellChrome.of(ctx).mute,
+                      ),
+                    ),
+                    const SizedBox(height: TokensStrip.s1),
                     Row(
                       children: [
                         FxTonalButton(

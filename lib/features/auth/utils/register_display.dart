@@ -18,8 +18,6 @@ String registerEnviarConfirmTitle() => 'Enviar código por e-mail?';
 String registerEnviarConfirmMessage() =>
     'Mandamos 6 dígitos para o e-mail. Válido por 10 minutos.';
 
-String registerJaTenhoContaLabel() => 'Já tenho conta';
-
 String registerHelpTitle() => 'Criar conta personal';
 
 String registerHelpSubtitle() =>

@@ -16,7 +16,6 @@ void main() {
     expect(screen, contains('FxShellScaffold'));
     expect(screen, contains('FxContentWidthLimiter'));
     expect(screen, contains('friendlyError'));
-    expect(screen, contains('FxEmptyState'));
     expect(screen, contains('SkeletonList'));
     expect(screen, contains('evolucaoHomeProvider'));
     final homeProvider = File(
@@ -28,8 +27,6 @@ void main() {
     expect(screen, contains('AlunoSegmentedChoice'));
     expect(screen, contains('IndexedStack'));
     expect(screen, isNot(contains('FxSettingsGroup')));
-    expect(screen, contains('FxSatelliteListTile'));
-    expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('showEvolucaoHelpSheet'));

@@ -3,6 +3,7 @@ import 'aluno360_ferramentas_logic.dart';
 import 'aluno360_medida_plausivel.dart';
 import 'aluno360_resumo_agora.dart';
 import 'aluno_display_utils.dart';
+import '../../../l10n/pt.dart';
 
 /// Os quatro grupos da aba Ferramentas, na ordem em que aparecem sem nada
 /// pedindo atenção.
@@ -192,5 +193,20 @@ String aluno360ComposicaoValor({String? bf, String? massaMagra}) =>
           );
 
 /// Aderência 0% sem histórico não é nota ruim: é "ainda sem dados".
-String aluno360AderenciaValor(Aluno aluno) =>
-    semHistoricoDeTreino(aluno) ? '—' : '${aluno.aderenciaPercent ?? 0}%';
+String aluno360AderenciaValor(Aluno aluno) => aderenciaDoCard(aluno).texto;
+
+/// O mesmo número em todo lugar: percentual, treinos dos primeiros dias ou sem ficha.
+({String texto, String rotulo}) aderenciaDoCard(Aluno aluno) {
+  final percent = aluno.aderenciaPercent;
+  return switch (aluno.aderenciaEstado) {
+    'COMECANDO' => (
+      texto: '${aluno.treinosJanela ?? 0}',
+      rotulo: ptS.aderenciaCardComecando,
+    ),
+    'SEM_FICHA' => (texto: '—', rotulo: ptS.aderenciaCardSemFicha),
+    _ => (
+      texto: semHistoricoDeTreino(aluno) ? '—' : '${percent ?? 0}%',
+      rotulo: ptS.alunoResumoMetricaAderencia,
+    ),
+  };
+}

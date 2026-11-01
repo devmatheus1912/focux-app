@@ -18,7 +18,6 @@ String? feedListChipTipo(FeedListChip chip) => switch (chip) {
 bool? feedListChipFixado(FeedListChip chip) =>
     chip == FeedListChip.fixados ? true : null;
 
-const feedTipoValues = ['TEXTO', 'IMAGEM', 'VIDEO', 'ENQUETE', 'DICA'];
 const feedTituloMax = 255;
 const feedConteudoMax = 4000;
 

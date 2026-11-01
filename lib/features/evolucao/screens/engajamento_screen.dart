@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/router/safe_navigation.dart';
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
@@ -17,7 +16,6 @@ import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
-import '../../../core/widgets/fx_hub_header.dart';
 import '../../../core/widgets/fx_grouped_action_sheet.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
@@ -39,6 +37,7 @@ import '../utils/engajamento_display.dart';
 import '../widgets/engajamento_atividade.dart';
 import '../widgets/engajamento_card_aderencia.dart';
 import '../widgets/engajamento_help_sheet.dart';
+import '../widgets/engajamento_quadro_semanas.dart';
 import '../../../l10n/pt.dart';
 
 class EngajamentoScreen extends ConsumerStatefulWidget {
@@ -153,6 +152,12 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
       grupos: [
         FxActionGroup<String>(null, [
           FxActionItem(
+            valor: 'evolucao',
+            rotulo: ptS.engajamentoVerEvolucao,
+            descricao: ptS.engajamentoVerEvolucaoApoio,
+            icone: Icons.show_chart_rounded,
+          ),
+          FxActionItem(
             valor: 'relatorio',
             rotulo: ptS.engajamentoRelatorioPdf,
             descricao: ptS.engajamentoRelatorioApoio,
@@ -162,6 +167,10 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
       ],
     );
     if (escolha == null || !mounted) return;
+    if (escolha == 'evolucao') {
+      _abrirEvolucao();
+      return;
+    }
     final plano = PlanGate.read(ref, PlanoRecursoKeys.relatorios);
     if (!plano.liberado) {
       await UpgradePromptSheet.show(
@@ -190,7 +199,10 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
-    final freshness = FxHubFreshness.fromFetchedAt(_fetchedAt);
+    final freshness = [
+      fxTitleCaseName(widget.alunoNome),
+      FxHubFreshness.fromFetchedAt(_fetchedAt),
+    ].nonNulls.join(' · ');
     final showSticky = !_loading && _erro == null;
     return fxScreenA11yScope(
       label: ptS.engajamentoAderencia(widget.alunoNome),
@@ -280,20 +292,32 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
     );
     final recentes = engajamentoRecentes(atividade);
     final dias = engajamentoPorDia(recentes);
+    final descansos = _aderencia?.diasDescanso ?? const <int>[];
+    final semanas = engajamentoSemanas(_eventos, diasDescanso: descansos);
+    final quadro = engajamentoContagemQuadro(semanas);
+    final naSemana = engajamentoDiasNaSemana(semanas.last);
 
     final topo = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        FxHubHeader(
-          title: fxTitleCaseName(widget.alunoNome),
-          subtitle: engajamentoPeriodoLabel(_dias),
-        ),
-        const SizedBox(height: TokensStrip.s4),
         EngajamentoCardAderencia(
           resumo: _aderencia,
           aderenciaCadastro: aderencia,
           frase: engajamentoFrase(_eventos),
           tendencia: engajamentoTendencia(_eventos),
+          onMontarFicha:
+              () => context.push(
+                '/alunos/${widget.alunoId}/rotina',
+                extra: widget.alunoNome,
+              ),
+        ),
+        const SizedBox(height: TokensStrip.s3),
+        EngajamentoQuadroSemanas(
+          semanas: semanas,
+          resumo:
+              quadro.previstos > 0
+                  ? ptS.engajamentoResumoQuadro(quadro.feitos, quadro.previstos)
+                  : ptS.engajamentoResumoQuadroSemPrevisto(quadro.feitos),
         ),
         const SizedBox(height: TokensStrip.s3),
         KeyedSubtree(
@@ -301,24 +325,24 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
           child: FxMetricStrip(
             metricas: [
               FxMetric(
-                valor: engajamentoTreinosCount(_eventos),
-                rotulo: ptS.engajamentoTreinosFeitos,
+                valor: _aderencia?.feitos ?? engajamentoTreinosSemana(_eventos),
+                rotulo: ptS.engajamentoDiasComTreino,
+              ),
+              FxMetric(
+                valor: naSemana,
+                texto:
+                    descansos.isEmpty
+                        ? '$naSemana'
+                        : ptS.engajamentoDeN(naSemana, 7 - descansos.length),
+                rotulo: ptS.engajamentoEstaSemana,
               ),
               FxMetric(
                 valor: aluno?.diasSemTreino ?? 0,
-                rotulo: ptS.alunoResumoMetricaDiasSemTreino,
-              ),
-              FxMetric(
-                valor: engajamentoTreinosSemana(_eventos),
-                rotulo: ptS.alunoResumoMetricaCheckins,
+                texto: engajamentoUltimoTreino(aluno?.diasSemTreino),
+                rotulo: ptS.engajamentoUltimoTreinoRotulo,
               ),
             ],
           ),
-        ),
-        const SizedBox(height: TokensStrip.s3),
-        _CalendarioTreinos(
-          dias: engajamentoCalendario(_eventos),
-          diasDescanso: _aderencia?.diasDescanso ?? const [],
         ),
         if (conversa != null) ...[
           const SizedBox(height: TokensStrip.s3),
@@ -340,25 +364,23 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
           ),
         ],
         const SizedBox(height: TokensStrip.s4),
-        Wrap(
-          spacing: TokensStrip.s2,
-          runSpacing: TokensStrip.s2,
+        Row(
           children: [
+            Expanded(
+              child: Text(
+                ptS.engajamentoAtividadeTitulo,
+                style: FocuxHubTypography.cardTitle(color: chrome.ink),
+              ),
+            ),
             FxActionChip(
               label: engajamentoPeriodoLabel(_dias),
               accent: primary,
               isDark: isDark,
               onPressed: _pickPeriodo,
             ),
-            FxActionChip(
-              label: ptS.alunoEvolucaoTitulo,
-              accent: primary,
-              isDark: isDark,
-              onPressed: _abrirEvolucao,
-            ),
           ],
         ),
-        const SizedBox(height: TokensStrip.s3),
+        const SizedBox(height: TokensStrip.s2),
         FxChoiceStrip<EngajamentoFiltro>(
           itens: [
             for (final filtro in EngajamentoFiltro.values)
@@ -472,89 +494,6 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
                   );
                 },
               ),
-    );
-  }
-}
-
-/// Cinco semanas, um ponto por dia. Hoje é o último ponto.
-class _CalendarioTreinos extends StatelessWidget {
-  const _CalendarioTreinos({required this.dias, required this.diasDescanso});
-
-  final List<({DateTime dia, EngajamentoTreinoEstado? estado})> dias;
-
-  /// Fora daqui, dia sem treino é falta: aparece em contorno.
-  final List<int> diasDescanso;
-
-  @override
-  Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
-    final primary = Theme.of(context).colorScheme.primary;
-    final feitos =
-        dias.where((d) => d.estado == EngajamentoTreinoEstado.feito).length;
-    final cor = chrome.isDark ? EagleTokens.warnDark : EagleTokens.warn;
-    final parcial = primary.withValues(alpha: 0.4);
-
-    Widget ponto(Color fundo) => Container(
-      width: 14,
-      height: 14,
-      decoration: BoxDecoration(color: fundo, shape: BoxShape.circle),
-    );
-    Widget legenda(Color fundo, String texto) => Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        ponto(fundo),
-        const SizedBox(width: TokensStrip.s1),
-        Text(texto, style: FocuxHubTypography.bodyMuted(color: chrome.mute)),
-      ],
-    );
-
-    return Semantics(
-      label: ptS.engajamentoUltimas5SemanasDiasCom(feitos),
-      excludeSemantics: true,
-      child: Container(
-        padding: const EdgeInsets.all(TokensStrip.s3),
-        decoration: fxListCardDecoration(context),
-        child: Column(
-          children: [
-            for (var semana = 0; semana < dias.length ~/ 7; semana++) ...[
-              if (semana > 0) const SizedBox(height: TokensStrip.s2),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  for (final d in dias.skip(semana * 7).take(7))
-                    d.estado == null &&
-                            diasDescanso.isNotEmpty &&
-                            !diasDescanso.contains(d.dia.weekday)
-                        ? Container(
-                          width: 14,
-                          height: 14,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(color: chrome.lineStrong),
-                          ),
-                        )
-                        : ponto(switch (d.estado) {
-                          EngajamentoTreinoEstado.feito => primary,
-                          EngajamentoTreinoEstado.parcial => parcial,
-                          EngajamentoTreinoEstado.cancelado => cor,
-                          _ => chrome.line,
-                        }),
-                ],
-              ),
-            ],
-            const SizedBox(height: TokensStrip.s3),
-            Row(
-              children: [
-                legenda(primary, ptS.engajamentoTreinou),
-                const SizedBox(width: TokensStrip.s3),
-                legenda(parcial, ptS.historicoParcial),
-                const SizedBox(width: TokensStrip.s3),
-                legenda(cor, ptS.engajamentoCancelou),
-              ],
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

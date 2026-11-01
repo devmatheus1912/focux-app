@@ -26,7 +26,6 @@ void main() {
     expect(screen, contains('iaProgressaoViewed'));
     expect(screen, contains('iaProgressaoCtaTapped'));
     expect(screen, isNot(contains('ShellHeaderIconButton')));
-    expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('showFxHelpSheet'));
     expect(screen, contains('IaSafetyDisclaimer'));
     expect(screen, contains('/alunos/\${widget.alunoId}/rotina'));

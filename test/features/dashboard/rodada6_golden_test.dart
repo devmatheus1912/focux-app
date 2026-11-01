@@ -83,7 +83,7 @@ void main() {
     });
 
     testWidgets('card de aderência ($tema)', (tester) async {
-      await tester.binding.setSurfaceSize(const Size(390, 220));
+      await tester.binding.setSurfaceSize(const Size(390, 260));
       addTearDown(() => tester.binding.setSurfaceSize(null));
       await tester.pumpWidget(
         harness(

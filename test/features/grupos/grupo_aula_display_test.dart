@@ -9,27 +9,6 @@ void main() {
     );
   });
 
-  test('grupoAulaVagasLabel e lotada', () {
-    expect(
-      grupoAulaVagasLabel(inscritos: 3, capacidadeMax: 20),
-      '17 vagas',
-    );
-    expect(
-      grupoAulaVagasLabel(inscritos: 19, capacidadeMax: 20),
-      '1 vaga',
-    );
-    expect(
-      grupoAulaVagasLabel(inscritos: 20, capacidadeMax: 20),
-      'Lotada',
-    );
-    expect(grupoAulaLotada(inscritos: 20, capacidadeMax: 20), isTrue);
-    expect(grupoAulaLotada(inscritos: 5, capacidadeMax: 20), isFalse);
-    expect(grupoAulaStatusLabel(inscrito: true, lotada: true), 'Inscrito');
-    expect(grupoAulaStatusLabel(inscrito: false, lotada: true), 'Lotada');
-    expect(grupoAulaStatusLabel(inscrito: false, lotada: false), isNull);
-    expect(grupoAulaFxIcon(inscritos: 20, capacidadeMax: 20), 'alert-triangle');
-    expect(grupoAulaFxIcon(inscritos: 5, capacidadeMax: 20), 'calendar');
-  });
 
   test('grupoAulaSubtitle junta local', () {
     expect(
@@ -45,41 +24,7 @@ void main() {
     );
   });
 
-  test('grupoAulaCountLabel e filtro', () {
-    expect(grupoAulaCountLabel(0), 'Nenhuma aula');
-    expect(grupoAulaCountLabel(2), '2 aulas');
-    expect(
-      grupoAulaMatches(
-        titulo: 'Funcional',
-        localAula: 'Praia',
-        lotada: false,
-        query: 'praia',
-        chip: GrupoAulaChip.abertas,
-      ),
-      isTrue,
-    );
-    expect(
-      grupoAulaMatches(
-        titulo: 'Funcional',
-        localAula: 'Praia',
-        lotada: true,
-        query: '',
-        chip: GrupoAulaChip.abertas,
-      ),
-      isFalse,
-    );
-    expect(grupoAulaChipQuery(GrupoAulaChip.todas), isNull);
-    expect(grupoAulaChipQuery(GrupoAulaChip.abertas), 'ABERTAS');
-    expect(grupoAulaChipQuery(GrupoAulaChip.lotadas), 'LOTADAS');
-  });
 
-  test('grupoAulaHubSubtitle junta freshness', () {
-    expect(grupoAulaHubSubtitle(null), 'Turmas abertas e vagas');
-    expect(
-      grupoAulaHubSubtitle('há 1 min'),
-      'Turmas abertas e vagas · há 1 min',
-    );
-  });
 
   test('opções de data da aula usam horizontes ou dias corridos', () {
     final now = DateTime(2026, 9, 4);

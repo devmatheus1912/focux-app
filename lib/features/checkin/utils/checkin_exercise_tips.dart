@@ -148,6 +148,10 @@ bool checkinExerciseHasTips(ExecucaoExercicio ee) {
       ee.substitutos?.trim().isNotEmpty == true;
 }
 
+/// Exercício oficial que ainda não tem demonstração gravada.
+bool checkinVideoEmBreve(ExecucaoExercicio ee) =>
+    ee.videoSource == 'PRODUCTION_PENDING' && !checkinExerciseHasDemo(ee);
+
 bool checkinExerciseHasDemo(ExecucaoExercicio ee) {
   return ee.gifUrl?.isNotEmpty == true ||
       ee.videoUrl?.isNotEmpty == true ||

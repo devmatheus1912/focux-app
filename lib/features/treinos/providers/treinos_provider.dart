@@ -152,10 +152,6 @@ final treinosHomeProvider = FutureProvider<TreinosHomeBundle>((ref) async {
   );
 });
 
-final treinosProvider = FutureProvider<List<Treino>>((ref) async {
-  return (await ref.watch(treinosHomeProvider.future)).treinos;
-});
-
 final treinosDoAlunoQueryProvider = NotifierProvider.family<
   FxValueNotifier<TreinosAlunoQuery>,
   TreinosAlunoQuery,

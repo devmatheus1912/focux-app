@@ -89,17 +89,6 @@ String habitoAlunoSubtitle({
   return meta;
 }
 
-bool habitoMatchesQuery({
-  required String titulo,
-  String? descricao,
-  required String query,
-}) {
-  final q = query.trim().toLowerCase();
-  if (q.isEmpty) return true;
-  final hay = '${titulo.toLowerCase()} ${(descricao ?? '').toLowerCase()}';
-  return hay.contains(q);
-}
-
 String habitoCountLabel(int count) {
   if (count <= 0) return 'Nenhum hábito';
   if (count == 1) return '1 hábito';

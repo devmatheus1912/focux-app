@@ -38,6 +38,7 @@ class TreinoPreviaExercicio {
     this.thumbnailUrl,
     this.gifUrl,
     this.temVideo = false,
+    this.videoEmBreve = false,
   });
 
   final int treinoExercicioId;
@@ -50,6 +51,7 @@ class TreinoPreviaExercicio {
   final String? thumbnailUrl;
   final String? gifUrl;
   final bool temVideo;
+  final bool videoEmBreve;
 
   /// Miniatura estática antes do GIF (lista leve).
   String? get imagemUrl => thumbnailUrl ?? gifUrl;
@@ -66,5 +68,6 @@ class TreinoPreviaExercicio {
         thumbnailUrl: checkinJsonString(j['thumbnailUrl']),
         gifUrl: checkinJsonString(j['gifUrl']),
         temVideo: checkinJsonBool(j['temVideo']),
+        videoEmBreve: checkinJsonBool(j['videoEmBreve']),
       );
 }

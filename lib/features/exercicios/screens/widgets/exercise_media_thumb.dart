@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/widgets/fx_cached_network_image.dart';
 import '../../data/exercicio_repository.dart';
 import '../../services/biblioteca_media_config.dart';
+import '../../../../l10n/pt.dart';
 
 class ExerciseMediaThumb extends StatefulWidget {
   const ExerciseMediaThumb({
@@ -15,6 +16,7 @@ class ExerciseMediaThumb extends StatefulWidget {
     this.showPlayBadge = false,
     this.expectMedia = false,
     this.celebrateSuccess = false,
+    this.videoEmBreve = false,
   });
 
   final String? mediaUrl;
@@ -27,6 +29,9 @@ class ExerciseMediaThumb extends StatefulWidget {
   /// Quando true e sem URL, mostra estado "sem demonstração" em vez de haltere genérico.
   final bool expectMedia;
   final bool celebrateSuccess;
+
+  /// Exercício oficial ainda sem demonstração.
+  final bool videoEmBreve;
 
   factory ExerciseMediaThumb.fromExercicio(
     Exercicio exercicio, {
@@ -54,6 +59,7 @@ class ExerciseMediaThumb extends StatefulWidget {
           (exercicioHasPersonalVideo(exercicio) || exercicio.hasPlayableMedia),
       expectMedia: pendingPublish,
       celebrateSuccess: celebrateSuccess,
+      videoEmBreve: exercicio.videoEmBreve,
     );
   }
 
@@ -176,6 +182,8 @@ class _ExerciseMediaThumbState extends State<ExerciseMediaThumb>
       label:
           ex != null && exercicioHasPersonalVideo(ex)
               ? 'Seu vídeo de $label'
+              : widget.videoEmBreve
+              ? '$label, ${ptS.videoEmBreve}'
               : widget.expectMedia
               ? 'Demonstração de $label'
               : label,
@@ -228,7 +236,9 @@ class _ExerciseMediaThumbState extends State<ExerciseMediaThumb>
                 : null,
       ),
       child: Icon(
-        personalPending
+        widget.videoEmBreve
+            ? Icons.videocam_outlined
+            : personalPending
             ? Icons.videocam_rounded
             : missing
             ? Icons.cloud_sync_outlined
@@ -365,13 +375,6 @@ String? _resolveCloudinaryOrRaster(String url) {
   return cloudinaryVideoPosterUrl(url);
 }
 
-bool exercicioMissingPreviewPoster(Exercicio exercicio) {
-  if (!exercicio.hasPlayableMedia) return false;
-  if (!exercicioHasPublishedLibraryMedia(exercicio)) return true;
-  final poster = exercisePreviewMediaUrlFor(exercicio);
-  return poster == null || poster.contains('.mp4');
-}
-
 bool _isRasterImageUrl(String url) {
   if (url.contains('.mp4') || url.contains('.mov')) return false;
   return RegExp(
@@ -436,7 +439,7 @@ bool exercicioHasPersonalVideo(Exercicio exercicio) {
 }
 
 /// Abre prévia útil: vídeo próprio ou demo MoveKit/biblioteca publicada.
-/// Sem mídia tocável: sem atalho (nunca sheet "em breve").
+/// Sem mídia tocável: sem atalho. O aviso "Vídeo em breve" não abre nada.
 bool canPreviewExerciseMedia(Exercicio exercicio) {
   if (exercicioHasPersonalVideo(exercicio)) return true;
   if (exercicioHasPublishedLibraryMedia(exercicio)) return true;

@@ -12,7 +12,6 @@ import 'package:focux_app/features/treinos/providers/ficha_modelos_provider.dart
 import 'package:focux_app/features/treinos/widgets/modelo_contexto_treino.dart';
 import 'package:focux_app/features/treinos/providers/treinos_provider.dart';
 import 'package:focux_app/features/treinos/screens/treino_detail_screen.dart';
-import 'package:focux_app/features/treinos/utils/treino_blocos.dart';
 import 'package:focux_app/features/treinos/widgets/ficha_contexto_treino.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
@@ -74,27 +73,6 @@ Widget _app(GoRouter router, {RotinaFila rotina = _rotina, Treino? treino}) =>
 
 void main() {
   setUp(() => GoogleFonts.config.allowRuntimeFetching = false);
-
-  group('blocos do treino', () {
-    final todos = [
-      _item(1, 'AQUECIMENTO', 0),
-      _item(2, 'TRABALHO', 1),
-      _item(3, 'TRABALHO', 2),
-      _item(4, 'ALONGAMENTO', 3),
-    ];
-
-    test('só os blocos com exercício, na ordem da tela', () {
-      final blocos = blocosComExercicio([...todos]..shuffle());
-      expect(blocos.map((b) => b.$1), ['AQUECIMENTO', 'TRABALHO', 'ALONGAMENTO']);
-      expect(blocos[1].$2.map((e) => e.id), containsAll([2, 3]));
-    });
-
-    test('Ajuste continua aparecendo se já houver exercício nele', () {
-      final blocos = blocosComExercicio([_item(5, 'AJUSTE', 0), _item(6, 'TRABALHO', 1)]);
-      expect(blocos.map((b) => b.$1), ['TRABALHO', 'AJUSTE']);
-    });
-
-  });
 
   group('contexto da ficha', () {
     Future<GoRouter> abrir(WidgetTester tester, {RotinaFila rotina = _rotina, int treinoId = 9}) async {

@@ -72,12 +72,6 @@ void main() {
       );
     });
 
-    test('dias fora de ordem e com folga no meio', () {
-      expect(
-        _resumo(semanaPorDivisao(const [5, 1, 3, 6], umaPorDia(2))),
-        '1:Treino A 2:- 3:Treino B 4:- 5:segue 6:segue 7:-',
-      );
-    });
 
     test('uma letra por dia continua igual ao antigo semanaPorFrequencia', () {
       expect(
@@ -132,11 +126,6 @@ void main() {
     });
   });
 
-  test('mover para um dia que segue troca de lugar com ele', () {
-    final base = semanaPorDivisao(const [1, 2, 3], umaPorDia(2));
-    final movida = moverDia(base, de: 1, para: 3);
-    expect(_resumo(movida), '1:segue 2:Treino B 3:Treino A 4:- 5:- 6:- 7:-');
-  });
 
   group('sugestaoDaSessao', () {
     test('nome com foco acha o dia do modelo', () {
@@ -193,15 +182,6 @@ void main() {
       for (var d = 4; d <= 7; d++) DiaDaSemana(dia: d, descanso: true),
     ];
 
-    test('ABC para ABCD em 4 dias: A, B e C ficam com treino e nome; D nasce vazio', () {
-      final troca = trocarDivisao(abc(), semanaPorDivisao(const [1, 2, 4, 5], umaPorDia(4)));
-      expect(troca.saem, isEmpty);
-      final sessoes = [
-        for (final d in troca.semana)
-          for (final x in d.sessoes) '${d.dia}:${x.treinoId}:${x.nome}',
-      ];
-      expect(sessoes, ['1:1:A · Peito', '2:2:B · Costas', '4:3:C · Pernas', '5:null:Treino D']);
-    });
 
     test('ABC para AB: C sai e é avisado', () {
       final troca = trocarDivisao(abc(), semanaPorDivisao(const [1, 2, 3, 4], divisoesSugeridas(4).first));

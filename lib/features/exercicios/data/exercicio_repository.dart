@@ -181,6 +181,9 @@ class Exercicio {
   bool get isProductionPending =>
       videoSource == 'PRODUCTION_PENDING' || videoSource == 'CURATION_REQUIRED';
 
+  /// Exercício oficial cuja demonstração ainda não foi gravada.
+  bool get videoEmBreve => isProductionPending && !hasPlayableMedia;
+
   String? get primaryGroupLabel =>
       grupoMuscularPrimario?.backendName ?? musculoAlvo;
 

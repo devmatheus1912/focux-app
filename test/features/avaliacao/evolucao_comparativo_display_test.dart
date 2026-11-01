@@ -17,10 +17,10 @@ void main() {
     expect(evolucaoComparativoFmtData(''), '—');
     expect(evolucaoComparativoFmtData('nao-e-data'), 'nao-e-data');
     expect(evolucaoComparativoFmtNum(null), '—');
-    expect(evolucaoComparativoFmtNum(72.46), '72.5');
+    expect(evolucaoComparativoFmtNum(72.46), '72,5');
     expect(evolucaoComparativoFmtValor(null, 'kg'), '—');
-    expect(evolucaoComparativoFmtValor(80, 'kg'), '80.0 kg');
-    expect(evolucaoComparativoFmtValor(22.1, ''), '22.1');
+    expect(evolucaoComparativoFmtValor(80, 'kg'), '80,0 kg');
+    expect(evolucaoComparativoFmtValor(22.1, ''), '22,1');
   });
 
   test('404 amigável conta como vazio', () {
@@ -70,7 +70,7 @@ void main() {
       atual: 78,
       menorEMelhor: true,
     );
-    expect(downGood.text, '-2.0');
+    expect(downGood.text, '-2,0');
     expect(downGood.tone, EvolucaoComparativoDeltaTone.better);
     expect(downGood.improved, isTrue);
 
@@ -79,7 +79,7 @@ void main() {
       atual: 82,
       menorEMelhor: true,
     );
-    expect(upBad.text, '+2.0');
+    expect(upBad.text, '+2,0');
     expect(upBad.tone, EvolucaoComparativoDeltaTone.worse);
 
     final upGood = evolucaoComparativoDelta(
@@ -94,7 +94,7 @@ void main() {
       atual: 70,
       menorEMelhor: true,
     );
-    expect(same.text, '+0.0');
+    expect(same.text, '+0,0');
     expect(same.tone, EvolucaoComparativoDeltaTone.same);
     expect(same.hasIcon, isFalse);
 

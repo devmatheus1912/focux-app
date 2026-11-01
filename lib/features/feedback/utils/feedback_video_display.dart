@@ -75,12 +75,3 @@ const feedbackVideoHelpTip =
     'O aluno envia o vídeo do exercício e você responde com a correção: '
     'toque no vídeo para assistir e escrever. Segure para remover. '
     'Disponível no Pro e no Enterprise.';
-
-bool feedbackVideoMatchesQuery({
-  required String comentario,
-  required String query,
-}) {
-  final q = query.trim().toLowerCase();
-  if (q.isEmpty) return true;
-  return comentario.toLowerCase().contains(q);
-}

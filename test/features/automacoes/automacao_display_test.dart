@@ -46,33 +46,4 @@ void main() {
     expect(automacaoPausarConfirmMessage(), contains('meio do fluxo'));
   });
 
-  test('busca casa nome, descrição e gatilho', () {
-    expect(
-      automacaoMatchesQuery(
-        nome: 'Boas-vindas',
-        descricao: 'Mensagem no primeiro dia',
-        triggerTipo: 'NOVO_ALUNO',
-        query: 'bem',
-      ),
-      isFalse,
-    );
-    expect(
-      automacaoMatchesQuery(
-        nome: 'Boas-vindas',
-        descricao: 'Mensagem no primeiro dia',
-        triggerTipo: 'NOVO_ALUNO',
-        query: 'primeiro',
-      ),
-      isTrue,
-    );
-    expect(
-      automacaoMatchesQuery(
-        nome: 'Cobrança',
-        descricao: null,
-        triggerTipo: 'INADIMPLENCIA',
-        query: 'inadimpl',
-      ),
-      isTrue,
-    );
-  });
 }

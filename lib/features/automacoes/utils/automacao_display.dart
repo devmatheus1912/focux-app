@@ -49,19 +49,6 @@ String automacaoLogStatusLabel(String status) {
   }
 }
 
-bool automacaoMatchesQuery({
-  required String nome,
-  required String? descricao,
-  required String triggerTipo,
-  required String query,
-}) {
-  final q = query.trim().toLowerCase();
-  if (q.isEmpty) return true;
-  if (nome.toLowerCase().contains(q)) return true;
-  if ((descricao ?? '').toLowerCase().contains(q)) return true;
-  return automacaoTriggerLabel(triggerTipo).toLowerCase().contains(q);
-}
-
 String automacaoFluxoStatusLabel({required bool ativo}) =>
     ativo ? 'Ativo' : 'Pausado';
 
