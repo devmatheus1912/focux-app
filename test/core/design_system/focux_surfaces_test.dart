@@ -135,8 +135,6 @@ void main() {
     expect(equipamentos!.spec.type, FocuxSurfaceType.s5);
     expect(FocuxSurfaces.resolveParent(equipamentos), '/alunos/9');
 
-    final fotos = FocuxSurfaces.resolve('/alunos/9/fotos');
-    expect(fotos!.spec.type, FocuxSurfaceType.s4);
-    expect(FocuxSurfaces.resolveParent(fotos), '/alunos/9');
+    expect(FocuxSurfaces.resolve('/alunos/9/fotos'), isNull);
   });
 }

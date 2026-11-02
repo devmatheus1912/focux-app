@@ -1,5 +1,12 @@
 part of 'anamnese_aluno_screen.dart';
 
+String _dataCurta(String? iso) {
+  final d = DateTime.tryParse(iso ?? '');
+  if (d == null) return '';
+  String dd(int n) => n.toString().padLeft(2, '0');
+  return '${dd(d.day)}/${dd(d.month)}/${d.year}';
+}
+
 extension on _AnamneseAlunoScreenState {
   /// Ficha enviada: leitura por seção, com "Editar" em cada uma.
   Widget _corpoResumo(S s, Anamnese a) {
@@ -7,7 +14,14 @@ extension on _AnamneseAlunoScreenState {
       (
         s.anamneseAlunoEtapaSaudeGeral,
         AnamneseEtapa.saudeGeral,
-        [(s.anamneseAlunoRespostasSim, '${_parq.values.where((v) => v == true).length}')],
+        [
+          (
+            s.anamneseAlunoRespostasSim,
+            _parq.values.any((v) => v == true)
+                ? '${_parq.values.where((v) => v == true).length}'
+                : s.anamneseAlunoSemRestricao,
+          ),
+        ],
       ),
       (
         s.anamneseAlunoHistorico,
@@ -29,7 +43,7 @@ extension on _AnamneseAlunoScreenState {
             (s.anamneseAlunoHorasSono, anamneseSonoHorasLabel(_sonoHoras)),
           (s.anamneseAlunoQualidadeSono, _qualidadeSonoCtrl.text),
           (s.anamneseAlunoEstresse, _estresseCtrl.text),
-          (s.anamneseAlunoTabagismo, _tabagismoCtrl.text),
+          (s.anamneseAlunoTabagismo, anamneseValorLegivel(_tabagismoCtrl.text)),
           (s.anamneseAlunoAlcool, _alcoolCtrl.text),
         ],
       ),
@@ -58,45 +72,72 @@ extension on _AnamneseAlunoScreenState {
         ),
         children: [
           FxStatusBanner(
-            title: s.anamneseAlunoEnviadaTitulo,
-            body: s.anamneseAlunoEnviadaTexto,
-            tone: a.isPrecisaAtestado ? FxBannerTone.warn : FxBannerTone.success,
+            title:
+                a.isRevisada
+                    ? s.anamneseAlunoRevisadaTitulo
+                    : s.anamneseAlunoEnviadaTitulo,
+            body:
+                a.isRevisada
+                    ? s.anamneseAlunoRevisadaTexto(_dataCurta(a.revisadaEm))
+                    : s.anamneseAlunoEnviadaTexto,
+            tone: FxBannerTone.success,
           ),
           for (final (titulo, etapa, linhas) in secoes) ...[
             const SizedBox(height: FxSettingsLayout.groupGap),
             FxSettingsGroup(
               header: titulo,
               children: [
-                for (final (rotulo, valor) in linhas)
-                  if (valor.trim().isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: TokensStrip.s1,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            rotulo,
-                            style: FocuxHubTypography.bodyMuted(color: chrome.mute),
-                          ),
-                          Text(
-                            valor.trim(),
-                            style: FocuxHubTypography.body(color: chrome.ink),
-                          ),
-                        ],
-                      ),
+                Row(
+                  children: [
+                    Expanded(
+                      child:
+                          linhas.any((l) => l.$2.trim().isNotEmpty)
+                              ? Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  for (final (rotulo, valor) in linhas)
+                                    if (valor.trim().isNotEmpty)
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: TokensStrip.s1,
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              rotulo,
+                                              style: FocuxHubTypography.bodyMuted(
+                                                color: chrome.mute,
+                                              ),
+                                            ),
+                                            Text(
+                                              valor.trim(),
+                                              style: FocuxHubTypography.body(
+                                                color: chrome.ink,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                ],
+                              )
+                              : Text(
+                                s.anamneseAlunoNadaInformado,
+                                style: FocuxHubTypography.bodyMuted(
+                                  color: chrome.mute,
+                                ),
+                              ),
                     ),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: FxTonalButton(
-                    label: s.anamneseAlunoEditar,
-                    compact: true,
-                    onPressed: () {
-                      setState(() => _editando = true);
-                      _irPara(etapa);
-                    },
-                  ),
+                    IconButton(
+                      tooltip: s.anamneseAlunoEditar,
+                      icon: Icon(Icons.edit_outlined, color: chrome.mute),
+                      onPressed: () {
+                        setState(() => _editando = true);
+                        _irPara(etapa);
+                      },
+                    ),
+                  ],
                 ),
               ],
             ),

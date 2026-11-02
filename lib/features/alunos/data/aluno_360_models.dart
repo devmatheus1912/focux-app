@@ -130,10 +130,16 @@ class Aluno360AnamneseResumo {
   /// Same codes as [AnamneseStatus] (`NAO_INICIADA`, `SOLICITADA`, …).
   final String? status;
 
-  const Aluno360AnamneseResumo({this.status});
+  /// Quando entrou no status atual.
+  final String? desde;
+
+  const Aluno360AnamneseResumo({this.status, this.desde});
 
   factory Aluno360AnamneseResumo.fromJson(Map<String, dynamic> json) =>
-      Aluno360AnamneseResumo(status: json['status'] as String?);
+      Aluno360AnamneseResumo(
+        status: json['status'] as String?,
+        desde: json['desde'] as String?,
+      );
 }
 
 class Aluno360Ferramentas {

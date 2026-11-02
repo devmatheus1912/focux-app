@@ -38,7 +38,9 @@ import '../../../core/widgets/fx_anel.dart';
 import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/fx_metric_strip.dart';
 import '../../../core/theme/shell_chrome.dart';
+import '../../evolucao/providers/evolucao_home_provider.dart';
 import '../../evolucao/providers/metas_provider.dart';
+import '../../evolucao/widgets/evolucao_hero.dart';
 
 
 class RelatorioScreen extends ConsumerStatefulWidget {
@@ -432,6 +434,10 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
           ),
           children: [
             _topo(dados),
+            if (ref.watch(evolucaoHomeProvider(widget.alunoId)).value?.aneis case final aneis?) ...[
+              const SizedBox(height: TokensStrip.s3),
+              EvolucaoMiniAneis(aneis: aneis, doPersonal: true),
+            ],
             const SizedBox(height: TokensStrip.s3),
             Align(
               alignment: Alignment.centerLeft,

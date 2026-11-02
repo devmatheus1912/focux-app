@@ -47,7 +47,7 @@ class CheckinWorkoutHeader extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(
           FxSettingsLayout.pageInset,
           TokensStrip.s2,
-          TokensStrip.s3,
+          FxSettingsLayout.pageInset,
           0,
         ),
         child: Column(
@@ -55,24 +55,29 @@ class CheckinWorkoutHeader extends StatelessWidget {
           children: [
             Row(
               children: [
-                Flexible(
-                  child: Text(
-                    treinoNome,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: FocuxHubTypography.sectionTitle(
-                      context,
-                      color: chrome.ink,
-                    ),
+                Expanded(
+                  child: Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          treinoNome,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: FocuxHubTypography.sectionTitle(
+                            context,
+                            color: chrome.ink,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: TokensStrip.s2),
+                      Text(
+                        contextLine,
+                        maxLines: 1,
+                        style: FocuxTypography.bodySmall(color: chrome.mute),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(width: TokensStrip.s2),
-                Text(
-                  contextLine,
-                  maxLines: 1,
-                  style: FocuxTypography.bodySmall(color: chrome.mute),
-                ),
-                const Spacer(),
                 if (onMais != null)
                   IconButton(
                     tooltip: s.checkinMais,
@@ -96,10 +101,7 @@ class CheckinWorkoutHeader extends StatelessWidget {
             ),
             if (totalExercicios > 1)
               Padding(
-                padding: const EdgeInsets.only(
-                  right: TokensStrip.s1,
-                  top: TokensStrip.s1,
-                ),
+                padding: const EdgeInsets.only(top: TokensStrip.s1),
                 child: Semantics(
                   label: progressoLeitura,
                   excludeSemantics: true,

@@ -177,7 +177,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.text('3 treinos em 7 dias'), findsOneWidget);
+    expect(find.text('3 de 7 dias com treino'), findsOneWidget);
     expect(find.text('7 dias'), findsOneWidget);
     expect(find.textContaining('esta semana'), findsNothing);
   });

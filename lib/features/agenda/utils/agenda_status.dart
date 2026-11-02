@@ -16,6 +16,11 @@ bool agendaStatusIsActionable(String status) {
 
 bool agendaStatusNeedsConfirm(String status) => status == 'AGENDADO';
 
+/// Sessão ativa e futura se cancela: o aluno precisa ser avisado.
+bool agendaPodeExcluir(Agendamento ag, {DateTime? now}) =>
+    !agendaStatusIsActionable(ag.status) ||
+    !ag.fim.isAfter(now ?? DateTime.now());
+
 String agendaStatusLabel(String status) {
   switch (status) {
     case 'AGENDADO':

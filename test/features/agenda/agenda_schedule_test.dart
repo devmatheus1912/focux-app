@@ -40,17 +40,6 @@ void main() {
     expect(agendaEventTitle(alunoNome: '  ', titulo: 'Avaliação'), 'Avaliação');
   });
 
-  test('subtítulo do sheet mostra só o horário', () {
-    expect(
-      agendaEventSheetSubtitle(
-        inicio: DateTime(2026, 8, 19, 8, 30),
-        fim: DateTime(2026, 8, 19, 9, 30),
-        statusLabel: 'Agendado',
-      ),
-      '08:30–09:30',
-    );
-  });
-
   test('iso date e hora', () {
     expect(agendaIsoDate(DateTime(2026, 8, 19)), '2026-08-19');
     expect(agendaHm(DateTime(2026, 8, 19, 8, 30)), '08:30');

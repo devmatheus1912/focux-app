@@ -25,6 +25,7 @@ import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/queued_offline_exit.dart';
 import '../../alunos/data/aluno_contact_utils.dart';
+import '../../alunos/utils/aluno_status.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
@@ -54,6 +55,7 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
   static var _ultimaDuracao = agendaDuracaoPadraoMin;
 
   final _titulo = TextEditingController();
+  final _nota = TextEditingController();
   final _meses = <DateTime, List<Agendamento>>{};
   late final AgendaNovoArgs _args;
   int? _alunoId;
@@ -109,6 +111,7 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
   @override
   void dispose() {
     _titulo.dispose();
+    _nota.dispose();
     super.dispose();
   }
 
@@ -154,7 +157,8 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
     await _pickHorario(aviso: message);
   }
 
-  Future<void> _showAlunoSheet(List<Aluno> alunos) async {
+  Future<void> _showAlunoSheet(List<Aluno> todos) async {
+    final alunos = todos.where(alunoStatusAtivo).toList();
     final aluno = await showFxHomeSheet<Aluno>(
       context,
       builder: (_) => AgendaAlunoSheet(alunos: alunos, selectedId: _alunoId),
@@ -201,7 +205,7 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
         final resultado = await repo.criarLote(alunoId, [
           for (final d in datas)
             (inicio: d, fim: d.add(Duration(minutes: _duracao))),
-        ], titulo);
+        ], titulo, nota: _nota.text.trim());
         invalidateAgendaCaches(ref);
         AnalyticsService.instance.track(ProductEvents.agendaCreated);
         if (!mounted) return;
@@ -210,7 +214,13 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
           s.agendaLoteResultado(resultado.criados, resultado.pulados),
         );
       } else {
-        await repo.criar(alunoId, inicio, fim, titulo.isEmpty ? null : titulo);
+        await repo.criar(
+          alunoId,
+          inicio,
+          fim,
+          titulo.isEmpty ? null : titulo,
+          nota: _nota.text.trim(),
+        );
         invalidateAgendaCaches(ref);
         AnalyticsService.instance.track(ProductEvents.agendaCreated);
         if (!mounted) return;
@@ -417,6 +427,14 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
                     inputFormatters: [
                       LengthLimitingTextInputFormatter(agendaTituloMax),
                     ],
+                    rotuloVisivel: true,
+                  ),
+                  AlunoInsetFormField(
+                    controller: _nota,
+                    label: S.of(context).agendaNotaCampo,
+                    icon: Icons.notes_rounded,
+                    maxLines: 3,
+                    textCapitalization: TextCapitalization.sentences,
                     rotuloVisivel: true,
                     showDivider: false,
                   ),

@@ -14,7 +14,7 @@ Agendamento _ag(int id, int hora, String nome) => Agendamento(
   status: 'AGENDADO',
 );
 
-Future<List<int>> _pump(WidgetTester tester, {bool expand = false}) async {
+Future<List<int>> _pump(WidgetTester tester) async {
   tester.view.physicalSize = const Size(390, 844);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
@@ -33,7 +33,6 @@ Future<List<int>> _pump(WidgetTester tester, {bool expand = false}) async {
           ]),
           onSelect: (_) {},
           onSwipe: swipes.add,
-          expand: expand,
         ),
       ),
     ),
@@ -45,24 +44,6 @@ Future<List<int>> _pump(WidgetTester tester, {bool expand = false}) async {
 void main() {
   setUp(() => GoogleFonts.config.allowRuntimeFetching = false);
 
-  testWidgets('tela inteira: semanas esticam e o dia mostra a contagem', (
-    tester,
-  ) async {
-    await _pump(tester, expand: true);
-    expect(find.text('3'), findsWidgets);
-    expect(find.text('7h Ana'), findsNothing);
-    final cell = tester.getSize(
-      find.bySemanticsLabel(
-        agendaMonthDayA11y(
-          day: DateTime(2026, 10, 7),
-          count: 3,
-          isToday: false,
-        ),
-      ),
-    );
-    expect(cell.height, greaterThan(AgendaMonthGrid.cellHeight));
-    expect(tester.takeException(), isNull);
-  });
 
   testWidgets('leitor de tela ouve a contagem do dia', (tester) async {
     await _pump(tester);

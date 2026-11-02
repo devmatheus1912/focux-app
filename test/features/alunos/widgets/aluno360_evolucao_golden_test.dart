@@ -1,6 +1,8 @@
 @Tags(['golden'])
 library;
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -16,6 +18,8 @@ import 'package:focux_app/features/alunos/widgets/aluno360_weight_activity_card.
 import '../../../support/riverpod_seeds.dart';
 import '../../../support/tolerant_golden_comparator.dart';
 import 'package:focux_app/features/evolucao/providers/metas_provider.dart';
+import 'package:focux_app/features/evolucao/data/evolucao_repository.dart';
+import 'package:focux_app/features/evolucao/providers/evolucao_home_provider.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -63,6 +67,9 @@ void main() {
     return ProviderScope(
       overrides: [
         seededTimeline360(42, Timeline360PagedState(events: timelineEvents)),
+        evolucaoHomeProvider(42).overrideWith(
+          (ref) => Completer<EvolucaoHomeBundle>().future,
+        ),
         metasDoAlunoProvider(42).overrideWith((ref) async => const []),
         alunoPesoHistoricoProvider(42).overrideWith((ref) async => const []),
       ],

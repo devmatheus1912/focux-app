@@ -10,15 +10,12 @@ import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
-import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
-import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_motion.dart';
-import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/alunos/widgets/aluno_inset_form_field.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -32,13 +29,10 @@ class EvolucaoComparativoScreen extends ConsumerStatefulWidget {
   final int alunoId;
   final String alunoNome;
 
-  /// Aba da Evolução: sem cabeçalho próprio.
-  final bool embutida;
   const EvolucaoComparativoScreen({
     super.key,
     required this.alunoId,
     this.alunoNome = 'Aluno',
-    this.embutida = false,
   });
   @override
   ConsumerState<EvolucaoComparativoScreen> createState() =>
@@ -53,7 +47,6 @@ class _EvolucaoComparativoScreenState
   bool _semAvaliacao = false;
   bool _compartilhando = false;
   bool _registrando = false;
-  DateTime? _fetchedAt;
 
   @override
   void initState() {
@@ -75,7 +68,6 @@ class _EvolucaoComparativoScreenState
       setState(() {
         _comparativo = c;
         _loading = false;
-        _fetchedAt = DateTime.now();
       });
     } catch (e) {
       final msg = friendlyError(e);
@@ -92,30 +84,6 @@ class _EvolucaoComparativoScreenState
     }
   }
 
-  void _showHelp() {
-    showFxHelpSheet(
-      context,
-      title: 'Comparativo',
-      subtitle: evolucaoComparativoHubSubtitle(),
-      tips: const [
-        FxHelpTip(
-          'Janela',
-          'Primeiro e último valor de cada métrica, somando medidas e avaliações físicas.',
-          icon: 'trend',
-        ),
-        FxHelpTip(
-          'Delta',
-          'A diferença não leva cor: ganhar ou perder depende do objetivo do aluno.',
-          icon: 'target',
-        ),
-        FxHelpTip(
-          'Chat',
-          'Compartilhar envia um resumo na conversa. Confirme antes — o aluno vê a mensagem.',
-          icon: 'message-circle',
-        ),
-      ],
-    );
-  }
 
   Future<void> _compartilhar() async {
     if (_compartilhando || _comparativo == null) return;
@@ -309,18 +277,7 @@ class _EvolucaoComparativoScreenState
           if (didPop) return;
           safePopOrGo(context, '/alunos/${widget.alunoId}');
         },
-        child: widget.embutida ? corpo : FxShellScaffold(
-          useMesh: true,
-          appBar: FxShellAppBar(
-            title: 'Comparativo',
-            subtitle: FxHubFreshness.fromFetchedAt(_fetchedAt),
-            onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
-            actions: [
-              FxHelpIconButton(tooltip: 'Como comparar', onTap: _showHelp),
-            ],
-          ),
-          body: corpo,
-        ),
+        child: corpo,
       ),
     );
   }

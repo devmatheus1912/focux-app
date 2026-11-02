@@ -1,3 +1,7 @@
+import 'dart:async';
+
+import 'package:focux_app/features/evolucao/data/evolucao_repository.dart';
+import 'package:focux_app/features/evolucao/providers/evolucao_home_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -30,6 +34,9 @@ void main() {
   Widget harness(Widget child) {
     return ProviderScope(
       overrides: [
+        evolucaoHomeProvider(42).overrideWith(
+          (ref) => Completer<EvolucaoHomeBundle>().future,
+        ),
         metasDoAlunoProvider(42).overrideWith((ref) async => const []),
         alunoPesoHistoricoProvider(42).overrideWith((ref) async => const []),
       ],

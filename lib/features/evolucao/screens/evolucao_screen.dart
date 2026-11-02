@@ -9,17 +9,19 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/fx_utils.dart';
+import '../../../core/utils/pt_br_display.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
-import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_grouped_action_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/providers/aluno_detail_providers.dart';
+import '../../alunos/providers/alunos_provider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../alunos/utils/aluno360_medida_plausivel.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
@@ -33,9 +35,7 @@ import '../providers/evolucao_home_provider.dart';
 import '../utils/evolucao_home_client_cache.dart';
 import '../../avaliacao/screens/evolucao_comparativo_screen.dart';
 import '../widgets/escolher_exercicio_campo.dart';
-import '../../../core/widgets/fx_tonal_button.dart';
 import '../data/meta_corporal.dart';
-import '../providers/metas_provider.dart';
 import '../widgets/evolucao_conquistas.dart';
 import '../widgets/evolucao_hero.dart';
 import '../widgets/evolucao_metas_bloco.dart';
@@ -54,27 +54,39 @@ class EvolucaoScreen extends ConsumerStatefulWidget {
     super.key,
     required this.alunoId,
     required this.alunoNome,
+    this.abaInicial = EvolucaoHubView.medidas,
   });
+
+  /// Aberta direto em uma aba, como Comparar a partir do 360.
+  final EvolucaoHubView abaInicial;
 
   @override
   ConsumerState<EvolucaoScreen> createState() => _EvolucaoScreenState();
 }
 
 class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
-  EvolucaoHubView _view = EvolucaoHubView.medidas;
+  late EvolucaoHubView _view = widget.abaInicial;
+
+  /// Fotos e Comparar só carregam quando abertas.
+  late final Set<EvolucaoHubView> _abertas = {_view};
+
+  /// Quem chega por notificação ou tarefa não traz o nome na rota.
+  String get _nome =>
+      widget.alunoNome != 'Aluno'
+          ? widget.alunoNome
+          : ref.watch(alunoProvider(widget.alunoId)).value?.nome ?? widget.alunoNome;
 
   void _registrar() {
     if (_view == EvolucaoHubView.medidas) {
-      _mostrarDialogMedida();
+      _registrarMedida();
     } else {
-      _mostrarDialogRecorde();
+      _formularioRecorde();
     }
   }
 
   Future<void> _atualizar() async {
     EvolucaoHomeClientCache.invalidate(widget.alunoId);
     ref.invalidate(evolucaoHomeProvider(widget.alunoId));
-    ref.invalidate(metasDoAlunoProvider(widget.alunoId));
     await ref.read(evolucaoHomeProvider(widget.alunoId).future);
   }
 
@@ -143,24 +155,22 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
   @override
   Widget build(BuildContext context) {
     final homeAsync = ref.watch(evolucaoHomeProvider(widget.alunoId));
-    final medidasAsync = homeAsync.whenData((h) => h.medidas);
-    final recordesAsync = homeAsync.whenData((h) => h.recordes);
-    final medidas = medidasAsync.asData?.value;
-    final metas =
-        ref.watch(metasDoAlunoProvider(widget.alunoId)).value ?? const [];
+    final home = homeAsync.value;
+    final medidas = home?.medidas ?? const <MedidaCorporal>[];
+    final recordes = home?.recordes ?? const <RecordePessoal>[];
+    final metas = home?.metas ?? const <MetaCorporal>[];
+    final aneis = home?.aneis ?? const EvolucaoAneis();
     final ocupadas = {
       for (final m in metas)
         if (m.aberta) m.metrica,
     };
-    final conquistas = conquistasDe(
-      metas,
-      recordesAsync.asData?.value ?? const [],
-    );
+    final conquistas = conquistasDe(metas, recordes);
+    final nome = _nome;
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
 
     return fxScreenA11yScope(
-      label: 'Evolução — ${widget.alunoNome}',
+      label: 'Evolução — $nome',
       child: PopScope(
         canPop: false,
         onPopInvokedWithResult: (didPop, _) {
@@ -171,17 +181,13 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
           useMesh: true,
           appBar: FxShellAppBar(
             title: 'Evolução',
-            subtitle: fxTitleCaseName(widget.alunoNome),
+            subtitle: fxTitleCaseName(nome),
             onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
             actions: [
               IconButton(
-                tooltip: 'Enviar no chat',
-                icon: const Icon(Icons.chat_bubble_outline_rounded),
-                onPressed: _compartilharNoChat,
-              ),
-              FxHelpIconButton(
-                tooltip: 'Como usar a evolução',
-                onTap: () => showEvolucaoHelpSheet(context),
+                tooltip: ptS.evolucaoMais,
+                icon: const Icon(Icons.more_horiz_rounded),
+                onPressed: () => _maisAcoes(ocupadas, aneis.cicloMedidasDias),
               ),
             ],
           ),
@@ -219,34 +225,8 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                               child: Column(
                                 children: [
                                   EvolucaoHero(
-                                    medidas: medidas ?? const [],
-                                    metas: metas,
-                                    acao:
-                                        metaMetricas.every(
-                                              (m) => ocupadas.contains(m),
-                                            )
-                                            ? null
-                                            : FxTonalButton(
-                                              label: ptS.metaDefinir,
-                                              icon: Icons.flag_outlined,
-                                              compact: true,
-                                              onPressed: () async {
-                                                final salvou =
-                                                    await abrirFormularioDeMeta(
-                                                      context,
-                                                      ref,
-                                                      alunoId: widget.alunoId,
-                                                      ocupadas: ocupadas,
-                                                    );
-                                                if (salvou) {
-                                                  ref.invalidate(
-                                                    metasDoAlunoProvider(
-                                                      widget.alunoId,
-                                                    ),
-                                                  );
-                                                }
-                                              },
-                                            ),
+                                    aneis: aneis,
+                                    onDefinirMeta: () => _definirMeta(ocupadas),
                                   ),
                                   const SizedBox(height: TokensStrip.s4),
                                   AlunoSegmentedChoice(
@@ -254,12 +234,10 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                                     selected: _view.name,
                                     isDark: chrome.isDark,
                                     onSelect:
-                                        (value) => setState(
-                                          () =>
-                                              _view = evolucaoHubViewFromSecao(
-                                                value,
-                                              ),
-                                        ),
+                                        (value) => setState(() {
+                                          _view = evolucaoHubViewFromSecao(value);
+                                          _abertas.add(_view);
+                                        }),
                                   ),
                                 ],
                               ),
@@ -269,9 +247,11 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                                 index: _view.index,
                                 children: [
                                   EvolucaoMedidasAba(
-                                    medidas: medidas ?? const [],
+                                    medidas: medidas,
+                                    metas: metas,
+                                    gordura: home?.gordura ?? const [],
                                     vazioSubtitulo:
-                                        'Registre peso e circunferências de ${satelliteFirstName(widget.alunoNome)} para acompanhar a evolução.',
+                                        'Registre peso e circunferências de ${satelliteFirstName(nome)} para acompanhar a evolução.',
                                     onAtualizar: _atualizar,
                                     onAbrirMedida: _abrirMedida,
                                     topo: [
@@ -279,6 +259,8 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                                         alunoId: widget.alunoId,
                                         metas: metas,
                                       ),
+                                    ],
+                                    depois: [
                                       if (conquistas.isNotEmpty) ...[
                                         EvolucaoConquistas(
                                           conquistas: conquistas,
@@ -290,22 +272,25 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                                     ],
                                   ),
                                   EvolucaoRecordesAba(
-                                    recordes:
-                                        recordesAsync.asData?.value ?? const [],
+                                    recordes: recordes,
                                     vazioSubtitulo:
-                                        'Marque o primeiro recorde de ${satelliteFirstName(widget.alunoNome)} após um check-in ou treino forte.',
+                                        'Marque o primeiro recorde de ${satelliteFirstName(nome)} após um check-in ou treino forte.',
                                     onAtualizar: _atualizar,
+                                    onEditar: (r) => _formularioRecorde(recorde: r),
+                                    onExcluir: _excluirRecorde,
                                   ),
-                                  EvolucaoFotosScreen(
-                                    alunoId: widget.alunoId,
-                                    alunoNome: widget.alunoNome,
-                                    embutida: true,
-                                  ),
-                                  EvolucaoComparativoScreen(
-                                    alunoId: widget.alunoId,
-                                    alunoNome: widget.alunoNome,
-                                    embutida: true,
-                                  ),
+                                  _abertas.contains(EvolucaoHubView.fotos)
+                                      ? EvolucaoFotosScreen(
+                                        alunoId: widget.alunoId,
+                                        alunoNome: nome,
+                                      )
+                                      : const SizedBox.shrink(),
+                                  _abertas.contains(EvolucaoHubView.comparativo)
+                                      ? EvolucaoComparativoScreen(
+                                        alunoId: widget.alunoId,
+                                        alunoNome: nome,
+                                      )
+                                      : const SizedBox.shrink(),
                                 ],
                               ),
                             ),
@@ -331,7 +316,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                       label:
                           _view == EvolucaoHubView.medidas
                               ? 'Registrar medida'
-                              : 'Registrar recorde',
+                              : ptS.evolucaoRecordeNovoTitulo,
                       onPressed: _registrar,
                     ),
                   ),
@@ -343,146 +328,62 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
     );
   }
 
-  Future<void> _mostrarDialogMedida() async {
-    final pesoCtrl = TextEditingController();
-    final abdomenCtrl = TextEditingController();
-    final quadrilCtrl = TextEditingController();
-    final bracoCtrl = TextEditingController();
-    final gorduraCtrl = TextEditingController();
-    final massaCtrl = TextEditingController();
-    try {
-      Future<bool> abrirFormulario() => showFxFormSheet(
-        context,
-        title: 'Nova medida',
-        icon: Icons.monitor_weight_outlined,
-        confirmLabel: 'Salvar',
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            AlunoInsetFormField(
-              rotuloVisivel: true,
-              controller: pesoCtrl,
-              label: 'Peso (kg)',
-              icon: Icons.monitor_weight_outlined,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-            ),
-            AlunoInsetFormField(
-              rotuloVisivel: true,
-              controller: abdomenCtrl,
-              label: ptS.evolucaoCampoCintura,
-              icon: Icons.straighten_outlined,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-            ),
-            AlunoInsetFormField(
-              rotuloVisivel: true,
-              controller: quadrilCtrl,
-              label: 'Quadril (cm)',
-              icon: Icons.straighten_outlined,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-            ),
-            AlunoInsetFormField(
-              rotuloVisivel: true,
-              controller: bracoCtrl,
-              label: 'Braço (cm)',
-              icon: Icons.straighten_outlined,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-            ),
-            AlunoInsetFormField(
-              rotuloVisivel: true,
-              controller: gorduraCtrl,
-              label: 'Gordura corporal (%)',
-              icon: Icons.pie_chart_outline_outlined,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-            ),
-            AlunoInsetFormField(
-              rotuloVisivel: true,
-              controller: massaCtrl,
-              label: 'Massa magra (%)',
-              icon: Icons.fitness_center_outlined,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              showDivider: false,
-            ),
-          ],
-        ),
+  Future<void> _registrarMedida() async {
+    final bundle = ref.read(evolucaoHomeProvider(widget.alunoId)).value;
+    NovaMedida? nova;
+    // Valor impossível (458 kg, 818 %) pede confirmação; "Corrigir" reabre.
+    while (true) {
+      nova = await novaMedidaSheet(context, medidas: bundle?.medidas ?? const []);
+      if (nova == null || !mounted) return;
+      final suspeitas = medidasSuspeitas(
+        peso: nova.peso,
+        gordura: nova.gordura,
+        massaMagra: nova.massa,
       );
-      double? ler(TextEditingController c) =>
-          double.tryParse(c.text.replaceAll(',', '.'));
-      // Valor impossível (458 kg, 818 %) pede confirmação; os campos ficam
-      // como estão para o personal corrigir sem digitar tudo de novo.
-      while (true) {
-        final saved = await abrirFormulario();
-        if (saved != true) return;
-        final suspeitas = medidasSuspeitas(
-          peso: ler(pesoCtrl),
-          gordura: ler(gorduraCtrl),
-          massaMagra: ler(massaCtrl),
-        );
-        if (suspeitas.isEmpty) break;
-        if (!mounted) return;
-        final manter = await showFxConfirmSheet(
-          context,
-          title: S.of(context).aluno360ConfirmeValoresTitulo,
-          message: S
-              .of(context)
-              .aluno360ConfirmeValoresMensagem(suspeitas.join(', ')),
-          confirmLabel: S.of(context).aluno360ConfirmeValoresSalvar,
-          cancelLabel: S.of(context).aluno360ConfirmeValoresCorrigir,
-          icon: Icons.warning_amber_rounded,
-        );
-        if (manter) break;
-      }
-      final peso = double.tryParse(pesoCtrl.text.replaceAll(',', '.'));
-      final cintura = double.tryParse(abdomenCtrl.text.replaceAll(',', '.'));
-      final quadril = double.tryParse(quadrilCtrl.text.replaceAll(',', '.'));
-      final braco = double.tryParse(bracoCtrl.text.replaceAll(',', '.'));
-      final gordura = double.tryParse(gorduraCtrl.text.replaceAll(',', '.'));
-      final massa = double.tryParse(massaCtrl.text.replaceAll(',', '.'));
-      if (peso == null &&
-          cintura == null &&
-          quadril == null &&
-          braco == null &&
-          gordura == null &&
-          massa == null) {
-        if (!mounted) return;
-        FeedbackHelper.showError(context, 'Informe ao menos um valor.');
-        return;
-      }
-      final api = ref.read(apiClientProvider);
+      if (suspeitas.isEmpty) break;
+      final manter = await showFxConfirmSheet(
+        context,
+        title: S.of(context).aluno360ConfirmeValoresTitulo,
+        message: S.of(context).aluno360ConfirmeValoresMensagem(suspeitas.join(', ')),
+        confirmLabel: S.of(context).aluno360ConfirmeValoresSalvar,
+        cancelLabel: S.of(context).aluno360ConfirmeValoresCorrigir,
+        icon: Icons.warning_amber_rounded,
+      );
+      if (manter || !mounted) break;
+    }
+    final m = nova;
+    if (!mounted) return;
+    if (m.peso == null &&
+        m.cintura == null &&
+        m.quadril == null &&
+        m.braco == null &&
+        m.gordura == null &&
+        m.massa == null) {
+      FeedbackHelper.showError(context, ptS.evolucaoInformeValor);
+      return;
+    }
+    final api = ref.read(apiClientProvider);
+    try {
       await EvolucaoRepository(api).adicionarMedida(
         widget.alunoId,
-        peso: peso,
-        cintura: cintura,
-        quadril: quadril,
-        braco: braco,
+        data: m.data,
+        peso: m.peso,
+        cintura: m.cintura,
+        quadril: m.quadril,
+        braco: m.braco,
       );
-      // Medida já persistiu — refresh UI mesmo se avaliação complementar falhar.
-      EvolucaoHomeClientCache.invalidate(widget.alunoId);
-      ref.invalidate(evolucaoHomeProvider(widget.alunoId));
-      ref.invalidate(metasDoAlunoProvider(widget.alunoId));
+      // Medida já persistiu: a tela atualiza mesmo se a avaliação falhar.
       await invalidateAluno360Providers(ref, widget.alunoId);
-      if (gordura != null || massa != null) {
+      if (m.gordura != null || m.massa != null) {
         try {
           await AvaliacaoRepository(api).registrar(widget.alunoId, {
-            if (peso != null) 'pesoKg': peso,
-            if (cintura != null) 'cinturaCm': cintura,
-            if (quadril != null) 'quadrilCm': quadril,
-            if (gordura != null) 'percGordura': gordura,
-            if (massa != null) 'percMassa': massa,
+            if (m.peso != null) 'pesoKg': m.peso,
+            if (m.cintura != null) 'cinturaCm': m.cintura,
+            if (m.quadril != null) 'quadrilCm': m.quadril,
+            if (m.gordura != null) 'percGordura': m.gordura,
+            if (m.massa != null) 'percMassa': m.massa,
             'observacoes': 'Registrado via evolução (nova medida)',
           });
-          ref.invalidate(metasDoAlunoProvider(widget.alunoId));
           await invalidateAluno360Providers(ref, widget.alunoId);
         } catch (avaliacaoErr) {
           if (mounted) {
@@ -490,87 +391,191 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
               context,
               friendlyError(
                 avaliacaoErr,
-                fallback:
-                    'Medida salva. Gordura/massa não entraram na avaliação.',
+                fallback: 'Medida salva. Gordura/massa não entraram na avaliação.',
               ),
             );
           }
           return;
         }
       }
-      if (!mounted) return;
-      FeedbackHelper.showSuccess(context, 'Medida adicionada!');
+      if (mounted) FeedbackHelper.showSuccess(context, ptS.evolucaoMedidaAdicionada);
     } catch (e) {
-      if (!mounted) return;
-      FeedbackHelper.showError(context, friendlyError(e));
-    } finally {
-      pesoCtrl.dispose();
-      abdomenCtrl.dispose();
-      quadrilCtrl.dispose();
-      bracoCtrl.dispose();
-      gorduraCtrl.dispose();
-      massaCtrl.dispose();
+      if (mounted) FeedbackHelper.showError(context, friendlyError(e));
     }
   }
 
-  Future<void> _mostrarDialogRecorde() async {
-    final exercicioCtrl = TextEditingController();
-    final cargaCtrl = TextEditingController();
-    final repsCtrl = TextEditingController();
+  /// Novo recorde ou, com [recorde], correção de um existente.
+  Future<void> _formularioRecorde({RecordePessoal? recorde}) async {
+    final recordes = ref.read(evolucaoHomeProvider(widget.alunoId)).value?.recordes ?? const [];
+    final vistos = <String>{};
+    final recentes = <ExercicioEscolhido>[
+      for (final r in recordes)
+        if (vistos.add(r.exercicioNome.toLowerCase()))
+          (id: r.exercicioId, nome: r.exercicioNome),
+    ].take(5).toList();
+    ExercicioEscolhido? escolhido =
+        recorde == null ? null : (id: recorde.exercicioId, nome: recorde.exercicioNome);
+    final cargaCtrl = TextEditingController(
+      text: recorde?.cargaKg == null ? '' : formatBrDecimal(recorde!.cargaKg!),
+    );
+    final repsCtrl = TextEditingController(text: recorde?.repeticoes?.toString() ?? '');
     try {
       final saved = await showFxFormSheet(
         context,
-        title: 'Novo recorde',
+        title: recorde == null ? ptS.evolucaoRecordeNovoTitulo : ptS.evolucaoRecordeEditarTitulo,
         icon: Icons.emoji_events_outlined,
-        confirmLabel: 'Salvar',
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            EscolherExercicioCampo(controller: exercicioCtrl),
-            AlunoInsetFormField(
-              rotuloVisivel: true,
-              controller: cargaCtrl,
-              label: 'Carga (kg)',
-              icon: Icons.tune_outlined,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
+        confirmLabel: ptS.evolucaoSalvar,
+        child: StatefulBuilder(
+          builder:
+              (context, setSheet) => Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  EscolherExercicioCampo(
+                    escolhido: escolhido,
+                    recentes: recentes,
+                    onEscolher: (e) => setSheet(() => escolhido = e),
+                  ),
+                  AlunoInsetFormField(
+                    rotuloVisivel: true,
+                    controller: cargaCtrl,
+                    label: ptS.evolucaoCampoCarga,
+                    icon: Icons.tune_outlined,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  ),
+                  AlunoInsetFormField(
+                    rotuloVisivel: true,
+                    controller: repsCtrl,
+                    label: ptS.evolucaoCampoReps,
+                    icon: Icons.repeat_outlined,
+                    keyboardType: TextInputType.number,
+                    showDivider: false,
+                  ),
+                ],
               ),
-            ),
-            AlunoInsetFormField(
-              rotuloVisivel: true,
-              controller: repsCtrl,
-              label: 'Repetições (opcional)',
-              icon: Icons.repeat_outlined,
-              keyboardType: TextInputType.number,
-              showDivider: false,
-            ),
-          ],
         ),
       );
-      if (saved != true) return;
-      final nome = exercicioCtrl.text.trim();
-      if (nome.isEmpty) {
-        if (!mounted) return;
-        FeedbackHelper.showError(context, 'Informe o exercício.');
+      if (saved != true || !mounted) return;
+      final exercicio = escolhido;
+      final carga = double.tryParse(cargaCtrl.text.trim().replaceAll(',', '.'));
+      if (exercicio == null) {
+        FeedbackHelper.showError(context, ptS.evolucaoInformeExercicio);
         return;
       }
-      await EvolucaoRepository(ref.read(apiClientProvider)).adicionarRecorde(
-        widget.alunoId,
-        exercicioNome: nome,
-        carga: double.tryParse(cargaCtrl.text.replaceAll(',', '.')),
-        repeticoes: int.tryParse(repsCtrl.text.trim()),
-      );
-      EvolucaoHomeClientCache.invalidate(widget.alunoId);
-      ref.invalidate(evolucaoHomeProvider(widget.alunoId));
-      if (!mounted) return;
-      FeedbackHelper.showSuccess(context, 'Recorde adicionado!');
+      if (carga == null || carga < 0.5 || carga > 1000) {
+        FeedbackHelper.showError(context, ptS.evolucaoCargaInvalida);
+        return;
+      }
+      final repo = EvolucaoRepository(ref.read(apiClientProvider));
+      final reps = int.tryParse(repsCtrl.text.trim());
+      if (recorde == null) {
+        await repo.adicionarRecorde(
+          widget.alunoId,
+          exercicioId: exercicio.id,
+          exercicioNome: exercicio.nome,
+          carga: carga,
+          repeticoes: reps,
+        );
+      } else {
+        await repo.editarRecorde(
+          widget.alunoId,
+          recorde,
+          exercicioId: exercicio.id,
+          exercicioNome: exercicio.nome,
+          carga: carga,
+          repeticoes: reps,
+        );
+      }
+      await invalidateAluno360Providers(ref, widget.alunoId);
+      if (mounted) FeedbackHelper.showSuccess(context, ptS.evolucaoRecordeSalvo);
     } catch (e) {
-      if (!mounted) return;
-      FeedbackHelper.showError(context, friendlyError(e));
+      if (mounted) FeedbackHelper.showError(context, friendlyError(e));
     } finally {
-      exercicioCtrl.dispose();
       cargaCtrl.dispose();
       repsCtrl.dispose();
+    }
+  }
+
+  Future<void> _excluirRecorde(RecordePessoal recorde) async {
+    final ok = await showFxConfirmSheet(
+      context,
+      title: ptS.evolucaoRecordeExcluirTitulo,
+      message: ptS.evolucaoRecordeExcluirTexto,
+      icon: Icons.delete_outline_rounded,
+      confirmLabel: ptS.evolucaoExcluir,
+      destructive: true,
+    );
+    if (!ok || !mounted) return;
+    try {
+      await EvolucaoRepository(ref.read(apiClientProvider)).excluirRecorde(widget.alunoId, recorde.id);
+      await invalidateAluno360Providers(ref, widget.alunoId);
+      if (mounted) FeedbackHelper.showSuccess(context, ptS.evolucaoRecordeExcluido);
+    } catch (e) {
+      if (mounted) FeedbackHelper.showError(context, friendlyError(e));
+    }
+  }
+
+  Future<void> _definirMeta(Set<String> ocupadas) async {
+    final salvou = await abrirFormularioDeMeta(
+      context,
+      ref,
+      alunoId: widget.alunoId,
+      ocupadas: ocupadas,
+    );
+    if (salvou) await invalidateAluno360Providers(ref, widget.alunoId);
+  }
+
+  Future<void> _ajustarCiclo(int atual) async {
+    final dias = await showFxGroupedActionSheet<int>(
+      context,
+      titulo: ptS.evolucaoCiclo,
+      icone: Icons.event_repeat_outlined,
+      grupos: [
+        FxActionGroup<int>(ptS.evolucaoCicloTexto(satelliteFirstName(_nome)), [
+          for (final d in const [15, 30, 45, 60])
+            FxActionItem(
+              valor: d,
+              rotulo: ptS.evolucaoCicloOpcao('$d'),
+              icone: d == atual ? Icons.check_rounded : Icons.event_outlined,
+            ),
+        ]),
+      ],
+    );
+    if (dias == null || dias == atual || !mounted) return;
+    try {
+      await EvolucaoRepository(ref.read(apiClientProvider)).definirCicloMedidas(widget.alunoId, dias);
+      await invalidateAluno360Providers(ref, widget.alunoId);
+      if (mounted) FeedbackHelper.showSuccess(context, ptS.evolucaoCicloSalvo);
+    } catch (e) {
+      if (mounted) FeedbackHelper.showError(context, friendlyError(e));
+    }
+  }
+
+  Future<void> _maisAcoes(Set<String> ocupadas, int ciclo) async {
+    final podeMeta = !metaMetricas.every(ocupadas.contains);
+    final escolha = await showFxGroupedActionSheet<String>(
+      context,
+      titulo: ptS.evolucaoMais,
+      icone: Icons.more_horiz_rounded,
+      grupos: [
+        FxActionGroup<String>(null, [
+          if (podeMeta)
+            FxActionItem(valor: 'meta', rotulo: ptS.evolucaoDefinirMeta, icone: Icons.flag_outlined),
+          FxActionItem(valor: 'ciclo', rotulo: ptS.evolucaoCiclo, icone: Icons.event_repeat_outlined),
+          FxActionItem(valor: 'chat', rotulo: ptS.evolucaoEnviarNoChat, icone: Icons.chat_bubble_outline_rounded),
+          FxActionItem(valor: 'ajuda', rotulo: ptS.evolucaoAjuda, icone: Icons.help_outline_rounded),
+        ]),
+      ],
+    );
+    if (!mounted) return;
+    switch (escolha) {
+      case 'meta':
+        await _definirMeta(ocupadas);
+      case 'ciclo':
+        await _ajustarCiclo(ciclo);
+      case 'chat':
+        await _compartilharNoChat();
+      case 'ajuda':
+        showEvolucaoHelpSheet(context);
     }
   }
 }

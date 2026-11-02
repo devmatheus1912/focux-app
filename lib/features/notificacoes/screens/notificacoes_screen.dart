@@ -26,6 +26,8 @@ import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_status_banner.dart';
+import '../../../core/fcm/fcm_service.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
@@ -45,6 +47,7 @@ class NotificacoesScreen extends ConsumerStatefulWidget {
 }
 
 class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
+  final _permissaoNegada = FcmService.permissaoNegada();
   final _openedAt = DateTime.now();
   final _searchCtrl = TextEditingController();
   final _searchFocus = FocusNode();
@@ -354,6 +357,26 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
         ),
         body: Column(
           children: [
+            FutureBuilder<bool>(
+              future: _permissaoNegada,
+              builder:
+                  (context, snapshot) =>
+                      snapshot.data == true
+                          ? Padding(
+                            padding: const EdgeInsets.fromLTRB(
+                              TokensStrip.s4,
+                              TokensStrip.s2,
+                              TokensStrip.s4,
+                              0,
+                            ),
+                            child: FxStatusBanner(
+                              title: ptS.notificacoesPermissaoTitulo,
+                              body: ptS.notificacoesPermissaoTexto,
+                              tone: FxBannerTone.warn,
+                            ),
+                          )
+                          : const SizedBox.shrink(),
+            ),
             if (mostrarBusca) Padding(
               padding: const EdgeInsets.fromLTRB(
                 TokensStrip.s4,

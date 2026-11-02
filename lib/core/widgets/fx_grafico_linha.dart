@@ -13,8 +13,7 @@ class PontoGrafico {
   final double valor;
 }
 
-/// Linha no tempo com eixos e toque. Use com 4 pontos ou mais: com menos,
-/// cartão de número informa melhor.
+/// Linha no tempo com eixos e toque.
 class FxGraficoLinha extends StatelessWidget {
   const FxGraficoLinha({
     super.key,
@@ -22,6 +21,7 @@ class FxGraficoLinha extends StatelessWidget {
     required this.unidade,
     required this.resumo,
     this.tendencia = const [],
+    this.alvo,
     this.altura = 200,
   });
 
@@ -33,6 +33,9 @@ class FxGraficoLinha extends StatelessWidget {
 
   /// Com tendência, os registros ficam em segundo plano e ela vira a linha principal.
   final List<double> tendencia;
+
+  /// Linha tracejada do alvo.
+  final double? alvo;
   final double altura;
 
   static String _data(DateTime d) =>
@@ -45,7 +48,11 @@ class FxGraficoLinha extends StatelessWidget {
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
-    final valores = [...pontos.map((p) => p.valor), ...tendencia];
+    final valores = [
+      ...pontos.map((p) => p.valor),
+      ...tendencia,
+      if (alvo case final alvo?) alvo,
+    ];
     final menor = valores.reduce((a, b) => a < b ? a : b);
     final maior = valores.reduce((a, b) => a > b ? a : b);
     final folga = maior == menor ? 1.0 : (maior - menor) * 0.2;
@@ -101,6 +108,24 @@ class FxGraficoLinha extends StatelessWidget {
             minY: minY,
             maxY: maxY,
             borderData: FlBorderData(show: false),
+            extraLinesData: ExtraLinesData(
+              horizontalLines: [
+                if (alvo case final alvo?)
+                  HorizontalLine(
+                    y: alvo,
+                    color: chrome.mute,
+                    strokeWidth: 1.5,
+                    dashArray: const [6, 5],
+                    label: HorizontalLineLabel(
+                      show: true,
+                      alignment: Alignment.topRight,
+                      style: estiloEixo,
+                      labelResolver:
+                          (_) => '${formatBrDecimal(alvo)} $unidade',
+                    ),
+                  ),
+              ],
+            ),
             gridData: FlGridData(
               drawVerticalLine: false,
               horizontalInterval: (maxY - minY) / 3,

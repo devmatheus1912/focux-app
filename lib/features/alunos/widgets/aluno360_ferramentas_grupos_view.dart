@@ -50,6 +50,7 @@ class Aluno360FerramentasGrupos extends ConsumerWidget {
     this.massaMagra,
     this.aderenciaSemanal,
     this.anamneseStatus,
+    this.anamneseDesde,
     this.anamneseLoading = false,
   });
 
@@ -62,6 +63,7 @@ class Aluno360FerramentasGrupos extends ConsumerWidget {
 
   /// De `/360/ferramentas.anamneseResumo.status`. Nulo = não iniciada.
   final String? anamneseStatus;
+  final String? anamneseDesde;
   final bool anamneseLoading;
 
   void _upgrade(
@@ -321,7 +323,10 @@ class Aluno360FerramentasGrupos extends ConsumerWidget {
           label: 'Anamnese',
           subtitle: anamneseLoading
               ? 'Carregando ficha…'
-              : Aluno360FerramentasLogic.anamneseSubtitle(anamneseStatus),
+              : Aluno360FerramentasLogic.anamneseSubtitle(
+                anamneseStatus,
+                desde: anamneseDesde,
+              ),
           value: anamneseLoading
               ? '…'
               : Aluno360FerramentasLogic.anamneseValue(anamneseStatus),

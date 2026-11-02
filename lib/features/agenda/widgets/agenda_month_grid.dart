@@ -6,14 +6,14 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/motion_preferences.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
+import '../../../core/widgets/fx_strip_card.dart';
 import '../data/agenda_repository.dart';
 import '../utils/agenda_month.dart';
 import '../utils/agenda_schedule.dart';
+import '../utils/agenda_status.dart';
 
 /// Mês: título grande, grade de borda a borda e a contagem de atendimentos.
 /// Arrastar na horizontal troca o mês; o dia abre na visão Dia.
-///
-/// Com [expand], as semanas dividem a altura disponível.
 class AgendaMonthGrid extends StatelessWidget {
   const AgendaMonthGrid({
     super.key,
@@ -22,13 +22,12 @@ class AgendaMonthGrid extends StatelessWidget {
     required this.eventsByDay,
     required this.onSelect,
     required this.onSwipe,
-    this.expand = false,
     this.now,
   });
 
   /// Altura mínima da célula: a fonte da grade não escala (o leitor de tela
   /// lê o rótulo completo do dia).
-  static const double cellHeight = 66;
+  static const double cellHeight = 48;
 
   final DateTime month;
   final DateTime selected;
@@ -36,7 +35,6 @@ class AgendaMonthGrid extends StatelessWidget {
   final ValueChanged<DateTime> onSelect;
   final ValueChanged<int> onSwipe;
 
-  final bool expand;
   final DateTime? now;
 
   void _swipe(double? velocity) {
@@ -53,7 +51,7 @@ class AgendaMonthGrid extends StatelessWidget {
     final days = agendaMonthGrid(month);
     final weeks = agendaMonthWeeks(month);
 
-    Widget weekRows(double height) => AnimatedSwitcher(
+    final grid = AnimatedSwitcher(
       duration: fxMotionDuration(
         context,
         normal: const Duration(milliseconds: 180),
@@ -80,7 +78,7 @@ class AgendaMonthGrid extends StatelessWidget {
                         events:
                             eventsByDay[agendaIsoDate(days[w * 7 + d])] ??
                             const [],
-                        height: height,
+                        height: cellHeight,
                         onTap: () => onSelect(days[w * 7 + d]),
                       ),
                     ),
@@ -91,32 +89,13 @@ class AgendaMonthGrid extends StatelessWidget {
       ),
     );
 
-    final grid =
-        expand
-            ? Expanded(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final h =
-                      constraints.maxHeight.isFinite
-                          ? (constraints.maxHeight / weeks).floorToDouble()
-                          : cellHeight;
-                  final height = h < cellHeight ? cellHeight : h;
-                  return SingleChildScrollView(
-                    physics: const NeverScrollableScrollPhysics(),
-                    child: weekRows(height),
-                  );
-                },
-              ),
-            )
-            : weekRows(cellHeight);
-
     final body = GestureDetector(
       behavior: HitTestBehavior.opaque,
       onHorizontalDragEnd: (d) => _swipe(d.primaryVelocity),
       child: MediaQuery.withClampedTextScaling(
         maxScaleFactor: 1.3,
         child: Column(
-          mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Padding(
@@ -147,7 +126,7 @@ class AgendaMonthGrid extends StatelessWidget {
     );
 
     return Column(
-      mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _MonthTitle(
@@ -155,7 +134,7 @@ class AgendaMonthGrid extends StatelessWidget {
           onPrev: () => onSwipe(-1),
           onNext: () => onSwipe(1),
         ),
-        if (expand) Expanded(child: body) else body,
+        body,
       ],
     );
   }
@@ -258,19 +237,18 @@ class _MonthDayCell extends StatelessWidget {
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
     final weekend = day.weekday >= DateTime.saturday;
-    final Color circle;
-    final Color numberColor;
+    final Color fundo;
+    final Color numero;
     if (selected) {
-      circle = isToday ? primary : chrome.ink;
-      numberColor = isToday || !chrome.isDark ? Colors.white : Colors.black;
-    } else if (isToday) {
-      circle = Colors.transparent;
-      numberColor = primary;
+      fundo = primary;
+      numero = fxPaletaSobreMarca(context).ink;
     } else {
-      circle = Colors.transparent;
-      numberColor =
-          !inMonth
-              ? chrome.mute.withValues(alpha: 0.4)
+      fundo = Colors.transparent;
+      numero =
+          isToday
+              ? primary
+              : !inMonth
+              ? chrome.mute.withValues(alpha: 0.55)
               : weekend
               ? chrome.mute
               : chrome.ink;
@@ -301,16 +279,20 @@ class _MonthDayCell extends StatelessWidget {
                     context,
                     normal: const Duration(milliseconds: 160),
                   ),
-                  width: 24,
-                  height: 24,
+                  width: 28,
+                  height: 28,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: circle,
+                    color: fundo,
                     shape: BoxShape.circle,
+                    border:
+                        isToday && !selected
+                            ? Border.all(color: primary, width: 1.5)
+                            : null,
                   ),
                   child: Text(
                     '${day.day}',
-                    style: FocuxHubTypography.body(color: numberColor).copyWith(
+                    style: FocuxHubTypography.body(color: numero).copyWith(
                       fontSize: 14,
                       fontWeight:
                           isToday || selected
@@ -319,20 +301,67 @@ class _MonthDayCell extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 2),
-                if (events.isNotEmpty)
-                  Text(
-                    '${events.length}',
-                    maxLines: 1,
-                    style: FocuxHubTypography.bodyMuted(
-                      color: inMonth ? primary : chrome.mute,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
+                const SizedBox(height: 3),
+                _PontosDoDia(
+                  events: events,
+                  inMonth: inMonth,
+                  isDark: chrome.isDark,
+                  primary: primary,
+                ),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Até 3 pontos, com a cor do status; o resto vira "+N".
+class _PontosDoDia extends StatelessWidget {
+  const _PontosDoDia({
+    required this.events,
+    required this.inMonth,
+    required this.isDark,
+    required this.primary,
+  });
+
+  final List<Agendamento> events;
+  final bool inMonth;
+  final bool isDark;
+  final Color primary;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    if (events.isEmpty) return const SizedBox(height: 8);
+    final pontos = events.take(3);
+    final extra = events.length - pontos.length;
+    return SizedBox(
+      height: 8,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          for (final e in pontos)
+            Container(
+              width: 5,
+              height: 5,
+              margin: const EdgeInsets.symmetric(horizontal: 1),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: agendaStatusColor(
+                  e.naoVouEm != null ? 'FALTA' : e.status,
+                  isDark: isDark,
+                  primary: primary,
+                ).withValues(alpha: inMonth ? 1 : 0.45),
+              ),
+            ),
+          if (extra > 0)
+            Text(
+              '+$extra',
+              style: FocuxHubTypography.chip(chrome.mute).copyWith(fontSize: 9, height: 1),
+            ),
+        ],
       ),
     );
   }

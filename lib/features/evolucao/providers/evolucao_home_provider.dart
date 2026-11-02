@@ -4,7 +4,9 @@ import '../../auth/providers/auth_provider.dart';
 import '../data/evolucao_repository.dart';
 import '../utils/evolucao_home_client_cache.dart';
 
-final evolucaoHomeProvider = FutureProvider.family<EvolucaoHomeBundle, int>((
+/// Com `autoDispose`, abrir a tela sempre respeita os 45 s do cache: quem chega
+/// pela notificação não vê o dado da visita anterior.
+final evolucaoHomeProvider = FutureProvider.autoDispose.family<EvolucaoHomeBundle, int>((
   ref,
   alunoId,
 ) async {
@@ -16,12 +18,17 @@ final evolucaoHomeProvider = FutureProvider.family<EvolucaoHomeBundle, int>((
   return bundle;
 });
 
-/// Warm Medidas hub before the user taps (Ferramentas → Evolução).
-///
-/// Skips network when `/360/ferramentas.evolucaoHome` already hydrated the cache.
+/// Evolução do aluno logado: mesma resposta, sem cache de personal.
+final minhaEvolucaoProvider = FutureProvider.autoDispose<EvolucaoHomeBundle>(
+  (ref) => EvolucaoRepository(ref.read(apiClientProvider)).minhaEvolucao(),
+);
+
+/// Aquece a tela antes do toque.
 void prefetchEvolucaoHome(WidgetRef ref, int alunoId) {
   if (EvolucaoHomeClientCache.getIfFresh(alunoId) != null) return;
   // ignore: unawaited_futures
-  ref.read(evolucaoHomeProvider(alunoId).future);
+  EvolucaoRepository(ref.read(apiClientProvider)).getHome(alunoId).then(
+    (bundle) => EvolucaoHomeClientCache.put(alunoId, bundle),
+    onError: (_) {},
+  );
 }
-

@@ -2,7 +2,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 /// Preferências locais da lista de alunos (densidade, etc.).
 class AlunoListPreferences {
-  const AlunoListPreferences({this.compact = false});
+  const AlunoListPreferences({this.compact = true});
 
   final bool compact;
 

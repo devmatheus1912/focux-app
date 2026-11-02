@@ -1,3 +1,7 @@
+import 'dart:async';
+
+import 'package:focux_app/features/evolucao/data/evolucao_repository.dart';
+import 'package:focux_app/features/evolucao/providers/evolucao_home_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
@@ -53,6 +57,9 @@ Future<void> _abrir(
   );
   addTearDown(router.dispose);
   final overrides = <Override>[
+    evolucaoHomeProvider(_id).overrideWith(
+      (ref) => Completer<EvolucaoHomeBundle>().future,
+    ),
     metasDoAlunoProvider(_id).overrideWith((ref) async => const []),
     alunoPesoHistoricoProvider(_id).overrideWith((ref) async => historico),
   ];

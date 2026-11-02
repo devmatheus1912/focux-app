@@ -74,7 +74,6 @@ extension AlunosListScreenFilters on _AlunosListScreenState {
             children: [
               FxSettingsGroup(
                 header: 'Ordenação',
-                caption: 'Como a lista é priorizada.',
                 edgeToEdgeRows: true,
                 accent: primary,
                 children: FxInsetPickerOption.list(

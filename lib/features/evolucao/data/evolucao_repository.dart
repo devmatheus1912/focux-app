@@ -139,12 +139,53 @@ class AderenciaResumo {
   );
 }
 
-/// BFF `GET /api/alunos/{id}/evolucao/home` — medidas + recordes.
+/// Os três anéis da Evolução. Campo nulo: anel vazio.
+class EvolucaoAneis {
+  const EvolucaoAneis({
+    this.treinoFeitos = 0,
+    this.treinoPrevistos,
+    this.metaProgresso,
+    this.ultimaMedida,
+    this.cicloMedidasDias = 30,
+  });
+
+  final int treinoFeitos;
+
+  /// Dias por semana da ficha. Nulo sem ficha.
+  final int? treinoPrevistos;
+
+  /// De 0 a 100, a meta aberta mais avançada. Nulo sem meta.
+  final int? metaProgresso;
+  final String? ultimaMedida;
+  final int cicloMedidasDias;
+
+  factory EvolucaoAneis.fromJson(Map<String, dynamic> j) => EvolucaoAneis(
+    treinoFeitos: (j['treinoFeitos'] as num?)?.toInt() ?? 0,
+    treinoPrevistos: (j['treinoPrevistos'] as num?)?.toInt(),
+    metaProgresso: (j['metaProgresso'] as num?)?.toInt(),
+    ultimaMedida: j['ultimaMedida'] == null ? null : _medidaDataString(j['ultimaMedida']),
+    cicloMedidasDias: (j['cicloMedidasDias'] as num?)?.toInt() ?? 30,
+  );
+}
+
+/// Gordura por avaliação: medida não tem esse campo.
+typedef PontoGordura = ({String data, double valor});
+
+/// BFF `GET /api/alunos/{id}/evolucao/home`: tudo que a tela precisa.
 class EvolucaoHomeBundle {
   final List<MedidaCorporal> medidas;
   final List<RecordePessoal> recordes;
+  final List<MetaCorporal> metas;
+  final List<PontoGordura> gordura;
+  final EvolucaoAneis aneis;
 
-  const EvolucaoHomeBundle({required this.medidas, required this.recordes});
+  const EvolucaoHomeBundle({
+    required this.medidas,
+    required this.recordes,
+    this.metas = const [],
+    this.gordura = const [],
+    this.aneis = const EvolucaoAneis(),
+  });
 
   factory EvolucaoHomeBundle.fromJson(Map<String, dynamic> j) {
     return EvolucaoHomeBundle(
@@ -164,6 +205,21 @@ class EvolucaoHomeBundle {
                 ),
               )
               .toList(),
+      metas: [
+        for (final item in (j['metas'] as List?) ?? const [])
+          MetaCorporal.fromJson(Map<String, dynamic>.from(item as Map)),
+      ],
+      gordura: [
+        for (final item in (j['gordura'] as List?) ?? const [])
+          (
+            data: _medidaDataString((item as Map)['data']),
+            valor: (item['valor'] as num).toDouble(),
+          ),
+      ],
+      aneis:
+          j['aneis'] is Map
+              ? EvolucaoAneis.fromJson(Map<String, dynamic>.from(j['aneis'] as Map))
+              : const EvolucaoAneis(),
     );
   }
 }
@@ -232,21 +288,6 @@ class EvolucaoRepository {
       braco: braco,
     ),
   );
-
-  Future<List<MetaCorporal>> metas(int alunoId) async {
-    final r = await _dio.get('/api/alunos/$alunoId/metas');
-    return _listaDeMetas(r.data);
-  }
-
-  Future<List<MetaCorporal>> minhasMetas() async {
-    final r = await _dio.get('/api/aluno/metas');
-    return _listaDeMetas(r.data);
-  }
-
-  List<MetaCorporal> _listaDeMetas(Object? data) => [
-    for (final item in data as List)
-      MetaCorporal.fromJson(Map<String, dynamic>.from(item as Map)),
-  ];
 
   Map<String, dynamic> _corpoDaMeta({
     required String metrica,
@@ -386,20 +427,62 @@ class EvolucaoRepository {
     );
   }
 
+  Map<String, dynamic> _corpoDoRecorde({
+    int? exercicioId,
+    required String exercicioNome,
+    required String data,
+    required double carga,
+    int? repeticoes,
+  }) => {
+    if (exercicioId != null) 'exercicioId': exercicioId,
+    'exercicioNome': exercicioNome,
+    'data': data,
+    'cargaKg': carga,
+    if (repeticoes != null) 'repeticoes': repeticoes,
+  };
+
+  Future<void> editarRecorde(
+    int alunoId,
+    RecordePessoal recorde, {
+    int? exercicioId,
+    required String exercicioNome,
+    required double carga,
+    int? repeticoes,
+  }) => _dio.put(
+    '/api/alunos/$alunoId/recordes/${recorde.id}',
+    data: _corpoDoRecorde(
+      exercicioId: exercicioId,
+      exercicioNome: exercicioNome,
+      data: recorde.data,
+      carga: carga,
+      repeticoes: repeticoes,
+    ),
+  );
+
+  Future<void> excluirRecorde(int alunoId, int recordeId) =>
+      _dio.delete('/api/alunos/$alunoId/recordes/$recordeId');
+
+  Future<void> definirCicloMedidas(int alunoId, int dias) => _dio.put(
+    '/api/alunos/$alunoId/ciclo-medidas',
+    data: {'dias': dias},
+  );
+
   Future<RecordePessoal> adicionarRecorde(
     int alunoId, {
+    int? exercicioId,
     required String exercicioNome,
-    double? carga,
+    required double carga,
     int? repeticoes,
   }) async {
     final r = await _dio.post(
       '/api/alunos/$alunoId/recordes',
-      data: {
-        'exercicioNome': exercicioNome,
-        'data': DateTime.now().toIso8601String().substring(0, 10),
-        if (carga != null) 'cargaKg': carga,
-        if (repeticoes != null) 'repeticoes': repeticoes,
-      },
+      data: _corpoDoRecorde(
+        exercicioId: exercicioId,
+        exercicioNome: exercicioNome,
+        data: DateTime.now().toIso8601String().substring(0, 10),
+        carga: carga,
+        repeticoes: repeticoes,
+      ),
     );
     final raw = r.data;
     if (raw is Map) {

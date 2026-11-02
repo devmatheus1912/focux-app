@@ -47,7 +47,7 @@ void main() {
     expect(screen, isNot(contains('SkeletonList')));
     expect(screen, isNot(contains('AgendaDayEmptyPanel')));
     expect(screen, isNot(contains('AgendaTodayPill')));
-    expect(screen, contains('expand: true'));
+    expect(screen, contains('AgendaMonthGrid'));
     expect(screen, isNot(contains('class _AgendaEmptyState')));
     expect(
       File('lib/features/agenda/screens/agenda_screen.dart').readAsStringSync(),

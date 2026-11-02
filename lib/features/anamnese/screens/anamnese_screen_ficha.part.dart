@@ -14,7 +14,7 @@ class _AnamneseBody extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _AnamneseDecisao(anamnese: a),
+        _AnamneseDecisao(anamnese: a, treino: treino),
         if (a.isNaoIniciada) ...[
           const SizedBox(height: TokensStrip.s5),
           // CTA único no sticky S3 — empty sem action (§11 / §13).
@@ -24,7 +24,7 @@ class _AnamneseBody extends StatelessWidget {
             subtitle: 'O aluno preenche a anamnese. Você solicita e revisa.',
             quiet: true,
           ),
-        ] else if (a.isSolicitada && !a.personalPodeRevisar) ...[
+        ] else if (a.isSolicitada && !a.temRespostas) ...[
           const SizedBox(height: TokensStrip.s5),
           const FxEmptyState(
             icon: 'calendar',
@@ -33,7 +33,7 @@ class _AnamneseBody extends StatelessWidget {
                 'O aluno foi notificado. Quando enviar, você revisa aqui.',
             quiet: true,
           ),
-        ] else if (a.personalPodeRevisar) ...[
+        ] else if (a.temRespostas) ...[
           const SizedBox(height: TokensStrip.s4),
           Text(
             'Pontos de atenção',
@@ -41,10 +41,6 @@ class _AnamneseBody extends StatelessWidget {
           ),
           const SizedBox(height: TokensStrip.s2),
           _AnamnesePontos(pontos: anamnesePontosDeAtencao(a)),
-          if (treino.isNotEmpty) ...[
-            const SizedBox(height: TokensStrip.s3),
-            Text(treino, style: FocuxHubTypography.body(color: chrome.ink)),
-          ],
           const SizedBox(height: TokensStrip.s4),
           Text(
             'Respostas',
@@ -55,6 +51,7 @@ class _AnamneseBody extends StatelessWidget {
             _AnamneseSecao(
               titulo: anamneseSecaoTitle(secao.value),
               respostas: anamneseRespostas(a, secao.value),
+              aberta: secao.value == anamneseSecaoParq && a.parqPositivo == true,
             ),
           if (anamneseNotasDoPersonal(a) case final notas
               when notas.isNotEmpty) ...[
@@ -76,9 +73,10 @@ class _AnamneseBody extends StatelessWidget {
 }
 
 class _AnamneseDecisao extends StatelessWidget {
-  const _AnamneseDecisao({required this.anamnese});
+  const _AnamneseDecisao({required this.anamnese, this.treino = ''});
 
   final Anamnese anamnese;
+  final String treino;
 
   @override
   Widget build(BuildContext context) {
@@ -98,6 +96,10 @@ class _AnamneseDecisao extends StatelessWidget {
             anamneseDecisaoApoio(anamnese),
             style: FocuxHubTypography.bodyMuted(color: chrome.mute),
           ),
+          if (treino.isNotEmpty) ...[
+            const SizedBox(height: TokensStrip.s1),
+            Text(treino, style: FocuxHubTypography.body(color: chrome.ink)),
+          ],
         ],
       ),
     );
@@ -148,10 +150,17 @@ class _AnamnesePontos extends StatelessWidget {
 }
 
 class _AnamneseSecao extends StatelessWidget {
-  const _AnamneseSecao({required this.titulo, required this.respostas});
+  const _AnamneseSecao({
+    required this.titulo,
+    required this.respostas,
+    this.aberta = false,
+  });
 
   final String titulo;
   final List<(String, String)> respostas;
+
+  /// PAR-Q+ com resposta "sim" já chega aberto.
+  final bool aberta;
 
   @override
   Widget build(BuildContext context) {
@@ -164,6 +173,7 @@ class _AnamneseSecao extends StatelessWidget {
         child: Theme(
           data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
           child: ExpansionTile(
+            initiallyExpanded: aberta,
             tilePadding: const EdgeInsets.symmetric(horizontal: TokensStrip.s3),
             childrenPadding: const EdgeInsets.fromLTRB(
               TokensStrip.s3,

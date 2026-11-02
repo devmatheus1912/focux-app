@@ -1,15 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../auth/providers/auth_provider.dart';
-import '../data/evolucao_repository.dart';
 import '../data/meta_corporal.dart';
+import 'evolucao_home_provider.dart';
 
+/// Metas vêm na mesma chamada da Evolução.
 final metasDoAlunoProvider = FutureProvider.autoDispose
     .family<List<MetaCorporal>, int>(
-      (ref, alunoId) =>
-          EvolucaoRepository(ref.read(apiClientProvider)).metas(alunoId),
+      (ref, alunoId) async =>
+          (await ref.watch(evolucaoHomeProvider(alunoId).future)).metas,
     );
-
-final minhasMetasProvider = FutureProvider.autoDispose<List<MetaCorporal>>(
-  (ref) => EvolucaoRepository(ref.read(apiClientProvider)).minhasMetas(),
-);

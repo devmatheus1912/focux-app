@@ -9,5 +9,5 @@ abstract final class AlunosMicrocopy {
   static const clearFilter = 'Limpar filtro';
   static const organizeTooltip = 'Organizar lista';
   static const densityTitle = 'Lista compacta';
-  static const densitySubtitle = 'Só nome e objetivo na linha.';
+  static const densitySubtitle = 'Só nome e objetivo. Alerta aparece no lugar do objetivo.';
 }

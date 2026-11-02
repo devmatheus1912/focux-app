@@ -124,23 +124,21 @@ bool shouldShowAlunoListBadge(
 }
 
 /// Série da lista = últimos 7 dias corridos (não a semana do calendário).
-String alunoWeeklyCheckinsLabel(int weeklyCheckins) {
-  if (weeklyCheckins <= 0) return '';
-  return weeklyCheckins == 1
-      ? '1 treino em 7 dias'
-      : '$weeklyCheckins treinos em 7 dias';
+String alunoDiasComTreinoLabel(int dias) {
+  if (dias <= 0) return '';
+  return '${dias.clamp(0, 7)} de 7 dias com treino';
 }
 
 String adherenceActivityLabel({
   required Aluno aluno,
-  required int weeklyCheckins,
+  required int diasComTreino,
 }) {
   final dias = aluno.diasSemTreino;
   // Paridade hero 360: alarme de inatividade a partir de 3 dias.
   if (dias != null && dias >= 3) {
     return 'Parado há ${dias}d';
   }
-  return alunoWeeklyCheckinsLabel(weeklyCheckins);
+  return alunoDiasComTreinoLabel(diasComTreino);
 }
 
 bool alunoListHasMeaningfulPercent(int? aderenciaPercent) =>

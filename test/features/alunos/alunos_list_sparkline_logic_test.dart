@@ -12,7 +12,7 @@ void main() {
       ],
     );
     expect(metrics.sparkValues, [1, 2, 0]);
-    expect(metrics.weeklyCheckins, 3);
+    expect(metrics.diasComTreino, 2);
     expect(metrics.aderenciaPercent, 43);
   });
 
@@ -30,7 +30,7 @@ void main() {
       cachedAderenciaPercent: 72,
     );
     expect(metrics.sparkValues, isEmpty);
-    expect(metrics.weeklyCheckins, 0);
+    expect(metrics.diasComTreino, 0);
     expect(metrics.aderenciaPercent, 72);
   });
 
@@ -50,7 +50,7 @@ void main() {
       2,
     ]);
     final metrics = alunosListSparklineMetrics(points: points);
-    expect(metrics.weeklyCheckins, 26);
+    expect(metrics.diasComTreino, 2);
     expect(metrics.aderenciaPercent, inInclusiveRange(0, 100));
   });
 }

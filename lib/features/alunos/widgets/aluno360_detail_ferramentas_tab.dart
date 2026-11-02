@@ -63,6 +63,7 @@ class Aluno360DetailFerramentasTab extends ConsumerWidget {
         massaMagra: massaMagra,
         aderenciaSemanal: aderenciaSemanal,
         anamneseStatus: anamneseStatus,
+        anamneseDesde: ferramentasAsync.value?.anamneseResumo?.desde,
         anamneseLoading: anamneseLoading,
       ),
     );

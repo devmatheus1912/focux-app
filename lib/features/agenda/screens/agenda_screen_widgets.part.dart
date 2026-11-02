@@ -11,7 +11,7 @@ class _AgendaEventSheet extends StatefulWidget {
     this.onComplete,
     this.onCancel,
     this.onReschedule,
-    required this.onDelete,
+    this.onDelete,
   });
 
   final Agendamento agendamento;
@@ -23,7 +23,7 @@ class _AgendaEventSheet extends StatefulWidget {
   final Future<void> Function()? onComplete;
   final Future<void> Function()? onCancel;
   final Future<void> Function()? onReschedule;
-  final Future<void> Function() onDelete;
+  final Future<void> Function()? onDelete;
 
   @override
   State<_AgendaEventSheet> createState() => _AgendaEventSheetState();
@@ -60,46 +60,15 @@ class _AgendaEventSheetState extends State<_AgendaEventSheet> {
     await _run(widget.onComplete);
   }
 
-  Widget _dangerPrimary({
+  Widget _perigo({
     required String label,
     required VoidCallback? onPressed,
-  }) {
-    return SizedBox(
-      height: 52,
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: EagleTokens.bad,
-          foregroundColor: Colors.white,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-        ),
-        child: Text(label),
-      ),
-    );
-  }
-
-  Widget _dangerSecondary({
-    required String label,
-    required VoidCallback? onPressed,
-  }) {
-    return SizedBox(
-      height: 52,
-      child: OutlinedButton(
-        onPressed: onPressed,
-        style: OutlinedButton.styleFrom(
-          foregroundColor: EagleTokens.bad,
-          side: BorderSide(color: EagleTokens.bad.withValues(alpha: 0.55)),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-        ),
-        child: Text(label),
-      ),
-    );
-  }
+  }) => FxTonalButton(
+    label: label,
+    danger: true,
+    expanded: true,
+    onPressed: onPressed,
+  );
 
   List<Widget> _eventActions({required bool completePrimary}) {
     final nav = <FxSettingsTile>[
@@ -174,14 +143,15 @@ class _AgendaEventSheetState extends State<_AgendaEventSheet> {
     ];
     final dangers = <Widget>[
       if (widget.onCancel != null)
-        _dangerSecondary(
+        _perigo(
           label: 'Cancelar horário',
           onPressed: _busy ? null : () => _run(widget.onCancel),
         ),
-      _dangerPrimary(
-        label: 'Excluir agendamento',
-        onPressed: _busy ? null : () => _run(widget.onDelete),
-      ),
+      if (widget.onDelete != null)
+        _perigo(
+          label: 'Excluir agendamento',
+          onPressed: _busy ? null : () => _run(widget.onDelete),
+        ),
     ];
 
     return [
@@ -191,7 +161,7 @@ class _AgendaEventSheetState extends State<_AgendaEventSheet> {
         FxSettingsGroup(children: commandTiles),
       ],
       for (final danger in dangers) ...[
-        const SizedBox(height: FxSettingsLayout.groupGap),
+        const SizedBox(height: TokensStrip.s2),
         danger,
       ],
     ];
@@ -203,11 +173,6 @@ class _AgendaEventSheetState extends State<_AgendaEventSheet> {
     final ag = widget.agendamento;
     final title = agendaEventTitle(alunoNome: ag.alunoNome, titulo: ag.titulo);
     final sessionNote = agendaEventSessionNote(ag.titulo);
-    final subtitle = agendaEventSheetSubtitle(
-      inicio: ag.inicio,
-      fim: ag.fim,
-      statusLabel: widget.statusLabel,
-    );
     final date =
         '${ag.inicio.day.toString().padLeft(2, '0')}/${ag.inicio.month.toString().padLeft(2, '0')}/${ag.inicio.year}';
     final time =
@@ -216,7 +181,6 @@ class _AgendaEventSheetState extends State<_AgendaEventSheet> {
             : agendaHm(ag.inicio);
     final completePrimary = agendaSessionIsDue(ag) && widget.onComplete != null;
     final obs = ag.observacoes?.trim();
-    final pos = ag.observacoesPosAtendimento?.trim();
     final atendimento = ag.statusAtendimento?.trim();
 
     return Semantics(
@@ -236,7 +200,6 @@ class _AgendaEventSheetState extends State<_AgendaEventSheet> {
             FxHomeSheetHeader(
               isDark: chrome.isDark,
               title: title,
-              subtitle: subtitle,
               leading: AlunoAvatar(
                 name: title,
                 photoUrl: widget.photoUrl,
@@ -244,11 +207,19 @@ class _AgendaEventSheetState extends State<_AgendaEventSheet> {
               ),
             ),
             SizedBox(height: TokensStrip.s3),
-            _AgendaMetaStrip(
+            AgendaMetaStrip(
               date: date,
               time: time,
               status: widget.statusLabel,
             ),
+            if (ag.naoVouEm != null) ...[
+              const SizedBox(height: TokensStrip.s2),
+              FxStatusBanner(
+                title: S.of(context).agendaAvisouNaoVai,
+                body: S.of(context).agendaDecidaNaoVai,
+                tone: FxBannerTone.warn,
+              ),
+            ],
             if (sessionNote != null) ...[
               const SizedBox(height: TokensStrip.s2),
               _AgendaDetailNote(label: 'Tipo de sessão', value: sessionNote),
@@ -264,102 +235,11 @@ class _AgendaEventSheetState extends State<_AgendaEventSheet> {
               const SizedBox(height: TokensStrip.s2),
               _AgendaDetailNote(label: 'Nota', value: obs),
             ],
-            if (pos != null && pos.isNotEmpty) ...[
-              const SizedBox(height: TokensStrip.s2),
-              _AgendaDetailNote(label: 'Depois do atendimento', value: pos),
-            ],
             SizedBox(height: TokensStrip.s4),
             ..._eventActions(completePrimary: completePrimary),
           ],
         ),
       ),
-    );
-  }
-}
-
-class _AgendaMetaStrip extends StatelessWidget {
-  const _AgendaMetaStrip({
-    required this.date,
-    required this.time,
-    required this.status,
-  });
-
-  final String date;
-  final String time;
-  final String status;
-
-  @override
-  Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    return DecoratedBox(
-      decoration: fxStripCardDecoration(
-        context,
-        accent: primary,
-        radius: 16,
-        glowStrength: 0.03,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-        child: IntrinsicHeight(
-          child: Row(
-            children: [
-              Expanded(child: _AgendaMetaCell(label: 'Data', value: date)),
-              _AgendaMetaDivider(color: primary),
-              Expanded(child: _AgendaMetaCell(label: 'Horário', value: time)),
-              _AgendaMetaDivider(color: primary),
-              Expanded(child: _AgendaMetaCell(label: 'Status', value: status)),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _AgendaMetaDivider extends StatelessWidget {
-  const _AgendaMetaDivider({required this.color});
-
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: VerticalDivider(
-        width: 1,
-        thickness: 1,
-        color: color.withValues(alpha: 0.16),
-      ),
-    );
-  }
-}
-
-class _AgendaMetaCell extends StatelessWidget {
-  const _AgendaMetaCell({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: FocuxHubTypography.chip(chrome.mute),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: FocuxHubTypography.body(color: chrome.ink).copyWith(
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-      ],
     );
   }
 }

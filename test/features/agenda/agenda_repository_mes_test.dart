@@ -87,19 +87,6 @@ void main() {
     expect(adapter.chamadas, ['/api/agenda/mes?2026,10']);
   });
 
-  test('backend antigo: junta as 6 semanas sem duplicar', () async {
-    final adapter = _Adapter(temMes: false);
-    final items = await _repo(adapter).listarMes(2026, 10);
-    expect(items.map((a) => a.id), [1, 2]);
-    expect(adapter.chamadas.where((c) => c.startsWith('/api/agenda/semana')), [
-      '/api/agenda/semana?2026-09-28',
-      '/api/agenda/semana?2026-10-05',
-      '/api/agenda/semana?2026-10-12',
-      '/api/agenda/semana?2026-10-19',
-      '/api/agenda/semana?2026-10-26',
-      '/api/agenda/semana?2026-11-02',
-    ]);
-  });
 
   test('agenda do aluno pede o escopo', () async {
     final adapter = _Adapter(temMes: true);

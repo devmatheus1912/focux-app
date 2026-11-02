@@ -241,12 +241,12 @@ void main() {
 
   group('adherenceActivityLabel', () {
     test('some o rótulo quando não há treinos em 7 dias', () {
-      expect(alunoWeeklyCheckinsLabel(0), isEmpty);
+      expect(alunoDiasComTreinoLabel(0), isEmpty);
     });
 
-    test('contagem diz a janela de 7 dias, não a semana', () {
-      expect(alunoWeeklyCheckinsLabel(1), '1 treino em 7 dias');
-      expect(alunoWeeklyCheckinsLabel(3), '3 treinos em 7 dias');
+    test('conta dias, nunca passa de 7', () {
+      expect(alunoDiasComTreinoLabel(1), '1 de 7 dias com treino');
+      expect(alunoDiasComTreinoLabel(11), '7 de 7 dias com treino');
     });
   });
 

@@ -16,11 +16,13 @@ import 'package:google_fonts/google_fonts.dart';
 const _conflito = 'Horário conflita com outro agendamento.';
 const _pendente = 'Sem conexão. Vamos enviar quando a rede voltar.';
 
+/// Sessão já encerrada: sessão ativa e futura se cancela, não se exclui.
 class _FakeAgendaRepository implements AgendaRepository {
-  _FakeAgendaRepository({this.statusError, this.excluirError});
+  _FakeAgendaRepository({this.statusError, this.excluirError, this.status = 'AGENDADO'});
 
   final Object? statusError;
   final Object? excluirError;
+  final String status;
 
   Agendamento get _hoje {
     final now = DateTime.now();
@@ -30,7 +32,7 @@ class _FakeAgendaRepository implements AgendaRepository {
       alunoNome: 'Aluno Teste',
       inicio: DateTime(now.year, now.month, now.day, 0, 1),
       fim: DateTime(now.year, now.month, now.day, 23, 59),
-      status: 'AGENDADO',
+      status: status,
     );
   }
 
@@ -146,7 +148,10 @@ void main() {
   ) async {
     await _pumpAgenda(
       tester,
-      _FakeAgendaRepository(excluirError: StateError('Null check operator')),
+      _FakeAgendaRepository(
+        excluirError: StateError('Null check operator'),
+        status: 'CONCLUIDO',
+      ),
     );
     await _openSheet(tester);
 
@@ -167,7 +172,10 @@ void main() {
   ) async {
     await _pumpAgenda(
       tester,
-      _FakeAgendaRepository(excluirError: const OfflineQueuedException()),
+      _FakeAgendaRepository(
+        excluirError: const OfflineQueuedException(),
+        status: 'CONCLUIDO',
+      ),
     );
     await _openSheet(tester);
 

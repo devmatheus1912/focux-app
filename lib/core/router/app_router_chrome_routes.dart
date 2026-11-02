@@ -51,7 +51,7 @@ import '../../features/assinatura/screens/assinatura_success_screen.dart';
 import '../../features/assinatura/assinatura_route_args.dart';
 import '../../features/alertas/screens/alertas_screen.dart';
 import '../../features/evolucao/screens/evolucao_screen.dart';
-import '../../features/evolucao/screens/evolucao_fotos_screen.dart';
+import '../../features/evolucao/utils/evolucao_display.dart';
 import '../../features/ia/screens/progressao_aceitar_screen.dart';
 import '../../features/alunos/screens/editar_aluno_screen.dart';
 import '../../features/ranking/screens/ranking_screen.dart';
@@ -71,7 +71,6 @@ import '../../features/broadcasts/screens/broadcast_screen.dart';
 import '../../features/alertas/screens/alerta_detalhe_screen.dart';
 import '../../features/alertas/screens/alertas_config_screen.dart';
 import '../../features/relatorio/screens/relatorio_global_screen.dart';
-import '../../features/avaliacao/screens/evolucao_comparativo_screen.dart';
 import '../../features/agenda/data/agenda_novo_args.dart';
 import '../../features/agenda/screens/novo_agendamento_screen.dart';
 import '../../features/agenda/screens/agenda_aluno_screen.dart';
@@ -215,17 +214,9 @@ RouteBase buildChromeShellRoute() {
                 (context, state) => EvolucaoScreen(
                   alunoId: intPathParam(state, 'id')!,
                   alunoNome: stringRouteExtra(state) ?? 'Aluno',
-                ),
-          ),
-          GoRoute(
-            path: '/alunos/:id/fotos',
-            redirect:
-                (context, state) =>
-                    intPathParam(state, 'id') == null ? '/alunos' : null,
-            builder:
-                (context, state) => EvolucaoFotosScreen(
-                  alunoId: intPathParam(state, 'id')!,
-                  alunoNome: stringRouteExtra(state) ?? 'Aluno',
+                  abaInicial: evolucaoHubViewFromSecao(
+                    state.uri.queryParameters['aba'] ?? '',
+                  ),
                 ),
           ),
           GoRoute(
@@ -320,17 +311,6 @@ RouteBase buildChromeShellRoute() {
                 initialSection: args.section,
               );
             },
-          ),
-          GoRoute(
-            path: '/alunos/:id/evolucao-comparativo',
-            redirect:
-                (context, state) =>
-                    intPathParam(state, 'id') == null ? '/alunos' : null,
-            builder:
-                (context, state) => EvolucaoComparativoScreen(
-                  alunoId: intPathParam(state, 'id')!,
-                  alunoNome: stringRouteExtra(state) ?? 'Aluno',
-                ),
           ),
           GoRoute(
             path: '/alunos/:id/fichas-anteriores',

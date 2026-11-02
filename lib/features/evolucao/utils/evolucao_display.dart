@@ -5,11 +5,11 @@ import '../data/evolucao_repository.dart';
 
 enum EvolucaoHubView { medidas, recordes, fotos, comparativo }
 
-const evolucaoDetalheSecoes = [
-  (value: 'medidas', label: 'Medidas'),
-  (value: 'recordes', label: 'Recordes'),
-  (value: 'fotos', label: 'Fotos'),
-  (value: 'comparativo', label: 'Comparar'),
+List<({String value, String label})> get evolucaoDetalheSecoes => [
+  (value: 'medidas', label: ptS.evolucaoAbaCorpo),
+  (value: 'recordes', label: ptS.evolucaoAbaForca),
+  (value: 'fotos', label: ptS.evolucaoAbaFotos),
+  (value: 'comparativo', label: ptS.evolucaoAbaComparar),
 ];
 
 EvolucaoHubView evolucaoHubViewFromSecao(String value) =>

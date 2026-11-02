@@ -11,40 +11,49 @@ import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_sheet_frame.dart';
 import '../../../core/widgets/fx_sheet_search_field.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
-import '../../exercicios/providers/exercicios_provider.dart';
 import '../../../l10n/pt.dart';
+import '../../exercicios/data/enums.dart';
+import '../../exercicios/data/exercicio_repository.dart';
+import '../../exercicios/data/exercicio_taxonomy_labels.dart';
+import '../../exercicios/data/exercise_enum_api.dart';
+import '../../exercicios/providers/exercicios_provider.dart';
+import '../../treinos/widgets/exercise_group_chips.dart';
 
-/// Campo do recorde: um toque abre a busca da biblioteca.
-class EscolherExercicioCampo extends ConsumerStatefulWidget {
-  const EscolherExercicioCampo({super.key, required this.controller});
+/// `id` nulo: texto livre, fora da biblioteca.
+typedef ExercicioEscolhido = ({int? id, String nome});
 
-  final TextEditingController controller;
+/// Campo do recorde: um toque abre a biblioteca inteira.
+class EscolherExercicioCampo extends StatelessWidget {
+  const EscolherExercicioCampo({
+    super.key,
+    required this.escolhido,
+    required this.onEscolher,
+    this.recentes = const [],
+  });
 
-  @override
-  ConsumerState<EscolherExercicioCampo> createState() =>
-      _EscolherExercicioCampoState();
-}
+  final ExercicioEscolhido? escolhido;
+  final ValueChanged<ExercicioEscolhido> onEscolher;
 
-class _EscolherExercicioCampoState
-    extends ConsumerState<EscolherExercicioCampo> {
-  Future<void> _escolher() async {
-    final nome = await showFxHomeSheet<String>(
+  /// Exercícios que este aluno já registrou.
+  final List<ExercicioEscolhido> recentes;
+
+  Future<void> _escolher(BuildContext context) async {
+    final escolha = await showFxHomeSheet<ExercicioEscolhido>(
       context,
-      builder: (_) => const _BuscaExercicio(),
+      builder: (_) => BuscaExercicio(recentes: recentes),
     );
     FxKeyboardDismissScope.dismiss();
-    if (nome != null && mounted) {
-      setState(() => widget.controller.text = nome);
-    }
+    if (escolha != null) onEscolher(escolha);
   }
 
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
-    final nome = widget.controller.text.trim();
+    final nome = escolhido?.nome ?? '';
     return Padding(
       padding: const EdgeInsets.only(bottom: TokensStrip.s2),
       child: Semantics(
@@ -53,7 +62,7 @@ class _EscolherExercicioCampoState
         excludeSemantics: true,
         child: InkWell(
           borderRadius: BorderRadius.circular(TokensStrip.rSm),
-          onTap: _escolher,
+          onTap: () => _escolher(context),
           child: ConstrainedBox(
             constraints: const BoxConstraints(minHeight: 48),
             child: Row(
@@ -78,55 +87,77 @@ class _EscolherExercicioCampoState
   }
 }
 
-class _BuscaExercicio extends ConsumerStatefulWidget {
-  const _BuscaExercicio();
+/// Favoritos, recentes do aluno e toda a biblioteca, paginada.
+class BuscaExercicio extends ConsumerStatefulWidget {
+  const BuscaExercicio({super.key, this.recentes = const []});
+
+  final List<ExercicioEscolhido> recentes;
 
   @override
-  ConsumerState<_BuscaExercicio> createState() => _BuscaExercicioState();
+  ConsumerState<BuscaExercicio> createState() => _BuscaExercicioState();
 }
 
-class _BuscaExercicioState extends ConsumerState<_BuscaExercicio> {
+class _BuscaExercicioState extends ConsumerState<BuscaExercicio> {
+  final _rolagem = ScrollController();
   Timer? _espera;
-  List<String> _nomes = const [];
   String _termo = '';
+  GrupoMuscular? _grupo;
+  List<Exercicio> _favoritos = const [];
+  List<Exercicio> _lista = const [];
+  int _pagina = 0;
+  bool _temMais = false;
   bool _carregando = true;
+  bool _carregandoMais = false;
   String? _erro;
 
   @override
   void initState() {
     super.initState();
-    _carregar('');
+    _rolagem.addListener(_perto);
+    _carregar();
+  }
+
+  void _perto() {
+    if (_rolagem.position.extentAfter < 240) _carregarMais();
   }
 
   void _buscar(String texto) {
     _espera?.cancel();
-    _espera = Timer(
-      const Duration(milliseconds: 300),
-      () => _carregar(texto.trim()),
-    );
+    _espera = Timer(const Duration(milliseconds: 300), () {
+      _termo = texto.trim();
+      _carregar();
+    });
   }
 
-  /// Sem termo, abre com os favoritos para a folha nunca nascer em branco.
-  Future<void> _carregar(String termo) async {
+  bool get _semFiltro => _termo.isEmpty && _grupo == null;
+
+  Future<void> _carregar() async {
+    final termo = _termo;
+    final grupo = _grupo;
     setState(() {
-      _termo = termo;
       _carregando = true;
       _erro = null;
     });
     try {
       final repo = ref.read(exercicioRepositoryProvider);
-      var lista =
-          termo.isEmpty
-              ? await repo.listar(favoritos: true)
-              : await repo.listar(nome: termo);
-      if (termo.isEmpty && lista.isEmpty) lista = await repo.listar();
-      if (!mounted || termo != _termo) return;
+      final pagina = await repo.listarPickerPagina(
+        busca: termo,
+        grupoMuscularPrimario: grupo == null ? null : enumQueryParam(grupo),
+      );
+      final favoritos =
+          termo.isEmpty && grupo == null
+              ? (await repo.listarPickerPagina(favoritos: true, size: 50)).content
+              : const <Exercicio>[];
+      if (!mounted || termo != _termo || grupo != _grupo) return;
       setState(() {
-        _nomes = lista.map((e) => e.nome).toList();
+        _lista = pagina.content;
+        _favoritos = favoritos;
+        _pagina = 0;
+        _temMais = pagina.content.length >= 30;
         _carregando = false;
       });
     } catch (e) {
-      if (!mounted || termo != _termo) return;
+      if (!mounted || termo != _termo || grupo != _grupo) return;
       setState(() {
         _erro = friendlyError(e);
         _carregando = false;
@@ -134,11 +165,51 @@ class _BuscaExercicioState extends ConsumerState<_BuscaExercicio> {
     }
   }
 
+  Future<void> _carregarMais() async {
+    if (_carregando || _carregandoMais || !_temMais) return;
+    setState(() => _carregandoMais = true);
+    try {
+      final pagina = await ref.read(exercicioRepositoryProvider).listarPickerPagina(
+        busca: _termo,
+        grupoMuscularPrimario: _grupo == null ? null : enumQueryParam(_grupo),
+        page: _pagina + 1,
+      );
+      if (!mounted) return;
+      final vistos = _lista.map((e) => e.id).toSet();
+      setState(() {
+        _lista = [..._lista, ...pagina.content.where((e) => vistos.add(e.id))];
+        _pagina += 1;
+        _temMais = pagina.content.length >= 30;
+        _carregandoMais = false;
+      });
+    } catch (_) {
+      if (mounted) setState(() => _carregandoMais = false);
+    }
+  }
+
   @override
   void dispose() {
     _espera?.cancel();
+    _rolagem.dispose();
     super.dispose();
   }
+
+  Widget _secao(String titulo, ShellPalette chrome) => Padding(
+    padding: const EdgeInsets.only(top: TokensStrip.s3, bottom: TokensStrip.s1),
+    child: Text(titulo, style: FocuxHubTypography.chip(chrome.mute)),
+  );
+
+  Widget _linha(ExercicioEscolhido item, {String? grupo}) => FxSatelliteListTile(
+    title: item.nome,
+    titleCase: false,
+    subtitle: grupo == null ? null : Text(grupo),
+    onTap: () => Navigator.pop(context, item),
+  );
+
+  Widget _linhaDe(Exercicio e) => _linha(
+    (id: e.id, nome: e.nome),
+    grupo: TaxonomyLabels.grupo[e.grupoMuscularPrimario],
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -154,6 +225,17 @@ class _BuscaExercicioState extends ConsumerState<_BuscaExercicio> {
             dica: ptS.escolherBuscarExercicio,
             onChanged: _buscar,
           ),
+          const SizedBox(height: TokensStrip.s2),
+          ExerciseGroupChips(
+            selecionados: {if (_grupo != null) _grupo!},
+            noTreino: const {},
+            primary: primary,
+            isDark: chrome.isDark,
+            onToggle: (g) {
+              _grupo = _grupo == g ? null : g;
+              _carregar();
+            },
+          ),
           if (_termo.length >= 2)
             Padding(
               padding: const EdgeInsets.only(top: TokensStrip.s2),
@@ -162,7 +244,11 @@ class _BuscaExercicioState extends ConsumerState<_BuscaExercicio> {
                 child: FxTonalButton(
                   label: ptS.escolherUsarTexto(_termo),
                   compact: true,
-                  onPressed: () => Navigator.pop(context, _termo),
+                  onPressed:
+                      () => Navigator.pop<ExercicioEscolhido>(
+                        context,
+                        (id: null, nome: _termo),
+                      ),
                 ),
               ),
             ),
@@ -175,27 +261,36 @@ class _BuscaExercicioState extends ConsumerState<_BuscaExercicio> {
                       chromeOnDark: chrome.isDark,
                       primary: primary,
                       message: _erro!,
-                      onRetry: () => _carregar(_termo),
+                      onRetry: _carregar,
                     )
-                    : _nomes.isEmpty
+                    : _lista.isEmpty && _favoritos.isEmpty
                     ? Center(
                       child: Text(
                         ptS.escolherNadaEncontrado,
                         style: FocuxHubTypography.bodyMuted(color: chrome.mute),
                       ),
                     )
-                    : ListView.builder(
+                    : ListView(
+                      controller: _rolagem,
                       keyboardDismissBehavior:
                           ScrollViewKeyboardDismissBehavior.onDrag,
-                      itemCount: _nomes.length,
-                      itemBuilder:
-                          (context, i) => ListTile(
-                            title: Text(
-                              _nomes[i],
-                              style: FocuxHubTypography.body(color: chrome.ink),
-                            ),
-                            onTap: () => Navigator.pop(context, _nomes[i]),
+                      children: [
+                        if (_semFiltro && _favoritos.isNotEmpty) ...[
+                          _secao(ptS.escolherFavoritos, chrome),
+                          for (final e in _favoritos) _linhaDe(e),
+                        ],
+                        if (_semFiltro && widget.recentes.isNotEmpty) ...[
+                          _secao(ptS.escolherRecentes, chrome),
+                          for (final r in widget.recentes) _linha(r),
+                        ],
+                        if (_semFiltro) _secao(ptS.escolherTodos, chrome),
+                        for (final e in _lista) _linhaDe(e),
+                        if (_carregandoMais)
+                          Padding(
+                            padding: const EdgeInsets.all(TokensStrip.s3),
+                            child: Center(child: FxLoading(color: primary)),
                           ),
+                      ],
                     ),
           ),
         ],

@@ -181,6 +181,12 @@ bool? anamneseParqValue(Anamnese a, String key) {
   }
 }
 
+/// Valor gravado pelo chip escrito como frase.
+String anamneseValorLegivel(String valor) => switch (valor.trim()) {
+  'Fumo' => 'Fuma',
+  _ => valor.trim(),
+};
+
 String anamneseAlunoCtaTitle(Anamnese a) {
   if (a.isPrecisaAtestado) {
     return 'Seu personal pediu atestado';
@@ -195,10 +201,13 @@ String anamneseAlunoCtaBody(Anamnese a) {
   if (a.isPrecisaAtestado) {
     return a.atestadoObs?.trim().isNotEmpty == true
         ? a.atestadoObs!.trim()
-        : 'Atualize a ficha e anexe/envie o atestado conforme orientado.';
+        : 'Entregue o atestado ao seu personal.';
   }
   if (a.isSolicitada) {
-    return 'Preencha a ficha de saúde e objetivos para o personal revisar.';
+    final pedido = a.pedidoAtualizacao?.trim();
+    return pedido != null && pedido.isNotEmpty
+        ? pedido
+        : 'Preencha a ficha de saúde e objetivos para o personal revisar.';
   }
   if (a.isPreenchida) {
     return 'Enviada para revisão do personal.';
@@ -211,14 +220,13 @@ String anamneseAlunoCtaBody(Anamnese a) {
 
 /// O que o personal precisa ver antes de liberar o treino.
 List<String> anamnesePontosDeAtencao(Anamnese a) => [
-  if (a.parqPositivo == true) 'Respondeu sim em alguma pergunta do PAR-Q+',
   ...a.alertas,
   if (a.tabagismo == 'Fumo') 'Fuma',
 ];
 
 String anamneseDecisaoTitulo(Anamnese a) {
   if (a.isRevisada) return 'Revisada';
-  if (a.isPrecisaAtestado) return 'Aguardando atestado';
+  if (a.isPrecisaAtestado) return 'Atestado pendente';
   if (a.isPreenchida) {
     final n = anamnesePontosDeAtencao(a).length;
     if (n == 0) return 'Revisar · sem pontos de atenção';
@@ -266,7 +274,7 @@ List<(String, String)> anamneseRespostas(Anamnese a, String secao) {
       ('Sono', a.sonoHoras == null ? null : anamneseSonoHorasLabel(a.sonoHoras)),
       ('Qualidade do sono', a.qualidadeSono),
       ('Nível de estresse', a.nivelEstresse),
-      ('Tabagismo', a.tabagismo),
+      ('Tabagismo', a.tabagismo == null ? null : anamneseValorLegivel(a.tabagismo!)),
       ('Álcool', a.alcool),
       ('Observações', a.observacoes),
     ],
@@ -302,7 +310,9 @@ List<(String, String)> anamneseRespostas(Anamnese a, String secao) {
 /// Campos do personal, fora das respostas do aluno.
 List<(String, String)> anamneseNotasDoPersonal(Anamnese a) => [
   if ((a.notasProfissional ?? '').trim().isNotEmpty)
-    ('Notas', a.notasProfissional!.trim()),
+    ('Só você vê', a.notasProfissional!.trim()),
+  if ((a.pedidoAtualizacao ?? '').trim().isNotEmpty)
+    ('Pedido ao aluno', a.pedidoAtualizacao!.trim()),
   if ((a.atestadoObs ?? '').trim().isNotEmpty)
     ('Atestado', a.atestadoObs!.trim()),
 ];

@@ -71,6 +71,7 @@ class Anamnese {
   // Personal (revisão)
   final String? notasProfissional;
   final String? atestadoObs;
+  final String? pedidoAtualizacao;
 
   // Timestamps
   final String? solicitadaEm;
@@ -119,6 +120,7 @@ class Anamnese {
     this.nivelAtividade,
     this.notasProfissional,
     this.atestadoObs,
+    this.pedidoAtualizacao,
     this.solicitadaEm,
     this.preenchidaEm,
     this.revisadaEm,
@@ -138,6 +140,9 @@ class Anamnese {
   /// Personal pode revisar o conteúdo preenchido pelo aluno.
   bool get personalPodeRevisar =>
       isPreenchida || isRevisada || isPrecisaAtestado;
+
+  /// Pedido de atualização: as respostas anteriores seguem à vista.
+  bool get temRespostas => personalPodeRevisar || preenchidaEm != null;
 
   factory Anamnese.fromJson(Map<String, dynamic> j) => Anamnese(
     id: j['id'] as int?,
@@ -180,6 +185,7 @@ class Anamnese {
     nivelAtividade: j['nivelAtividade'] as String?,
     notasProfissional: j['notasProfissional'] as String?,
     atestadoObs: j['atestadoObs'] as String?,
+    pedidoAtualizacao: j['pedidoAtualizacao'] as String?,
     solicitadaEm: j['solicitadaEm'] as String?,
     preenchidaEm: j['preenchidaEm'] as String?,
     revisadaEm: j['revisadaEm'] as String?,
@@ -203,16 +209,19 @@ class AnamneseRevisaoRequest {
     required this.status,
     this.notasProfissional,
     this.atestadoObs,
+    this.pedidoAtualizacao,
   });
 
   final String status;
   final String? notasProfissional;
   final String? atestadoObs;
+  final String? pedidoAtualizacao;
 
   Map<String, dynamic> toJson() => {
     'status': status,
     if (notasProfissional != null) 'notasProfissional': notasProfissional,
     if (atestadoObs != null) 'atestadoObs': atestadoObs,
+    if (pedidoAtualizacao != null) 'pedidoAtualizacao': pedidoAtualizacao,
   };
 }
 

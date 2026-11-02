@@ -7,7 +7,8 @@ enum EvolucaoMetrica {
   peso('kg'),
   cintura('cm'),
   quadril('cm'),
-  braco('cm');
+  braco('cm'),
+  gordura('%');
 
   const EvolucaoMetrica(this.unidade);
 
@@ -18,6 +19,7 @@ enum EvolucaoMetrica {
     EvolucaoMetrica.cintura => ptS.evolucaoMetricaCintura,
     EvolucaoMetrica.quadril => ptS.evolucaoMetricaQuadril,
     EvolucaoMetrica.braco => ptS.evolucaoMetricaBraco,
+    EvolucaoMetrica.gordura => ptS.metaGordura,
   };
 
   double? valor(MedidaCorporal m) => switch (this) {
@@ -25,6 +27,15 @@ enum EvolucaoMetrica {
     EvolucaoMetrica.cintura => m.cintura,
     EvolucaoMetrica.quadril => m.quadril,
     EvolucaoMetrica.braco => m.braco,
+    EvolucaoMetrica.gordura => null,
+  };
+
+  /// Código da meta nesta medida. Quadril e braço não têm meta.
+  String? get codigoMeta => switch (this) {
+    EvolucaoMetrica.peso => 'PESO',
+    EvolucaoMetrica.cintura => 'CINTURA',
+    EvolucaoMetrica.gordura => 'GORDURA',
+    _ => null,
   };
 }
 
@@ -46,8 +57,11 @@ enum EvolucaoPeriodo {
   };
 }
 
-/// A partir daqui a linha informa mais que cartões de número.
-const evolucaoPontosParaGrafico = 4;
+/// Com dois registros já existe direção.
+const evolucaoPontosParaGrafico = 2;
+
+/// Antes disso, ritmo é oscilação.
+const evolucaoPontosParaRitmo = 4;
 
 /// A partir daqui a tendência separa evolução de oscilação do dia.
 const evolucaoPontosParaTendencia = 7;
@@ -70,6 +84,31 @@ List<PontoGrafico> serieDaMetrica(
     if (metrica.valor(m) != null && DateTime.tryParse(m.data) != null)
       PontoGrafico(DateTime.parse(m.data), metrica.valor(m)!),
 ];
+
+/// Gordura vem das avaliações, em qualquer ordem.
+List<PontoGrafico> serieDeGordura(Iterable<PontoGordura> pontos) {
+  final serie = [
+    for (final p in pontos)
+      if (DateTime.tryParse(p.data) != null)
+        PontoGrafico(DateTime.parse(p.data), p.valor),
+  ];
+  serie.sort((a, b) => a.data.compareTo(b.data));
+  return serie;
+}
+
+/// Quanto muda por semana. Nulo com poucos registros.
+double? ritmoSemanal(List<PontoGrafico> pontos) {
+  if (pontos.length < evolucaoPontosParaRitmo) return null;
+  final dias = pontos.last.data.difference(pontos.first.data).inDays;
+  if (dias < 7) return null;
+  return (pontos.last.valor - pontos.first.valor) / dias * 7;
+}
+
+/// De 0 a 1: onde o valor está entre o início e o alvo.
+double fracaoAteOAlvo(double inicio, double alvo, double atual) {
+  if (alvo == inicio) return 0;
+  return ((atual - inicio) / (alvo - inicio)).clamp(0.0, 1.0);
+}
 
 List<PontoGrafico> pontosDoPeriodo(
   List<PontoGrafico> pontos,
@@ -116,28 +155,6 @@ String resumoDaSerie(EvolucaoMetrica metrica, List<PontoGrafico> pontos) {
     atual,
     diferencaTexto(diferenca, metrica.unidade),
     dataCurta(pontos.first.data),
-  );
-}
-
-/// Variação de peso para o topo: últimos 30 dias, ou desde o início se for menos.
-({String texto, String? data})? variacaoDoPeso(
-  List<PontoGrafico> pesos, {
-  DateTime? hoje,
-}) {
-  if (pesos.isEmpty) return null;
-  final ultima = dataCurta(pesos.last.data);
-  if (pesos.length < 2) return (texto: '', data: ultima);
-  final corte = (hoje ?? DateTime.now()).subtract(const Duration(days: 30));
-  final recentes = pesos.where((p) => !p.data.isBefore(corte)).toList();
-  final completo = pesos.first.data.isAfter(corte) || recentes.length < 2;
-  final base = completo ? pesos.first : recentes.first;
-  final diferenca = diferencaTexto(pesos.last.valor - base.valor, 'kg');
-  return (
-    texto:
-        completo
-            ? ptS.evolucaoDesde(diferenca, dataCurta(base.data))
-            : ptS.evolucaoEm30Dias(diferenca),
-    data: ultima,
   );
 }
 

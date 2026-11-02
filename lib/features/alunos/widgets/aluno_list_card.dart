@@ -115,7 +115,6 @@ class AlunoListCard extends ConsumerWidget {
       cachedAderenciaPercent: aluno.aderenciaPercent,
     );
     final aderenciaPercent = sparkline.aderenciaPercent;
-    final weeklyCheckins = sparkline.weeklyCheckins;
     final sparkValues = sparkline.sparkValues;
     final sparkWidth = compact ? 48.0 : 56.0;
     final aderColor = EagleTokens.aderenciaColor(
@@ -124,7 +123,7 @@ class AlunoListCard extends ConsumerWidget {
     );
     final adherenceLabel = adherenceActivityLabel(
       aluno: aluno,
-      weeklyCheckins: weeklyCheckins,
+      diasComTreino: sparkline.diasComTreino,
     );
     final opsText = alunoListOpsText(
       adherenceLabel: adherenceLabel,
@@ -132,13 +131,16 @@ class AlunoListCard extends ConsumerWidget {
       aderenciaPercent: aderenciaPercent,
       filtro: activeFiltro,
     );
-    final opsIsDays = adherenceLabel.isNotEmpty;
+    final opsIsDias = adherenceLabel.isNotEmpty;
     final meaningfulPercent = alunoListHasMeaningfulPercent(aderenciaPercent);
     final needsOutreach =
         !modoSelecao && activeFiltro == AlunoFiltro.contatoHoje;
-    // A linha 2 já diz "Parado há N dias": não repete embaixo.
+    // A linha 2 já diz "Parado há N dias": não repete embaixo. Compacta: só
+    // nome e objetivo, e o alerta toma o lugar do objetivo.
     final showOpsLine =
-        opsText.isNotEmpty && !(opsIsDays && linha.tipo == LinhaDoCardTipo.parado);
+        !compact &&
+        opsText.isNotEmpty &&
+        !(opsIsDias && linha.tipo == LinhaDoCardTipo.parado);
     final aguardandoEntrada = !aluno.contaAtiva && alunoStatusAtivo(aluno);
     final s = S.of(context);
     final whatsappNumber = (aluno.whatsapp ?? '').replaceAll(RegExp(r'\D'), '');
@@ -168,8 +170,7 @@ class AlunoListCard extends ConsumerWidget {
           '$displayName, $statusText'
           '${aguardandoEntrada ? ', ${s.alunoAindaNaoEntrou}' : ''}'
           '${statusExplicacao == null ? '' : ', $statusExplicacao'}'
-          ', $aderenciaLabel'
-          '${adherenceLabel.isEmpty ? '' : ', $adherenceLabel'}',
+          ', $aderenciaLabel',
       child: InkWell(
         onTap:
             modoSelecao
@@ -271,8 +272,11 @@ class AlunoListCard extends ConsumerWidget {
                             linha.texto,
                             style: FocuxHubTypography.bodyMuted(
                               color:
-                                  linha.tipo == LinhaDoCardTipo.convite
-                                      ? EagleTokens.warn
+                                  linha.tipo == LinhaDoCardTipo.convite ||
+                                          linha.tipo == LinhaDoCardTipo.parado
+                                      ? (isDark
+                                          ? EagleTokens.warnAccentSoft
+                                          : EagleTokens.warnDeep)
                                       : secondaryInk,
                               height: 1.25,
                             ),
@@ -284,15 +288,10 @@ class AlunoListCard extends ConsumerWidget {
                             Row(
                               children: [
                                 Container(
-                                  width: compact ? 5 : 6,
-                                  height: compact ? 5 : 6,
+                                  width: 6,
+                                  height: 6,
                                   decoration: BoxDecoration(
-                                    color:
-                                        opsIsDays
-                                            ? (isDark
-                                                ? EagleTokens.warnAccentSoft
-                                                : EagleTokens.warnDeep)
-                                            : aderColor,
+                                    color: aderColor,
                                     shape: BoxShape.circle,
                                   ),
                                 ),
@@ -300,23 +299,11 @@ class AlunoListCard extends ConsumerWidget {
                                 Flexible(
                                   child: Text(
                                     opsText,
-                                    style:
-                                        opsIsDays
-                                            ? FocuxHubTypography.bodyMuted(
-                                              color:
-                                                  isDark
-                                                      ? EagleTokens
-                                                          .warnAccentSoft
-                                                      : EagleTokens.warnDeep,
-                                              fontWeight: FontWeight.w600,
-                                              height: 1.15,
-                                            )
-                                            : FocuxHubTypography.metric(
-                                              fontSize: compact ? 11.5 : 12.5,
-                                              fontWeight: FontWeight.w700,
-                                              color: aderColor,
-                                              height: 1.1,
-                                            ),
+                                    style: FocuxHubTypography.bodyMuted(
+                                      color: secondaryInk,
+                                      fontWeight: FontWeight.w600,
+                                      height: 1.15,
+                                    ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),

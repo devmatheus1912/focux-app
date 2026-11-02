@@ -104,9 +104,9 @@ void main() {
         ),
         'OK',
       );
-      expect(Aluno360FerramentasLogic.anamneseValue('REVISADA'), 'OK');
+      expect(Aluno360FerramentasLogic.anamneseValue('REVISADA'), 'Revisada');
       expect(Aluno360FerramentasLogic.anamneseValue('PREENCHIDA'), 'Revisar');
-      expect(Aluno360FerramentasLogic.anamneseValue('SOLICITADA'), 'Pendente');
+      expect(Aluno360FerramentasLogic.anamneseValue('SOLICITADA'), 'Aguardando');
       expect(Aluno360FerramentasLogic.anamneseNeedsAttention('PREENCHIDA'), isTrue);
       expect(Aluno360FerramentasLogic.anamneseNeedsAttention('SOLICITADA'), isFalse);
       expect(Aluno360FerramentasLogic.anamneseNeedsAttention('REVISADA'), isFalse);

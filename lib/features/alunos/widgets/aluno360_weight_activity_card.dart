@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../evolucao/providers/evolucao_home_provider.dart';
+import '../../evolucao/widgets/evolucao_hero.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -65,6 +68,14 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
         children: [
           DashboardSectionHeader(title: S.of(context).corpoTitulo),
           const SizedBox(height: TokensStrip.s3),
+          if (ref.watch(evolucaoHomeProvider(alunoId)).value?.aneis case final aneis?) ...[
+            EvolucaoMiniAneis(
+              aneis: aneis,
+              doPersonal: true,
+              onTap: () => _openEvolucao(context),
+            ),
+            const SizedBox(height: TokensStrip.s2),
+          ],
           InkWell(
             onTap: () => _openEvolucao(context),
             borderRadius: BorderRadius.circular(12),

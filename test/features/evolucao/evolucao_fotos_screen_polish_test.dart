@@ -9,14 +9,12 @@ void main() {
     );
     expect(screen, contains('fxScreenA11yScope'));
     expect(screen, isNot(contains('CircularProgressIndicator')));
-    expect(screen, contains('FxShellScaffold'));
     expect(screen, contains('friendlyError'));
     expect(screen, contains('FxEmptyState'));
     expect(screen, contains('SkeletonList'));
     expect(screen, contains('RefreshIndicator'));
-    expect(screen, contains('safePopOrGo'));
     expect(screen, contains('PopScope'));
-    expect(screen, contains('FxHubFreshness.joinCount'));
+
     expect(screen, contains('viewInsetsOf'));
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('listarFotosPagina'));

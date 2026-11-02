@@ -28,7 +28,7 @@ void main() {
     expect(screen, contains('IndexedStack'));
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, contains('FxLiquidPrimaryButton'));
-    expect(screen, contains('FxHelpIconButton'));
+    expect(screen, contains('showEvolucaoHelpSheet'));
     expect(screen, contains('showEvolucaoHelpSheet'));
     expect(screen, contains('EvolucaoFotosScreen'));
     expect(screen, contains('EvolucaoComparativoScreen'));

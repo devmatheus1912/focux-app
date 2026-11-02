@@ -23,8 +23,9 @@ class _FakeRepo implements AgendaRepository {
     int alunoId,
     DateTime inicio,
     DateTime fim,
-    String? titulo,
-  ) async {
+    String? titulo, {
+    String? nota,
+  }) async {
     criados++;
     final options = RequestOptions(path: '/api/agenda');
     throw DioException(

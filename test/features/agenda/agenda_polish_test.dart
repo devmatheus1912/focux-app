@@ -42,7 +42,7 @@ void main() {
     expect(screen, isNot(contains('maskEmailForList')));
     expect(screen, isNot(contains('FxLiquidPrimaryButton')));
     expect(screen, isNot(contains('FxLiquidSecondaryButton')));
-    expect(screen, contains('_AgendaMetaStrip'));
+    expect(screen, contains('AgendaMetaStrip'));
     expect(screen, contains('Semantics('));
     expect(screen, contains('explicitChildNodes: true'));
     expect(screen, isNot(contains('ListTile(')));
@@ -71,7 +71,7 @@ void main() {
       allOf(contains('FxEmptyState'), isNot(contains('FxEmptyAction'))),
     );
     expect(screen, contains('_eventActions'));
-    expect(screen, contains('_danger'));
+    expect(screen, contains('_perigo'));
     expect(screen, isNot(contains('Icons.delete_outline_rounded')));
     expect(screen, isNot(contains('? () {}')));
     expect(screen, isNot(contains('label: agendaHorarioConfirmLabel')));

@@ -287,12 +287,6 @@ void main() {
       );
       expect(
         File(
-          'lib/features/alunos/providers/aluno_detail_providers.dart',
-        ).readAsStringSync(),
-        contains('_hydrateEvolucaoHomeFromFerramentas'),
-      );
-      expect(
-        File(
           'lib/features/evolucao/providers/evolucao_home_provider.dart',
         ).readAsStringSync(),
         contains('EvolucaoHomeClientCache.getIfFresh'),

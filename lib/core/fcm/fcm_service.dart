@@ -148,6 +148,17 @@ class FcmService {
 
   static Future<void>? _permissionInFlight;
 
+  /// Aparelho recusou notificações: o sino continua, o push não chega.
+  static Future<bool> permissaoNegada() async {
+    if (kIsWeb) return false;
+    try {
+      final settings = await FirebaseMessaging.instance.getNotificationSettings();
+      return settings.authorizationStatus == AuthorizationStatus.denied;
+    } catch (_) {
+      return false;
+    }
+  }
+
   /// Pede permissão de notificação (prompt só na primeira vez) e registra o
   /// token. Chamar com sessão ativa — nunca no boot deslogado.
   static Future<void> requestPermissionIfNeeded(ApiClient apiClient) {

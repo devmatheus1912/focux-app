@@ -43,6 +43,8 @@ import '../../checkin/utils/treinos_hub_view.dart' show sessaoAntigaAberta;
 import '../../checkin/widgets/ficha_vigencia_aluno.dart';
 import '../../checkin/widgets/treinos_hoje_acao.dart' show descartarSessaoAberta;
 import '../../checkin/widgets/treinos_hub_rows.dart' show TreinosSessaoAbertaAviso;
+import '../../evolucao/providers/evolucao_home_provider.dart';
+import '../../evolucao/widgets/evolucao_hero.dart';
 import '../../../core/widgets/fx_status_pill.dart';
 import '../../treinos/models/rotina_fila.dart';
 import '../../treinos/utils/ficha_vigencia.dart';
@@ -407,6 +409,15 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
                 invalidateAlunoDashboardHome(ref);
               }
             },
+          ),
+        ),
+      if (ref.watch(minhaEvolucaoProvider).value?.aneis case final aneis?)
+        (
+          TokensStrip.s3,
+          EvolucaoMiniAneis(
+            aneis: aneis,
+            doPersonal: false,
+            onTap: () => context.push('/aluno/progresso'),
           ),
         ),
       if (home.personalBrand.nomePersonal.trim().isNotEmpty)

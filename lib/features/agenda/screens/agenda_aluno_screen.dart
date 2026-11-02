@@ -12,6 +12,7 @@ import '../../../core/utils/clipboard_sensitive.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
@@ -30,7 +31,9 @@ import '../../chat/providers/chat_rascunho_provider.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/agenda_repository.dart';
 import '../utils/agenda_display.dart';
+import '../utils/agenda_schedule.dart';
 import '../utils/agenda_status.dart';
+import '../widgets/agenda_meta_strip.dart';
 
 class AgendaAlunoScreen extends ConsumerStatefulWidget {
   const AgendaAlunoScreen({super.key});
@@ -65,7 +68,8 @@ class _Secao {
   }
 }
 
-class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
+class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen>
+    with WidgetsBindingObserver {
   final _proximas = _Secao(agendaAlunoEscopoProximas);
   final _anteriores = _Secao(agendaAlunoEscopoAnteriores);
   var _anterioresAbertas = false;
@@ -74,9 +78,22 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
   String? _erro;
   DateTime? _fetchedAt;
 
+  /// Voltar ao app, inclusive pela notificação, traz a agenda atual.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _load();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     markAlunoAgendaReviewed(
       ref.read(alunoDashboardHomeProvider).value?.agendaProximoInicio,
     ).ignore();
@@ -196,12 +213,7 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
         ref.read(apiClientProvider),
       ).confirmarPresenca(ag.id);
       if (!mounted) return;
-      setState(() {
-        _proximas.items = [
-          for (final item in _proximas.items)
-            item.id == atualizado.id ? atualizado : item,
-        ];
-      });
+      _substituir(atualizado);
       invalidateAlunoDashboardHome(ref);
       FeedbackHelper.showSuccess(context, s.agendaAlunoPresencaConfirmada);
     } catch (e) {
@@ -210,10 +222,34 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
     }
   }
 
-  /// Só avisa: abre o chat com o texto pronto e o personal decide o horário.
-  void _naoVou(Agendamento ag) {
+  void _substituir(Agendamento atualizado) => setState(() {
+    _proximas.items = [
+      for (final item in _proximas.items)
+        item.id == atualizado.id ? atualizado : item,
+    ];
+  });
+
+  /// Registra o aviso; quem remarca ou cancela é o personal.
+  Future<void> _naoVou(Agendamento ag) async {
     final s = S.of(context);
-    ref.read(chatAlunoRascunhoProvider.notifier).value = s
+    final ok = await showFxConfirmSheet(
+      context,
+      title: s.agendaNaoVouTitulo,
+      message: s.agendaNaoVouTexto,
+      confirmLabel: s.agendaNaoVouAvisar,
+      icon: Icons.event_busy_outlined,
+    );
+    if (!ok || !mounted) return;
+    try {
+      _substituir(await AgendaRepository(ref.read(apiClientProvider)).avisarNaoVou(ag.id));
+      if (mounted) FeedbackHelper.showSuccess(context, s.agendaNaoVouEnviado);
+    } catch (e) {
+      if (mounted) FeedbackHelper.showApiFailure(context, e);
+    }
+  }
+
+  void _abrirChat(Agendamento ag) {
+    ref.read(chatAlunoRascunhoProvider.notifier).value = S.of(context)
         .agendaAlunoNaoVouMensagem(agendaAlunoDiaLabel(ag.inicio, ag.fim));
     openAlunoRoute(context, '/chat/aluno');
   }
@@ -239,14 +275,13 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  '${s.agendaAlunoStatus}: ${agendaAlunoStatusLabel(ag)}',
-                  style: FocuxHubTypography.body(color: chrome.ink),
-                ),
-                const SizedBox(height: TokensStrip.s1),
-                Text(
-                  '${s.agendaAlunoDuracao}: ${ag.fim.difference(ag.inicio).inMinutes} min',
-                  style: FocuxHubTypography.body(color: chrome.ink),
+                AgendaMetaStrip(
+                  date: agendaDayShortLabel(ag.inicio),
+                  time: '${agendaHm(ag.inicio)}–${agendaHm(ag.fim)}',
+                  status:
+                      ag.naoVouEm != null
+                          ? s.agendaAvisouNaoVai
+                          : agendaAlunoStatusLabel(ag),
                 ),
                 if (obs.isNotEmpty) ...[
                   const SizedBox(height: TokensStrip.s3),
@@ -269,11 +304,11 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
                     const SizedBox(height: TokensStrip.s2),
                   ],
                   FxTonalButton(
-                    label: s.agendaAlunoNaoVou,
+                    label: ag.naoVouEm == null ? s.agendaAlunoNaoVou : s.agendaAbrirChat,
                     expanded: true,
                     onPressed: () {
                       Navigator.of(ctx).pop();
-                      _naoVou(ag);
+                      ag.naoVouEm == null ? _naoVou(ag) : _abrirChat(ag);
                     },
                   ),
                 ],
@@ -355,7 +390,7 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '${agendaAlunoDefaultTitle(ag.titulo)} · ${podeConfirmar ? s.agendaAlunoFaltaConfirmar : s.agendaAlunoConfirmada}',
+                  '${agendaAlunoDefaultTitle(ag.titulo)} · ${ag.naoVouEm != null ? s.agendaAvisouNaoVai : podeConfirmar ? s.agendaAlunoFaltaConfirmar : s.agendaAlunoConfirmada}',
                   style: FocuxHubTypography.bodyMuted(color: chrome.mute),
                 ),
               ],
@@ -370,9 +405,9 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
             const SizedBox(height: TokensStrip.s2),
           ],
           FxTonalButton(
-            label: s.agendaAlunoNaoVou,
+            label: ag.naoVouEm == null ? s.agendaAlunoNaoVou : s.agendaAbrirChat,
             expanded: true,
-            onPressed: () => _naoVou(ag),
+            onPressed: () => ag.naoVouEm == null ? _naoVou(ag) : _abrirChat(ag),
           ),
         ],
       ),

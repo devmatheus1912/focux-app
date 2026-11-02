@@ -94,11 +94,11 @@ abstract final class Aluno360FerramentasLogic {
   static String anamneseValue(String? status) {
     switch (status) {
       case 'SOLICITADA':
-        return 'Pendente';
+        return 'Aguardando';
       case 'PREENCHIDA':
         return 'Revisar';
       case 'REVISADA':
-        return 'OK';
+        return 'Revisada';
       case 'PRECISA_ATESTADO':
         return 'Atestado';
       case 'NAO_INICIADA':
@@ -107,16 +107,21 @@ abstract final class Aluno360FerramentasLogic {
     }
   }
 
-  static String anamneseSubtitle(String? status) {
+  static String anamneseSubtitle(String? status, {String? desde}) {
+    final data = DateTime.tryParse(desde ?? '');
+    final dia =
+        data == null
+            ? ''
+            : ' · ${data.day.toString().padLeft(2, '0')}/${data.month.toString().padLeft(2, '0')}';
     switch (status) {
       case 'SOLICITADA':
-        return 'Aguardando o aluno preencher';
+        return 'Aguardando o aluno preencher$dia';
       case 'PREENCHIDA':
-        return 'Pronta para revisão';
+        return 'Pronta para revisão$dia';
       case 'REVISADA':
-        return 'Ficha revisada';
+        return 'Ficha revisada$dia';
       case 'PRECISA_ATESTADO':
-        return 'Aguardando atestado';
+        return 'Atestado pendente$dia';
       case 'NAO_INICIADA':
       default:
         return 'Aluno preenche · você revisa';

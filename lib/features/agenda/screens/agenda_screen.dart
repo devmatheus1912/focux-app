@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/config/env.dart';
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -38,7 +37,8 @@ import '../../dashboard/constants/dashboard_layout.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/widgets/fx_choice_strip.dart';
 import '../../../core/widgets/fx_grouped_action_sheet.dart';
-import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_status_banner.dart';
+import '../widgets/agenda_meta_strip.dart';
 import '../widgets/agenda_slot_picker_sheet.dart';
 import '../../../l10n/app_localizations.dart';
 
@@ -53,7 +53,8 @@ class AgendaScreen extends ConsumerStatefulWidget {
   ConsumerState<AgendaScreen> createState() => _AgendaScreenState();
 }
 
-class _AgendaScreenState extends ConsumerState<AgendaScreen> {
+class _AgendaScreenState extends ConsumerState<AgendaScreen>
+    with WidgetsBindingObserver {
   List<Agendamento> _ags = [];
   Object? _erro;
   late DateTime _mes;
@@ -62,9 +63,22 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
 
   static const _visaoKey = 'agenda_visao';
 
+  /// Voltar ao app, inclusive pela notificação, traz a agenda atual.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _load(force: true);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     final now = DateTime.now();
     _mes = agendaMonthOf(now);
     _dia = agendaDefaultSelectedDay(_mes, now: now);
@@ -228,6 +242,23 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
     final primary = Theme.of(context).colorScheme.primary;
     final showError = _erro != null && _ags.isEmpty;
     final porDia = agendaVisibleByDay(_ags);
+    Widget lista() => AgendaDiaLista(
+      dia: _dia,
+      agendamentos: _ags,
+      photoFor: _photoFor,
+      onRefresh: () {
+        AnalyticsService.instance.track(ProductEvents.agendaRefreshed);
+        return _load(force: true);
+      },
+      onOpen: _openAgendamentoDetails,
+      onNew:
+          (slot, duracaoMin) => _novoAgendamento(
+            day: _dia,
+            slot: slot,
+            duracaoMin: duracaoMin,
+          ),
+      onPresenca: _registrarPresenca,
+    );
     return fxScreenA11yScope(
       label: 'Agenda',
       child: FxShellScaffold(
@@ -238,9 +269,10 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
           title: 'Agenda',
           showBack: false,
           actions: [
-            FxHelpIconButton(
+            IconButton(
               tooltip: 'Como usar a agenda',
-              onTap: () {
+              icon: const Icon(Icons.help_outline_rounded),
+              onPressed: () {
                 AnalyticsService.instance.track(ProductEvents.agendaHelpOpened);
                 showAgendaHelpSheet(context);
               },
@@ -302,13 +334,43 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                             onRetry: () => _load(force: true),
                           )
                           : _visao == AgendaVisao.mes
-                          ? AgendaMonthGrid(
-                            month: _mes,
-                            selected: _dia,
-                            eventsByDay: porDia,
-                            onSelect: _openDay,
-                            onSwipe: _changeMonth,
-                            expand: true,
+                          ? Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              AgendaMonthGrid(
+                                month: _mes,
+                                selected: _dia,
+                                eventsByDay: porDia,
+                                onSelect: _selectDay,
+                                onSwipe: _changeMonth,
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                  TokensStrip.s4,
+                                  TokensStrip.s2,
+                                  TokensStrip.s4,
+                                  0,
+                                ),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        agendaDayShortLabel(_dia),
+                                        style: FocuxHubTypography.cardTitle(
+                                          color: chrome.ink,
+                                        ),
+                                      ),
+                                    ),
+                                    FxTonalButton(
+                                      label: s.agendaVerDia,
+                                      compact: true,
+                                      onPressed: () => _openDay(_dia),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Expanded(child: lista()),
+                            ],
                           )
                           : Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -318,27 +380,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                                 porDia: porDia,
                                 onDia: _selectDay,
                               ),
-                              Expanded(
-                                child: AgendaDiaLista(
-                                  dia: _dia,
-                                  agendamentos: _ags,
-                                  photoFor: _photoFor,
-                                  onRefresh: () {
-                                    AnalyticsService.instance.track(
-                                      ProductEvents.agendaRefreshed,
-                                    );
-                                    return _load(force: true);
-                                  },
-                                  onOpen: _openAgendamentoDetails,
-                                  onNew:
-                                      (slot, duracaoMin) => _novoAgendamento(
-                                        day: _dia,
-                                        slot: slot,
-                                        duracaoMin: duracaoMin,
-                                      ),
-                                  onPresenca: _registrarPresenca,
-                                ),
-                              ),
+                              Expanded(child: lista()),
                             ],
                           ),
                 ),

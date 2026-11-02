@@ -124,7 +124,6 @@ final aluno360FerramentasBundleProvider =
   _keepFor(ref);
   final cached = Aluno360ClientCache.getFerramentasIfFresh(alunoId);
   if (cached != null) {
-    _hydrateEvolucaoHomeFromFerramentas(alunoId, cached);
     return cached;
   }
   final sw = Stopwatch()..start();
@@ -133,7 +132,6 @@ final aluno360FerramentasBundleProvider =
   ).buscarAluno360Ferramentas(alunoId);
   sw.stop();
   Aluno360ClientCache.putFerramentas(alunoId, bundle);
-  _hydrateEvolucaoHomeFromFerramentas(alunoId, bundle);
   if (kDebugMode) {
     debugPrint(
       '[aluno360] GET /api/alunos/$alunoId/360/ferramentas '
@@ -143,16 +141,6 @@ final aluno360FerramentasBundleProvider =
   }
   return bundle;
 });
-
-/// Seed Medidas cache from `/360/ferramentas.evolucaoHome`.
-void _hydrateEvolucaoHomeFromFerramentas(
-  int alunoId,
-  Aluno360Ferramentas bundle,
-) {
-  final home = bundle.evolucaoHome;
-  if (home == null) return;
-  EvolucaoHomeClientCache.put(alunoId, home);
-}
 
 /// Fire-and-forget after Operação is usable (idle / next frame).
 void prefetchAluno360SecondaryTabs(WidgetRef ref, int alunoId) {

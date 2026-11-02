@@ -1,70 +1,15 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_empty_state.dart';
-import '../../../core/widgets/fx_cached_network_image.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../alunos/data/aluno_contact_utils.dart';
 import '../../alunos/data/aluno_repository.dart';
-
-class _AgendaAlunoAvatar extends StatelessWidget {
-  final Aluno? aluno;
-
-  const _AgendaAlunoAvatar({required this.aluno});
-
-  @override
-  Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
-    final primary = Theme.of(context).colorScheme.primary;
-    final foto = aluno?.fotoUrl;
-    final hasPhoto = foto != null && foto.isNotEmpty;
-    final initials = _initials(aluno?.nome ?? '');
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(13),
-      child: Container(
-        width: 42,
-        height: 42,
-        color: BrandPalette.soft(primary, dark: chrome.isDark),
-        child:
-            hasPhoto
-                ? FxCachedNetworkImage(
-                  imageUrl: foto,
-                  width: 42,
-                  height: 42,
-                  fit: BoxFit.cover,
-                  memCacheWidth: 84,
-                  errorBuilder: (_, _, _) => _fallback(primary, initials),
-                )
-                : _fallback(primary, initials),
-      ),
-    );
-  }
-
-  Widget _fallback(Color primary, String initials) {
-    if (initials == '?') {
-      return Icon(Icons.person_outline_rounded, color: primary, size: 20);
-    }
-    return Center(
-      child: Text(
-        initials,
-        style: FocuxHubTypography.cardTitle(color: primary),
-      ),
-    );
-  }
-
-  String _initials(String name) {
-    final parts = name.trim().split(RegExp(r'\s+'));
-    if (parts.isEmpty || parts.first.isEmpty) return '?';
-    final first = parts.first.characters.first;
-    final last = parts.length > 1 ? parts.last.characters.first : '';
-    return (first + last).toUpperCase();
-  }
-}
+import '../../alunos/widgets/aluno_avatar.dart';
 
 class AgendaAlunoSheet extends StatefulWidget {
   final List<Aluno> alunos;
@@ -204,7 +149,11 @@ class _AgendaAlunoSheetState extends State<AgendaAlunoSheet> {
                                 ),
                                 child: Row(
                                   children: [
-                                    _AgendaAlunoAvatar(aluno: aluno),
+                                    AlunoAvatar(
+                                      name: aluno.nome,
+                                      photoUrl: aluno.fotoUrl,
+                                      variant: AlunoAvatarVariant.strip,
+                                    ),
                                     const SizedBox(width: 12),
                                     Expanded(
                                       child: Column(

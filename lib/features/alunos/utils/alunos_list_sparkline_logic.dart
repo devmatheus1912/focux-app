@@ -24,7 +24,7 @@ double _sanitizeCheckins(double value) {
 }
 
 /// Métricas de aderência para card da lista de alunos.
-({List<double> sparkValues, int weeklyCheckins, int? aderenciaPercent})
+({List<double> sparkValues, int diasComTreino, int? aderenciaPercent})
 alunosListSparklineMetrics({
   required List<AderenciaWeekPoint> points,
   int? cachedAderenciaPercent,
@@ -32,6 +32,8 @@ alunosListSparklineMetrics({
   final raw =
       points.map((e) => _sanitizeCheckins(e.checkins)).toList(growable: false);
   final weeklyCheckins = raw.fold<double>(0, (p, v) => p + v).round();
+  // Aderência conta dias: duas sessões no mesmo dia valem um.
+  final diasComTreino = raw.where((v) => v > 0).length;
   final aderenciaPercent =
       cachedAderenciaPercent?.clamp(0, 100) ??
       (raw.isEmpty
@@ -44,7 +46,7 @@ alunosListSparklineMetrics({
           : const <double>[];
   return (
     sparkValues: sparkValues,
-    weeklyCheckins: weeklyCheckins,
+    diasComTreino: diasComTreino,
     aderenciaPercent: aderenciaPercent,
   );
 }

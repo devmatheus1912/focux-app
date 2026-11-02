@@ -24,6 +24,7 @@ import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../alunos/providers/aluno_detail_providers.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../data/anamnese_repository.dart';
 import '../providers/anamnese_provider.dart';
@@ -106,8 +107,10 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen> {
       final a = await _repo.solicitar(widget.alunoId);
       if (!mounted) return;
       ref.invalidate(alunoAnamneseProvider(widget.alunoId));
+      await invalidateAluno360Providers(ref, widget.alunoId);
+      if (!mounted) return;
       setState(() => _anamnese = a);
-      FeedbackHelper.showSuccess(context, 'Anamnese solicitada ao aluno.');
+      FeedbackHelper.showSuccess(context, 'Pedido enviado ao aluno.');
     } catch (e) {
       if (mounted) FeedbackHelper.showError(context, friendlyError(e));
     } finally {
@@ -121,6 +124,7 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen> {
     required String confirmLabel,
     String? subtitle,
     bool pedirAtestado = false,
+    bool pedirAtualizacao = false,
   }) async {
     final notasCtrl = TextEditingController(
       text: _anamnese?.notasProfissional ?? '',
@@ -128,6 +132,7 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen> {
     final atestadoCtrl = TextEditingController(
       text: _anamnese?.atestadoObs ?? '',
     );
+    final pedidoCtrl = TextEditingController();
     final ok = await showFxFormSheet(
       context,
       title: title,
@@ -137,17 +142,27 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          if (pedirAtualizacao)
+            AlunoInsetFormField(
+              rotuloVisivel: true,
+              controller: pedidoCtrl,
+              label: 'O que o aluno deve atualizar',
+              icon: Icons.edit_note_rounded,
+              maxLines: 3,
+            ),
           AlunoInsetFormField(
+            rotuloVisivel: true,
             controller: notasCtrl,
-            label: 'Notas do profissional',
+            label: 'Notas · só você vê',
             icon: Icons.sticky_note_2_outlined,
             maxLines: 4,
             showDivider: pedirAtestado,
           ),
           if (pedirAtestado)
             AlunoInsetFormField(
+              rotuloVisivel: true,
               controller: atestadoCtrl,
-              label: 'Observação do atestado',
+              label: 'Orientação ao aluno',
               icon: Icons.medical_information_outlined,
               maxLines: 3,
               showDivider: false,
@@ -158,6 +173,7 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen> {
     if (!ok || !mounted) {
       notasCtrl.dispose();
       atestadoCtrl.dispose();
+      pedidoCtrl.dispose();
       return;
     }
     HapticFeedback.mediumImpact();
@@ -169,10 +185,13 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen> {
           status: status,
           notasProfissional: notasCtrl.text.trim(),
           atestadoObs: pedirAtestado ? atestadoCtrl.text.trim() : null,
+          pedidoAtualizacao: pedirAtualizacao ? pedidoCtrl.text.trim() : null,
         ),
       );
       if (!mounted) return;
       ref.invalidate(alunoAnamneseProvider(widget.alunoId));
+      await invalidateAluno360Providers(ref, widget.alunoId);
+      if (!mounted) return;
       setState(() => _anamnese = a);
       FeedbackHelper.showSuccess(
         context,
@@ -187,6 +206,7 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen> {
     } finally {
       notasCtrl.dispose();
       atestadoCtrl.dispose();
+      pedidoCtrl.dispose();
       if (mounted) setState(() => _acting = false);
     }
   }
@@ -194,7 +214,8 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen> {
   String? get _primaryCtaLabel {
     final a = _anamnese;
     if (a == null) return null;
-    if (a.isNaoIniciada || a.isSolicitada) return 'Solicitar anamnese';
+    if (a.isNaoIniciada) return 'Solicitar anamnese';
+    if (a.isSolicitada) return 'Reenviar pedido';
     if (a.isPreenchida || a.isPrecisaAtestado) return 'Marcar revisada';
     return null;
   }
@@ -264,6 +285,7 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen> {
           title: 'Pedir atualização',
           subtitle: 'O aluno será notificado para atualizar a ficha.',
           confirmLabel: 'Pedir atualização',
+          pedirAtualizacao: true,
         );
       case 'chat':
         context.push('/alunos/${widget.alunoId}/chat');

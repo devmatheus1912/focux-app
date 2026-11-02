@@ -45,19 +45,6 @@ String? agendaEventSessionNote(String? titulo) {
   return t;
 }
 
-String agendaEventSheetSubtitle({
-  required DateTime inicio,
-  required DateTime fim,
-  required String statusLabel,
-}) {
-  final time =
-      fim.isAfter(inicio)
-          ? '${agendaHm(inicio)}–${agendaHm(fim)}'
-          : agendaHm(inicio);
-  // Status fica só no meta strip — evita "Confirmado" duplicado no header.
-  return time;
-}
-
 String agendaIsoDate(DateTime d) {
   final y = d.year.toString().padLeft(4, '0');
   final m = d.month.toString().padLeft(2, '0');

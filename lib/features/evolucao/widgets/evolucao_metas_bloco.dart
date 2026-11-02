@@ -11,13 +11,12 @@ import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_grouped_action_sheet.dart';
 import '../../../core/widgets/fx_quick_chips.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../l10n/pt.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../data/evolucao_repository.dart';
 import '../data/meta_corporal.dart';
-import '../providers/metas_provider.dart';
+import '../../alunos/providers/aluno_detail_providers.dart';
 
 double? _numero(String texto) =>
     double.tryParse(texto.trim().replaceAll(',', '.'));
@@ -43,6 +42,8 @@ Future<bool> abrirFormularioDeMeta(
   );
   final observacao = TextEditingController(text: meta?.observacao ?? '');
   DateTime? prazo = meta?.prazo == null ? null : DateTime.tryParse(meta!.prazo!);
+  // Prazo de meta existente segue valendo até o personal trocar.
+  var prazoDias = prazo == null ? 0 : -1;
   final livres = metaMetricas.where((m) => !ocupadas.contains(m)).toList();
   try {
     final ok = await showFxFormSheet(
@@ -82,26 +83,20 @@ Future<bool> abrirFormularioDeMeta(
                   showDivider: false,
                 ),
                 const SizedBox(height: TokensStrip.s2),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: FxTonalButton(
-                    label:
-                        prazo == null
-                            ? ptS.metaPrazoDefinir
-                            : ptS.metaPrazoAte(_dataCurta(prazo!)),
-                    icon: Icons.event_outlined,
-                    compact: true,
-                    onPressed: () async {
-                      final hoje = DateTime.now();
-                      final data = await showDatePicker(
-                        context: context,
-                        firstDate: hoje,
-                        lastDate: DateTime(hoje.year + 3),
-                        initialDate: prazo ?? hoje.add(const Duration(days: 90)),
-                      );
-                      if (data != null) setSheet(() => prazo = data);
-                    },
-                  ),
+                FxQuickChips<int>(
+                  itens: const [0, 30, 60, 90],
+                  selecionado: prazoDias,
+                  rotuloDe:
+                      (d) =>
+                          d == 0 ? ptS.metaPrazoSem : ptS.metaPrazoDias('$d'),
+                  onSelecionar:
+                      (d) => setSheet(() {
+                        prazoDias = d;
+                        prazo =
+                            d == 0
+                                ? null
+                                : DateTime.now().add(Duration(days: d));
+                      }),
                 ),
               ],
             ),
@@ -141,9 +136,6 @@ Future<bool> abrirFormularioDeMeta(
   }
 }
 
-String _dataCurta(DateTime d) =>
-    '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
-
 /// O que o personal precisa decidir sobre as metas deste aluno.
 class EvolucaoMetasBloco extends ConsumerWidget {
   const EvolucaoMetasBloco({
@@ -165,7 +157,7 @@ class EvolucaoMetasBloco extends ConsumerWidget {
   ) async {
     try {
       await acao();
-      ref.invalidate(metasDoAlunoProvider(alunoId));
+      await invalidateAluno360Providers(ref, alunoId);
     } catch (e) {
       if (context.mounted) FeedbackHelper.showError(context, friendlyError(e));
     }
@@ -204,7 +196,7 @@ class EvolucaoMetasBloco extends ConsumerWidget {
         ocupadas: const {},
         meta: meta,
       );
-      if (salvou) ref.invalidate(metasDoAlunoProvider(alunoId));
+      if (salvou) await invalidateAluno360Providers(ref, alunoId);
     } else if (escolha == 'encerrar') {
       final ok = await showFxConfirmSheet(
         context,
@@ -220,65 +212,108 @@ class EvolucaoMetasBloco extends ConsumerWidget {
     }
   }
 
+  Future<void> _confirmar(
+    BuildContext context,
+    WidgetRef ref,
+    MetaCorporal m,
+  ) async {
+    final escolha = await showFxGroupedActionSheet<String>(
+      context,
+      titulo: ptS.metaConfirmarTitulo(metaMetricaRotulo(m.metrica)),
+      grupos: [
+        FxActionGroup<String>(null, [
+          FxActionItem(
+            valor: 'confirmar',
+            rotulo: ptS.metaConfirmarAcao,
+            descricao: ptS.metaConfirmarDescricao,
+            icone: Icons.verified_outlined,
+          ),
+          FxActionItem(
+            valor: 'devolver',
+            rotulo: ptS.metaDevolver,
+            descricao: ptS.metaDevolverDescricao,
+            icone: Icons.undo_rounded,
+          ),
+        ]),
+      ],
+    );
+    if (escolha == null || !context.mounted) return;
+    await _rodar(context, ref, () => _repo(ref).acaoDeMeta(alunoId, m.id, escolha));
+  }
+
+  Future<void> _proximoPasso(
+    BuildContext context,
+    WidgetRef ref,
+    MetaCorporal m,
+  ) async {
+    final escolha = await showFxGroupedActionSheet<String>(
+      context,
+      titulo: ptS.metaProximoPassoTitulo(metaMetricaRotulo(m.metrica)),
+      grupos: [
+        FxActionGroup<String>(null, [
+          FxActionItem(
+            valor: 'nova',
+            rotulo: ptS.metaNova,
+            descricao: ptS.metaNovaDescricao,
+            icone: Icons.flag_outlined,
+          ),
+          FxActionItem(
+            valor: 'manter',
+            rotulo: ptS.metaManter,
+            descricao: ptS.metaManterDescricao,
+            icone: Icons.shield_outlined,
+          ),
+          FxActionItem(
+            valor: 'sem',
+            rotulo: ptS.metaSemNova,
+            descricao: ptS.metaSemNovaDescricao,
+            icone: Icons.close_rounded,
+          ),
+        ]),
+      ],
+    );
+    if (!context.mounted) return;
+    switch (escolha) {
+      case 'nova':
+        final salvou = await abrirFormularioDeMeta(
+          context,
+          ref,
+          alunoId: alunoId,
+          ocupadas: {for (final x in metaMetricas) if (x != m.metrica) x},
+          metricaInicial: m.metrica,
+        );
+        if (salvou) await invalidateAluno360Providers(ref, alunoId);
+      case 'manter':
+        await _rodar(context, ref, () => _repo(ref).manterResultado(alunoId, m.metrica));
+      case 'sem':
+        await _rodar(
+          context,
+          ref,
+          () => _repo(ref).acaoDeMeta(alunoId, m.id, 'sem-proximo-passo'),
+        );
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final chrome = ShellChrome.of(context);
     final confirmar = metas.where((m) => m.aConfirmar);
     final proximos = metas.where((m) => m.proximoPassoPendente);
     final manutencao = metas.where((m) => m.aberta && m.manutencao);
     final ativas = metas.where((m) => m.aberta && !m.aConfirmar && !m.manutencao);
     final linhas = <Widget>[
       for (final m in confirmar)
-        _Cartao(
+        _LinhaMeta(
           titulo: ptS.metaConfirmarTitulo(metaMetricaRotulo(m.metrica)),
           texto: ptS.metaConfirmarTexto(metaValor(m.metrica, m.valorAtual)),
-          acoes: [
-            FxTonalButton(
-              label: ptS.metaConfirmar,
-              compact: true,
-              onPressed:
-                  () => _rodar(context, ref, () => _repo(ref).acaoDeMeta(alunoId, m.id, 'confirmar')),
-            ),
-            FxTonalButton(
-              label: ptS.metaDevolver,
-              compact: true,
-              onPressed:
-                  () => _rodar(context, ref, () => _repo(ref).acaoDeMeta(alunoId, m.id, 'devolver')),
-            ),
-          ],
+          destaque: true,
+          onMais: () => _confirmar(context, ref, m),
         ),
       for (final m in proximos)
-        _Cartao(
+        _LinhaMeta(
           titulo: ptS.metaProximoPassoTitulo(metaMetricaRotulo(m.metrica)),
           texto: ptS.metaProximoPassoTexto,
-          acoes: [
-            FxTonalButton(
-              label: ptS.metaNova,
-              compact: true,
-              onPressed: () async {
-                final salvou = await abrirFormularioDeMeta(
-                  context,
-                  ref,
-                  alunoId: alunoId,
-                  ocupadas: const {},
-                  metricaInicial: m.metrica,
-                );
-                if (salvou) ref.invalidate(metasDoAlunoProvider(alunoId));
-              },
-            ),
-            FxTonalButton(
-              label: ptS.metaManter,
-              compact: true,
-              onPressed:
-                  () => _rodar(context, ref, () => _repo(ref).manterResultado(alunoId, m.metrica)),
-            ),
-            FxTonalButton(
-              label: ptS.metaSemNova,
-              compact: true,
-              onPressed:
-                  () => _rodar(context, ref, () => _repo(ref).acaoDeMeta(alunoId, m.id, 'sem-proximo-passo')),
-            ),
-          ],
+          destaque: true,
+          onMais: () => _proximoPasso(context, ref, m),
         ),
       for (final m in ativas)
         _LinhaMeta(
@@ -309,48 +344,10 @@ class EvolucaoMetasBloco extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            ptS.metasTitulo,
-            style: FocuxHubTypography.cardTitle(color: chrome.ink),
-          ),
-          const SizedBox(height: TokensStrip.s2),
           for (final linha in linhas) ...[
             linha,
             const SizedBox(height: TokensStrip.s2),
           ],
-        ],
-      ),
-    );
-  }
-}
-
-class _Cartao extends StatelessWidget {
-  const _Cartao({required this.titulo, required this.texto, required this.acoes});
-
-  final String titulo;
-  final String texto;
-  final List<Widget> acoes;
-
-  @override
-  Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
-    return Container(
-      padding: const EdgeInsets.all(TokensStrip.s3),
-      decoration: fxListCardDecoration(
-        context,
-        accent: Theme.of(context).colorScheme.primary,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(titulo, style: FocuxHubTypography.cardTitle(color: chrome.ink)),
-          Text(texto, style: FocuxHubTypography.bodyMuted(color: chrome.mute)),
-          const SizedBox(height: TokensStrip.s2),
-          Wrap(
-            spacing: TokensStrip.s2,
-            runSpacing: TokensStrip.s1,
-            children: acoes,
-          ),
         ],
       ),
     );
@@ -362,11 +359,15 @@ class _LinhaMeta extends StatelessWidget {
     required this.titulo,
     required this.texto,
     required this.onMais,
+    this.destaque = false,
   });
 
   final String titulo;
   final String texto;
   final VoidCallback onMais;
+
+  /// Pede decisão do personal.
+  final bool destaque;
 
   @override
   Widget build(BuildContext context) {
@@ -378,7 +379,10 @@ class _LinhaMeta extends StatelessWidget {
         TokensStrip.s1,
         TokensStrip.s2,
       ),
-      decoration: fxListCardDecoration(context),
+      decoration: fxListCardDecoration(
+        context,
+        accent: destaque ? Theme.of(context).colorScheme.primary : null,
+      ),
       child: Row(
         children: [
           Expanded(

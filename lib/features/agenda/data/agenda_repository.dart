@@ -2,7 +2,6 @@ import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/api/offline_queued_ack.dart';
 import '../../../core/api/pagina.dart';
-import '../utils/agenda_schedule.dart';
 
 class Agendamento {
   final int id;
@@ -14,7 +13,7 @@ class Agendamento {
   final String? observacoes;
   final String status;
   final String? statusAtendimento;
-  final String? observacoesPosAtendimento;
+  final DateTime? naoVouEm;
 
   Agendamento({
     required this.id,
@@ -26,7 +25,7 @@ class Agendamento {
     this.observacoes,
     required this.status,
     this.statusAtendimento,
-    this.observacoesPosAtendimento,
+    this.naoVouEm,
   });
 
   factory Agendamento.fromJson(Map<String, dynamic> j) => Agendamento(
@@ -39,7 +38,7 @@ class Agendamento {
     observacoes: j['observacoes'] as String?,
     status: j['status'] as String,
     statusAtendimento: j['statusAtendimento'] as String?,
-    observacoesPosAtendimento: j['observacoesPosAtendimento'] as String?,
+    naoVouEm: j['naoVouEm'] == null ? null : DateTime.parse(j['naoVouEm'] as String),
   );
 }
 
@@ -63,8 +62,9 @@ class AgendaRepository {
     int alunoId,
     DateTime inicio,
     DateTime fim,
-    String? titulo,
-  ) async {
+    String? titulo, {
+    String? nota,
+  }) async {
     final r = await _dio.post(
       '/api/agenda',
       data: {
@@ -72,6 +72,7 @@ class AgendaRepository {
         'inicio': inicio.toIso8601String(),
         'fim': fim.toIso8601String(),
         if (titulo != null && titulo.isNotEmpty) 'titulo': titulo,
+        if (nota != null && nota.isNotEmpty) 'observacoes': nota,
       },
     );
     throwIfQueuedOffline(r);
@@ -92,6 +93,7 @@ class AgendaRepository {
         if (titulo != null) 'titulo': titulo,
       },
     );
+    throwIfQueuedOffline(r);
     return Agendamento.fromJson(r.data as Map<String, dynamic>);
   }
 
@@ -108,8 +110,9 @@ class AgendaRepository {
   Future<AgendaLoteResultado> criarLote(
     int alunoId,
     List<({DateTime inicio, DateTime fim})> horarios,
-    String? titulo,
-  ) async {
+    String? titulo, {
+    String? nota,
+  }) async {
     final r = await _dio.post(
       '/api/agenda/lote',
       data: {
@@ -122,6 +125,7 @@ class AgendaRepository {
             },
         ],
         if (titulo != null && titulo.isNotEmpty) 'titulo': titulo,
+        if (nota != null && nota.isNotEmpty) 'observacoes': nota,
       },
     );
     throwIfQueuedOffline(r);
@@ -146,39 +150,13 @@ class AgendaRepository {
     throwIfQueuedOffline(await _dio.delete('/api/agenda/$id'));
   }
 
-  Future<List<Agendamento>> listarSemana(String data) async {
+  /// Grade de 6 semanas do mês.
+  Future<List<Agendamento>> listarMes(int ano, int mes) async {
     final r = await _dio.get(
-      '/api/agenda/semana',
-      queryParameters: {'data': data},
+      '/api/agenda/mes',
+      queryParameters: {'ano': ano, 'mes': mes},
     );
     return _parseAgendamentos(r.data);
-  }
-
-  /// Grade de 6 semanas do mês. Backend antigo sem `/mes`: junta as 6 semanas.
-  Future<List<Agendamento>> listarMes(int ano, int mes) async {
-    try {
-      final r = await _dio.get(
-        '/api/agenda/mes',
-        queryParameters: {'ano': ano, 'mes': mes},
-      );
-      return _parseAgendamentos(r.data);
-    } on DioException catch (e) {
-      final code = e.response?.statusCode;
-      if (code != 404 && code != 405) rethrow;
-    }
-    final first = DateTime(ano, mes);
-    final semanas = await Future.wait([
-      for (var i = 0; i < 6; i++)
-        listarSemana(
-          agendaIsoDate(DateTime(ano, mes, 2 - first.weekday + i * 7)),
-        ),
-    ]);
-    final seen = <int>{};
-    return [
-      for (final semana in semanas)
-        for (final ag in semana)
-          if (seen.add(ag.id)) ag,
-    ];
   }
 
   /// [escopo]: `proximas` (fim >= agora, crescente) ou `anteriores`
@@ -215,6 +193,12 @@ class AgendaRepository {
 
   Future<Agendamento> confirmarPresenca(int id) async {
     final r = await _dio.post('/api/agenda/$id/confirmar');
+    throwIfQueuedOffline(r);
+    return Agendamento.fromJson(r.data as Map<String, dynamic>);
+  }
+
+  Future<Agendamento> avisarNaoVou(int id) async {
+    final r = await _dio.post('/api/agenda/$id/nao-vou');
     throwIfQueuedOffline(r);
     return Agendamento.fromJson(r.data as Map<String, dynamic>);
   }

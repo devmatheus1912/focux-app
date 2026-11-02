@@ -44,7 +44,7 @@ class AgendaEventCard extends StatelessWidget {
     final time = agendaHm(agendamento.inicio);
     final subtitle = [
       if (detalheExtra case final extra?) extra,
-      status,
+      if (agendamento.naoVouEm != null) ptS.agendaAvisouNaoVai else status,
       if (note != null && note.isNotEmpty) note,
     ].join(' · ');
 

@@ -218,7 +218,7 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                                         () =>
                                             hasRadarP0 && !timelineHasSignals
                                                 ? context.push(
-                                                  '/alunos/$alunoId/evolucao-comparativo',
+                                                  '/alunos/$alunoId/evolucao?aba=comparativo',
                                                   extra: alunoNome,
                                                 )
                                                 : _openCheckinMessage(context),

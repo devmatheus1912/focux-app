@@ -6,6 +6,8 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/pt_br_display.dart';
 import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_grafico_linha.dart';
+import '../../../core/widgets/fx_grouped_action_sheet.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_sheet_frame.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -22,11 +24,17 @@ class EvolucaoRecordesAba extends StatelessWidget {
     required this.recordes,
     required this.vazioSubtitulo,
     required this.onAtualizar,
+    this.onEditar,
+    this.onExcluir,
   });
 
   final List<RecordePessoal> recordes;
   final String vazioSubtitulo;
   final Future<void> Function() onAtualizar;
+
+  /// Só para o personal.
+  final ValueChanged<RecordePessoal>? onEditar;
+  final ValueChanged<RecordePessoal>? onExcluir;
 
   @override
   Widget build(BuildContext context) {
@@ -76,7 +84,7 @@ class EvolucaoRecordesAba extends StatelessWidget {
             const SizedBox(height: TokensStrip.s3),
           ],
           for (final p in progresso) ...[
-            _CartaoRecorde(progresso: p),
+            _CartaoRecorde(progresso: p, onEditar: onEditar, onExcluir: onExcluir),
             const SizedBox(height: TokensStrip.s2),
           ],
         ],
@@ -86,36 +94,75 @@ class EvolucaoRecordesAba extends StatelessWidget {
 }
 
 class _CartaoRecorde extends StatelessWidget {
-  const _CartaoRecorde({required this.progresso});
+  const _CartaoRecorde({required this.progresso, this.onEditar, this.onExcluir});
 
   final ProgressoRecorde progresso;
+  final ValueChanged<RecordePessoal>? onEditar;
+  final ValueChanged<RecordePessoal>? onExcluir;
+
+  Future<void> _acoes(BuildContext context, RecordePessoal r) async {
+    final escolha = await showFxGroupedActionSheet<String>(
+      context,
+      titulo: progresso.nome,
+      grupos: [
+        FxActionGroup<String>(null, [
+          FxActionItem(
+            valor: 'editar',
+            rotulo: ptS.evolucaoRecordeEditar,
+            icone: Icons.edit_outlined,
+          ),
+          FxActionItem(
+            valor: 'excluir',
+            rotulo: ptS.evolucaoRecordeExcluir,
+            icone: Icons.delete_outline_rounded,
+            perigo: true,
+          ),
+        ]),
+      ],
+    );
+    if (!context.mounted || escolha == null) return;
+    Navigator.pop(context);
+    if (escolha == 'editar') {
+      onEditar?.call(r);
+    } else {
+      onExcluir?.call(r);
+    }
+  }
 
   void _abrirHistorico(BuildContext context) {
-    final chrome = ShellChrome.of(context);
+    final emOrdem = progresso.historico.reversed.toList();
+    final pontos = [
+      for (final r in emOrdem)
+        if (r.cargaKg != null && DateTime.tryParse(r.data) != null)
+          PontoGrafico(DateTime.parse(r.data), r.cargaKg!),
+    ];
     showFxHomeSheet<void>(
       context,
       builder:
-          (_) => FxSheetFrame(
+          (ctx) => FxSheetFrame(
             title: progresso.nome,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                if (pontos.length >= evolucaoPontosParaGrafico) ...[
+                  FxGraficoLinha(
+                    pontos: pontos,
+                    unidade: 'kg',
+                    altura: 160,
+                    resumo: progresso.nome,
+                  ),
+                  const SizedBox(height: TokensStrip.s3),
+                ],
                 for (final r in progresso.historico)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: TokensStrip.s1,
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            evolucaoRecordeSubtitle(r),
-                            style: FocuxHubTypography.body(color: chrome.ink),
-                          ),
-                        ),
-                      ],
-                    ),
+                  FxSatelliteListTile(
+                    title: evolucaoRecordeSubtitle(r),
+                    titleCase: false,
+                    trailing:
+                        onEditar == null
+                            ? const SizedBox.shrink()
+                            : const Icon(Icons.more_horiz_rounded),
+                    onTap: onEditar == null ? null : () => _acoes(ctx, r),
                   ),
               ],
             ),

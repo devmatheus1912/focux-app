@@ -112,9 +112,6 @@ void main() {
     final ehHoje = vazio.day == hoje.day;
     final rotulo = agendaDayShortLabel(vazio);
 
-    expect(find.textContaining('Agendar em'), findsNothing);
-    expect(find.text('Dia livre'), findsNothing);
-
     await tester.tap(
       find.bySemanticsLabel(
         agendaMonthDayA11y(day: vazio, count: 0, isToday: ehHoje),

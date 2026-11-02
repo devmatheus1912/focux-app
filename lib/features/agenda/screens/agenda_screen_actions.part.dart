@@ -69,13 +69,13 @@ extension on _AgendaScreenState {
     },
   );
 
-  /// "Veio" fecha a sessão; "Faltou" só registra, para não contar como feita.
+  /// "Veio" fecha a sessão no servidor; "Faltou" só registra.
   Future<void> _registrarPresenca(Agendamento ag, bool veio) async {
     final s = S.of(context);
-    final repo = ref.read(agendaRepositoryProvider);
     try {
-      await repo.registrarPresenca(ag.id, veio ? 'PRESENTE' : 'FALTA');
-      if (veio) await repo.atualizarStatus(ag.id, 'CONCLUIDO');
+      await ref
+          .read(agendaRepositoryProvider)
+          .registrarPresenca(ag.id, veio ? 'PRESENTE' : 'FALTA');
       await _load(force: true);
       if (!mounted) return;
       FeedbackHelper.showSuccess(
@@ -227,7 +227,7 @@ extension on _AgendaScreenState {
                       final ok = await _confirmDestructive(
                         title: 'Cancelar horário?',
                         body:
-                            'O horário com ${ag.alunoNome} deixa de aparecer como ativo.',
+                            '${agendaPrimeiroNome(ag.alunoNome)} será avisado do cancelamento.',
                         confirmLabel: 'Cancelar horário',
                       );
                       if (!ok) return;
@@ -235,10 +235,10 @@ extension on _AgendaScreenState {
                     }
                     : null,
             onReschedule: actionable ? () => _reschedule(ag) : null,
-            onDelete: () async {
+            onDelete: agendaPodeExcluir(ag) ? () async {
               final ok = await _confirmDestructive(
                 title: 'Excluir atendimento?',
-                body: 'Isso remove o horário com ${ag.alunoNome} da agenda.',
+                body: 'Isso remove o registro desta sessão da agenda.',
                 confirmLabel: 'Excluir',
               );
               if (!ok || !mounted) return;
@@ -252,7 +252,7 @@ extension on _AgendaScreenState {
                   FeedbackHelper.showSuccess(context, 'Agendamento excluído.');
                 },
               );
-            },
+            } : null,
           ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -11,6 +12,7 @@ import '../../../core/widgets/fx_cached_network_image.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_grouped_action_sheet.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -21,11 +23,12 @@ import '../../alunos/widgets/aluno_form_choices.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../evolucao/data/evolucao_repository.dart';
 import '../../evolucao/data/meta_corporal.dart';
-import '../../evolucao/providers/metas_provider.dart';
+import '../../evolucao/providers/evolucao_home_provider.dart';
+import '../../evolucao/utils/evolucao_aneis.dart';
+import '../../evolucao/widgets/evolucao_foto_tela_cheia.dart';
 import '../../evolucao/widgets/evolucao_conquistas.dart';
 import '../../chat/providers/chat_rascunho_provider.dart';
 import '../../../core/theme/focux_hub_typography.dart';
-import '../../../core/widgets/fx_tonal_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../evolucao/utils/evolucao_fotos_display.dart';
 import '../../evolucao/widgets/evolucao_hero.dart';
@@ -34,10 +37,6 @@ import '../../evolucao/widgets/evolucao_recordes_aba.dart';
 import '../../evolucao/widgets/medida_form_sheet.dart';
 
 const _chaveVistas = 'conquistas_celebradas_v1';
-
-final minhaEvolucaoProvider = FutureProvider.autoDispose<EvolucaoHomeBundle>(
-  (ref) => EvolucaoRepository(ref.read(apiClientProvider)).minhaEvolucao(),
-);
 
 final minhasFotosProvider = FutureProvider.autoDispose<List<FotoEvolucao>>(
   (ref) async =>
@@ -69,7 +68,25 @@ class _MeuProgressoScreenState extends ConsumerState<MeuProgressoScreen> {
     if (pendente == null || !mounted) return;
     await prefs.setStringList(_chaveVistas, [...vistas, pendente.chave]);
     if (!mounted) return;
+    HapticFeedback.lightImpact();
     await mostrarConquista(context, pendente, compartilhar: true);
+  }
+
+  Future<void> _maisAcoes() async {
+    final escolha = await showFxGroupedActionSheet<String>(
+      context,
+      titulo: ptS.meuProgressoTitulo,
+      grupos: [
+        FxActionGroup<String>(null, [
+          FxActionItem(
+            valor: 'sugerir',
+            rotulo: ptS.metaSugerirAjuste,
+            icone: Icons.chat_bubble_outline_rounded,
+          ),
+        ]),
+      ],
+    );
+    if (escolha == 'sugerir' && mounted) _sugerirAjuste();
   }
 
   void _sugerirAjuste() {
@@ -80,7 +97,6 @@ class _MeuProgressoScreenState extends ConsumerState<MeuProgressoScreen> {
   Future<void> _atualizar() async {
     ref.invalidate(minhaEvolucaoProvider);
     ref.invalidate(minhasFotosProvider);
-    ref.invalidate(minhasMetasProvider);
     ref.invalidate(alunoPerfilHomeProvider);
     await ref.read(minhaEvolucaoProvider.future);
   }
@@ -145,7 +161,7 @@ class _MeuProgressoScreenState extends ConsumerState<MeuProgressoScreen> {
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
     final evolucao = ref.watch(minhaEvolucaoProvider);
-    final metas = ref.watch(minhasMetasProvider).value ?? const [];
+    final metas = evolucao.value?.metas ?? const <MetaCorporal>[];
     return fxScreenA11yScope(
       label: ptS.meuProgressoTitulo,
       child: FxShellScaffold(
@@ -153,6 +169,14 @@ class _MeuProgressoScreenState extends ConsumerState<MeuProgressoScreen> {
         appBar: FxShellAppBar(
           title: ptS.meuProgressoTitulo,
           onBack: () => context.pop(),
+          actions: [
+            if (metas.any((m) => m.aberta))
+              IconButton(
+                tooltip: ptS.metaSugerirAjuste,
+                icon: const Icon(Icons.more_horiz_rounded),
+                onPressed: _maisAcoes,
+              ),
+          ],
         ),
         body: evolucao.when(
           loading:
@@ -188,7 +212,11 @@ class _MeuProgressoScreenState extends ConsumerState<MeuProgressoScreen> {
                       ),
                       child: Column(
                         children: [
-                          EvolucaoHero(medidas: dados.medidas, metas: metas),
+                          EvolucaoHero(
+                            aneis: dados.aneis,
+                            doPersonal: false,
+                            frase: fraseDoAluno(metas, dados.medidas),
+                          ),
                           const SizedBox(height: TokensStrip.s4),
                           AlunoSegmentedChoice(
                             options: [
@@ -216,23 +244,17 @@ class _MeuProgressoScreenState extends ConsumerState<MeuProgressoScreen> {
                           vazioSubtitulo: ptS.meuProgressoSemMedida,
                           onAtualizar: _atualizar,
                           onAbrirMedida: _abrirMedida,
+                          metas: metas,
+                          gordura: dados.gordura,
                           topo: [
-                            if (metas.any((m) => m.aberta))
-                              Align(
-                                alignment: Alignment.centerLeft,
-                                child: Padding(
-                                  padding: const EdgeInsets.only(
-                                    bottom: TokensStrip.s3,
-                                  ),
-                                  child: FxTonalButton(
-                                    label: ptS.metaSugerirAjuste,
-                                    icon: Icons.chat_bubble_outline_rounded,
-                                    compact: true,
-                                    onPressed: _sugerirAjuste,
-                                  ),
-                                ),
-                              )
-                            else if (metas.any((m) => m.concluida))
+                            if (conquistas.isNotEmpty) ...[
+                              EvolucaoConquistas(
+                                conquistas: conquistas,
+                                compartilhar: true,
+                              ),
+                              const SizedBox(height: TokensStrip.s3),
+                            ],
+                            if (!metas.any((m) => m.aberta) && metas.any((m) => m.concluida))
                               Padding(
                                 padding: const EdgeInsets.only(
                                   bottom: TokensStrip.s3,
@@ -244,13 +266,6 @@ class _MeuProgressoScreenState extends ConsumerState<MeuProgressoScreen> {
                                   ),
                                 ),
                               ),
-                            if (conquistas.isNotEmpty) ...[
-                              EvolucaoConquistas(
-                                conquistas: conquistas,
-                                compartilhar: true,
-                              ),
-                              const SizedBox(height: TokensStrip.s3),
-                            ],
                           ],
                         ),
                       },
@@ -270,15 +285,11 @@ class _Fotos extends ConsumerWidget {
 
   final ValueChanged<FotoEvolucao> onExcluir;
 
-  void _ampliar(BuildContext context, FotoEvolucao foto) => showDialog<void>(
-    context: context,
-    builder:
-        (ctx) => GestureDetector(
-          onTap: () => Navigator.pop(ctx),
-          child: Center(
-            child: FxCachedNetworkImage(imageUrl: foto.url, fit: BoxFit.contain),
-          ),
-        ),
+  void _ampliar(BuildContext context, FotoEvolucao foto) => abrirFotoEmTelaCheia(
+    context,
+    url: foto.url,
+    legenda: evolucaoFotosDateLabel(foto.data),
+    onExcluir: foto.registradoPor == 'ALUNO' ? () => onExcluir(foto) : null,
   );
 
   @override
@@ -332,7 +343,6 @@ class _Fotos extends ConsumerWidget {
                             excludeSemantics: true,
                             child: GestureDetector(
                               onTap: () => _ampliar(context, foto),
-                              onLongPress: () => onExcluir(foto),
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(
                                   TokensStrip.rCard,
