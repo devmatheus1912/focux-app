@@ -20,11 +20,20 @@ import '../../alunos/providers/alunos_provider.dart';
 import '../../alunos/widgets/aluno_form_choices.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../evolucao/data/evolucao_repository.dart';
+import '../../evolucao/data/meta_corporal.dart';
+import '../../evolucao/providers/metas_provider.dart';
+import '../../evolucao/widgets/evolucao_conquistas.dart';
+import '../../chat/providers/chat_rascunho_provider.dart';
+import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../evolucao/utils/evolucao_fotos_display.dart';
 import '../../evolucao/widgets/evolucao_hero.dart';
 import '../../evolucao/widgets/evolucao_medidas_aba.dart';
 import '../../evolucao/widgets/evolucao_recordes_aba.dart';
 import '../../evolucao/widgets/medida_form_sheet.dart';
+
+const _chaveVistas = 'conquistas_celebradas_v1';
 
 final minhaEvolucaoProvider = FutureProvider.autoDispose<EvolucaoHomeBundle>(
   (ref) => EvolucaoRepository(ref.read(apiClientProvider)).minhaEvolucao(),
@@ -46,10 +55,32 @@ class MeuProgressoScreen extends ConsumerStatefulWidget {
 
 class _MeuProgressoScreenState extends ConsumerState<MeuProgressoScreen> {
   String _aba = 'medidas';
+  var _celebrando = false;
+
+  /// Celebra uma vez por conquista, neste aparelho. Recorde não entra.
+  Future<void> _celebrar(List<Conquista> conquistas) async {
+    if (_celebrando) return;
+    final nova = conquistas.where((c) => c.celebra);
+    if (nova.isEmpty) return;
+    _celebrando = true;
+    final prefs = await SharedPreferences.getInstance();
+    final vistas = prefs.getStringList(_chaveVistas) ?? const [];
+    final pendente = nova.where((c) => !vistas.contains(c.chave)).firstOrNull;
+    if (pendente == null || !mounted) return;
+    await prefs.setStringList(_chaveVistas, [...vistas, pendente.chave]);
+    if (!mounted) return;
+    await mostrarConquista(context, pendente, compartilhar: true);
+  }
+
+  void _sugerirAjuste() {
+    ref.read(chatAlunoRascunhoProvider.notifier).value = ptS.metaSugerirTexto;
+    context.go('/chat/aluno');
+  }
 
   Future<void> _atualizar() async {
     ref.invalidate(minhaEvolucaoProvider);
     ref.invalidate(minhasFotosProvider);
+    ref.invalidate(minhasMetasProvider);
     ref.invalidate(alunoPerfilHomeProvider);
     await ref.read(minhaEvolucaoProvider.future);
   }
@@ -114,6 +145,7 @@ class _MeuProgressoScreenState extends ConsumerState<MeuProgressoScreen> {
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
     final evolucao = ref.watch(minhaEvolucaoProvider);
+    final metas = ref.watch(minhasMetasProvider).value ?? const [];
     return fxScreenA11yScope(
       label: ptS.meuProgressoTitulo,
       child: FxShellScaffold(
@@ -137,7 +169,14 @@ class _MeuProgressoScreenState extends ConsumerState<MeuProgressoScreen> {
                 onRetry: () => ref.invalidate(minhaEvolucaoProvider),
               ),
           data:
-              (dados) => FxContentWidthLimiter(
+              (dados) {
+                final conquistas = conquistasDe(metas, dados.recordes);
+                if (conquistas.isNotEmpty) {
+                  WidgetsBinding.instance.addPostFrameCallback(
+                    (_) => _celebrar(conquistas),
+                  );
+                }
+                return FxContentWidthLimiter(
                 child: Column(
                   children: [
                     Padding(
@@ -149,7 +188,7 @@ class _MeuProgressoScreenState extends ConsumerState<MeuProgressoScreen> {
                       ),
                       child: Column(
                         children: [
-                          EvolucaoHero(medidas: dados.medidas),
+                          EvolucaoHero(medidas: dados.medidas, metas: metas),
                           const SizedBox(height: TokensStrip.s4),
                           AlunoSegmentedChoice(
                             options: [
@@ -177,12 +216,49 @@ class _MeuProgressoScreenState extends ConsumerState<MeuProgressoScreen> {
                           vazioSubtitulo: ptS.meuProgressoSemMedida,
                           onAtualizar: _atualizar,
                           onAbrirMedida: _abrirMedida,
+                          topo: [
+                            if (metas.any((m) => m.aberta))
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(
+                                    bottom: TokensStrip.s3,
+                                  ),
+                                  child: FxTonalButton(
+                                    label: ptS.metaSugerirAjuste,
+                                    icon: Icons.chat_bubble_outline_rounded,
+                                    compact: true,
+                                    onPressed: _sugerirAjuste,
+                                  ),
+                                ),
+                              )
+                            else if (metas.any((m) => m.concluida))
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  bottom: TokensStrip.s3,
+                                ),
+                                child: Text(
+                                  ptS.metaSemMetaAluno,
+                                  style: FocuxHubTypography.bodyMuted(
+                                    color: chrome.mute,
+                                  ),
+                                ),
+                              ),
+                            if (conquistas.isNotEmpty) ...[
+                              EvolucaoConquistas(
+                                conquistas: conquistas,
+                                compartilhar: true,
+                              ),
+                              const SizedBox(height: TokensStrip.s3),
+                            ],
+                          ],
                         ),
                       },
                     ),
                   ],
                 ),
-              ),
+              );
+              },
         ),
       ),
     );

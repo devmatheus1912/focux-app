@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -17,18 +16,14 @@ import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
-import '../../../core/widgets/fx_hub_header.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/widgets/fx_action_chip.dart';
-import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
-import '../../alunos/widgets/aluno_form_choices.dart';
 import '../../alunos/widgets/aluno_outreach_message_sheet.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../data/relatorio_repository.dart';
@@ -39,8 +34,12 @@ import '../widgets/relatorio_aluno_help_sheet.dart';
 import '../../../l10n/pt.dart';
 import '../../../core/pdf/focux_pdf_brand_loader.dart';
 import '../../alunos/providers/aluno_detail_providers.dart';
+import '../../../core/widgets/fx_anel.dart';
+import '../../../core/widgets/fx_strip_card.dart';
+import '../../../core/widgets/fx_metric_strip.dart';
+import '../../../core/theme/shell_chrome.dart';
+import '../../evolucao/providers/metas_provider.dart';
 
-part 'relatorio_screen_metrics.part.dart';
 
 class RelatorioScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -68,7 +67,6 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
   var _viewTracked = false;
   var _ttvTracked = false;
   var _exporting = false;
-  var _secao = relatorioDetalheSecaoResumo;
 
   @override
   void initState() {
@@ -181,6 +179,7 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
         dados: dados,
         comparativo: _comparativo,
         brand: marca,
+        metas: await ref.read(metasDoAlunoProvider(widget.alunoId).future),
       );
       AnalyticsService.instance.track(
         ProductEvents.relatorioAlunoPdfExported,
@@ -275,9 +274,17 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
           useMesh: true,
           appBar: FxShellAppBar(
             title: 'Relatório',
-            subtitle: FxHubFreshness.fromFetchedAt(_fetchedAt),
+            subtitle: [
+              fxTitleCaseName(widget.alunoNome),
+              FxHubFreshness.fromFetchedAt(_fetchedAt),
+            ].nonNulls.join(' · '),
             onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
             actions: [
+              IconButton(
+                tooltip: ptS.relatorioMais,
+                icon: const Icon(Icons.more_horiz_rounded),
+                onPressed: _abrirMaisAcoes,
+              ),
               FxHelpIconButton(
                 tooltip: 'Como ler este relatório',
                 onTap: () {
@@ -332,6 +339,65 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
     );
   }
 
+  /// Taxa em anel; aluno começando vê o dia da ficha, sem nota ainda.
+  Widget _topo(AderenciaData? dados) {
+    final sobre = fxPaletaSobreMarca(context);
+    final aluno =
+        ref.watch(aluno360OperacaoBundleProvider(widget.alunoId)).value?.aluno;
+    final comecando = _alunoComecando;
+    final taxa = dados?.taxaAderenciaPercent ?? 0;
+    final feitos = dados?.treinosConcluidos ?? 0;
+    return FxStripCard(
+      marca: true,
+      child: Row(
+        children: [
+          FxAnel(
+            fracao: comecando ? 0 : (taxa / 100).clamp(0.0, 1.0),
+            cor: sobre.ink,
+            fundo: sobre.ink.withValues(alpha: 0.2),
+            child: Text(
+              comecando
+                  ? '$feitos'
+                  : relatorioAderenciaMediaLabel(taxa),
+              style: FocuxHubTypography.metric(
+                color: sobre.ink,
+                fontSize: FocuxHubTypography.metricEm,
+              ),
+            ),
+          ),
+          const SizedBox(width: TokensStrip.s4),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  comecando
+                      ? ptS.relatorioComecandoTitulo
+                      : ptS.relatorioTaxaTitulo,
+                  style: FocuxHubTypography.cardTitle(color: sobre.ink),
+                ),
+                Text(
+                  comecando
+                      ? ptS.relatorioTreinosAteAgora(aluno?.treinosJanela ?? feitos)
+                      : ptS.relatorioDiasPrevistos(
+                        feitos,
+                        dados?.treinosTotal ?? 0,
+                      ),
+                  style: FocuxHubTypography.bodyMuted(color: sobre.mute),
+                ),
+                if (comecando)
+                  Text(
+                    ptS.relatorioComecandoApoio,
+                    style: FocuxHubTypography.bodyMuted(color: sobre.ink),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildBody({required bool isDark, required Color primary}) {
     final dados = _dados;
     if (_loading) {
@@ -365,36 +431,21 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
             TokensStrip.s6,
           ),
           children: [
-            FxHubHeader(
-              title: fxTitleCaseName(widget.alunoNome),
-              subtitle: relatorioAlunoHubSubtitle(
-                diasAnalisados: dados?.diasAnalisados ?? 0,
+            _topo(dados),
+            const SizedBox(height: TokensStrip.s3),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: FxActionChip(
+                label: relatorioAlunoPeriodoValueLabel(
+                  dias: _dias,
+                  inicio: _rangeCustom?.start,
+                  fim: _rangeCustom?.end,
+                ),
+                accent: primary,
+                isDark: isDark,
+                onPressed: _abrirPeriodo,
               ),
             ),
-            const SizedBox(height: TokensStrip.s2),
-            Wrap(
-              spacing: TokensStrip.s2,
-              runSpacing: TokensStrip.s2,
-              children: [
-                FxActionChip(
-                  label: relatorioAlunoPeriodoValueLabel(
-                    dias: _dias,
-                    inicio: _rangeCustom?.start,
-                    fim: _rangeCustom?.end,
-                  ),
-                  accent: primary,
-                  isDark: isDark,
-                  onPressed: _abrirPeriodo,
-                ),
-                FxActionChip(
-                  label: relatorioAlunoMaisChip(),
-                  accent: primary,
-                  isDark: isDark,
-                  onPressed: _abrirMaisAcoes,
-                ),
-              ],
-            ),
-            ..._metricTiles(dados: dados, isDark: isDark, primary: primary),
             if (dados == null || dados.treinosTotal == 0) ...[
               const SizedBox(height: TokensStrip.s5),
               FxEmptyState(
@@ -408,66 +459,95 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
                 ),
               ),
             ] else ...[
-              const SizedBox(height: TokensStrip.s4),
-              AlunoSegmentedChoice(
-                options: relatorioDetalheSecoes,
-                selected: _secao,
-                isDark: isDark,
-                onSelect: (value) => setState(() => _secao = value),
+              const SizedBox(height: TokensStrip.s3),
+              FxMetricStrip(
+                metricas: [
+                  FxMetric(
+                    valor: dados.treinosConcluidos,
+                    rotulo: ptS.relatorioMetricaDias,
+                  ),
+                  FxMetric(
+                    valor: _comparativo?.checkInsAtual ?? 0,
+                    rotulo: ptS.relatorioMetricaCheckins,
+                  ),
+                  FxMetric(
+                    valor: (_comparativo?.deltaPercent ?? 0).round(),
+                    texto:
+                        _comparativo == null || _alunoComecando
+                            ? '—'
+                            : relatorioAlunoDeltaLabel(
+                              _comparativo!.deltaPercent,
+                            ),
+                    rotulo: ptS.relatorioMetricaVariacao,
+                  ),
+                ],
               ),
-              if (_secao == relatorioDetalheSecaoResumo) ...[
-                const SizedBox(height: TokensStrip.s4),
-                Text(
-                  relatorioAlunoResumoCaption(),
-                  style: FocuxHubTypography.bodyMuted(
-                    color: fxScreenMute(context),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ] else if (_secao == relatorioDetalheSecaoComparativo &&
-                  _comparativo != null) ...[
-                const SizedBox(height: TokensStrip.s2),
-                OperationalMetricTile(
-                  label: 'Variação',
-                  value: relatorioAlunoDeltaLabel(_comparativo!.deltaPercent),
-                  hint: 'Mesmo número de dias, logo antes deste',
-                  color:
-                      _comparativo!.deltaPercent < 0
-                          ? EagleTokens.bad
-                          : primary,
-                  isDark: isDark,
-                  emphasis:
-                      _comparativo!.deltaPercent < 0
-                          ? OperationalMetricEmphasis.alert
-                          : OperationalMetricEmphasis.normal,
-                ),
-                const SizedBox(height: TokensStrip.s5),
-                const DashboardSectionHeader(title: 'Versus o recorte anterior'),
+              if (_comparativo != null && !_alunoComecando) ...[
                 const SizedBox(height: TokensStrip.s3),
-                FxSatelliteListTile(
-                  title: 'Este período',
-                  subtitle: Text(
-                    '${relatorioAderenciaMediaLabel(_comparativo!.aderenciaAtual)} · ${relatorioAlunoCheckinsLabel(_comparativo!.checkInsAtual)}',
-                  ),
-                ),
-                FxSatelliteListTile(
-                  title: 'Anterior',
-                  subtitle: Text(
-                    '${relatorioAderenciaMediaLabel(_comparativo!.aderenciaAnterior)} · ${relatorioAlunoCheckinsLabel(_comparativo!.checkInsAnterior)}',
-                  ),
-                ),
-              ] else if (_secao == relatorioDetalheSecaoComparativo) ...[
-                const SizedBox(height: TokensStrip.s5),
-                FxEmptyState(
-                  icon: 'trend',
-                  title: 'Sem recorte anterior',
-                  subtitle:
-                      'Com mais história neste aluno, o versus aparece aqui.',
-                ),
+                _Comparativo(comparativo: _comparativo!),
               ],
             ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _Comparativo extends StatelessWidget {
+  const _Comparativo({required this.comparativo});
+
+  final ComparativoPeriodo comparativo;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    final primary = Theme.of(context).colorScheme.primary;
+    Widget barra(String rotulo, double valor, double opacidade) => Padding(
+      padding: const EdgeInsets.only(top: TokensStrip.s2),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  rotulo,
+                  style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                ),
+              ),
+              Text(
+                relatorioAderenciaMediaLabel(valor),
+                style: FocuxHubTypography.cardTitle(color: chrome.ink),
+              ),
+            ],
+          ),
+          const SizedBox(height: TokensStrip.s1),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(TokensStrip.s1),
+            child: LinearProgressIndicator(
+              value: (valor / 100).clamp(0.0, 1.0),
+              minHeight: 8,
+              color: primary.withValues(alpha: opacidade),
+              backgroundColor: chrome.line,
+            ),
+          ),
+        ],
+      ),
+    );
+    return Container(
+      padding: const EdgeInsets.all(TokensStrip.s3),
+      decoration: fxListCardDecoration(context),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            ptS.relatorioComparativoTitulo,
+            style: FocuxHubTypography.cardTitle(color: chrome.ink),
+          ),
+          barra(ptS.relatorioPeriodoAnterior, comparativo.aderenciaAnterior, 0.45),
+          barra(ptS.relatorioPeriodoAtual, comparativo.aderenciaAtual, 1),
+        ],
       ),
     );
   }

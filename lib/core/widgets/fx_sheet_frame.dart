@@ -16,6 +16,7 @@ class FxSheetFrame extends StatelessWidget {
     this.footer,
     this.maxHeightFactor = FxHomeSheetChrome.maxHeightFactor,
     this.expand = false,
+    this.rolar = true,
   });
 
   final String title;
@@ -27,6 +28,10 @@ class FxSheetFrame extends StatelessWidget {
   final Widget? footer;
   final double maxHeightFactor;
   final bool expand;
+
+  /// False quando o corpo já tem a própria lista: lista dentro de rolagem não
+  /// tem altura e some.
+  final bool rolar;
 
   @override
   Widget build(BuildContext context) {
@@ -52,11 +57,14 @@ class FxSheetFrame extends StatelessWidget {
           Flexible(
             fit: expand ? FlexFit.tight : FlexFit.loose,
             child: FxKeyboardDismissScope(
-              child: SingleChildScrollView(
-                keyboardDismissBehavior:
-                    ScrollViewKeyboardDismissBehavior.onDrag,
-                child: child,
-              ),
+              child:
+                  rolar
+                      ? SingleChildScrollView(
+                        keyboardDismissBehavior:
+                            ScrollViewKeyboardDismissBehavior.onDrag,
+                        child: child,
+                      )
+                      : child,
             ),
           ),
           if (footer != null) ...[

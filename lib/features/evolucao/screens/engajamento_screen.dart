@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -13,18 +12,13 @@ import '../../../core/utils/fx_utils.dart';
 import '../../../core/utils/motion_preferences.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
-import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_grouped_action_sheet.dart';
-import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
-import '../../../core/widgets/fx_action_chip.dart';
-import '../../../core/widgets/fx_action_link.dart';
-import '../../../core/widgets/fx_choice_strip.dart';
 import '../../../core/widgets/fx_metric_strip.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
 import '../../alunos/providers/aluno_detail_providers.dart';
@@ -34,11 +28,15 @@ import '../../subscription/widgets/upgrade_prompt_sheet.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/evolucao_repository.dart';
 import '../utils/engajamento_display.dart';
-import '../widgets/engajamento_atividade.dart';
 import '../widgets/engajamento_card_aderencia.dart';
 import '../widgets/engajamento_help_sheet.dart';
 import '../widgets/engajamento_quadro_semanas.dart';
 import '../../../l10n/pt.dart';
+import '../../../core/widgets/fx_home_sheet.dart';
+import '../../alunos/widgets/aluno360_timeline_full_sheet.dart';
+
+/// O quadro mostra 5 semanas.
+const _diasDoQuadro = 35;
 
 class EngajamentoScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -56,15 +54,12 @@ class EngajamentoScreen extends ConsumerStatefulWidget {
 }
 
 class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
-  int _dias = 30;
   List<EventoEngajamento> _eventos = [];
   AderenciaResumo? _aderencia;
   bool _loading = true;
   String? _erro;
   DateTime? _fetchedAt;
   final _checkinsSectionKey = GlobalKey();
-  var _filtro = EngajamentoFiltro.tudo;
-  var _mostrarCancelados = false;
 
   @override
   void initState() {
@@ -79,7 +74,7 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
     });
     try {
       final repo = EvolucaoRepository(ref.read(apiClientProvider));
-      final eventos = await repo.engajamento(widget.alunoId, dias: _dias);
+      final eventos = await repo.engajamento(widget.alunoId, dias: _diasDoQuadro);
       if (mounted) {
         setState(() {
           _eventos = eventos.eventos;
@@ -97,28 +92,6 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
         });
       }
     }
-  }
-
-  Future<void> _pickPeriodo() async {
-    HapticFeedback.selectionClick();
-    final picked = await showFxInsetPickerSheet<int>(
-      context,
-      title: ptS.engajamentoPeriodo,
-      selected: _dias,
-      items: [
-        for (final d in engajamentoPeriodos)
-          FxInsetPickerSheetItem(value: d, label: engajamentoPeriodoLabel(d)),
-      ],
-    );
-    if (!mounted || picked == null || picked == _dias) return;
-    setState(() => _dias = picked);
-    await _load();
-  }
-
-  void _verNoventaDias() {
-    if (_dias == 90) return;
-    setState(() => _dias = 90);
-    _load();
   }
 
   void _abrirEvolucao() {
@@ -187,12 +160,6 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
       '/alunos/${widget.alunoId}/relatorio',
       extra: widget.alunoNome,
     );
-  }
-
-  void _abrirEvento(EventoEngajamento evento) {
-    final rota = engajamentoEventoRota(evento.tipo, widget.alunoId);
-    if (rota == null) return;
-    context.push(rota, extra: widget.alunoNome);
   }
 
   @override
@@ -282,18 +249,12 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
         ref.watch(aluno360OperacaoBundleProvider(widget.alunoId)).value?.aluno;
     final aderencia = aluno?.aderenciaPercent ?? 0;
     final conversa = engajamentoConversa(_eventos);
-    final cancelados = engajamentoCanceladosCount(_eventos);
-    final atividade = engajamentoSemRepetir(
-      engajamentoAtividade(
-        _eventos,
-        filtro: _filtro,
-        mostrarCancelados: _mostrarCancelados,
-      ),
-    );
-    final recentes = engajamentoRecentes(atividade);
-    final dias = engajamentoPorDia(recentes);
     final descansos = _aderencia?.diasDescanso ?? const <int>[];
-    final semanas = engajamentoSemanas(_eventos, diasDescanso: descansos);
+    final semanas = engajamentoSemanas(
+      _eventos,
+      diasDescanso: descansos,
+      diaDaFicha: _aderencia?.diaDaFicha ?? 0,
+    );
     final quadro = engajamentoContagemQuadro(semanas);
     final naSemana = engajamentoDiasNaSemana(semanas.last);
 
@@ -363,35 +324,23 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
             ],
           ),
         ],
-        const SizedBox(height: TokensStrip.s4),
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                ptS.engajamentoAtividadeTitulo,
-                style: FocuxHubTypography.cardTitle(color: chrome.ink),
-              ),
-            ),
-            FxActionChip(
-              label: engajamentoPeriodoLabel(_dias),
-              accent: primary,
-              isDark: isDark,
-              onPressed: _pickPeriodo,
-            ),
-          ],
-        ),
-        const SizedBox(height: TokensStrip.s2),
-        FxChoiceStrip<EngajamentoFiltro>(
-          itens: [
-            for (final filtro in EngajamentoFiltro.values)
-              FxChoiceItem(
-                value: filtro,
-                label: engajamentoFiltroLabel(filtro),
-              ),
-          ],
-          selecionado: _filtro,
-          onSelecionar: (filtro) => setState(() => _filtro = filtro),
-        ),
+        if (aluno != null) ...[
+          const SizedBox(height: TokensStrip.s4),
+          FxTonalButton(
+            label: ptS.engajamentoVerHistorico,
+            expanded: true,
+            onPressed:
+                () => showFxHomeSheet<void>(
+                  context,
+                  builder:
+                      (_) => Aluno360TimelineFullSheet(
+                        aluno: aluno,
+                        isDark: isDark,
+                        primary: primary,
+                      ),
+                ),
+          ),
+        ],
       ],
     );
 
@@ -405,95 +354,11 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
 
     return RefreshIndicator(
       onRefresh: _load,
-      child:
-          _eventos.isEmpty
-              ? ListView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: padding,
-                children: [
-                  topo,
-                  const SizedBox(height: TokensStrip.s5),
-                  FxEmptyState(
-                    icon: 'trend',
-                    title: ptS.engajamentoNadaNestePeriodo,
-                    subtitle: ptS.engajamentoTreinosMedidasEMensagensDo,
-                    action:
-                        _dias == 90
-                            ? null
-                            : FxEmptyAction(
-                              label: ptS.engajamentoVer90Dias,
-                              onTap: _verNoventaDias,
-                            ),
-                  ),
-                ],
-              )
-              : ListView.builder(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: padding,
-                itemCount: dias.length + 2,
-                itemBuilder: (context, i) {
-                  if (i == 0) return topo;
-                  if (i == dias.length + 1) {
-                    final verTudo =
-                        atividade.length > recentes.length
-                            ? Padding(
-                              padding: const EdgeInsets.only(
-                                top: TokensStrip.s3,
-                              ),
-                              child: FxTonalButton(
-                                label: ptS.engajamentoVerTudo,
-                                expanded: true,
-                                onPressed:
-                                    () => context.push(
-                                      '/alunos/${widget.alunoId}/engajamento/historico',
-                                      extra: (
-                                        alunoNome: widget.alunoNome,
-                                        eventos: atividade,
-                                      ),
-                                    ),
-                              ),
-                            )
-                            : const SizedBox.shrink();
-                    if (cancelados == 0) return verTudo;
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        verTudo,
-                        Padding(
-                          padding: const EdgeInsets.only(top: TokensStrip.s3),
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: FxActionLink(
-                              label:
-                                  _mostrarCancelados
-                                      ? ptS.engajamentoEsconderCanceladas
-                                      : ptS.engajamentoMostrarCanceladas(
-                                        cancelados,
-                                      ),
-                              onTap:
-                                  () => setState(
-                                    () =>
-                                        _mostrarCancelados =
-                                            !_mostrarCancelados,
-                                  ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  }
-                  final (dia, eventos) = dias[i - 1];
-                  return EngajamentoAtividadeDia(
-                    dia: dia,
-                    eventos: eventos,
-                    onEvento: _abrirEvento,
-                    podeAbrir:
-                        (e) =>
-                            engajamentoEventoRota(e.tipo, widget.alunoId) !=
-                            null,
-                  );
-                },
-              ),
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: padding,
+        children: [topo],
+      ),
     );
   }
 }

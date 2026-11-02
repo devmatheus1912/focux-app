@@ -151,25 +151,6 @@ String sanitizeCopilotAcaoWearable(
   return 'Retomar contato e checar como está o treino.';
 }
 
-/// Mutually exclusive card body states for “Prioridade do dia”.
-enum CopilotPriorityCardState {
-  /// No prescription yet (first paint / empty).
-  idle,
-
-  /// Showing proximaAcao from GET /360/operacao (or legacy /360).
-  showingDeterministic,
-
-  /// IA request in flight — keep current card, status line only.
-  refreshingAi,
-
-  /// Showing GET /api/ia/copiloto/proxima-acao response.
-  showingAi,
-
-  /// IA failed — keep deterministic (or offline fallback).
-  errorAi,
-}
-
-
 String copilotDisplayAction(Aluno aluno, String acao) {
   final normalized = normalizeIaCopilotAcao(acao);
   final lower = normalized.toLowerCase();

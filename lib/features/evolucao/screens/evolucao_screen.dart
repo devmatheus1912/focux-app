@@ -33,7 +33,12 @@ import '../providers/evolucao_home_provider.dart';
 import '../utils/evolucao_home_client_cache.dart';
 import '../../avaliacao/screens/evolucao_comparativo_screen.dart';
 import '../widgets/escolher_exercicio_campo.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
+import '../data/meta_corporal.dart';
+import '../providers/metas_provider.dart';
+import '../widgets/evolucao_conquistas.dart';
 import '../widgets/evolucao_hero.dart';
+import '../widgets/evolucao_metas_bloco.dart';
 import '../widgets/evolucao_medidas_aba.dart';
 import '../widgets/evolucao_recordes_aba.dart';
 import '../widgets/medida_form_sheet.dart';
@@ -69,6 +74,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
   Future<void> _atualizar() async {
     EvolucaoHomeClientCache.invalidate(widget.alunoId);
     ref.invalidate(evolucaoHomeProvider(widget.alunoId));
+    ref.invalidate(metasDoAlunoProvider(widget.alunoId));
     await ref.read(evolucaoHomeProvider(widget.alunoId).future);
   }
 
@@ -140,6 +146,16 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
     final medidasAsync = homeAsync.whenData((h) => h.medidas);
     final recordesAsync = homeAsync.whenData((h) => h.recordes);
     final medidas = medidasAsync.asData?.value;
+    final metas =
+        ref.watch(metasDoAlunoProvider(widget.alunoId)).value ?? const [];
+    final ocupadas = {
+      for (final m in metas)
+        if (m.aberta) m.metrica,
+    };
+    final conquistas = conquistasDe(
+      metas,
+      recordesAsync.asData?.value ?? const [],
+    );
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
 
@@ -202,7 +218,36 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                               ),
                               child: Column(
                                 children: [
-                                  EvolucaoHero(medidas: medidas ?? const []),
+                                  EvolucaoHero(
+                                    medidas: medidas ?? const [],
+                                    metas: metas,
+                                    acao:
+                                        metaMetricas.every(
+                                              (m) => ocupadas.contains(m),
+                                            )
+                                            ? null
+                                            : FxTonalButton(
+                                              label: ptS.metaDefinir,
+                                              icon: Icons.flag_outlined,
+                                              compact: true,
+                                              onPressed: () async {
+                                                final salvou =
+                                                    await abrirFormularioDeMeta(
+                                                      context,
+                                                      ref,
+                                                      alunoId: widget.alunoId,
+                                                      ocupadas: ocupadas,
+                                                    );
+                                                if (salvou) {
+                                                  ref.invalidate(
+                                                    metasDoAlunoProvider(
+                                                      widget.alunoId,
+                                                    ),
+                                                  );
+                                                }
+                                              },
+                                            ),
+                                  ),
                                   const SizedBox(height: TokensStrip.s4),
                                   AlunoSegmentedChoice(
                                     options: evolucaoDetalheSecoes,
@@ -229,6 +274,20 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                                         'Registre peso e circunferências de ${satelliteFirstName(widget.alunoNome)} para acompanhar a evolução.',
                                     onAtualizar: _atualizar,
                                     onAbrirMedida: _abrirMedida,
+                                    topo: [
+                                      EvolucaoMetasBloco(
+                                        alunoId: widget.alunoId,
+                                        metas: metas,
+                                      ),
+                                      if (conquistas.isNotEmpty) ...[
+                                        EvolucaoConquistas(
+                                          conquistas: conquistas,
+                                        ),
+                                        const SizedBox(
+                                          height: TokensStrip.s3,
+                                        ),
+                                      ],
+                                    ],
                                   ),
                                   EvolucaoRecordesAba(
                                     recordes:
@@ -411,6 +470,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
       // Medida já persistiu — refresh UI mesmo se avaliação complementar falhar.
       EvolucaoHomeClientCache.invalidate(widget.alunoId);
       ref.invalidate(evolucaoHomeProvider(widget.alunoId));
+      ref.invalidate(metasDoAlunoProvider(widget.alunoId));
       await invalidateAluno360Providers(ref, widget.alunoId);
       if (gordura != null || massa != null) {
         try {
@@ -422,6 +482,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
             if (massa != null) 'percMassa': massa,
             'observacoes': 'Registrado via evolução (nova medida)',
           });
+          ref.invalidate(metasDoAlunoProvider(widget.alunoId));
           await invalidateAluno360Providers(ref, widget.alunoId);
         } catch (avaliacaoErr) {
           if (mounted) {

@@ -37,7 +37,7 @@ Aluno _hugo({
 final _proxima = ProximaAcaoResumo(
   acao: 'Completar mapa corporal',
   motivo: 'Faltam medidas para ajustar o treino',
-  fonte: 'PADRAO',
+  fonte: 'IA',
   prioridade: 'P2',
 );
 
@@ -177,7 +177,7 @@ void main() {
     await _abrir(tester, _hugo());
     expect(find.text('Aderência'), findsOneWidget);
     expect(find.text('Dias sem treino'), findsOneWidget);
-    expect(find.text('Sessões 7 dias'), findsOneWidget);
+    expect(find.text('Treinos em 7 dias'), findsOneWidget);
     await tester.tap(find.text('Dias sem treino'));
     await tester.pump(const Duration(milliseconds: 400));
     expect(find.text('rota engajamento'), findsOneWidget);

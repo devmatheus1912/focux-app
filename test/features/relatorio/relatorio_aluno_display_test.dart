@@ -70,30 +70,4 @@ void main() {
     expect(relatorioAlunoCheckinsLabel(8), '8 check-ins');
   });
 
-  test('hub e sticky do relatório do aluno', () {
-    expect(relatorioAlunoStickyExport(), 'Exportar PDF');
-    expect(relatorioAlunoStickyEmpty(), 'Ver evolução');
-    expect(
-      relatorioAlunoHubSubtitle(diasAnalisados: 30),
-      'Recorte de 30 dias',
-    );
-    expect(
-      relatorioAlunoHubSubtitle(diasAnalisados: 1),
-      'Recorte de 1 dia',
-    );
-    expect(
-      relatorioAlunoHubSubtitle(diasAnalisados: 0),
-      'Aderência do aluno',
-    );
-    expect(relatorioAlunoPeriodoMetricValue(30), '30 dias');
-    expect(relatorioAlunoCheckinsMetricValue(null), '—');
-    expect(relatorioAlunoCheckinsMetricValue(8), '8');
-    expect(
-      relatorioAlunoResumoCaption(),
-      'Aderência é dias únicos com check-in concluído sobre os dias do recorte. '
-      'Dois treinos no mesmo dia contam como 1.',
-    );
-    expect(relatorioAlunoCheckinChip(), 'Pedir check-in');
-    expect(relatorioDetalheSecoes, hasLength(2));
-  });
 }

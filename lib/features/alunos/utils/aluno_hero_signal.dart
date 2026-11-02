@@ -145,13 +145,15 @@ AlunoHeroPrimarySignal alunoHeroPrimarySignal(Aluno aluno) {
 String alunoHeroCaption(Aluno aluno, AlunoHeroPrimarySignal signal) {
   if (signal.label == 'Sem treino') {
     final dias = aluno.diasSemTreino ?? 0;
+    if (dias == 0) return 'Treinou hoje';
+    if (dias == 1) return 'Treinou ontem';
     if (dias >= AlunoFollowUpStore.diasSemTreinoLimite) {
       return 'Parado há $dias dias — contato hoje';
     }
     if (dias >= 3) {
       return '$dias dias parado — vale check-in';
     }
-    return 'Rotina em dia';
+    return 'Último treino há $dias dias';
   }
   if (signal.label == alunoHeroAderenciaLabel) {
     final ader = aluno.aderenciaPercent ?? 0;
@@ -170,7 +172,8 @@ String alunoHeroContextLine(AlunoHeroPrimarySignal signal, String caption) {
   // Caption already carries the signal (aderência / risco) — avoid
   // "Aderência 30 dias · Aderência baixa — …" wrap in the identity strip.
   if (signal.label == riscoOperacionalLabel ||
-      signal.label == alunoHeroAderenciaLabel) {
+      signal.label == alunoHeroAderenciaLabel ||
+      signal.label == 'Sem treino') {
     return caption;
   }
   return '${signal.label} · $caption';

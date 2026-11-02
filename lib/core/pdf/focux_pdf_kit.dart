@@ -244,14 +244,10 @@ pw.Widget _capa(
                 ],
               ),
             ),
-            // Logo do personal sempre que existe; o selo Focux só fica quando a
-            // marca Focux não foi ocultada.
-            if (brand.logo != null) ...[
-              pw.SizedBox(height: 34, child: pw.Image(brand.logo!)),
-              if (!brand.whiteLabel && assets.logo != null)
-                pw.SizedBox(width: 10),
-            ],
-            if (!brand.whiteLabel && assets.logo != null)
+            // Uma logo só: a do personal; sem ela, a Focux. Focux fica no rodapé.
+            if (brand.logo != null)
+              pw.SizedBox(height: 34, child: pw.Image(brand.logo!))
+            else if (!brand.whiteLabel && assets.logo != null)
               pw.SizedBox(height: 30, child: pw.Image(assets.logo!)),
           ],
         ),

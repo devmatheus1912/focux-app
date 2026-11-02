@@ -6,6 +6,7 @@ import 'package:printing/printing.dart';
 import '../../../core/pdf/focux_pdf_kit.dart';
 import '../../../core/utils/pt_br_display.dart';
 import '../data/relatorio_repository.dart';
+import '../../evolucao/data/meta_corporal.dart';
 
 String relatorioPeriodoLabelPdf({
   required int dias,
@@ -34,12 +35,14 @@ Future<Uint8List> buildRelatorioPdf({
   ComparativoPeriodo? comparativo,
   FocuxPdfBrand? brand,
   DateTime? agora,
+  List<MetaCorporal> metas = const [],
 }) {
   final marca = brand ?? FocuxPdfBrand.focux();
   // seções na cor da marca do personal
   List<pw.Widget> secao(String titulo, List<pw.Widget> filhos) =>
       focuxPdfSection(titulo, filhos, cor: marca.cor);
   final checkIns = comparativo?.checkInsAtual;
+  final abertas = metas.where((m) => m.aberta && !m.manutencao).toList();
   final doc = pw.Document(
     title: 'Relatório de aderência · $alunoNome',
     author: marca.nome,
@@ -61,7 +64,7 @@ Future<Uint8List> buildRelatorioPdf({
             legenda: null,
           ),
           (
-            titulo: 'Treinos feitos',
+            titulo: 'Dias com treino',
             valor: '${dados.treinosConcluidos} de ${dados.treinosTotal}',
             legenda: null,
           ),
@@ -72,6 +75,26 @@ Future<Uint8List> buildRelatorioPdf({
           ),
         ]),
         pw.SizedBox(height: 18),
+        if (abertas.isNotEmpty)
+          ...secao('Metas', [
+            focuxPdfTable(
+              headers: const ['Medida', 'Atual', 'Alvo', 'Progresso'],
+              rows: [
+                for (final m in abertas)
+                  [
+                    metaMetricaRotulo(m.metrica),
+                    metaValor(m.metrica, m.valorAtual),
+                    metaValor(m.metrica, m.valorAlvo),
+                    '${m.progresso}%',
+                  ],
+              ],
+              cellAlignments: const {
+                1: pw.Alignment.centerRight,
+                2: pw.Alignment.centerRight,
+                3: pw.Alignment.centerRight,
+              },
+            ),
+          ]),
         if (comparativo != null) ...[
           ...secao('Aderência: atual x período anterior', [
             focuxPdfBarChart(
@@ -128,6 +151,7 @@ Future<void> exportRelatorioPdf({
   required AderenciaData dados,
   ComparativoPeriodo? comparativo,
   FocuxPdfBrand? brand,
+  List<MetaCorporal> metas = const [],
 }) async {
   final assets = await FocuxPdfAssets.load();
   final bytes = await buildRelatorioPdf(
@@ -137,6 +161,7 @@ Future<void> exportRelatorioPdf({
     dados: dados,
     comparativo: comparativo,
     brand: brand,
+    metas: metas,
   );
   await Printing.layoutPdf(onLayout: (_) async => bytes);
 }

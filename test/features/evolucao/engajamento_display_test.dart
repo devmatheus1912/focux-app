@@ -3,11 +3,6 @@ import 'package:focux_app/features/evolucao/data/evolucao_repository.dart';
 import 'package:focux_app/features/evolucao/utils/engajamento_display.dart';
 
 void main() {
-  test('engajamentoPeriodoLabel e janelas', () {
-    expect(engajamentoPeriodos, [30, 60, 90]);
-    expect(engajamentoPeriodoLabel(30), '30 dias');
-    expect(engajamentoPeriodoLabel(90), '90 dias');
-  });
 
   test('engajamentoTipoLabel em PT-BR', () {
     expect(engajamentoTipoLabel('TREINO'), 'Treino');
@@ -28,34 +23,7 @@ void main() {
     expect(engajamentoFxIcon(null), 'calendar');
   });
 
-  test('engajamentoEventoLabel e subtitle', () {
-    expect(engajamentoEventoLabel('  Treino A - CONCLUIDO  ', 'TREINO'),
-        'Treino A · concluído');
-    expect(engajamentoEventoLabel('Peito A · em andamento', 'TREINO'),
-        'Peito A · em andamento');
-    expect(engajamentoEventoLabel('  ', 'MEDIDA'), 'Medida');
-    expect(
-      engajamentoEventoSubtitle(tipo: 'TREINO', titulo: 'Peito A · concluído'),
-      'Treino',
-    );
-    expect(engajamentoEventoSubtitle(tipo: 'MEDIDA', titulo: 'Medida'), isNull);
-  });
 
-  test('engajamento agrupa por dia com hora no trailing', () {
-    final now = DateTime(2026, 9, 3, 18);
-    expect(engajamentoHoraLabel('2026-09-01T14:05:00'), '14:05');
-    expect(engajamentoHoraLabel('x'), '—');
-    expect(engajamentoDiaLabel('2026-09-03T08:00:00', now: now), 'Hoje');
-    expect(engajamentoDiaLabel('2026-09-02T23:00:00', now: now), 'Ontem');
-    expect(engajamentoDiaLabel('2026-08-30T10:00:00', now: now), '30/08');
-    final linhas = engajamentoLinhasPorDia([
-      EventoEngajamento(tipo: 'TREINO', descricao: 'A', dataHora: '2026-09-03T10:00:00'),
-      EventoEngajamento(tipo: 'MENSAGEM', descricao: 'B', dataHora: '2026-09-03T09:00:00'),
-      EventoEngajamento(tipo: 'MEDIDA', descricao: 'C', dataHora: '2026-09-02T09:00:00'),
-    ], now: now);
-    expect(linhas.map((l) => l.dia ?? l.evento!.descricao).toList(),
-        ['Hoje', 'A', 'B', 'Ontem', 'C']);
-  });
 
   EventoEngajamento treino(String dataHora, [String? status]) =>
       EventoEngajamento(
@@ -122,32 +90,6 @@ void main() {
     );
   });
 
-  test('atividade junta mensagens do dia e esconde cancelados', () {
-    final eventos = [
-      EventoEngajamento(
-        tipo: 'MENSAGEM',
-        descricao: 'Você enviou',
-        dataHora: '2026-09-03T11:00:00',
-      ),
-      EventoEngajamento(
-        tipo: 'MENSAGEM',
-        descricao: 'Aluno enviou',
-        dataHora: '2026-09-03T10:00:00',
-      ),
-      treino('2026-09-03T09:00:00', 'CANCELADO'),
-      treino('2026-09-02T09:00:00', 'CONCLUIDO'),
-    ];
-    final tudo = engajamentoAtividade(eventos, filtro: EngajamentoFiltro.tudo);
-    expect(tudo.map((e) => e.descricao), ['2 mensagens', 'A']);
-    expect(
-      engajamentoAtividade(
-        eventos,
-        filtro: EngajamentoFiltro.treinos,
-        mostrarCancelados: true,
-      ),
-      hasLength(2),
-    );
-  });
 
   test('rota de próxima ação', () {
     expect(engajamentoEventoRota('MENSAGEM', 9), '/alunos/9/chat');

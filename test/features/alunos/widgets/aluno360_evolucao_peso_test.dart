@@ -11,6 +11,7 @@ import 'package:focux_app/features/alunos/widgets/aluno360_weight_activity_card.
 import 'package:focux_app/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:focux_app/features/evolucao/providers/metas_provider.dart';
 
 const _id = 42;
 
@@ -52,6 +53,7 @@ Future<void> _abrir(
   );
   addTearDown(router.dispose);
   final overrides = <Override>[
+    metasDoAlunoProvider(_id).overrideWith((ref) async => const []),
     alunoPesoHistoricoProvider(_id).overrideWith((ref) async => historico),
   ];
   await tester.pumpWidget(
@@ -108,7 +110,6 @@ void main() {
       expect(find.text('Estável'), findsNothing);
       expect(find.byType(FxSparkline), findsNothing);
       expect(find.text('Registre outra medida para ver a tendência.'), findsOneWidget);
-      expect(find.text('Registrar medida'), findsOneWidget);
     });
 
     testWidgets('peso só do cadastro diz de onde veio, sem fingir tendência', (tester) async {
@@ -190,7 +191,7 @@ void main() {
   });
 
   group('aba Evolução', () {
-    testWidgets('"Ajustar treino" é uma linha no fim e leva aos treinos', (tester) async {
+    testWidgets('sem "Ajustar treino": a ficha já está no Resumo', (tester) async {
       await _abrir(
         tester,
         Aluno360DetailEvolucaoTab(
@@ -205,12 +206,8 @@ void main() {
         ),
         historico: [70.0, 72.0],
       );
-      expect(find.byKey(const ValueKey('aluno360_evolucao_ajustar_treino')), findsOneWidget);
-      expect(find.text('Ajustar treino'), findsOneWidget);
-      await tester.ensureVisible(find.text('Abrir'));
-      await tester.tap(find.text('Abrir'));
-      await tester.pump(const Duration(milliseconds: 400));
-      expect(find.text('rota treinos'), findsOneWidget);
+      expect(find.text('Ajustar treino'), findsNothing);
+      expect(find.text('Corpo'), findsOneWidget);
     });
 
     testWidgets('nenhuma seção tem o link "Ajuda"', (tester) async {

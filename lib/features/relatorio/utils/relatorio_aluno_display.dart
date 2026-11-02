@@ -171,16 +171,6 @@ String relatorioAlunoStickyEmpty() => 'Ver evolução';
 
 String relatorioAlunoCheckinChip() => 'Pedir check-in';
 
-String relatorioAlunoMaisChip() => 'Mais';
-
-const relatorioDetalheSecaoResumo = 'resumo';
-const relatorioDetalheSecaoComparativo = 'comparativo';
-
-const relatorioDetalheSecoes = [
-  (value: relatorioDetalheSecaoResumo, label: 'Resumo'),
-  (value: relatorioDetalheSecaoComparativo, label: 'Versus'),
-];
-
 String relatorioAlunoHubSubtitle({
   required int diasAnalisados,
 }) {
@@ -195,8 +185,6 @@ String relatorioAlunoPeriodoMetricValue(int diasAnalisados) {
   return '$diasAnalisados dias';
 }
 
-String relatorioAlunoPeriodoMetricHint() => 'Recorte deste relatório';
-
 String relatorioAlunoCheckinsMetricValue(int? checkIns) {
   if (checkIns == null) return '—';
   return '$checkIns';
@@ -206,7 +194,3 @@ String relatorioAlunoCheckinsMetricHint(int? checkIns) {
   if (checkIns == null) return 'Sem recorte anterior ainda';
   return relatorioAlunoCheckinsLabel(checkIns);
 }
-
-String relatorioAlunoResumoCaption() =>
-    'Aderência é dias únicos com check-in concluído sobre os dias do recorte. '
-    'Dois treinos no mesmo dia contam como 1.';

@@ -26,7 +26,6 @@ import '../../exercicios/screens/exercicios_list_screen.dart';
 import '../../feed/screens/feed_aluno_screen.dart';
 import '../../feed/screens/feed_screen.dart';
 import '../../financeiro/screens/financeiro_screen.dart';
-import '../../gamificacao/screens/gamificacao_screen.dart';
 import '../../growth/screens/migracao_magica_screen.dart';
 import '../../ia/screens/ia_copiloto_screen.dart';
 import '../../notificacoes/screens/notificacoes_screen.dart';
@@ -102,7 +101,6 @@ Widget _buildQaRouteScreen(Uri uri) {
     '/notificacoes' => NotificacoesScreen(),
     '/analytics' => const AnalyticsScreen(),
     '/agenda' => const AgendaScreen(),
-    '/gamificacao' => const GamificacaoScreen(),
     '/dashboard/qualidade' => QualidadeOperacionalScreen(),
     '/planos' => const AssinaturaScreen(),
     '/paywall' => const AssinaturaScreen(),

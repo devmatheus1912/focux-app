@@ -1,10 +1,6 @@
 import '../data/evolucao_repository.dart';
 import '../../../l10n/pt.dart';
 
-const engajamentoPeriodos = [30, 60, 90];
-
-String engajamentoPeriodoLabel(int dias) => '$dias dias';
-
 String engajamentoTipoLabel(String? tipo) {
   switch ((tipo ?? '').trim().toUpperCase()) {
     case 'TREINO':
@@ -40,19 +36,6 @@ String engajamentoFxIcon(String? tipo) {
   }
 }
 
-String engajamentoEventoLabel(String? descricao, String? tipo) {
-  final text = descricao?.trim();
-  if (text != null && text.isNotEmpty) {
-    return text
-        .replaceAll(' - ', ' · ')
-        .replaceAll('EM_ANDAMENTO', ptS.engajamentoEmAndamento)
-        .replaceAll('CONCLUIDO', 'concluído')
-        .replaceAll('CANCELADO', 'cancelado')
-        .replaceAll('_', ' ');
-  }
-  return engajamentoTipoLabel(tipo);
-}
-
 /// Tipo do evento como apoio; nulo quando o título já é o próprio tipo.
 String? engajamentoEventoSubtitle({
   required String? tipo,
@@ -61,14 +44,6 @@ String? engajamentoEventoSubtitle({
   if ((tipo ?? '').trim().toUpperCase() == 'MENSAGEM') return null;
   final label = engajamentoTipoLabel(tipo);
   return label.toLowerCase() == titulo.trim().toLowerCase() ? null : label;
-}
-
-String engajamentoHoraLabel(String dataHora) {
-  final dt = DateTime.tryParse(dataHora)?.toLocal();
-  if (dt == null) return '—';
-  final hour = dt.hour.toString().padLeft(2, '0');
-  final minute = dt.minute.toString().padLeft(2, '0');
-  return '$hour:$minute';
 }
 
 String engajamentoDiaLabel(String dataHora, {DateTime? now}) {
@@ -274,10 +249,13 @@ class EngajamentoSemana {
 List<EngajamentoSemana> engajamentoSemanas(
   Iterable<EventoEngajamento> eventos, {
   required List<int> diasDescanso,
+  required int diaDaFicha,
   DateTime? now,
   int semanas = 5,
 }) {
   final hoje = _dia(now ?? DateTime.now());
+  // Antes da ficha não havia treino previsto: nada conta como falta.
+  final inicio = DateTime(hoje.year, hoje.month, hoje.day - diaDaFicha + 1);
   final segunda = DateTime(hoje.year, hoje.month, hoje.day - hoje.weekday + 1);
   final porDia = {
     for (final d in engajamentoCalendario(eventos, now: hoje, dias: semanas * 7))
@@ -295,7 +273,9 @@ List<EngajamentoSemana> engajamentoSemanas(
       default:
     }
     if (diasDescanso.contains(dia.weekday)) return EngajamentoDiaEstado.descanso;
-    if (diasDescanso.isEmpty) return EngajamentoDiaEstado.semRegistro;
+    if (diasDescanso.isEmpty || diaDaFicha <= 0 || dia.isBefore(inicio)) {
+      return EngajamentoDiaEstado.semRegistro;
+    }
     // Hoje ainda pode treinar.
     return dia == hoje
         ? EngajamentoDiaEstado.semRegistro
@@ -391,72 +371,6 @@ bool _doAluno(EventoEngajamento e) =>
         ? e.descricao.toLowerCase().startsWith('aluno')
         : e.remetente!.toUpperCase() == 'ALUNO';
 
-enum EngajamentoFiltro { tudo, treinos, medidas, mensagens }
-
-String engajamentoFiltroLabel(EngajamentoFiltro filtro) => switch (filtro) {
-  EngajamentoFiltro.tudo => ptS.engajamentoTudo,
-  EngajamentoFiltro.treinos => ptS.dockTreinos,
-  EngajamentoFiltro.medidas => ptS.engajamentoMedidas,
-  EngajamentoFiltro.mensagens => ptS.engajamentoMensagens,
-};
-
-int engajamentoCanceladosCount(Iterable<EventoEngajamento> eventos) =>
-    eventos
-        .where(
-          (e) =>
-              engajamentoEhTreino(e) &&
-              engajamentoTreinoEstado(e) == EngajamentoTreinoEstado.cancelado,
-        )
-        .length;
-
-/// Eventos da lista: mensagens do dia viram uma linha e cancelados só a pedido.
-List<EventoEngajamento> engajamentoAtividade(
-  List<EventoEngajamento> eventos, {
-  required EngajamentoFiltro filtro,
-  bool mostrarCancelados = false,
-}) {
-  final porDia = <String, int>{};
-  for (final e in eventos.where(engajamentoEhMensagem)) {
-    final chave = e.dataHora.split('T').first;
-    porDia[chave] = (porDia[chave] ?? 0) + 1;
-  }
-  final vistos = <String>{};
-  final saida = <EventoEngajamento>[];
-  for (final e in eventos) {
-    final tipo = e.tipo.trim().toUpperCase();
-    final treino = engajamentoEhTreino(e);
-    final passa = switch (filtro) {
-      EngajamentoFiltro.tudo => true,
-      EngajamentoFiltro.treinos => treino,
-      EngajamentoFiltro.medidas => tipo == 'MEDIDA',
-      EngajamentoFiltro.mensagens => engajamentoEhMensagem(e),
-    };
-    if (!passa) continue;
-    if (treino &&
-        !mostrarCancelados &&
-        engajamentoTreinoEstado(e) == EngajamentoTreinoEstado.cancelado) {
-      continue;
-    }
-    if (!engajamentoEhMensagem(e)) {
-      saida.add(e);
-      continue;
-    }
-    final chave = e.dataHora.split('T').first;
-    if (!vistos.add(chave)) continue;
-    final total = porDia[chave]!;
-    saida.add(
-      total == 1
-          ? e
-          : EventoEngajamento(
-            tipo: e.tipo,
-            descricao: '$total mensagens',
-            dataHora: e.dataHora,
-          ),
-    );
-  }
-  return saida;
-}
-
 String? engajamentoEventoRota(String? tipo, int alunoId) {
   switch ((tipo ?? '').trim().toUpperCase()) {
     case 'MENSAGEM':
@@ -472,53 +386,6 @@ String? engajamentoEventoRota(String? tipo, int alunoId) {
   }
 }
 
-/// Treino com início e conclusão no mesmo dia vira uma linha só.
-List<EventoEngajamento> engajamentoSemRepetir(List<EventoEngajamento> eventos) {
-  final vistos = <String>{};
-  return [
-    for (final e in eventos)
-      if (vistos.add(
-        '${e.dataHora.length >= 10 ? e.dataHora.substring(0, 10) : e.dataHora}'
-        '|${e.tipo}|${e.descricao}',
-      ))
-        e,
-  ];
-}
-
 /// Quantos eventos a tela de Aderência mostra; o resto fica em "Ver tudo".
 const engajamentoEventosNaTela = 10;
 const engajamentoDiasNaTela = 7;
-
-/// Só o recente: o calendário já conta os treinos do período.
-List<EventoEngajamento> engajamentoRecentes(
-  List<EventoEngajamento> eventos, {
-  DateTime? now,
-}) {
-  final corte = (now ?? DateTime.now()).subtract(
-    const Duration(days: engajamentoDiasNaTela),
-  );
-  return eventos
-      .where((e) {
-        final quando = DateTime.tryParse(e.dataHora);
-        return quando == null || quando.isAfter(corte);
-      })
-      .take(engajamentoEventosNaTela)
-      .toList();
-}
-
-/// Agrupa eventos em (dia, eventos), na ordem recebida.
-List<(String, List<EventoEngajamento>)> engajamentoPorDia(
-  List<EventoEngajamento> eventos, {
-  DateTime? now,
-}) {
-  final dias = <(String, List<EventoEngajamento>)>[];
-  for (final linha in engajamentoLinhasPorDia(eventos, now: now)) {
-    final evento = linha.evento;
-    if (evento == null) {
-      dias.add((linha.dia!, []));
-    } else {
-      dias.last.$2.add(evento);
-    }
-  }
-  return dias;
-}

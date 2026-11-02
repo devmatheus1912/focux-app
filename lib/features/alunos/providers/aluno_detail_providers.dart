@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/state/fx_value_notifier.dart';
 import '../../../features/auth/providers/auth_provider.dart';
-import '../../avaliacao/data/avaliacao_repository.dart';
 import '../../dashboard/data/command_center_data.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../../health/data/health_repository.dart';
@@ -23,6 +22,7 @@ import 'package:flutter/foundation.dart';
 import 'aluno_timeline360_paged_provider.dart';
 import 'alunos_provider.dart';
 import '../../../core/utils/pt_br_display.dart';
+import '../../evolucao/utils/evolucao_series.dart';
 
 export 'aluno_timeline360_paged_provider.dart';
 
@@ -337,9 +337,11 @@ final alunoPesoHistoricoProvider = FutureProvider.autoDispose.family<List<double
   alunoId,
 ) async {
   _keepFor(ref);
-  return AvaliacaoRepository(
-    ref.read(apiClientProvider),
-  ).listarPesoHistorico(alunoId);
+  final home = await ref.watch(evolucaoHomeProvider(alunoId).future);
+  return [
+    for (final ponto in serieDaMetrica(home.medidas, EvolucaoMetrica.peso))
+      ponto.valor,
+  ];
 });
 
 /// Tudo que mostra este aluno, inclusive Home, lista e sugestão da IA.
@@ -365,6 +367,7 @@ Future<void> invalidateAluno360Providers(WidgetRef ref, int alunoId) async {
   ref.invalidate(alunoCopilotoActionProvider(alunoId));
   ref.invalidate(alunoOpenIaActionsProvider(alunoId));
   ref.invalidate(alunoAderenciaSemanalProvider(alunoId));
+  ref.invalidate(evolucaoHomeProvider(alunoId));
   ref.invalidate(alunoPesoHistoricoProvider(alunoId));
   await ref.read(aluno360OperacaoBundleProvider(alunoId).future);
 }

@@ -11,8 +11,6 @@ void main() {
     expect(screen, contains('FxShellScaffold'));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, isNot(contains('FxSettingsGroup')));
-    expect(screen, contains('FxHubHeader'));
-    expect(screen, contains('OperationalMetricTile'));
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('FxContentWidthLimiter'));
     expect(screen, contains('relatorioAlunoStickyExport'));
@@ -27,7 +25,6 @@ void main() {
     expect(screen, contains('/alunos/\${widget.alunoId}/evolucao'));
     expect(screen, contains('/alunos/\${widget.alunoId}/chat'));
     expect(screen, contains("'/alunos/\${widget.alunoId}'"));
-    expect(screen, contains('relatorioAlunoMaisChip'));
     expect(screen, contains('_abrirMaisAcoes'));
     expect(screen, contains('relatorioAlunoCheckinChip'));
     expect(screen, contains("value: 'checkin'"));
@@ -48,15 +45,12 @@ void main() {
       ),
     );
     expect(screen, contains('PopScope'));
-    expect(screen, contains('AlunoSegmentedChoice'));
     expect(screen, isNot(contains('constrainWidth: false')));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, isNot(contains('_PeriodPill')));
     expect(screen, isNot(contains('_AderenciaRingPainter')));
     expect(screen, isNot(contains('showDateRangePicker')));
     expect(screen, contains('relatorioAlunoPeriodoOpcoes'));
-    expect(screen, contains('relatorioAlunoPeriodoMetricValue'));
-    expect(screen, contains('relatorioAlunoResumoCaption'));
     expect(screen, contains('carregarMarcaDoPdf'));
   });
 }

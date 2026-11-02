@@ -16,7 +16,6 @@ void main() {
 
     expect(screen, contains('fxScreenA11yScope'));
     expect(screen, isNot(contains('FxSettingsGroup')));
-    expect(screen, contains('OperationalMetricTile'));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('friendlyError'));
     expect(screen, contains('Exportar relatório em PDF'));

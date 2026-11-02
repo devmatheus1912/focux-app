@@ -41,18 +41,6 @@ class OperacaoStickyAction {
 
 enum OperacaoDominantMetricKind { risco, aderencia, prontidao }
 
-/// Cards do grid Status operacional — destino decidido no app (BE sem deep link).
-enum OperacaoStatusCardKind {
-  focoDoDia,
-  prontidao,
-  aderencia,
-  ultimoTreino,
-  risco,
-  checkins7d,
-}
-
-enum OperacaoStatusCardDestination { chat, engajamento, treinos, noop }
-
 /// Primary operational metric shown above the secondary grid.
 class OperacaoDominantMetric {
   const OperacaoDominantMetric({

@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:rive/rive.dart' show RiveNative;
 import 'package:sentry_flutter/sentry_flutter.dart'
     show SentryWidgetsFlutterBinding, SentryWidget;
 
@@ -187,22 +186,12 @@ void main() {
       );
     };
 
-    unawaited(_initRiveNative());
     applyLegacyPasswordResetRedirect(AppRouter.router);
     runApp(
       // Retry fica no ApiClient (fxNoRetry); retry do provider dobraria 4xx.
       ProviderScope(retry: (_, _) => null, child: SentryWidget(child: const FocuxApp())),
     );
   }, reportUncaughtZoneError);
-}
-
-/// Motor nativo do Rive; se falhar, as animações caem no fallback estático.
-Future<void> _initRiveNative() async {
-  try {
-    await RiveNative.init();
-  } catch (error) {
-    if (kDebugMode) debugPrint('[Focux] Rive native init error: $error');
-  }
 }
 
 class FocuxApp extends ConsumerStatefulWidget {

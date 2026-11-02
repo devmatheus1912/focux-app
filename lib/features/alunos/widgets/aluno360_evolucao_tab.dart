@@ -3,14 +3,13 @@ import 'package:flutter/material.dart';
 import '../constants/aluno_360_layout.dart';
 import 'aluno360_entrance.dart';
 
-/// Evolução tab layout: inteligente + timeline (side-by-side on tablet) → weight.
+/// Evolução tab layout: inteligente, Corpo e linha do tempo.
 class Aluno360EvolucaoTab extends StatelessWidget {
   const Aluno360EvolucaoTab({
     super.key,
     required this.evolucaoCard,
     required this.timelineCard,
     required this.weightCard,
-    required this.ajustarCard,
     required this.animateEntrance,
     required this.onEntrancePlayed,
   });
@@ -18,9 +17,6 @@ class Aluno360EvolucaoTab extends StatelessWidget {
   final Widget evolucaoCard;
   final Widget timelineCard;
   final Widget weightCard;
-
-  /// Linha de ação no fim ("Ajustar treino"), no lugar da antiga barra fixa.
-  final Widget ajustarCard;
   final bool animateEntrance;
   final VoidCallback onEntrancePlayed;
 
@@ -37,12 +33,11 @@ class Aluno360EvolucaoTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final inteligente = _section(0, evolucaoCard);
-    final timeline = _section(1, timelineCard);
-    final weight = _section(2, weightCard);
+    final weight = _section(1, weightCard);
+    final timeline = _section(2, timelineCard);
     final inteligenteTablet = _section(0, evolucaoCard, tablet: true);
-    final timelineTablet = _section(1, timelineCard, tablet: true);
-    final weightTablet = _section(2, weightCard, tablet: true);
-    final ajustar = _section(3, ajustarCard);
+    final weightTablet = _section(1, weightCard, tablet: true);
+    final timelineTablet = _section(2, timelineCard, tablet: true);
 
     return Semantics(
       container: true,
@@ -63,11 +58,9 @@ class Aluno360EvolucaoTab extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        timelineTablet,
-                        const SizedBox(height: Aluno360Layout.sectionGap),
                         weightTablet,
                         const SizedBox(height: Aluno360Layout.sectionGap),
-                        ajustar,
+                        timelineTablet,
                       ],
                     ),
                   ),
@@ -80,11 +73,9 @@ class Aluno360EvolucaoTab extends StatelessWidget {
               children: [
                 inteligente,
                 const SizedBox(height: Aluno360Layout.sectionGap),
-                timeline,
-                const SizedBox(height: Aluno360Layout.sectionGap),
                 weight,
                 const SizedBox(height: Aluno360Layout.sectionGap),
-                ajustar,
+                timeline,
               ],
             );
           },

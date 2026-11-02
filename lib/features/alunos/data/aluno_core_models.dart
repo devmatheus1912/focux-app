@@ -26,6 +26,7 @@ class Aluno {
   /// MEDIDA, COMECANDO ou SEM_FICHA. Nulo em backend antigo.
   final String? aderenciaEstado;
   final int? treinosJanela;
+  final int? diasTreino7;
   final int? diasSemTreino;
   final String? riscoNivel;
   final String? proximoContato;
@@ -58,6 +59,7 @@ class Aluno {
     this.aderenciaPercent,
     this.aderenciaEstado,
     this.treinosJanela,
+    this.diasTreino7,
     this.diasSemTreino,
     this.riscoNivel,
     this.proximoContato,
@@ -121,6 +123,7 @@ class Aluno {
     aderenciaPercent: (json['aderenciaPercent'] as num?)?.toInt(),
     aderenciaEstado: json['aderenciaEstado'] as String?,
     treinosJanela: (json['treinosJanela'] as num?)?.toInt(),
+    diasTreino7: (json['diasTreino7'] as num?)?.toInt(),
     diasSemTreino: (json['diasSemTreino'] as num?)?.toInt(),
     riscoNivel: json['riscoNivel'] as String?,
     proximoContato: json['proximoContato'] as String?,
@@ -275,6 +278,9 @@ class ProximaAcaoResumo {
   final String? stickyLabelCompact;
   final String? ctaLabel;
   final bool? wearableRelevant;
+
+  /// Frase de reserva do servidor: não há nada a sugerir.
+  bool get ehPadrao => fonte == 'PADRAO';
 
   const ProximaAcaoResumo({
     required this.acao,

@@ -16,6 +16,8 @@ import '../../../l10n/app_localizations.dart';
 import '../utils/aluno360_medida_plausivel.dart';
 import '../utils/aluno360_peso_fonte.dart';
 import '../../../core/utils/pt_br_display.dart';
+import '../../evolucao/data/meta_corporal.dart';
+import '../../evolucao/providers/metas_provider.dart';
 
 class Aluno360WeightActivityCard extends ConsumerWidget {
   const Aluno360WeightActivityCard({
@@ -39,10 +41,6 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
     context.push('/alunos/$alunoId/evolucao', extra: aluno.nome);
   }
 
-  void _openComparativo(BuildContext context) {
-    context.push('/alunos/$alunoId/evolucao-comparativo', extra: aluno.nome);
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final pesoHistoricoAsync = ref.watch(alunoPesoHistoricoProvider(alunoId));
@@ -51,6 +49,12 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
     final peso = pesoMostrado(historico: historico, cadastro: aluno.peso);
     final suspeito =
         peso != null && !medidaPlausivel(MedidaTipo.pesoKg, peso.valor);
+    final metaAberta =
+        ref
+            .watch(metasDoAlunoProvider(alunoId))
+            .value
+            ?.where((m) => m.aberta && !m.manutencao)
+            .firstOrNull;
     final showRadarHint = hasRadarP0 && !suppressRadarHint && peso == null;
 
     return Semantics(
@@ -59,14 +63,10 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const DashboardSectionHeader(title: 'Peso · tendência'),
+          DashboardSectionHeader(title: S.of(context).corpoTitulo),
           const SizedBox(height: TokensStrip.s3),
           InkWell(
-            onTap:
-                () =>
-                    suspeito
-                        ? _openEvolucao(context)
-                        : _openComparativo(context),
+            onTap: () => _openEvolucao(context),
             borderRadius: BorderRadius.circular(12),
             child: OperationalMetricTile(
               label: 'Peso atual',
@@ -82,7 +82,9 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
                   ? S.of(context).aluno360PesoDoCadastro
                   : showRadarHint
                   ? 'Mapa corporal pendente no radar'
-                  : 'Toque para abrir o comparativo',
+                  : metaAberta != null
+                  ? '${metaMetricaRotulo(metaAberta.metrica)}: ${metaAberta.progresso}% da meta'
+                  : S.of(context).corpoToqueParaVer,
               color: suspeito ? EagleTokens.warn : primary,
               isDark: isDark,
             ),
@@ -138,13 +140,6 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
                       S.of(context).aluno360PesoSemTendencia,
                       style: Aluno360Layout.metaStyle(context),
                     ),
-                    const SizedBox(height: TokensStrip.s2),
-                    FxActionChip(
-                      label: 'Registrar medida',
-                      accent: primary,
-                      isDark: isDark,
-                      onPressed: () => _openEvolucao(context),
-                    ),
                   ],
                 );
               }
@@ -156,7 +151,7 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
                     label: 'Abrir histórico de medições corporais',
                     child: InkWell(
                       borderRadius: BorderRadius.circular(14),
-                      onTap: () => _openComparativo(context),
+                      onTap: () => _openEvolucao(context),
                       child: Aluno360WeightTrendSparkline(
                         values: weightSeries,
                         deltaKg: delta,
@@ -167,16 +162,6 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
                         ),
                         isDark: isDark,
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: TokensStrip.s2),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: FxActionChip(
-                      label: 'Registrar medida',
-                      accent: primary,
-                      isDark: isDark,
-                      onPressed: () => _openEvolucao(context),
                     ),
                   ),
                 ],

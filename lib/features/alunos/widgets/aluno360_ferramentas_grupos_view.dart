@@ -310,16 +310,11 @@ class Aluno360FerramentasGrupos extends ConsumerWidget {
               : 'Registrar medidas',
           value: aluno360ComposicaoValor(bf: bf, massaMagra: massaMagra),
           onTap: () =>
-              push('/alunos/$alunoId/evolucao-comparativo', extra: nome),
-        ),
-        Aluno360FerramentasModule.planoSucesso => linha(
-          label: 'Plano de sucesso',
-          subtitle: 'Metas e marcos do aluno',
-          onTap: () => push('/alunos/$alunoId/plano-sucesso', extra: nome),
+              push('/alunos/$alunoId/evolucao', extra: nome),
         ),
         Aluno360FerramentasModule.trilhas => linha(
           label: 'Trilhas',
-          subtitle: 'Metas com etapas e progresso',
+          subtitle: 'Etapas e progresso',
           onTap: () => push('/alunos/$alunoId/trilhas', extra: nome),
         ),
         Aluno360FerramentasModule.anamnese => linha(

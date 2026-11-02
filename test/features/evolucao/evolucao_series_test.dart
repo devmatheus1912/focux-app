@@ -60,7 +60,7 @@ void main() {
     final agora = DateTime(2026, 11, 4); // quarta
 
     test('começa na segunda e marca hoje', () {
-      final semanas = engajamentoSemanas(const [], diasDescanso: const [], now: agora);
+      final semanas = engajamentoSemanas(const [], diasDescanso: const [], diaDaFicha: 60, now: agora);
       expect(semanas, hasLength(5));
       expect(semanas.last.inicio, DateTime(2026, 11, 2));
       expect(semanas.last.dias[2].hoje, isTrue);
@@ -68,15 +68,21 @@ void main() {
     });
 
     test('sem dias de descanso não inventa falta', () {
-      final semanas = engajamentoSemanas(const [], diasDescanso: const [], now: agora);
+      final semanas = engajamentoSemanas(const [], diasDescanso: const [], diaDaFicha: 60, now: agora);
       expect(semanas.first.dias.first.estado, EngajamentoDiaEstado.semRegistro);
     });
 
     test('com descanso marcado, dia previsto sem treino é falta e hoje não', () {
-      final semanas = engajamentoSemanas(const [], diasDescanso: const [6, 7], now: agora);
+      final semanas = engajamentoSemanas(const [], diasDescanso: const [6, 7], diaDaFicha: 60, now: agora);
       expect(semanas.first.dias.first.estado, EngajamentoDiaEstado.faltou);
       expect(semanas.first.dias.last.estado, EngajamentoDiaEstado.descanso);
       expect(semanas.last.dias[2].estado, EngajamentoDiaEstado.semRegistro);
+    });
+
+    test('antes do início da ficha nada é falta', () {
+      final semanas = engajamentoSemanas(const [], diasDescanso: const [6, 7], diaDaFicha: 3, now: agora);
+      expect(semanas.first.dias.first.estado, EngajamentoDiaEstado.semRegistro);
+      expect(engajamentoContagemQuadro(semanas).previstos, 2);
     });
   });
 }

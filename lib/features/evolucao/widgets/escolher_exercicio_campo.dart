@@ -147,6 +147,7 @@ class _BuscaExercicioState extends ConsumerState<_BuscaExercicio> {
     return FxSheetFrame(
       title: ptS.escolherEscolherExercicio,
       expand: true,
+      rolar: false,
       child: Column(
         children: [
           FxSheetSearchField(

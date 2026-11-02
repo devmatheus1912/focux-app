@@ -118,7 +118,7 @@ class Aluno360ResumoTab extends ConsumerWidget {
       parseAderenciaSemanal(aderenciaSemanal),
       bundle: aderenciaBundle,
     );
-    final checkins = week.totalCheckins.round();
+    final checkins = aluno.diasTreino7 ?? week.totalCheckins.round();
     final semTreinos = semHistoricoDeTreino(aluno) && checkins == 0;
     final temRecuperacao = recoveryAsync.value != null;
     void abrirEngajamento() => context.push(

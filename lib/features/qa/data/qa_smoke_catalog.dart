@@ -257,16 +257,6 @@ const qaSmokeRoutes = <QaSmokeRoute>[
     expectedAnonymousRedirect: '/login?from=%2Fagenda',
   ),
 
-  // ── Gamificação ────────────────────────────────────────────────────────────
-  QaSmokeRoute(
-    id: 'personal-gamificacao',
-    area: 'gamificacao',
-    label: 'Gamificacao',
-    path: '/gamificacao',
-    authMode: 'PERSONAL',
-    expectedAnonymousRedirect: '/login?from=%2Fgamificacao',
-  ),
-
   // ── Qualidade ──────────────────────────────────────────────────────────────
   QaSmokeRoute(
     id: 'personal-qualidade',

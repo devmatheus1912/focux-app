@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 import '../../features/ferramentas/screens/ferramentas_hub_screen.dart';
 import '../../features/alunos/data/aluno_repository.dart';
 import '../../features/dashboard/screens/copilot_actions_screen.dart';
@@ -37,8 +36,6 @@ import '../../features/treinos/screens/add_exercicio_to_treino_screen.dart';
 import '../../features/treinos/utils/treino_criacao_fluxo.dart';
 import '../../features/financeiro/screens/financeiro_screen.dart';
 import '../../features/financeiro/utils/financeiro_hub_display.dart';
-import '../../features/evolucao/data/evolucao_repository.dart';
-import '../../features/evolucao/screens/engajamento_historico_screen.dart';
 import '../../features/relatorio/screens/relatorio_screen.dart';
 import '../../features/feed/screens/feed_screen.dart';
 import '../../features/feed/screens/feed_aluno_screen.dart';
@@ -71,8 +68,6 @@ import '../../features/financeiro/data/financeiro_repository.dart';
 import '../../features/notificacoes/screens/notificacoes_screen.dart';
 import '../../features/suporte/screens/suporte_web_redirect_screen.dart';
 import '../../features/broadcasts/screens/broadcast_screen.dart';
-import '../../features/plano_sucesso/plano_sucesso_provider.dart';
-import '../../features/plano_sucesso/plano_sucesso_screen.dart';
 import '../../features/alertas/screens/alerta_detalhe_screen.dart';
 import '../../features/alertas/screens/alertas_config_screen.dart';
 import '../../features/relatorio/screens/relatorio_global_screen.dart';
@@ -109,7 +104,6 @@ import '../../features/grupos/screens/grupo_aulas_personal_screen.dart';
 import '../../features/onboarding/screens/onboarding_wizard_screen.dart';
 import '../../features/captura/screens/leads_publicos_screen.dart';
 import '../../features/growth/screens/migracao_magica_screen.dart';
-import '../../features/gamificacao/screens/gamificacao_screen.dart';
 import '../../features/anamnese/screens/anamnese_screen.dart';
 import '../../features/ia/screens/ia_progressao_screen.dart';
 import '../../features/chat/screens/chat_screen.dart';
@@ -224,20 +218,6 @@ RouteBase buildChromeShellRoute() {
                 ),
           ),
           GoRoute(
-            path: '/alunos/:id/plano-sucesso',
-            redirect:
-                (context, state) =>
-                    intPathParam(state, 'id') == null ? '/alunos' : null,
-            builder:
-                (context, state) => ChangeNotifierProvider(
-                  create: (_) => PlanoSucessoProvider(),
-                  child: PlanoSucessoScreen(
-                    alunoId: intPathParam(state, 'id')!,
-                    alunoNome: stringRouteExtra(state),
-                  ),
-                ),
-          ),
-          GoRoute(
             path: '/alunos/:id/fotos',
             redirect:
                 (context, state) =>
@@ -325,28 +305,6 @@ RouteBase buildChromeShellRoute() {
                   alunoId: intPathParam(state, 'id')!,
                   alunoNome: stringRouteExtra(state) ?? 'Aluno',
                 ),
-          ),
-          GoRoute(
-            path: '/alunos/:id/engajamento/historico',
-            redirect: (context, state) =>
-                intPathParam(state, 'id') == null ||
-                        state.extra is! ({
-                          String alunoNome,
-                          List<EventoEngajamento> eventos,
-                        })
-                    ? '/alunos'
-                    : null,
-            builder: (context, state) {
-              final args = state.extra! as ({
-                String alunoNome,
-                List<EventoEngajamento> eventos,
-              });
-              return EngajamentoHistoricoScreen(
-                alunoId: intPathParam(state, 'id')!,
-                alunoNome: args.alunoNome,
-                eventos: args.eventos,
-              );
-            },
           ),
           GoRoute(
             path: '/alunos/:id/engajamento',
@@ -1073,14 +1031,6 @@ RouteBase buildChromeShellRoute() {
           GoRoute(
             path: '/admin/rbac',
             builder: (context, state) => const RbacScreen(),
-          ),
-          GoRoute(
-            path: '/gamificacao',
-            pageBuilder:
-                (context, state) => fxTransitionPage(
-                  state: state,
-                  child: const GamificacaoScreen(),
-                ),
           ),
         ],
       );

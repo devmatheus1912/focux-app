@@ -38,6 +38,7 @@ Aluno360OperacaoSnapshot resolveAluno360OperacaoSnapshot({
     forceIa: forceIa,
     iaAsync: iaAsync,
   );
+  if (effectiveProxima?.ehPadrao == true) effectiveProxima = null;
   if (effectiveProxima != null) {
     effectiveProxima = sanitizeProximaAcaoWearable(
       aluno,

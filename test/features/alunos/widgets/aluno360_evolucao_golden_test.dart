@@ -15,6 +15,7 @@ import 'package:focux_app/features/alunos/widgets/aluno360_weight_activity_card.
 
 import '../../../support/riverpod_seeds.dart';
 import '../../../support/tolerant_golden_comparator.dart';
+import 'package:focux_app/features/evolucao/providers/metas_provider.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -62,6 +63,7 @@ void main() {
     return ProviderScope(
       overrides: [
         seededTimeline360(42, Timeline360PagedState(events: timelineEvents)),
+        metasDoAlunoProvider(42).overrideWith((ref) async => const []),
         alunoPesoHistoricoProvider(42).overrideWith((ref) async => const []),
       ],
       child: MaterialApp(
@@ -217,7 +219,6 @@ void main() {
             isDark: false,
             ink: Colors.black,
           ),
-          ajustarCard: const SizedBox(height: 56),
           animateEntrance: false,
           onEntrancePlayed: () {},
         ),

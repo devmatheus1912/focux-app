@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/api/pagina.dart';
+import 'meta_corporal.dart';
 
 class MedidaCorporal {
   final int id;
@@ -231,6 +232,76 @@ class EvolucaoRepository {
       braco: braco,
     ),
   );
+
+  Future<List<MetaCorporal>> metas(int alunoId) async {
+    final r = await _dio.get('/api/alunos/$alunoId/metas');
+    return _listaDeMetas(r.data);
+  }
+
+  Future<List<MetaCorporal>> minhasMetas() async {
+    final r = await _dio.get('/api/aluno/metas');
+    return _listaDeMetas(r.data);
+  }
+
+  List<MetaCorporal> _listaDeMetas(Object? data) => [
+    for (final item in data as List)
+      MetaCorporal.fromJson(Map<String, dynamic>.from(item as Map)),
+  ];
+
+  Map<String, dynamic> _corpoDaMeta({
+    required String metrica,
+    double? alvo,
+    DateTime? prazo,
+    String? observacao,
+    bool manter = false,
+  }) => {
+    'metrica': metrica,
+    'valorAlvo': alvo,
+    'prazo': prazo?.toIso8601String().substring(0, 10),
+    'observacao': observacao,
+    'manter': manter,
+  };
+
+  Future<void> criarMeta(
+    int alunoId, {
+    required String metrica,
+    required double alvo,
+    DateTime? prazo,
+    String? observacao,
+  }) => _dio.post(
+    '/api/alunos/$alunoId/metas',
+    data: _corpoDaMeta(
+      metrica: metrica,
+      alvo: alvo,
+      prazo: prazo,
+      observacao: observacao,
+    ),
+  );
+
+  Future<void> manterResultado(int alunoId, String metrica) => _dio.post(
+    '/api/alunos/$alunoId/metas',
+    data: _corpoDaMeta(metrica: metrica, manter: true),
+  );
+
+  Future<void> editarMeta(
+    int alunoId,
+    MetaCorporal meta, {
+    required double alvo,
+    DateTime? prazo,
+    String? observacao,
+  }) => _dio.put(
+    '/api/alunos/$alunoId/metas/${meta.id}',
+    data: _corpoDaMeta(
+      metrica: meta.metrica,
+      alvo: alvo,
+      prazo: prazo,
+      observacao: observacao,
+    ),
+  );
+
+  /// `confirmar`, `devolver`, `encerrar` ou `sem-proximo-passo`.
+  Future<void> acaoDeMeta(int alunoId, int metaId, String acao) =>
+      _dio.post('/api/alunos/$alunoId/metas/$metaId/$acao');
 
   Future<void> excluirMedida(int alunoId, int medidaId) =>
       _dio.delete('/api/alunos/$alunoId/medidas/$medidaId');

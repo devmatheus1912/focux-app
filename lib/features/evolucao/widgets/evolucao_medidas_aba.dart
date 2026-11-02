@@ -9,6 +9,7 @@ import '../../../core/widgets/fx_choice_strip.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_grafico_linha.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_sparkline.dart';
 import '../../../l10n/pt.dart';
 import '../data/evolucao_repository.dart';
 import '../utils/evolucao_display.dart';
@@ -22,12 +23,16 @@ class EvolucaoMedidasAba extends StatefulWidget {
     required this.vazioSubtitulo,
     required this.onAtualizar,
     this.onAbrirMedida,
+    this.topo = const [],
   });
 
   final List<MedidaCorporal> medidas;
   final String vazioSubtitulo;
   final Future<void> Function() onAtualizar;
   final ValueChanged<MedidaCorporal>? onAbrirMedida;
+
+  /// Metas e conquistas, acima do gráfico.
+  final List<Widget> topo;
 
   @override
   State<EvolucaoMedidasAba> createState() => _EvolucaoMedidasAbaState();
@@ -49,7 +54,14 @@ class _EvolucaoMedidasAbaState extends State<EvolucaoMedidasAba> {
         onRefresh: widget.onAtualizar,
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(
+            FxSettingsLayout.pageInset,
+            TokensStrip.s2,
+            FxSettingsLayout.pageInset,
+            96,
+          ),
           children: [
+            ...widget.topo,
             FxEmptyState(
               key: const ValueKey('evolucao_medidas_empty'),
               icon: 'trend',
@@ -77,17 +89,7 @@ class _EvolucaoMedidasAbaState extends State<EvolucaoMedidasAba> {
           96,
         ),
         children: [
-          if (disponiveis.length > 1) ...[
-            FxChoiceStrip<EvolucaoMetrica>(
-              itens: [
-                for (final m in disponiveis)
-                  FxChoiceItem(value: m, label: m.rotulo),
-              ],
-              selecionado: metrica,
-              onSelecionar: (m) => setState(() => _metrica = m),
-            ),
-            const SizedBox(height: TokensStrip.s3),
-          ],
+          ...widget.topo,
           _BlocoDaSerie(
             metrica: metrica,
             pontos: pontos,
@@ -96,12 +98,15 @@ class _EvolucaoMedidasAbaState extends State<EvolucaoMedidasAba> {
             mostrarPeriodo: todos.length >= evolucaoPontosParaGrafico,
           ),
           const SizedBox(height: TokensStrip.s3),
-          _GradeDeMetricas(
-            medidas: medidas,
-            metricas: disponiveis,
-            selecionada: metrica,
-            onSelecionar: (m) => setState(() => _metrica = m),
-          ),
+          for (final m in disponiveis) ...[
+            _LinhaDeMetrica(
+              metrica: m,
+              serie: serieDaMetrica(medidas, m),
+              selecionada: m == metrica,
+              onTap: () => setState(() => _metrica = m),
+            ),
+            const SizedBox(height: TokensStrip.s2),
+          ],
           const SizedBox(height: TokensStrip.s4),
           _Historico(medidas: recentes, onAbrir: widget.onAbrirMedida),
         ],
@@ -157,6 +162,11 @@ class _BlocoDaSerie extends StatelessWidget {
           else if (pontos.isEmpty)
             Text(
               ptS.evolucaoSemDadoNoPeriodo,
+              style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+            )
+          else if (pontos.length == 1)
+            Text(
+              ptS.evolucaoFaltaParaLinha,
               style: FocuxHubTypography.bodyMuted(color: chrome.mute),
             )
           else ...[
@@ -221,46 +231,9 @@ class _Numero extends StatelessWidget {
   }
 }
 
-class _GradeDeMetricas extends StatelessWidget {
-  const _GradeDeMetricas({
-    required this.medidas,
-    required this.metricas,
-    required this.selecionada,
-    required this.onSelecionar,
-  });
-
-  final List<MedidaCorporal> medidas;
-  final List<EvolucaoMetrica> metricas;
-  final EvolucaoMetrica selecionada;
-  final ValueChanged<EvolucaoMetrica> onSelecionar;
-
-  @override
-  Widget build(BuildContext context) {
-    final largura = (MediaQuery.sizeOf(context).width -
-            FxSettingsLayout.pageInset * 2 -
-            TokensStrip.s2) /
-        2;
-    return Wrap(
-      spacing: TokensStrip.s2,
-      runSpacing: TokensStrip.s2,
-      children: [
-        for (final m in metricas)
-          SizedBox(
-            width: largura,
-            child: _CartaoDeMetrica(
-              metrica: m,
-              serie: serieDaMetrica(medidas, m),
-              selecionada: m == selecionada,
-              onTap: () => onSelecionar(m),
-            ),
-          ),
-      ],
-    );
-  }
-}
-
-class _CartaoDeMetrica extends StatelessWidget {
-  const _CartaoDeMetrica({
+/// Valor, tendência e diferença. Toque troca o gráfico.
+class _LinhaDeMetrica extends StatelessWidget {
+  const _LinhaDeMetrica({
     required this.metrica,
     required this.serie,
     required this.selecionada,
@@ -276,7 +249,6 @@ class _CartaoDeMetrica extends StatelessWidget {
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
-    final diferenca = serie.last.valor - serie.first.valor;
     final valor = '${formatBrDecimal(serie.last.valor)} ${metrica.unidade}';
     return Semantics(
       button: true,
@@ -292,24 +264,46 @@ class _CartaoDeMetrica extends StatelessWidget {
             context,
             accent: selecionada ? primary : null,
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
             children: [
-              Text(metrica.rotulo, style: FocuxHubTypography.chip(chrome.mute)),
-              const SizedBox(height: 2),
-              Text(
-                valor,
-                style: FocuxHubTypography.metric(
-                  color: chrome.ink,
-                  fontSize: FocuxHubTypography.metricMd,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      metrica.rotulo,
+                      style: FocuxHubTypography.chip(chrome.mute),
+                    ),
+                    Text(
+                      valor,
+                      style: FocuxHubTypography.metric(
+                        color: chrome.ink,
+                        fontSize: FocuxHubTypography.metricMd,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 2),
-              Text(
-                serie.length < 2
-                    ? dataCurta(serie.last.data)
-                    : diferencaTexto(diferenca, metrica.unidade),
-                style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+              if (serie.length >= 2)
+                FxSparkline(
+                  data: [for (final p in serie) p.valor],
+                  color: primary,
+                  width: 72,
+                  height: 28,
+                ),
+              const SizedBox(width: TokensStrip.s2),
+              SizedBox(
+                width: 84,
+                child: Text(
+                  serie.length < 2
+                      ? dataCurta(serie.last.data)
+                      : diferencaTexto(
+                        serie.last.valor - serie.first.valor,
+                        metrica.unidade,
+                      ),
+                  textAlign: TextAlign.end,
+                  style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                ),
               ),
             ],
           ),

@@ -161,26 +161,6 @@ AvaliacoesPagina avaliacoesPaginaFromResponse(dynamic data) {
   );
 }
 
-/// Páginas newest-first → até [maxPontos] pesos, do mais antigo ao mais novo.
-List<double> pesosHistoricoFromPaginas(
-  Iterable<AvaliacoesPagina> paginas, {
-  int maxPontos = 7,
-}) {
-  final newestFirst = <double>[];
-  for (final pagina in paginas) {
-    for (final row in pagina.content) {
-      final peso = row.pesoKg;
-      if (peso == null) continue;
-      newestFirst.add(peso);
-      if (newestFirst.length >= maxPontos) {
-        return newestFirst.reversed.toList();
-      }
-    }
-    if (!pagina.hasNext) break;
-  }
-  return newestFirst.reversed.toList();
-}
-
 class AvaliacaoRepository {
   final Dio _dio;
   AvaliacaoRepository(ApiClient c) : _dio = c.dio;
@@ -200,18 +180,6 @@ class AvaliacaoRepository {
       queryParameters: {'page': page, 'size': size},
     );
     return avaliacoesPaginaFromResponse(r.data);
-  }
-
-  /// Até 7 pesos mais recentes, andando páginas newest-first.
-  Future<List<double>> listarPesoHistorico(int alunoId) async {
-    final paginas = <AvaliacoesPagina>[];
-    for (var page = 0; page < 5; page++) {
-      final pagina = await listarPagina(alunoId, page: page, size: 100);
-      paginas.add(pagina);
-      final collected = pesosHistoricoFromPaginas(paginas);
-      if (collected.length >= 7 || !pagina.hasNext) return collected;
-    }
-    return pesosHistoricoFromPaginas(paginas);
   }
 
   Future<AvaliacaoFisica> registrar(

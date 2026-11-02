@@ -112,7 +112,6 @@ const _modulos = [
   'Ajustar cargas com IA',
   'Feedback em vídeo',
   'Composição corporal',
-  'Plano de sucesso',
   'Trilhas',
   'Anamnese',
   'Chat',

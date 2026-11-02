@@ -33,6 +33,5 @@ void main() {
       'lib/features/auth/utils/post_login_redirect.dart',
     );
     expect(util, isNot(contains("path == '/ia/aluno'")));
-    expect(util, contains("path == '/gamificacao'"));
   });
 }

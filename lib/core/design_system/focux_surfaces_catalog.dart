@@ -182,10 +182,6 @@ const Map<String, FocuxSurfaceSpec> focuxSurfaceCatalog = {
     type: _s3,
     logicalParent: '/alunos/:id',
   ),
-  '/alunos/:id/plano-sucesso': FocuxSurfaceSpec(
-    type: _s3,
-    logicalParent: '/alunos/:id',
-  ),
   '/alunos/:id/fotos': FocuxSurfaceSpec(
     type: _s4,
     logicalParent: '/alunos/:id',
@@ -217,10 +213,6 @@ const Map<String, FocuxSurfaceSpec> focuxSurfaceCatalog = {
   '/alunos/:id/feedback-video': FocuxSurfaceSpec(
     type: _s4,
     hasInput: true,
-    logicalParent: '/alunos/:id',
-  ),
-  '/alunos/:id/engajamento/historico': FocuxSurfaceSpec(
-    type: _s3,
     logicalParent: '/alunos/:id',
   ),
   '/alunos/:id/engajamento': FocuxSurfaceSpec(
@@ -560,7 +552,6 @@ const Map<String, FocuxSurfaceSpec> focuxSurfaceCatalog = {
   '/busca': FocuxSurfaceSpec(type: _s4, hasInput: true, logicalParent: _home),
   '/analytics': FocuxSurfaceSpec(type: _s1, logicalParent: _home),
   '/admin/rbac': FocuxSurfaceSpec(type: _s2, logicalParent: _perfil),
-  '/gamificacao': FocuxSurfaceSpec(type: _s1, logicalParent: _ferramentas),
   '/qa/smoke': FocuxSurfaceSpec(type: _s4, logicalParent: _home),
   '/qa/tokens-strip': FocuxSurfaceSpec(type: _s2, logicalParent: '/qa/smoke'),
 };

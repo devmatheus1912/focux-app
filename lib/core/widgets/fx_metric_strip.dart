@@ -37,13 +37,16 @@ class FxMetricStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
-    return Row(
-      children: [
-        for (final (i, m) in metricas.indexed) ...[
-          if (i > 0) const SizedBox(width: TokensStrip.s2),
-          Expanded(child: _Tile(metrica: m, chrome: chrome)),
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (final (i, m) in metricas.indexed) ...[
+            if (i > 0) const SizedBox(width: TokensStrip.s2),
+            Expanded(child: _Tile(metrica: m, chrome: chrome)),
+          ],
         ],
-      ],
+      ),
     );
   }
 }
@@ -88,7 +91,7 @@ class _Tile extends StatelessWidget {
             child: ConstrainedBox(
               constraints: const BoxConstraints(minHeight: 48),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   FittedBox(
                     fit: BoxFit.scaleDown,

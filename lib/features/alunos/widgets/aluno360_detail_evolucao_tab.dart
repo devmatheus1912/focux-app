@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
-import '../../../core/widgets/fx_action_row.dart';
-import '../../../l10n/app_localizations.dart';
 import '../data/aluno_repository.dart';
 import 'aluno360_evolucao_inteligente_card.dart';
 import 'aluno360_evolucao_tab.dart';
@@ -77,22 +74,6 @@ class Aluno360DetailEvolucaoTab extends StatelessWidget {
         timelineApiAsync: timeline360Async,
         isDark: isDark,
         compactEmpty: bothEmpty,
-      ),
-      ajustarCard: Builder(
-        builder: (context) {
-          final s = S.of(context);
-          return FxActionRow(
-            key: const ValueKey('aluno360_evolucao_ajustar_treino'),
-            leading: Icons.fitness_center_outlined,
-            titulo: s.aluno360EvolucaoAjustarTreinoTitulo,
-            motivo: s.aluno360EvolucaoAjustarTreinoMotivo,
-            verbo: s.aluno360EvolucaoAjustarTreinoVerbo,
-            onTap: () => context.push(
-              '/alunos/$alunoId/rotina',
-              extra: aluno.nome,
-            ),
-          );
-        },
       ),
       weightCard: Aluno360WeightActivityCard(
         aluno: aluno,

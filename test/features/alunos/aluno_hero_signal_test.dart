@@ -37,7 +37,7 @@ void main() {
           const AlunoHeroPrimarySignal(label: 'Sem treino', value: '5'),
           '5 dias parado — vale check-in',
         ),
-        'Sem treino · 5 dias parado — vale check-in',
+        '5 dias parado — vale check-in',
       );
     });
   });

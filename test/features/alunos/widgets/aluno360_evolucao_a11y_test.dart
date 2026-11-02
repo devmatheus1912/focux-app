@@ -5,6 +5,7 @@ import 'package:focux_app/l10n/app_localizations.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/providers/aluno_detail_providers.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_detail_evolucao_tab.dart';
+import 'package:focux_app/features/evolucao/providers/metas_provider.dart';
 
 void main() {
   final aluno = Aluno(
@@ -29,6 +30,7 @@ void main() {
   Widget harness(Widget child) {
     return ProviderScope(
       overrides: [
+        metasDoAlunoProvider(42).overrideWith((ref) async => const []),
         alunoPesoHistoricoProvider(42).overrideWith((ref) async => const []),
       ],
       child: MaterialApp(
