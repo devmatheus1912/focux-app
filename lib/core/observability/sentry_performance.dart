@@ -16,7 +16,10 @@ Future<void> initSentryPerformance() async {
     o.environment = Env.isProd ? 'production' : 'development';
 
     // ── Tracing ──────────────────────────────────────────────────────────────
+    // Transações clássicas: o interceptor e o observer de navegação dependem delas.
+    o.traceLifecycle = SentryTraceLifecycle.static;
     o.tracesSampleRate = Env.sentryTracesSampleRate;
+    o.enableTimeToFullDisplayTracing = true;
     o.tracePropagationTargets
       ..clear()
       ..add(Uri.parse(Env.apiUrl).host);
@@ -29,7 +32,15 @@ Future<void> initSentryPerformance() async {
     // enableNativeCrashHandling = false evita duplicata com Crashlytics.
     o.enableNativeCrashHandling = false;
 
-    o.beforeSendTransaction = (tx) async => stripRouteArguments(tx);
+    o.beforeSendTransaction = (tx, _) async => stripRouteArguments(tx);
+  });
+}
+
+/// Dados da tela chegaram: fecha o tempo de tela pronta (TTFD) da rota atual.
+void reportarTelaPronta() {
+  if (Env.sentryDsn.isEmpty) return;
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    SentryFlutter.currentDisplay()?.reportFullyDisplayed();
   });
 }
 

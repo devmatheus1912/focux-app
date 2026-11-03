@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../evolucao/providers/evolucao_home_provider.dart';
 import '../../../core/media/escolher_foto_de_perfil.dart';
 import '../../../core/utils/br_phone.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -42,7 +43,6 @@ part 'perfil_aluno_editar_screen_state.part.dart';
 class PerfilAlunoEditarScreen extends ConsumerStatefulWidget {
   const PerfilAlunoEditarScreen({super.key, this.acao});
   final PerfilEditarAcao? acao;
-
   @override
   ConsumerState<PerfilAlunoEditarScreen> createState() =>
       _PerfilAlunoEditarScreenState();

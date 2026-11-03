@@ -209,6 +209,7 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
         'fotoUrl': _fotoUrl,
       });
       ref.invalidate(alunoPerfilHomeProvider);
+      ref.invalidate(minhaEvolucaoProvider);
       ref.invalidate(alunoMeProvider);
       invalidateAlunoDashboardHome(ref);
       _captureBaseline();
@@ -356,6 +357,7 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
                   fotoUrl: fotoUrl,
                 );
                 ref.invalidate(alunoPerfilHomeProvider);
+                ref.invalidate(minhaEvolucaoProvider);
                 if (peso != null) {
                   _peso.text = numeroSemZero(peso);
                   await _save(silent: true);

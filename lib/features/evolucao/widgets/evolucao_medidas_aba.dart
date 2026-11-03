@@ -8,6 +8,7 @@ import '../../../core/utils/pt_br_display.dart';
 import '../../../core/widgets/fx_choice_strip.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_grafico_linha.dart';
+import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../l10n/pt.dart';
 import '../data/evolucao_repository.dart';
@@ -128,7 +129,7 @@ class _EvolucaoMedidasAbaState extends State<EvolucaoMedidasAba> {
           ),
           const SizedBox(height: TokensStrip.s4),
           ...widget.depois,
-          _Historico(medidas: recentes, onAbrir: widget.onAbrirMedida),
+          _LinhaHistorico(medidas: recentes, onAbrir: widget.onAbrirMedida),
         ],
       ),
     );
@@ -259,13 +260,13 @@ class _LinhaDeMetrica extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final valor = '${formatBrDecimal(serie.last.valor)} ${metrica.unidade}';
     final meta = this.meta;
+    final diferenca = serie.last.valor - serie.first.valor;
     final detalhe =
         serie.length < 2
             ? dataCurta(serie.last.data)
-            : diferencaTexto(
-              serie.last.valor - serie.first.valor,
-              metrica.unidade,
-            );
+            : diferenca == 0
+            ? '='
+            : diferencaTexto(diferenca, metrica.unidade);
     return Semantics(
       button: true,
       selected: selecionada,
@@ -273,8 +274,9 @@ class _LinhaDeMetrica extends StatelessWidget {
       excludeSemantics: true,
       child: InkWell(
         onTap: onTap,
-        child: Padding(
+        child: Container(
           padding: const EdgeInsets.all(TokensStrip.s3),
+          color: selecionada ? primary.withValues(alpha: 0.07) : null,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -296,15 +298,17 @@ class _LinhaDeMetrica extends StatelessWidget {
                     style: FocuxHubTypography.metric(
                       color: chrome.ink,
                       fontSize: FocuxHubTypography.metricMd,
-                    ),
+                    ).copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
                   ),
                   const SizedBox(width: TokensStrip.s2),
                   SizedBox(
                     width: 72,
                     child: Text(
                       detalhe,
+                      maxLines: 1,
                       textAlign: TextAlign.end,
-                      style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                      style: FocuxHubTypography.bodyMuted(color: chrome.mute)
+                          .copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
                     ),
                   ),
                 ],
@@ -341,12 +345,35 @@ class _LinhaDeMetrica extends StatelessWidget {
   }
 }
 
-class _Historico extends StatelessWidget {
-  const _Historico({required this.medidas, required this.onAbrir});
+/// O histórico mora numa folha: a aba mostra gráfico e medidas sem cartões de data.
+class _LinhaHistorico extends StatelessWidget {
+  const _LinhaHistorico({required this.medidas, required this.onAbrir});
 
   /// Da mais nova para a mais antiga.
   final List<MedidaCorporal> medidas;
   final ValueChanged<MedidaCorporal>? onAbrir;
+
+  Future<void> _abrir(BuildContext context) async {
+    final escolhida = await showFxHomeSheet<MedidaCorporal>(
+      context,
+      builder: (ctx) => _FolhaHistorico(medidas: medidas, podeAbrir: onAbrir != null),
+    );
+    if (escolhida != null) onAbrir?.call(escolhida);
+  }
+
+  @override
+  Widget build(BuildContext context) => FxSatelliteListTile(
+    title: ptS.evolucaoHistoricoLinha(medidas.length),
+    titleCase: false,
+    onTap: () => _abrir(context),
+  );
+}
+
+class _FolhaHistorico extends StatelessWidget {
+  const _FolhaHistorico({required this.medidas, required this.podeAbrir});
+
+  final List<MedidaCorporal> medidas;
+  final bool podeAbrir;
 
   static String _mes(String data) {
     final d = DateTime.tryParse(data);
@@ -381,13 +408,28 @@ class _Historico extends StatelessWidget {
               if (evolucaoAutorLabel(m.registradoPor) case final autor?) autor,
             ].join('\n'),
           ),
-          onTap: onAbrir == null ? null : () => onAbrir!(m),
+          onTap: podeAbrir ? () => Navigator.of(context).pop(m) : null,
         ),
       );
     }
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: filhos,
+    return FxHomeSheetSurface(
+      isDark: chrome.isDark,
+      maxHeight:
+          MediaQuery.sizeOf(context).height * FxHomeSheetChrome.maxHeightFactor,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          FxHomeSheetHandle(isDark: chrome.isDark),
+          const SizedBox(height: TokensStrip.s3),
+          FxHomeSheetHeader(
+            isDark: chrome.isDark,
+            title: ptS.evolucaoHistoricoTitulo,
+          ),
+          const SizedBox(height: TokensStrip.s2),
+          Flexible(child: ListView(shrinkWrap: true, children: filhos)),
+        ],
+      ),
     );
   }
 }

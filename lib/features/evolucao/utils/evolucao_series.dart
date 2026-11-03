@@ -30,12 +30,13 @@ enum EvolucaoMetrica {
     EvolucaoMetrica.gordura => null,
   };
 
-  /// Código da meta nesta medida. Quadril e braço não têm meta.
-  String? get codigoMeta => switch (this) {
+  /// Código da meta nesta medida.
+  String get codigoMeta => switch (this) {
     EvolucaoMetrica.peso => 'PESO',
     EvolucaoMetrica.cintura => 'CINTURA',
+    EvolucaoMetrica.quadril => 'QUADRIL',
+    EvolucaoMetrica.braco => 'BRACO',
     EvolucaoMetrica.gordura => 'GORDURA',
-    _ => null,
   };
 }
 

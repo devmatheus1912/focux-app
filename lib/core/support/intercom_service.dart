@@ -58,14 +58,20 @@ class IntercomService {
   /// Chama no logout do app.
   static Future<void> logout() async {
     if (kIsWeb) return;
+    identificar = null;
     final intercom = Intercom.instance;
     await intercom.removeUserJwtProvider();
     await intercom.logout();
   }
 
   /// Abre o Messenger como overlay (sem sair do app).
+  /// Identifica o usuário só ao abrir o suporte, sem chamada a cada início do app.
+  static Future<void> Function()? identificar;
+
   static Future<void> openMessenger() async {
     if (kIsWeb) return;
+    await identificar?.call();
+    identificar = null;
     await Intercom.instance.displayMessenger();
   }
 }

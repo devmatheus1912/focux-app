@@ -87,8 +87,14 @@ class _PersonalDashboardScreenState
 
   Future<void> _maybeShowOnboardingWizard() async {
     try {
+      final prefs = await SharedPreferences.getInstance();
+      final chave = 'onboarding_wizard_completo_${ref.read(perfilProvider).value?.id}';
+      if (prefs.getBool(chave) ?? false) return;
       final repo = OnboardingRepository(ref.read(apiClientProvider));
       final w = await OnboardingWizardClientCache.load(repo.wizard);
+      if (w.wizardCompleto && !chave.endsWith('null')) {
+        await prefs.setBool(chave, true);
+      }
       if (!mounted) return;
       if (!dashboardShouldOpenOnboardingWizard(
         wizardCompleto: w.wizardCompleto,

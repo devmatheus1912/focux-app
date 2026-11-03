@@ -2,18 +2,21 @@ import '../../../core/utils/pt_br_display.dart';
 import '../../../l10n/pt.dart';
 import 'evolucao_repository.dart';
 
-const metaMetricas = ['PESO', 'CINTURA', 'GORDURA'];
+const metaMetricas = ['PESO', 'CINTURA', 'QUADRIL', 'BRACO', 'GORDURA', 'MASSA'];
 
 String metaMetricaRotulo(String metrica) => switch (metrica) {
   'PESO' => ptS.evolucaoMetricaPeso,
   'CINTURA' => ptS.evolucaoMetricaCintura,
+  'QUADRIL' => ptS.evolucaoMetricaQuadril,
+  'BRACO' => ptS.evolucaoMetricaBraco,
+  'MASSA' => ptS.metaMassa,
   _ => ptS.metaGordura,
 };
 
 String metaUnidade(String metrica) => switch (metrica) {
   'PESO' => 'kg',
-  'CINTURA' => 'cm',
-  _ => '%',
+  'GORDURA' || 'MASSA' => '%',
+  _ => 'cm',
 };
 
 String metaValor(String metrica, double? valor) {

@@ -4,36 +4,36 @@ import '../../../core/api/api_client.dart';
 class RetencaoAlunoScore {
   final int alunoId;
   final String alunoNome;
-  final int scoreAtual;
-  final int? scoreAnterior;
-  final int delta;
-  final String riscoChurn;
-  final DateTime? dataCalculo;
+  final String nivel;
+  final List<String> motivos;
+  final int? diasSemTreino;
+  final bool cobravel;
+  final bool semFicha;
+  final bool adiado;
 
   RetencaoAlunoScore({
     required this.alunoId,
     required this.alunoNome,
-    required this.scoreAtual,
-    this.scoreAnterior,
-    required this.delta,
-    required this.riscoChurn,
-    this.dataCalculo,
+    required this.nivel,
+    this.motivos = const [],
+    this.diasSemTreino,
+    this.cobravel = false,
+    this.semFicha = false,
+    this.adiado = false,
   });
 
   factory RetencaoAlunoScore.fromJson(Map<String, dynamic> j) =>
       RetencaoAlunoScore(
         alunoId: (j['alunoId'] as num).toInt(),
-        alunoNome: (j['alunoNome'] as String?)?.trim().isNotEmpty == true
-            ? (j['alunoNome'] as String).trim()
-            : 'Aluno',
-        scoreAtual: (j['scoreAtual'] as num?)?.toInt() ?? 0,
-        scoreAnterior: (j['scoreAnterior'] as num?)?.toInt(),
-        delta: (j['delta'] as num?)?.toInt() ?? 0,
-        riscoChurn: j['riscoChurn'] as String? ?? 'MEDIO',
-        dataCalculo:
-            j['dataCalculo'] != null
-                ? DateTime.tryParse(j['dataCalculo'] as String)
-                : null,
+        alunoNome: (j['alunoNome'] as String?)?.trim() ?? '',
+        nivel: j['nivel'] as String? ?? 'BAIXO',
+        motivos: [
+          for (final m in (j['motivos'] as List?) ?? const []) '$m',
+        ],
+        diasSemTreino: (j['diasSemTreino'] as num?)?.toInt(),
+        cobravel: j['cobravel'] == true,
+        semFicha: j['semFicha'] == true,
+        adiado: j['adiado'] == true,
       );
 }
 
@@ -125,7 +125,11 @@ class RetencaoRepository {
     return RetencaoHome.fromJson(Map<String, dynamic>.from(r.data as Map));
   }
 
-  Future<RetencaoBasePage> listarBase({int page = 0, String? q}) async {
+  Future<RetencaoBasePage> listarBase({
+    int page = 0,
+    String? q,
+    String? nivel,
+  }) async {
     final query = q?.trim() ?? '';
     final r = await _dio.get(
       '/api/retencao/base',
@@ -133,8 +137,13 @@ class RetencaoRepository {
         'page': page,
         'size': basePageSize,
         if (query.isNotEmpty) 'q': query,
+        if (nivel != null) 'nivel': nivel,
       },
     );
     return RetencaoBasePage.fromJson(Map<String, dynamic>.from(r.data as Map));
   }
+
+  /// Tira o aluno da fila por um dia.
+  Future<void> adiar(int alunoId) =>
+      _dio.post('/api/alertas/aluno/$alunoId/resolver');
 }

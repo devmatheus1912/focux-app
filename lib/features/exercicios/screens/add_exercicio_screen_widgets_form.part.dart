@@ -70,6 +70,30 @@ const _quickSetups = [
   ),
 ];
 
+class _CancelarTexto extends StatelessWidget {
+  const _CancelarTexto({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: 'Cancelar',
+      excludeSemantics: true,
+      child: InkWell(
+        onTap: onTap,
+        child: Center(
+          child: Text(
+            'Cancelar',
+            style: FxSettingsLayout.footer(color: fxScreenMute(context)),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _QuickSetupStrip extends StatelessWidget {
   final String? selectedLabel;
   final ValueChanged<_ExerciseQuickSetup> onSelected;
@@ -103,33 +127,20 @@ class _QuickSetupStrip extends StatelessWidget {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: Column(
+          padding: const EdgeInsets.fromLTRB(4, 0, 4, 8),
+          child: Wrap(
+            spacing: 6,
+            runSpacing: 6,
             children: [
-              for (var row = 0; row < 2; row++) ...[
-                if (row > 0) const SizedBox(height: 6),
-                Row(
-                  children: [
-                    for (var col = 0; col < 2; col++) ...[
-                      if (col > 0) const SizedBox(width: 6),
-                      Expanded(
-                        child: FxToggleChip(
-                          expanded: true,
-                          label: _quickSetups[row * 2 + col].label,
-                          icon: _quickSetups[row * 2 + col].icon,
-                          selected:
-                              selectedLabel ==
-                              _quickSetups[row * 2 + col].label,
-                          isDark: isDark,
-                          filledWhenSelected: true,
-                          onTap:
-                              () => onSelected(_quickSetups[row * 2 + col]),
-                        ),
-                      ),
-                    ],
-                  ],
+              for (final setup in _quickSetups)
+                FxToggleChip(
+                  label: setup.label,
+                  icon: setup.icon,
+                  selected: selectedLabel == setup.label,
+                  isDark: isDark,
+                  filledWhenSelected: true,
+                  onTap: () => onSelected(setup),
                 ),
-              ],
             ],
           ),
         ),

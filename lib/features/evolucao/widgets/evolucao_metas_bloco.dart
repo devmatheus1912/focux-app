@@ -11,17 +11,47 @@ import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_grouped_action_sheet.dart';
 import '../../../core/widgets/fx_quick_chips.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../l10n/pt.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../data/evolucao_repository.dart';
 import '../data/meta_corporal.dart';
+import '../providers/evolucao_home_provider.dart';
+import '../utils/evolucao_series.dart';
 import '../../alunos/providers/aluno_detail_providers.dart';
 
 double? _numero(String texto) =>
     double.tryParse(texto.trim().replaceAll(',', '.'));
 
 /// Cria ou corrige meta. Devolve true se salvou.
+/// Última leitura da medida no aluno: valor e data.
+({double valor, String data})? metaLeituraAtual(
+  String metrica,
+  EvolucaoHomeBundle? home,
+) {
+  if (home == null) return null;
+  if (metrica == 'GORDURA' || metrica == 'MASSA') {
+    final ponto = (metrica == 'GORDURA' ? home.gordura : home.massa).firstOrNull;
+    return ponto == null ? null : (valor: ponto.valor, data: ponto.data);
+  }
+  final medida = EvolucaoMetrica.values.firstWhere(
+    (m) => m.codigoMeta == metrica,
+  );
+  final serie = serieDaMetrica(home.medidas, medida);
+  final ultimo = serie.lastOrNull;
+  return ultimo == null
+      ? null
+      : (valor: ultimo.valor, data: dataCurta(ultimo.data));
+}
+
+/// "Reduzir 5,0 cm" ao digitar; nulo sem alvo ou com alvo igual ao atual.
+String? metaLeituraDoAlvo(String metrica, double atual, double? alvo) {
+  if (alvo == null || alvo == atual) return null;
+  final diferenca = metaValor(metrica, (alvo - atual).abs());
+  return alvo < atual ? ptS.metaReduzir(diferenca) : ptS.metaAumentar(diferenca);
+}
+
 Future<bool> abrirFormularioDeMeta(
   BuildContext context,
   WidgetRef ref, {
@@ -29,6 +59,7 @@ Future<bool> abrirFormularioDeMeta(
   required Set<String> ocupadas,
   MetaCorporal? meta,
   String? metricaInicial,
+  VoidCallback? onRegistrarMedida,
 }) async {
   var metrica =
       meta?.metrica ??
@@ -44,70 +75,142 @@ Future<bool> abrirFormularioDeMeta(
   DateTime? prazo = meta?.prazo == null ? null : DateTime.tryParse(meta!.prazo!);
   // Prazo de meta existente segue valendo até o personal trocar.
   var prazoDias = prazo == null ? 0 : -1;
-  final livres = metaMetricas.where((m) => !ocupadas.contains(m)).toList();
+  final home = ref.read(evolucaoHomeProvider(alunoId)).value;
+  String? erroAlvo;
+  ({double valor, String data})? atual() => metaLeituraAtual(metrica, home);
+  var registrar = false;
+  alvo.addListener(() {
+    erroAlvo = null;
+    _avisarErro?.call();
+  });
   try {
     final ok = await showFxFormSheet(
       context,
       title: meta == null ? ptS.metaDefinir : ptS.metaEditar,
       icon: Icons.flag_outlined,
       confirmLabel: ptS.evolucaoSalvar,
+      podeConfirmar: () {
+        final valor = _numero(alvo.text);
+        final leitura = atual();
+        erroAlvo =
+            valor == null
+                ? ptS.metaAlvoInvalido
+                : meta == null && leitura?.valor == valor
+                ? ptS.metaAlvoIgualAtual
+                : null;
+        _avisarErro?.call();
+        return erroAlvo == null && (meta != null || home == null || leitura != null);
+      },
       child: StatefulBuilder(
-        builder:
-            (context, setSheet) => Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (meta == null) ...[
-                  FxQuickChips<String>(
-                    itens: livres,
-                    selecionado: metrica,
-                    rotuloDe: metaMetricaRotulo,
-                    onSelecionar: (m) => setSheet(() => metrica = m),
-                  ),
-                  const SizedBox(height: TokensStrip.s2),
-                ],
-                AlunoInsetFormField(
-                  rotuloVisivel: true,
-                  controller: alvo,
-                  label: ptS.metaAlvoCampo(metaUnidade(metrica)),
-                  icon: Icons.flag_outlined,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                ),
-                AlunoInsetFormField(
-                  rotuloVisivel: true,
-                  controller: observacao,
-                  label: ptS.metaObservacaoCampo,
-                  icon: Icons.notes_rounded,
-                  showDivider: false,
+        builder: (context, setSheet) {
+          _avisarErro = () => setSheet(() {});
+          final chrome = ShellChrome.of(context);
+          final leitura = atual();
+          final doAlvo =
+              leitura == null
+                  ? null
+                  : metaLeituraDoAlvo(metrica, leitura.valor, _numero(alvo.text));
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (meta == null) ...[
+                FxQuickChips<String>(
+                  itens: metaMetricas,
+                  selecionado: metrica,
+                  bloqueados: ocupadas,
+                  rotuloDe:
+                      (m) =>
+                          ocupadas.contains(m)
+                              ? ptS.metaJaTem(metaMetricaRotulo(m))
+                              : metaMetricaRotulo(m),
+                  onSelecionar: (m) => setSheet(() {
+                    metrica = m;
+                    erroAlvo = null;
+                  }),
                 ),
                 const SizedBox(height: TokensStrip.s2),
-                FxQuickChips<int>(
-                  itens: const [0, 30, 60, 90],
-                  selecionado: prazoDias,
-                  rotuloDe:
-                      (d) =>
-                          d == 0 ? ptS.metaPrazoSem : ptS.metaPrazoDias('$d'),
-                  onSelecionar:
-                      (d) => setSheet(() {
-                        prazoDias = d;
-                        prazo =
-                            d == 0
-                                ? null
-                                : DateTime.now().add(Duration(days: d));
-                      }),
-                ),
               ],
-            ),
+              if (leitura != null)
+                Text(
+                  ptS.metaAtualLinha(metaValor(metrica, leitura.valor), leitura.data),
+                  style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                )
+              else if (home != null && meta == null) ...[
+                Text(
+                  ptS.metaSemMedidaTexto,
+                  style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                ),
+                if (onRegistrarMedida != null) ...[
+                  const SizedBox(height: TokensStrip.s2),
+                  FxTonalButton(
+                    label: ptS.alunoPerfilRegistrarMedida,
+                    expanded: true,
+                    onPressed: () {
+                      registrar = true;
+                      Navigator.of(context).pop(false);
+                    },
+                  ),
+                ],
+              ],
+              const SizedBox(height: TokensStrip.s2),
+              AlunoInsetFormField(
+                rotuloVisivel: true,
+                obrigatorio: true,
+                controller: alvo,
+                label: ptS.metaAlvoCampo(metaUnidade(metrica)),
+                icon: Icons.flag_outlined,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+              ),
+              if (erroAlvo != null || doAlvo != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: TokensStrip.s1),
+                  child: Text(
+                    erroAlvo ?? doAlvo!,
+                    style: FocuxHubTypography.bodyMuted(
+                      color:
+                          erroAlvo != null
+                              ? Theme.of(context).colorScheme.error
+                              : chrome.mute,
+                    ),
+                  ),
+                ),
+              const SizedBox(height: TokensStrip.s3),
+              Text(ptS.metaPrazoRotulo, style: FocuxHubTypography.chip(chrome.mute)),
+              const SizedBox(height: TokensStrip.s1),
+              FxQuickChips<int>(
+                itens: const [0, 30, 60, 90],
+                selecionado: prazoDias,
+                rotuloDe:
+                    (d) => d == 0 ? ptS.metaPrazoSem : ptS.metaPrazoDias('$d'),
+                onSelecionar:
+                    (d) => setSheet(() {
+                      prazoDias = d;
+                      prazo =
+                          d == 0 ? null : DateTime.now().add(Duration(days: d));
+                    }),
+              ),
+              const SizedBox(height: TokensStrip.s2),
+              AlunoInsetFormField(
+                rotuloVisivel: true,
+                controller: observacao,
+                label: ptS.metaObservacaoCampo,
+                icon: Icons.notes_rounded,
+                showDivider: false,
+              ),
+            ],
+          );
+        },
       ),
     );
-    if (!ok || !context.mounted) return false;
-    final valor = _numero(alvo.text);
-    if (valor == null) {
-      FeedbackHelper.showError(context, ptS.metaAlvoInvalido);
+    if (registrar) {
+      onRegistrarMedida?.call();
       return false;
     }
+    if (!ok || !context.mounted) return false;
+    final valor = _numero(alvo.text)!;
     final repo = EvolucaoRepository(ref.read(apiClientProvider));
     if (meta == null) {
       await repo.criarMeta(
@@ -131,10 +234,13 @@ Future<bool> abrirFormularioDeMeta(
     if (context.mounted) FeedbackHelper.showError(context, friendlyError(e));
     return false;
   } finally {
+    _avisarErro = null;
     alvo.dispose();
     observacao.dispose();
   }
 }
+
+VoidCallback? _avisarErro;
 
 /// O que o personal precisa decidir sobre as metas deste aluno.
 class EvolucaoMetasBloco extends ConsumerWidget {

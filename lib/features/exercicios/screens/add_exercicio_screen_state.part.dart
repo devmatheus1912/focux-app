@@ -390,7 +390,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
         appBar: FxShellAppBar(
           title: screenTitle,
           leadingWidth: 92,
-          leading: FxTonalButton(label: 'Cancelar', onPressed: _cancel, compact: true),
+          leading: _CancelarTexto(onTap: _cancel),
           actions: [
             FxHelpIconButton(
               tooltip: 'Como cadastrar',
@@ -684,15 +684,15 @@ String _filterSummary({required int equipamentos, required int espacos}) {
   }
   if (equipamentos == 0) {
     final espacoText = '$espacos espaço${espacos == 1 ? '' : 's'}';
-    return '$espacoText definido${espacos == 1 ? '' : 's'}. Toque para ajustar.';
+    return espacoText;
   }
   if (espacos == 0) {
     final equipamentoText =
         '$equipamentos equipamento${equipamentos == 1 ? '' : 's'}';
-    return '$equipamentoText definido${equipamentos == 1 ? '' : 's'}. Toque para ajustar.';
+    return equipamentoText;
   }
   final equipamentoText =
       '$equipamentos equipamento${equipamentos == 1 ? '' : 's'}';
   final espacoText = '$espacos espaço${espacos == 1 ? '' : 's'}';
-  return '$equipamentoText · $espacoText. Toque para ajustar.';
+  return '$equipamentoText · $espacoText';
 }

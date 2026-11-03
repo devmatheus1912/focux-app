@@ -1,27 +1,21 @@
 import '../data/retencao_repository.dart';
 
-bool retencaoNomeExibivel(String nome) {
-  final t = nome.trim();
-  if (t.isEmpty) return false;
-  // Defesa FE: BE (#46) já exclui blank/"Aluno"; mantém filtro se payload antigo.
-  return t.toLowerCase() != 'aluno';
+/// "Sem treino há 12 dias · +1": o principal motivo e quantos mais há.
+String? retencaoMotivoCurto(RetencaoAlunoScore score) {
+  final motivos = score.motivos;
+  if (motivos.isEmpty) return null;
+  return motivos.length == 1
+      ? motivos.first
+      : '${motivos.first} · +${motivos.length - 1}';
 }
 
-/// "Saúde 10 de 100": o score é de saúde, não de risco (maior = mais saudável).
-String retencaoSaudeCurta(RetencaoAlunoScore score) =>
-    'Saúde ${score.scoreAtual} de 100';
-
-const retencaoEmptyTitle = 'Ainda sem leitura desta base';
-
-const retencaoEmptySubtitle =
-    'Cadastre alunos ativos. Ao abrir de novo, o score recalcula com os '
-    'check-ins concluídos (dias únicos, sem duplicar o mesmo dia).';
-
-/// Único verbo que sobrou fora da tela: levar a quem ainda não tem alunos.
-enum RetencaoFocusActionId { verAlunos }
-
-String retencaoFocusActionLabel(RetencaoFocusActionId id) => switch (id) {
-  RetencaoFocusActionId.verAlunos => 'Ver alunos',
-};
-
-const retencaoComoUsar = 'Como usar a tela';
+/// Comparação com a semana passada; nula sem histórico ou sem mudança.
+String? retencaoVariacaoSemanal(RetencaoHome home) {
+  final antes = home.altoSemanaAnterior;
+  if (antes == null) return null;
+  final diferenca = home.alto - antes;
+  if (diferenca == 0) return null;
+  return diferenca > 0
+      ? '$diferenca a mais que na semana passada'
+      : '${-diferenca} a menos que na semana passada';
+}

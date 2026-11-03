@@ -1,3 +1,4 @@
+import '../../../core/observability/sentry_performance.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';

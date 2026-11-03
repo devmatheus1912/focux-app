@@ -8,6 +8,7 @@ import 'mutacao_recente.dart';
 import 'api_transport_circuit.dart';
 import '../auth/session_invalidator.dart';
 import '../auth/session_refresh_coordinator.dart';
+import 'get_dedupe.dart';
 import '../config/env.dart';
 import '../observability/sentry_performance.dart';
 import '../planos/plano_cache_policy.dart';
@@ -41,6 +42,8 @@ class ApiClient {
 
     // Primeiro: fecha o span antes do interceptor principal resolver/retentar.
     _dio.interceptors.add(SentryHttpSpanInterceptor());
+    final dedupe = GetDedupe();
+    _dio.interceptors.add(dedupe.entrada);
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
@@ -127,6 +130,7 @@ class ApiClient {
               );
               try {
                 final retryResp = await _dio.fetch(e.requestOptions);
+                dedupe.responder(retryResp);
                 return handler.resolve(retryResp);
               } catch (_) {
                 // Keep the original error path so cache/offline/refresh logic still applies.
@@ -158,16 +162,16 @@ class ApiClient {
                 LocalCache.keyFor(e.requestOptions),
               );
               if (cached != null) {
-                return handler.resolve(
-                  Response(
-                    requestOptions: e.requestOptions,
-                    statusCode: 200,
-                    data: cached,
-                    headers: Headers.fromMap({
-                      'x-fx-from-cache': ['true'],
-                    }),
-                  ),
+                final salva = Response<dynamic>(
+                  requestOptions: e.requestOptions,
+                  statusCode: 200,
+                  data: cached,
+                  headers: Headers.fromMap({
+                    'x-fx-from-cache': ['true'],
+                  }),
                 );
+                dedupe.responder(salva);
+                return handler.resolve(salva);
               }
             }
           }
@@ -199,7 +203,8 @@ class ApiClient {
                 e.requestOptions.extra['fxAuthRetried'] = true;
                 try {
                   final retryResp = await _dio.fetch(e.requestOptions);
-                  return handler.resolve(retryResp);
+                  dedupe.responder(retryResp);
+                return handler.resolve(retryResp);
                 } catch (retryErr) {
                   if (!shouldInvalidateAfterAuthReplayFailure(retryErr)) {
                     handler.next(retryErr is DioException ? retryErr : e);
@@ -242,6 +247,7 @@ class ApiClient {
         },
       ),
     );
+    _dio.interceptors.add(dedupe.saida);
 
     Future.microtask(() => OfflineSyncService.syncPendingRequests(_dio));
   }

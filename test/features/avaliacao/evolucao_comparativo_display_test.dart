@@ -10,8 +10,8 @@ void main() {
     expect(evolucaoComparativoConfirmTitle(), 'Compartilhar no chat?');
     expect(evolucaoComparativoConfirmLabel(), 'Enviar');
     expect(
-      evolucaoComparativoJanelaCaption(primeira: '01/01', atual: '01/02'),
-      'Primeira 01/01 · Atual 01/02',
+      evolucaoComparativoJanelaCaption(primeira: '01/01', atual: '01/02', dias: 31),
+      '01/01 → 01/02 · 31 dias',
     );
     expect(evolucaoComparativoFmtData(null), '—');
     expect(evolucaoComparativoFmtData(''), '—');
@@ -105,5 +105,20 @@ void main() {
     );
     expect(missing.text, '—');
     expect(missing.tone, EvolucaoComparativoDeltaTone.missing);
+  });
+
+  test('diferença com unidade, seta neutra e "=" sem mudança', () {
+    EvolucaoComparativoMetrica m(double a, double b, String u) =>
+        EvolucaoComparativoMetrica(
+          label: 'x',
+          unidade: u,
+          primeira: a,
+          atual: b,
+          menorEMelhor: true,
+        );
+    expect(evolucaoComparativoDiferenca(m(90, 105, 'kg')), '↑ 15,0 kg');
+    expect(evolucaoComparativoDiferenca(m(70, 50, 'cm')), '↓ 20,0 cm');
+    expect(evolucaoComparativoDiferenca(m(60, 60, 'cm')), '=');
+    expect(evolucaoComparativoDias('2026-10-30', '2026-11-02'), 3);
   });
 }

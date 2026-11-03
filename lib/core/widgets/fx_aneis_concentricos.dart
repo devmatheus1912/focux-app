@@ -17,10 +17,11 @@ double _contraste(Color a, Color b) {
   return (math.max(x, y) + 0.05) / (math.min(x, y) + 0.05);
 }
 
-/// Três cores da mesma família da marca, com contraste de 3:1 sobre [fundo],
-/// em qualquer marca própria.
-List<Color> fxCoresDeAnel(Color fundo) {
-  final base = HSLColor.fromColor(fundo);
+/// Três cores da família de [marca], com contraste de 3:1 sobre [fundo], em
+/// qualquer marca própria. O fundo só decide a claridade: mesma medida, mesma
+/// família de cor em toda tela.
+List<Color> fxCoresDeAnel(Color fundo, {Color? marca}) {
+  final base = HSLColor.fromColor(marca ?? fundo);
   final escuro = fundo.computeLuminance() < 0.4;
   return [
     for (final giro in const [0.0, 42.0, -42.0])

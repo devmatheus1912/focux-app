@@ -1,3 +1,4 @@
+import '../../../core/observability/sentry_performance.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -24,7 +25,6 @@ import '../widgets/treinos_hoje_acao.dart';
 import '../widgets/treinos_hoje_linha.dart';
 import '../widgets/treinos_hub_rows.dart';
 import '../widgets/treinos_hub_skeleton.dart';
-
 /// Aba Treinos do aluno: lê só o agregado da Home (`/api/dashboard/aluno/home`).
 class MeusTreinosScreen extends ConsumerStatefulWidget {
   const MeusTreinosScreen({super.key});
@@ -128,6 +128,7 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
   Widget build(BuildContext context) {
     final s = S.of(context);
     final homeAsync = ref.watch(alunoDashboardHomeProvider);
+    if (homeAsync.hasValue) reportarTelaPronta();
 
     return fxScreenA11yScope(
       label: s.treinosHubTitulo,

@@ -1,3 +1,4 @@
+import '../../../core/observability/sentry_performance.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/analytics/analytics_service.dart';
@@ -131,6 +132,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen>
         _setAgs(items);
         _erro = null;
       });
+      reportarTelaPronta();
     } catch (e) {
       if (!mounted || mes != _mes) return;
       if (keepStale) {

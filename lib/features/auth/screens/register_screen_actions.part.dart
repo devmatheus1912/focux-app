@@ -74,17 +74,6 @@ extension on _RegisterScreenState {
           .read(authProvider.notifier)
           .enviarCodigoEmail(email);
       if (!mounted) return;
-      if (!result.codigoEnviado) {
-        HapticFeedback.heavyImpact();
-        setState(() {
-          _codeSent = false;
-          _error =
-              result.hint.isNotEmpty
-                  ? result.hint
-                  : 'Não enviamos código para este e-mail. Tente Entrar se já tiver conta.';
-        });
-        return;
-      }
       setState(() => _codeSent = true);
       _startResendCountdown();
       FeedbackHelper.showSuccess(

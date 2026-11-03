@@ -3,10 +3,11 @@ part of 'churn_dashboard_screen.dart';
 extension _ChurnDashboardContent on _ChurnDashboardScreenState {
   Widget _conteudo(BuildContext context, RetencaoHome home) {
     final s = S.of(context);
+    final chrome = ShellChrome.of(context);
     final contagem = retencaoContagem(home);
-    final chamar = retencaoChamarAgora(home.top3, _base);
-    final fila = filaSemAluno(retencaoFiltrar(_base, _nivel), chamar?.alunoId);
-    final filtros = mostrarFiltros(contagem);
+    final chamar = _nivel == null ? home.top3 : const <RetencaoAlunoScore>[];
+    final fila = filaSem(_base, chamar);
+    final variacao = retencaoVariacaoSemanal(home);
 
     String rotuloNivel(RetencaoNivel n) => switch (n) {
       RetencaoNivel.alto => s.retencaoMetAlto,
@@ -18,7 +19,7 @@ extension _ChurnDashboardContent on _ChurnDashboardScreenState {
       valor: contagem[n]!,
       rotulo: rotuloNivel(n),
       alerta: alerta,
-      onTap: contagem[n]! > 0 ? () => setState(() => _nivel = n) : null,
+      onTap: contagem[n]! > 0 ? () => _filtrar(n) : null,
     );
 
     return FxContentWidthLimiter(
@@ -40,61 +41,59 @@ extension _ChurnDashboardContent on _ChurnDashboardScreenState {
               metrica(RetencaoNivel.saudavel),
             ],
           ),
-          const SizedBox(height: TokensStrip.s4),
-          DashboardSectionHeader(title: s.retencaoChamarAgora),
-          const SizedBox(height: TokensStrip.s2),
-          if (chamar == null)
-            _SemRiscoAlto(
-              titulo: s.retencaoNinguemAlto,
-              texto: s.retencaoNinguemAltoTexto,
-            )
-          else ...[
-            FxActionRow(
-              titulo: chamar.alunoNome,
-              motivo: retencaoSaudeTexto(s, chamar),
-              verbo: s.retencaoVerboChamar,
-              onTap: () => _abrirChat(chamar),
+          if (variacao != null) ...[
+            const SizedBox(height: TokensStrip.s2),
+            Text(
+              variacao,
+              style: FocuxHubTypography.bodyMuted(color: chrome.mute),
             ),
+          ],
+          if (_nivel != null) ...[
             const SizedBox(height: TokensStrip.s2),
             Align(
               alignment: Alignment.centerLeft,
               child: FxActionChip(
-                label: s.retencaoMaisAcoes,
-                accent: ShellChrome.of(context).mute,
-                isDark: ShellChrome.of(context).isDark,
-                onPressed: () => _abrirAcoes(chamar),
+                label: s.retencaoFiltroTodos,
+                accent: chrome.mute,
+                isDark: chrome.isDark,
+                onPressed: () => _filtrar(null),
               ),
             ),
+          ] else ...[
+            const SizedBox(height: TokensStrip.s4),
+            DashboardSectionHeader(title: s.retencaoChamarAgora),
+            const SizedBox(height: TokensStrip.s2),
+            if (chamar.isEmpty)
+              _SemRiscoAlto(texto: s.retencaoNinguemAltoTexto)
+            else
+              for (final aluno in chamar)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: TokensStrip.s2),
+                  child: FxActionRow(
+                    titulo: aluno.alunoNome,
+                    motivo: retencaoMotivoCurto(aluno) ?? '',
+                    verbo: s.retencaoAcaoMensagem,
+                    onTap: () => _abrirChat(aluno),
+                  ),
+                ),
           ],
           const SizedBox(height: TokensStrip.s4),
           DashboardSectionHeader(title: s.retencaoFilaTitulo),
           const SizedBox(height: TokensStrip.s2),
-          TextField(
-            controller: _searchCtrl,
-            textInputAction: TextInputAction.search,
-            onChanged: _onBusca,
-            onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
-            decoration: FxInputDeco.build(context, s.retencaoBuscar),
-          ),
-          if (filtros) ...[
-            const SizedBox(height: TokensStrip.s2),
-            FxChoiceStrip<RetencaoNivel?>(
-              itens: [
-                FxChoiceItem(value: null, label: s.retencaoFiltroTodos),
-                for (final n in RetencaoNivel.values)
-                  if (contagem[n]! > 0)
-                    FxChoiceItem(value: n, label: rotuloNivel(n)),
-              ],
-              selecionado: _nivel,
-              onSelecionar: (n) => setState(() => _nivel = n),
+          if (mostrarBusca(home)) ...[
+            TextField(
+              controller: _searchCtrl,
+              textInputAction: TextInputAction.search,
+              onChanged: _onBusca,
+              onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
+              decoration: FxInputDeco.build(context, s.retencaoBuscar),
             ),
+            const SizedBox(height: TokensStrip.s2),
           ],
-          const SizedBox(height: TokensStrip.s3),
           if (fila.isEmpty)
-            FxEmptyState(
-              icon: 'activity',
-              title: s.retencaoFilaVazia,
-              subtitle: s.retencaoFilaVaziaTexto,
+            Text(
+              s.retencaoFilaVaziaTexto,
+              style: FocuxHubTypography.bodyMuted(color: chrome.mute),
             )
           else
             for (final score in fila)
@@ -110,26 +109,6 @@ extension _ChurnDashboardContent on _ChurnDashboardScreenState {
               titleCase: false,
               onTap: _carregandoMais ? null : _carregarMais,
             ),
-          const SizedBox(height: TokensStrip.s4),
-          FxSettingsGroup(
-            children: [
-              FxSettingsTile(
-                fxIcon: 'bell',
-                label: s.retencaoEntradaHistorico,
-                subtitle: s.retencaoEntradaHistoricoSub,
-                value: '',
-                onTap: () => context.push('/winback'),
-              ),
-              FxSettingsTile(
-                fxIcon: 'repeat',
-                label: s.retencaoEntradaCobranca,
-                subtitle: s.retencaoEntradaCobrancaSub,
-                value: '',
-                showDivider: false,
-                onTap: () => context.push('/dunning'),
-              ),
-            ],
-          ),
         ],
       ),
     );

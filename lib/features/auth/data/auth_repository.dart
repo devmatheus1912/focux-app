@@ -247,14 +247,31 @@ class AuthRepository {
     return _client.newDetachedAuthDio().post(path, data: data);
   }
 
+  static AuthCapabilities? _capabilities;
+  static AuthEnvironmentStatus? _ambiente;
+  static DateTime? _ambienteEm;
+
+  /// Config do servidor: uma vez por abertura do app.
   Future<AuthCapabilities> capabilities() async {
+    final salvo = _capabilities;
+    if (salvo != null) return salvo;
     final response = await _dio.get('/api/auth/capabilities');
-    return AuthCapabilities.fromJson(response.data as Map<String, dynamic>);
+    return _capabilities = AuthCapabilities.fromJson(
+      response.data as Map<String, dynamic>,
+    );
   }
 
   Future<AuthEnvironmentStatus> environmentStatus() async {
+    final salvo = _ambiente;
+    final em = _ambienteEm;
+    if (salvo != null &&
+        em != null &&
+        DateTime.now().difference(em) < const Duration(hours: 1)) {
+      return salvo;
+    }
     final response = await _dio.get('/api/auth/environment-status');
-    return AuthEnvironmentStatus.fromJson(
+    _ambienteEm = DateTime.now();
+    return _ambiente = AuthEnvironmentStatus.fromJson(
       response.data as Map<String, dynamic>,
     );
   }

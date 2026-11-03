@@ -535,7 +535,7 @@ void main() {
       ).readAsStringSync(),
       allOf(
         contains('DashboardSectionHeader'),
-        contains('OperationalMetricTile'),
+        contains('EvolucaoMiniAneis'),
       ),
     );
     expect(

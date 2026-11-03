@@ -322,6 +322,7 @@ class _EvolucaoComparativoScreenState
             evolucaoComparativoJanelaCaption(
               primeira: evolucaoComparativoFmtData(c.primeira.avaliadoEm),
               atual: evolucaoComparativoFmtData(c.atual.avaliadoEm),
+              dias: evolucaoComparativoDias(c.primeira.avaliadoEm, c.atual.avaliadoEm),
             ),
             style: FocuxHubTypography.bodyMuted(color: chrome.mute),
           ),

@@ -15,12 +15,18 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../support/dynamic_type_harness.dart';
 
-Map<String, Object> _aluno(int id, String nome, int score, {int delta = 0}) => {
+Map<String, Object> _aluno(
+  int id,
+  String nome,
+  String nivel, {
+  List<String> motivos = const ['Sem treino há 12 dias'],
+  bool cobravel = false,
+}) => {
   'alunoId': id,
   'alunoNome': nome,
-  'scoreAtual': score,
-  'delta': delta,
-  'riscoChurn': score < 40 ? 'ALTO' : (score < 70 ? 'MEDIO' : 'BAIXO'),
+  'nivel': nivel,
+  'motivos': nivel == 'BAIXO' ? const <String>[] : motivos,
+  'cobravel': cobravel,
 };
 
 class _Adapter implements HttpClientAdapter {
@@ -48,14 +54,17 @@ class _Adapter implements HttpClientAdapter {
         'alto': alto,
         'medio': medio,
         'saudavel': saudavel,
-        'top3': alunos.take(3).toList(),
+        'top3': alunos.where((a) => a['nivel'] != 'BAIXO').take(3).toList(),
       };
     } else if (options.path == '/api/retencao/base') {
       final q = (options.queryParameters['q'] as String? ?? '').toLowerCase();
+      final nivel = options.queryParameters['nivel'];
       final lista =
           alunos
               .where(
-                (a) => (a['alunoNome'] as String).toLowerCase().contains(q),
+                (a) =>
+                    (a['alunoNome'] as String).toLowerCase().contains(q) &&
+                    (nivel == null || a['nivel'] == nivel),
               )
               .toList();
       body = {
@@ -132,11 +141,11 @@ Future<void> _settle(WidgetTester tester) async {
 }
 
 final _cinco = [
-  _aluno(1, 'Hugo', 10, delta: -5),
-  _aluno(2, 'Iara', 15),
-  _aluno(3, 'João', 20),
-  _aluno(4, 'Kátia', 25),
-  _aluno(5, 'Léo', 30),
+  _aluno(1, 'Hugo', 'ALTO'),
+  _aluno(2, 'Iara', 'ALTO'),
+  _aluno(3, 'João', 'ALTO'),
+  _aluno(4, 'Kátia', 'ALTO'),
+  _aluno(5, 'Léo', 'ALTO'),
 ];
 
 void main() {
@@ -152,91 +161,95 @@ void main() {
     addTearDown(tester.view.reset);
   }
 
-  testWidgets(
-    '5 em risco alto: Hugo uma vez só, fila sem repetir, sem filtros',
-    (tester) async {
-      telaAlta(tester);
-      await tester.pumpWidget(_app(_Adapter(alunos: _cinco, alto: 5)));
-      await _settle(tester);
-      expect(find.text('Alunos em risco'), findsWidgets);
-      expect(find.text('Chamar agora'), findsOneWidget);
-      expect(find.text('Hugo'), findsOneWidget); // destaque; fora da fila
-      expect(find.text('Iara'), findsOneWidget);
-      expect(find.text('Léo'), findsOneWidget);
-      expect(find.text('Saúde 10 de 100 · caiu 5 pts'), findsOneWidget);
-      // um grupo só: nada de chips que repetem "Todos"
-      expect(find.text('Todos'), findsNothing);
-      expect(find.text('Ver todos'), findsNothing);
-      expect(find.text('Base toda'), findsNothing);
-      expect(find.text('Saúde da base'), findsNothing);
-      expect(find.text('Chamar'), findsOneWidget);
-    },
-  );
-
-  testWidgets('"Chamar" abre o chat do primeiro', (tester) async {
+  testWidgets('cada aluno mostra o motivo, sem nota de 0 a 100', (tester) async {
     telaAlta(tester);
     await tester.pumpWidget(_app(_Adapter(alunos: _cinco, alto: 5)));
     await _settle(tester);
-    await tester.tap(find.text('Chamar'));
+    expect(find.text('Chamar agora'), findsOneWidget);
+    expect(find.text('Hugo'), findsOneWidget);
+    expect(find.text('Léo'), findsOneWidget);
+    expect(find.text('Sem treino há 12 dias'), findsNWidgets(5));
+    expect(find.textContaining('de 100'), findsNothing);
+  });
+
+  testWidgets('"Mensagem" abre o chat de quem está em Chamar agora', (tester) async {
+    telaAlta(tester);
+    await tester.pumpWidget(_app(_Adapter(alunos: _cinco, alto: 5)));
+    await _settle(tester);
+    await tester.tap(find.text('Mensagem').first);
     await _settle(tester);
     expect(find.text('CHAT 1'), findsOneWidget);
   });
 
-  testWidgets('grupos mistos: aparecem os chips e o filtro funciona', (
-    tester,
-  ) async {
+  testWidgets('tocar no número filtra pelo servidor', (tester) async {
     telaAlta(tester);
-    final lista = [
-      _aluno(1, 'Hugo', 10),
-      _aluno(2, 'Iara', 55),
-      _aluno(3, 'João', 90),
-    ];
-    await tester.pumpWidget(
-      _app(_Adapter(alunos: lista, alto: 1, medio: 1, saudavel: 1)),
+    final adapter = _Adapter(
+      alunos: [
+        _aluno(1, 'Hugo', 'ALTO'),
+        _aluno(2, 'Iara', 'MEDIO'),
+        _aluno(3, 'João', 'BAIXO'),
+      ],
+      alto: 1,
+      medio: 1,
+      saudavel: 1,
     );
+    await tester.pumpWidget(_app(adapter));
     await _settle(tester);
-    expect(find.text('Todos'), findsOneWidget);
-    expect(find.text('Iara'), findsOneWidget);
-    expect(find.text('João'), findsOneWidget);
-    // filtra pelo chip de saudáveis (o da faixa de números tem o mesmo rótulo)
-    await tester.tap(find.text('Saudáveis').last);
+    await tester.tap(find.text('Em dia').first);
     await _settle(tester);
     expect(find.text('João'), findsOneWidget);
     expect(find.text('Iara'), findsNothing);
+    expect(adapter.chamadas.last, contains('nivel: BAIXO'));
+    await tester.tap(find.text('Todos'));
+    await _settle(tester);
+    expect(find.text('Iara'), findsOneWidget);
   });
 
-  testWidgets('a busca filtra a fila', (tester) async {
+  testWidgets('busca aparece com lista grande e vai ao servidor', (tester) async {
     telaAlta(tester);
-    final adapter = _Adapter(alunos: _cinco, alto: 5);
+    final adapter = _Adapter(alunos: _cinco, alto: 9);
     await tester.pumpWidget(_app(adapter));
     await _settle(tester);
     await tester.enterText(find.byType(TextField), 'Léo');
     await tester.pump(const Duration(milliseconds: 600));
     await _settle(tester);
-    expect(find.text('Léo'), findsWidgets); // campo + linha da fila
-    expect(find.text('Iara'), findsNothing);
+    expect(adapter.chamadas.last, contains('q: Léo'));
   });
 
-  testWidgets('sem ninguém em risco alto: aviso claro, sem botão de chamar', (
-    tester,
-  ) async {
+  testWidgets('sem ninguém para chamar: frase curta', (tester) async {
     telaAlta(tester);
     await tester.pumpWidget(
-      _app(_Adapter(alunos: [_aluno(1, 'Ana', 90)], alto: 0, saudavel: 1)),
+      _app(_Adapter(alunos: [_aluno(1, 'Ana', 'BAIXO')], alto: 0, saudavel: 1)),
     );
     await _settle(tester);
-    expect(find.text('Ninguém em risco alto agora'), findsOneWidget);
-    expect(find.text('Chamar'), findsNothing);
+    expect(find.text('Ninguém para chamar agora.'), findsOneWidget);
+    expect(find.text('Mensagem'), findsNothing);
   });
 
-  testWidgets('linhas de entrada para retomada e cobrança automática', (
-    tester,
-  ) async {
+  testWidgets('Cobrar só aparece quando há mensalidade em atraso', (tester) async {
+    telaAlta(tester);
+    final lista = [
+      _aluno(1, 'A', 'ALTO'),
+      _aluno(2, 'B', 'ALTO'),
+      _aluno(3, 'C', 'ALTO'),
+      _aluno(4, 'Hugo', 'ALTO'),
+      _aluno(5, 'Iara', 'ALTO', cobravel: true),
+    ];
+    await tester.pumpWidget(_app(_Adapter(alunos: lista, alto: 5)));
+    await _settle(tester);
+    await tester.tap(find.text('Hugo'));
+    await _settle(tester);
+    expect(find.text('Adiar 24 h'), findsOneWidget);
+    expect(find.text('Cobrar'), findsNothing);
+  });
+
+  testWidgets('Histórico e Cobrança ficam no menu do topo', (tester) async {
     telaAlta(tester);
     await tester.pumpWidget(_app(_Adapter(alunos: _cinco, alto: 5)));
     await _settle(tester);
-    expect(find.text('Histórico de retomada'), findsOneWidget);
-    expect(find.text('Cobrança automática'), findsOneWidget);
+    expect(find.text('Histórico de retomada'), findsNothing);
+    await tester.tap(find.byTooltip('Mais ações'));
+    await _settle(tester);
     await tester.tap(find.text('Histórico de retomada'));
     await _settle(tester);
     expect(find.text('WINBACK'), findsOneWidget);

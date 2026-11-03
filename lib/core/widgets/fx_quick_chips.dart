@@ -15,6 +15,7 @@ class FxQuickChips<T> extends StatelessWidget {
     this.outroRotulo,
     this.onOutro,
     this.outroSelecionado = false,
+    this.bloqueados = const {},
   });
 
   final List<T> itens;
@@ -29,6 +30,9 @@ class FxQuickChips<T> extends StatelessWidget {
   /// Valor atual não está entre os atalhos: "Outro" aparece marcado.
   final bool outroSelecionado;
 
+  /// Aparecem, mas não dão para tocar.
+  final Set<T> bloqueados;
+
   @override
   Widget build(BuildContext context) {
     return Wrap(
@@ -38,7 +42,7 @@ class FxQuickChips<T> extends StatelessWidget {
           FxChoiceChip(
             label: rotuloDe?.call(item) ?? '$item',
             selected: !outroSelecionado && item == selecionado,
-            onTap: () => onSelecionar(item),
+            onTap: bloqueados.contains(item) ? null : () => onSelecionar(item),
           ),
         if (outroRotulo != null && onOutro != null)
           FxChoiceChip(

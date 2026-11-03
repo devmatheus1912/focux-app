@@ -53,6 +53,7 @@ class MeuProgressoScreen extends ConsumerStatefulWidget {
 }
 
 class _MeuProgressoScreenState extends ConsumerState<MeuProgressoScreen> {
+  var _recolhido = false;
   String _aba = 'medidas';
   var _celebrando = false;
 
@@ -156,6 +157,17 @@ class _MeuProgressoScreenState extends ConsumerState<MeuProgressoScreen> {
     }
   }
 
+  /// Anéis recolhem depois de um pouco de rolagem; voltam ao topo.
+  Widget _aoRolar(Widget filho) => NotificationListener<ScrollUpdateNotification>(
+    onNotification: (n) {
+      if (n.metrics.axis != Axis.vertical) return false;
+      final recolher = n.metrics.pixels > 48;
+      if (recolher != _recolhido) setState(() => _recolhido = recolher);
+      return false;
+    },
+    child: filho,
+  );
+
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
@@ -216,13 +228,14 @@ class _MeuProgressoScreenState extends ConsumerState<MeuProgressoScreen> {
                             aneis: dados.aneis,
                             doPersonal: false,
                             frase: fraseDoAluno(metas, dados.medidas),
+                            recolhido: _recolhido,
                           ),
                           const SizedBox(height: TokensStrip.s4),
                           AlunoSegmentedChoice(
                             options: [
                               (value: 'medidas', label: ptS.meuProgressoMedidas),
-                              (value: 'fotos', label: ptS.meuProgressoFotos),
                               (value: 'recordes', label: ptS.meuProgressoRecordes),
+                              (value: 'fotos', label: ptS.meuProgressoFotos),
                             ],
                             selected: _aba,
                             isDark: chrome.isDark,
@@ -232,7 +245,7 @@ class _MeuProgressoScreenState extends ConsumerState<MeuProgressoScreen> {
                       ),
                     ),
                     Expanded(
-                      child: switch (_aba) {
+                      child: _aoRolar(EvolucaoFadeTopo(child: switch (_aba) {
                         'fotos' => _Fotos(onExcluir: _excluirFoto),
                         'recordes' => EvolucaoRecordesAba(
                           recordes: dados.recordes,
@@ -268,7 +281,7 @@ class _MeuProgressoScreenState extends ConsumerState<MeuProgressoScreen> {
                               ),
                           ],
                         ),
-                      },
+                      })),
                     ),
                   ],
                 ),

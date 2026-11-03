@@ -75,7 +75,8 @@ class AlunoSegmentedChoice extends StatelessWidget {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
 
-    return DecoratedBox(
+    return Container(
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(TokensStrip.rSm),
         border: Border.all(color: line.withValues(alpha: isDark ? 0.7 : 0.85)),

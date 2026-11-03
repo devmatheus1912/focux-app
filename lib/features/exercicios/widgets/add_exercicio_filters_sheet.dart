@@ -7,7 +7,6 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_sheet_search_field.dart';
 import '../../../core/widgets/fx_motion.dart';
-import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_toggle_chip.dart';
 import '../data/enums.dart';
@@ -119,20 +118,20 @@ class _AddExercicioFiltersSheetState extends State<_AddExercicioFiltersSheet> {
         ),
       );
     }
+    return Wrap(spacing: 6, runSpacing: 6, children: children);
+  }
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        const spacing = 6.0;
-        final itemWidth = (constraints.maxWidth - spacing) / 2;
-        return Wrap(
-          spacing: spacing,
-          runSpacing: spacing,
-          children: [
-            for (final child in children)
-              SizedBox(width: itemWidth, child: child),
-          ],
-        );
-      },
+  Widget _secao(String titulo, Widget conteudo) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          titulo,
+          style: FxSettingsLayout.sectionHeader(color: fxScreenMute(context)),
+        ),
+        const SizedBox(height: TokensStrip.s2),
+        conteudo,
+      ],
     );
   }
 
@@ -154,8 +153,9 @@ class _AddExercicioFiltersSheetState extends State<_AddExercicioFiltersSheet> {
             .where((e) => _matches(TaxonomyLabels.espaco[e] ?? e.backendName))
             .toList();
 
+    final e = _equipamentos.length;
     final summary =
-        '${_equipamentos.length} equip. · ${_espacos.length} espaço${_espacos.length == 1 ? '' : 's'}';
+        '$e equipamento${e == 1 ? '' : 's'} · ${_espacos.length} espaço${_espacos.length == 1 ? '' : 's'}';
 
     return FxHomeSheetSurface(
       isDark: widget.isDark,
@@ -187,68 +187,52 @@ class _AddExercicioFiltersSheetState extends State<_AddExercicioFiltersSheet> {
           const SizedBox(height: TokensStrip.s3),
           Flexible(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.only(bottom: 4),
+              padding: const EdgeInsets.only(bottom: TokensStrip.s4),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  FxSettingsGroup(
-                    header: 'Equipamentos',
-                    caption:
-                        _equipamentos.isEmpty
-                            ? 'Opcional — ajuda a filtrar na biblioteca.'
-                            : '${_equipamentos.length} selecionado${_equipamentos.length == 1 ? '' : 's'}',
-                    accent: primary,
-                    children: [
-                      _chipWrap(
-                        emptyMessage:
-                            _query.isEmpty
-                                ? 'Nenhum equipamento.'
-                                : 'Nenhum resultado para “$_query”.',
-                        children: [
-                          for (final item in equipamentosVisiveis)
-                            FxToggleChip(
-                              expanded: true,
-                              label:
-                                  TaxonomyLabels.equipamento[item] ??
-                                  item.backendName,
-                              selected: _equipamentos.contains(item),
-                              isDark: widget.isDark,
-                              showCheckmark: true,
-                              onTap: () => _toggleEquipamento(item),
-                            ),
-                        ],
-                      ),
-                    ],
+                  _secao(
+                    'Equipamentos',
+                    _chipWrap(
+                      emptyMessage:
+                          _query.isEmpty
+                              ? 'Nenhum equipamento.'
+                              : 'Nenhum resultado para “$_query”.',
+                      children: [
+                        for (final item in equipamentosVisiveis)
+                          FxToggleChip(
+                            label:
+                                TaxonomyLabels.equipamento[item] ??
+                                item.backendName,
+                            selected: _equipamentos.contains(item),
+                            isDark: widget.isDark,
+                            showCheckmark: true,
+                            onTap: () => _toggleEquipamento(item),
+                          ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: FxSettingsLayout.groupGap),
-                  FxSettingsGroup(
-                    header: 'Espaços',
-                    caption:
-                        _espacos.isEmpty
-                            ? 'Onde o exercício pode ser executado.'
-                            : '${_espacos.length} selecionado${_espacos.length == 1 ? '' : 's'}',
-                    accent: primary,
-                    children: [
-                      _chipWrap(
-                        emptyMessage:
-                            _query.isEmpty
-                                ? 'Nenhum espaço.'
-                                : 'Nenhum resultado para “$_query”.',
-                        children: [
-                          for (final item in espacosVisiveis)
-                            FxToggleChip(
-                              expanded: true,
-                              label:
-                                  TaxonomyLabels.espaco[item] ??
-                                  item.backendName,
-                              selected: _espacos.contains(item),
-                              isDark: widget.isDark,
-                              showCheckmark: true,
-                              onTap: () => _toggleEspaco(item),
-                            ),
-                        ],
-                      ),
-                    ],
+                  _secao(
+                    'Espaços',
+                    _chipWrap(
+                      emptyMessage:
+                          _query.isEmpty
+                              ? 'Nenhum espaço.'
+                              : 'Nenhum resultado para “$_query”.',
+                      children: [
+                        for (final item in espacosVisiveis)
+                          FxToggleChip(
+                            label:
+                                TaxonomyLabels.espaco[item] ??
+                                item.backendName,
+                            selected: _espacos.contains(item),
+                            isDark: widget.isDark,
+                            showCheckmark: true,
+                            onTap: () => _toggleEspaco(item),
+                          ),
+                      ],
+                    ),
                   ),
                 ],
               ),

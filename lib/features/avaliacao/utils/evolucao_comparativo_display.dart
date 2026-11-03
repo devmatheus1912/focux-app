@@ -138,11 +138,28 @@ String evolucaoComparativoConfirmMessage() =>
 
 String evolucaoComparativoConfirmLabel() => 'Enviar';
 
+/// "30/10 → 02/11 · 3 dias".
 String evolucaoComparativoJanelaCaption({
   required String primeira,
   required String atual,
+  int? dias,
 }) =>
-    'Primeira $primeira · Atual $atual';
+    '$primeira → $atual${dias == null ? '' : ' · $dias ${dias == 1 ? 'dia' : 'dias'}'}';
+
+int? evolucaoComparativoDias(String? primeira, String? atual) {
+  final a = DateTime.tryParse(primeira ?? '');
+  final b = DateTime.tryParse(atual ?? '');
+  return a == null || b == null ? null : b.difference(a).inDays;
+}
+
+/// Diferença com unidade e seta neutra; "=" sem mudança.
+String evolucaoComparativoDiferenca(EvolucaoComparativoMetrica m) {
+  final diferenca = m.atual! - m.primeira!;
+  if (diferenca == 0) return '=';
+  final seta = diferenca > 0 ? '↑' : '↓';
+  final unidade = m.unidade.isEmpty ? '' : ' ${m.unidade}';
+  return '$seta ${evolucaoComparativoFmtNum(diferenca.abs())}$unidade';
+}
 
 String evolucaoComparativoFmtData(String? iso) {
   if (iso == null || iso.isEmpty) return '—';

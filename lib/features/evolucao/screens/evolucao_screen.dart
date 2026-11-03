@@ -1,3 +1,4 @@
+import '../../../core/observability/sentry_performance.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -65,6 +66,7 @@ class EvolucaoScreen extends ConsumerStatefulWidget {
 }
 
 class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
+  var _recolhido = false;
   late EvolucaoHubView _view = widget.abaInicial;
 
   /// Fotos e Comparar só carregam quando abertas.
@@ -152,9 +154,21 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
     }
   }
 
+  /// Anéis recolhem depois de um pouco de rolagem; voltam ao topo.
+  Widget _aoRolar(Widget filho) => NotificationListener<ScrollUpdateNotification>(
+    onNotification: (n) {
+      if (n.metrics.axis != Axis.vertical) return false;
+      final recolher = n.metrics.pixels > 48;
+      if (recolher != _recolhido) setState(() => _recolhido = recolher);
+      return false;
+    },
+    child: filho,
+  );
+
   @override
   Widget build(BuildContext context) {
     final homeAsync = ref.watch(evolucaoHomeProvider(widget.alunoId));
+    if (homeAsync.hasValue) reportarTelaPronta();
     final home = homeAsync.value;
     final medidas = home?.medidas ?? const <MedidaCorporal>[];
     final recordes = home?.recordes ?? const <RecordePessoal>[];
@@ -227,6 +241,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                                   EvolucaoHero(
                                     aneis: aneis,
                                     onDefinirMeta: () => _definirMeta(ocupadas),
+                                    recolhido: _recolhido,
                                   ),
                                   const SizedBox(height: TokensStrip.s4),
                                   AlunoSegmentedChoice(
@@ -243,7 +258,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                               ),
                             ),
                             Expanded(
-                              child: IndexedStack(
+                              child: _aoRolar(EvolucaoFadeTopo(child: IndexedStack(
                                 index: _view.index,
                                 children: [
                                   EvolucaoMedidasAba(
@@ -292,7 +307,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                                       )
                                       : const SizedBox.shrink(),
                                 ],
-                              ),
+                              ))),
                             ),
                           ],
                         ),
@@ -520,6 +535,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
       ref,
       alunoId: widget.alunoId,
       ocupadas: ocupadas,
+      onRegistrarMedida: _registrarMedida,
     );
     if (salvou) await invalidateAluno360Providers(ref, widget.alunoId);
   }

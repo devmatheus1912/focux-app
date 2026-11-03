@@ -23,13 +23,12 @@ void main() {
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('FxMetricStrip'));
     expect(screen, contains('FxActionRow'));
-    expect(screen, contains('FxChoiceStrip'));
-    expect(screen, contains('mostrarFiltros'));
-    expect(screen, contains('filaSemAluno'));
+    expect(screen, contains('mostrarBusca'));
+    expect(screen, contains('filaSem'));
     expect(screen, contains('listarBase'));
     expect(screen, contains('getHome'));
     expect(screen, contains('showRetencaoAcoesSheet'));
-    expect(screen, contains('retencaoEmptyTitle'));
+    expect(screen, contains('retencaoVazioTitulo'));
     expect(screen, contains('FxEmptyAction'));
     expect(screen, contains('keyboardDismissBehavior'));
     expect(screen, contains('RefreshIndicator'));
@@ -43,6 +42,7 @@ void main() {
     expect(screen, contains('retencaoEntradaCobranca'));
     // O que saiu desta tela
     expect(screen, isNot(contains('showRetencaoCatalogSheet')));
+    expect(screen, isNot(contains('scoreAtual')));
     expect(screen, isNot(contains('Base toda')));
     expect(screen, isNot(contains('Ver todos')));
     expect(screen, isNot(contains('Hubs relacionados')));

@@ -28,6 +28,7 @@ Future<bool> showFxFormSheet(
   IconData icon = Icons.edit_outlined,
   String cancelLabel = FocuxMicrocopy.cancelar,
   bool destructive = false,
+  bool Function()? podeConfirmar,
 }) async {
   Animation<double>? saida;
   final confirmed = await showFxHomeSheet<bool>(
@@ -41,6 +42,7 @@ Future<bool> showFxFormSheet(
         confirmLabel: confirmLabel,
         cancelLabel: cancelLabel,
         destructive: destructive,
+        podeConfirmar: podeConfirmar,
         child: child,
       );
     },
@@ -98,6 +100,7 @@ class _FxFormSheet extends StatelessWidget {
     required this.cancelLabel,
     required this.destructive,
     required this.child,
+    this.podeConfirmar,
   });
 
   final String title;
@@ -107,6 +110,9 @@ class _FxFormSheet extends StatelessWidget {
   final String cancelLabel;
   final bool destructive;
   final Widget child;
+
+  /// Falso segura a folha aberta: o erro fica junto do campo.
+  final bool Function()? podeConfirmar;
 
   @override
   Widget build(BuildContext context) {
@@ -144,6 +150,7 @@ class _FxFormSheet extends StatelessWidget {
               height: 52,
               child: ElevatedButton(
                 onPressed: () {
+                  if (!(podeConfirmar?.call() ?? true)) return;
                   HapticFeedback.heavyImpact();
                   FxHomeSheetChrome.dismissAndPop(context, true);
                 },
@@ -161,7 +168,11 @@ class _FxFormSheet extends StatelessWidget {
           else
             FxLiquidPrimaryButton(
               label: confirmLabel,
-              onPressed: () => FxHomeSheetChrome.dismissAndPop(context, true),
+              onPressed: () {
+                if (podeConfirmar?.call() ?? true) {
+                  FxHomeSheetChrome.dismissAndPop(context, true);
+                }
+              },
             ),
           if (destructive) ...[
             const SizedBox(height: 10),

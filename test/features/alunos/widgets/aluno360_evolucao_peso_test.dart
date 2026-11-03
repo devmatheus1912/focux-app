@@ -1,12 +1,9 @@
-import 'dart:async';
-
 import 'package:focux_app/features/evolucao/data/evolucao_repository.dart';
 import 'package:focux_app/features/evolucao/providers/evolucao_home_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:focux_app/core/widgets/fx_sparkline.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/providers/aluno_detail_providers.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_detail_evolucao_tab.dart';
@@ -58,7 +55,7 @@ Future<void> _abrir(
   addTearDown(router.dispose);
   final overrides = <Override>[
     evolucaoHomeProvider(_id).overrideWith(
-      (ref) => Completer<EvolucaoHomeBundle>().future,
+      (ref) async => const EvolucaoHomeBundle(medidas: [], recordes: []),
     ),
     metasDoAlunoProvider(_id).overrideWith((ref) async => const []),
     alunoPesoHistoricoProvider(_id).overrideWith((ref) async => historico),
@@ -103,40 +100,32 @@ Timeline360Event _evento(
 
 void main() {
   group('peso: uma fonte só', () {
-    testWidgets('avaliação de 458 kg e cadastro vazio: o card pede confirmação, sem mostrar 458 como atual', (tester) async {
+    testWidgets('avaliação de 458 kg e cadastro vazio: o card pede confirmação', (tester) async {
       await _abrir(tester, _peso(_aluno()), historico: [458.0]);
-      expect(find.text('A confirmar'), findsOneWidget);
-      expect(find.text('458,0 kg'), findsNothing);
-      expect(find.text('—'), findsNothing);
-      expect(find.textContaining('Registrado 458,0 kg'), findsOneWidget);
+      expect(find.text('Peso: A confirmar'), findsOneWidget);
+      expect(find.textContaining('458'), findsNothing);
     });
 
-    testWidgets('um ponto só: sem gráfico e sem "Estável"', (tester) async {
+    testWidgets('um ponto só: peso sem diferença', (tester) async {
       await _abrir(tester, _peso(_aluno()), historico: [72.0]);
-      expect(find.text('72,0 kg'), findsOneWidget);
-      expect(find.text('Estável'), findsNothing);
-      expect(find.byType(FxSparkline), findsNothing);
-      expect(find.text('Registre outra medida para ver a tendência.'), findsOneWidget);
+      expect(find.text('Peso: 72,0 kg'), findsOneWidget);
     });
 
-    testWidgets('peso só do cadastro diz de onde veio, sem fingir tendência', (tester) async {
+    testWidgets('peso só do cadastro diz de onde veio', (tester) async {
       await _abrir(tester, _peso(_aluno(peso: 68.5)));
-      expect(find.text('68,5 kg'), findsOneWidget);
-      expect(find.text('Do cadastro'), findsOneWidget);
-      expect(find.text('Estável'), findsNothing);
-      expect(find.byType(FxSparkline), findsNothing);
+      expect(find.text('Peso: 68,5 kg · Do cadastro'), findsOneWidget);
     });
 
-    testWidgets('duas ou mais medidas desenham o gráfico e a variação', (tester) async {
+    testWidgets('duas medidas: peso e diferença, sem gráfico', (tester) async {
       await _abrir(tester, _peso(_aluno()), historico: [70.0, 72.0]);
-      expect(find.byType(FxSparkline), findsOneWidget);
-      expect(find.text('+2,0 kg'), findsOneWidget);
-      expect(find.text('Confirme este valor'), findsNothing);
+      expect(find.text('Peso: 72,0 kg · +2,0 kg'), findsOneWidget);
+      expect(find.text('Peso atual'), findsNothing);
+      expect(find.text('Últimas medições'), findsNothing);
     });
 
     testWidgets('sem nenhum dado convida a registrar a primeira medida', (tester) async {
       await _abrir(tester, _peso(_aluno()));
-      expect(find.text('—'), findsOneWidget);
+      expect(find.text('Peso: Sem medida'), findsOneWidget);
       expect(find.text('Registrar primeira medida'), findsOneWidget);
     });
 

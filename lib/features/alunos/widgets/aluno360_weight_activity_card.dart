@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../../evolucao/providers/evolucao_home_provider.dart';
+import '../../evolucao/utils/evolucao_series.dart';
 import '../../evolucao/widgets/evolucao_hero.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_loading.dart';
-import '../../../core/widgets/fx_sparkline.dart';
-import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/fx_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../constants/aluno_360_layout.dart';
@@ -19,8 +17,6 @@ import '../../../l10n/app_localizations.dart';
 import '../utils/aluno360_medida_plausivel.dart';
 import '../utils/aluno360_peso_fonte.dart';
 import '../../../core/utils/pt_br_display.dart';
-import '../../evolucao/data/meta_corporal.dart';
-import '../../evolucao/providers/metas_provider.dart';
 
 class Aluno360WeightActivityCard extends ConsumerWidget {
   const Aluno360WeightActivityCard({
@@ -52,12 +48,6 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
     final peso = pesoMostrado(historico: historico, cadastro: aluno.peso);
     final suspeito =
         peso != null && !medidaPlausivel(MedidaTipo.pesoKg, peso.valor);
-    final metaAberta =
-        ref
-            .watch(metasDoAlunoProvider(alunoId))
-            .value
-            ?.where((m) => m.aberta && !m.manutencao)
-            .firstOrNull;
     final showRadarHint = hasRadarP0 && !suppressRadarHint && peso == null;
 
     return Semantics(
@@ -68,208 +58,48 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
         children: [
           DashboardSectionHeader(title: S.of(context).corpoTitulo),
           const SizedBox(height: TokensStrip.s3),
-          if (ref.watch(evolucaoHomeProvider(alunoId)).value?.aneis case final aneis?) ...[
+          if (ref.watch(evolucaoHomeProvider(alunoId)).value?.aneis case final aneis?)
             EvolucaoMiniAneis(
               aneis: aneis,
               doPersonal: true,
               onTap: () => _openEvolucao(context),
-            ),
+              pesoLinha: peso == null
+                  ? S.of(context).aluno360SemMedida
+                  : suspeito
+                  ? S.of(context).aluno360PesoAConfirmar
+                  : peso.origem == PesoOrigem.cadastro
+                  ? '${formatBrDecimal(peso.valor)} kg · ${S.of(context).aluno360PesoDoCadastro}'
+                  : _pesoComDiferenca(peso.valor, historico),
+            )
+          else
+            FxLoading.sectionShimmer(context, height: 72, showHeader: false),
+          if (peso == null) ...[
             const SizedBox(height: TokensStrip.s2),
-          ],
-          InkWell(
-            onTap: () => _openEvolucao(context),
-            borderRadius: BorderRadius.circular(12),
-            child: OperationalMetricTile(
-              label: 'Peso atual',
-              value:
-                  peso == null
-                      ? '—'
-                      : suspeito
-                      ? 'A confirmar'
-                      : '${formatBrDecimal(peso.valor)} kg',
-              hint: suspeito
-                  ? 'Registrado ${formatBrDecimal(peso.valor)} kg · toque para corrigir'
-                  : peso?.origem == PesoOrigem.cadastro
-                  ? S.of(context).aluno360PesoDoCadastro
-                  : showRadarHint
-                  ? 'Mapa corporal pendente no radar'
-                  : metaAberta != null
-                  ? '${metaMetricaRotulo(metaAberta.metrica)}: ${metaAberta.progresso}% da meta'
-                  : S.of(context).corpoToqueParaVer,
-              color: suspeito ? EagleTokens.warn : primary,
-              isDark: isDark,
+            Align(
+              alignment: Alignment.centerLeft,
+              child: FxActionChip(
+                label: 'Registrar primeira medida',
+                accent: primary,
+                isDark: isDark,
+                onPressed: () => _openEvolucao(context),
+              ),
             ),
-          ),
-          const SizedBox(height: TokensStrip.s2),
-          pesoHistoricoAsync.when(
-            loading:
-                () => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: FxLoading.sectionShimmer(
-                    context,
-                    height: 72,
-                    showHeader: false,
-                  ),
-                ),
-            error:
-                (_, __) => Align(
-                  alignment: Alignment.centerLeft,
-                  child: FxActionChip(
-                    label: 'Tentar histórico',
-                    accent: primary,
-                    isDark: isDark,
-                    onPressed:
-                        () => ref.invalidate(alunoPesoHistoricoProvider(alunoId)),
-                  ),
-                ),
-            data: (series) {
-              final weightSeries = serieDePeso(
-                historico: series,
-                cadastro: aluno.peso,
-              );
-              if (weightSeries.isEmpty) {
-                return Align(
-                  alignment: Alignment.centerLeft,
-                  child: FxActionChip(
-                    label: 'Registrar primeira medida',
-                    accent: primary,
-                    isDark: isDark,
-                    onPressed: () => _openEvolucao(context),
-                  ),
-                );
-              }
-              final delta =
-                  weightSeries.length >= 2
-                      ? weightSeries.last - weightSeries.first
-                      : 0.0;
-              if (weightSeries.length < 2) {
-                // Um ponto não é tendência: sem gráfico e sem "Estável".
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      S.of(context).aluno360PesoSemTendencia,
-                      style: Aluno360Layout.metaStyle(context),
-                    ),
-                  ],
-                );
-              }
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Semantics(
-                    button: true,
-                    label: 'Abrir histórico de medições corporais',
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(14),
-                      onTap: () => _openEvolucao(context),
-                      child: Aluno360WeightTrendSparkline(
-                        values: weightSeries,
-                        deltaKg: delta,
-                        color: primary,
-                        ink: ink,
-                        trackColor: primary.withValues(
-                          alpha: isDark ? 0.18 : 0.12,
-                        ),
-                        isDark: isDark,
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
+          ],
+          if (showRadarHint) ...[
+            const SizedBox(height: TokensStrip.s2),
+            Text(
+              'Mapa corporal pendente no radar',
+              style: Aluno360Layout.metaStyle(context),
+            ),
+          ],
         ],
       ),
     );
   }
-}
 
-class Aluno360WeightTrendSparkline extends StatelessWidget {
-  const Aluno360WeightTrendSparkline({
-    super.key,
-    required this.values,
-    required this.deltaKg,
-    required this.color,
-    required this.ink,
-    required this.trackColor,
-    required this.isDark,
-  });
-
-  final List<double> values;
-  final double deltaKg;
-  final Color color;
-  final Color ink;
-  final Color trackColor;
-  final bool isDark;
-
-  @override
-  Widget build(BuildContext context) {
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final deltaLabel =
-        deltaKg.abs() < 0.05
-            ? 'Estável'
-            : '${deltaKg > 0 ? '+' : ''}${formatBrDecimal(deltaKg)} kg';
-    final deltaColor =
-        deltaKg.abs() < 0.05
-            ? mute
-            : deltaKg < 0
-            ? EagleTokens.good
-            : EagleTokens.warn;
-
-    return Semantics(
-      label:
-          'Tendência de peso com ${values.length} medições. Variação $deltaLabel',
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
-        decoration: BoxDecoration(
-          color: trackColor,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: color.withValues(alpha: 0.14)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    'Últimas medições',
-                    style: Aluno360Layout.captionStyle(
-                      context,
-                    ).copyWith(color: ink.withValues(alpha: 0.72), fontWeight: FontWeight.w600),
-                  ),
-                ),
-                Text(
-                  deltaLabel,
-                  style: Aluno360Layout.captionStyle(
-                    context,
-                  ).copyWith(color: deltaColor, fontWeight: FontWeight.w700),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            SizedBox(
-              height: 36,
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  return FxSparkline(
-                    data:
-                        values.length >= 2
-                            ? values
-                            : [values.first, values.first],
-                    color: color,
-                    width: constraints.maxWidth,
-                    height: constraints.maxHeight,
-                    strokeWidth: 2.2,
-                    fill: true,
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+  static String _pesoComDiferenca(double atual, List<double> historico) {
+    final texto = '${formatBrDecimal(atual)} kg';
+    if (historico.length < 2) return texto;
+    return '$texto · ${diferencaTexto(historico.last - historico.first, 'kg')}';
   }
 }

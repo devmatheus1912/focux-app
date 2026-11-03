@@ -21,7 +21,6 @@ import '../../../core/analytics/analytics_service.dart';
 import 'package:flutter/foundation.dart';
 import 'aluno_timeline360_paged_provider.dart';
 import 'alunos_provider.dart';
-import '../../../core/utils/pt_br_display.dart';
 import '../../evolucao/utils/evolucao_series.dart';
 
 export 'aluno_timeline360_paged_provider.dart';
@@ -272,27 +271,7 @@ final alunoEvolucaoInteligenteProvider =
 
       // Preferir recordes de evolucaoHome quando o sinal inteligente ainda
       // não trouxe último PR (ex.: PR gravado no concluir, cache antigo).
-      final cached = EvolucaoHomeClientCache.getIfFresh(alunoId);
-      final recordes = cached?.recordes;
-      if (recordes == null || recordes.isEmpty) return raw;
-      final pr = recordes.first;
-      final carga = pr.cargaKg;
-      return EvolucaoInteligente(
-        sinal: raw.sinal,
-        resumo: raw.resumo,
-        ultimoPrLabel:
-            carga == null
-                ? pr.exercicioNome
-                : '${carga == carga.roundToDouble() ? carga.toStringAsFixed(0) : formatBrDecimal(carga)}kg',
-        ultimoPrCargaKg: carga,
-        ultimoPrExercicio: pr.exercicioNome,
-        volumeSemanal: raw.volumeSemanal,
-        volumeMensal: raw.volumeMensal,
-        tendenciaVolumePct: raw.tendenciaVolumePct,
-        proximaAcao: raw.proximaAcao,
-        sugerirCopiloto: raw.sugerirCopiloto,
-        volumePorSemana: raw.volumePorSemana,
-      );
+      return raw;
     });
 
 bool _hasUltimoPr(EvolucaoInteligente ev) {

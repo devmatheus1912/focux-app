@@ -280,7 +280,7 @@ class _FocuxAppState extends ConsumerState<FocuxApp>
 
   void _syncIntercomUser() {
     if (kIsWeb) return;
-    unawaited(_loginIntercom());
+    IntercomService.identificar = _loginIntercom;
   }
 
   /// Busca no backend o JWT do Messenger (`/api/auth/intercom-jwt`) e identifica o

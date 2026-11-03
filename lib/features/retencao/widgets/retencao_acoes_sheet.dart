@@ -1,97 +1,52 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/fx_home_sheet.dart';
-import '../../../core/widgets/fx_action_chip.dart';
+import '../../../core/widgets/fx_grouped_action_sheet.dart';
+import '../../../l10n/app_localizations.dart';
 import '../data/retencao_repository.dart';
-import '../utils/retencao_display.dart';
 
-Future<void> showRetencaoAcoesSheet(
+enum RetencaoAcao { mensagem, perfil, ficha, cobrar, adiar }
+
+/// Ações do aluno, com os motivos completos no topo.
+Future<RetencaoAcao?> showRetencaoAcoesSheet(
   BuildContext context, {
   required RetencaoAlunoScore score,
-  required VoidCallback onAluno,
-  required VoidCallback onChat,
-  required VoidCallback onCobrar,
 }) {
-  return showFxHomeSheet<void>(
+  final s = S.of(context);
+  return showFxGroupedActionSheet<RetencaoAcao>(
     context,
-    builder:
-        (ctx) => _RetencaoAcoesSheet(
-          score: score,
-          onAluno: () {
-            Navigator.of(ctx).pop();
-            onAluno();
-          },
-          onChat: () {
-            Navigator.of(ctx).pop();
-            onChat();
-          },
-          onCobrar: () {
-            Navigator.of(ctx).pop();
-            onCobrar();
-          },
+    titulo: score.alunoNome,
+    subtitulo: score.motivos.isEmpty ? null : score.motivos.join(' · '),
+    grupos: [
+      FxActionGroup<RetencaoAcao>(null, [
+        FxActionItem(
+          valor: RetencaoAcao.mensagem,
+          rotulo: s.retencaoAcaoMensagem,
+          icone: Icons.chat_bubble_outline_rounded,
         ),
+        FxActionItem(
+          valor: RetencaoAcao.perfil,
+          rotulo: s.retencaoAcaoPerfil,
+          icone: Icons.person_outline_rounded,
+        ),
+        if (score.semFicha)
+          FxActionItem(
+            valor: RetencaoAcao.ficha,
+            rotulo: s.retencaoAcaoFicha,
+            icone: Icons.fitness_center_rounded,
+          ),
+        if (score.cobravel)
+          FxActionItem(
+            valor: RetencaoAcao.cobrar,
+            rotulo: s.retencaoAcaoCobrar,
+            icone: Icons.payments_outlined,
+          ),
+        if (!score.adiado)
+          FxActionItem(
+            valor: RetencaoAcao.adiar,
+            rotulo: s.retencaoAcaoAdiar,
+            icone: Icons.snooze_rounded,
+          ),
+      ]),
+    ],
   );
-}
-
-class _RetencaoAcoesSheet extends StatelessWidget {
-  const _RetencaoAcoesSheet({
-    required this.score,
-    required this.onAluno,
-    required this.onChat,
-    required this.onCobrar,
-  });
-
-  final RetencaoAlunoScore score;
-  final VoidCallback onAluno;
-  final VoidCallback onChat;
-  final VoidCallback onCobrar;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primary = Theme.of(context).colorScheme.primary;
-    return FxHomeSheetSurface(
-      isDark: isDark,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          FxHomeSheetHandle(isDark: isDark),
-          const SizedBox(height: TokensStrip.s4),
-          FxHomeSheetHeader(
-            title: score.alunoNome,
-            subtitle: retencaoSaudeCurta(score),
-            leading: Icon(Icons.favorite_outline, size: 18, color: primary),
-          ),
-          const SizedBox(height: TokensStrip.s4),
-          Wrap(
-            spacing: TokensStrip.s2,
-            runSpacing: TokensStrip.s2,
-            children: [
-              FxActionChip(
-                label: 'Escrever',
-                accent: primary,
-                isDark: isDark,
-                onPressed: onChat,
-                solid: true,
-              ),
-              FxActionChip(
-                label: 'Cobrar',
-                accent: primary,
-                isDark: isDark,
-                onPressed: onCobrar,
-              ),
-              FxActionChip(
-                label: 'Abrir 360',
-                accent: primary,
-                isDark: isDark,
-                onPressed: onAluno,
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
 }

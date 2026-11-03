@@ -177,6 +177,7 @@ class EvolucaoHomeBundle {
   final List<RecordePessoal> recordes;
   final List<MetaCorporal> metas;
   final List<PontoGordura> gordura;
+  final List<PontoGordura> massa;
   final EvolucaoAneis aneis;
 
   const EvolucaoHomeBundle({
@@ -184,6 +185,7 @@ class EvolucaoHomeBundle {
     required this.recordes,
     this.metas = const [],
     this.gordura = const [],
+    this.massa = const [],
     this.aneis = const EvolucaoAneis(),
   });
 
@@ -211,6 +213,13 @@ class EvolucaoHomeBundle {
       ],
       gordura: [
         for (final item in (j['gordura'] as List?) ?? const [])
+          (
+            data: _medidaDataString((item as Map)['data']),
+            valor: (item['valor'] as num).toDouble(),
+          ),
+      ],
+      massa: [
+        for (final item in (j['massa'] as List?) ?? const [])
           (
             data: _medidaDataString((item as Map)['data']),
             valor: (item['valor'] as num).toDouble(),

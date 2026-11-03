@@ -7,6 +7,8 @@ import 'package:go_router/go_router.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -14,17 +16,16 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/fx_action_chip.dart';
 import '../../../core/widgets/fx_action_row.dart';
-import '../../../core/widgets/fx_choice_strip.dart';
+import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_grouped_action_sheet.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_metric_strip.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../l10n/app_localizations.dart';
@@ -106,13 +107,14 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
 
   Future<void> _load() async {
     setState(() {
-      _loading = true;
+      _loading = _home == null;
       _error = null;
     });
     try {
       final repo = ref.read(retencaoRepositoryProvider);
+      final baseFutura = repo.listarBase(q: _query, nivel: _nivel?.api);
       final home = await repo.getHome();
-      final base = await repo.listarBase(q: _query);
+      final base = await baseFutura;
       if (!mounted) return;
       setState(() {
         _home = home;
@@ -124,10 +126,17 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
       _trackViewIfNeeded();
     } catch (e) {
       if (!mounted) return;
-      setState(() {
-        _loading = false;
-        _error = friendlyError(e);
-      });
+      setState(() => _loading = false);
+      _falhou(e);
+    }
+  }
+
+  /// Com a lista na tela, avisa e mantém; sem nada para mostrar, vira tela de erro.
+  void _falhou(Object e) {
+    if (_home == null) {
+      setState(() => _error = friendlyError(e));
+    } else {
+      FeedbackHelper.showError(context, friendlyError(e));
     }
   }
 
@@ -137,7 +146,7 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
     try {
       final next = await ref
           .read(retencaoRepositoryProvider)
-          .listarBase(page: _page + 1, q: _query);
+          .listarBase(page: _page + 1, q: _query, nivel: _nivel?.api);
       if (!mounted) return;
       final vistos = _base.map((s) => s.alunoId).toSet();
       setState(() {
@@ -165,7 +174,7 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
     try {
       final base = await ref
           .read(retencaoRepositoryProvider)
-          .listarBase(q: _query);
+          .listarBase(q: _query, nivel: _nivel?.api);
       if (!mounted) return;
       setState(() {
         _base = base.itens;
@@ -173,8 +182,13 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
         _hasNext = base.hasNext;
       });
     } catch (e) {
-      if (mounted) setState(() => _error = friendlyError(e));
+      if (mounted) _falhou(e);
     }
+  }
+
+  void _filtrar(RetencaoNivel? nivel) {
+    setState(() => _nivel = nivel == _nivel ? null : nivel);
+    _recarregarBase();
   }
 
   void _abrirAluno(RetencaoAlunoScore score) {
@@ -198,14 +212,57 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
     context.push('/financeiro?alunoId=${score.alunoId}');
   }
 
-  void _abrirAcoes(RetencaoAlunoScore score) {
-    showRetencaoAcoesSheet(
+  Future<void> _abrirAcoes(RetencaoAlunoScore score) async {
+    final acao = await showRetencaoAcoesSheet(context, score: score);
+    if (!mounted) return;
+    switch (acao) {
+      case RetencaoAcao.mensagem:
+        _abrirChat(score);
+      case RetencaoAcao.perfil:
+        _abrirAluno(score);
+      case RetencaoAcao.ficha:
+        context.push('/alunos/${score.alunoId}');
+      case RetencaoAcao.cobrar:
+        _abrirCobranca(score);
+      case RetencaoAcao.adiar:
+        await _adiar(score);
+      case null:
+        break;
+    }
+  }
+
+  Future<void> _adiar(RetencaoAlunoScore score) async {
+    try {
+      await ref.read(retencaoRepositoryProvider).adiar(score.alunoId);
+      await _load();
+    } catch (e) {
+      if (mounted) _falhou(e);
+    }
+  }
+
+  Future<void> _maisAcoes() async {
+    final s = S.of(context);
+    final rota = await showFxGroupedActionSheet<String>(
       context,
-      score: score,
-      onAluno: () => _abrirAluno(score),
-      onChat: () => _abrirChat(score),
-      onCobrar: () => _abrirCobranca(score),
+      titulo: s.retencaoTitulo,
+      grupos: [
+        FxActionGroup<String>(null, [
+          FxActionItem(
+            valor: '/winback',
+            rotulo: s.retencaoEntradaHistorico,
+            descricao: s.retencaoEntradaHistoricoSub,
+            icone: Icons.notifications_none_rounded,
+          ),
+          FxActionItem(
+            valor: '/dunning',
+            rotulo: s.retencaoEntradaCobranca,
+            descricao: s.retencaoEntradaCobrancaSub,
+            icone: Icons.repeat_rounded,
+          ),
+        ]),
+      ],
     );
+    if (rota != null && mounted) context.push(rota);
   }
 
   void _ajuda() {
@@ -244,7 +301,12 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
               safePopOrGo(context, '/dashboard/personal');
             },
             actions: [
-              FxHelpIconButton(tooltip: retencaoComoUsar, onTap: _ajuda),
+              FxHelpIconButton(tooltip: s.retencaoComoUsar, onTap: _ajuda),
+              IconButton(
+                tooltip: s.retencaoMaisAcoes,
+                icon: const Icon(Icons.more_horiz_rounded),
+                onPressed: _maisAcoes,
+              ),
             ],
           ),
           body:
@@ -273,12 +335,10 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
                                 const SizedBox(height: 48),
                                 FxEmptyState(
                                   icon: 'activity',
-                                  title: retencaoEmptyTitle,
-                                  subtitle: retencaoEmptySubtitle,
+                                  title: s.retencaoVazioTitulo,
+                                  subtitle: s.retencaoVazioTexto,
                                   action: FxEmptyAction(
-                                    label: retencaoFocusActionLabel(
-                                      RetencaoFocusActionId.verAlunos,
-                                    ),
+                                    label: s.retencaoVerAlunos,
                                     onTap: () {
                                       AnalyticsService.instance.track(
                                         ProductEvents.alunosViewed,

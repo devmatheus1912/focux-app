@@ -446,6 +446,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
   @override
   Widget build(BuildContext context) {
     final homeAsync = ref.watch(alunosHomeProvider);
+    if (homeAsync.hasValue) reportarTelaPronta();
     ref.listen<AsyncValue<AlunosHomeBundle>>(alunosHomeProvider, (_, next) {
       next.whenData((home) {
         ref.read(alunosHomeTailProvider.notifier).reset(home.page);

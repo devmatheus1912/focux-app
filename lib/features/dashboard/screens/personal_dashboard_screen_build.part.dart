@@ -27,6 +27,7 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                     },
                   ),
               data: (home) {
+                reportarTelaPronta();
                 _applyHomeDeepLinkOnce(context);
                 final data = home.personal;
                 _maybeOfferTrial(data.totalAlunos);

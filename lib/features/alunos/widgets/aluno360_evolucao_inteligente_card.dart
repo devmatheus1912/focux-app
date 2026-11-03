@@ -83,6 +83,12 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
     );
   }
 
+  static String _recordeChip(EvolucaoInteligente ev) {
+    final nome = ev.ultimoPrExercicio?.trim();
+    final valor = _ultimoPrValue(ev)!;
+    return nome == null || nome.isEmpty ? 'PR $valor' : '$nome $valor';
+  }
+
   static String? _ultimoPrValue(EvolucaoInteligente ev) {
     final label = ev.ultimoPrLabel?.trim();
     if (label != null && label.isNotEmpty) {
@@ -149,12 +155,6 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
         final singleWeek = Aluno360EvolucaoInteligenteLogic.isSingleWeekVolume(
           ev.volumePorSemana,
         );
-        final hideMonthlyVolume =
-            Aluno360EvolucaoInteligenteLogic.isRedundantWeeklyMonthlyVolume(
-              volumeSemanal: ev.volumeSemanal,
-              volumeMensal: ev.volumeMensal,
-              singleWeek: singleWeek,
-            );
 
         return Semantics(
           container: true,
@@ -237,22 +237,18 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                                 spacing: TokensStrip.s2,
                                 runSpacing: TokensStrip.s2,
                                 children: [
+                                  if (ev.sinal != 'SEM_BASE')
+                                    _EvolucaoMetricChip(
+                                      label: sinalLabel(ev.sinal),
+                                      color: sigColor,
+                                    ),
                                   _EvolucaoMetricChip(
-                                    label: sinalLabel(ev.sinal),
-                                    color: sigColor,
-                                  ),
-                                  _EvolucaoMetricChip(
-                                    label:
-                                        hideMonthlyVolume
-                                            ? formatAlunoVolumeKg(
-                                              ev.volumeSemanal,
-                                            )
-                                            : '${formatAlunoVolumeKg(ev.volumeSemanal)} sem.',
+                                    label: 'Volume 7 dias: ${formatAlunoVolumeKg(ev.volumeSemanal)}',
                                     color: primary,
                                   ),
                                   if (_ultimoPrValue(ev) != null)
                                     _EvolucaoMetricChip(
-                                      label: 'PR ${_ultimoPrValue(ev)!}',
+                                      label: _recordeChip(ev),
                                       color: primary,
                                     ),
                                 ],

@@ -252,6 +252,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                         title: 'Não conseguimos carregar o aluno',
                       ),
                   data: (aluno) {
+                    reportarTelaPronta();
                     final perfilCompletion = copilotProfileCompletion(aluno);
                     final uiHints = operacaoAsync.value?.operacaoUiHints;
                     final proximaForPriority = proximaAcao360;

@@ -39,6 +39,7 @@ Future<void> _initSentry({
   await Sentry.close();
   await Sentry.init((o) {
     o.dsn = 'https://key@o0.ingest.sentry.io/0';
+    o.traceLifecycle = SentryTraceLifecycle.static;
     o.tracesSampleRate = 1.0;
     configure(o);
   });
@@ -53,7 +54,7 @@ void main() {
     sent = null;
     await _initSentry(configure: (o) {
       o.transport = _CapturingTransport();
-      o.beforeSendTransaction = (tx) => sent = stripRouteArguments(tx);
+      o.beforeSendTransaction = (tx, _) => sent = stripRouteArguments(tx);
     });
     adapter = _CaptureAdapter();
     dio = Dio(BaseOptions(baseUrl: Env.apiUrl))

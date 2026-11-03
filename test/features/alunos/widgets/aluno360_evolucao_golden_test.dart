@@ -1,7 +1,6 @@
 @Tags(['golden'])
 library;
 
-import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -68,7 +67,7 @@ void main() {
       overrides: [
         seededTimeline360(42, Timeline360PagedState(events: timelineEvents)),
         evolucaoHomeProvider(42).overrideWith(
-          (ref) => Completer<EvolucaoHomeBundle>().future,
+          (ref) async => const EvolucaoHomeBundle(medidas: [], recordes: []),
         ),
         metasDoAlunoProvider(42).overrideWith((ref) async => const []),
         alunoPesoHistoricoProvider(42).overrideWith((ref) async => const []),
