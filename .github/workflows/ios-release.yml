@@ -77,6 +77,29 @@ jobs:
       - name: Flutter pub get
         run: flutter pub get
 
+      # 2.4.4 publica um Package.swift inválido (pasta include inexistente).
+      # 2.4.5+ pede archive 4, e o excel 4.0.6 segura o archive em 3.x.
+      # Sem o Package.swift, o Flutter instala este plugin pelo podspec.
+      - name: Keep flutter_native_splash on CocoaPods
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          cache="${PUB_CACHE:-$HOME/.pub-cache}"
+          dirs=("$cache"/hosted/pub.dev/flutter_native_splash-*)
+          if [[ ${#dirs[@]} -eq 0 ]]; then
+            echo "::error::flutter_native_splash não está no pub-cache ($cache)."
+            exit 1
+          fi
+          for d in "${dirs[@]}"; do
+            f="$d/ios/flutter_native_splash/Package.swift"
+            if [[ -f "$f" ]]; then
+              rm -f "$f"
+              echo "removed $f"
+            else
+              echo "already absent: $f"
+            fi
+          done
+
       - name: Write Intercom config
         env:
           INTERCOM_APP_ID: ${{ secrets.INTERCOM_APP_ID }}
