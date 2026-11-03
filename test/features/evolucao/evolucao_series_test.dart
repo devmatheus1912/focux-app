@@ -85,4 +85,27 @@ void main() {
       expect(engajamentoContagemQuadro(semanas).previstos, 2);
     });
   });
+
+  test('3 registros: cada ponto, ordem e período', () {
+    MedidaCorporal m(int id, String data, double peso) =>
+        MedidaCorporal.fromJson({'id': id, 'data': data, 'peso': peso});
+    final pontos = serieDaMetrica([
+      m(3, '2026-11-02', 105),
+      m(1, '2026-10-30', 90),
+      m(2, '2026-11-01', 100),
+    ], EvolucaoMetrica.peso);
+    expect(pontos.map((p) => p.valor), [90, 100, 105]);
+    final hoje = DateTime(2026, 11, 2);
+    for (final p in EvolucaoPeriodo.values) {
+      expect(pontosDoPeriodo(pontos, p, hoje: hoje), hasLength(3));
+    }
+    expect(
+      pontosDoPeriodo(pontos, EvolucaoPeriodo.dias30, hoje: DateTime(2026, 12, 15)),
+      isEmpty,
+    );
+    expect(
+      pontosDoPeriodo(pontos, EvolucaoPeriodo.dias90, hoje: DateTime(2026, 12, 15)),
+      hasLength(3),
+    );
+  });
 }

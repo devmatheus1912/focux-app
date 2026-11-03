@@ -283,29 +283,16 @@ class _FocuxAppState extends ConsumerState<FocuxApp>
     IntercomService.identificar = _loginIntercom;
   }
 
-  /// Busca no backend o JWT do Messenger (`/api/auth/intercom-jwt`) e identifica o
-  /// usuário. Se o backend ainda não entrega o JWT, cai no HMAC legado
-  /// (`/api/auth/intercom-hash`). Qualquer falha é silenciosa — o suporte continua
-  /// funcional sem identificação.
+  /// Busca no backend o JWT do Messenger (`/api/auth/intercom-jwt`) e identifica
+  /// o usuário. Qualquer falha é silenciosa: o suporte abre sem identificação.
   Future<void> _loginIntercom() async {
     try {
       final dio = ref.read(apiClientProvider).dio;
-      String? userId;
-      String? jwt;
-      String? hash;
-      try {
-        final r = await dio.get('/api/auth/intercom-jwt');
-        final data = r.data as Map<String, dynamic>;
-        userId = data['userId'] as String?;
-        jwt = data['jwt'] as String?;
-      } catch (_) {}
-      if (jwt == null || userId == null) {
-        final r = await dio.get('/api/auth/intercom-hash');
-        final data = r.data as Map<String, dynamic>;
-        userId = data['userId'] as String?;
-        hash = data['hash'] as String?;
-      }
-      if (userId == null || (jwt == null && hash == null)) return;
+      final r = await dio.get('/api/auth/intercom-jwt');
+      final data = r.data as Map<String, dynamic>;
+      final userId = data['userId'] as String?;
+      final jwt = data['jwt'] as String?;
+      if (userId == null || jwt == null) return;
       final perfil = await ref.read(perfilProvider.future);
       final papel =
           ref.read(userRoleProvider) == UserRole.aluno ? 'aluno' : 'personal';
@@ -313,17 +300,14 @@ class _FocuxAppState extends ConsumerState<FocuxApp>
         userId: userId,
         papel: papel,
         jwt: jwt,
-        jwtProvider: jwt == null
-            ? null
-            : () async {
-                try {
-                  final r = await dio.get('/api/auth/intercom-jwt');
-                  return (r.data as Map<String, dynamic>)['jwt'] as String?;
-                } catch (_) {
-                  return null;
-                }
-              },
-        userHash: hash,
+        jwtProvider: () async {
+          try {
+            final r = await dio.get('/api/auth/intercom-jwt');
+            return (r.data as Map<String, dynamic>)['jwt'] as String?;
+          } catch (_) {
+            return null;
+          }
+        },
         email: perfil.email,
         name: perfil.nome,
       );
