@@ -127,10 +127,8 @@ flutter_native_splash:
 # The following section is specific to Flutter packages.
 flutter:
 
-  # flutter_native_splash (dev) falha na integração SPM experimental do Flutter 3.44+.
-  config:
-    enable-swift-package-manager: false
-
+  # sentry_flutter 10 só traz o SDK iOS via Swift Package Manager.
+  # Não desligar enable-swift-package-manager: o archive do TestFlight quebra.
   generate: true
 
   # The following line ensures that the Material Icons font is
