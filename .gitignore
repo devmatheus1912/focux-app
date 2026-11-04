@@ -90,6 +90,7 @@ focux_app.iml
 !.cursor/skills/**
 !.cursor/rules/
 !.cursor/rules/**
+.cursor/rules/graphify.mdc
 !.cursor/agents/
 !.cursor/agents/**
 
@@ -162,3 +163,7 @@ docs/
 
 # Intercom keys
 lib/core/support/intercom_config.dart
+
+# Graphify local knowledge graph (never commit)
+graphify-out/
+graphify-work/
