@@ -104,18 +104,18 @@ void main() {
 
   setUp(() {
     SharedPreferences.setMockInitialValues({});
-    DashboardHomeClientCache.clear();
+    dashboardHomeClientCache.clear();
     PlanoFeaturesBffCache.clear();
   });
   tearDown(() {
-    DashboardHomeClientCache.clear();
+    dashboardHomeClientCache.clear();
     PlanoFeaturesBffCache.clear();
   });
 
   test(
     'bootstrap skips GET /planos/me when Home cache has fresh planoFeatures',
     () async {
-      DashboardHomeClientCache.put(_homeBundle(_premium));
+      dashboardHomeClientCache.put(_homeBundle(_premium));
       final repo = _RecordingPlanosRepository();
       final notifier = _notifierFor(repo);
 
@@ -131,7 +131,7 @@ void main() {
   test(
     'bootstrap still hits /planos/me when Home bundle has no planoFeatures',
     () async {
-      DashboardHomeClientCache.put(_homeBundle(null));
+      dashboardHomeClientCache.put(_homeBundle(null));
       final repo = _RecordingPlanosRepository()..freshResult = _premium;
       final notifier = _notifierFor(repo);
 
@@ -143,7 +143,7 @@ void main() {
   );
 
   test('stale Home cache (past 90s TTL) does not skip /planos/me', () async {
-    DashboardHomeClientCache.put(
+    dashboardHomeClientCache.put(
       _homeBundle(_premium),
       now: DateTime.now().subtract(const Duration(seconds: 91)),
     );

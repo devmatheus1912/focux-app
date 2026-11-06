@@ -17,11 +17,11 @@ import '../../support/riverpod_seeds.dart';
 
 void main() {
   setUp(() {
-    DashboardHomeClientCache.clear();
+    dashboardHomeClientCache.clear();
     PlanoFeaturesBffCache.clear();
   });
   tearDown(() {
-    DashboardHomeClientCache.clear();
+    dashboardHomeClientCache.clear();
     PlanoFeaturesBffCache.clear();
   });
 

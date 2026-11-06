@@ -209,19 +209,19 @@ class DashboardRepository {
   /// 304 órfão (sem body): limpa ETag, retry 1× sem If-None-Match, devolve 200.
   Future<DashboardHomeBundle?> getHome() async {
     // Garante probe do ClientCache antes do interceptor decidir If-None-Match.
-    DashboardHomeClientCache.hasBody;
-    final response = await _dio.get(DashboardHomeClientCache.etagPath);
+    dashboardHomeClientCache.hasBody;
+    final response = await _dio.get(dashboardHomeClientCache.etagPath);
     if (response.statusCode != 304) {
       return _parsePersonalHome(response.data);
     }
-    if (DashboardHomeClientCache.hasBody) return null;
+    if (dashboardHomeClientCache.hasBody) return null;
 
     ApiEtagStore.removeForPath(
       method: 'GET',
-      path: DashboardHomeClientCache.etagPath,
+      path: dashboardHomeClientCache.etagPath,
     );
     final retry = await _dio.get(
-      DashboardHomeClientCache.etagPath,
+      dashboardHomeClientCache.etagPath,
       options: Options(extra: const {'fxSkipEtag': true}),
     );
     return _parsePersonalHome(retry.data);
@@ -307,19 +307,19 @@ class DashboardRepository {
   /// `null` = HTTP 304 com body no ClientCache — caller reusa cache.
   /// 304 órfão (sem body): limpa ETag, retry 1× sem If-None-Match, devolve 200.
   Future<AlunoDashboardHomeBundle?> getAlunoHome() async {
-    AlunoDashboardHomeClientCache.hasBody;
-    final response = await _dio.get(AlunoDashboardHomeClientCache.etagPath);
+    alunoDashboardHomeClientCache.hasBody;
+    final response = await _dio.get(alunoDashboardHomeClientCache.etagPath);
     if (response.statusCode != 304) {
       return _parseAlunoHome(response.data);
     }
-    if (AlunoDashboardHomeClientCache.hasBody) return null;
+    if (alunoDashboardHomeClientCache.hasBody) return null;
 
     ApiEtagStore.removeForPath(
       method: 'GET',
-      path: AlunoDashboardHomeClientCache.etagPath,
+      path: alunoDashboardHomeClientCache.etagPath,
     );
     final retry = await _dio.get(
-      AlunoDashboardHomeClientCache.etagPath,
+      alunoDashboardHomeClientCache.etagPath,
       options: Options(extra: const {'fxSkipEtag': true}),
     );
     return _parseAlunoHome(retry.data);

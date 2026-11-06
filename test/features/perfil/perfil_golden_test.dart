@@ -65,7 +65,7 @@ void main() {
 
   setUp(() {
     SharedPreferences.setMockInitialValues({});
-    DashboardHomeClientCache.clear();
+    dashboardHomeClientCache.clear();
   });
 
   final casos = {'incompleto': _incompleto, 'completo': _completo};

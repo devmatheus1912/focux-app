@@ -62,7 +62,7 @@ class _OnboardingWizardScreenState
   }
 
   void _evictHomeCaches() {
-    DashboardHomeClientCache.clear();
+    dashboardHomeClientCache.clear();
     PlanoFeaturesBffCache.clear();
     OnboardingWizardClientCache.clear();
     invalidatePersonalDashboardHome(ref);

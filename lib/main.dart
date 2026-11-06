@@ -358,8 +358,8 @@ class _FocuxAppState extends ConsumerState<FocuxApp>
 
     // Soft reload só após pausa ≥ 2 min — evita stampede em switches rápidos.
     if (away < const Duration(minutes: 2)) return;
-    if (away > DashboardHomeClientCache.ttl) {
-      DashboardHomeClientCache.clear();
+    if (away > dashboardHomeClientCache.ttl) {
+      dashboardHomeClientCache.clear();
     }
     invalidatePersonalDashboardHome(ref);
     // SWR do aluno: pinta o bundle anterior e revalida com ETag.

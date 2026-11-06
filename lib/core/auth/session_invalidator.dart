@@ -101,8 +101,8 @@ class SessionInvalidator {
     AlunoAutonomyAnalytics.resetSessao();
     AlunosHomeClientCache.clear();
     Aluno360ClientCache.clear();
-    DashboardHomeClientCache.clear();
-    AlunoDashboardHomeClientCache.clear();
+    dashboardHomeClientCache.clear();
+    alunoDashboardHomeClientCache.clear();
     PlanoFeaturesBffCache.clear();
     EvolucaoHomeClientCache.clear();
     AgendaWeekClientCache.clear();

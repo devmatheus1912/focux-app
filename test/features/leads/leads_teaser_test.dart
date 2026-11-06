@@ -54,8 +54,8 @@ Future<int> _pump(
 }
 
 void main() {
-  setUp(DashboardHomeClientCache.clear);
-  tearDown(DashboardHomeClientCache.clear);
+  setUp(dashboardHomeClientCache.clear);
+  tearDown(dashboardHomeClientCache.clear);
 
   test('rótulo do teaser', () {
     expect(leadsTeaserLabel(null), isNull);

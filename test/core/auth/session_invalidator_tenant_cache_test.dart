@@ -92,7 +92,7 @@ void main() {
     const query = AlunosHomeQuery();
     final now = DateTime(2026, 9, 10, 12);
     AlunosHomeClientCache.put(query, alunosHome(), now: now);
-    DashboardHomeClientCache.put(dashboardHome(), now: now);
+    dashboardHomeClientCache.put(dashboardHome(), now: now);
     Aluno360ClientCache.putOperacao(
       7,
       Aluno360Operacao(
@@ -167,7 +167,7 @@ void main() {
     expect(prefsBefore.getBool('health_authorized'), isTrue);
 
     expect(AlunosHomeClientCache.getIfFresh(query, now: now), isNotNull);
-    expect(DashboardHomeClientCache.getIfFresh(now: now), isNotNull);
+    expect(dashboardHomeClientCache.getIfFresh(now: now), isNotNull);
     expect(Aluno360ClientCache.getOperacaoIfFresh(7, now: now), isNotNull);
     expect(PlanoFeaturesBffCache.getIfFresh(now: now), isNotNull);
     expect(OnboardingWizardClientCache.getIfFresh(now: now), isNotNull);
@@ -179,7 +179,7 @@ void main() {
     await SessionInvalidator.invalidate(reason: 'test');
 
     expect(AlunosHomeClientCache.getIfFresh(query, now: now), isNull);
-    expect(DashboardHomeClientCache.getIfFresh(now: now), isNull);
+    expect(dashboardHomeClientCache.getIfFresh(now: now), isNull);
     expect(Aluno360ClientCache.getOperacaoIfFresh(7, now: now), isNull);
     expect(Aluno360ClientCache.getOperacaoEvenIfStale(7, now: now), isNull);
     expect(PlanoFeaturesBffCache.getIfFresh(now: now), isNull);

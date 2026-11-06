@@ -50,7 +50,7 @@ class FeatureGate extends ConsumerWidget {
     final fromProvider = featuresAsync.value;
     final fromHome =
         fromProvider == null
-            ? DashboardHomeClientCache.getIfFresh()?.planoFeatures
+            ? dashboardHomeClientCache.getIfFresh()?.planoFeatures
             : null;
 
     if (fromProvider == null && fromHome != null) {

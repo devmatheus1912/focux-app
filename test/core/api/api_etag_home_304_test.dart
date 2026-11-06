@@ -169,14 +169,14 @@ void main() {
     FlutterSecureStorage.setMockInitialValues({});
     SharedPreferences.setMockInitialValues({});
     ApiEtagStore.clear();
-    AlunoDashboardHomeClientCache.clear();
-    DashboardHomeClientCache.clear();
+    alunoDashboardHomeClientCache.clear();
+    dashboardHomeClientCache.clear();
   });
 
   tearDown(() {
     ApiEtagStore.clear();
-    AlunoDashboardHomeClientCache.clear();
-    DashboardHomeClientCache.clear();
+    alunoDashboardHomeClientCache.clear();
+    dashboardHomeClientCache.clear();
   });
 
   test('ApiEtagStore keyFor normaliza path sem query', () {
@@ -193,7 +193,7 @@ void main() {
 
     final first = await repo.getAlunoHome();
     expect(first, isNotNull);
-    AlunoDashboardHomeClientCache.put(first!);
+    alunoDashboardHomeClientCache.put(first!);
 
     final second = await repo.getAlunoHome();
     expect(second, isNull); // 304 + body local
@@ -210,7 +210,7 @@ void main() {
     final first = await repo.getHome();
     expect(first, isNotNull);
     expect(first!.pulse?.coachPendentes, 3);
-    DashboardHomeClientCache.put(first);
+    dashboardHomeClientCache.put(first);
 
     final second = await repo.getHome();
     expect(second, isNull);
@@ -224,10 +224,10 @@ void main() {
 
     // ETag órfão sem ClientCache (simula clear de body sem dropar etag / race).
     ApiEtagStore.put(
-      ApiEtagStore.keyFor(method: 'GET', path: DashboardHomeClientCache.etagPath),
+      ApiEtagStore.keyFor(method: 'GET', path: dashboardHomeClientCache.etagPath),
       '"stale-orphan"',
     );
-    expect(DashboardHomeClientCache.hasBody, isFalse);
+    expect(dashboardHomeClientCache.hasBody, isFalse);
 
     final bundle = await repo.getHome();
     expect(bundle, isNotNull);
@@ -239,11 +239,11 @@ void main() {
   test('clear() do ClientCache dropa ETag junto', () {
     final key = ApiEtagStore.keyFor(
       method: 'GET',
-      path: DashboardHomeClientCache.etagPath,
+      path: dashboardHomeClientCache.etagPath,
     );
     ApiEtagStore.put(key, '"x"');
-    DashboardHomeClientCache.hasBody; // register probe
-    DashboardHomeClientCache.clear();
+    dashboardHomeClientCache.hasBody; // register probe
+    dashboardHomeClientCache.clear();
     expect(ApiEtagStore.get(key), isNull);
   });
 
@@ -253,10 +253,10 @@ void main() {
     final repo = DashboardRepository(client);
 
     ApiEtagStore.put(
-      ApiEtagStore.keyFor(method: 'GET', path: DashboardHomeClientCache.etagPath),
+      ApiEtagStore.keyFor(method: 'GET', path: dashboardHomeClientCache.etagPath),
       '"home-v1"',
     );
-    expect(DashboardHomeClientCache.hasBody, isFalse);
+    expect(dashboardHomeClientCache.hasBody, isFalse);
 
     final bundle = await repo.getHome();
     expect(bundle, isNotNull);

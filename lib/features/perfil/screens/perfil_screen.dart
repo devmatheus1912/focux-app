@@ -184,7 +184,7 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
     final onboarding = ref.watch(onboardingStatusProvider).value;
     final primeirosPassosFeitos =
         onboarding != null && nextSetupStep(onboarding) == null;
-    final cachedPlano = DashboardHomeClientCache.getIfFresh()?.planoFeatures;
+    final cachedPlano = dashboardHomeClientCache.getIfFresh()?.planoFeatures;
     if (cachedPlano != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!context.mounted) return;

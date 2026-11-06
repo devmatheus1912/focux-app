@@ -3,7 +3,7 @@ import 'onboarding_repository.dart';
 
 /// Cache client do wizard, mesmo TTL da Home (90s).
 abstract final class OnboardingWizardClientCache {
-  static const ttl = DashboardHomeClientCache.ttl;
+  static final ttl = dashboardHomeClientCache.ttl;
 
   static OnboardingWizard? _wizard;
   static DateTime? _fetchedAt;

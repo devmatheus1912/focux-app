@@ -46,8 +46,8 @@ void main() {
     expect(invalidator, contains('SecureStorage.clearAll'));
     expect(invalidator, contains('AlunosHomeClientCache.clear()'));
     expect(invalidator, contains('Aluno360ClientCache.clear()'));
-    expect(invalidator, contains('DashboardHomeClientCache.clear()'));
-    expect(invalidator, contains('AlunoDashboardHomeClientCache.clear()'));
+    expect(invalidator, contains('dashboardHomeClientCache.clear()'));
+    expect(invalidator, contains('alunoDashboardHomeClientCache.clear()'));
     expect(invalidator, contains('AlunoInsightAnalytics.resetSessao()'));
     expect(invalidator, contains('ApiEtagStore.clear()'));
     expect(invalidator, contains('PlanoFeaturesBffCache.clear()'));

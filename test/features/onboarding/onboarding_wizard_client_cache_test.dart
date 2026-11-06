@@ -21,7 +21,7 @@ void main() {
   test('TTL 90s alinhado ao cache da Home', () {
     expect(
       OnboardingWizardClientCache.ttl,
-      DashboardHomeClientCache.ttl,
+      dashboardHomeClientCache.ttl,
     );
     final t0 = DateTime(2026, 8, 25, 20);
     OnboardingWizardClientCache.put(wizard(), now: t0);

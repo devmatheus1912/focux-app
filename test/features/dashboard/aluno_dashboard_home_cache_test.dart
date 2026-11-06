@@ -4,33 +4,33 @@ import 'package:focux_app/features/dashboard/data/dashboard_repository.dart';
 import 'package:focux_app/features/dashboard/utils/aluno_dashboard_home_client_cache.dart';
 
 void main() {
-  tearDown(AlunoDashboardHomeClientCache.clear);
+  tearDown(alunoDashboardHomeClientCache.clear);
 
-  test('AlunoDashboardHomeClientCache TTL e SWR', () {
+  test('alunoDashboardHomeClientCache TTL e SWR', () {
     final now = DateTime.utc(2026, 9, 18, 12);
     final bundle = _minimalAlunoHome();
-    AlunoDashboardHomeClientCache.put(bundle, now: now);
+    alunoDashboardHomeClientCache.put(bundle, now: now);
 
     expect(
-      AlunoDashboardHomeClientCache.getIfFresh(
+      alunoDashboardHomeClientCache.getIfFresh(
         now: now.add(const Duration(seconds: 30)),
       ),
       isNotNull,
     );
     expect(
-      AlunoDashboardHomeClientCache.getIfFresh(
+      alunoDashboardHomeClientCache.getIfFresh(
         now: now.add(const Duration(seconds: 61)),
       ),
       isNull,
     );
     expect(
-      AlunoDashboardHomeClientCache.getEvenIfStale(
+      alunoDashboardHomeClientCache.getEvenIfStale(
         now: now.add(const Duration(minutes: 2)),
       ),
       isNotNull,
     );
     expect(
-      AlunoDashboardHomeClientCache.getEvenIfStale(
+      alunoDashboardHomeClientCache.getEvenIfStale(
         now: now.add(const Duration(minutes: 6)),
       ),
       isNull,

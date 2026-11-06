@@ -16,7 +16,7 @@ final planosRepositoryProvider = Provider<PlanosRepository>(
 
 /// Server-side feature flags do plano atual.
 ///
-/// Se [DashboardHomeClientCache] já tem `planoFeatures` fresco (TTL 90s),
+/// Se [dashboardHomeClientCache] já tem `planoFeatures` fresco (TTL 90s),
 /// [PlanoFeaturesNotifier.bootstrap] usa esse snapshot e não chama
 /// GET `/api/planos/me`. Sem Home cache, aplica stale-while-revalidate no
 /// snapshot local de [PlanosRepository] (gate imediato + refresh em fundo).
@@ -47,7 +47,7 @@ class PlanoFeaturesNotifier extends Notifier<AsyncValue<PlanoFeatures>> {
 
   PlanoFeatures? _freshHomeSnapshot() =>
       PlanoFeaturesBffCache.getIfFresh() ??
-      DashboardHomeClientCache.getIfFresh()?.planoFeatures;
+      dashboardHomeClientCache.getIfFresh()?.planoFeatures;
 
   bool _applyFreshHomeCacheIfAny() {
     final fresh = _freshHomeSnapshot();

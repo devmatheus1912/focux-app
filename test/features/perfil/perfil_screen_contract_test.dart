@@ -16,12 +16,12 @@ void main() {
   testWidgets('perfil personal renders compact hub for the coach', (
     tester,
   ) async {
-    DashboardHomeClientCache.clear();
+    dashboardHomeClientCache.clear();
     tester.view.physicalSize = const Size(390, 1200);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
-    addTearDown(DashboardHomeClientCache.clear);
+    addTearDown(dashboardHomeClientCache.clear);
 
     await tester.pumpWidget(
       ProviderScope(
@@ -103,12 +103,12 @@ void main() {
   testWidgets('perfil completo esconde Completar (sem teaser de IA)', (
     tester,
   ) async {
-    DashboardHomeClientCache.clear();
+    dashboardHomeClientCache.clear();
     tester.view.physicalSize = const Size(390, 1200);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
-    addTearDown(DashboardHomeClientCache.clear);
+    addTearDown(dashboardHomeClientCache.clear);
 
     await tester.pumpWidget(
       ProviderScope(
@@ -152,12 +152,12 @@ void main() {
   testWidgets('conta: sem exclusão duplicada, Sair neutro e Excluir sozinho', (
     tester,
   ) async {
-    DashboardHomeClientCache.clear();
+    dashboardHomeClientCache.clear();
     tester.view.physicalSize = const Size(390, 2400);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
-    addTearDown(DashboardHomeClientCache.clear);
+    addTearDown(dashboardHomeClientCache.clear);
 
     await tester.pumpWidget(
       ProviderScope(
@@ -185,13 +185,13 @@ void main() {
   });
 
   testWidgets('aparência troca o tema direto, sem abrir sheet', (tester) async {
-    DashboardHomeClientCache.clear();
+    dashboardHomeClientCache.clear();
     SharedPreferences.setMockInitialValues({});
     tester.view.physicalSize = const Size(390, 2400);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
-    addTearDown(DashboardHomeClientCache.clear);
+    addTearDown(dashboardHomeClientCache.clear);
 
     late ProviderContainer container;
     await tester.pumpWidget(

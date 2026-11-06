@@ -95,7 +95,7 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                     onboardingFromHome?.primeiroTreinoCriado ?? false;
                 return RefreshIndicator(
                   onRefresh: () async {
-                    DashboardHomeClientCache.clear();
+                    dashboardHomeClientCache.clear();
                     PlanoFeaturesBffCache.clear();
                     invalidatePersonalDashboardHome(ref);
                     ref.invalidate(notificacoesProvider);
@@ -145,11 +145,11 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                             ),
                             freshnessLabel:
                                 _homeFetchedAt == null
-                                    ? DashboardHomeClientCache.fetchedAt == null
+                                    ? dashboardHomeClientCache.fetchedAt == null
                                         ? null
                                         : DashboardMicrocopy.atualizadoHa(
                                           DateTime.now().difference(
-                                            DashboardHomeClientCache.fetchedAt!,
+                                            dashboardHomeClientCache.fetchedAt!,
                                           ),
                                         )
                                     : DashboardMicrocopy.atualizadoHa(

@@ -111,7 +111,7 @@ void main() {
       screen,
       contains('if (atual != null && atual.inicio == inicio) return;'),
     );
-    expect(provider, contains('AlunoDashboardHomeClientCache.revalidar()'));
+    expect(provider, contains('alunoDashboardHomeClientCache.revalidar()'));
     expect(main, contains('ref.invalidate(alunoDashboardHomeProvider);'));
   });
 }

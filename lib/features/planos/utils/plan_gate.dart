@@ -15,7 +15,7 @@ import '../providers/plano_features_provider.dart';
 /// tela de destino tem [FeatureGate] e decide com o plano real.
 abstract final class PlanGate {
   static PlanoFeatures? _known(PlanoFeatures? fromProvider) =>
-      (fromProvider ?? DashboardHomeClientCache.getIfFresh()?.planoFeatures)
+      (fromProvider ?? dashboardHomeClientCache.getIfFresh()?.planoFeatures)
           ?.normalizeForTier();
 
   static PlanoRecurso resolve(PlanoFeatures? features, String key) {

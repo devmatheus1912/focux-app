@@ -7,10 +7,9 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../alunos/providers/alunos_provider.dart';
+import '../../dashboard/providers/dashboard_provider.dart';
 import '../../perfil/providers/perfil_provider.dart';
 import '../../exercicios/services/biblioteca_bootstrap.dart';
-import '../../dashboard/utils/aluno_dashboard_home_prefetch.dart';
-import '../../dashboard/utils/dashboard_home_prefetch.dart';
 import '../../alunos/utils/alunos_home_prefetch.dart';
 import '../providers/auth_provider.dart';
 import '../utils/splash_navigation.dart';

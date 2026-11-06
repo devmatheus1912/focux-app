@@ -45,7 +45,7 @@ void main() {
 
   setUp(() {
     SharedPreferences.setMockInitialValues({});
-    DashboardHomeClientCache.clear();
+    dashboardHomeClientCache.clear();
   });
 
   final casos = <String, DashboardHomeBundle Function()>{

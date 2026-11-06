@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/api/bff_snapshot_cache.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/command_center_data.dart';
 import '../data/dashboard_repository.dart';
@@ -10,102 +11,48 @@ final dashboardRepositoryProvider = Provider<DashboardRepository>(
   (ref) => DashboardRepository(ref.read(apiClientProvider)),
 );
 
-/// Single BFF call for personal Home (personal + command center + financeiro).
-/// Respeita TTL client 90s (= cache BE `dashboard-home`) + SWR; `invalidate` limpa.
-final dashboardHomeProvider = FutureProvider<DashboardHomeBundle>((ref) async {
-  // Não limpar cache no dispose — invalidate pós-login/recarrega descartava o
-  // prefetch e pintava "Algo saiu do ar". Limpeza só no logout/tenant switch.
-  final freshHit = DashboardHomeClientCache.getIfFresh();
-  if (freshHit != null) return freshHit;
+/// Home BFF do personal (personal + command center + financeiro). TTL 90 s +
+/// SWR em [dashboardHomeClientCache]. Não limpar o cache no dispose: invalidar
+/// pós-login descartava o prefetch. Limpeza só no logout/troca de tenant.
+final dashboardHomeProvider = FutureProvider<DashboardHomeBundle>(
+  (ref) => lerSnapshotBff(
+    ref,
+    dashboardHomeClientCache,
+    () => ref.read(dashboardRepositoryProvider).getHome(),
+  ),
+);
 
-  final staleHit = DashboardHomeClientCache.getEvenIfStale();
-  if (staleHit != null && DashboardHomeClientCache.claimRefresh()) {
-    Future<void>(() async {
-      try {
-        final fresh = await ref.read(dashboardRepositoryProvider).getHome();
-        if (fresh != null) {
-          DashboardHomeClientCache.put(fresh);
-          ref.invalidateSelf();
-        } else {
-          DashboardHomeClientCache.put(staleHit);
-        }
-      } catch (_) {
-        // Mantém stale.
-      } finally {
-        DashboardHomeClientCache.releaseRefresh();
-      }
-    });
-    return staleHit;
+/// Home BFF do aluno (`GET /api/dashboard/aluno/home`), TTL 60 s + SWR.
+final alunoDashboardHomeProvider = FutureProvider<AlunoDashboardHomeBundle>(
+  (ref) => lerSnapshotBff(
+    ref,
+    alunoDashboardHomeClientCache,
+    () => ref.read(dashboardRepositoryProvider).getAlunoHome(),
+  ),
+);
+
+/// Aquece a Home do personal antes de navegar (Hoje pinta de uma ida só).
+Future<void> prefetchPersonalDashboardHome(WidgetRef ref) async {
+  try {
+    await ref.read(dashboardHomeProvider.future);
+  } catch (_) {
+    // Melhor esforço: a Home busca de novo se falhar.
   }
+}
 
-  final fresh = await ref.read(dashboardRepositoryProvider).getHome();
-  if (fresh == null) {
-    final stale = DashboardHomeClientCache.getEvenIfStale();
-    if (stale != null) {
-      DashboardHomeClientCache.put(stale);
-      return stale;
-    }
-    // Repository já fez retry do 304 órfão — não deve chegar aqui.
-    // Último recurso: um GET explícito sem ETag via repositório (hasBody=false).
-    final recovered = await ref.read(dashboardRepositoryProvider).getHome();
-    if (recovered != null) {
-      DashboardHomeClientCache.put(recovered);
-      return recovered;
-    }
-    throw StateError('GET /api/dashboard/home: resposta vazia');
+/// Aquece a Home do aluno antes de navegar.
+Future<void> prefetchAlunoDashboardHome(WidgetRef ref) async {
+  try {
+    await ref.read(alunoDashboardHomeProvider.future);
+  } catch (_) {
+    // Melhor esforço.
   }
-  DashboardHomeClientCache.put(fresh);
-  return fresh;
-});
-
-/// Home BFF do aluno — `GET /api/dashboard/aluno/home` (TTL client 60s + SWR).
-final alunoDashboardHomeProvider =
-    FutureProvider<AlunoDashboardHomeBundle>((ref) async {
-  final freshHit = AlunoDashboardHomeClientCache.getIfFresh();
-  if (freshHit != null) return freshHit;
-
-  final staleHit = AlunoDashboardHomeClientCache.getEvenIfStale();
-  if (staleHit != null && AlunoDashboardHomeClientCache.claimRefresh()) {
-    // SWR: pinta stale e atualiza em background.
-    Future<void>(() async {
-      try {
-        final fresh =
-            await ref.read(dashboardRepositoryProvider).getAlunoHome();
-        if (fresh != null) {
-          AlunoDashboardHomeClientCache.put(fresh);
-        } else {
-          AlunoDashboardHomeClientCache.revalidar();
-        }
-        ref.invalidateSelf();
-      } catch (_) {
-        // Mantém stale.
-      } finally {
-        AlunoDashboardHomeClientCache.releaseRefresh();
-      }
-    });
-    return staleHit;
-  }
-
-  final fresh = await ref.read(dashboardRepositoryProvider).getAlunoHome();
-  if (fresh == null) {
-    final stale = AlunoDashboardHomeClientCache.revalidar();
-    if (stale != null) return stale;
-    final recovered =
-        await ref.read(dashboardRepositoryProvider).getAlunoHome();
-    if (recovered != null) {
-      AlunoDashboardHomeClientCache.put(recovered);
-      return recovered;
-    }
-    throw StateError('GET /api/dashboard/aluno/home: resposta vazia');
-  }
-  AlunoDashboardHomeClientCache.put(fresh);
-  return fresh;
-});
+}
 
 /// Write do aluno que muda a Home: sem limpar o cache client, o provider
-/// serviria o bundle antigo por até [AlunoDashboardHomeClientCache.ttl].
+/// serviria o bundle antigo por até [alunoDashboardHomeClientCache.ttl].
 void invalidateAlunoDashboardHome(WidgetRef ref) {
-  AlunoDashboardHomeClientCache.clear();
+  alunoDashboardHomeClientCache.clear();
   ref.invalidate(alunoDashboardHomeProvider);
 }
 
@@ -114,12 +61,12 @@ void invalidateAlunoDashboardHome(WidgetRef ref) {
 /// Único jeito de atualizar a Home: `invalidate` sozinho lê o cache do cliente
 /// e devolve o dado velho por até 90 s.
 void invalidatePersonalDashboardHome(WidgetRef ref) {
-  DashboardHomeClientCache.clear();
+  dashboardHomeClientCache.clear();
   ref.invalidate(dashboardHomeProvider);
 }
 
 void invalidatePersonalDashboardHomeRef(Ref ref) {
-  DashboardHomeClientCache.clear();
+  dashboardHomeClientCache.clear();
   ref.invalidate(dashboardHomeProvider);
 }
 
@@ -128,9 +75,9 @@ void invalidatePersonalDashboardHomeRef(Ref ref) {
 Future<void> refreshAlunoDashboardHome(WidgetRef ref) async {
   final fresh = await ref.read(dashboardRepositoryProvider).getAlunoHome();
   if (fresh != null) {
-    AlunoDashboardHomeClientCache.put(fresh);
+    alunoDashboardHomeClientCache.put(fresh);
   } else {
-    AlunoDashboardHomeClientCache.revalidar();
+    alunoDashboardHomeClientCache.revalidar();
   }
   ref.invalidate(alunoDashboardHomeProvider);
   await ref.read(alunoDashboardHomeProvider.future);

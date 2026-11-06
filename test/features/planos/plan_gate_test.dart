@@ -70,8 +70,8 @@ Future<void> _pump(
 }
 
 void main() {
-  setUp(DashboardHomeClientCache.clear);
-  tearDown(DashboardHomeClientCache.clear);
+  setUp(dashboardHomeClientCache.clear);
+  tearDown(dashboardHomeClientCache.clear);
 
   test('plano desconhecido não tranca (destino decide)', () {
     final r = PlanGate.resolve(null, PlanoRecursoKeys.loja);

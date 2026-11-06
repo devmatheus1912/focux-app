@@ -61,8 +61,8 @@ Widget _gateApp({
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  setUp(DashboardHomeClientCache.clear);
-  tearDown(DashboardHomeClientCache.clear);
+  setUp(dashboardHomeClientCache.clear);
+  tearDown(dashboardHomeClientCache.clear);
 
   test('FeatureGate loading uses SkeletonList, never spinner-only', () {
     final gate = File('lib/core/widgets/feature_gate.dart').readAsStringSync();
@@ -72,14 +72,14 @@ void main() {
     // Upsell só na tela travada — auto-sheet no mount foi removido de propósito.
     expect(gate, isNot(contains('UpgradePromptSheet.showIfAllowed')));
     expect(gate, contains('_LockedScreen'));
-    expect(gate, contains('DashboardHomeClientCache.getIfFresh'));
+    expect(gate, contains('dashboardHomeClientCache.getIfFresh'));
     expect(gate, contains('seedFromHome'));
     expect(gate, contains('addPostFrameCallback'));
 
     final provider = File(
       'lib/features/planos/providers/plano_features_provider.dart',
     ).readAsStringSync();
-    expect(provider, contains('DashboardHomeClientCache.getIfFresh'));
+    expect(provider, contains('dashboardHomeClientCache.getIfFresh'));
     expect(provider, contains('_applyFreshHomeCacheIfAny'));
     expect(provider, contains('_refreshIfBootstrapStillCurrent'));
   });
@@ -87,7 +87,7 @@ void main() {
   testWidgets(
     'FeatureGate uses Home cache immediately — no loading-only flash',
     (tester) async {
-      DashboardHomeClientCache.put(
+      dashboardHomeClientCache.put(
         _homeBundle(
           const PlanoFeatures(
             plano: SubscriptionPlan.PRO,
@@ -123,7 +123,7 @@ void main() {
   testWidgets(
     'FeatureGate stays locked from Home cache — does not flash paid child',
     (tester) async {
-      DashboardHomeClientCache.put(
+      dashboardHomeClientCache.put(
         _homeBundle(
           const PlanoFeatures(
             plano: SubscriptionPlan.FREE,

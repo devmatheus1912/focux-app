@@ -126,7 +126,7 @@ void main() {
       'focux_home_focus_mode_v1': false,
       'focux_home_coach_v1': true,
     });
-    DashboardHomeClientCache.clear();
+    dashboardHomeClientCache.clear();
   });
 
   for (final tela in kDynamicTypeTelas) {
