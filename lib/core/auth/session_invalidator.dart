@@ -39,9 +39,22 @@ class SessionInvalidator {
   static int get generation => _generation;
   static int _generation = 0;
 
-  static const _sessionPrefKeys = [
+  /// Preferências da conta (não do aparelho): o próximo usuário do celular não
+  /// herda escolha de compartilhar saúde, prescrição, biblioteca ou catálogo do
+  /// plano anterior. Tema, visão da agenda e dicas vistas ficam (são do aparelho).
+  static const sessionPrefKeys = [
     'focux_plano_features_cache_v2',
     ...alunoOnboardingPrefKeys,
+    'saude_aviso_compartilhamento_visto',
+    'saude_escolha_compartilhamento_feita',
+    'saude_meta_passos',
+    'last_exercise_prescription_v1',
+    'recent_exercise_order_v1',
+    'recent_exercise_usage_v1',
+    'biblioteca_bootstrap_v1_done',
+    'ferramentas_catalogo_json_v1',
+    'ferramentas_catalogo_version_v1',
+    'focux_paywall_vitrine_cache_v1',
   ];
 
   static Future<void> invalidate({String? reason}) async {
@@ -114,7 +127,7 @@ class SessionInvalidator {
   static Future<void> _clearSessionPrefs() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      for (final key in _sessionPrefKeys) {
+      for (final key in sessionPrefKeys) {
         await prefs.remove(key);
       }
     } catch (_) {}

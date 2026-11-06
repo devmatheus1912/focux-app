@@ -14,6 +14,11 @@ abstract final class Aluno360ClientCache {
       <int, ({Aluno360Ferramentas bundle, DateTime at})>{};
   static final _operacaoRefreshing = <int>{};
 
+  /// Sobe a cada [invalidate]/[clear]. Busca iniciada antes de uma escrita na
+  /// ficha não pode gravar o bundle antigo depois dela.
+  static int _geracao = 0;
+  static int get geracao => _geracao;
+
   /// Mapa ordenado por inserção: re-put move p/ o fim, estouro tira o mais velho.
   static const maxEntries = 40;
 
@@ -53,7 +58,13 @@ abstract final class Aluno360ClientCache {
   static void releaseOperacaoRefresh(int alunoId) =>
       _operacaoRefreshing.remove(alunoId);
 
-  static void putOperacao(int alunoId, Aluno360Operacao bundle, {DateTime? now}) {
+  static void putOperacao(
+    int alunoId,
+    Aluno360Operacao bundle, {
+    DateTime? now,
+    int? geracao,
+  }) {
+    if (geracao != null && geracao != _geracao) return;
     _put(_operacao, alunoId, (bundle: bundle, at: now ?? DateTime.now()));
   }
 
@@ -67,7 +78,13 @@ abstract final class Aluno360ClientCache {
     return hit.bundle;
   }
 
-  static void putEvolucao(int alunoId, Aluno360Evolucao bundle, {DateTime? now}) {
+  static void putEvolucao(
+    int alunoId,
+    Aluno360Evolucao bundle, {
+    DateTime? now,
+    int? geracao,
+  }) {
+    if (geracao != null && geracao != _geracao) return;
     _put(_evolucao, alunoId, (bundle: bundle, at: now ?? DateTime.now()));
   }
 
@@ -88,11 +105,14 @@ abstract final class Aluno360ClientCache {
     int alunoId,
     Aluno360Ferramentas bundle, {
     DateTime? now,
+    int? geracao,
   }) {
+    if (geracao != null && geracao != _geracao) return;
     _put(_ferramentas, alunoId, (bundle: bundle, at: now ?? DateTime.now()));
   }
 
   static void invalidate(int alunoId) {
+    _geracao++;
     _operacao.remove(alunoId);
     _evolucao.remove(alunoId);
     _ferramentas.remove(alunoId);
@@ -100,6 +120,7 @@ abstract final class Aluno360ClientCache {
   }
 
   static void clear() {
+    _geracao++;
     _operacao.clear();
     _evolucao.clear();
     _ferramentas.clear();

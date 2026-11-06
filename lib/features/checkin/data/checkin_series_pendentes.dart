@@ -70,8 +70,52 @@ class CheckinSeriesPendentesStore {
 
   static const prefKey = 'checkin_series_pendentes_v1';
 
-  Future<List<CheckinSeriePendente>> ler() async {
+  Future<List<CheckinSeriePendente>> ler() async =>
+      _lerDe(await SharedPreferences.getInstance());
+
+  /// A mesma série substitui a anterior e vai para o fim da fila.
+  Future<void> adicionar(CheckinSeriePendente serie) =>
+      _mudar((atual) => [...atual.where((p) => !p.mesmaSerie(serie)), serie]);
+
+  /// Remove só se o conteúdo não mudou: uma versão nova registrada durante o
+  /// envio continua na fila.
+  Future<void> remover(CheckinSeriePendente serie) {
+    final alvo = jsonEncode(serie.toJson());
+    return _mudar(
+      (atual) => atual.where((p) => jsonEncode(p.toJson()) != alvo).toList(),
+    );
+  }
+
+  /// Execução descartada: as séries dela não têm mais para onde ir.
+  Future<void> removerDaExecucao(int execucaoId) => _mudar(
+    (atual) => atual.where((p) => p.execucaoId != execucaoId).toList(),
+  );
+
+  static Future<void> limpar() async {
     final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(prefKey);
+  }
+
+  /// O único `await` vem antes de ler: ler, mudar e gravar acontecem sem
+  /// pausa (o SharedPreferences atualiza a memória na hora; só o disco é
+  /// assíncrono). Sem isso, uma série marcada enquanto a rodada da fila remove
+  /// outra sobrescrevia a lista: série nova perdida ou enviada voltando.
+  Future<void> _mudar(
+    List<CheckinSeriePendente> Function(List<CheckinSeriePendente> atual) mudar,
+  ) async {
+    final prefs = await SharedPreferences.getInstance();
+    final fila = mudar(_lerDe(prefs));
+    if (fila.isEmpty) {
+      await prefs.remove(prefKey);
+      return;
+    }
+    await prefs.setString(
+      prefKey,
+      jsonEncode(fila.map((p) => p.toJson()).toList()),
+    );
+  }
+
+  static List<CheckinSeriePendente> _lerDe(SharedPreferences prefs) {
     final raw = prefs.getString(prefKey);
     if (raw == null || raw.isEmpty) return const [];
     try {
@@ -84,42 +128,5 @@ class CheckinSeriesPendentesStore {
     } catch (_) {
       return const [];
     }
-  }
-
-  /// A mesma série substitui a anterior e vai para o fim da fila.
-  Future<void> adicionar(CheckinSeriePendente serie) async {
-    final atual = await ler();
-    await _salvar([...atual.where((p) => !p.mesmaSerie(serie)), serie]);
-  }
-
-  /// Remove só se o conteúdo não mudou: uma versão nova registrada durante o
-  /// envio continua na fila.
-  Future<void> remover(CheckinSeriePendente serie) async {
-    final atual = await ler();
-    final alvo = jsonEncode(serie.toJson());
-    await _salvar(atual.where((p) => jsonEncode(p.toJson()) != alvo).toList());
-  }
-
-  /// Execução descartada: as séries dela não têm mais para onde ir.
-  Future<void> removerDaExecucao(int execucaoId) async {
-    final atual = await ler();
-    await _salvar(atual.where((p) => p.execucaoId != execucaoId).toList());
-  }
-
-  static Future<void> limpar() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(prefKey);
-  }
-
-  Future<void> _salvar(List<CheckinSeriePendente> fila) async {
-    final prefs = await SharedPreferences.getInstance();
-    if (fila.isEmpty) {
-      await prefs.remove(prefKey);
-      return;
-    }
-    await prefs.setString(
-      prefKey,
-      jsonEncode(fila.map((p) => p.toJson()).toList()),
-    );
   }
 }

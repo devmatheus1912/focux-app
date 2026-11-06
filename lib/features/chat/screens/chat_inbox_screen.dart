@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/analytics/analytics_service.dart';
+import '../../../core/auth/sessao_provider.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/state/fx_value_notifier.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -48,23 +49,27 @@ part 'chat_inbox_screen_widgets.part.dart';
 final chatInboxQueryProvider = fxValueProvider<String>('');
 
 final chatInboxHomeProvider = FutureProvider<ChatInboxHomeBundle>((ref) async {
+  ref.watch(sessaoProvider);
   final q = ref.watch(chatInboxQueryProvider);
   return ChatRepository(ref.read(apiClientProvider)).inboxHome(q: q);
 });
 
 final chatInboxProvider = FutureProvider<List<ChatInboxItem>>((ref) async {
+  ref.watch(sessaoProvider);
   return (await ref.watch(chatInboxHomeProvider.future)).inbox;
 });
 
 final chatInboxUnreadProvider = FutureProvider<List<ChatInboxItem>>((
   ref,
 ) async {
+  ref.watch(sessaoProvider);
   return (await ref.watch(chatInboxHomeProvider.future)).unread;
 });
 
 final chatInboxArchivedProvider = FutureProvider<List<ChatInboxItem>>((
   ref,
 ) async {
+  ref.watch(sessaoProvider);
   return (await ref.watch(chatInboxHomeProvider.future)).archived;
 });
 

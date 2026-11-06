@@ -24,9 +24,13 @@ void main() {
     expect(o.extra['fxNoRetry'], isTrue);
   });
 
-  test('403 vazio ou de JWT derruba', () {
-    expect(derruba(null), isTrue);
-    expect(derruba(''), isTrue);
+  test('403 vazio não derruba: a API manda 401 para token inválido', () {
+    expect(derruba(null), isFalse);
+    expect(derruba(''), isFalse);
+    expect(derruba('   '), isFalse);
+  });
+
+  test('403 que fala de JWT ou autenticação derruba', () {
     expect(derruba({'error': 'Full authentication is required'}), isTrue);
     expect(derruba('JWT expired'), isTrue);
   });

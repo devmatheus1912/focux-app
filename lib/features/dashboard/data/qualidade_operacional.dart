@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/auth/sessao_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 
 class QualidadeOperacionalData {
@@ -33,6 +34,7 @@ class QualidadeOperacionalData {
 }
 
 final qualidadeProvider = FutureProvider<QualidadeOperacionalData>((ref) async {
+  ref.watch(sessaoProvider);
   final api = ref.read(apiClientProvider);
   final res = await api.dio.get('/api/dashboard/qualidade');
   return QualidadeOperacionalData.fromJson(res.data as Map<String, dynamic>);

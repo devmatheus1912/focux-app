@@ -1,9 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/auth/sessao_provider.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/lead_repository.dart';
 
 final leadsHomeProvider = FutureProvider<LeadsHomeBundle>((ref) async {
+  ref.watch(sessaoProvider);
   return LeadRepository(ref.read(apiClientProvider)).getHome();
 });
 

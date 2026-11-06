@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/auth/sessao_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../../dunning/data/dunning_repository.dart';
@@ -13,6 +14,7 @@ final financeiroRepositoryProvider = Provider<FinanceiroRepository>(
 final financeiroHomeProvider = FutureProvider<FinanceiroHomeBundle>((
   ref,
 ) async {
+  ref.watch(sessaoProvider);
   return ref.read(financeiroRepositoryProvider).getHome();
 });
 

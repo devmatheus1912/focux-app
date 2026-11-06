@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/auth/sessao_provider.dart';
 import '../../../core/state/fx_value_notifier.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../ia/providers/ia_copilot_providers.dart';
@@ -89,6 +90,7 @@ final alunosHomeTailProvider =
     );
 
 final alunosHomeProvider = FutureProvider<AlunosHomeBundle>((ref) async {
+  ref.watch(sessaoProvider);
   final query = ref.watch(alunosHomeQueryProvider);
   final cached = AlunosHomeClientCache.getIfFresh(query);
   if (cached != null) return cached;
@@ -108,25 +110,30 @@ final alunosHomeProvider = FutureProvider<AlunosHomeBundle>((ref) async {
 });
 
 final alunosProvider = FutureProvider<List<Aluno>>((ref) async {
+  ref.watch(sessaoProvider);
   return (await ref.watch(alunosHomeProvider.future)).alunos;
 });
 
 final alunoProvider = FutureProvider.family<Aluno, int>((ref, id) async {
+  ref.watch(sessaoProvider);
   return ref.read(alunoRepositoryProvider).buscar(id);
 });
 
 final alunoAutonomiaResumoProvider =
     FutureProvider.family<AlunoAutonomiaResumo, int>((ref, id) async {
+      ref.watch(sessaoProvider);
       return ref.read(alunoRepositoryProvider).buscarAutonomiaResumo(id);
     });
 
 /// Perfil do aluno autenticado (endpoint /api/aluno/me).
 final alunoMeProvider = FutureProvider<Aluno>((ref) async {
+  ref.watch(sessaoProvider);
   return ref.read(alunoRepositoryProvider).me();
 });
 
 /// BFF da aba Perfil — `GET /api/aluno/perfil/home`.
 final alunoPerfilHomeProvider = FutureProvider<AlunoPerfilHomeBundle>((ref) async {
+  ref.watch(sessaoProvider);
   return ref.read(alunoRepositoryProvider).getPerfilHome();
 });
 

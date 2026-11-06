@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/bff_snapshot_cache.dart';
+import '../../../core/auth/sessao_provider.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/command_center_data.dart';
 import '../data/dashboard_repository.dart';
@@ -15,20 +16,26 @@ final dashboardRepositoryProvider = Provider<DashboardRepository>(
 /// SWR em [dashboardHomeClientCache]. Não limpar o cache no dispose: invalidar
 /// pós-login descartava o prefetch. Limpeza só no logout/troca de tenant.
 final dashboardHomeProvider = FutureProvider<DashboardHomeBundle>(
-  (ref) => lerSnapshotBff(
-    ref,
-    dashboardHomeClientCache,
-    () => ref.read(dashboardRepositoryProvider).getHome(),
-  ),
+  (ref) {
+    ref.watch(sessaoProvider);
+    return lerSnapshotBff(
+      ref,
+      dashboardHomeClientCache,
+      () => ref.read(dashboardRepositoryProvider).getHome(),
+    );
+  },
 );
 
 /// Home BFF do aluno (`GET /api/dashboard/aluno/home`), TTL 60 s + SWR.
 final alunoDashboardHomeProvider = FutureProvider<AlunoDashboardHomeBundle>(
-  (ref) => lerSnapshotBff(
-    ref,
-    alunoDashboardHomeClientCache,
-    () => ref.read(dashboardRepositoryProvider).getAlunoHome(),
-  ),
+  (ref) {
+    ref.watch(sessaoProvider);
+    return lerSnapshotBff(
+      ref,
+      alunoDashboardHomeClientCache,
+      () => ref.read(dashboardRepositoryProvider).getAlunoHome(),
+    );
+  },
 );
 
 /// Aquece a Home do personal antes de navegar (Hoje pinta de uma ida só).
@@ -85,6 +92,7 @@ Future<void> refreshAlunoDashboardHome(WidgetRef ref) async {
 }
 
 final commandCenterProvider = FutureProvider<CommandCenterData>((ref) async {
+  ref.watch(sessaoProvider);
   return (await ref.watch(dashboardHomeProvider.future)).commandCenter;
 });
 

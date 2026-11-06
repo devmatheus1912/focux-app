@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/auth/sessao_provider.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/fx_settings_layout.dart';
@@ -31,6 +32,7 @@ final rbacRepositoryProvider = Provider(
 );
 
 final permissoesRbacProvider = FutureProvider<List<PermissaoRbac>>((ref) async {
+  ref.watch(sessaoProvider);
   return ref.read(rbacRepositoryProvider).listar();
 });
 

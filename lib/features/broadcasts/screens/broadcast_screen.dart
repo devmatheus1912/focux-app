@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/auth/sessao_provider.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
@@ -36,6 +37,7 @@ final _broadcastRepositoryProvider = Provider<BroadcastRepository>(
 );
 
 final _broadcastHistoricoProvider = FutureProvider<List<Broadcast>>((ref) {
+  ref.watch(sessaoProvider);
   return ref.read(_broadcastRepositoryProvider).listar();
 });
 

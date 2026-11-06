@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/auth/sessao_provider.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -38,6 +39,7 @@ typedef IaActionsQuery = ({String status, String q});
 
 final iaActionsProvider =
     FutureProvider.family<IaCommandActionsPage, IaActionsQuery>((ref, query) {
+      ref.watch(sessaoProvider);
       return ref
           .read(dashboardRepositoryProvider)
           .getIaCommandActionsPage(status: query.status, q: query.q);

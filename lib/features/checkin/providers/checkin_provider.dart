@@ -1,5 +1,6 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/auth/sessao_provider.dart';
 import '../../../core/storage/secure_storage.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/utils/aluno360_client_cache.dart';
@@ -50,5 +51,6 @@ final checkinConexaoVoltouProvider = Provider<Stream<void>>(
 final checkinPersonalHomeProvider = FutureProvider<CheckinPersonalHomeBundle>((
   ref,
 ) async {
+  ref.watch(sessaoProvider);
   return ref.read(checkinRepositoryProvider).personalHome();
 });

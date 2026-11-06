@@ -52,12 +52,14 @@ final aluno360OperacaoBundleProvider =
   final stale = Aluno360ClientCache.getOperacaoEvenIfStale(alunoId);
   if (stale != null) {
     if (Aluno360ClientCache.claimOperacaoRefresh(alunoId)) {
+      final geracao = Aluno360ClientCache.geracao;
       // ignore: unawaited_futures
       Future(() async {
         try {
           final bundle = await AlunoRepository(
             ref.read(apiClientProvider),
           ).buscarAluno360Operacao(alunoId);
+          if (geracao != Aluno360ClientCache.geracao) return;
           Aluno360ClientCache.putOperacao(alunoId, bundle);
           ref.invalidateSelf();
         } catch (_) {
@@ -73,12 +75,13 @@ final aluno360OperacaoBundleProvider =
     return stale;
   }
 
+  final geracao = Aluno360ClientCache.geracao;
   final sw = Stopwatch()..start();
   final bundle = await AlunoRepository(
     ref.read(apiClientProvider),
   ).buscarAluno360Operacao(alunoId);
   sw.stop();
-  Aluno360ClientCache.putOperacao(alunoId, bundle);
+  Aluno360ClientCache.putOperacao(alunoId, bundle, geracao: geracao);
   final ms = sw.elapsedMilliseconds;
   if (kDebugMode) {
     debugPrint('[aluno360] GET /api/alunos/$alunoId/360/operacao ${ms}ms');
@@ -102,12 +105,13 @@ final aluno360EvolucaoBundleProvider =
   _keepFor(ref);
   final cached = Aluno360ClientCache.getEvolucaoIfFresh(alunoId);
   if (cached != null) return cached;
+  final geracao = Aluno360ClientCache.geracao;
   final sw = Stopwatch()..start();
   final bundle = await AlunoRepository(
     ref.read(apiClientProvider),
   ).buscarAluno360Evolucao(alunoId);
   sw.stop();
-  Aluno360ClientCache.putEvolucao(alunoId, bundle);
+  Aluno360ClientCache.putEvolucao(alunoId, bundle, geracao: geracao);
   if (kDebugMode) {
     debugPrint(
       '[aluno360] GET /api/alunos/$alunoId/360/evolucao '
@@ -125,12 +129,13 @@ final aluno360FerramentasBundleProvider =
   if (cached != null) {
     return cached;
   }
+  final geracao = Aluno360ClientCache.geracao;
   final sw = Stopwatch()..start();
   final bundle = await AlunoRepository(
     ref.read(apiClientProvider),
   ).buscarAluno360Ferramentas(alunoId);
   sw.stop();
-  Aluno360ClientCache.putFerramentas(alunoId, bundle);
+  Aluno360ClientCache.putFerramentas(alunoId, bundle, geracao: geracao);
   if (kDebugMode) {
     debugPrint(
       '[aluno360] GET /api/alunos/$alunoId/360/ferramentas '

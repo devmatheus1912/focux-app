@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/auth/sessao_provider.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/exercicio_repository.dart';
 import '../data/exercicio_video_uploader.dart';
@@ -84,6 +85,7 @@ final exerciciosFilteredProvider =
       ref,
       filter,
     ) async {
+      ref.watch(sessaoProvider);
       return ref
           .read(exercicioRepositoryProvider)
           .listar(
@@ -105,6 +107,7 @@ final exerciciosFilteredProvider =
 
 // Provider sem filtro (compatibilidade)
 final exerciciosProvider = FutureProvider<List<Exercicio>>((ref) async {
+  ref.watch(sessaoProvider);
   return ref.read(exercicioRepositoryProvider).listar();
 });
 
@@ -112,11 +115,13 @@ final exercicioProvider = FutureProvider.family<Exercicio, int>((
   ref,
   id,
 ) async {
+  ref.watch(sessaoProvider);
   return ref.read(exercicioRepositoryProvider).buscar(id);
 });
 
 final exerciciosCuradoriaProvider = FutureProvider<ExercicioCuradoriaResumo>((
   ref,
 ) async {
+  ref.watch(sessaoProvider);
   return ref.read(exercicioRepositoryProvider).buscarCuradoria();
 });

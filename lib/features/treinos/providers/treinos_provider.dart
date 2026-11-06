@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/auth/sessao_provider.dart';
 import '../../../core/state/fx_value_notifier.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/treino_repository.dart';
@@ -144,6 +145,7 @@ final treinosHomeTailProvider =
     );
 
 final treinosHomeProvider = FutureProvider<TreinosHomeBundle>((ref) async {
+  ref.watch(sessaoProvider);
   final query = ref.watch(treinosHomeQueryProvider);
   return ref.watch(treinoRepositoryProvider).getHome(
     q: query.q,
@@ -166,6 +168,7 @@ final treinosDoAlunoTailProvider = NotifierProvider.family<
 
 final treinosDoAlunoPageProvider =
     FutureProvider.family<TreinosAlunoPage, int>((ref, alunoId) async {
+      ref.watch(sessaoProvider);
       final query = ref.watch(treinosDoAlunoQueryProvider(alunoId));
       return ref.watch(treinoRepositoryProvider).listarTreinosDoAlunoPagina(
         alunoId,
@@ -176,12 +179,14 @@ final treinosDoAlunoPageProvider =
     });
 
 final treinoProvider = FutureProvider.family<Treino, int>((ref, id) async {
+  ref.watch(sessaoProvider);
   return ref.watch(treinoRepositoryProvider).buscar(id);
 });
 
 /// First paint do picker — um GET (`/api/treinos/{id}/picker/home`).
 final treinoPickerHomeProvider =
     FutureProvider.family<TreinoPickerHomeBundle, int>((ref, treinoId) async {
+      ref.watch(sessaoProvider);
       return ref.watch(treinoRepositoryProvider).getPickerHome(treinoId);
     });
 

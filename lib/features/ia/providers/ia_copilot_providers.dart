@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/auth/sessao_provider.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../dashboard/data/command_center_data.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
@@ -10,6 +11,7 @@ import '../models/ia_copilot_proxima_acao.dart';
 import '../models/ia_copiloto_home.dart';
 
 final iaCopilotoHomeProvider = FutureProvider<IaCopilotoHomeBundle>((ref) async {
+  ref.watch(sessaoProvider);
   return IaRepository(ref.read(apiClientProvider)).copilotoHome();
 });
 
@@ -41,6 +43,7 @@ final insightsProvider =
       ref,
       query,
     ) async {
+      ref.watch(sessaoProvider);
       return IaRepository(
         ref.read(apiClientProvider),
       ).insights(alunoId: query.alunoId, mode: query.mode);
@@ -48,6 +51,7 @@ final insightsProvider =
 
 final proximaAcaoProvider =
     FutureProvider.family<IaCopilotProximaAcao, int>((ref, alunoId) async {
+  ref.watch(sessaoProvider);
   return IaRepository(ref.read(apiClientProvider)).proximaAcao(alunoId);
 });
 

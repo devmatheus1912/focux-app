@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/auth/sessao_provider.dart';
 import '../data/exercise_enum_api.dart';
 import '../data/enums.dart';
 import '../data/exercicio_page.dart';
@@ -84,6 +85,7 @@ int _setHash(Set<Equipamento> values) {
 final exercicioPickerStatsProvider = FutureProvider<ExercicioPickerStats>((
   ref,
 ) async {
+  ref.watch(sessaoProvider);
   return ref.read(exercicioRepositoryProvider).buscarPickerStats();
 });
 
@@ -92,6 +94,7 @@ final exercicioPickerPageProvider =
       ref,
       query,
     ) async {
+      ref.watch(sessaoProvider);
       return ref.read(exercicioRepositoryProvider).listarPickerPagina(
         busca: query.busca,
         padraoMovimento: enumQueryParam(query.padraoMovimento),

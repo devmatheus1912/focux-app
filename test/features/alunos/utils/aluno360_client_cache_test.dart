@@ -106,4 +106,22 @@ void main() {
       isNull,
     );
   });
+
+  test('busca iniciada antes de uma escrita não grava o bundle antigo', () {
+    Aluno360ClientCache.clear();
+    final geracao = Aluno360ClientCache.geracao;
+
+    // A ficha foi editada enquanto a busca estava em voo.
+    Aluno360ClientCache.invalidate(1);
+    Aluno360ClientCache.putOperacao(1, _operacao, geracao: geracao);
+
+    expect(Aluno360ClientCache.getOperacaoEvenIfStale(1), isNull);
+
+    Aluno360ClientCache.putOperacao(
+      1,
+      _operacao,
+      geracao: Aluno360ClientCache.geracao,
+    );
+    expect(Aluno360ClientCache.getOperacaoIfFresh(1), isNotNull);
+  });
 }

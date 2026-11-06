@@ -579,16 +579,18 @@ class ApiClient {
 
   /// 403 com `codigo` é regra de negócio (plano, senha provisória, aluno
   /// bloqueado): nunca derruba a sessão. Palavra solta na mensagem
-  /// ("token de IA", "assinatura expirada") também não.
+  /// ("token de IA", "assinatura expirada") também não. 403 sem corpo também
+  /// não: a API responde 401 para token ausente ou inválido, então 403 vazio
+  /// é papel sem permissão ou proxy/WAF, e derrubar apagaria a fila offline.
   @visibleForTesting
   static bool isLikelySessionAuthFailure403(Object? data) {
-    if (data == null) return true;
+    if (data == null) return false;
     if (data is Map) {
       final codigo = data['codigo'];
       if (codigo is String && codigo.trim().isNotEmpty) return false;
     }
     final text = data.toString().toLowerCase();
-    if (text.isEmpty) return true;
+    if (text.trim().isEmpty) return false;
     return text.contains('full authentication') ||
         text.contains('jwt') ||
         text.contains('invalid token') ||
