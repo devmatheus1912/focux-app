@@ -124,7 +124,10 @@ void main() {
     expect(screen, contains('checkinConexaoVoltouProvider'));
     expect(screen, contains('checkinDescansoAlertaProvider'));
     expect(screen, contains('AppLifecycleState.resumed'));
-    expect(screen, contains('removerDaExecucao'));
+    expect(
+      _src('lib/features/checkin/utils/checkin_sessao.dart'),
+      contains('removerDaExecucao'),
+    );
     final corpo =
         File(
           'lib/features/checkin/screens/checkin_screen_corpo.part.dart',

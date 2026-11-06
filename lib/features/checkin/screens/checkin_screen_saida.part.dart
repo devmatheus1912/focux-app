@@ -16,8 +16,7 @@ extension _CheckinSaida on _CheckinScreenState {
 
   Future<bool> _descartar(int execucaoId) async {
     try {
-      await _repo.descartar(execucaoId);
-      await _CheckinScreenState._fila.removerDaExecucao(execucaoId);
+      await _sessao.descartar(execucaoId);
       checkinSessaoMudou(ref);
       return true;
     } catch (e) {

@@ -27,6 +27,7 @@ import '../services/checkin_fila_sync.dart';
 import '../utils/checkin_descanso_relogio.dart';
 import '../utils/checkin_execucao_display.dart';
 import '../utils/checkin_execucao_estado.dart';
+import '../utils/checkin_sessao.dart';
 import '../utils/checkin_exercise_tips.dart';
 import '../utils/checkin_resumo.dart';
 import '../utils/checkin_sem_carga.dart';
@@ -125,6 +126,12 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
 
   CheckinRepository get _repo => ref.read(checkinRepositoryProvider);
 
+  CheckinSessao get _sessao => CheckinSessao(
+    repo: _repo,
+    fila: _fila,
+    enviarFila: () => ref.read(checkinFilaSyncProvider).enviar(),
+  );
+
   Future<void> _iniciar() async {
     if (_loading && _execucao != null) return;
     if (_iniciarInFlight) return;
@@ -135,13 +142,12 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
       _sessaoAberta = null;
     });
     try {
-      final recebida = await _repo.iniciar(widget.treinoId);
-      final fila = await _fila.ler();
+      final sessao = await _sessao.iniciar(widget.treinoId);
       if (!mounted) return;
-      final execucao = checkinAplicarPendentes(recebida, fila);
+      final execucao = sessao.execucao!;
       setState(() {
         _execucao = execucao;
-        _pendentes = checkinPendentesDaExecucao(fila, execucao.id);
+        _pendentes = sessao.pendentes;
         _loading = false;
       });
       _iniciarRelogio(execucao);
@@ -173,40 +179,18 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
   /// Recusa do servidor é avisada pelo escopo global da fila; aqui só o
   /// estado da tela acompanha a rodada.
   Future<bool> _enviarFila() async {
-    final CheckinFilaResultado r;
+    final CheckinSessaoEstado sessao;
     try {
-      r = await ref.read(checkinFilaSyncProvider).enviar();
+      sessao = await _sessao.sincronizar(_execucao);
     } catch (_) {
       return false;
     }
     if (!mounted) return false;
-    final base = _execucao;
-    ExecucaoTreino? atual;
-    if (base != null) {
-      var t = base;
-      for (final e in r.enviadas) {
-        if (e.execucaoId == t.id) t = checkinComExercicio(t, e.exercicio);
-      }
-      atual = checkinAplicarPendentes(t, r.restantes);
-    }
     setState(() {
-      _execucao = atual;
-      _pendentes = checkinPendentesDaExecucao(r.restantes, atual?.id);
+      _execucao = sessao.execucao;
+      _pendentes = sessao.pendentes;
     });
-    if (r.rejeitadas > 0) await _recarregar();
     return _pendentes == 0;
-  }
-
-  /// Série recusada saiu da fila: o estado local volta ao do servidor.
-  Future<void> _recarregar() async {
-    final id = _execucao?.id;
-    if (id == null) return;
-    try {
-      final servidor = await _repo.detalhe(id);
-      final fila = await _fila.ler();
-      if (!mounted) return;
-      setState(() => _execucao = checkinAplicarPendentes(servidor, fila));
-    } catch (_) {}
   }
 
   Future<bool> _filaLimpa() async {
@@ -393,16 +377,9 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
     setState(() => _concluindo = true);
     try {
       final id = _execucao!.id!;
-      var concluida = await checkinConcluir(() => _repo.concluir(id));
-      if (concluida == null) {
-        try {
-          concluida = await _repo.detalhe(id);
-        } catch (_) {}
-      }
-      SessaoEvolucaoDto? evolucao;
-      try {
-        evolucao = await _repo.evolucaoSessao(id);
-      } catch (_) {}
+      final conclusao = await _sessao.concluir(id);
+      final concluida = conclusao.concluida;
+      final evolucao = conclusao.evolucao;
       checkinSessaoMudou(ref);
       final semCarga = await _contarSemCarga();
       if (!mounted) return;
