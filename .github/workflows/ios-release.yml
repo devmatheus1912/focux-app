@@ -284,11 +284,20 @@ jobs:
           fi
           IPA="${ipas[0]}"
           echo "Uploading ${IPA} to App Store Connect..."
+          # altool pode sair com 0 mesmo quando a Apple recusa o pacote (ex.:
+          # build repetido); o job só passa se o envio deu certo de verdade.
+          set +e
           xcrun altool --upload-app \
             -f "${IPA}" \
             -t ios \
             --apiKey "${ASC_KEY_ID}" \
-            --apiIssuer "${ASC_ISSUER_ID}"
+            --apiIssuer "${ASC_ISSUER_ID}" 2>&1 | tee altool.log
+          status=${PIPESTATUS[0]}
+          set -e
+          if [[ $status -ne 0 ]] || grep -qE "Failed to upload|ERROR:" altool.log; then
+            echo "::error::Envio ao TestFlight recusado. Veja o log do altool acima (build repetido? suba o +N do pubspec)."
+            exit 1
+          fi
 
       - name: Cleanup keychain
         if: always()
