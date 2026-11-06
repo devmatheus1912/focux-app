@@ -87,6 +87,15 @@ class EvolucaoRecordesAba extends StatelessWidget {
             _CartaoRecorde(progresso: p, onEditar: onEditar, onExcluir: onExcluir),
             const SizedBox(height: TokensStrip.s2),
           ],
+          // Um registro por exercício ainda não tem evolução: diz o que falta.
+          if (progresso.every((p) => p.historico.length < 2))
+            Padding(
+              padding: const EdgeInsets.only(top: TokensStrip.s2),
+              child: Text(
+                ptS.evolucaoForcaProximo,
+                style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+              ),
+            ),
         ],
       ),
     );

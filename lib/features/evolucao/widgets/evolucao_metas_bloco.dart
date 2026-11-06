@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -425,13 +426,25 @@ class EvolucaoMetasBloco extends ConsumerWidget {
         _LinhaMeta(
           titulo: metaMetricaRotulo(m.metrica),
           texto: [
-            ptS.metaProgressoLinha(
-              metaValor(m.metrica, m.valorInicial),
-              metaValor(m.metrica, m.valorAlvo),
-              m.progresso,
-            ),
+            // 0% esconde quem se afastou: aí a linha diz e mostra o atual.
+            if (m.valorAtual case final atual?
+                when rumoDaMeta(m, atual) == RumoDaMeta.seAfastando)
+              ptS.metaSeAfastandoLinha(
+                metaValor(m.metrica, m.valorInicial),
+                metaValor(m.metrica, m.valorAlvo),
+                metaValor(m.metrica, atual),
+              )
+            else
+              ptS.metaProgressoLinha(
+                metaValor(m.metrica, m.valorInicial),
+                metaValor(m.metrica, m.valorAlvo),
+                m.progresso,
+              ),
             if (m.observacao != null) m.observacao!,
           ].join('\n'),
+          alerta:
+              m.valorAtual != null &&
+              rumoDaMeta(m, m.valorAtual!) == RumoDaMeta.seAfastando,
           onMais: () => _opcoes(context, ref, m),
         ),
       for (final m in manutencao)
@@ -466,11 +479,15 @@ class _LinhaMeta extends StatelessWidget {
     required this.texto,
     required this.onMais,
     this.destaque = false,
+    this.alerta = false,
   });
 
   final String titulo;
   final String texto;
   final VoidCallback onMais;
+
+  /// Medida indo para o lado oposto do alvo: o texto fica na cor de alerta.
+  final bool alerta;
 
   /// Pede decisão do personal.
   final bool destaque;
@@ -496,7 +513,15 @@ class _LinhaMeta extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(titulo, style: FocuxHubTypography.cardTitle(color: chrome.ink)),
-                Text(texto, style: FocuxHubTypography.bodyMuted(color: chrome.mute)),
+                Text(
+                  texto,
+                  style: FocuxHubTypography.bodyMuted(
+                    color:
+                        alerta
+                            ? (chrome.isDark ? EagleTokens.warnDark : EagleTokens.warn)
+                            : chrome.mute,
+                  ),
+                ),
               ],
             ),
           ),

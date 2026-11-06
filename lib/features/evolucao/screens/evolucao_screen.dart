@@ -31,7 +31,9 @@ import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../../avaliacao/data/avaliacao_repository.dart';
 import '../../avaliacao/utils/evolucao_comparativo_display.dart';
 import '../data/evolucao_repository.dart';
+import '../utils/evolucao_aneis.dart';
 import '../utils/evolucao_display.dart';
+import '../utils/evolucao_series.dart';
 import '../providers/evolucao_home_provider.dart';
 import '../utils/evolucao_home_client_cache.dart';
 import '../../avaliacao/screens/evolucao_comparativo_screen.dart';
@@ -67,6 +69,9 @@ class EvolucaoScreen extends ConsumerStatefulWidget {
 
 class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
   var _recolhido = false;
+
+  /// Redesenha a folha do recorde quando a validação muda.
+  VoidCallback? _avisarFormulario;
   late EvolucaoHubView _view = widget.abaInicial;
 
   /// Fotos e Comparar só carregam quando abertas.
@@ -240,6 +245,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                                 children: [
                                   EvolucaoHero(
                                     aneis: aneis,
+                                    metaNome: nomeDaMetaPrincipal(metas),
                                     onDefinirMeta: () => _definirMeta(ocupadas),
                                     recolhido: _recolhido,
                                   ),
@@ -346,20 +352,40 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
   Future<void> _registrarMedida() async {
     final bundle = ref.read(evolucaoHomeProvider(widget.alunoId)).value;
     NovaMedida? nova;
-    // Valor impossível (458 kg, 818 %) pede confirmação; "Corrigir" reabre.
+    // "Corrigir" reabre a folha.
     while (true) {
-      nova = await novaMedidaSheet(context, medidas: bundle?.medidas ?? const []);
-      if (nova == null || !mounted) return;
-      final suspeitas = medidasSuspeitas(
-        peso: nova.peso,
-        gordura: nova.gordura,
-        massaMagra: nova.massa,
+      nova = await novaMedidaSheet(
+        context,
+        medidas: bundle?.medidas ?? const [],
+        inicial: nova,
       );
+      if (nova == null || !mounted) return;
+      // Fora da faixa de um adulto (458 kg) ou mudança grande demais desde a
+      // última medida (90 → 110 kg em 5 dias): os dois pedem confirmação.
+      final suspeitas = [
+        ...medidasSuspeitas(
+          peso: nova.peso,
+          gordura: nova.gordura,
+          massaMagra: nova.massa,
+        ),
+        ...variacoesSuspeitas(
+          data: nova.data,
+          medidas: bundle?.medidas ?? const [],
+          gordura: bundle?.gordura ?? const [],
+          massa: bundle?.massa ?? const [],
+          peso: nova.peso,
+          cintura: nova.cintura,
+          quadril: nova.quadril,
+          braco: nova.braco,
+          percGordura: nova.gordura,
+          percMassa: nova.massa,
+        ),
+      ];
       if (suspeitas.isEmpty) break;
       final manter = await showFxConfirmSheet(
         context,
         title: S.of(context).aluno360ConfirmeValoresTitulo,
-        message: S.of(context).aluno360ConfirmeValoresMensagem(suspeitas.join(', ')),
+        message: ptS.evolucaoConfirmeMedida(suspeitas.join(', ')),
         confirmLabel: S.of(context).aluno360ConfirmeValoresSalvar,
         cancelLabel: S.of(context).aluno360ConfirmeValoresCorrigir,
         icon: Icons.warning_amber_rounded,
@@ -434,52 +460,69 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
       text: recorde?.cargaKg == null ? '' : formatBrDecimal(recorde!.cargaKg!),
     );
     final repsCtrl = TextEditingController(text: recorde?.repeticoes?.toString() ?? '');
+    // Validação dentro da folha: o erro aparece no campo e nada do que foi
+    // digitado se perde.
+    String? erroExercicio;
+    String? erroCarga;
+    double? lerCarga() =>
+        double.tryParse(cargaCtrl.text.trim().replaceAll(',', '.'));
     try {
       final saved = await showFxFormSheet(
         context,
         title: recorde == null ? ptS.evolucaoRecordeNovoTitulo : ptS.evolucaoRecordeEditarTitulo,
         icon: Icons.emoji_events_outlined,
         confirmLabel: ptS.evolucaoSalvar,
+        podeConfirmar: () {
+          final carga = lerCarga();
+          erroExercicio = escolhido == null ? ptS.evolucaoInformeExercicio : null;
+          erroCarga =
+              carga == null || carga < 0.5 || carga > 1000
+                  ? ptS.evolucaoCargaInvalida
+                  : null;
+          _avisarFormulario?.call();
+          return erroExercicio == null && erroCarga == null;
+        },
         child: StatefulBuilder(
-          builder:
-              (context, setSheet) => Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  EscolherExercicioCampo(
-                    escolhido: escolhido,
-                    recentes: recentes,
-                    onEscolher: (e) => setSheet(() => escolhido = e),
-                  ),
-                  AlunoInsetFormField(
-                    rotuloVisivel: true,
-                    controller: cargaCtrl,
-                    label: ptS.evolucaoCampoCarga,
-                    icon: Icons.tune_outlined,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  ),
-                  AlunoInsetFormField(
-                    rotuloVisivel: true,
-                    controller: repsCtrl,
-                    label: ptS.evolucaoCampoReps,
-                    icon: Icons.repeat_outlined,
-                    keyboardType: TextInputType.number,
-                    showDivider: false,
-                  ),
-                ],
-              ),
+          builder: (context, setSheet) {
+            _avisarFormulario = () => setSheet(() {});
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                EscolherExercicioCampo(
+                  escolhido: escolhido,
+                  recentes: recentes,
+                  erro: erroExercicio,
+                  onEscolher: (e) => setSheet(() {
+                    escolhido = e;
+                    erroExercicio = null;
+                  }),
+                ),
+                AlunoInsetFormField(
+                  rotuloVisivel: true,
+                  obrigatorio: true,
+                  controller: cargaCtrl,
+                  label: ptS.evolucaoCampoCarga,
+                  icon: Icons.tune_outlined,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  ajuda: erroCarga,
+                  ajudaErro: erroCarga != null,
+                ),
+                AlunoInsetFormField(
+                  rotuloVisivel: true,
+                  controller: repsCtrl,
+                  label: ptS.evolucaoCampoReps,
+                  icon: Icons.repeat_outlined,
+                  keyboardType: TextInputType.number,
+                  showDivider: false,
+                ),
+              ],
+            );
+          },
         ),
       );
       if (saved != true || !mounted) return;
-      final exercicio = escolhido;
-      final carga = double.tryParse(cargaCtrl.text.trim().replaceAll(',', '.'));
-      if (exercicio == null) {
-        FeedbackHelper.showError(context, ptS.evolucaoInformeExercicio);
-        return;
-      }
-      if (carga == null || carga < 0.5 || carga > 1000) {
-        FeedbackHelper.showError(context, ptS.evolucaoCargaInvalida);
-        return;
-      }
+      final exercicio = escolhido!;
+      final carga = lerCarga()!;
       final repo = EvolucaoRepository(ref.read(apiClientProvider));
       final reps = int.tryParse(repsCtrl.text.trim());
       if (recorde == null) {
@@ -505,6 +548,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
     } catch (e) {
       if (mounted) FeedbackHelper.showError(context, friendlyError(e));
     } finally {
+      _avisarFormulario = null;
       cargaCtrl.dispose();
       repsCtrl.dispose();
     }

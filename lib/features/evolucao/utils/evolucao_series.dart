@@ -1,6 +1,7 @@
 import '../../../core/utils/pt_br_display.dart';
 import '../../../core/widgets/fx_grafico_linha.dart';
 import '../../../l10n/pt.dart';
+import '../../alunos/utils/aluno360_medida_plausivel.dart';
 import '../data/evolucao_repository.dart';
 
 export '../../../core/utils/pt_br_display.dart' show dataCurta;
@@ -185,10 +186,22 @@ class ProgressoRecorde {
 }
 
 /// Fórmula de Epley. Nulo fora da faixa em que a estimativa presta.
+/// Exercício de peso do corpo, core ou mobilidade: 1RM não faz sentido ali.
+/// O recorde guarda só o nome, então a decisão sai dele.
+bool exercicioSemUmRm(String nome) {
+  final n = nome.toLowerCase();
+  const termos = [
+    'abdominal', 'abdômen', 'abdomen', 'prancha', 'crunch', 'sit-up',
+    'alongamento', 'mobilidade', 'polichinelo', 'burpee',
+  ];
+  return termos.any(n.contains);
+}
+
 double? umRmEstimado(RecordePessoal r) {
   final carga = r.cargaKg;
   final reps = r.repeticoes;
   if (carga == null || reps == null || reps < 2 || reps > 12) return null;
+  if (exercicioSemUmRm(r.exercicioNome)) return null;
   return carga * (1 + reps / 30);
 }
 
@@ -238,4 +251,52 @@ ProgressoRecorde? maiorProgresso(List<ProgressoRecorde> lista) {
     }
   }
   return maior;
+}
+
+/// O que mudou demais desde o último registro ("Peso +20,0 kg em 5 dias"),
+/// pela regra de [variacaoSuspeita]. Vazia quando está tudo plausível.
+List<String> variacoesSuspeitas({
+  required String data,
+  required List<MedidaCorporal> medidas,
+  List<PontoGordura> gordura = const [],
+  List<PontoGordura> massa = const [],
+  double? peso,
+  double? cintura,
+  double? quadril,
+  double? braco,
+  double? percGordura,
+  double? percMassa,
+}) {
+  final dia = DateTime.tryParse(data);
+  if (dia == null) return const [];
+  String? checar(String rotulo, String unidade, double? novo, PontoGrafico? ultimo) {
+    if (novo == null || ultimo == null) return null;
+    final diferenca = novo - ultimo.valor;
+    final dias = dia.difference(ultimo.data).inDays.abs();
+    if (!variacaoSuspeita(unidade, diferenca, dias)) return null;
+    return ptS.evolucaoVariacaoItem(
+      rotulo,
+      diferencaTexto(diferenca, unidade == '%' ? 'pp' : unidade),
+      dias < 1 ? 1 : dias,
+    );
+  }
+
+  final novos = {
+    EvolucaoMetrica.peso: peso,
+    EvolucaoMetrica.cintura: cintura,
+    EvolucaoMetrica.quadril: quadril,
+    EvolucaoMetrica.braco: braco,
+  };
+  return [
+    for (final MapEntry(key: m, value: novo) in novos.entries)
+      if (checar(m.rotulo, m.unidade, novo, serieDaMetrica(medidas, m).lastOrNull)
+          case final item?)
+        item,
+    if (checar(ptS.metaGordura, '%', percGordura, serieDeGordura(gordura).lastOrNull)
+        case final item?)
+      item,
+    if (checar(ptS.metaMassa, '%', percMassa, serieDeGordura(massa).lastOrNull)
+        case final item?)
+      item,
+  ];
 }

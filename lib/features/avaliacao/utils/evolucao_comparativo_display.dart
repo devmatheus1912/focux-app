@@ -1,5 +1,6 @@
 import '../../../core/utils/fx_utils.dart';
 import '../data/avaliacao_repository.dart';
+import '../../alunos/utils/aluno360_medida_plausivel.dart';
 import '../../../core/utils/pt_br_display.dart';
 
 enum EvolucaoComparativoDeltaTone { better, worse, same, missing }
@@ -34,13 +35,6 @@ bool evolucaoComparativoIsEmptyError(String message) {
       lower.contains('nao encontrado') ||
       lower.contains('nenhuma avaliação') ||
       lower.contains('nenhuma avaliacao');
-}
-
-String evolucaoComparativoPesoMetricHint(double? delta) {
-  if (delta == null) return 'Peso da última avaliação';
-  if (delta == 0) return 'Peso igual ao da primeira';
-  final signed = '${delta > 0 ? '+' : ''}${formatBrDecimal(delta)} kg';
-  return 'Desde a primeira: $signed';
 }
 
 double? evolucaoComparativoImc(double? pesoKg, double? alturaCm) {
@@ -157,13 +151,25 @@ int? evolucaoComparativoDias(String? primeira, String? atual) {
   return diaB.difference(diaA).inDays;
 }
 
-/// Diferença com unidade e seta neutra; "=" sem mudança.
+/// Diferença com unidade e seta neutra; "=" sem mudança. Percentual muda em
+/// pontos: 20% → 25% é "↑ 5,0 pp", não "5,0 %".
 String evolucaoComparativoDiferenca(EvolucaoComparativoMetrica m) {
   final diferenca = m.atual! - m.primeira!;
   if (diferenca == 0) return '=';
   final seta = diferenca > 0 ? '↑' : '↓';
-  final unidade = m.unidade.isEmpty ? '' : ' ${m.unidade}';
+  final unidade = switch (m.unidade) {
+    '' => '',
+    '%' => ' pp',
+    final u => ' $u',
+  };
   return '$seta ${evolucaoComparativoFmtNum(diferenca.abs())}$unidade';
+}
+
+/// Mudança grande demais para o intervalo ([variacaoSuspeita]): a linha
+/// pede conferência antes de virar o antes e depois do aluno.
+bool evolucaoComparativoSuspeita(EvolucaoComparativoMetrica m, int? dias) {
+  if (m.primeira == null || m.atual == null || dias == null) return false;
+  return variacaoSuspeita(m.unidade, m.atual! - m.primeira!, dias);
 }
 
 String evolucaoComparativoFmtData(String? iso) {

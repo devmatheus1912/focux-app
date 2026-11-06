@@ -6,7 +6,9 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/pt_br_display.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_grouped_action_sheet.dart';
+import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_quick_chips.dart';
+import '../../../core/widgets/fx_sheet_frame.dart';
 import '../../../l10n/pt.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../data/evolucao_repository.dart';
@@ -80,30 +82,45 @@ class _Campos extends StatelessWidget {
   final TextEditingController? massa;
 
   /// Último valor de cada campo, para o personal comparar ao digitar.
-  final Map<EvolucaoMetrica, String> referencia;
+  final Map<EvolucaoMetrica, double> referencia;
 
+  /// Rótulo curto; a última medida aparece como valor fantasma no campo e,
+  /// por extenso, embaixo. Tudo é opcional: o aviso sai uma vez, no topo.
   Widget _campo(
     TextEditingController c,
     String rotulo,
     IconData icone, {
     EvolucaoMetrica? metrica,
     bool divisor = true,
-  }) => AlunoInsetFormField(
-    rotuloVisivel: true,
-    controller: c,
-    label:
-        referencia[metrica] == null
-            ? rotulo
-            : '$rotulo · ${ptS.evolucaoUltimaReferencia(referencia[metrica]!)}',
-    icon: icone,
-    keyboardType: _teclado,
-    showDivider: divisor,
-  );
+  }) {
+    final ultima = metrica == null ? null : referencia[metrica];
+    return AlunoInsetFormField(
+      rotuloVisivel: true,
+      mostrarOpcional: false,
+      controller: c,
+      label: rotulo,
+      hint: ultima == null ? null : formatBrDecimal(ultima),
+      ajuda:
+          ultima == null
+              ? null
+              : ptS.evolucaoUltimaReferencia(
+                '${formatBrDecimal(ultima)} ${metrica!.unidade}',
+              ),
+      icon: icone,
+      keyboardType: _teclado,
+      showDivider: divisor,
+    );
+  }
 
   @override
   Widget build(BuildContext context) => Column(
     mainAxisSize: MainAxisSize.min,
+    crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
+      Text(
+        ptS.evolucaoFormDica,
+        style: FocuxHubTypography.bodyMuted(color: ShellChrome.of(context).mute),
+      ),
       _campo(peso, ptS.evolucaoCampoPeso, Icons.monitor_weight_outlined, metrica: EvolucaoMetrica.peso),
       _campo(cintura, ptS.evolucaoCampoCintura, Icons.straighten_outlined, metrica: EvolucaoMetrica.cintura),
       _campo(quadril, ptS.evolucaoCampoQuadril, Icons.straighten_outlined, metrica: EvolucaoMetrica.quadril),
@@ -122,12 +139,18 @@ class _Campos extends StatelessWidget {
   );
 }
 
-enum _DiaDaMedida { hoje, ontem }
+enum _DiaDaMedida { hoje, ontem, outra }
 
+/// Hoje, ontem ou uma data do último ano (a medida de anteontem também entra).
 class _EscolhaDaData extends StatelessWidget {
-  const _EscolhaDaData({required this.dia, required this.onEscolher});
+  const _EscolhaDaData({
+    required this.dia,
+    required this.outra,
+    required this.onEscolher,
+  });
 
   final _DiaDaMedida dia;
+  final DateTime? outra;
   final ValueChanged<_DiaDaMedida> onEscolher;
 
   @override
@@ -141,8 +164,12 @@ class _EscolhaDaData extends StatelessWidget {
         FxQuickChips<_DiaDaMedida>(
           itens: _DiaDaMedida.values,
           selecionado: dia,
-          rotuloDe:
-              (d) => d == _DiaDaMedida.hoje ? ptS.evolucaoHoje : ptS.evolucaoOntem,
+          rotuloDe: (d) => switch (d) {
+            _DiaDaMedida.hoje => ptS.evolucaoHoje,
+            _DiaDaMedida.ontem => ptS.evolucaoOntem,
+            _DiaDaMedida.outra =>
+              outra == null ? ptS.evolucaoOutraData : dataCurta(outra!),
+          },
           onSelecionar: onEscolher,
         ),
         const SizedBox(height: TokensStrip.s2),
@@ -151,22 +178,56 @@ class _EscolhaDaData extends StatelessWidget {
   }
 }
 
+/// Calendário do último ano, na folha do kit.
+Future<DateTime?> _escolherOutraData(BuildContext context, DateTime? atual) {
+  final hoje = DateTime.now();
+  return showFxHomeSheet<DateTime>(
+    context,
+    builder:
+        (ctx) => FxSheetFrame(
+          title: ptS.evolucaoMedidaData,
+          child: CalendarDatePicker(
+            initialDate: atual ?? hoje.subtract(const Duration(days: 2)),
+            firstDate: hoje.subtract(const Duration(days: 365)),
+            lastDate: hoje,
+            onDateChanged: (d) => FxHomeSheetChrome.dismissAndPop(ctx, d),
+          ),
+        ),
+  );
+}
+
 /// Registra medida do aluno. [medidas] traz os valores atuais como referência.
+/// [inicial] reabre a folha com o que já foi digitado ("Corrigir").
 Future<NovaMedida?> novaMedidaSheet(
   BuildContext context, {
   required List<MedidaCorporal> medidas,
+  NovaMedida? inicial,
 }) async {
-  final peso = TextEditingController();
-  final cintura = TextEditingController();
-  final quadril = TextEditingController();
-  final braco = TextEditingController();
-  final gordura = TextEditingController();
-  final massa = TextEditingController();
-  var dia = _DiaDaMedida.hoje;
-  final referencia = <EvolucaoMetrica, String>{
+  TextEditingController campo(double? v) =>
+      TextEditingController(text: v == null ? '' : formatBrDecimal(v));
+  final peso = campo(inicial?.peso);
+  final cintura = campo(inicial?.cintura);
+  final quadril = campo(inicial?.quadril);
+  final braco = campo(inicial?.braco);
+  final gordura = campo(inicial?.gordura);
+  final massa = campo(inicial?.massa);
+  final hojeIso = DateTime.now().toIso8601String().substring(0, 10);
+  final ontemIso = DateTime.now()
+      .subtract(const Duration(days: 1))
+      .toIso8601String()
+      .substring(0, 10);
+  var dia = switch (inicial?.data) {
+    null => _DiaDaMedida.hoje,
+    final d when d == hojeIso => _DiaDaMedida.hoje,
+    final d when d == ontemIso => _DiaDaMedida.ontem,
+    _ => _DiaDaMedida.outra,
+  };
+  DateTime? outra =
+      dia == _DiaDaMedida.outra ? DateTime.tryParse(inicial!.data) : null;
+  final referencia = <EvolucaoMetrica, double>{
     for (final m in EvolucaoMetrica.values)
       if (serieDaMetrica(medidas, m).lastOrNull case final ponto?)
-        m: '${formatBrDecimal(ponto.valor)} ${m.unidade}',
+        m: ponto.valor,
   };
   try {
     final ok = await showFxFormSheet(
@@ -182,7 +243,19 @@ Future<NovaMedida?> novaMedidaSheet(
               children: [
                 _EscolhaDaData(
                   dia: dia,
-                  onEscolher: (d) => setSheet(() => dia = d),
+                  outra: outra,
+                  onEscolher: (d) async {
+                    if (d != _DiaDaMedida.outra) {
+                      setSheet(() => dia = d);
+                      return;
+                    }
+                    final escolhida = await _escolherOutraData(context, outra);
+                    if (escolhida == null) return;
+                    setSheet(() {
+                      outra = escolhida;
+                      dia = _DiaDaMedida.outra;
+                    });
+                  },
                 ),
                 _Campos(
                   peso: peso,
@@ -198,9 +271,11 @@ Future<NovaMedida?> novaMedidaSheet(
       ),
     );
     if (!ok) return null;
-    final data = DateTime.now().subtract(
-      Duration(days: dia == _DiaDaMedida.ontem ? 1 : 0),
-    );
+    final data = switch (dia) {
+      _DiaDaMedida.hoje => DateTime.now(),
+      _DiaDaMedida.ontem => DateTime.now().subtract(const Duration(days: 1)),
+      _DiaDaMedida.outra => outra ?? DateTime.now(),
+    };
     return (
       data: data.toIso8601String().substring(0, 10),
       peso: _ler(peso),

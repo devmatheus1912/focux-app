@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
@@ -127,6 +128,17 @@ class _EvolucaoMedidasAbaState extends State<EvolucaoMedidasAba> {
             metaDe: _metaDe,
             onSelecionar: (m) => setState(() => _metrica = m),
           ),
+          // Trocar o gráfico tocando na linha não se descobre sozinho.
+          if (disponiveis.length > 1 && todos.length >= evolucaoPontosParaGrafico)
+            Padding(
+              padding: const EdgeInsets.only(top: TokensStrip.s2),
+              child: Text(
+                ptS.evolucaoToqueParaGrafico,
+                style: FocuxHubTypography.bodyMuted(
+                  color: ShellChrome.of(context).mute,
+                ),
+              ),
+            ),
           const SizedBox(height: TokensStrip.s4),
           ...widget.depois,
           _LinhaHistorico(medidas: recentes, onAbrir: widget.onAbrirMedida),
@@ -162,6 +174,11 @@ class _BlocoDaSerie extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          Text(
+            metrica.rotulo,
+            style: FocuxHubTypography.cardTitle(color: chrome.ink),
+          ),
+          const SizedBox(height: TokensStrip.s2),
           FxChoiceStrip<EvolucaoPeriodo>(
             itens: [
               for (final p in EvolucaoPeriodo.values)
@@ -261,16 +278,25 @@ class _LinhaDeMetrica extends StatelessWidget {
     final valor = '${formatBrDecimal(serie.last.valor)} ${metrica.unidade}';
     final meta = this.meta;
     final diferenca = serie.last.valor - serie.first.valor;
+    // A diferença diz a base: "+20,0 cm desde 30/10", não um número solto.
     final detalhe =
         serie.length < 2
             ? dataCurta(serie.last.data)
-            : diferenca == 0
-            ? '='
-            : diferencaTexto(diferenca, metrica.unidade);
+            : ptS.evolucaoDesde(
+              diferencaTexto(diferenca, metrica.unidade),
+              dataCurta(serie.first.data),
+            );
+    final rumo = rumoDaMeta(meta, serie.last.valor);
+    final corRumo = corDoRumo(chrome, rumo);
+    final rumoTexto = switch (rumo) {
+      RumoDaMeta.noRumo => ptS.evolucaoNoRumo,
+      RumoDaMeta.seAfastando => ptS.evolucaoSeAfastando,
+      null => null,
+    };
     return Semantics(
       button: true,
       selected: selecionada,
-      label: '${metrica.rotulo}, $valor, $detalhe',
+      label: [metrica.rotulo, valor, detalhe, if (rumoTexto != null) rumoTexto].join(', '),
       excludeSemantics: true,
       child: InkWell(
         onTap: onTap,
@@ -280,36 +306,39 @@ class _LinhaDeMetrica extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // Valor no tamanho do título do cartão: a linha é para varrer,
+              // o número grande fica para o gráfico.
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                    child: Text(
-                      metrica.rotulo,
-                      style: FocuxHubTypography.body(
-                        color: selecionada ? primary : chrome.ink,
-                      ).copyWith(
-                        fontWeight:
-                            selecionada ? FontWeight.w700 : FontWeight.w500,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          metrica.rotulo,
+                          style: FocuxHubTypography.cardTitle(
+                            color: selecionada ? primary : chrome.ink,
+                          ),
+                        ),
+                        Text(
+                          detalhe,
+                          style: FocuxHubTypography.bodyMuted(color: chrome.mute)
+                              .copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
+                        ),
+                        if (rumoTexto != null)
+                          Text(
+                            rumoTexto,
+                            style: FocuxHubTypography.chip(corRumo ?? chrome.mute),
+                          ),
+                      ],
                     ),
-                  ),
-                  Text(
-                    valor,
-                    style: FocuxHubTypography.metric(
-                      color: chrome.ink,
-                      fontSize: FocuxHubTypography.metricMd,
-                    ).copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
                   ),
                   const SizedBox(width: TokensStrip.s2),
-                  SizedBox(
-                    width: 72,
-                    child: Text(
-                      detalhe,
-                      maxLines: 1,
-                      textAlign: TextAlign.end,
-                      style: FocuxHubTypography.bodyMuted(color: chrome.mute)
-                          .copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
-                    ),
+                  Text(
+                    valor,
+                    style: FocuxHubTypography.cardTitle(color: chrome.ink)
+                        .copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
                   ),
                 ],
               ),
@@ -326,9 +355,14 @@ class _LinhaDeMetrica extends StatelessWidget {
                     minHeight: 6,
                     color: primary,
                     // Na linha selecionada o fundo já é primary a 7%: o trilho
-                    // em `line` sumia e meta em 0% parecia sem barra.
+                    // em `line` sumia e meta em 0% parecia sem barra. Se
+                    // afastando, o trilho fica na cor de alerta.
                     backgroundColor:
-                        selecionada ? primary.withValues(alpha: 0.18) : chrome.line,
+                        rumo == RumoDaMeta.seAfastando
+                            ? corRumo!.withValues(alpha: 0.28)
+                            : selecionada
+                            ? primary.withValues(alpha: 0.18)
+                            : chrome.line,
                   ),
                 ),
                 const SizedBox(height: TokensStrip.s1),
@@ -347,6 +381,13 @@ class _LinhaDeMetrica extends StatelessWidget {
     );
   }
 }
+
+/// Verde no rumo, âmbar se afastando; nulo sem meta.
+Color? corDoRumo(ShellPalette chrome, RumoDaMeta? rumo) => switch (rumo) {
+  RumoDaMeta.noRumo => chrome.isDark ? EagleTokens.goodDark : EagleTokens.good,
+  RumoDaMeta.seAfastando => chrome.isDark ? EagleTokens.warnDark : EagleTokens.warn,
+  null => null,
+};
 
 /// O histórico mora numa folha: a aba mostra gráfico e medidas sem cartões de data.
 class _LinhaHistorico extends StatelessWidget {

@@ -71,54 +71,58 @@ class EvolucaoConquistas extends StatelessWidget {
           style: FocuxHubTypography.cardTitle(color: chrome.ink),
         ),
         const SizedBox(height: TokensStrip.s2),
-        SizedBox(
-          height: 148,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            clipBehavior: Clip.none,
-            itemCount: conquistas.length,
-            separatorBuilder: (_, __) => const SizedBox(width: TokensStrip.s2),
-            itemBuilder: (context, i) {
-              final c = conquistas[i];
-              return Semantics(
-                button: true,
-                label: '${c.titulo}, ${c.detalhe}',
-                excludeSemantics: true,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(TokensStrip.rCard),
-                  onTap:
-                      () => mostrarConquista(
-                        context,
-                        c,
-                        compartilhar: compartilhar,
+        // Linhas na largura toda: o detalhe ("de 100,0 kg para 110,0 kg em 2
+        // dias") cabe inteiro, sem cartão de meia largura cortando a frase.
+        Container(
+          decoration: fxListCardDecoration(context),
+          child: Column(
+            children: [
+              for (final (i, c) in conquistas.indexed) ...[
+                if (i > 0) Divider(height: 1, color: chrome.line),
+                Semantics(
+                  button: true,
+                  label: '${c.titulo}, ${c.detalhe}',
+                  excludeSemantics: true,
+                  child: InkWell(
+                    onTap:
+                        () => mostrarConquista(
+                          context,
+                          c,
+                          compartilhar: compartilhar,
+                        ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(TokensStrip.s3),
+                      child: Row(
+                        children: [
+                          ConquistaMedalha(tipo: c.tipo, tamanho: 40),
+                          const SizedBox(width: TokensStrip.s3),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  c.titulo,
+                                  style: FocuxHubTypography.cardTitle(
+                                    color: chrome.ink,
+                                  ),
+                                ),
+                                Text(
+                                  c.detalhe,
+                                  style: FocuxHubTypography.bodyMuted(
+                                    color: chrome.mute,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Icon(Icons.chevron_right_rounded, color: chrome.mute),
+                        ],
                       ),
-                  child: Container(
-                    width: 132,
-                    padding: const EdgeInsets.all(TokensStrip.s2),
-                    decoration: fxListCardDecoration(context),
-                    child: Column(
-                      children: [
-                        ConquistaMedalha(tipo: c.tipo, tamanho: 48),
-                        const SizedBox(height: TokensStrip.s1),
-                        Text(
-                          c.titulo,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: FocuxHubTypography.cardTitle(color: chrome.ink),
-                        ),
-                        Text(
-                          c.detalhe,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.center,
-                          style: FocuxHubTypography.chip(chrome.mute),
-                        ),
-                      ],
                     ),
                   ),
                 ),
-              );
-            },
+              ],
+            ],
           ),
         ),
       ],

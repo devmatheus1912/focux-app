@@ -227,6 +227,7 @@ class _MeuProgressoScreenState extends ConsumerState<MeuProgressoScreen> {
                           EvolucaoHero(
                             aneis: dados.aneis,
                             doPersonal: false,
+                            metaNome: nomeDaMetaPrincipal(metas),
                             frase: fraseDoAluno(metas, dados.medidas),
                             recolhido: _recolhido,
                           ),

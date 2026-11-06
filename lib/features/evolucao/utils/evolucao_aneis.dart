@@ -19,10 +19,14 @@ class LeituraDoAnel {
 }
 
 /// Sempre 3, na mesma ordem: a tela não muda de forma quando falta dado.
+///
+/// [metaNome] nomeia o anel de meta ("Meta · Braço"): "Meta 25%" sozinho não
+/// diz de qual meta é.
 List<LeituraDoAnel> leiturasDosAneis(
   EvolucaoAneis aneis, {
   required bool doPersonal,
   DateTime? hoje,
+  String? metaNome,
 }) {
   final previstos = aneis.treinoPrevistos;
   final meta = aneis.metaProgresso;
@@ -50,7 +54,10 @@ List<LeituraDoAnel> leiturasDosAneis(
           vazio: true,
         )
         : LeituraDoAnel(
-          rotulo: ptS.evolucaoAnelMeta,
+          rotulo:
+              metaNome == null
+                  ? ptS.evolucaoAnelMeta
+                  : ptS.evolucaoAnelMetaDe(metaNome),
           valor: '$meta%',
           fracao: meta / 100,
         ),
@@ -114,3 +121,10 @@ String? fraseDoAluno(
   }
   return partes.join(' · ');
 }
+
+/// Nome da medida da meta que o anel mostra ([metaPrincipal]).
+String? nomeDaMetaPrincipal(List<MetaCorporal> metas) =>
+    switch (metaPrincipal(metas)) {
+      final m? => metaMetricaRotulo(m.metrica),
+      null => null,
+    };

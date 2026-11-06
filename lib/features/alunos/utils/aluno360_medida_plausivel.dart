@@ -32,3 +32,18 @@ List<String> medidasSuspeitas({
   if (massaMagra != null && !medidaPlausivel(MedidaTipo.massaMagraPct, massaMagra))
     'Massa magra ${formatBrDecimal(massaMagra)}%',
 ];
+
+/// Quanto uma medida pode mudar de verdade entre dois registros, pela
+/// unidade: peso até 1,5 kg por dia, circunferência até 1 cm por dia e
+/// percentual até 3 pontos por semana (com janela mínima de uma semana).
+/// Passou disso, é mais provável erro de digitação do que evolução.
+bool variacaoSuspeita(String unidade, double diferenca, int dias) {
+  final d = dias < 1 ? 1 : dias;
+  final limite = switch (unidade) {
+    'kg' => 1.5 * d,
+    'cm' => 1.0 * d,
+    '%' => 3.0 * (d < 7 ? 7 : d) / 7,
+    _ => double.infinity,
+  };
+  return diferenca.abs() > limite;
+}

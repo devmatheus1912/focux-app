@@ -28,8 +28,17 @@ class AlunoInsetFormField extends StatelessWidget {
     this.rotuloVisivel = false,
     this.obrigatorio = false,
     this.ajuda,
+    this.ajudaErro = false,
+    this.mostrarOpcional = true,
     this.rotuloFlutuante = true,
   });
+
+  /// [ajuda] é mensagem de erro: sai na cor de erro.
+  final bool ajudaErro;
+
+  /// Com [rotuloVisivel]: falso tira o "opcional" — o formulário em que tudo
+  /// é opcional diz isso uma vez só, no topo.
+  final bool mostrarOpcional;
 
   /// Rótulo pequeno acima do valor, dentro da linha: o campo cheio continua
   /// dizendo o que é.
@@ -63,10 +72,8 @@ class AlunoInsetFormField extends StatelessWidget {
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
     final soft = BrandPalette.softened(primary);
-    final fieldHint = hint ?? label;
-
     if (rotuloVisivel) {
-      return _comRotulo(context, chrome, soft, fieldHint);
+      return _comRotulo(context, chrome, soft);
     }
 
     return Column(
@@ -90,7 +97,7 @@ class AlunoInsetFormField extends StatelessWidget {
             decoration: FxInputDeco.insetGrouped(
               context,
               icon: icon,
-              hint: fieldHint,
+              hint: hint ?? label,
               iconColor: soft,
             ).copyWith(
               // Contador só nos campos curtos (BE @Size ≤ 50).
@@ -116,7 +123,6 @@ class AlunoInsetFormField extends StatelessWidget {
     BuildContext context,
     ShellPalette chrome,
     Color soft,
-    String fieldHint,
   ) {
     return Padding(
       padding: const EdgeInsets.only(top: TokensStrip.s2, bottom: TokensStrip.s2),
@@ -133,10 +139,11 @@ class AlunoInsetFormField extends StatelessWidget {
                   color: chrome.ink,
                 ).copyWith(fontWeight: FontWeight.w800),
               ),
-              Text(
-                obrigatorio ? 'obrigatório' : 'opcional',
-                style: FxSettingsLayout.subhead(color: chrome.mute),
-              ),
+              if (obrigatorio || mostrarOpcional)
+                Text(
+                  obrigatorio ? 'obrigatório' : 'opcional',
+                  style: FxSettingsLayout.subhead(color: chrome.mute),
+                ),
             ],
           ),
           const SizedBox(height: TokensStrip.s1),
@@ -167,7 +174,8 @@ class AlunoInsetFormField extends StatelessWidget {
                   decoration: FxInputDeco.insetGrouped(
                     context,
                     icon: icon,
-                    hint: fieldHint,
+                    // O rótulo já está acima: repetir no placeholder é ruído.
+                    hint: hint ?? '',
                     iconColor: soft,
                   ).copyWith(counterText: ''),
                 ),
@@ -178,7 +186,9 @@ class AlunoInsetFormField extends StatelessWidget {
             const SizedBox(height: TokensStrip.s1),
             Text(
               ajuda!,
-              style: FxSettingsLayout.footer(color: chrome.mute),
+              style: FxSettingsLayout.footer(
+                color: ajudaErro ? Theme.of(context).colorScheme.error : chrome.mute,
+              ),
             ),
           ],
         ],

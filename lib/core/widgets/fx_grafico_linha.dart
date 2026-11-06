@@ -7,6 +7,7 @@ import '../theme/focux_hub_typography.dart';
 import '../theme/shell_chrome.dart';
 import '../utils/motion_preferences.dart';
 import '../utils/pt_br_display.dart';
+import '../../l10n/pt.dart';
 
 class PontoGrafico {
   const PontoGrafico(this.data, this.valor);
@@ -152,7 +153,7 @@ class FxGraficoLinha extends StatelessWidget {
                       show: true,
                       alignment: Alignment.topRight,
                       style: estiloEixo,
-                      labelResolver: (_) => '${formatBrDecimal(alvo)} $unidade',
+                      labelResolver: (_) => ptS.evolucaoAlvoDe('${formatBrDecimal(alvo)} $unidade'),
                     ),
                   ),
               ],

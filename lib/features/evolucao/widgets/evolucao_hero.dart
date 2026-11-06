@@ -29,9 +29,13 @@ class EvolucaoHero extends StatelessWidget {
     this.frase,
     this.onDefinirMeta,
     this.recolhido = false,
+    this.metaNome,
   });
 
   final EvolucaoAneis aneis;
+
+  /// Medida da meta do anel ([nomeDaMetaPrincipal]).
+  final String? metaNome;
   final bool doPersonal;
   final String? frase;
 
@@ -44,7 +48,11 @@ class EvolucaoHero extends StatelessWidget {
     final sobre = fxPaletaSobreMarca(context);
     final fundo = Theme.of(context).colorScheme.primary;
     final cores = fxCoresDeAnel(fundo);
-    final leituras = leiturasDosAneis(aneis, doPersonal: doPersonal);
+    final leituras = leiturasDosAneis(
+      aneis,
+      doPersonal: doPersonal,
+      metaNome: metaNome,
+    );
     return FxStripCard(
       marca: true,
       padding: const EdgeInsets.all(TokensStrip.s3),
@@ -134,30 +142,41 @@ class _Legenda extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final sobre = fxPaletaSobreMarca(context);
+    // Rótulo e valor juntos, um embaixo do outro: antes o valor ficava na
+    // outra ponta do cartão e o olho precisava atravessar para ligar os dois.
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 3),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 8,
-            height: 8,
-            decoration: BoxDecoration(color: cor, shape: BoxShape.circle),
+          Padding(
+            padding: const EdgeInsets.only(top: 5),
+            child: Container(
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(color: cor, shape: BoxShape.circle),
+            ),
           ),
           const SizedBox(width: TokensStrip.s2),
-          Text(leitura.rotulo, style: FocuxHubTypography.chip(sobre.mute)),
-          const SizedBox(width: TokensStrip.s2),
           Expanded(
-            child: onTap == null
-                ? Text(
-                  leitura.valor,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  leitura.rotulo,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.end,
-                  style: FocuxHubTypography.cardTitle(color: sobre.ink),
-                )
-                : Align(
-                  alignment: Alignment.centerRight,
-                  child: Theme(
+                  style: FocuxHubTypography.chip(sobre.mute),
+                ),
+                if (onTap == null)
+                  Text(
+                    leitura.valor,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: FocuxHubTypography.cardTitle(color: sobre.ink),
+                  )
+                else
+                  Theme(
                     data: fxTemaSobreMarca(context),
                     child: FxTonalButton(
                       label: leitura.valor,
@@ -165,7 +184,8 @@ class _Legenda extends StatelessWidget {
                       onPressed: onTap,
                     ),
                   ),
-                ),
+              ],
+            ),
           ),
         ],
       ),

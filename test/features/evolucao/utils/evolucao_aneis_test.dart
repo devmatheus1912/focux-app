@@ -42,7 +42,7 @@ void main() {
     );
     expect(l[0].fracao, closeTo(0.6, 0.001));
     expect(l[1].valor, '40%');
-    expect(l[2].valor, '20 dias restantes');
+    expect(l[2].valor, 'próxima em 20 dias');
   });
 
   test('medida fora do ciclo aparece vencida', () {
@@ -51,7 +51,7 @@ void main() {
       doPersonal: true,
       hoje: hoje,
     );
-    expect(l[2].valor, 'Vencida');
+    expect(l[2].valor, 'Medir agora');
   });
 
   test('cor dos anéis tem contraste em marca clara e escura', () {

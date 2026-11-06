@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -50,6 +52,10 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
   var _page = 0;
   String? _erro;
   var _comparando = false;
+
+  /// Foto de corpo é dado sensível e o aparelho pode estar à vista de
+  /// outros: a grade abre desfocada e o primeiro toque mostra.
+  var _revelado = false;
   FotoEvolucao? _selBefore;
   FotoEvolucao? _selAfter;
   double _slider = 0.5;
@@ -237,6 +243,10 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
 
   void _tocar(FotoEvolucao f) {
     HapticFeedback.selectionClick();
+    if (!_revelado) {
+      setState(() => _revelado = true);
+      return;
+    }
     if (!_comparando) {
       abrirFotoEmTelaCheia(
         context,
@@ -265,7 +275,10 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
     return Semantics(
       button: true,
       selected: isB || isA,
-      label: evolucaoFotosDateLabel(f.data),
+      label:
+          _revelado
+              ? evolucaoFotosDateLabel(f.data)
+              : '${evolucaoFotosDateLabel(f.data)}. ${ptS.evolucaoFotosMostrar}',
       excludeSemantics: true,
       child: GestureDetector(
         onTap: () => _tocar(f),
@@ -274,11 +287,22 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              FxCachedNetworkImage(
-                imageUrl: f.url,
-                fit: BoxFit.cover,
-                memCacheWidth: 360,
+              ImageFiltered(
+                enabled: !_revelado,
+                imageFilter: ui.ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+                child: FxCachedNetworkImage(
+                  imageUrl: f.url,
+                  fit: BoxFit.cover,
+                  memCacheWidth: 360,
+                ),
               ),
+              if (!_revelado)
+                Center(
+                  child: Icon(
+                    Icons.visibility_outlined,
+                    color: Colors.white.withValues(alpha: 0.9),
+                  ),
+                ),
               if (isB || isA)
                 DecoratedBox(
                   decoration: BoxDecoration(
@@ -348,7 +372,13 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
               children: [
                 Expanded(
                   child: Text(
-                    _comparando ? ptS.evolucaoFotoEscolhaDuas : ptS.evolucaoFotoDica,
+                    _comparando
+                        ? ptS.evolucaoFotoEscolhaDuas
+                        : !_revelado
+                        ? ptS.evolucaoFotosDesfocadas
+                        : _fotos.length >= 2
+                        ? ptS.evolucaoFotoDicaComparar
+                        : ptS.evolucaoFotoDica,
                     style: FocuxHubTypography.bodyMuted(color: chrome.mute),
                   ),
                 ),

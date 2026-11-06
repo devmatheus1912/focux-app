@@ -90,6 +90,22 @@ class MetaCorporal {
   );
 }
 
+enum RumoDaMeta { noRumo, seAfastando }
+
+/// Para onde a medida andou desde o início da meta. Nulo sem meta aberta,
+/// sem direção (alvo igual ao início) ou sem mudança. Manutenção vale pela
+/// faixa: dentro está no rumo, fora está se afastando.
+RumoDaMeta? rumoDaMeta(MetaCorporal? meta, double atual) {
+  if (meta == null || !meta.aberta) return null;
+  if (meta.manutencao) {
+    return meta.foraDaFaixa ? RumoDaMeta.seAfastando : RumoDaMeta.noRumo;
+  }
+  final sentido = meta.valorAlvo - meta.valorInicial;
+  final andou = atual - meta.valorInicial;
+  if (sentido == 0 || andou == 0) return null;
+  return (sentido > 0) == (andou > 0) ? RumoDaMeta.noRumo : RumoDaMeta.seAfastando;
+}
+
 enum ConquistaTipo { meta, mantido, recorde }
 
 class Conquista {

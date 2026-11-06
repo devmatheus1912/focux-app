@@ -36,50 +36,6 @@ String engajamentoFxIcon(String? tipo) {
   }
 }
 
-/// Tipo do evento como apoio; nulo quando o título já é o próprio tipo.
-String? engajamentoEventoSubtitle({
-  required String? tipo,
-  required String titulo,
-}) {
-  if ((tipo ?? '').trim().toUpperCase() == 'MENSAGEM') return null;
-  final label = engajamentoTipoLabel(tipo);
-  return label.toLowerCase() == titulo.trim().toLowerCase() ? null : label;
-}
-
-String engajamentoDiaLabel(String dataHora, {DateTime? now}) {
-  final dt = DateTime.tryParse(dataHora)?.toLocal();
-  if (dt == null) return ptS.engajamentoSemData;
-  final ref = now ?? DateTime.now();
-  final hoje = DateTime(ref.year, ref.month, ref.day);
-  final dia = DateTime(dt.year, dt.month, dt.day);
-  final diff = hoje.difference(dia).inDays;
-  if (diff == 0) return ptS.dockHoje;
-  if (diff == 1) return ptS.treinosDiaOntem;
-  final d = dt.day.toString().padLeft(2, '0');
-  final m = dt.month.toString().padLeft(2, '0');
-  return '$d/$m';
-}
-
-typedef EngajamentoLinha = ({String? dia, EventoEngajamento? evento});
-
-/// Achata eventos (já ordenados do mais recente) em cabeçalho de dia + itens.
-List<EngajamentoLinha> engajamentoLinhasPorDia(
-  List<EventoEngajamento> eventos, {
-  DateTime? now,
-}) {
-  final linhas = <EngajamentoLinha>[];
-  String? atual;
-  for (final evento in eventos) {
-    final dia = engajamentoDiaLabel(evento.dataHora, now: now);
-    if (dia != atual) {
-      linhas.add((dia: dia, evento: null));
-      atual = dia;
-    }
-    linhas.add((dia: null, evento: evento));
-  }
-  return linhas;
-}
-
 enum EngajamentoTreinoEstado { feito, parcial, cancelado, aberto }
 
 bool engajamentoEhTreino(EventoEngajamento e) {
@@ -385,7 +341,3 @@ String? engajamentoEventoRota(String? tipo, int alunoId) {
       return null;
   }
 }
-
-/// Quantos eventos a tela de Aderência mostra; o resto fica em "Ver tudo".
-const engajamentoEventosNaTela = 10;
-const engajamentoDiasNaTela = 7;

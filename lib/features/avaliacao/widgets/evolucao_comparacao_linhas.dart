@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -25,6 +26,7 @@ class EvolucaoComparacaoLinhas extends StatelessWidget {
       primeira: primeira,
       atual: atual,
     );
+    final dias = evolucaoComparativoDias(primeira.avaliadoEm, atual.avaliadoEm);
     final gordura = atual.percGordura;
     final massa = atual.percMassa ?? atual.massaMuscular;
     return Column(
@@ -40,7 +42,10 @@ class EvolucaoComparacaoLinhas extends StatelessWidget {
             children: [
               for (final (i, m) in metricas.where((m) => m.visivel).indexed) ...[
                 if (i > 0) Divider(height: 1, color: ShellChrome.of(context).line),
-                _Linha(metrica: m),
+                _Linha(
+                  metrica: m,
+                  suspeita: evolucaoComparativoSuspeita(m, dias),
+                ),
               ],
             ],
           ),
@@ -118,9 +123,12 @@ class _Composicao extends StatelessWidget {
 /// Nome, "90,0 → 105,0 kg" e a diferença à direita. Sem cor: subir ou descer
 /// depende do objetivo.
 class _Linha extends StatelessWidget {
-  const _Linha({required this.metrica});
+  const _Linha({required this.metrica, this.suspeita = false});
 
   final EvolucaoComparativoMetrica metrica;
+
+  /// Variação fora do comum para o intervalo: marca "Confira".
+  final bool suspeita;
 
   @override
   Widget build(BuildContext context) {
@@ -132,8 +140,10 @@ class _Linha extends StatelessWidget {
         temDois
             ? '${evolucaoComparativoFmtNum(metrica.primeira)} → $atual'
             : ptS.comparacaoUmRegistro(metrica.primeira == null ? atual : inicio);
+    final rotulo = ptS.comparacaoLinha(metrica.label, inicio, atual);
+    final alerta = chrome.isDark ? EagleTokens.warnDark : EagleTokens.warn;
     return Semantics(
-      label: ptS.comparacaoLinha(metrica.label, inicio, atual),
+      label: suspeita ? ptS.comparacaoConfiraA11y(rotulo) : rotulo,
       excludeSemantics: true,
       child: Padding(
         padding: const EdgeInsets.all(TokensStrip.s3),
@@ -155,12 +165,26 @@ class _Linha extends StatelessWidget {
               ),
             ),
             if (temDois)
-              Text(
-                evolucaoComparativoDiferenca(metrica),
-                style: FocuxHubTypography.metric(
-                  color: chrome.ink,
-                  fontSize: TokensStrip.fontBody,
-                ).copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    evolucaoComparativoDiferenca(metrica),
+                    style: FocuxHubTypography.metric(
+                      color: chrome.ink,
+                      fontSize: TokensStrip.fontBody,
+                    ).copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
+                  ),
+                  if (suspeita)
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.warning_amber_rounded, size: 14, color: alerta),
+                        const SizedBox(width: 2),
+                        Text(ptS.comparacaoConfira, style: FocuxHubTypography.chip(alerta)),
+                      ],
+                    ),
+                ],
               ),
           ],
         ),

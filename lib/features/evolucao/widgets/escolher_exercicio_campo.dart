@@ -11,7 +11,6 @@ import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_loading.dart';
-import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_sheet_frame.dart';
 import '../../../core/widgets/fx_sheet_search_field.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
@@ -33,9 +32,13 @@ class EscolherExercicioCampo extends StatelessWidget {
     required this.escolhido,
     required this.onEscolher,
     this.recentes = const [],
+    this.erro,
   });
 
   final ExercicioEscolhido? escolhido;
+
+  /// Mensagem embaixo do campo quando falta escolher.
+  final String? erro;
   final ValueChanged<ExercicioEscolhido> onEscolher;
 
   /// Exercícios que este aluno já registrou.
@@ -83,8 +86,26 @@ class EscolherExercicioCampo extends StatelessWidget {
           ),
         ),
       ),
-    );
+    ).withErro(context, erro);
   }
+}
+
+extension on Widget {
+  /// Campo seguido da mensagem de erro, quando houver.
+  Widget withErro(BuildContext context, String? erro) => erro == null
+      ? this
+      : Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          this,
+          Text(
+            erro,
+            style: FocuxHubTypography.bodyMuted(
+              color: Theme.of(context).colorScheme.error,
+            ),
+          ),
+        ],
+      );
 }
 
 /// Favoritos, recentes do aluno e toda a biblioteca, paginada.
@@ -153,8 +174,8 @@ class _BuscaExercicioState extends ConsumerState<BuscaExercicio> {
               : const <Exercicio>[];
       if (!mounted || termo != _termo || grupo != _grupo) return;
       setState(() {
-        _lista = pagina.content;
-        _favoritos = favoritos;
+        _lista = pagina.content.where(_temCarga).toList();
+        _favoritos = favoritos.where(_temCarga).toList();
         _pagina = 0;
         _temMais = pagina.content.length >= 30;
         _carregando = false;
@@ -183,7 +204,7 @@ class _BuscaExercicioState extends ConsumerState<BuscaExercicio> {
       if (!mounted) return;
       final vistos = _lista.map((e) => e.id).toSet();
       setState(() {
-        _lista = [..._lista, ...pagina.content.where((e) => vistos.add(e.id))];
+        _lista = [..._lista, ...pagina.content.where((e) => _temCarga(e) && vistos.add(e.id))];
         _pagina += 1;
         _temMais = pagina.content.length >= 30;
         _carregandoMais = false;
@@ -205,13 +226,54 @@ class _BuscaExercicioState extends ConsumerState<BuscaExercicio> {
     child: Text(titulo, style: FocuxHubTypography.chip(chrome.mute)),
   );
 
-  Widget _linha(ExercicioEscolhido item, {String? grupo}) =>
-      FxSatelliteListTile(
-        title: item.nome,
-        titleCase: false,
-        subtitle: grupo == null ? null : Text(grupo),
+  /// Linha de lista agrupada, sem cartão por item: nome em até duas linhas
+  /// (o que diferencia "no banco declinado" fica no fim do nome).
+  Widget _linha(ExercicioEscolhido item, {String? grupo}) {
+    final chrome = ShellChrome.of(context);
+    return Semantics(
+      button: true,
+      label: grupo == null ? item.nome : '${item.nome}, $grupo',
+      excludeSemantics: true,
+      child: InkWell(
         onTap: () => Navigator.pop(context, item),
-      );
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 56),
+          padding: const EdgeInsets.symmetric(vertical: TokensStrip.s2),
+          decoration: BoxDecoration(
+            border: Border(bottom: BorderSide(color: chrome.line)),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.nome,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: FocuxHubTypography.cardTitle(color: chrome.ink),
+                    ),
+                    if (grupo != null)
+                      Text(
+                        grupo,
+                        style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                      ),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right_rounded, color: chrome.mute),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Recorde é de carga: mobilidade e cardio não entram na escolha.
+  static bool _temCarga(Exercicio e) =>
+      e.grupoMuscularPrimario != GrupoMuscular.mobilidade &&
+      e.grupoMuscularPrimario != GrupoMuscular.cardio;
 
   /// A biblioteca vem paginada e pode ter centenas de exercícios: cada linha
   /// só é montada quando entra na tela.
