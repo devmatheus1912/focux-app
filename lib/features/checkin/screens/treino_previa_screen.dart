@@ -18,9 +18,7 @@ import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../alunos/utils/aluno360_client_cache.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
-import '../../evolucao/utils/evolucao_home_client_cache.dart';
 import '../models/treino_previa.dart';
 import '../utils/checkin_resumo.dart';
 import '../providers/checkin_provider.dart';
@@ -68,9 +66,7 @@ class _TreinoPreviaScreenState extends ConsumerState<TreinoPreviaScreen> {
     setState(() => _registrando = true);
     try {
       await ref.read(checkinRepositoryProvider).confirmarPlano(widget.treinoId);
-      EvolucaoHomeClientCache.clear();
-      Aluno360ClientCache.clear();
-      invalidateAlunoDashboardHome(ref);
+      checkinSessaoMudou(ref);
       if (!mounted) return;
       await showCheckinResumo(
         context,

@@ -17,9 +17,6 @@ import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../alunos/utils/aluno360_client_cache.dart';
-import '../../dashboard/providers/dashboard_provider.dart';
-import '../../evolucao/utils/evolucao_home_client_cache.dart';
 import '../data/checkin_repository.dart';
 import '../data/checkin_series_pendentes.dart';
 import '../providers/checkin_provider.dart';
@@ -406,7 +403,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
       try {
         evolucao = await _repo.evolucaoSessao(id);
       } catch (_) {}
-      _invalidateSessaoCaches();
+      checkinSessaoMudou(ref);
       final semCarga = await _contarSemCarga();
       if (!mounted) return;
       final resumo = buildCheckinResumo(
@@ -438,12 +435,6 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
         _focoTreinoExercicioId = null;
       }
     });
-  }
-
-  void _invalidateSessaoCaches() {
-    EvolucaoHomeClientCache.clear();
-    Aluno360ClientCache.clear();
-    invalidateAlunoDashboardHome(ref);
   }
 
   Future<void> _abrirFila(List<ExecucaoExercicio> exercicios) async {

@@ -18,7 +18,7 @@ extension _CheckinSaida on _CheckinScreenState {
     try {
       await _repo.descartar(execucaoId);
       await _CheckinScreenState._fila.removerDaExecucao(execucaoId);
-      _invalidateSessaoCaches();
+      checkinSessaoMudou(ref);
       return true;
     } catch (e) {
       if (mounted) _erro(friendlyError(e));

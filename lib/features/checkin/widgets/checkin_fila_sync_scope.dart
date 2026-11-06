@@ -5,10 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../alunos/utils/aluno360_client_cache.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../../dashboard/providers/dashboard_provider.dart';
-import '../../evolucao/utils/evolucao_home_client_cache.dart';
 import '../providers/checkin_provider.dart';
 import '../services/checkin_fila_sync.dart';
 import '../utils/checkin_series_fila.dart';
@@ -64,9 +61,7 @@ class _CheckinFilaSyncScopeState extends ConsumerState<CheckinFilaSyncScope>
 
   void _aoTerminar(CheckinFilaResultado r) {
     if (!mounted || (r.enviadas.isEmpty && r.rejeitadas == 0)) return;
-    EvolucaoHomeClientCache.clear();
-    Aluno360ClientCache.clear();
-    invalidateAlunoDashboardHome(ref);
+    checkinSessaoMudou(ref);
     if (r.rejeitadas > 0) {
       FeedbackHelper.showError(
         context,
