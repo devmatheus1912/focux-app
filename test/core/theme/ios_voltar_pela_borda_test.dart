@@ -45,10 +45,10 @@ void main() {
     expect(find.text('abrir'), findsOneWidget);
   }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
-  testWidgets('Android segue com a transição própria', (tester) async {
+  testWidgets('Android usa o voltar preditivo', (tester) async {
     expect(
       fxPremiumPageTransitions.builders[TargetPlatform.android],
-      isA<FxPremiumPageTransitionsBuilder>(),
+      isA<PredictiveBackPageTransitionsBuilder>(),
     );
   });
 }

@@ -1,3 +1,4 @@
+import '../../../core/theme/focux_contrast.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -199,7 +200,7 @@ class _SuccessBadge extends StatelessWidget {
           width: 76,
           height: 76,
           decoration: BoxDecoration(shape: BoxShape.circle, color: accent),
-          child: const Icon(Icons.check_rounded, color: Colors.white, size: 44),
+          child: Icon(Icons.check_rounded, color: FocuxContrast.readableOn(accent), size: 44),
         ),
       ),
     );

@@ -97,10 +97,9 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
       _erro = null;
     });
     try {
-      final home =
-          await AlertasRepository(ref.read(apiClientProvider)).getHome(
-            q: _query,
-          );
+      final home = await AlertasRepository(
+        ref.read(apiClientProvider),
+      ).getHome(q: _query);
       if (!mounted) return;
       setState(() {
         _alertas = home.riscos;
@@ -253,10 +252,14 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                 },
               ),
               const SizedBox(height: TokensStrip.s2),
-              FxTonalButton(label: alertaAdiarCtaLabel(), onPressed: () {
+              FxTonalButton(
+                label: alertaAdiarCtaLabel(),
+                onPressed: () {
                   Navigator.pop(sheetContext);
                   _resolverAlerta(alerta);
-                }, compact: true),
+                },
+                compact: true,
+              ),
             ],
           ),
         );
@@ -278,7 +281,10 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
     ];
     final freshness = FxHubFreshness.fromFetchedAt(_fetchedAt);
     final emptyFiltered =
-        !_loading && _erro == null && _query.trim().isNotEmpty && _alertas.isEmpty;
+        !_loading &&
+        _erro == null &&
+        _query.trim().isNotEmpty &&
+        _alertas.isEmpty;
 
     Widget configTile(AlertasConfiguracao config) {
       return FxSatelliteListTile(
@@ -311,241 +317,241 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
           _leave();
         },
         child: FxShellScaffold(
-        useMesh: true,
-        constrainWidth: false,
-        appBar: FxShellAppBar(
-          title: 'Alertas',
-          subtitle:
-              _loading
-                  ? freshness
-                  : alertaListSubtitle(
-                    totalRiscos: _totalRiscos,
-                    freshness: freshness,
-                  ),
-          onBack: _leave,
-          actions: [
-            FxHelpIconButton(
-              tooltip: 'Como usar os alertas',
-              onTap: () {
-                AnalyticsService.instance.track(
-                  ProductEvents.alertasHubHelpOpened,
-                );
-                showFxHelpSheet(
-                  context,
-                  title: 'Alertas',
-                  subtitle:
-                      'Quem está esfriando. O check-in live continua no aluno.',
-                  tips: const [
-                    FxHelpTip('Como calculamos', alertaComoCalculamos),
-                    FxHelpTip(
-                      'Lista',
-                      'Toque no aluno para o detalhe. Segure para escrever ou adiar 24h.',
+          useMesh: true,
+          constrainWidth: false,
+          appBar: FxShellAppBar(
+            title: 'Alertas',
+            subtitle:
+                _loading
+                    ? freshness
+                    : alertaListSubtitle(
+                      totalRiscos: _totalRiscos,
+                      freshness: freshness,
                     ),
-                    FxHelpTip('Limiares', 'Ajuste em Quando dispara.'),
-                  ],
-                );
-              },
-            ),
-          ],
-        ),
-        body:
-            _loading
-                ? const Padding(
-                  padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-                  child: SkeletonList(count: 6),
-                )
-                : _erro != null
-                ? FxErrorState(
-                  chromeOnDark: isDark,
-                  primary: brand,
-                  message: _erro!,
-                  onRetry: _load,
-                )
-                : Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        TokensStrip.s4,
-                        TokensStrip.s2,
-                        TokensStrip.s4,
-                        TokensStrip.s2,
+            onBack: _leave,
+            actions: [
+              FxHelpIconButton(
+                tooltip: 'Como usar os alertas',
+                onTap: () {
+                  AnalyticsService.instance.track(
+                    ProductEvents.alertasHubHelpOpened,
+                  );
+                  showFxHelpSheet(
+                    context,
+                    title: 'Alertas',
+                    subtitle:
+                        'Quem está esfriando. O check-in live continua no aluno.',
+                    tips: const [
+                      FxHelpTip('Como calculamos', alertaComoCalculamos),
+                      FxHelpTip(
+                        'Lista',
+                        'Toque no aluno para o detalhe. Segure para escrever ou adiar 24h.',
                       ),
-                      child: DecoratedBox(
-                        decoration: fxStripCardDecoration(
-                          context,
-                          accent: brand,
-                          radius: TokensStrip.rCard,
-                          glowStrength: 0.03,
+                      FxHelpTip('Limiares', 'Ajuste em Quando dispara.'),
+                    ],
+                  );
+                },
+              ),
+            ],
+          ),
+          body:
+              _loading
+                  ? const Padding(
+                    padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                    child: SkeletonList(count: 6),
+                  )
+                  : _erro != null
+                  ? FxErrorState(
+                    chromeOnDark: isDark,
+                    primary: brand,
+                    message: _erro!,
+                    onRetry: _load,
+                  )
+                  : Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          TokensStrip.s4,
+                          TokensStrip.s2,
+                          TokensStrip.s4,
+                          TokensStrip.s2,
                         ),
-                        child: TextField(
-                          controller: _searchController,
-                          focusNode: _searchFocus,
-                          onChanged: _onQueryChanged,
-                          onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
-                          textInputAction: TextInputAction.search,
-                          decoration: InputDecoration(
-                            filled: false,
-                            isDense: true,
-                            hintText: 'Buscar aluno ou motivo',
-                            border: InputBorder.none,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 12,
-                            ),
-                            prefixIcon: Icon(
-                              Icons.search_rounded,
-                              color: brand,
-                              size: 20,
-                            ),
-                            suffixIcon:
-                                _query.trim().isEmpty
-                                    ? null
-                                    : IconButton(
-                                      tooltip: 'Limpar busca',
-                                      onPressed: _clearQuery,
-                                      icon: Icon(
-                                        Icons.close_rounded,
-                                        color: mute,
-                                        size: 18,
+                        child: DecoratedBox(
+                          decoration: fxStripCardDecoration(
+                            context,
+                            accent: brand,
+                            radius: TokensStrip.rCard,
+                            glowStrength: 0.03,
+                          ),
+                          child: TextField(
+                            controller: _searchController,
+                            focusNode: _searchFocus,
+                            onChanged: _onQueryChanged,
+                            onTapOutside:
+                                (_) => FxKeyboardDismissScope.dismiss(),
+                            textInputAction: TextInputAction.search,
+                            decoration: InputDecoration(
+                              filled: false,
+                              isDense: true,
+                              hintText: 'Buscar aluno ou motivo',
+                              border: InputBorder.none,
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 12,
+                              ),
+                              prefixIcon: Icon(
+                                Icons.search_rounded,
+                                color: brand,
+                                size: 20,
+                              ),
+                              suffixIcon:
+                                  _query.trim().isEmpty
+                                      ? null
+                                      : IconButton(
+                                        tooltip: 'Limpar busca',
+                                        onPressed: _clearQuery,
+                                        icon: Icon(
+                                          Icons.close_rounded,
+                                          color: mute,
+                                          size: 18,
+                                        ),
                                       ),
-                                    ),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    Expanded(
-                      child: RefreshIndicator(
-                        color: brand,
-                        onRefresh: () async {
-                          AnalyticsService.instance.track(
-                            ProductEvents.alertasHubRefreshed,
-                          );
-                          await _load();
-                        },
-                        child:
-                            emptyFiltered
-                                ? ListView(
-                                  physics:
-                                      const AlwaysScrollableScrollPhysics(),
-                                  keyboardDismissBehavior:
-                                      ScrollViewKeyboardDismissBehavior.onDrag,
-                                  children: [
-                                    SizedBox(
-                                      height: 280,
-                                      child: FxEmptyState(
-                                        icon: 'search',
-                                        title: 'Nada encontrado',
-                                        subtitle:
-                                            'Ajuste a busca para achar outro aluno em risco.',
-                                        action: FxEmptyAction(
-                                          label: 'Limpar busca',
-                                          secondary: true,
-                                          onTap: _clearQuery,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                )
-                                : _alertas.isEmpty
-                                ? ListView(
-                                  physics:
-                                      const AlwaysScrollableScrollPhysics(),
-                                  keyboardDismissBehavior:
-                                      ScrollViewKeyboardDismissBehavior.onDrag,
-                                  padding: const EdgeInsets.fromLTRB(
-                                    TokensStrip.s4,
-                                    TokensStrip.s2,
-                                    TokensStrip.s4,
-                                    TokensStrip.s6,
-                                  ),
-                                  children: [
-                                    if (_config != null) configTile(_config!),
-                                    SizedBox(
-                                      height: 280,
-                                      child: FxEmptyState(
-                                        icon: 'circle-check',
-                                        title: 'Nenhum aluno em risco',
-                                        subtitle:
-                                            'Avisamos aqui quando alguém esfriar. Você pode apertar ou folgar os limiares.',
-                                        action:
-                                            _config == null
-                                                ? null
-                                                : FxEmptyAction(
-                                                  label: 'Ajustar limiares',
-                                                  onTap: _abrirConfig,
-                                                ),
-                                      ),
-                                    ),
-                                  ],
-                                )
-                                : FxContentWidthLimiter(
-                                  child: ListView.builder(
+                      Expanded(
+                        child: RefreshIndicator(
+                          color: brand,
+                          onRefresh: () async {
+                            AnalyticsService.instance.track(
+                              ProductEvents.alertasHubRefreshed,
+                            );
+                            await _load();
+                          },
+                          child:
+                              emptyFiltered
+                                  ? ListView(
                                     physics:
                                         const AlwaysScrollableScrollPhysics(),
                                     keyboardDismissBehavior:
                                         ScrollViewKeyboardDismissBehavior
                                             .onDrag,
-                                    padding: EdgeInsets.fromLTRB(
+                                    children: [
+                                      SizedBox(
+                                        height: 280,
+                                        child: FxEmptyState(
+                                          icon: 'search',
+                                          title: 'Nada encontrado',
+                                          subtitle:
+                                              'Ajuste a busca para achar outro aluno em risco.',
+                                          action: FxEmptyAction(
+                                            label: 'Limpar busca',
+                                            secondary: true,
+                                            onTap: _clearQuery,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                  : _alertas.isEmpty
+                                  ? ListView(
+                                    physics:
+                                        const AlwaysScrollableScrollPhysics(),
+                                    keyboardDismissBehavior:
+                                        ScrollViewKeyboardDismissBehavior
+                                            .onDrag,
+                                    padding: const EdgeInsets.fromLTRB(
                                       TokensStrip.s4,
                                       TokensStrip.s2,
                                       TokensStrip.s4,
-                                      TokensStrip.s6 +
-                                          MediaQuery.viewInsetsOf(
-                                            context,
-                                          ).bottom,
+                                      TokensStrip.s6,
                                     ),
-                                    itemCount:
-                                        rows.length + (_hasMore ? 1 : 0),
-                                    itemBuilder: (context, i) {
-                                      if (_hasMore && i == rows.length) {
-                                        return FxSatelliteListTile(
-                                          title:
-                                              _carregandoMais
-                                                  ? 'Carregando…'
-                                                  : 'Carregar mais',
-                                          onTap:
-                                              _carregandoMais
+                                    children: [
+                                      if (_config != null) configTile(_config!),
+                                      SizedBox(
+                                        height: 280,
+                                        child: FxEmptyState(
+                                          icon: 'circle-check',
+                                          title: 'Nenhum aluno em risco',
+                                          subtitle:
+                                              'Avisamos aqui quando alguém esfriar. Você pode apertar ou folgar os limiares.',
+                                          action:
+                                              _config == null
                                                   ? null
-                                                  : _carregarMais,
-                                        );
-                                      }
-                                      final row = rows[i];
-                                      if (row.config != null) {
-                                        return configTile(row.config!);
-                                      }
-                                      final alerta = row.alerta!;
-                                      final showSection =
-                                          i == 0 ||
-                                          rows[i - 1].section != row.section;
-                                      return Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.stretch,
-                                        children: [
-                                          if (showSection &&
-                                              row.section == 'alto')
-                                            const Padding(
-                                              padding: EdgeInsets.only(
-                                                bottom: TokensStrip.s2,
+                                                  : FxEmptyAction(
+                                                    label: 'Ajustar limiares',
+                                                    onTap: _abrirConfig,
+                                                  ),
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                  : FxContentWidthLimiter(
+                                    child: ListView.builder(
+                                      physics:
+                                          const AlwaysScrollableScrollPhysics(),
+                                      keyboardDismissBehavior:
+                                          ScrollViewKeyboardDismissBehavior
+                                              .onDrag,
+                                      padding: EdgeInsets.fromLTRB(
+                                        TokensStrip.s4,
+                                        TokensStrip.s2,
+                                        TokensStrip.s4,
+                                        TokensStrip.s6 +
+                                            MediaQuery.viewInsetsOf(
+                                              context,
+                                            ).bottom,
+                                      ),
+                                      itemCount:
+                                          rows.length + (_hasMore ? 1 : 0),
+                                      itemBuilder: (context, i) {
+                                        if (_hasMore && i == rows.length) {
+                                          return FxSatelliteListTile(
+                                            title:
+                                                _carregandoMais
+                                                    ? 'Carregando…'
+                                                    : 'Carregar mais',
+                                            onTap:
+                                                _carregandoMais
+                                                    ? null
+                                                    : _carregarMais,
+                                          );
+                                        }
+                                        final row = rows[i];
+                                        if (row.config != null) {
+                                          return configTile(row.config!);
+                                        }
+                                        final alerta = row.alerta!;
+                                        final showSection =
+                                            i == 0 ||
+                                            rows[i - 1].section != row.section;
+                                        return Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.stretch,
+                                          children: [
+                                            if (showSection &&
+                                                row.section == 'alto')
+                                              const Padding(
+                                                padding: EdgeInsets.only(
+                                                  bottom: TokensStrip.s2,
+                                                ),
+                                                child: DashboardSectionHeader(
+                                                  title: 'Alto',
+                                                ),
                                               ),
-                                              child: DashboardSectionHeader(
-                                                title: 'Alto',
+                                            if (showSection &&
+                                                row.section == 'medio')
+                                              const Padding(
+                                                padding: EdgeInsets.only(
+                                                  top: TokensStrip.s2,
+                                                  bottom: TokensStrip.s2,
+                                                ),
+                                                child: DashboardSectionHeader(
+                                                  title: 'Médio',
+                                                ),
                                               ),
-                                            ),
-                                          if (showSection &&
-                                              row.section == 'medio')
-                                            const Padding(
-                                              padding: EdgeInsets.only(
-                                                top: TokensStrip.s2,
-                                                bottom: TokensStrip.s2,
-                                              ),
-                                              child: DashboardSectionHeader(
-                                                title: 'Médio',
-                                              ),
-                                            ),
-                                          GestureDetector(
-                                            onLongPress:
-                                                () => _openActions(alerta),
-                                            child: FxSatelliteListTile(
+                                            FxSatelliteListTile(
                                               title: alerta.alunoNome,
                                               subtitle:
                                                   alerta.motivos.isEmpty
@@ -572,18 +578,19 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                                                       ? brand
                                                       : null,
                                               onTap: () => _openAlerta(alerta),
+                                              onLongPress:
+                                                  () => _openActions(alerta),
                                             ),
-                                          ),
-                                        ],
-                                      );
-                                    },
+                                          ],
+                                        );
+                                      },
+                                    ),
                                   ),
-                                ),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-      ),
+                    ],
+                  ),
+        ),
       ),
     );
   }

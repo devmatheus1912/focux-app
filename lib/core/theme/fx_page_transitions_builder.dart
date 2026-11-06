@@ -31,12 +31,15 @@ class FxPremiumPageTransitionsBuilder extends PageTransitionsBuilder {
   }
 }
 
-/// iPhone e Mac usam a transição Cupertino: é ela que traz o gesto de voltar
-/// arrastando da borda (sem ela nenhuma tela voltava pelo gesto). Tela com
-/// `PopScope(canPop: false)` continua sem gesto, como no botão de voltar.
+/// Cada sistema usa a transição que traz o gesto de voltar dele:
+/// - iPhone e Mac: Cupertino, com o arrasto da borda (sem ela nenhuma tela
+///   voltava pelo gesto);
+/// - Android: voltar preditivo, que mostra a tela anterior durante o gesto
+///   (Android 14+); fora do gesto entra o fade padrão do Material.
+/// Tela com `PopScope(canPop: false)` continua sem gesto, como no botão de voltar.
 const fxPremiumPageTransitions = PageTransitionsTheme(
   builders: {
-    TargetPlatform.android: FxPremiumPageTransitionsBuilder(),
+    TargetPlatform.android: PredictiveBackPageTransitionsBuilder(),
     TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
     TargetPlatform.linux: FxPremiumPageTransitionsBuilder(),
     TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),

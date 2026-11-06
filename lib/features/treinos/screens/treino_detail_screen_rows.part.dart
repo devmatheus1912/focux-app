@@ -42,10 +42,7 @@ class _ExercicioRow extends StatelessWidget {
         te.exercicio.isPersonalUpload
             ? '${te.exercicio.nomeDisplay} · Meu'
             : te.exercicio.nomeDisplay;
-    final apoio = [
-      if (grupo.isNotEmpty) grupo,
-      if (hasNote) note,
-    ].join(' · ');
+    final apoio = [if (grupo.isNotEmpty) grupo, if (hasNote) note].join(' · ');
 
     return Container(
       decoration: BoxDecoration(
@@ -144,8 +141,9 @@ class _ExercicioRow extends StatelessWidget {
               tooltip: 'Ações de ${te.exercicio.nomeDisplay}',
               onPressed: onMenu,
               style: IconButton.styleFrom(
+                // 48×48: alvo de toque mínimo do iOS e do Android.
                 minimumSize: const Size(
-                  TreinosLayout.headerChromeSize,
+                  TreinosLayout.touchTarget,
                   TreinosLayout.touchTarget,
                 ),
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,

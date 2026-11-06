@@ -1,3 +1,4 @@
+import '../../../../l10n/pt.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -105,7 +106,9 @@ class _SubstituirExercicioBottomSheetState
           .read(exercicioRepositoryProvider)
           .listarPickerPagina(
             padraoMovimento: enumQueryParam(widget.alvo.padraoMovimento),
-            grupoMuscularPrimario: enumQueryParam(widget.alvo.grupoMuscularPrimario),
+            grupoMuscularPrimario: enumQueryParam(
+              widget.alvo.grupoMuscularPrimario,
+            ),
             page: _page,
             size: 40,
           );
@@ -258,7 +261,8 @@ class _SubstituirExercicioBottomSheetState
                                   icon: Icons.add_rounded,
                                   accent: BrandPalette.softened(primary),
                                   label: 'Criar exercício personalizado',
-                                  subtitle: 'Abre o cadastro e usa no lugar deste',
+                                  subtitle:
+                                      'Abre o cadastro e usa no lugar deste',
                                   onTap: () {
                                     Navigator.of(context).pop();
                                     widget.onCriarNovo!();
@@ -307,14 +311,15 @@ class _AlternativaTile extends StatelessWidget {
       onTap: onTap,
       accessory:
           canPreviewExerciseMedia(exercicio)
-              ? GestureDetector(
-                onTap: () {
-                  HapticFeedback.selectionClick();
-                  showExerciseMediaPreview(context, exercicio: exercicio);
-                },
-                child: ExerciseMediaThumb.fromExercicio(
-                  exercicio,
-                  size: 34,
+              ? Semantics(
+                button: true,
+                label: ptS.a11yVerDemonstracao(exercicio.nomeDisplay),
+                child: GestureDetector(
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    showExerciseMediaPreview(context, exercicio: exercicio);
+                  },
+                  child: ExerciseMediaThumb.fromExercicio(exercicio, size: 34),
                 ),
               )
               : null,

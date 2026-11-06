@@ -1,3 +1,4 @@
+import '../../../core/theme/focux_contrast.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/focux_hub_typography.dart';
@@ -83,7 +84,7 @@ class DiaVencimentoGrade extends StatelessWidget {
                   child: Text(
                     '$d',
                     style: FocuxHubTypography.bodyMuted(
-                      color: d == selecionado ? Colors.white : chrome.ink,
+                      color: d == selecionado ? FocuxContrast.readableOn(chrome.brand) : chrome.ink,
                       fontWeight: FontWeight.w700,
                     ),
                   ),

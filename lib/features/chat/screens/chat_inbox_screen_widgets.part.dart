@@ -226,59 +226,53 @@ class _InboxTile extends StatelessWidget {
     );
     final unread = item.naoLidas;
     final primary = Theme.of(context).colorScheme.primary;
-    return GestureDetector(
-      onLongPress: onLongPress,
-      child: FxSatelliteListTile(
-        margin: const EdgeInsets.only(bottom: 4),
-        title: item.alunoNome,
-        subtitle: Text(
-          preview,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        leading:
-            selecting && selected
-                ? Icon(Icons.check_rounded, color: primary)
-                : AlunoAvatar(
-                  name: item.alunoNome,
-                  photoUrl: item.fotoUrl,
-                  variant: AlunoAvatarVariant.strip,
+    return FxSatelliteListTile(
+      margin: const EdgeInsets.only(bottom: 4),
+      title: item.alunoNome,
+      subtitle: Text(preview, maxLines: 1, overflow: TextOverflow.ellipsis),
+      leading:
+          selecting && selected
+              ? Icon(Icons.check_rounded, color: primary)
+              : AlunoAvatar(
+                name: item.alunoNome,
+                photoUrl: item.fotoUrl,
+                variant: AlunoAvatarVariant.strip,
+              ),
+      trailing: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Text(
+            fxTimeAgo(item.enviadoEm),
+            style: FocuxHubTypography.bodyMuted(
+              color: unread > 0 ? primary : fxScreenMute(context),
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          if (unread > 0) ...[
+            const SizedBox(height: TokensStrip.s1),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: TokensStrip.s2,
+                vertical: 2,
+              ),
+              decoration: BoxDecoration(
+                color: primary,
+                borderRadius: BorderRadius.circular(TokensStrip.rPill),
+              ),
+              child: Text(
+                unread > 99 ? '99+' : '$unread',
+                style: FocuxHubTypography.chip(
+                  Theme.of(context).colorScheme.onPrimary,
                 ),
-        trailing: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Text(
-              fxTimeAgo(item.enviadoEm),
-              style: FocuxHubTypography.bodyMuted(
-                color: unread > 0 ? primary : fxScreenMute(context),
-                fontWeight: FontWeight.w700,
               ),
             ),
-            if (unread > 0) ...[
-              const SizedBox(height: TokensStrip.s1),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: TokensStrip.s2,
-                  vertical: 2,
-                ),
-                decoration: BoxDecoration(
-                  color: primary,
-                  borderRadius: BorderRadius.circular(TokensStrip.rPill),
-                ),
-                child: Text(
-                  unread > 99 ? '99+' : '$unread',
-                  style: FocuxHubTypography.chip(
-                    Theme.of(context).colorScheme.onPrimary,
-                  ),
-                ),
-              ),
-            ],
           ],
-        ),
-        accent: unread > 0 || selected ? primary : null,
-        onTap: onTap,
+        ],
       ),
+      accent: unread > 0 || selected ? primary : null,
+      onTap: onTap,
+      onLongPress: onLongPress,
     );
   }
 }

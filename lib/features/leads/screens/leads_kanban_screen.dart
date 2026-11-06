@@ -1,3 +1,4 @@
+import '../../../core/theme/focux_contrast.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/router/safe_navigation.dart';
@@ -550,8 +551,8 @@ class _LeadCard extends StatelessWidget {
                 alignment: Alignment.center,
                 child: Text(
                   title.isNotEmpty ? title[0].toUpperCase() : '?',
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: FocuxContrast.readableOn(isDark ? brandDeep : brand),
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
                   ),

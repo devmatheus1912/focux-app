@@ -146,7 +146,10 @@ class _BuscaExercicioState extends ConsumerState<BuscaExercicio> {
       );
       final favoritos =
           termo.isEmpty && grupo == null
-              ? (await repo.listarPickerPagina(favoritos: true, size: 50)).content
+              ? (await repo.listarPickerPagina(
+                favoritos: true,
+                size: 50,
+              )).content
               : const <Exercicio>[];
       if (!mounted || termo != _termo || grupo != _grupo) return;
       setState(() {
@@ -169,11 +172,14 @@ class _BuscaExercicioState extends ConsumerState<BuscaExercicio> {
     if (_carregando || _carregandoMais || !_temMais) return;
     setState(() => _carregandoMais = true);
     try {
-      final pagina = await ref.read(exercicioRepositoryProvider).listarPickerPagina(
-        busca: _termo,
-        grupoMuscularPrimario: _grupo == null ? null : enumQueryParam(_grupo),
-        page: _pagina + 1,
-      );
+      final pagina = await ref
+          .read(exercicioRepositoryProvider)
+          .listarPickerPagina(
+            busca: _termo,
+            grupoMuscularPrimario:
+                _grupo == null ? null : enumQueryParam(_grupo),
+            page: _pagina + 1,
+          );
       if (!mounted) return;
       final vistos = _lista.map((e) => e.id).toSet();
       setState(() {
@@ -199,17 +205,46 @@ class _BuscaExercicioState extends ConsumerState<BuscaExercicio> {
     child: Text(titulo, style: FocuxHubTypography.chip(chrome.mute)),
   );
 
-  Widget _linha(ExercicioEscolhido item, {String? grupo}) => FxSatelliteListTile(
-    title: item.nome,
-    titleCase: false,
-    subtitle: grupo == null ? null : Text(grupo),
-    onTap: () => Navigator.pop(context, item),
-  );
+  Widget _linha(ExercicioEscolhido item, {String? grupo}) =>
+      FxSatelliteListTile(
+        title: item.nome,
+        titleCase: false,
+        subtitle: grupo == null ? null : Text(grupo),
+        onTap: () => Navigator.pop(context, item),
+      );
 
-  Widget _linhaDe(Exercicio e) => _linha(
-    (id: e.id, nome: e.nome),
-    grupo: TaxonomyLabels.grupo[e.grupoMuscularPrimario],
-  );
+  /// A biblioteca vem paginada e pode ter centenas de exercícios: cada linha
+  /// só é montada quando entra na tela.
+  Widget _listaPreguicosa(ShellPalette chrome, Color primary) {
+    final linhas = <Widget Function()>[
+      if (_semFiltro && _favoritos.isNotEmpty) ...[
+        () => _secao(ptS.escolherFavoritos, chrome),
+        for (final e in _favoritos) () => _linhaDe(e),
+      ],
+      if (_semFiltro && widget.recentes.isNotEmpty) ...[
+        () => _secao(ptS.escolherRecentes, chrome),
+        for (final r in widget.recentes) () => _linha(r),
+      ],
+      if (_semFiltro) () => _secao(ptS.escolherTodos, chrome),
+      for (final e in _lista) () => _linhaDe(e),
+      if (_carregandoMais)
+        () => Padding(
+          padding: const EdgeInsets.all(TokensStrip.s3),
+          child: Center(child: FxLoading(color: primary)),
+        ),
+    ];
+    return ListView.builder(
+      controller: _rolagem,
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      itemCount: linhas.length,
+      itemBuilder: (_, i) => linhas[i](),
+    );
+  }
+
+  Widget _linhaDe(Exercicio e) => _linha((
+    id: e.id,
+    nome: e.nome,
+  ), grupo: TaxonomyLabels.grupo[e.grupoMuscularPrimario]);
 
   @override
   Widget build(BuildContext context) {
@@ -245,10 +280,10 @@ class _BuscaExercicioState extends ConsumerState<BuscaExercicio> {
                   label: ptS.escolherUsarTexto(_termo),
                   compact: true,
                   onPressed:
-                      () => Navigator.pop<ExercicioEscolhido>(
-                        context,
-                        (id: null, nome: _termo),
-                      ),
+                      () => Navigator.pop<ExercicioEscolhido>(context, (
+                        id: null,
+                        nome: _termo,
+                      )),
                 ),
               ),
             ),
@@ -270,28 +305,7 @@ class _BuscaExercicioState extends ConsumerState<BuscaExercicio> {
                         style: FocuxHubTypography.bodyMuted(color: chrome.mute),
                       ),
                     )
-                    : ListView(
-                      controller: _rolagem,
-                      keyboardDismissBehavior:
-                          ScrollViewKeyboardDismissBehavior.onDrag,
-                      children: [
-                        if (_semFiltro && _favoritos.isNotEmpty) ...[
-                          _secao(ptS.escolherFavoritos, chrome),
-                          for (final e in _favoritos) _linhaDe(e),
-                        ],
-                        if (_semFiltro && widget.recentes.isNotEmpty) ...[
-                          _secao(ptS.escolherRecentes, chrome),
-                          for (final r in widget.recentes) _linha(r),
-                        ],
-                        if (_semFiltro) _secao(ptS.escolherTodos, chrome),
-                        for (final e in _lista) _linhaDe(e),
-                        if (_carregandoMais)
-                          Padding(
-                            padding: const EdgeInsets.all(TokensStrip.s3),
-                            child: Center(child: FxLoading(color: primary)),
-                          ),
-                      ],
-                    ),
+                    : _listaPreguicosa(chrome, primary),
           ),
         ],
       ),

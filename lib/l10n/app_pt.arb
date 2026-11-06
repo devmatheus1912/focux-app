@@ -2668,5 +2668,9 @@
   "progressoSemPeso": "Sem medida",
   "aluno360SemMedida": "Sem medida",
   "aluno360PesoAConfirmar": "A confirmar",
-  "metaMassa": "Massa magra"
+  "metaMassa": "Massa magra",
+  "a11yVerDemonstracao": "Ver demonstração de {nome}",
+  "@a11yVerDemonstracao": { "placeholders": { "nome": { "type": "String" } } },
+  "a11yAbrirImagem": "Abrir imagem",
+  "a11yMaisAcoes": "Mais ações"
 }

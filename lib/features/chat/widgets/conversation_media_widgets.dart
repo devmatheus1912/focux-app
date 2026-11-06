@@ -1,3 +1,5 @@
+import '../../../core/theme/focux_contrast.dart';
+import '../../../l10n/pt.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -44,51 +46,55 @@ class ConversationMediaPreview extends StatelessWidget {
 
       return Padding(
         padding: const EdgeInsets.only(bottom: 8),
-        child: GestureDetector(
-          onTap: onOpen,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(14),
-            child: Stack(
-              children: [
-                FxCachedNetworkImage(
-                  imageUrl: url,
-                  height: previewHeight,
-                  width: previewWidth,
-                  fit: BoxFit.cover,
-                  memCacheWidth: (previewWidth * 2).round(),
-                  filterQuality: FilterQuality.medium,
-                  errorBuilder:
-                      (_, __, ___) => Container(
-                        height: previewHeight,
-                        width: previewWidth,
-                        color: Colors.black12,
-                        alignment: Alignment.center,
-                        child: const Icon(Icons.broken_image_outlined),
+        child: Semantics(
+          button: true,
+          label: ptS.a11yAbrirImagem,
+          child: GestureDetector(
+            onTap: onOpen,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(14),
+              child: Stack(
+                children: [
+                  FxCachedNetworkImage(
+                    imageUrl: url,
+                    height: previewHeight,
+                    width: previewWidth,
+                    fit: BoxFit.cover,
+                    memCacheWidth: (previewWidth * 2).round(),
+                    filterQuality: FilterQuality.medium,
+                    errorBuilder:
+                        (_, __, ___) => Container(
+                          height: previewHeight,
+                          width: previewWidth,
+                          color: Colors.black12,
+                          alignment: Alignment.center,
+                          child: const Icon(Icons.broken_image_outlined),
+                        ),
+                  ),
+                  Positioned(
+                    right: 8,
+                    bottom: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 5,
                       ),
-                ),
-                Positioned(
-                  right: 8,
-                  bottom: 8,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 5,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.42),
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: const Text(
-                      'Abrir',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.42),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: const Text(
+                        'Abrir',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -439,7 +445,7 @@ class _ConversationAudioInlinePlayerState
                   style: IconButton.styleFrom(
                     backgroundColor: primary,
                     disabledBackgroundColor: primary.withValues(alpha: 0.7),
-                    foregroundColor: Colors.white,
+                    foregroundColor: FocuxContrast.readableOn(primary),
                     minimumSize: const Size(36, 36),
                   ),
                   icon:

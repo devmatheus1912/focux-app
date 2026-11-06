@@ -1,3 +1,4 @@
+import '../../../core/theme/focux_contrast.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/tokens_strip.dart';
@@ -82,7 +83,7 @@ Future<bool> showCopilotExecutarConfirmSheet(
                       label: const Text('Confirmar'),
                       style: FilledButton.styleFrom(
                         backgroundColor: primary,
-                        foregroundColor: Colors.white,
+                        foregroundColor: FocuxContrast.readableOn(primary),
                       ),
                     ),
                   ),

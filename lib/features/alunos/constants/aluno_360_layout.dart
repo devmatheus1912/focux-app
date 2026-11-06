@@ -1,3 +1,4 @@
+import '../../../core/theme/focux_contrast.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/focux_hub_typography.dart';
@@ -17,6 +18,7 @@ abstract final class Aluno360Layout {
   static const double insetCardRadius = TokensStrip.rCard;
   static const double tabBarHeight = 52;
   static const double tabContentGap = TokensStrip.s4;
+
   /// Chip overlay (paridade Perfil/Home) — CTA primária sticky.
   static const double stickyBarContentHeight = 64;
 
@@ -41,12 +43,19 @@ abstract final class Aluno360Layout {
     );
   }
 
-  /// Identity strip height (compact strip + padding at textScale ≤ 1.25).
+  /// Teto da fonte no bloco de identidade: ele fica fixo no topo da ficha e,
+  /// sem teto, comeria a tela com fonte grande. A altura abaixo usa o mesmo
+  /// teto para não sobrar faixa vazia.
+  static const double heroMaxTextScale = 1.25;
+
+  /// Identity strip height (compact strip + padding at textScale ≤ [heroMaxTextScale]).
   static double heroBodyHeight(
     BuildContext context, {
     bool comAvisoDeRisco = false,
   }) {
-    final textScale = MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 2.0);
+    final textScale = MediaQuery.textScalerOf(
+      context,
+    ).scale(1).clamp(1.0, heroMaxTextScale);
     final base = comAvisoDeRisco ? 176.0 : 116.0;
     return base + ((textScale - 1) * 40);
   }
@@ -107,10 +116,7 @@ abstract final class Aluno360Layout {
     required Color primary,
     required bool isDark,
   }) {
-    return fxListCardDecoration(
-      context,
-      radius: FxSettingsLayout.groupRadius,
-    );
+    return fxListCardDecoration(context, radius: FxSettingsLayout.groupRadius);
   }
 
   /// Flat surface for every tile inside the Histórico 360 sheet (no mixed InkWell fills).
@@ -120,10 +126,7 @@ abstract final class Aluno360Layout {
   }) {
     final chrome = ShellChrome.of(context);
     return BoxDecoration(
-      color:
-          isDark
-              ? Colors.white.withValues(alpha: 0.04)
-              : chrome.cardFill,
+      color: isDark ? Colors.white.withValues(alpha: 0.04) : chrome.cardFill,
       borderRadius: BorderRadius.circular(12),
     );
   }
@@ -150,10 +153,9 @@ abstract final class Aluno360Layout {
 
   /// Micro badges (module tiles, status chips).
   static TextStyle badgeMicroStyle(BuildContext context, Color color) {
-    return FocuxHubTypography.chip(color).copyWith(
-      fontWeight: FontWeight.w600,
-      letterSpacing: 0.15,
-    );
+    return FocuxHubTypography.chip(
+      color,
+    ).copyWith(fontWeight: FontWeight.w600, letterSpacing: 0.15);
   }
 
   /// Sticky bar and primary pill labels.
@@ -193,28 +195,23 @@ abstract final class Aluno360Layout {
 
   /// Card section titles — same weight as Alunos list card names.
   static TextStyle sectionTitleStyle(BuildContext context, Color ink) {
-    return FocuxHubTypography.body(color: ink).copyWith(
-      fontWeight: FontWeight.w700,
-      letterSpacing: -0.15,
-      height: 1.2,
-    );
+    return FocuxHubTypography.body(
+      color: ink,
+    ).copyWith(fontWeight: FontWeight.w700, letterSpacing: -0.15, height: 1.2);
   }
 
   /// Collapsible inset headers (Próximo contato compact).
   static TextStyle compactSectionTitleStyle(BuildContext context, Color ink) {
-    return FocuxHubTypography.cardTitle(color: ink).copyWith(
-      fontWeight: FontWeight.w600,
-      letterSpacing: -0.1,
-    );
+    return FocuxHubTypography.cardTitle(
+      color: ink,
+    ).copyWith(fontWeight: FontWeight.w600, letterSpacing: -0.1);
   }
 
   /// Titles inside nested panels (empty states, callouts).
   static TextStyle panelTitleStyle(BuildContext context, Color ink) {
-    return FocuxHubTypography.cardTitle(color: ink).copyWith(
-      fontWeight: FontWeight.w600,
-      height: 1.25,
-      letterSpacing: -0.05,
-    );
+    return FocuxHubTypography.cardTitle(
+      color: ink,
+    ).copyWith(fontWeight: FontWeight.w600, height: 1.25, letterSpacing: -0.05);
   }
 
   /// Emphasized body inside cards (prescription, instructions).
@@ -228,11 +225,9 @@ abstract final class Aluno360Layout {
 
   /// Hero / identity name on Aluno 360 toolbar and hero card.
   static TextStyle identityNameStyle(BuildContext context, Color ink) {
-    return FocuxHubTypography.body(color: ink).copyWith(
-      fontWeight: FontWeight.w700,
-      letterSpacing: -0.15,
-      height: 1.15,
-    );
+    return FocuxHubTypography.body(
+      color: ink,
+    ).copyWith(fontWeight: FontWeight.w700, letterSpacing: -0.15, height: 1.15);
   }
 
   /// Card subtitles under titles (min 12px).
@@ -283,7 +278,7 @@ abstract final class Aluno360Layout {
       minimumSize: const Size(0, 48),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       backgroundColor: primary,
-      foregroundColor: Colors.white,
+      foregroundColor: FocuxContrast.readableOn(primary),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(13)),
     );
   }

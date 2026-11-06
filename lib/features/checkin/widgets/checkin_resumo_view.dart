@@ -1,3 +1,4 @@
+import '../../../core/theme/focux_contrast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -91,7 +92,7 @@ class CheckinResumoView extends StatelessWidget {
       width: 88,
       height: 88,
       decoration: BoxDecoration(shape: BoxShape.circle, color: primary),
-      child: const Icon(Icons.check_rounded, color: Colors.white, size: 48),
+      child: Icon(Icons.check_rounded, color: FocuxContrast.readableOn(primary), size: 48),
     );
     if (!reduce) {
       check = check

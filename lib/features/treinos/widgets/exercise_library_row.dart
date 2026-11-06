@@ -1,3 +1,4 @@
+import '../../../l10n/pt.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -43,6 +44,7 @@ class ExerciseLibraryRow extends StatelessWidget {
   /// "Atenção: joelho": região do aluno citada nas contraindicações. Só aviso.
   final String? alerta;
   final VoidCallback? onUploadVideo;
+
   /// Segurar o card: favoritar/desfavoritar (preferido no picker).
   final VoidCallback? onFavoriteToggle;
   final bool uploadEnabled;
@@ -77,11 +79,13 @@ class ExerciseLibraryRow extends StatelessWidget {
     final line = chrome.line;
     final brand = BrandPalette.softened(Theme.of(context).colorScheme.primary);
     final meta = exerciseLibraryMeta(exercicio);
-    final hasPreview = onPreviewThumb != null && canPreviewExerciseMedia(exercicio);
-    final dividerInset = insetGroup
-        ? 0.0
-        : (_hasThumbMedia ? 36.0 : 0.0) +
-            (_hasThumbMedia ? FxSettingsLayout.iconGap : 0.0);
+    final hasPreview =
+        onPreviewThumb != null && canPreviewExerciseMedia(exercicio);
+    final dividerInset =
+        insetGroup
+            ? 0.0
+            : (_hasThumbMedia ? 36.0 : 0.0) +
+                (_hasThumbMedia ? FxSettingsLayout.iconGap : 0.0);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -115,19 +119,26 @@ class ExerciseLibraryRow extends StatelessWidget {
               child: Row(
                 children: [
                   if (_hasThumbMedia) ...[
-                    GestureDetector(
-                      onTap:
+                    Semantics(
+                      button: hasPreview,
+                      label:
                           hasPreview
-                              ? () {
-                                HapticFeedback.selectionClick();
-                                onPreviewThumb!();
-                              }
+                              ? ptS.a11yVerDemonstracao(exercicio.nomeDisplay)
                               : null,
-                      child: ExerciseMediaThumb.fromExercicio(
-                        exercicio,
-                        size: 36,
-                        radius: 10,
-                        showPlayBadge: hasPreview,
+                      child: GestureDetector(
+                        onTap:
+                            hasPreview
+                                ? () {
+                                  HapticFeedback.selectionClick();
+                                  onPreviewThumb!();
+                                }
+                                : null,
+                        child: ExerciseMediaThumb.fromExercicio(
+                          exercicio,
+                          size: 36,
+                          radius: 10,
+                          showPlayBadge: hasPreview,
+                        ),
                       ),
                     ),
                     const SizedBox(width: FxSettingsLayout.iconGap),
@@ -154,7 +165,8 @@ class ExerciseLibraryRow extends StatelessWidget {
                                 style: FxSettingsLayout.subhead(color: mute),
                               ),
                             ),
-                            if (!alreadyInTreino && !videoFocuxIntocado(exercicio)) ...[
+                            if (!alreadyInTreino &&
+                                !videoFocuxIntocado(exercicio)) ...[
                               const SizedBox(width: 6),
                               _MeuPill(brand: brand),
                             ],
@@ -211,8 +223,7 @@ class ExerciseLibraryRow extends StatelessWidget {
                         exercicio.favoritado
                             ? Icons.star_rounded
                             : Icons.star_outline_rounded,
-                        color:
-                            exercicio.favoritado ? EagleTokens.gold : mute,
+                        color: exercicio.favoritado ? EagleTokens.gold : mute,
                         size: 22,
                       ),
                     ),
@@ -344,9 +355,9 @@ class _InTreinoPill extends StatelessWidget {
       ),
       child: Text(
         resumo == null || resumo!.isEmpty ? 'No treino' : 'No treino · $resumo',
-        style: FxSettingsLayout.footer(color: mute).copyWith(
-          fontWeight: FontWeight.w800,
-        ),
+        style: FxSettingsLayout.footer(
+          color: mute,
+        ).copyWith(fontWeight: FontWeight.w800),
       ),
     );
   }

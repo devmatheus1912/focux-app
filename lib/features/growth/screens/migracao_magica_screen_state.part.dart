@@ -621,8 +621,8 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                               alignment: Alignment.center,
                               child: Text(
                                 nome.isNotEmpty ? nome[0].toUpperCase() : '?',
-                                style: const TextStyle(
-                                  color: Colors.white,
+                                style: TextStyle(
+                                  color: FocuxContrast.readableOn(isDark ? brandDeep : brand),
                                   fontSize: 16,
                                   fontWeight: FontWeight.w700,
                                 ),

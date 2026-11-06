@@ -70,7 +70,7 @@ class AlunoDetailHeroCard extends StatelessWidget {
           '$displayName, objetivo $objective, ${status.label}, '
           '${signal.label} ${signal.value}${signal.suffix ?? ''}',
       child: MediaQuery.withClampedTextScaling(
-        maxScaleFactor: 1.25,
+        maxScaleFactor: Aluno360Layout.heroMaxTextScale,
         child: FxStripCard(
           key: const ValueKey('aluno360_hero_card'),
           marca: true,

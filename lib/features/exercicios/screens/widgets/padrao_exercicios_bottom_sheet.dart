@@ -1,3 +1,4 @@
+import '../../../../l10n/pt.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -298,14 +299,15 @@ class _ExerciseChoiceTile extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (canPreviewExerciseMedia(exercicio))
-            GestureDetector(
-              onTap: () {
-                HapticFeedback.selectionClick();
-                showExerciseMediaPreview(context, exercicio: exercicio);
-              },
-              child: ExerciseMediaThumb.fromExercicio(
-                exercicio,
-                size: 34,
+            Semantics(
+              button: true,
+              label: ptS.a11yVerDemonstracao(exercicio.nomeDisplay),
+              child: GestureDetector(
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  showExerciseMediaPreview(context, exercicio: exercicio);
+                },
+                child: ExerciseMediaThumb.fromExercicio(exercicio, size: 34),
               ),
             ),
           const SizedBox(width: 6),

@@ -1,3 +1,4 @@
+import '../../../core/theme/focux_contrast.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/brand_palette.dart';
@@ -146,16 +147,16 @@ class _AlunoAvatarInitialsFace extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textColor = perfilStyle ? (primary ?? fill) : Colors.white;
+    final textColor = perfilStyle ? (primary ?? fill) : FocuxContrast.readableOn(fill);
     final textStyle =
         perfilStyle
             ? FxSettingsLayout.avatarInitials(color: textColor)
-            : FocuxHubTypography.chip(Colors.white).copyWith(
+            : FocuxHubTypography.chip(FocuxContrast.readableOn(fill)).copyWith(
               fontSize: (inner / 2) * 0.72,
               fontWeight: FontWeight.w700,
               letterSpacing: -0.3,
               height: 1,
-              color: Colors.white,
+              color: FocuxContrast.readableOn(fill),
             );
 
     return ColoredBox(
