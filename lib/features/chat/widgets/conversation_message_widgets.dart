@@ -276,9 +276,10 @@ class ConversationSystemEvent extends StatelessWidget {
       corIcone: evolucao ? primary : null,
       texto: '${view.threadLabel} · $time',
       leitura: '${view.title}. ${view.threadLabel}, $time',
-      onTap: evolucao && view.linhas.isNotEmpty
-          ? () => _abrirEvolucao(context, view)
-          : null,
+      onTap:
+          evolucao && view.linhas.isNotEmpty
+              ? () => _abrirEvolucao(context, view)
+              : null,
     );
   }
 
@@ -286,23 +287,24 @@ class ConversationSystemEvent extends StatelessWidget {
     final chrome = ShellChrome.of(context);
     showFxBottomSheet<void>(
       context: context,
-      builder: (_) => FxSheetFrame(
-        title: view.title,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (final linha in view.linhas)
-              Padding(
-                padding: const EdgeInsets.only(bottom: TokensStrip.s2),
-                child: Text(
-                  linha,
-                  style: FocuxHubTypography.body(color: chrome.ink),
-                ),
-              ),
-          ],
-        ),
-      ),
+      builder:
+          (_) => FxSheetFrame(
+            title: view.title,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (final linha in view.linhas)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: TokensStrip.s2),
+                    child: Text(
+                      linha,
+                      style: FocuxHubTypography.body(color: chrome.ink),
+                    ),
+                  ),
+              ],
+            ),
+          ),
     );
   }
 }
@@ -386,16 +388,17 @@ class _LinhaDeEvento extends StatelessWidget {
       button: onTap != null,
       label: leitura,
       excludeSemantics: true,
-      child: onTap == null
-          ? linha
-          : InkWell(
-              borderRadius: BorderRadius.circular(TokensStrip.rSm),
-              onTap: onTap,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(minHeight: 48),
-                child: Center(child: linha),
+      child:
+          onTap == null
+              ? linha
+              : InkWell(
+                borderRadius: BorderRadius.circular(TokensStrip.rSm),
+                onTap: onTap,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 48),
+                  child: Center(child: linha),
+                ),
               ),
-            ),
     );
   }
 }
@@ -454,8 +457,7 @@ class ConversationBubble extends StatelessWidget {
     final sendFailed = mine && outgoingStatus == ChatOutgoingStatus.failed;
     final showMeta = sendFailed || chatBubbleShowsTimestampMeta(groupSlot);
     final bubbleShape = chatBubbleBorderRadius(mine: mine, slot: groupSlot);
-    final borderWidth =
-        highlighted ? 1.6 : (mine ? 0.0 : 1.0);
+    final borderWidth = highlighted ? 1.6 : (mine ? 0.0 : 1.0);
 
     return Align(
       alignment: mine ? Alignment.centerRight : Alignment.centerLeft,
@@ -466,7 +468,9 @@ class ConversationBubble extends StatelessWidget {
           margin: chatBubbleGroupMargin(groupSlot),
           padding: EdgeInsets.fromLTRB(
             TokensStrip.s3,
-            groupSlot == ChatBubbleGroupSlot.middle ? TokensStrip.s2 : TokensStrip.s3,
+            groupSlot == ChatBubbleGroupSlot.middle
+                ? TokensStrip.s2
+                : TokensStrip.s3,
             TokensStrip.s3,
             TokensStrip.s2,
           ),
@@ -474,17 +478,21 @@ class ConversationBubble extends StatelessWidget {
           decoration: BoxDecoration(
             color: fill,
             borderRadius: bubbleShape,
-            border: borderWidth > 0 ? Border.all(color: line, width: borderWidth) : null,
+            border:
+                borderWidth > 0
+                    ? Border.all(color: line, width: borderWidth)
+                    : null,
             // A bolha recebida precisa se soltar do fundo do chat.
-            boxShadow: mine || isDark
-                ? null
-                : [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+            boxShadow:
+                mine || isDark
+                    ? null
+                    : [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.05),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -540,7 +548,9 @@ class ConversationBubble extends StatelessWidget {
                               reaction.mine
                                   ? accentColor.withValues(alpha: 0.14)
                                   : chrome.sheetFill,
-                          borderRadius: BorderRadius.circular(TokensStrip.rPill),
+                          borderRadius: BorderRadius.circular(
+                            TokensStrip.rPill,
+                          ),
                           border: Border.all(
                             color:
                                 reaction.mine
@@ -558,8 +568,8 @@ class ConversationBubble extends StatelessWidget {
               ],
               if (showMeta) ...[
                 const SizedBox(height: 3),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
+                Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     if (!deleted && msg.editedAt != null) ...[
                       Text(
@@ -603,7 +613,6 @@ class ConversationBubble extends StatelessWidget {
     if (tipoMidia == null) return false;
     return ['IMAGE', 'IMAGEM', 'VIDEO', 'AUDIO'].contains(tipoMidia);
   }
-
 }
 
 String _conversationTimeLabel(DateTime dt) {

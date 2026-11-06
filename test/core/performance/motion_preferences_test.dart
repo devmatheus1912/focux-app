@@ -68,16 +68,21 @@ void main() {
   });
 
   group('appTextScaler', () {
-    test('respeita a fonte do sistema até 1,3', () {
+    test('respeita a fonte do sistema até o teto', () {
       expect(appTextScaler(const TextScaler.linear(1.15)).scale(1), 1.15);
+      // Acima do teto antigo (1,3) a fonte do sistema passa inteira.
+      expect(appTextScaler(const TextScaler.linear(1.45)).scale(1), 1.45);
       expect(
-        appTextScaler(const TextScaler.linear(1.3)).scale(1),
+        appTextScaler(const TextScaler.linear(1.6)).scale(1),
         kAppMaxTextScale,
       );
     });
 
     test('corta escalas acima do teto e abaixo do piso', () {
-      expect(appTextScaler(const TextScaler.linear(2)).scale(1), 1.3);
+      expect(
+        appTextScaler(const TextScaler.linear(3)).scale(1),
+        kAppMaxTextScale,
+      );
       expect(appTextScaler(const TextScaler.linear(0.5)).scale(1), 0.85);
     });
   });

@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 
 import '../utils/motion_preferences.dart';
@@ -8,6 +9,15 @@ Page<T> fxTransitionPage<T>({
   required Widget child,
   bool fade = false,
 }) {
+  // No iPhone a página Cupertino traz o gesto de voltar pela borda; a
+  // transição própria abaixo não tem gesto nenhum.
+  if (defaultTargetPlatform == TargetPlatform.iOS) {
+    return CupertinoPage<T>(
+      key: state.pageKey,
+      name: state.name ?? state.path,
+      child: child,
+    );
+  }
   return CustomTransitionPage<T>(
     key: state.pageKey,
     name: state.name ?? state.path,

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 /// Premium fade + slide transition applied globally via [ThemeData.pageTransitionsTheme].
@@ -30,12 +31,15 @@ class FxPremiumPageTransitionsBuilder extends PageTransitionsBuilder {
   }
 }
 
+/// iPhone e Mac usam a transição Cupertino: é ela que traz o gesto de voltar
+/// arrastando da borda (sem ela nenhuma tela voltava pelo gesto). Tela com
+/// `PopScope(canPop: false)` continua sem gesto, como no botão de voltar.
 const fxPremiumPageTransitions = PageTransitionsTheme(
   builders: {
     TargetPlatform.android: FxPremiumPageTransitionsBuilder(),
-    TargetPlatform.iOS: FxPremiumPageTransitionsBuilder(),
+    TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
     TargetPlatform.linux: FxPremiumPageTransitionsBuilder(),
-    TargetPlatform.macOS: FxPremiumPageTransitionsBuilder(),
+    TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
     TargetPlatform.windows: FxPremiumPageTransitionsBuilder(),
     TargetPlatform.fuchsia: FxPremiumPageTransitionsBuilder(),
   },

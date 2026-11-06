@@ -7,18 +7,17 @@ bool reduceMotionOf(BuildContext context) =>
 Duration fxMotionDuration(
   BuildContext context, {
   Duration normal = const Duration(milliseconds: 220),
-}) =>
-    reduceMotionOf(context) ? Duration.zero : normal;
+}) => reduceMotionOf(context) ? Duration.zero : normal;
 
 /// Millisecond helper for [AnimatedSize] / [AnimatedContainer].
-int fxMotionDurationMs(
-  BuildContext context, {
-  int normal = 220,
-}) =>
+int fxMotionDurationMs(BuildContext context, {int normal = 220}) =>
     reduceMotionOf(context) ? 0 : normal;
 
-/// Teto global do Dynamic Type — igual em todas as larguras de tela.
-const double kAppMaxTextScale = 1.3;
+/// Teto global do Dynamic Type — igual em todas as larguras de tela. 1.6 passa
+/// do maior tamanho comum do iOS (perto de 1,35) e entra nos de acessibilidade
+/// sem desmontar as telas densas (chat, execução do treino); antes era 1.3 e
+/// cortava quem precisa de fonte grande. Em 2.0 essas telas quebravam.
+const double kAppMaxTextScale = 1.6;
 
 /// Piso global — evita texto ilegível quando o sistema reduz a fonte.
 const double kAppMinTextScale = 0.85;

@@ -83,17 +83,28 @@ class CheckinPendentesAviso extends StatelessWidget {
         padding: const EdgeInsets.symmetric(
           horizontal: FxSettingsLayout.pageInset,
         ),
-        child: Row(
+        // Com fonte grande o botão desce para a linha de baixo em vez de
+        // espremer o texto numa coluna de uma palavra.
+        child: Wrap(
+          alignment: WrapAlignment.spaceBetween,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: TokensStrip.s2,
+          runSpacing: TokensStrip.s1,
           children: [
-            Icon(Icons.cloud_off_rounded, size: 18, color: chrome.mute),
-            const SizedBox(width: TokensStrip.s2),
-            Expanded(
-              child: Text(
-                s.checkinPendentes(pendentes),
-                style: FocuxHubTypography.bodyMuted(
-                  color: chrome.mute,
-                ).copyWith(fontSize: checkinPendentesAvisoFonte),
-              ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.cloud_off_rounded, size: 18, color: chrome.mute),
+                const SizedBox(width: TokensStrip.s2),
+                Flexible(
+                  child: Text(
+                    s.checkinPendentes(pendentes),
+                    style: FocuxHubTypography.bodyMuted(
+                      color: chrome.mute,
+                    ).copyWith(fontSize: checkinPendentesAvisoFonte),
+                  ),
+                ),
+              ],
             ),
             FxTonalButton(
               label: s.checkinPendentesTentar,
