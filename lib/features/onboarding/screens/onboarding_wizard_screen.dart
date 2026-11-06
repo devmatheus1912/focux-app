@@ -27,6 +27,7 @@ import '../../dashboard/utils/dashboard_home_client_cache.dart';
 import '../../dashboard/utils/dashboard_onboarding_logic.dart';
 import '../../planos/data/plano_features_bff_cache.dart';
 import '../data/onboarding_repository.dart';
+import '../providers/onboarding_provider.dart';
 import '../data/onboarding_wizard_client_cache.dart';
 import '../utils/onboarding_wizard_display.dart';
 import '../utils/onboarding_wizard_normalize.dart';

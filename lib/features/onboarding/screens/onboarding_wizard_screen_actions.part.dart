@@ -27,8 +27,7 @@ extension on _OnboardingWizardScreenState {
       ),
     );
     try {
-      await OnboardingRepository(ref.read(apiClientProvider)).marcarCompleto();
-      _evictHomeCaches();
+      await concluirOnboarding(ref);
       if (mounted) context.go('/dashboard/personal');
     } catch (e) {
       if (!mounted) return;
