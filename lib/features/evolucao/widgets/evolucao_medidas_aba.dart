@@ -325,7 +325,10 @@ class _LinhaDeMetrica extends StatelessWidget {
                     ),
                     minHeight: 6,
                     color: primary,
-                    backgroundColor: chrome.line,
+                    // Na linha selecionada o fundo já é primary a 7%: o trilho
+                    // em `line` sumia e meta em 0% parecia sem barra.
+                    backgroundColor:
+                        selecionada ? primary.withValues(alpha: 0.18) : chrome.line,
                   ),
                 ),
                 const SizedBox(height: TokensStrip.s1),

@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
@@ -41,6 +43,35 @@ class FxGraficoLinha extends StatelessWidget {
   static String _data(DateTime d) =>
       '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}';
 
+  /// Eixo Y com passo redondo (1, 2, 2,5 ou 5 × 10ⁿ) e limites múltiplos
+  /// dele: as marcas saem 40, 50, 60 em vez de 37, 56, 75.
+  @visibleForTesting
+  static ({double min, double max, double passo}) eixoY(
+    double menor,
+    double maior,
+  ) {
+    if (maior == menor) {
+      menor -= 1;
+      maior += 1;
+    }
+    // Folga pequena: ponto no limite não fica colado na borda.
+    final margem = (maior - menor) * 0.08;
+    final baixo = menor - margem;
+    final alto = maior + margem;
+    final bruto = (alto - baixo) / 3;
+    final base = math.pow(10, (math.log(bruto) / math.ln10).floor()).toDouble();
+    final passo = [
+      1,
+      2,
+      2.5,
+      5,
+      10,
+    ].map((m) => m * base).firstWhere((p) => p >= bruto);
+    final min = (baixo / passo).floor() * passo;
+    final max = (alto / passo).ceil() * passo;
+    return (min: min, max: max, passo: passo);
+  }
+
   double _x(int i) =>
       pontos[i].data.difference(pontos.first.data).inHours / 24 + i * 0.01;
 
@@ -55,9 +86,10 @@ class FxGraficoLinha extends StatelessWidget {
     ];
     final menor = valores.reduce((a, b) => a < b ? a : b);
     final maior = valores.reduce((a, b) => a > b ? a : b);
-    final folga = maior == menor ? 1.0 : (maior - menor) * 0.2;
-    final minY = menor - folga;
-    final maxY = maior + folga;
+    final eixo = eixoY(menor, maior);
+    final minY = eixo.min;
+    final maxY = eixo.max;
+    final casasDoEixo = eixo.passo % 1 == 0 ? 0 : 1;
     final maxX = _x(pontos.length - 1);
     final temTendencia = tendencia.length == pontos.length;
     final estiloEixo = FocuxHubTypography.chip(chrome.mute);
@@ -120,15 +152,14 @@ class FxGraficoLinha extends StatelessWidget {
                       show: true,
                       alignment: Alignment.topRight,
                       style: estiloEixo,
-                      labelResolver:
-                          (_) => '${formatBrDecimal(alvo)} $unidade',
+                      labelResolver: (_) => '${formatBrDecimal(alvo)} $unidade',
                     ),
                   ),
               ],
             ),
             gridData: FlGridData(
               drawVerticalLine: false,
-              horizontalInterval: (maxY - minY) / 3,
+              horizontalInterval: eixo.passo,
               getDrawingHorizontalLine:
                   (_) => FlLine(color: chrome.line, strokeWidth: 1),
             ),
@@ -139,13 +170,13 @@ class FxGraficoLinha extends StatelessWidget {
                 sideTitles: SideTitles(
                   showTitles: true,
                   reservedSize: 40,
-                  interval: (maxY - minY) / 3,
+                  interval: eixo.passo,
                   getTitlesWidget:
                       (valor, meta) =>
                           valor == meta.min || valor == meta.max
                               ? const SizedBox.shrink()
                               : Text(
-                                formatBrDecimal(valor, digits: 0),
+                                formatBrDecimal(valor, digits: casasDoEixo),
                                 style: estiloEixo,
                               ),
                 ),
@@ -161,6 +192,8 @@ class FxGraficoLinha extends StatelessWidget {
                     );
                     return SideTitleWidget(
                       meta: meta,
+                      // Primeira e última data não vazam para fora do card.
+                      fitInside: SideTitleFitInsideData.fromTitleMeta(meta),
                       child: Text(_data(data), style: estiloEixo),
                     );
                   },

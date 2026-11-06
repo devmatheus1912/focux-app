@@ -205,4 +205,33 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(find.text('Equipamentos e espaços'), findsOneWidget);
   });
+
+  testWidgets('barra de composição corporal aparece (não fica com altura 0)', (
+    tester,
+  ) async {
+    tela(tester, const Size(390, 500));
+    const snap = {
+      'avaliadoEm': '2026-11-02',
+      'percGordura': 20.0,
+      'percMassa': 80.0,
+    };
+    await tester.pumpWidget(
+      _tela(
+        EvolucaoComparacaoLinhas(
+          primeira: SnapshotAvaliacao.fromJson(snap),
+          atual: SnapshotAvaliacao.fromJson(snap),
+        ),
+        escuro: false,
+      ),
+    );
+    await _pronto(tester);
+    final faixas = find.descendant(
+      of: find.byType(EvolucaoComparacaoLinhas),
+      matching: find.byType(ColoredBox),
+    );
+    expect(faixas, findsWidgets);
+    for (final faixa in faixas.evaluate()) {
+      expect(tester.getSize(find.byWidget(faixa.widget)).height, 12);
+    }
+  });
 }

@@ -83,7 +83,9 @@ class _Composicao extends StatelessWidget {
               borderRadius: BorderRadius.circular(TokensStrip.s1),
               child: SizedBox(
                 height: 12,
+                // Stretch: ColoredBox sem filho encolhe para altura 0 numa Row.
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Expanded(
                       flex: (gordura * 10).round(),

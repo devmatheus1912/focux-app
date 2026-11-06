@@ -120,5 +120,10 @@ void main() {
     expect(evolucaoComparativoDiferenca(m(70, 50, 'cm')), '↓ 20,0 cm');
     expect(evolucaoComparativoDiferenca(m(60, 60, 'cm')), '=');
     expect(evolucaoComparativoDias('2026-10-30', '2026-11-02'), 3);
+    // Com horário: noite de 30/10 até manhã de 02/11 seguem 3 dias.
+    expect(
+      evolucaoComparativoDias('2026-10-30T20:00:00', '2026-11-02T08:00:00'),
+      3,
+    );
   });
 }

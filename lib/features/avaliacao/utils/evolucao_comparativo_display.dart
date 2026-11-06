@@ -146,10 +146,15 @@ String evolucaoComparativoJanelaCaption({
 }) =>
     '$primeira → $atual${dias == null ? '' : ' · $dias ${dias == 1 ? 'dia' : 'dias'}'}';
 
+/// Dias de calendário: avaliação de 30/10 à noite e de 02/11 de manhã são
+/// 3 dias, não os 2 que sairiam contando blocos de 24 h.
 int? evolucaoComparativoDias(String? primeira, String? atual) {
   final a = DateTime.tryParse(primeira ?? '');
   final b = DateTime.tryParse(atual ?? '');
-  return a == null || b == null ? null : b.difference(a).inDays;
+  if (a == null || b == null) return null;
+  final diaA = DateTime.utc(a.year, a.month, a.day);
+  final diaB = DateTime.utc(b.year, b.month, b.day);
+  return diaB.difference(diaA).inDays;
 }
 
 /// Diferença com unidade e seta neutra; "=" sem mudança.
