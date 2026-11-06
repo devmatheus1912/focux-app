@@ -73,9 +73,10 @@ void invalidatePersonalDashboardHomeRef(Ref ref) {
 /// Puxar para atualizar: busca o bundle novo sem apagar o atual (mantém o
 /// ETag). Sem rede, lança antes de mexer no cache e a Home segue como estava.
 Future<void> refreshAlunoDashboardHome(WidgetRef ref) async {
+  final geracao = alunoDashboardHomeClientCache.geracao;
   final fresh = await ref.read(dashboardRepositoryProvider).getAlunoHome();
   if (fresh != null) {
-    alunoDashboardHomeClientCache.put(fresh);
+    alunoDashboardHomeClientCache.put(fresh, geracao: geracao);
   } else {
     alunoDashboardHomeClientCache.revalidar();
   }

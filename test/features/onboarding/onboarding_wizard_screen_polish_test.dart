@@ -25,7 +25,7 @@ void main() {
     expect(screen, contains('ProductEvents.setupWizardViewed'));
     expect(screen, contains('ProductEvents.setupWizardContinue'));
     expect(screen, contains('ProductEvents.setupWizardCompleted'));
-    expect(screen, contains('dashboardHomeClientCache.clear'));
+    expect(screen, contains('invalidatePersonalDashboardHome(ref)'));
     expect(screen, contains('OnboardingWizardClientCache'));
     expect(screen, contains('pushSetupActionRoute'));
     expect(screen, contains('_load(silent: true)'));

@@ -54,7 +54,7 @@ void main() {
     final sessao = _sessao(repo);
     final base = (await sessao.iniciar(7)).execucao;
 
-    final estado = await sessao.sincronizar(base);
+    final estado = await sessao.sincronizar(() => base);
 
     expect(estado.execucao?.treinoNome, 'Treino A');
     expect(repo.detalhes, 0);
@@ -74,13 +74,42 @@ void main() {
       );
       final base = (await sessao.iniciar(7)).execucao;
 
-      final estado = await sessao.sincronizar(base);
+      final estado = await sessao.sincronizar(() => base);
 
       expect(repo.detalhes, 1);
       expect(estado.execucao?.treinoNome, 'Do servidor');
       expect(estado.pendentes, 0);
     },
   );
+
+  test('série marcada durante o envio não some', () async {
+    final repo = _RepoComServidor();
+    final base = (await _sessao(repo).iniciar(7)).execucao!;
+    var atual = base;
+    final sessao = CheckinSessao(
+      repo: repo,
+      fila: const CheckinSeriesPendentesStore(),
+      enviarFila: () async {
+        // O aluno marca uma série enquanto a fila sobe.
+        atual = ExecucaoTreino.fromJson({
+          'id': base.id,
+          'treinoId': 7,
+          'treinoNome': 'Marcada durante o envio',
+          'status': 'EM_ANDAMENTO',
+          'exercicios': const [],
+        });
+        return const CheckinFilaResultado(
+          enviadas: [],
+          rejeitadas: 0,
+          restantes: [],
+        );
+      },
+    );
+
+    final estado = await sessao.sincronizar(() => atual);
+
+    expect(estado.execucao?.treinoNome, 'Marcada durante o envio');
+  });
 
   test('descartar avisa o servidor', () async {
     final repo = FakeCheckinRepo();

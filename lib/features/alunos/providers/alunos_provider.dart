@@ -130,13 +130,21 @@ final alunoPerfilHomeProvider = FutureProvider<AlunoPerfilHomeBundle>((ref) asyn
   return ref.read(alunoRepositoryProvider).getPerfilHome();
 });
 
-void invalidateAlunosCaches(WidgetRef ref) {
-  AlunosHomeClientCache.clear();
-  Aluno360ClientCache.clear();
-  ref.read(alunosHomeTailProvider.notifier).clear();
-  ref.invalidate(alunosHomeProvider);
-  ref.invalidate(iaCopilotoHomeProvider);
-}
+/// Lista única do que mostra a carteira: Alunos Home (e a cauda paginada),
+/// 360 e Copiloto. Tela usa [invalidateAlunosCaches]; o ciclo de vida do aluno
+/// lê este provider. Uma lista só, para os dois caminhos não divergirem.
+final limparCachesDeAlunosProvider = Provider<void Function()>(
+  (ref) => () {
+    AlunosHomeClientCache.clear();
+    Aluno360ClientCache.clear();
+    ref.read(alunosHomeTailProvider.notifier).clear();
+    ref.invalidate(alunosHomeProvider);
+    ref.invalidate(iaCopilotoHomeProvider);
+  },
+);
+
+void invalidateAlunosCaches(WidgetRef ref) =>
+    ref.read(limparCachesDeAlunosProvider)();
 
 /// Lista + chips — sem apagar o cache 360 de todos os alunos.
 void invalidateAlunosListCaches(WidgetRef ref) {

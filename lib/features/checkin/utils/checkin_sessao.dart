@@ -47,10 +47,14 @@ class CheckinSessao {
     );
   }
 
-  /// Envia a fila e soma ao [base] o que foi aceito. Série recusada saiu da
-  /// fila: a execução volta à do servidor.
-  Future<CheckinSessaoEstado> sincronizar(ExecucaoTreino? base) async {
+  /// Envia a fila e soma o que foi aceito à execução [atualAgora] lida
+  /// *depois* do envio: série marcada enquanto a fila subia não pode sumir.
+  /// Série recusada saiu da fila: a execução volta à do servidor.
+  Future<CheckinSessaoEstado> sincronizar(
+    ExecucaoTreino? Function() atualAgora,
+  ) async {
     final r = await enviarFila();
+    final base = atualAgora();
     ExecucaoTreino? atual;
     if (base != null) {
       var t = base;

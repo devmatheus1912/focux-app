@@ -181,7 +181,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
   Future<bool> _enviarFila() async {
     final CheckinSessaoEstado sessao;
     try {
-      sessao = await _sessao.sincronizar(_execucao);
+      sessao = await _sessao.sincronizar(() => _execucao);
     } catch (_) {
       return false;
     }

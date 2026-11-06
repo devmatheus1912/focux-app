@@ -27,6 +27,7 @@ class BffSnapshotCache<T> {
   T? _bundle;
   DateTime? _fetchedAt;
   bool _refreshing = false;
+  int _geracao = 0;
   bool _probeRegistered = false;
 
   void _ensureProbe() {
@@ -71,7 +72,13 @@ class BffSnapshotCache<T> {
 
   void releaseRefresh() => _refreshing = false;
 
-  void put(T bundle, {DateTime? now}) {
+  /// Sobe a cada [clear] (logout, troca de tenant, escrita que muda a Home).
+  int get geracao => _geracao;
+
+  /// Com [geracao], só grava se o cache não foi limpo desde que a busca
+  /// começou: resposta da sessão anterior não volta depois do logout.
+  void put(T bundle, {DateTime? now, int? geracao}) {
+    if (geracao != null && geracao != _geracao) return;
     _ensureProbe();
     _bundle = bundle;
     _fetchedAt = now ?? DateTime.now();
@@ -88,6 +95,7 @@ class BffSnapshotCache<T> {
   }
 
   void clear() {
+    _geracao++;
     _bundle = null;
     _fetchedAt = null;
     _refreshing = false;
@@ -110,27 +118,33 @@ Future<T> lerSnapshotBff<T>(
 
   final staleHit = cache.getEvenIfStale();
   if (staleHit != null && cache.claimRefresh()) {
+    final geracao = cache.geracao;
     Future<void>(() async {
       try {
         final fresh = await buscar();
+        if (geracao != cache.geracao) return;
         if (fresh != null) {
           cache.put(fresh);
         } else {
           cache.revalidar();
+          // 304 sem cópia nova: o bundle na tela é o mesmo, sem rebuild.
+          if (cache.renovar == null) return;
         }
         ref.invalidateSelf();
       } catch (_) {
         // Mantém stale.
       } finally {
-        cache.releaseRefresh();
+        // Depois de um clear o claim já foi zerado e pode ser de outro refresh.
+        if (geracao == cache.geracao) cache.releaseRefresh();
       }
     });
     return staleHit;
   }
 
+  final geracao = cache.geracao;
   final fresh = await buscar();
   if (fresh != null) {
-    cache.put(fresh);
+    cache.put(fresh, geracao: geracao);
     return fresh;
   }
   final stale = cache.revalidar();
@@ -138,7 +152,7 @@ Future<T> lerSnapshotBff<T>(
   // 304 órfão (sem body local): o repositório já tenta de novo sem ETag.
   final recovered = await buscar();
   if (recovered != null) {
-    cache.put(recovered);
+    cache.put(recovered, geracao: geracao);
     return recovered;
   }
   throw StateError('GET ${cache.etagPath}: resposta vazia');

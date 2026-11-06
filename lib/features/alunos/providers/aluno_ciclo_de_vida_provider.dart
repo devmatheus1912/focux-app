@@ -1,10 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../dashboard/providers/dashboard_provider.dart';
-import '../../ia/providers/ia_copilot_providers.dart';
+import '../../financeiro/providers/financeiro_provider.dart';
 import '../data/aluno_repository.dart';
-import '../utils/aluno360_client_cache.dart';
-import '../utils/alunos_home_client_cache.dart';
 import 'alunos_provider.dart';
 
 /// Ação em vários alunos: quantos deram certo e o primeiro erro.
@@ -13,18 +11,20 @@ class ResultadoLoteAlunos {
     required this.total,
     required this.sucesso,
     this.primeiroErro,
+    this.primeiroStack,
   });
 
   final int total;
   final int sucesso;
   final Object? primeiroErro;
+  final StackTrace? primeiroStack;
 
   int get falhas => total - sucesso;
 }
 
 /// Ciclo de vida do Aluno pela carteira (lista e ficha): excluir, mudar status
 /// e marcar mensalidades pagas. Dono das chamadas e do que fica velho depois:
-/// Alunos Home, 360, Copiloto e a Home do personal (contagens da carteira).
+/// Alunos Home, 360, Copiloto, a Home do personal e o Financeiro.
 /// As telas ficam só com a confirmação e o aviso.
 class AlunoCicloDeVida {
   AlunoCicloDeVida(this._ref);
@@ -38,12 +38,14 @@ class AlunoCicloDeVida {
   Future<ResultadoLoteAlunos> excluir(List<int> ids) async {
     var sucesso = 0;
     Object? primeiroErro;
+    StackTrace? primeiroStack;
     for (final id in ids) {
       try {
         await _repo.excluirAluno(id);
         sucesso++;
-      } catch (e) {
+      } catch (e, st) {
         primeiroErro ??= e;
+        primeiroStack ??= st;
       }
     }
     _carteiraMudou();
@@ -51,6 +53,7 @@ class AlunoCicloDeVida {
       total: ids.length,
       sucesso: sucesso,
       primeiroErro: primeiroErro,
+      primeiroStack: primeiroStack,
     );
   }
 
@@ -64,13 +67,13 @@ class AlunoCicloDeVida {
     _carteiraMudou();
   }
 
+  /// A carteira mudou de verdade (não só recarregou): além dos caches de
+  /// alunos, caem a Home do personal (contagens) e o Financeiro (cobranças e
+  /// inadimplência do aluno excluído, bloqueado ou pago).
   void _carteiraMudou() {
-    AlunosHomeClientCache.clear();
-    Aluno360ClientCache.clear();
-    _ref.read(alunosHomeTailProvider.notifier).clear();
-    _ref.invalidate(alunosHomeProvider);
-    _ref.invalidate(iaCopilotoHomeProvider);
+    _ref.read(limparCachesDeAlunosProvider)();
     invalidatePersonalDashboardHomeRef(_ref);
+    _ref.invalidate(financeiroHomeProvider);
   }
 }
 

@@ -42,7 +42,9 @@ Future<void> confirmarExclusaoAlunoDetail(
   if (confirm != true || !context.mounted) return;
   try {
     final r = await ref.read(alunoCicloDeVidaProvider).excluir([aluno.id]);
-    if (r.primeiroErro != null) throw r.primeiroErro!;
+    if (r.primeiroErro case final erro?) {
+      Error.throwWithStackTrace(erro, r.primeiroStack ?? StackTrace.current);
+    }
     if (context.mounted) {
       FeedbackHelper.showSuccess(context, 'Aluno excluído.');
       safePopOrGo(context, '/alunos');
