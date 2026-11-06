@@ -7,9 +7,9 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
-import '../../../features/auth/providers/auth_provider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../data/aluno_repository.dart';
+import '../providers/aluno_ciclo_de_vida_provider.dart';
 import '../providers/aluno_detail_providers.dart';
 import '../providers/alunos_provider.dart';
 import '../widgets/aluno_delete_confirm_sheet.dart';
@@ -41,10 +41,9 @@ Future<void> confirmarExclusaoAlunoDetail(
   );
   if (confirm != true || !context.mounted) return;
   try {
-    await AlunoRepository(ref.read(apiClientProvider)).excluirAluno(aluno.id);
+    final r = await ref.read(alunoCicloDeVidaProvider).excluir([aluno.id]);
+    if (r.primeiroErro != null) throw r.primeiroErro!;
     if (context.mounted) {
-      // Antes do pop: o ref da ficha morre com a rota.
-      invalidateAlunosCaches(ref);
       FeedbackHelper.showSuccess(context, 'Aluno excluído.');
       safePopOrGo(context, '/alunos');
     }
@@ -72,11 +71,10 @@ Future<void> confirmarAlteracaoStatusAlunoDetail(
   );
   if (!confirm || !context.mounted) return;
   try {
-    await AlunoRepository(
-      ref.read(apiClientProvider),
-    ).atualizarStatusLote([aluno.id], novoStatus);
+    await ref.read(alunoCicloDeVidaProvider).atualizarStatus([
+      aluno.id,
+    ], novoStatus);
     if (!context.mounted) return;
-    invalidateAlunosCaches(ref);
     FeedbackHelper.showSuccess(
       context,
       alunoStatusAlteradoMessage(
@@ -106,7 +104,10 @@ Future<void> confirmarReenviarLinkAlunoDetail(
   final s = S.of(context);
   final confirm = await showFxConfirmSheet(
     context,
-    title: aindaNaoEntrou ? s.alunoReenviarConviteTitulo : s.alunoReenviarLinkTitulo,
+    title:
+        aindaNaoEntrou
+            ? s.alunoReenviarConviteTitulo
+            : s.alunoReenviarLinkTitulo,
     message:
         aindaNaoEntrou
             ? s.alunoReenviarConviteTexto
@@ -118,9 +119,9 @@ Future<void> confirmarReenviarLinkAlunoDetail(
   if (!confirm || !context.mounted) return;
 
   try {
-    final link = await AlunoRepository(
-      ref.read(apiClientProvider),
-    ).gerarLinkAtivacao(aluno.id);
+    final link = await ref
+        .read(alunoRepositoryProvider)
+        .gerarLinkAtivacao(aluno.id);
     if (!context.mounted) return;
     final marca = await carregarMarcaDoConvite(ref);
     if (!context.mounted) return;

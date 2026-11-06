@@ -277,32 +277,23 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
     );
     if (confirmar != true) return;
 
-    final repo = AlunoRepository(ref.read(apiClientProvider));
-    int sucesso = 0;
-    Object? primeiroErro;
-    for (final id in List<int>.from(_selecionados)) {
-      try {
-        await repo.excluirAluno(id);
-        sucesso++;
-      } catch (e) {
-        primeiroErro ??= e;
-      }
-    }
+    final r = await ref
+        .read(alunoCicloDeVidaProvider)
+        .excluir(List<int>.from(_selecionados));
     if (mounted) {
-      invalidateAlunosCaches(ref);
-      if (sucesso < total) {
+      if (r.falhas > 0) {
         FeedbackHelper.showError(
           context,
           alunosExclusaoFalhaMessage(
-            falhas: total - sucesso,
-            total: total,
+            falhas: r.falhas,
+            total: r.total,
             primeiroErro:
-                primeiroErro == null ? null : friendlyError(primeiroErro),
+                r.primeiroErro == null ? null : friendlyError(r.primeiroErro!),
           ),
         );
       }
-      if (sucesso > 0) {
-        FeedbackHelper.showSuccess(context, alunosExcluidosMessage(sucesso));
+      if (r.sucesso > 0) {
+        FeedbackHelper.showSuccess(context, alunosExcluidosMessage(r.sucesso));
       }
       setState(() {
         _modoSelecao = false;
@@ -331,14 +322,9 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
     }
     try {
       await ref
-          .read(apiClientProvider)
-          .dio
-          .post(
-            '/api/financeiro/mensalidades/lote-pago',
-            data: {'alunoIds': _selecionados.toList()},
-          );
+          .read(alunoCicloDeVidaProvider)
+          .marcarMensalidadesPagas(_selecionados.toList());
       if (mounted) {
-        invalidateAlunosCaches(ref);
         FeedbackHelper.showSuccess(
           context,
           mensalidadesPagasMessage(_selecionados.length),
@@ -378,11 +364,11 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
       destructive: novoStatus == AlunoStatus.bloqueado,
     );
     if (!confirmar || !mounted) return;
-    final repo = AlunoRepository(ref.read(apiClientProvider));
     try {
-      await repo.atualizarStatusLote(_selecionados.toList(), novoStatus);
+      await ref
+          .read(alunoCicloDeVidaProvider)
+          .atualizarStatus(_selecionados.toList(), novoStatus);
       if (mounted) {
-        invalidateAlunosCaches(ref);
         FeedbackHelper.showSuccess(
           context,
           alunosStatusAlteradosMessage(novoStatus, qtd),

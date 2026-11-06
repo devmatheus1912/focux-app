@@ -109,6 +109,14 @@ class AlunoRepository {
     );
   }
 
+  /// Marca como pagas as mensalidades em aberto dos alunos (seleção da lista).
+  Future<void> marcarMensalidadesPagasLote(List<int> ids) async {
+    await _dio.post(
+      '/api/financeiro/mensalidades/lote-pago',
+      data: {'alunoIds': ids},
+    );
+  }
+
   Future<Aluno> buscar(int id) async {
     final response = await _dio.get('/api/alunos/$id');
     return Aluno.fromJson(response.data as Map<String, dynamic>);
