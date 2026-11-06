@@ -5,6 +5,8 @@ import 'aluno_home_week.dart';
 import 'aluno_pendencias.dart';
 import 'aluno_today_action.dart';
 
+export '../../alunos/utils/aluno_status.dart' show alunoPrimeiroNome;
+
 typedef AlunoTodayTexto =
     ({
       String eyebrow,
@@ -255,11 +257,6 @@ double _umaCasa(double v) => (v * 10).round() / 10;
     detalhe: s.alunoAvisoAtestadoDetalhe,
   ),
 };
-
-String alunoPrimeiroNome(String nome) {
-  final partes = nome.trim().split(RegExp(r'\s+'));
-  return partes.first;
-}
 
 String _nomeOu(String? nome, String fallback) {
   final limpo = nome?.trim() ?? '';

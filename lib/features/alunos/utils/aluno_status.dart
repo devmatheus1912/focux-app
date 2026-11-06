@@ -16,9 +16,11 @@ String alunoStatusNormalizado(String status) => status.trim().toUpperCase();
 bool alunoStatusAtivo(Aluno aluno) =>
     alunoStatusNormalizado(aluno.status) == AlunoStatus.ativo;
 
-String alunoPrimeiroNome(String nome) {
+/// Primeiro nome do aluno para mensagens. Nome vazio vira [vazio] (cada
+/// texto escolhe o que cabe: "o aluno", "aluno" ou nada).
+String alunoPrimeiroNome(String nome, {String vazio = 'o aluno'}) {
   final trimmed = nome.trim();
-  if (trimmed.isEmpty) return 'o aluno';
+  if (trimmed.isEmpty) return vazio;
   return trimmed.split(RegExp(r'\s+')).first;
 }
 

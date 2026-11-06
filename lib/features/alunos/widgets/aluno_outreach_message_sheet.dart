@@ -94,7 +94,7 @@ class _AlunoOutreachMessageSheet extends ConsumerWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final displayName = fxTitleCaseName(alunoNome);
-    final firstName = alunoPrimeiroNome(alunoNome);
+    final firstName = alunoPrimeiroNome(alunoNome, vazio: 'aluno');
     final checkin = icon == Icons.fact_check_outlined;
 
     Future<void> openChatWithDraft() async {

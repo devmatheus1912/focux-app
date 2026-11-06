@@ -3,6 +3,8 @@ import '../../../core/widgets/fx_grafico_linha.dart';
 import '../../../l10n/pt.dart';
 import '../data/evolucao_repository.dart';
 
+export '../../../core/utils/pt_br_display.dart' show dataCurta;
+
 enum EvolucaoMetrica {
   peso('kg'),
   cintura('cm'),
@@ -143,8 +145,6 @@ String diferencaTexto(double diferenca, String unidade) {
   return '${_sinal(diferenca)}${formatBrDecimal(diferenca.abs())} $unidade';
 }
 
-String dataCurta(DateTime d) =>
-    '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}';
 
 /// O que o leitor de tela diz no lugar do gráfico.
 String resumoDaSerie(EvolucaoMetrica metrica, List<PontoGrafico> pontos) {

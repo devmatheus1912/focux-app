@@ -2,9 +2,7 @@ part of 'anamnese_aluno_screen.dart';
 
 String _dataCurta(String? iso) {
   final d = DateTime.tryParse(iso ?? '');
-  if (d == null) return '';
-  String dd(int n) => n.toString().padLeft(2, '0');
-  return '${dd(d.day)}/${dd(d.month)}/${d.year}';
+  return d == null ? '' : dataBr(d);
 }
 
 extension on _AnamneseAlunoScreenState {

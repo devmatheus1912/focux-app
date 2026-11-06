@@ -1,3 +1,5 @@
+export '../../../core/utils/pt_br_display.dart' show dataCurta;
+
 /// Vigência da ficha: quanto tempo ela vale. Só orienta: nunca bloqueia o treino.
 /// Mesma regra do backend (FichaVigencia.java).
 enum EstadoVigencia { semPrazo, emDia, venceEmBreve, venceHoje, vencida }
@@ -52,10 +54,6 @@ int diasAteOFim(DateTime fim, DateTime hoje) {
   final b = DateTime.utc(hoje.year, hoje.month, hoje.day);
   return a.difference(b).inDays;
 }
-
-/// "30/11".
-String dataCurta(DateTime data) =>
-    '${data.day.toString().padLeft(2, '0')}/${data.month.toString().padLeft(2, '0')}';
 
 /// "2026-11-30", como a API espera.
 String dataIso(DateTime data) =>

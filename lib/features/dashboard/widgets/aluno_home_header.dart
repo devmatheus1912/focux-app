@@ -16,7 +16,7 @@ class AlunoHomeHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = S.of(context);
     final chrome = ShellChrome.of(context);
-    final primeiroNome = alunoPrimeiroNome(alunoNome);
+    final primeiroNome = alunoPrimeiroNome(alunoNome, vazio: '');
 
     return Semantics(
       header: true,

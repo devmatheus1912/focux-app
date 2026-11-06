@@ -111,8 +111,6 @@ class Conquista {
   bool get celebra => tipo != ConquistaTipo.recorde;
 }
 
-String _dataCurta(DateTime d) =>
-    '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}';
 
 /// Mais recente primeiro. Tudo sai de metas e recordes: selo não tem tabela.
 List<Conquista> conquistasDe(
@@ -173,7 +171,7 @@ List<Conquista> conquistasDe(
             chave: 'recorde_${r.id}',
             tipo: ConquistaTipo.recorde,
             titulo: formatBrKg(carga),
-            detalhe: ptS.conquistaRecordeDetalhe(r.exercicioNome, _dataCurta(data)),
+            detalhe: ptS.conquistaRecordeDetalhe(r.exercicioNome, dataCurta(data)),
             data: data,
           ),
         );

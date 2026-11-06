@@ -204,3 +204,11 @@ String monthYearLabelPtBr(DateTime date) {
   ];
   return '${months[date.month - 1]} ${date.year}';
 }
+
+String _doisDigitos(int n) => n.toString().padLeft(2, '0');
+
+/// "30/11".
+String dataCurta(DateTime d) => '${_doisDigitos(d.day)}/${_doisDigitos(d.month)}';
+
+/// "30/11/2026".
+String dataBr(DateTime d) => '${dataCurta(d)}/${d.year}';

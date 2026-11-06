@@ -5,6 +5,9 @@ import '../../dashboard/data/command_center_data.dart';
 import '../../ia/models/ia_copilot_proxima_acao.dart';
 import '../data/aluno_repository.dart';
 import 'aluno360_copilot_logic.dart';
+import 'aluno_status.dart';
+
+export 'aluno_status.dart' show alunoPrimeiroNome;
 
 part 'aluno360_operacao_logic_format.part.dart';
 part 'aluno360_operacao_logic_visibility.part.dart';

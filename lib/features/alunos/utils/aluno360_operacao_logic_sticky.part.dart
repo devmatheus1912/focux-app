@@ -1,14 +1,8 @@
 part of 'aluno360_operacao_logic.dart';
 
-String alunoPrimeiroNome(String nomeAluno) {
-  final trimmed = nomeAluno.trim();
-  if (trimmed.isEmpty) return 'aluno';
-  return trimmed.split(' ').first;
-}
-
 /// Mensagem sugerida ao pedir check-in pelo Aluno 360.
 String checkinMensagemPronta(String nomeAluno) {
-  final firstName = alunoPrimeiroNome(nomeAluno);
+  final firstName = alunoPrimeiroNome(nomeAluno, vazio: 'aluno');
   return 'Oi, $firstName. Como foi seu último treino? '
       'Me manda carga, repetições e qualquer sensação fora do normal.';
 }
