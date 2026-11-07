@@ -4,6 +4,7 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Linha discreta abaixo do título: a ficha e o modelo gravam a cada mudança,
 /// e isso precisa ficar visível ("Tudo salvo" / "Salvando…").
@@ -23,7 +24,7 @@ class EstadoDoSalvo extends StatelessWidget {
         child: Row(
           children: [
             Icon(
-              salvando ? Icons.sync_rounded : Icons.cloud_done_outlined,
+              salvando ? FxIcons.renovar : FxIcons.nuvemOk,
               size: 16,
               color: chrome.mute,
             ),

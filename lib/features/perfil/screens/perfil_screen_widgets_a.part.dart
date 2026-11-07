@@ -90,7 +90,7 @@ class _PerfilBodyState extends State<_PerfilBody> {
                   decoration: chrome.headerAction(radius: 18),
                   alignment: Alignment.center,
                   child: Icon(
-                    Icons.edit_rounded,
+                    FxIcons.editar,
                     size: 18,
                     color: BrandPalette.softened(primaryColor),
                   ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/theme/fx_icons.dart';
 
 class ExerciciosBatchActions extends StatelessWidget {
   const ExerciciosBatchActions({
@@ -33,7 +34,7 @@ class ExerciciosBatchActions extends StatelessWidget {
             children: [
               IconButton(
                 tooltip: 'Cancelar selecao',
-                icon: const Icon(Icons.close_rounded),
+                icon: const Icon(FxIcons.fechar),
                 onPressed: onCancel,
               ),
               Expanded(
@@ -44,17 +45,17 @@ class ExerciciosBatchActions extends StatelessWidget {
               ),
               IconButton(
                 tooltip: 'Selecionar todos filtrados',
-                icon: const Icon(Icons.select_all_rounded),
+                icon: const Icon(FxIcons.selecionarTudo),
                 onPressed: onSelectAll,
               ),
               IconButton(
                 tooltip: 'Favoritar',
-                icon: const Icon(Icons.star_rounded),
+                icon: const Icon(FxIcons.estrelaAtiva),
                 onPressed: onFavorite,
               ),
               IconButton(
                 tooltip: 'Excluir',
-                icon: const Icon(Icons.delete_outline_rounded),
+                icon: const Icon(FxIcons.excluir),
                 onPressed: onDelete,
               ),
             ],

@@ -5,6 +5,7 @@ import '../../planos/utils/plano_capability.dart';
 import '../../subscription/plan_entitlements.dart';
 import '../data/aluno_repository.dart';
 import 'aluno360_operacao_logic.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Módulos da aba Ferramentas sujeitos a gate de plano.
 enum Aluno360FerramentasGatedModule { iaProgresso, feedbackVideo }
@@ -30,17 +31,17 @@ abstract final class Aluno360FerramentasLogic {
 
   static IconData moduleIcon(Aluno360FerramentasModule module) {
     return switch (module) {
-      Aluno360FerramentasModule.treinos => Icons.fitness_center_outlined,
-      Aluno360FerramentasModule.equipamentos => Icons.handyman_outlined,
-      Aluno360FerramentasModule.iaProgresso => Icons.auto_awesome_outlined,
-      Aluno360FerramentasModule.composicao => Icons.monitor_weight_outlined,
-      Aluno360FerramentasModule.aderencia => Icons.event_available_outlined,
-      Aluno360FerramentasModule.trilhas => Icons.route_outlined,
-      Aluno360FerramentasModule.anamnese => Icons.assignment_outlined,
-      Aluno360FerramentasModule.mensalidades => Icons.payments_outlined,
-      Aluno360FerramentasModule.recorrencia => Icons.autorenew_rounded,
-      Aluno360FerramentasModule.chat => Icons.chat_bubble_outline_rounded,
-      Aluno360FerramentasModule.feedbackVideo => Icons.videocam_outlined,
+      Aluno360FerramentasModule.treinos => FxIcons.treino,
+      Aluno360FerramentasModule.equipamentos => FxIcons.ferramentas,
+      Aluno360FerramentasModule.iaProgresso => FxIcons.ia,
+      Aluno360FerramentasModule.composicao => FxIcons.balanca,
+      Aluno360FerramentasModule.aderencia => FxIcons.eventoConfirmado,
+      Aluno360FerramentasModule.trilhas => FxIcons.rota,
+      Aluno360FerramentasModule.anamnese => FxIcons.prancheta,
+      Aluno360FerramentasModule.mensalidades => FxIcons.pagamento,
+      Aluno360FerramentasModule.recorrencia => FxIcons.renovar,
+      Aluno360FerramentasModule.chat => FxIcons.chat,
+      Aluno360FerramentasModule.feedbackVideo => FxIcons.video,
     };
   }
 

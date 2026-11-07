@@ -6,6 +6,7 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/focux_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_motion.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// TOKENS STRIP v1.0.0 — secondary pill button (white + teal border).
 class FxSecondaryButton extends StatelessWidget {
@@ -128,7 +129,7 @@ class FxStripChip extends StatelessWidget {
                 const SizedBox(width: 4),
                 GestureDetector(
                   onTap: onDismiss,
-                  child: Icon(Icons.close_rounded, size: 14, color: primary),
+                  child: Icon(FxIcons.fecharPequeno, size: 14, color: primary),
                 ),
               ],
             ],
@@ -162,27 +163,27 @@ class FxStripBadge extends StatelessWidget {
       FxStripBadgeKind.error => (
         TokensStrip.badgeError,
         TokensStrip.badgeErrorBg,
-        Icons.close_rounded,
+        FxIcons.fechar,
       ),
       FxStripBadgeKind.success => (
         TokensStrip.badgeSuccess,
         TokensStrip.badgeSuccessBg,
-        Icons.check_rounded,
+        FxIcons.check,
       ),
       FxStripBadgeKind.info => (
         TokensStrip.badgeInfo,
         TokensStrip.badgeInfoBg,
-        Icons.info_outline_rounded,
+        FxIcons.info,
       ),
       FxStripBadgeKind.warning => (
         TokensStrip.badgeWarning,
         TokensStrip.badgeWarningBg,
-        Icons.warning_amber_rounded,
+        FxIcons.alerta,
       ),
       FxStripBadgeKind.notification => (
         TokensStrip.badgeNotify,
         TokensStrip.badgeNotifyBg,
-        Icons.notifications_none_rounded,
+        FxIcons.notificacao,
       ),
     };
 
@@ -255,7 +256,7 @@ class FxStripToast extends StatelessWidget {
               ),
             ),
             child: Icon(
-              Icons.check_rounded,
+              FxIcons.check,
               size: 18,
               color: TokensStrip.badgeSuccess,
             ),
@@ -285,7 +286,7 @@ class FxStripToast extends StatelessWidget {
             tooltip: 'Fechar',
             onPressed: onClose,
             icon: Icon(
-              Icons.close_rounded,
+              FxIcons.fechar,
               size: 18,
               color: TokensStrip.textSecondary.withValues(alpha: 0.8),
             ),
@@ -324,7 +325,7 @@ class FxStripTooltip extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
               child: const Icon(
-                Icons.info_outline_rounded,
+                FxIcons.infoPequeno,
                 size: 14,
                 color: Colors.white,
               ),
@@ -470,7 +471,7 @@ class FxStripBreadcrumbs extends StatelessWidget {
           ),
           if (i < segments.length - 1)
             Icon(
-              Icons.chevron_right_rounded,
+              FxIcons.chevronDireitaPequeno,
               size: 16,
               color: primary.withValues(alpha: 0.5),
             ),
@@ -534,14 +535,14 @@ class FxStripPagination extends StatelessWidget {
         IconButton(
           tooltip: 'Página anterior',
           onPressed: page > 1 ? () => onPage(page - 1) : null,
-          icon: const Icon(Icons.chevron_left_rounded),
+          icon: const Icon(FxIcons.chevronEsquerda),
         ),
         for (var i = 1; i <= totalPages.clamp(1, 5); i++) pageBtn(i),
         if (totalPages > 5) Text('…', style: TextStyle(color: mute)),
         IconButton(
           tooltip: 'Próxima página',
           onPressed: page < totalPages ? () => onPage(page + 1) : null,
-          icon: const Icon(Icons.chevron_right_rounded),
+          icon: const Icon(FxIcons.chevronDireita),
         ),
       ],
     );

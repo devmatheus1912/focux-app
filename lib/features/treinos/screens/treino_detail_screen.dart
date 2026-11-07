@@ -54,6 +54,7 @@ import '../widgets/treino_inset_sheet.dart';
 import '../widgets/prescription_editor_sheet.dart';
 import '../data/workout_builder_preset.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../core/theme/fx_icons.dart';
 
 part 'treino_detail_screen_body.part.dart';
 part 'treino_detail_screen_exercises.part.dart';
@@ -285,7 +286,7 @@ class _TreinoDetailOverflowButton extends ConsumerWidget {
         modeloId: modeloId,
         isDark: isDark,
       ),
-      icon: const Icon(Icons.more_horiz_rounded),
+      icon: const Icon(FxIcons.mais),
     );
   }
 }

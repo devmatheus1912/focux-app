@@ -14,6 +14,7 @@ import '../utils/treino_atribuicao_prazo.dart';
 import 'treino_home_sheet.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Resultado do sheet de escolher aluno e o prazo opcional.
 class TreinoAtribuicaoResult {
@@ -118,7 +119,7 @@ class _TreinoAssignSheetState extends State<TreinoAssignSheet> {
                     ? widget.subtitleWhenEmpty
                     : widget.subtitleWhenReady,
             leading: Icon(
-              Icons.person_add_alt_1_rounded,
+              FxIcons.adicionarPessoa,
               color: soft,
               size: FxSettingsLayout.iconSize,
             ),
@@ -130,7 +131,7 @@ class _TreinoAssignSheetState extends State<TreinoAssignSheet> {
               caption: 'Cadastre um aluno antes de atribuir este treino.',
               children: [
                 FxSettingsTile(
-                  icon: Icons.person_outline_rounded,
+                  icon: FxIcons.pessoa,
                   accent: soft,
                   label: 'Nenhum aluno cadastrado',
                   value: '',
@@ -159,7 +160,7 @@ class _TreinoAssignSheetState extends State<TreinoAssignSheet> {
                                       true
                                   ? widget.alunos[i].objetivo!.trim()
                                   : 'Objetivo não definido',
-                          icon: Icons.person_outline_rounded,
+                          icon: FxIcons.pessoa,
                           selected: selectedAlunoId == widget.alunos[i].id,
                           onTap: () {
                             HapticFeedback.selectionClick();

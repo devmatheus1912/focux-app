@@ -34,6 +34,7 @@ import '../widgets/aluno_form_choices.dart';
 import '../widgets/aluno_inset_form_field.dart';
 import '../widgets/editar_aluno_help_sheet.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class EditarAlunoScreen extends ConsumerStatefulWidget {
   final Aluno aluno;
@@ -137,7 +138,7 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
       context,
       title: editarAlunoConfirmTitle(addAlunoFirstName(_nome.text)),
       message: editarAlunoConfirmMessage(),
-      icon: Icons.badge_outlined,
+      icon: FxIcons.cracha,
       confirmLabel: editarAlunoConfirmLabel(),
     );
     if (!ok || !mounted) return;
@@ -332,7 +333,7 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
                             rotuloVisivel: true,
                             obrigatorio: true,
                             hint: 'Nome do aluno',
-                            icon: Icons.person_outline_rounded,
+                            icon: FxIcons.pessoa,
                             textCapitalization: TextCapitalization.words,
                             inputFormatters: [
                               LengthLimitingTextInputFormatter(
@@ -355,7 +356,7 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
                             label: 'Telefone',
                             rotuloVisivel: true,
                             hint: 'DDD + número',
-                            icon: Icons.phone_outlined,
+                            icon: FxIcons.telefone,
                             keyboardType: TextInputType.phone,
                             inputFormatters: [
                               LengthLimitingTextInputFormatter(
@@ -368,7 +369,7 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
                             label: 'WhatsApp',
                             rotuloVisivel: true,
                             hint: 'DDD + número',
-                            icon: Icons.chat_bubble_outline_rounded,
+                            icon: FxIcons.chat,
                             keyboardType: TextInputType.phone,
                             inputFormatters: [BrPhone.formatter()],
                             validator: BrPhone.validateOptional,
@@ -387,7 +388,7 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
                             label: 'Objetivo',
                             rotuloVisivel: true,
                             hint: 'Ex.: Hipertrofia, emagrecimento',
-                            icon: Icons.flag_outlined,
+                            icon: FxIcons.meta,
                             textCapitalization: TextCapitalization.sentences,
                             maxLines: 2,
                             showDivider: true,
@@ -402,7 +403,7 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
                             label: S.of(context).editarAlunoNascimento,
                             rotuloVisivel: true,
                             hint: 'DD-MM-AAAA',
-                            icon: Icons.cake_outlined,
+                            icon: FxIcons.aniversario,
                             keyboardType: TextInputType.datetime,
                             validator: (v) => editarAlunoNascimentoValido(
                                   v,
@@ -417,7 +418,7 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
                             label: S.of(context).editarAlunoAltura,
                             rotuloVisivel: true,
                             hint: 'Ex.: 175',
-                            icon: Icons.height_outlined,
+                            icon: FxIcons.altura,
                             keyboardType: TextInputType.number,
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly,
@@ -526,7 +527,7 @@ class _EmailSomenteLeitura extends StatelessWidget {
               SizedBox(
                 width: FxSettingsLayout.insetPrefixWidth,
                 child: Icon(
-                  Icons.alternate_email_rounded,
+                  FxIcons.arroba,
                   color: mute,
                   size: 20,
                 ),

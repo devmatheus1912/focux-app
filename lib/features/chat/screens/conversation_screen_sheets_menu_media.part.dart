@@ -9,25 +9,25 @@ extension ConversationScreenSheetsMenuMedia on _ConversationScreenState {
           valor: 'perfil',
           rotulo: 'Ver perfil do aluno',
           descricao: 'Abrir o Aluno 360',
-          icone: Icons.person_outline_rounded,
+          icone: FxIcons.pessoa,
         ),
       const FxActionItem(
         valor: 'buscar',
         rotulo: 'Buscar conversa',
         descricao: 'Encontrar mensagem na thread',
-        icone: Icons.search_rounded,
+        icone: FxIcons.buscar,
       ),
       const FxActionItem(
         valor: 'midias',
         rotulo: 'Mídias da conversa',
         descricao: 'Fotos, vídeos e áudios',
-        icone: Icons.perm_media_outlined,
+        icone: FxIcons.midia,
       ),
       const FxActionItem(
         valor: 'atualizar',
         rotulo: 'Atualizar conversa',
         descricao: 'Recarregar mensagens',
-        icone: Icons.refresh_rounded,
+        icone: FxIcons.atualizar,
       ),
     ];
     final seguranca = <FxActionItem<String>>[
@@ -36,20 +36,20 @@ extension ConversationScreenSheetsMenuMedia on _ConversationScreenState {
           valor: 'denunciar',
           rotulo: l10n.chatDenunciarConversa,
           descricao: l10n.chatDenunciarConversaSubtitulo,
-          icone: Icons.flag_outlined,
+          icone: FxIcons.meta,
         ),
       if (_bloqueadoPorMim)
         FxActionItem(
           valor: 'desbloquear',
           rotulo: l10n.chatDesbloquear,
           descricao: l10n.chatDesbloquearSubtitulo,
-          icone: Icons.lock_open_rounded,
+          icone: FxIcons.cadeadoAberto,
         ),
     ];
     final chosen = await showFxGroupedActionSheet<String>(
       context,
       titulo: 'Conversa',
-      icone: Icons.more_horiz_rounded,
+      icone: FxIcons.mais,
       grupos: [
         FxActionGroup<String>(null, conversa),
         if (seguranca.isNotEmpty) FxActionGroup<String>('Segurança', seguranca),
@@ -64,7 +64,7 @@ extension ConversationScreenSheetsMenuMedia on _ConversationScreenState {
                     _isAlunoMode
                         ? l10n.chatBloquearSubtituloAluno
                         : l10n.chatBloquearSubtituloPersonal,
-                icone: Icons.block_rounded,
+                icone: FxIcons.bloquear,
               ),
     );
     if (chosen == null || !mounted) return;
@@ -118,7 +118,7 @@ extension ConversationScreenSheetsMenuMedia on _ConversationScreenState {
             : l10n.chatBloquearConfirmaPersonal,
         confirmLabel: l10n.chatBloquear,
         destructive: true,
-        icon: Icons.block_rounded,
+        icon: FxIcons.bloquear,
       );
       if (!ok || !mounted) return;
     }
@@ -182,7 +182,7 @@ extension ConversationScreenSheetsMenuMedia on _ConversationScreenState {
                       isDark: isDark,
                       title: 'Midias da conversa',
                       leading: Icon(
-                        Icons.perm_media_outlined,
+                        FxIcons.midia,
                         color: primary,
                         size: 18,
                       ),
@@ -237,7 +237,7 @@ extension ConversationScreenSheetsMenuMedia on _ConversationScreenState {
                       child:
                           items.isEmpty
                               ? const ConversationSearchState(
-                                icon: Icons.perm_media_outlined,
+                                icon: FxIcons.midia,
                                 title: 'Sem midias aqui',
                                 subtitle:
                                     'Fotos, videos e audios enviados aparecerao nesta area.',
@@ -298,7 +298,7 @@ extension ConversationScreenSheetsMenuMedia on _ConversationScreenState {
               FxHomeSheetHeader(
                 isDark: isDark,
                 title: 'Foto',
-                leading: const Icon(Icons.image_outlined, size: 18),
+                leading: const Icon(FxIcons.imagem, size: 18),
               ),
               SizedBox(height: TokensStrip.s3),
               Expanded(
@@ -317,7 +317,7 @@ extension ConversationScreenSheetsMenuMedia on _ConversationScreenState {
                               alignment: Alignment.center,
                               decoration: fxListCardDecoration(ctx),
                               child: const Icon(
-                                Icons.broken_image_outlined,
+                                FxIcons.imagemQuebrada,
                                 size: 32,
                               ),
                             ),

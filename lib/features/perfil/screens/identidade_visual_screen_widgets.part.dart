@@ -232,7 +232,7 @@ class _LogoUploadRing extends StatelessWidget {
                         ),
                       )
                       : Icon(
-                        Icons.photo_camera_outlined,
+                        FxIcons.cameraPequeno,
                         size: 16,
                         color: CuratedBrandPalette.readableOn(primary),
                       ),
@@ -393,7 +393,7 @@ class _PaywallCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.lock_outline, color: primary, size: 20),
+              Icon(FxIcons.cadeado, color: primary, size: 20),
               const SizedBox(width: 8),
               Text(
                 'Recurso Enterprise',

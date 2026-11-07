@@ -16,6 +16,7 @@ import '../data/aluno_home_insight.dart';
 import '../utils/aluno_home_texts.dart';
 import '../utils/aluno_today_action.dart';
 import 'aluno_home_insight_line.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Card de foco: a única superfície com `emphasize` na Home. Molde único:
 /// eyebrow · título · contexto · semana · ação principal · ação secundária.
@@ -229,7 +230,7 @@ class AlunoTodayFocusCard extends StatelessWidget {
         return [
           FxTonalButton(
             label: s.alunoHojeVerTreino,
-            icon: Icons.fitness_center_rounded,
+            icon: FxIcons.treino,
             expanded: true,
             fundo: fundoTonal,
             texto: textoTonal,
@@ -252,7 +253,7 @@ class AlunoTodayFocusCard extends StatelessWidget {
           return [
             FxTonalButton(
               label: texto.cta,
-              icon: Icons.add_rounded,
+              icon: FxIcons.adicionar,
               expanded: true,
               fundo: fundoTonal,
               texto: textoTonal,

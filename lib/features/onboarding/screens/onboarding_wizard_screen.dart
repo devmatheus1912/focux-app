@@ -32,6 +32,7 @@ import '../utils/onboarding_wizard_display.dart';
 import '../utils/onboarding_wizard_normalize.dart';
 import '../utils/setup_action_navigation.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 part 'onboarding_wizard_screen_actions.part.dart';
 
@@ -318,7 +319,7 @@ class _OnboardingWizardScreenState
                 width: 28,
                 child:
                     step.completed
-                        ? Icon(Icons.check_rounded, color: primary, size: 22)
+                        ? Icon(FxIcons.check, color: primary, size: 22)
                         : Text(
                           '${i + 1}',
                           style: FocuxHubTypography.metric(

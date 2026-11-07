@@ -65,7 +65,7 @@ class _MigracaoImportacaoResumoBody extends StatelessWidget {
           // ── E-mail enviado ───────────────────────────────────────────────
           if (data.emailEnviadoAutomaticamente.isNotEmpty) ...[
             _MigracaoGrupoHeader(
-              icon: Icons.mark_email_read_rounded,
+              icon: FxIcons.emailLido,
               color: EagleTokens.good,
               titulo: 'E-mail enviado',
               subtitulo:
@@ -81,7 +81,7 @@ class _MigracaoImportacaoResumoBody extends StatelessWidget {
           // ── E-mail não saiu: tem e-mail, mas o envio falhou ──────────────
           if (data.emailNaoSaiu.isNotEmpty) ...[
             _MigracaoGrupoHeader(
-              icon: Icons.mail_outline_rounded,
+              icon: FxIcons.email,
               color: EagleTokens.warn,
               titulo: 'E-mail não saiu',
               subtitulo:
@@ -96,7 +96,7 @@ class _MigracaoImportacaoResumoBody extends StatelessWidget {
           // ── Só telefone ──────────────────────────────────────────────────
           if (data.soTelefone.isNotEmpty) ...[
             _MigracaoGrupoHeader(
-              icon: Icons.send_rounded,
+              icon: FxIcons.enviar,
               color: EagleTokens.whatsapp,
               titulo: 'Só telefone',
               subtitulo: 'Sem e-mail. Envie o convite pelo WhatsApp.',
@@ -110,7 +110,7 @@ class _MigracaoImportacaoResumoBody extends StatelessWidget {
           // ── Sem contato ──────────────────────────────────────────────────
           if (data.semContato.isNotEmpty) ...[
             _MigracaoGrupoHeader(
-              icon: Icons.link_rounded,
+              icon: FxIcons.link,
               color: mute,
               titulo: 'Sem contato',
               subtitulo:
@@ -263,7 +263,7 @@ class _MigracaoConviteTile extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        Icons.check_circle_rounded,
+                        FxIcons.concluidoAtivo,
                         size: 16,
                         color: EagleTokens.good,
                       ),
@@ -423,7 +423,7 @@ class _MigracaoEmailEnviadoTile extends StatelessWidget {
         decoration: fxListCardDecoration(context, accent: EagleTokens.good),
         child: Row(
           children: [
-            Icon(Icons.check_circle_rounded,
+            Icon(FxIcons.concluidoAtivo,
                 size: 16, color: EagleTokens.good),
             const SizedBox(width: 8),
             Expanded(
@@ -513,7 +513,7 @@ class _MigracaoEnviarTodosButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return OutlinedButton.icon(
-      icon: const Icon(Icons.send_rounded, size: 16),
+      icon: const Icon(FxIcons.enviarPequeno, size: 16),
       label: Text(migracaoCopiarConvitesLabel(data.length)),
       onPressed: () => _copiarEAbrir(context),
     );

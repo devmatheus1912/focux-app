@@ -74,7 +74,7 @@ class PaywallContextBanner extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: TokensStrip.s3),
       child: Row(
         children: [
-          Icon(Icons.lock_open_rounded, color: accent, size: 16),
+          Icon(FxIcons.cadeadoAbertoPequeno, color: accent, size: 16),
           const SizedBox(width: TokensStrip.s2),
           Expanded(
             child: Text(

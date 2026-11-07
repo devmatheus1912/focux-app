@@ -42,7 +42,7 @@ void main() {
         'confirmarPlano',
         'Fiz o treino',
         'Carregar mais',
-        'Icons.refresh_rounded',
+        'FxIcons.atualizar',
         'aderencia',
         'volumeSemanaKg',
       ]) {

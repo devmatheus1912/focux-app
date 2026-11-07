@@ -18,6 +18,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../support/dynamic_type_harness.dart';
+import 'package:focux_app/core/theme/fx_icons.dart';
 
 class _Chamada {
   _Chamada(this.metodo, this.path, this.corpo);
@@ -180,7 +181,7 @@ void main() {
     await tester.pumpWidget(_app(treino, adapter));
     await _settle(tester);
 
-    final alcas = find.byIcon(Icons.drag_indicator_rounded);
+    final alcas = find.byIcon(FxIcons.arrastar);
     // alça do exercício 4 (único de Trabalho): sobe por cima de 3 linhas e do cabeçalho
     final alca4 = alcas.at(3);
     final gesto = await tester.startGesture(tester.getCenter(alca4));

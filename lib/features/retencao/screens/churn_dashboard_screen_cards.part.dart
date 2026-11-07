@@ -28,17 +28,17 @@ class _SeloNivel extends StatelessWidget {
     final (rotulo, icone, cor) = switch (nivel) {
       RetencaoNivel.alto => (
         s.retencaoMetAlto,
-        Icons.error_outline_rounded,
+        FxIcons.erro,
         Theme.of(context).colorScheme.error,
       ),
       RetencaoNivel.atencao => (
         s.retencaoMetAtencao,
-        Icons.schedule_rounded,
+        FxIcons.relogio,
         EagleTokens.warn,
       ),
       RetencaoNivel.saudavel => (
         s.retencaoMetSaudaveis,
-        Icons.check_circle_outline_rounded,
+        FxIcons.concluido,
         chrome.brand,
       ),
     };
@@ -93,7 +93,7 @@ class _RetencaoTile extends StatelessWidget {
           child: IconButton(
             tooltip: s.retencaoAcaoMensagem,
             onPressed: onChat,
-            icon: Icon(Icons.chat_bubble_outline_rounded, color: primary),
+            icon: Icon(FxIcons.chat, color: primary),
           ),
         ),
       ),

@@ -11,6 +11,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../data/health_repository.dart';
 import '../utils/health_plausibilidade.dart';
 import '../utils/prontidao_display.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Card da nota de prontidão, na cor da marca (mesmo princípio do card
 /// principal da Home). Três estados com a mesma altura: com nota, sem sono e
@@ -70,9 +71,9 @@ class ProntidaoCard extends StatelessWidget {
     // "nota zero" e empurrava os dados do dia para baixo da dobra.
     if (estado != ProntidaoEstado.comNota) {
       final (rotulo, icone, acao) = switch (estado) {
-        ProntidaoEstado.calibrando => ('Por quê?', Icons.hourglass_bottom_rounded, onPorQue),
-        ProntidaoEstado.indisponivel => ('Atualizar', Icons.cloud_off_rounded, onAtualizar ?? onComoRegistrar),
-        _ => ('Como registrar', Icons.bedtime_outlined, onComoRegistrar),
+        ProntidaoEstado.calibrando => ('Por quê?', FxIcons.ampulheta, onPorQue),
+        ProntidaoEstado.indisponivel => ('Atualizar', FxIcons.semConexao, onAtualizar ?? onComoRegistrar),
+        _ => ('Como registrar', FxIcons.sono, onComoRegistrar),
       };
       return Semantics(
         container: true,
@@ -142,10 +143,10 @@ class ProntidaoCard extends StatelessWidget {
                   cor: marca.sobre,
                   icone:
                       estado == ProntidaoEstado.calibrando
-                          ? Icons.hourglass_bottom_rounded
+                          ? FxIcons.ampulheta
                           : estado == ProntidaoEstado.indisponivel
-                          ? Icons.cloud_off_rounded
-                          : Icons.bedtime_outlined,
+                          ? FxIcons.semConexao
+                          : FxIcons.sono,
                 ),
                 const SizedBox(width: TokensStrip.s4),
                 Expanded(
@@ -178,21 +179,21 @@ class ProntidaoCard extends StatelessWidget {
                 if (estado == ProntidaoEstado.comNota) ...[
                   _BotaoDoCard(
                     rotulo: 'Ver treino de hoje',
-                    icone: Icons.fitness_center_rounded,
+                    icone: FxIcons.treino,
                     cheio: true,
                     marca: marca,
                     onTap: onVerTreino,
                   ),
                   _BotaoDoCard(
                     rotulo: 'Por quê?',
-                    icone: Icons.info_outline_rounded,
+                    icone: FxIcons.info,
                     marca: marca,
                     onTap: onPorQue,
                   ),
                 ] else if (estado == ProntidaoEstado.indisponivel)
                   _BotaoDoCard(
                     rotulo: 'Atualizar',
-                    icone: Icons.refresh_rounded,
+                    icone: FxIcons.atualizar,
                     cheio: true,
                     marca: marca,
                     onTap: onAtualizar ?? onComoRegistrar,
@@ -200,7 +201,7 @@ class ProntidaoCard extends StatelessWidget {
                 else if (estado == ProntidaoEstado.calibrando)
                   _BotaoDoCard(
                     rotulo: 'Por quê?',
-                    icone: Icons.info_outline_rounded,
+                    icone: FxIcons.info,
                     cheio: true,
                     marca: marca,
                     onTap: onPorQue,
@@ -208,7 +209,7 @@ class ProntidaoCard extends StatelessWidget {
                 else
                   _BotaoDoCard(
                     rotulo: 'Como registrar',
-                    icone: Icons.bedtime_outlined,
+                    icone: FxIcons.sono,
                     cheio: true,
                     marca: marca,
                     onTap: onComoRegistrar,

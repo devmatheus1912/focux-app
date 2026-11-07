@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/alunos/utils/aluno360_copilot_logic.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_copilot_executar_confirm.dart';
 import 'package:focux_app/core/theme/brand_palette.dart';
+import 'package:focux_app/core/theme/fx_icons.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -30,7 +31,7 @@ void main() {
     const spec = CopilotExecutarAcaoSpec(
       backendTipo: 'ENVIAR_PUSH',
       label: 'Enviar notificação ao aluno',
-      icon: Icons.notifications_active_outlined,
+      icon: FxIcons.notificacaoAtiva,
       executingLabel: 'Enviando…',
       executingSemantics: 'Enviando notificação ao aluno',
       parametros: 'Oi, Beatriz.',

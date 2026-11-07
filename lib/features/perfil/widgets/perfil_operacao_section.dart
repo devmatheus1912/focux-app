@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../../planos/data/plano_recurso.dart';
 import '../../planos/utils/plan_gate.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Itens de Operação do hub Perfil.
 class PerfilOperacaoSection extends ConsumerWidget {
@@ -28,7 +29,7 @@ class PerfilOperacaoSection extends ConsumerWidget {
       children: [
         FxSettingsTile(
           iconeComFundo: true,
-          icon: Icons.workspace_premium_outlined,
+          icon: FxIcons.premium,
           label: 'Planos e assinatura',
           value: planoLabel,
           mute: mute,
@@ -37,7 +38,7 @@ class PerfilOperacaoSection extends ConsumerWidget {
         ),
         FxSettingsTile(
           iconeComFundo: true,
-          icon: Icons.account_balance_wallet_outlined,
+          icon: FxIcons.carteira,
           label: 'Carteira e PIX',
           value:
               !carteira.liberado
@@ -60,7 +61,7 @@ class PerfilOperacaoSection extends ConsumerWidget {
         ),
         FxSettingsTile(
           iconeComFundo: true,
-          icon: Icons.person_add_alt_1_outlined,
+          icon: FxIcons.adicionarPessoa,
           label: 'Convites',
           value: 'Link de cadastro',
           mute: mute,

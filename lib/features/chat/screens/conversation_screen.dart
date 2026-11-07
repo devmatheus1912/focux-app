@@ -61,6 +61,7 @@ import '../widgets/conversation_media_widgets.dart';
 import '../widgets/conversation_outgoing_status.dart';
 import 'package:focux_app/core/widgets/fx_grouped_action_sheet.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
+import '../../../core/theme/fx_icons.dart';
 part 'conversation_screen_messaging.part.dart';
 part 'conversation_screen_outbox.part.dart';
 part 'conversation_screen_sheets_actions.part.dart';
@@ -484,11 +485,11 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
             ),
             IconButton(
               onPressed: _showSearchSheet,
-              icon: const Icon(Icons.search_rounded),
+              icon: const Icon(FxIcons.buscar),
             ),
             IconButton(
               onPressed: _showChatMenu,
-              icon: const Icon(Icons.more_horiz),
+              icon: const Icon(FxIcons.mais),
             ),
           ],
         ),
@@ -730,7 +731,7 @@ class _ConversationBlockedBar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(Icons.block_rounded, size: 18, color: mute),
+          Icon(FxIcons.bloquear, size: 18, color: mute),
           const SizedBox(width: TokensStrip.s2),
           Expanded(
             child: Text(

@@ -4,6 +4,7 @@ import '../brand/focux_microcopy.dart';
 import '../theme/design_tokens.dart';
 import '../theme/focux_hub_typography.dart';
 import '../theme/tokens_strip.dart';
+import '../theme/fx_icons.dart';
 
 /// Canonical error + retry — Home 10/10 parity for every hub/satellite screen.
 class FxErrorState extends StatelessWidget {
@@ -26,9 +27,9 @@ class FxErrorState extends StatelessWidget {
     required this.message,
     required this.onRetry,
     this.title,
-    this.icon = Icons.cloud_off_rounded,
+    this.icon = FxIcons.semConexao,
     this.retryLabel,
-    this.retryIcon = Icons.refresh_rounded,
+    this.retryIcon = FxIcons.atualizar,
   });
 
   @override

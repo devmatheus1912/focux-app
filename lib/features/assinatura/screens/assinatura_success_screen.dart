@@ -10,6 +10,7 @@ import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../planos/paywall/paywall_catalog.dart';
 import '../../subscription/models/subscription_plan.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Confirmação pós-compra com próximos passos educativos.
 class AssinaturaSuccessScreen extends StatelessWidget {
@@ -123,7 +124,7 @@ class AssinaturaSuccessScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Icon(
-                                Icons.arrow_forward_rounded,
+                                FxIcons.avancar,
                                 size: 18,
                                 color: accent,
                               ),
@@ -200,7 +201,7 @@ class _SuccessBadge extends StatelessWidget {
           width: 76,
           height: 76,
           decoration: BoxDecoration(shape: BoxShape.circle, color: accent),
-          child: Icon(Icons.check_rounded, color: FocuxContrast.readableOn(accent), size: 44),
+          child: Icon(FxIcons.check, color: FocuxContrast.readableOn(accent), size: 44),
         ),
       ),
     );

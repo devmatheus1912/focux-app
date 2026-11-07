@@ -31,6 +31,7 @@ import '../providers/anamnese_provider.dart';
 import '../utils/anamnese_display.dart';
 import '../utils/anamnese_pdf.dart';
 import '../widgets/anamnese_help_sheet.dart';
+import '../../../core/theme/fx_icons.dart';
 
 part 'anamnese_screen_ficha.part.dart';
 
@@ -138,7 +139,7 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen> {
       title: title,
       subtitle: subtitle,
       confirmLabel: confirmLabel,
-      icon: Icons.fact_check_outlined,
+      icon: FxIcons.conferir,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -147,14 +148,14 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen> {
               rotuloVisivel: true,
               controller: pedidoCtrl,
               label: 'O que o aluno deve atualizar',
-              icon: Icons.edit_note_rounded,
+              icon: FxIcons.anotar,
               maxLines: 3,
             ),
           AlunoInsetFormField(
             rotuloVisivel: true,
             controller: notasCtrl,
             label: 'Notas · só você vê',
-            icon: Icons.sticky_note_2_outlined,
+            icon: FxIcons.notas,
             maxLines: 4,
             showDivider: pedirAtestado,
           ),
@@ -163,7 +164,7 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen> {
               rotuloVisivel: true,
               controller: atestadoCtrl,
               label: 'Orientação ao aluno',
-              icon: Icons.medical_information_outlined,
+              icon: FxIcons.fichaMedica,
               maxLines: 3,
               showDivider: false,
             ),
@@ -241,30 +242,30 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen> {
     final acao = await showFxGroupedActionSheet<String>(
       context,
       titulo: 'Anamnese',
-      icone: Icons.fact_check_outlined,
+      icone: FxIcons.conferir,
       grupos: [
         FxActionGroup<String>(null, [
           FxActionItem(
             valor: 'atestado',
             rotulo: 'Pedir atestado',
-            icone: Icons.medical_information_outlined,
+            icone: FxIcons.fichaMedica,
           ),
           if (a.personalPodeRevisar)
             FxActionItem(
               valor: 'atualizar',
               rotulo: 'Pedir atualização',
-              icone: Icons.refresh_rounded,
+              icone: FxIcons.atualizar,
             ),
           FxActionItem(
             valor: 'chat',
             rotulo: 'Abrir chat',
-            icone: Icons.chat_bubble_outline_rounded,
+            icone: FxIcons.chat,
           ),
           if (a.personalPodeRevisar)
             FxActionItem(
               valor: 'pdf',
               rotulo: 'Exportar PDF',
-              icone: Icons.picture_as_pdf_outlined,
+              icone: FxIcons.pdf,
             ),
         ]),
       ],
@@ -305,7 +306,7 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen> {
         IconButton(
           tooltip: 'Mais ações',
           onPressed: _abrirMenu,
-          icon: const Icon(Icons.more_horiz_rounded),
+          icon: const Icon(FxIcons.mais),
         ),
     ];
   }

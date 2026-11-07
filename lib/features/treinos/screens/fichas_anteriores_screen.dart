@@ -17,6 +17,7 @@ import '../providers/ficha_historico_provider.dart';
 import '../utils/ficha_historico_textos.dart';
 import '../widgets/ficha_help_sheets.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Fichas que o aluno já teve, da mais recente para a mais antiga.
 class FichasAnterioresScreen extends ConsumerStatefulWidget {
@@ -115,7 +116,7 @@ class FichaAnteriorCard extends StatelessWidget {
     return FxTapRow(
       title: periodoDaFicha(s, ficha),
       subtitle: '${motivoDaFicha(s, ficha)}\n$contagem',
-      leading: Icon(Icons.history_rounded, color: chrome.mute),
+      leading: Icon(FxIcons.historico, color: chrome.mute),
       onTap: onTap,
     );
   }

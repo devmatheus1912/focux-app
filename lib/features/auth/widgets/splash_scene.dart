@@ -6,6 +6,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/focux_official_logo.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
 import '../utils/splash_navigation.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Splash: o logo parado e mais nada. Sem animação de entrada, sem barra de
 /// progresso e sem "Carregando": ela só segura a tela até o destino resolver.
@@ -124,7 +125,7 @@ class _Travada extends StatelessWidget {
         const SizedBox(height: TokensStrip.s3),
         FxTonalButton(
           label: 'Tentar de novo',
-          icon: Icons.refresh_rounded,
+          icon: FxIcons.atualizar,
           onPressed: onTentarNovamente,
         ),
       ],

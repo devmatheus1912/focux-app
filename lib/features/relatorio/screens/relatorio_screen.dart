@@ -42,6 +42,7 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../evolucao/providers/evolucao_home_provider.dart';
 import '../../evolucao/providers/metas_provider.dart';
 import '../../evolucao/widgets/evolucao_hero.dart';
+import '../../../core/theme/fx_icons.dart';
 
 
 class RelatorioScreen extends ConsumerStatefulWidget {
@@ -137,7 +138,7 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
     final picked = await showFxInsetPickerSheet<String>(
       context,
       title: 'Período',
-      headerIcon: Icons.calendar_today_outlined,
+      headerIcon: FxIcons.calendario,
       selected: selected,
       items: [
         for (final opcao in opcoes)
@@ -215,7 +216,7 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
     final chosen = await showFxInsetPickerSheet<String>(
       context,
       title: 'Mais',
-      headerIcon: Icons.more_horiz_rounded,
+      headerIcon: FxIcons.mais,
       selected: null,
       items: [
         if (baixa)
@@ -223,19 +224,19 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
             value: 'checkin',
             label: relatorioAlunoCheckinChip(),
             subtitle: 'Lembrar o aluno de marcar presença',
-            icon: Icons.fact_check_outlined,
+            icon: FxIcons.conferir,
           ),
         const FxInsetPickerSheetItem(
           value: 'aluno',
           label: 'Aluno',
           subtitle: 'Voltar ao 360',
-          icon: Icons.person_outline_rounded,
+          icon: FxIcons.pessoa,
         ),
         const FxInsetPickerSheetItem(
           value: 'chat',
           label: 'Chat',
           subtitle: 'Mensagem com o aluno',
-          icon: Icons.chat_bubble_outline_rounded,
+          icon: FxIcons.chat,
         ),
       ],
     );
@@ -285,7 +286,7 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
             actions: [
               IconButton(
                 tooltip: ptS.relatorioMais,
-                icon: const Icon(Icons.more_horiz_rounded),
+                icon: const Icon(FxIcons.mais),
                 onPressed: _abrirMaisAcoes,
               ),
               FxHelpIconButton(

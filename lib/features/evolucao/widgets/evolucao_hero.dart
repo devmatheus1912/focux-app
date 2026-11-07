@@ -5,11 +5,11 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_aneis_concentricos.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_strip_card.dart';
-import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../core/utils/motion_preferences.dart';
 import '../../../l10n/pt.dart';
 import '../data/evolucao_repository.dart';
 import '../utils/evolucao_aneis.dart';
+import '../../../core/theme/fx_icons.dart';
 
 List<AnelConcentrico> _aneisDe(List<LeituraDoAnel> leituras, List<Color> cores) => [
   for (final (i, l) in leituras.indexed)
@@ -176,12 +176,28 @@ class _Legenda extends StatelessWidget {
                     style: FocuxHubTypography.cardTitle(color: sobre.ink),
                   )
                 else
-                  Theme(
-                    data: fxTemaSobreMarca(context),
-                    child: FxTonalButton(
-                      label: leitura.valor,
-                      compact: true,
-                      onPressed: onTap,
+                  // Link no mesmo texto das outras linhas: o botão tonal saía
+                  // quase preto sobre a marca e parecia desativado.
+                  Semantics(
+                    button: true,
+                    label: leitura.valor,
+                    excludeSemantics: true,
+                    child: InkWell(
+                      onTap: onTap,
+                      borderRadius: BorderRadius.circular(TokensStrip.s2),
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(minHeight: 44),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          widthFactor: 1,
+                          child: Text(
+                            '${leitura.valor} ›',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: FocuxHubTypography.cardTitle(color: sobre.ink),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
               ],
@@ -309,7 +325,7 @@ class EvolucaoMiniAneis extends StatelessWidget {
                 ),
               ),
               if (onTap != null)
-                Icon(Icons.chevron_right_rounded, color: scheme.onSurfaceVariant),
+                Icon(FxIcons.chevronDireita, color: scheme.onSurfaceVariant),
             ],
           ),
         ),

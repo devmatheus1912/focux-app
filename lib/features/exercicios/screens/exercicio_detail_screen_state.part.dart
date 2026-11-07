@@ -89,7 +89,7 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
     final saved = await showFxFormSheet(
       context,
       title: _editorialActionTitle(status),
-      icon: Icons.rate_review_outlined,
+      icon: FxIcons.avaliacao,
       confirmLabel: 'Salvar',
       child: TextField(
         controller: notesCtrl,
@@ -315,7 +315,7 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
                               if (ex.descricao?.trim().isNotEmpty == true) ...[
                                 const SizedBox(height: 14),
                                 _SimpleInfoCard(
-                                  icon: Icons.menu_book_rounded,
+                                  icon: FxIcons.livro,
                                   title: 'Como orientar',
                                   text: ex.descricao!.trim(),
                                 ),

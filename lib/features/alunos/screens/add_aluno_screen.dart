@@ -36,6 +36,7 @@ import '../widgets/aluno_form_choices.dart';
 import '../widgets/aluno_inset_form_field.dart';
 import '../../leads/providers/leads_provider.dart';
 import '../utils/convite_marca_loader.dart';
+import '../../../core/theme/fx_icons.dart';
 
 part 'add_aluno_screen_widgets.part.dart';
 
@@ -218,7 +219,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
       message: addAlunoConfirmMessage(
         hasWhatsapp: _whatsappCtrl.text.trim().isNotEmpty,
       ),
-      icon: Icons.badge_outlined,
+      icon: FxIcons.cracha,
       confirmLabel: addAlunoConfirmLabel(),
     );
     if (!ok || !mounted) return;
@@ -396,7 +397,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                               rotuloVisivel: true,
                               obrigatorio: true,
                               hint: 'Ex.: Beatriz Andrade',
-                              icon: Icons.person_outline_rounded,
+                              icon: FxIcons.pessoa,
                               inputFormatters: [
                                 LengthLimitingTextInputFormatter(
                                   addAlunoNomeMax,
@@ -415,7 +416,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                               rotuloVisivel: true,
                               obrigatorio: true,
                               hint: 'aluno@email.com',
-                              icon: Icons.alternate_email_rounded,
+                              icon: FxIcons.arroba,
                               keyboardType: TextInputType.emailAddress,
                               inputFormatters: [
                                 LengthLimitingTextInputFormatter(
@@ -439,7 +440,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                               rotuloVisivel: true,
                               ajuda: 'Com WhatsApp, o convite já sai pronto.',
                               hint: '(11) 99999-9999',
-                              icon: Icons.phone_iphone_rounded,
+                              icon: FxIcons.celular,
                               keyboardType: TextInputType.phone,
                               inputFormatters: [BrPhone.formatter()],
                               validator: BrPhone.validateOptional,
@@ -491,7 +492,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                                 label: 'Outro objetivo',
                                 rotuloVisivel: true,
                                 hint: 'Ex.: Reabilitação',
-                                icon: Icons.flag_outlined,
+                                icon: FxIcons.meta,
                                 textCapitalization:
                                     TextCapitalization.sentences,
                                 inputFormatters: [

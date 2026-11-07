@@ -29,6 +29,7 @@ import '../../alunos/widgets/aluno_avatar.dart';
 import '../data/depoimento_repository.dart';
 import '../utils/depoimento_display.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class DepoimentosPersonalScreen extends ConsumerStatefulWidget {
   const DepoimentosPersonalScreen({super.key});
@@ -160,7 +161,7 @@ class _State extends ConsumerState<DepoimentosPersonalScreen> {
         message: item.aprovado
             ? 'Ele some da prova social do perfil.'
             : 'O aluno não vê este texto publicado.',
-        icon: Icons.close_rounded,
+        icon: FxIcons.fechar,
         confirmLabel: item.aprovado ? 'Remover' : 'Rejeitar',
         destructive: true,
       );
@@ -192,7 +193,7 @@ class _State extends ConsumerState<DepoimentosPersonalScreen> {
             FxHomeSheetHeader(
               isDark: chrome.isDark,
               leading: Icon(
-                Icons.star_outline_rounded,
+                FxIcons.estrela,
                 color: Theme.of(sheetContext).colorScheme.primary,
                 size: 18,
               ),
@@ -211,8 +212,8 @@ class _State extends ConsumerState<DepoimentosPersonalScreen> {
                   for (var i = 0; i < 5; i++)
                     Icon(
                       i < item.nota.clamp(1, 5)
-                          ? Icons.star_rounded
-                          : Icons.star_outline_rounded,
+                          ? FxIcons.estrelaAtiva
+                          : FxIcons.estrela,
                       size: 18,
                       color: EagleTokens.goldStar,
                     ),
@@ -342,7 +343,7 @@ class _State extends ConsumerState<DepoimentosPersonalScreen> {
                         vertical: 12,
                       ),
                       prefixIcon: Icon(
-                        Icons.search_rounded,
+                        FxIcons.buscar,
                         color: primary,
                         size: 20,
                       ),
@@ -352,7 +353,7 @@ class _State extends ConsumerState<DepoimentosPersonalScreen> {
                               tooltip: 'Limpar busca',
                               onPressed: _clearQuery,
                               icon: Icon(
-                                Icons.close_rounded,
+                                FxIcons.fechar,
                                 color: chrome.mute,
                                 size: 18,
                               ),
@@ -480,7 +481,7 @@ class _State extends ConsumerState<DepoimentosPersonalScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       const Icon(
-                        Icons.star_rounded,
+                        FxIcons.estrelaAtiva,
                         size: 14,
                         color: EagleTokens.goldStar,
                       ),

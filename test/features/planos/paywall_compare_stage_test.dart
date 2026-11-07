@@ -4,6 +4,7 @@ import 'package:focux_app/features/planos/paywall/paywall_catalog.dart';
 import 'package:focux_app/features/planos/paywall/paywall_compare_stage.dart';
 import 'package:focux_app/features/subscription/models/subscription_plan.dart';
 import 'package:focux_app/features/subscription/subscription_products.dart';
+import 'package:focux_app/core/theme/fx_icons.dart';
 
 void main() {
   testWidgets('fillViewport estica o card e evita faixa vazia', (tester) async {
@@ -75,7 +76,7 @@ void main() {
 
     // Primeira linha com ✓ é Free e Pro (Aba Hoje); a última é só Pro.
     final checkDx = tester
-        .getCenter(find.byIcon(Icons.check_rounded, skipOffstage: false).last)
+        .getCenter(find.byIcon(FxIcons.check, skipOffstage: false).last)
         .dx;
     expect((checkDx - headerPro.dx).abs(), lessThan(12));
   });

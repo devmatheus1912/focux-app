@@ -7,6 +7,7 @@ import '../theme/focux_hub_typography.dart';
 import '../theme/tokens_strip.dart';
 import 'fx_home_sheet.dart';
 import 'fx_tonal_button.dart';
+import '../theme/fx_icons.dart';
 
 /// Confirmação canônica no chrome da Home — substitui `AlertDialog` de
 /// confirmar/cancelar. Retorna `true` só se o usuário confirmar.
@@ -19,7 +20,7 @@ Future<bool> showFxConfirmSheet(
   required String confirmLabel,
   String? subtitle,
   String? message,
-  IconData icon = Icons.help_outline_rounded,
+  IconData icon = FxIcons.ajuda,
   IconData? confirmIcon,
   String cancelLabel = FocuxMicrocopy.cancelar,
   bool destructive = false,

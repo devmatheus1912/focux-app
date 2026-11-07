@@ -13,6 +13,7 @@ import 'treino_no_lugar.dart';
 import '../services/recent_exercise_usage_store.dart';
 import '../utils/divisao_catalogo.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Sugere exercícios para **esta** sessão. Se o nome casa com um dia de um modelo
 /// ("B · Costas e bíceps"), abre direto os blocos desse dia; senão, o personal
@@ -65,7 +66,7 @@ Future<void> openSugerirExercicios({
             ),
             leading: IconButton(
               tooltip: 'Voltar',
-              icon: const Icon(Icons.arrow_back),
+              icon: const Icon(FxIcons.voltar),
               onPressed: () => Navigator.pop(routeContext, false),
             ),
           ),

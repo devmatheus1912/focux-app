@@ -22,6 +22,7 @@ import '../utils/aluno360_copilot_logic.dart';
 import '../utils/aluno360_operacao_logic.dart';
 import 'aluno360_acao_sticky.dart';
 import 'aluno360_copilot_ia_refresh_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 Future<void> showAluno360CopilotFolha(
   BuildContext context, {
@@ -95,7 +96,7 @@ class _CopilotFolha extends ConsumerWidget {
     return FxSheetFrame(
       title: s.alunoResumoCopilotoTitulo,
       subtitle: aluno.nome,
-      leading: Icon(Icons.auto_awesome_outlined, color: primary, size: 20),
+      leading: Icon(FxIcons.ia, color: primary, size: 20),
       footer: Padding(
         padding: const EdgeInsets.all(TokensStrip.s3),
         child: FxLiquidPrimaryButton(
@@ -138,7 +139,7 @@ class _CopilotFolha extends ConsumerWidget {
                   ),
                 IconButton(
                   tooltip: s.copilotoFolhaMaisOpcoes,
-                  icon: Icon(Icons.more_horiz_rounded, color: chrome.mute),
+                  icon: Icon(FxIcons.mais, color: chrome.mute),
                   onPressed:
                       () => showFxHomeSheet<void>(
                         context,
@@ -164,7 +165,7 @@ class _CopilotFolha extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Icon(
-                        Icons.check_circle_outline,
+                        FxIcons.concluido,
                         size: 18,
                         color: primary,
                       ),
@@ -200,7 +201,7 @@ class _CopilotFolha extends ConsumerWidget {
                       const SizedBox(height: TokensStrip.s2),
                       FxTonalButton(
                         label: s.copilotoCopiar,
-                        icon: Icons.copy_rounded,
+                        icon: FxIcons.copiar,
                         compact: true,
                         onPressed: () async {
                           await Clipboard.setData(

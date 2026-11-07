@@ -8,6 +8,7 @@ import '../../../core/widgets/fx_cached_network_image.dart';
 import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Assinatura do personal na Home do aluno: logo, nome, slogan e um botão
 /// para conversar. Sem slogan, só logo e nome.
@@ -91,7 +92,7 @@ class AlunoPersonalCard extends StatelessWidget {
             const SizedBox(width: TokensStrip.s2),
             FxTonalButton(
               label: s.alunoPersonalCardConversar,
-              icon: Icons.chat_bubble_outline_rounded,
+              icon: FxIcons.chat,
               compact: true,
               onPressed: onConversar,
             ),

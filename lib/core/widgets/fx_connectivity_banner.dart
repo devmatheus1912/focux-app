@@ -14,6 +14,7 @@ import '../theme/design_tokens.dart';
 import '../utils/connectivity_banner_state.dart';
 import 'feedback_helper.dart';
 import 'fx_tonal_button.dart';
+import '../theme/fx_icons.dart';
 
 /// Mostra conexão e fila offline, e drena a fila: ao voltar a rede, ao voltar
 /// ao primeiro plano e em intervalo enquanto houver pendência.
@@ -228,10 +229,10 @@ class _FxConnectivityBannerState extends ConsumerState<FxConnectivityBanner>
   IconData _bannerIcon(ConnectivityBannerKind kind) {
     return switch (kind) {
       ConnectivityBannerKind.offline ||
-      ConnectivityBannerKind.offlinePending => Icons.wifi_off_rounded,
-      ConnectivityBannerKind.dropped => Icons.error_outline_rounded,
-      ConnectivityBannerKind.unstable => Icons.cloud_off_rounded,
-      _ => Icons.sync,
+      ConnectivityBannerKind.offlinePending => FxIcons.semConexao,
+      ConnectivityBannerKind.dropped => FxIcons.erro,
+      ConnectivityBannerKind.unstable => FxIcons.semConexao,
+      _ => FxIcons.renovar,
     };
   }
 

@@ -8,6 +8,7 @@ import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../alunos/utils/add_aluno_display.dart';
 import '../../alunos/utils/aluno360_medida_plausivel.dart';
+import '../../../core/theme/fx_icons.dart';
 
 const generosDoAluno = [
   (valor: 'MASCULINO', rotulo: 'Masculino'),
@@ -107,7 +108,7 @@ class CampoDeEscolha extends StatelessWidget {
   }
 
   Widget? _fim(ShellPalette chrome) =>
-      acao ?? (onTap == null ? null : Icon(Icons.chevron_right_rounded, color: chrome.mute));
+      acao ?? (onTap == null ? null : Icon(FxIcons.chevronDireita, color: chrome.mute));
 }
 
 class MedidaCampo extends StatelessWidget {

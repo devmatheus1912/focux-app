@@ -29,6 +29,7 @@ import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../l10n/pt.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class EvolucaoFotosScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -122,18 +123,18 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
     final src = await showFxGroupedActionSheet<ImageSource>(
       context,
       titulo: ptS.evolucaoFotoAdicionar,
-      icone: Icons.add_a_photo_outlined,
+      icone: FxIcons.adicionarFoto,
       grupos: [
         FxActionGroup<ImageSource>(ptS.evolucaoFotoOrigem, [
           FxActionItem(
             valor: ImageSource.camera,
             rotulo: ptS.evolucaoFotoCamera,
-            icone: Icons.camera_alt_outlined,
+            icone: FxIcons.camera,
           ),
           FxActionItem(
             valor: ImageSource.gallery,
             rotulo: ptS.evolucaoFotoGaleria,
-            icone: Icons.photo_library_outlined,
+            icone: FxIcons.galeria,
           ),
         ]),
       ],
@@ -299,10 +300,37 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
               if (!_revelado)
                 Center(
                   child: Icon(
-                    Icons.visibility_outlined,
+                    FxIcons.ver,
                     color: Colors.white.withValues(alpha: 0.9),
                   ),
                 ),
+              // Data no canto, sobre faixa escura: legível com ou sem desfoque.
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Colors.transparent, Colors.black.withValues(alpha: 0.55)],
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      TokensStrip.s2,
+                      TokensStrip.s3,
+                      TokensStrip.s2,
+                      TokensStrip.s1,
+                    ),
+                    child: Text(
+                      evolucaoFotosDateLabel(f.data),
+                      style: FocuxHubTypography.chip(Colors.white),
+                    ),
+                  ),
+                ),
+              ),
               if (isB || isA)
                 DecoratedBox(
                   decoration: BoxDecoration(
@@ -449,7 +477,7 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
       context,
       title: ptS.evolucaoExcluirFotoTitulo,
       message: ptS.evolucaoExcluirFotoMensagem,
-      icon: Icons.delete_outline_rounded,
+      icon: FxIcons.excluir,
       confirmLabel: ptS.evolucaoExcluir,
       destructive: true,
     );

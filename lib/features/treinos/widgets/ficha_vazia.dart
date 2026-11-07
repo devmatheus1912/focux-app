@@ -17,6 +17,7 @@ import '../models/ficha_modelo.dart';
 import '../utils/divisao_catalogo.dart';
 import '../utils/semana_da_fila.dart';
 import 'ficha_acoes.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// O que o personal escolheu em "Montar do zero": a semana e por quantas semanas vale.
 class PlanoDaFicha {
@@ -123,8 +124,8 @@ class _FichaVaziaState extends State<FichaVazia> {
       title: s.valePorTitulo,
       itens: [
         for (final n in const [4, 8, 12])
-          FxActionSheetItem(value: n, label: s.valePorSemanas(n), icon: Icons.event_rounded),
-        FxActionSheetItem(value: 0, label: s.vigenciaSemPrazo, icon: Icons.all_inclusive_rounded),
+          FxActionSheetItem(value: n, label: s.valePorSemanas(n), icon: FxIcons.calendario),
+        FxActionSheetItem(value: 0, label: s.vigenciaSemPrazo, icon: FxIcons.infinito),
       ],
     );
     if (escolha == null || !mounted) return;
@@ -196,7 +197,7 @@ class _FichaVaziaState extends State<FichaVazia> {
           if (widget.onCopiarDeAluno != null)
             FxLinkRow(
               label: s.fichaVaziaCopiarAluno,
-              icon: Icons.people_alt_outlined,
+              icon: FxIcons.grupo,
               onTap: widget.onCopiarDeAluno,
             ),
         ],
@@ -286,7 +287,7 @@ class _FichaVaziaState extends State<FichaVazia> {
                 child: Text(nomes[dia.dia - 1], style: FocuxHubTypography.cardTitle(color: chrome.ink)),
               ),
               if (dia.segueSequencia) ...[
-                Icon(Icons.repeat_rounded, size: 16, color: chrome.mute),
+                Icon(FxIcons.repetirPequeno, size: 16, color: chrome.mute),
                 const SizedBox(width: TokensStrip.s1),
               ],
               Expanded(
@@ -308,7 +309,7 @@ class _FichaVaziaState extends State<FichaVazia> {
         const SizedBox(height: TokensStrip.s1),
         FxLinkRow(
           label: _semanas == 0 ? s.vigenciaSemPrazo : s.fichaVaziaValePor(_semanas),
-          icon: Icons.event_rounded,
+          icon: FxIcons.calendario,
           detalhe: s.fichaVaziaMudar,
           onTap: _mudarPrazo,
         ),

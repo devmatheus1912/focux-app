@@ -10,11 +10,11 @@ class _ExerciseEssentials extends StatelessWidget {
   Widget build(BuildContext context) {
     final items =
         [
-          (Icons.fitness_center_rounded, _grupoLabel(exercicio)),
-          (Icons.category_rounded, _modalidadeLabel(exercicio)),
-          (Icons.construction_rounded, _equipamentoLabel(exercicio)),
-          (Icons.trending_up_rounded, _dificuldadeLabel(exercicio)),
-          (Icons.route_rounded, _padraoLabel(exercicio)),
+          (FxIcons.treino, _grupoLabel(exercicio)),
+          (FxIcons.categoria, _modalidadeLabel(exercicio)),
+          (FxIcons.ferramentas, _equipamentoLabel(exercicio)),
+          (FxIcons.subindo, _dificuldadeLabel(exercicio)),
+          (FxIcons.rota, _padraoLabel(exercicio)),
         ].where((item) => item.$2?.trim().isNotEmpty == true).toList();
 
     if (items.isEmpty) return const SizedBox.shrink();
@@ -147,26 +147,26 @@ class _GuidanceExpansion extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _CleanExpansion(
-      icon: Icons.health_and_safety_outlined,
+      icon: FxIcons.saude,
       title: 'Cuidados e substituições',
       children: [
         if (exercicio.errosComuns?.trim().isNotEmpty == true)
           _GuidanceCard(
-            icon: Icons.report_problem_outlined,
+            icon: FxIcons.alerta,
             title: 'Erros comuns',
             text: exercicio.errosComuns!.trim(),
             color: EagleTokens.warn,
           ),
         if (exercicio.contraindicacoes?.trim().isNotEmpty == true)
           _GuidanceCard(
-            icon: Icons.health_and_safety_outlined,
+            icon: FxIcons.saude,
             title: 'Contraindicações',
             text: exercicio.contraindicacoes!.trim(),
             color: EagleTokens.bad,
           ),
         if (exercicio.substitutos?.trim().isNotEmpty == true)
           _GuidanceCard(
-            icon: Icons.swap_horiz_rounded,
+            icon: FxIcons.trocar,
             title: 'Substitutos',
             text: exercicio.substitutos!.trim(),
             color: Theme.of(context).colorScheme.primary,
@@ -188,7 +188,7 @@ class _TechnicalDataExpansion extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _CleanExpansion(
-      icon: Icons.tune_rounded,
+      icon: FxIcons.filtros,
       title: 'Dados técnicos',
       children: [
         if (_taxonomyChips(exercicio).isNotEmpty)
@@ -364,7 +364,7 @@ class _ReadinessCheck extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            ok ? Icons.check_circle_rounded : Icons.radio_button_unchecked,
+            ok ? FxIcons.concluidoAtivo : FxIcons.circulo,
             color: ok ? color : fallback,
             size: 15,
           ),
@@ -421,29 +421,29 @@ List<Widget> _taxonomyChips(Exercicio exercicio) {
   return [
     if (_modalidadeLabel(exercicio)?.isNotEmpty == true)
       _CompactPill(
-        icon: Icons.category_rounded,
+        icon: FxIcons.categoria,
         label: _modalidadeLabel(exercicio)!,
       ),
     if (_grupoLabel(exercicio)?.isNotEmpty == true)
       _CompactPill(
-        icon: Icons.fitness_center_rounded,
+        icon: FxIcons.treino,
         label: _grupoLabel(exercicio)!,
       ),
     if (_padraoLabel(exercicio)?.isNotEmpty == true)
-      _CompactPill(icon: Icons.route_rounded, label: _padraoLabel(exercicio)!),
+      _CompactPill(icon: FxIcons.rota, label: _padraoLabel(exercicio)!),
     for (final equipamento in exercicio.equipamentos)
       _CompactPill(
-        icon: Icons.construction_rounded,
+        icon: FxIcons.ferramentas,
         label:
             TaxonomyLabels.equipamento[equipamento] ?? equipamento.backendName,
       ),
     if (_dificuldadeLabel(exercicio)?.isNotEmpty == true)
       _CompactPill(
-        icon: Icons.trending_up_rounded,
+        icon: FxIcons.subindo,
         label: _dificuldadeLabel(exercicio)!,
       ),
     if (exercicio.unilateral)
-      const _CompactPill(icon: Icons.swap_horiz_rounded, label: 'Unilateral'),
+      const _CompactPill(icon: FxIcons.trocar, label: 'Unilateral'),
   ];
 }
 
@@ -459,10 +459,10 @@ IconData _trustIcon(Exercicio exercicio) {
   return switch (exercicio.mediaTrustLevel) {
     'READY' =>
       exercicio.isPersonalUpload
-          ? Icons.workspace_premium_rounded
-          : Icons.verified_rounded,
-    'NO_VIDEO' => Icons.videocam_off_outlined,
-    _ => Icons.rate_review_outlined,
+          ? FxIcons.premium
+          : FxIcons.verificado,
+    'NO_VIDEO' => FxIcons.videoOff,
+    _ => FxIcons.avaliacao,
   };
 }
 
@@ -520,7 +520,7 @@ class _EditorialReviewPanel extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.fact_check_rounded, color: color),
+              Icon(FxIcons.conferir, color: color),
               const SizedBox(width: 10),
               Expanded(
                 child: Column(
@@ -569,19 +569,19 @@ class _EditorialReviewPanel extends StatelessWidget {
             children: [
               _EditorialActionButton(
                 label: 'Aprovar',
-                icon: Icons.verified_rounded,
+                icon: FxIcons.verificado,
                 selected: status == 'APPROVED',
                 onTap: () => onChange('APPROVED'),
               ),
               _EditorialActionButton(
                 label: 'Reprovar',
-                icon: Icons.block_rounded,
+                icon: FxIcons.bloquear,
                 selected: status == 'REJECTED',
                 onTap: () => onChange('REJECTED'),
               ),
               _EditorialActionButton(
                 label: 'Revisar',
-                icon: Icons.rate_review_rounded,
+                icon: FxIcons.avaliacao,
                 selected: status == 'PENDING_REVIEW',
                 onTap: () => onChange('PENDING_REVIEW'),
               ),
@@ -701,7 +701,7 @@ class _MediaMetadataPanel extends StatelessWidget {
       child: Row(
         children: [
           Icon(
-            licensed ? Icons.verified_rounded : Icons.video_library_rounded,
+            licensed ? FxIcons.verificado : FxIcons.videos,
             color: licensed ? EagleTokens.good : primary,
           ),
           const SizedBox(width: 10),
@@ -863,7 +863,7 @@ class _VideoPlayerState extends State<_VideoPlayer> {
                               color: Colors.black54,
                             ),
                             child: const Icon(
-                              Icons.play_arrow_rounded,
+                              FxIcons.play,
                               color: Colors.white,
                               size: 36,
                             ),

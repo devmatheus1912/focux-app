@@ -8,6 +8,7 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Faixa compacta de ativação no fold da Home — linha 52 + barra no fio inferior.
 /// Não compete com o cumprimento: fica *abaixo* do Olá, no ritmo do Perfil.
@@ -121,7 +122,7 @@ class DashboardHomeActivationStrip extends StatelessWidget {
                             const SizedBox(width: TokensStrip.s1),
                           ],
                           Icon(
-                            Icons.chevron_right,
+                            FxIcons.chevronDireita,
                             size: FxSettingsLayout.chevronSize,
                             color: chrome.mute,
                           ),

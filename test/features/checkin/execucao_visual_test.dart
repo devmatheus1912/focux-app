@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/checkin/widgets/checkin_header_widgets.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:focux_app/core/theme/fx_icons.dart';
 
 void main() {
   setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
@@ -30,7 +31,7 @@ void main() {
     );
     expect(find.byTooltip('Mais'), findsOneWidget);
     expect(find.text('Sair'), findsOneWidget);
-    expect(find.byIcon(Icons.help_outline_rounded), findsNothing);
+    expect(find.byIcon(FxIcons.ajuda), findsNothing);
     final barra = find.byKey(const ValueKey('checkin-barra-treino'));
     expect(find.descendant(of: barra, matching: find.byType(Expanded)), findsNWidgets(3));
   });

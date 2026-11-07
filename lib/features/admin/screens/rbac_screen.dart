@@ -26,6 +26,7 @@ import '../../auth/providers/auth_provider.dart';
 import '../data/rbac_repository.dart';
 import '../models/permissao_rbac.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 final rbacRepositoryProvider = Provider(
   (ref) => RbacRepository(ref.read(apiClientProvider)),
@@ -85,7 +86,7 @@ class RbacScreen extends ConsumerWidget {
               button: true,
               label: 'Conceder permissão',
               child: IconButton(
-                icon: const Icon(Icons.add_rounded),
+                icon: const Icon(FxIcons.adicionar),
                 tooltip: 'Conceder permissão',
                 onPressed: () => _showConcederPermissao(context, ref),
               ),
@@ -131,8 +132,8 @@ class RbacScreen extends ConsumerWidget {
                       FxSettingsTile(
                         icon:
                             permissoes[i].nivel == 'ADMIN'
-                                ? Icons.security_outlined
-                                : Icons.vpn_key_outlined,
+                                ? FxIcons.seguranca
+                                : FxIcons.chave,
                         label: permissoes[i].recurso,
                         value: permissoes[i].nivel,
                         mute: mute,
@@ -166,7 +167,7 @@ class RbacScreen extends ConsumerWidget {
       message: 'Quem usava este acesso perde na hora.',
       confirmLabel: 'Revogar',
       destructive: true,
-      icon: Icons.delete_outline_rounded,
+      icon: FxIcons.excluir,
     );
     if (!ok || !context.mounted) return;
     try {
@@ -210,7 +211,7 @@ class RbacScreen extends ConsumerWidget {
                     title: permissao.recurso,
                     subtitle: 'Ajuste o nível ou revogue o acesso.',
                     leading: Icon(
-                      Icons.vpn_key_outlined,
+                      FxIcons.chave,
                       color: primary,
                       size: 18,
                     ),
@@ -219,7 +220,7 @@ class RbacScreen extends ConsumerWidget {
                   FxSettingsGroup(
                     children: [
                       FxSettingsTile(
-                        icon: Icons.tune_outlined,
+                        icon: FxIcons.filtros,
                         label: 'Nível',
                         value: nivel,
                         mute: mute,
@@ -315,7 +316,7 @@ class RbacScreen extends ConsumerWidget {
                     title: 'Conceder permissão',
                     subtitle: 'Escolha o recurso e o nível de acesso.',
                     leading: Icon(
-                      Icons.vpn_key_outlined,
+                      FxIcons.chave,
                       color: primary,
                       size: 18,
                     ),
@@ -324,7 +325,7 @@ class RbacScreen extends ConsumerWidget {
                   FxSettingsGroup(
                     children: [
                       FxSettingsTile(
-                        icon: Icons.folder_outlined,
+                        icon: FxIcons.pasta,
                         label: 'Recurso',
                         value: recursoSelecionado,
                         mute: mute,
@@ -345,7 +346,7 @@ class RbacScreen extends ConsumerWidget {
                         },
                       ),
                       FxSettingsTile(
-                        icon: Icons.tune_outlined,
+                        icon: FxIcons.filtros,
                         label: 'Nível',
                         value: nivelSelecionado,
                         mute: mute,

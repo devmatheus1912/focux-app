@@ -15,6 +15,7 @@ import '../../../core/widgets/fx_settings_tile.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../data/pacote_repository.dart';
 import '../utils/pacote_display.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Abre bottom sheet premium; retorna true se pacote foi criado.
 Future<bool> showNovoPacoteSheet(
@@ -85,7 +86,7 @@ class _NovoPacoteSheetState extends State<_NovoPacoteSheet> {
       context,
       title: pacoteCriarConfirmTitle(),
       message: pacoteCriarConfirmMessage(),
-      icon: Icons.add_card_outlined,
+      icon: FxIcons.adicionarCartao,
       confirmLabel: pacoteCriarConfirmLabel(),
     );
     if (!ok || !mounted) return;
@@ -152,7 +153,7 @@ class _NovoPacoteSheetState extends State<_NovoPacoteSheet> {
                       ),
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
-                    icon: const Icon(Icons.close_rounded, size: 22),
+                    icon: const Icon(FxIcons.fechar, size: 22),
                   ),
                 ),
               ),
@@ -171,7 +172,7 @@ class _NovoPacoteSheetState extends State<_NovoPacoteSheet> {
                   AlunoInsetFormField(
                     controller: _tituloCtrl,
                     label: 'Título',
-                    icon: Icons.title_outlined,
+                    icon: FxIcons.titulo,
                     inputFormatters: [
                       LengthLimitingTextInputFormatter(pacoteTituloMax),
                     ],
@@ -184,7 +185,7 @@ class _NovoPacoteSheetState extends State<_NovoPacoteSheet> {
                   AlunoInsetFormField(
                     controller: _descCtrl,
                     label: 'Descrição',
-                    icon: Icons.notes_outlined,
+                    icon: FxIcons.notas,
                     maxLines: 2,
                     inputFormatters: [
                       LengthLimitingTextInputFormatter(pacoteDescricaoMax),
@@ -193,7 +194,7 @@ class _NovoPacoteSheetState extends State<_NovoPacoteSheet> {
                   AlunoInsetFormField(
                     controller: _valorCtrl,
                     label: 'Valor que o cliente paga (R\$)',
-                    icon: Icons.payments_outlined,
+                    icon: FxIcons.pagamento,
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),

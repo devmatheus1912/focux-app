@@ -39,6 +39,7 @@ import '../widgets/auth_biometria_sheet.dart';
 import '../widgets/auth_social_button.dart';
 import '../widgets/auth_social_stack.dart';
 import '../widgets/auth_text_link.dart';
+import '../../../core/theme/fx_icons.dart';
 
 part 'login_screen_actions.part.dart';
 
@@ -235,7 +236,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   label: loginSlugFieldLabel(),
                                   controller: _slugController,
                                   hintText: loginSlugFieldHint(),
-                                  icon: Icons.link_rounded,
+                                  icon: FxIcons.link,
                                   textInputAction: TextInputAction.next,
                                   inputFormatters: [
                                     FilteringTextInputFormatter.allow(
@@ -256,7 +257,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 label: 'E-mail',
                                 controller: _emailController,
                                 hintText: 'seu@email.com',
-                                icon: Icons.person_outline_rounded,
+                                icon: FxIcons.pessoa,
                                 keyboardType: TextInputType.emailAddress,
                                 textInputAction: TextInputAction.next,
                                 autofillHints: const [AutofillHints.email],
@@ -272,7 +273,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 label: 'Senha',
                                 controller: _passwordController,
                                 hintText: '••••••••',
-                                icon: Icons.lock_outline_rounded,
+                                icon: FxIcons.cadeado,
                                 obscureText: !_showPassword,
                                 textInputAction: TextInputAction.done,
                                 autofillHints: const [AutofillHints.password],
@@ -294,8 +295,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                       ),
                                   icon: Icon(
                                     _showPassword
-                                        ? Icons.visibility_off_outlined
-                                        : Icons.visibility_outlined,
+                                        ? FxIcons.ocultar
+                                        : FxIcons.ver,
                                     color: heroTealSurface(0.82),
                                     size: 20,
                                   ),
@@ -340,8 +341,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   label: 'Entrar com ${_biometria!.rotulo}',
                                   leading: Icon(
                                     _biometria == BiometriaTipo.faceId
-                                        ? Icons.face_unlock_outlined
-                                        : Icons.fingerprint_rounded,
+                                        ? FxIcons.rosto
+                                        : FxIcons.digital,
                                     size: 24,
                                     color: Colors.white,
                                   ),
@@ -375,7 +376,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               if (showGoogleNote) ...[
                                 if (showGoogle) const SizedBox(height: 12),
                                 AuthOperationalNotice(
-                                  icon: Icons.g_mobiledata_rounded,
+                                  icon: FxIcons.google,
                                   title:
                                       _googleStatusTitle ??
                                       'Google pendente no ambiente',

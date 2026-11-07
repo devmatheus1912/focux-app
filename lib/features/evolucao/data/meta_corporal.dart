@@ -1,5 +1,7 @@
 import '../../../core/utils/pt_br_display.dart';
 import '../../../l10n/pt.dart';
+import '../../../core/widgets/fx_grafico_linha.dart';
+import '../utils/evolucao_series.dart';
 import 'evolucao_repository.dart';
 
 const metaMetricas = ['PESO', 'CINTURA', 'QUADRIL', 'BRACO', 'GORDURA', 'MASSA'];
@@ -115,7 +117,11 @@ class Conquista {
     required this.titulo,
     required this.detalhe,
     required this.data,
+    required this.valor,
   });
+
+  /// O número que vai no centro do selo ("−8,0 kg", "60,0 kg", "82,0 kg").
+  final String valor;
 
   /// Para celebrar uma vez só.
   final String chave;
@@ -125,28 +131,91 @@ class Conquista {
   final DateTime data;
 
   bool get celebra => tipo != ConquistaTipo.recorde;
+
+  /// "Meta batida", "Meta mantida", "Novo recorde".
+  String get tipoRotulo => switch (tipo) {
+    ConquistaTipo.meta => ptS.conquistaTipoMeta,
+    ConquistaTipo.mantido => ptS.conquistaTipoMantido,
+    ConquistaTipo.recorde => ptS.conquistaTipoRecorde,
+  };
 }
 
 
 /// Mais recente primeiro. Tudo sai de metas e recordes: selo não tem tabela.
+/// Série da medida da meta (peso e circunferências das medidas; gordura e
+/// massa das avaliações).
+List<PontoGrafico> serieDaMetaCorporal(
+  String metrica, {
+  List<MedidaCorporal> medidas = const [],
+  List<PontoGordura> gordura = const [],
+  List<PontoGordura> massa = const [],
+}) => switch (metrica) {
+  'GORDURA' => serieDeGordura(gordura),
+  'MASSA' => serieDeGordura(massa),
+  _ => switch (EvolucaoMetrica.values.where((e) => e.codigoMeta == metrica).firstOrNull) {
+    final e? => serieDaMetrica(medidas, e),
+    null => const [],
+  },
+};
+
+/// Da medida que deu o valor inicial à que concluiu a meta: quantos dias
+/// passaram (pelas datas das medidas, não da meta) e se algum passo no meio
+/// pede "Confira". Nulo quando a série não tem os dois pontos.
+({int dias, bool suspeito})? trechoDaMeta(MetaCorporal m, List<PontoGrafico> serie) {
+  final concluida = m.concluidaEm;
+  if (concluida == null || serie.length < 2) return null;
+  final final_ = m.valorFinal ?? m.valorAlvo;
+  bool igual(double a, double b) => (a - b).abs() < 0.05;
+  final dia = DateTime(concluida.year, concluida.month, concluida.day);
+  final fim = serie.lastIndexWhere(
+    (p) => !p.data.isAfter(dia) && igual(p.valor, final_),
+  );
+  if (fim < 1) return null;
+  var inicio = serie.sublist(0, fim).lastIndexWhere((p) => igual(p.valor, m.valorInicial));
+  if (inicio < 0) {
+    final criado = m.criadoEm;
+    if (criado == null) return null;
+    inicio = serie.sublist(0, fim).lastIndexWhere((p) => !p.data.isAfter(criado));
+    if (inicio < 0) return null;
+  }
+  final suspeitos = pontosSuspeitos(serie, metaUnidade(m.metrica));
+  return (
+    dias: serie[fim].data.difference(serie[inicio].data).inDays,
+    suspeito: suspeitos.any((i) => i > inicio && i <= fim),
+  );
+}
+
 List<Conquista> conquistasDe(
   List<MetaCorporal> metas,
-  List<RecordePessoal> recordes,
-) {
+  List<RecordePessoal> recordes, {
+  List<MedidaCorporal> medidas = const [],
+  List<PontoGordura> gordura = const [],
+  List<PontoGordura> massa = const [],
+}) {
   final lista = <Conquista>[];
   for (final m in metas) {
     final concluida = m.concluidaEm;
     if (m.concluida && concluida != null && !m.manutencao) {
       final final_ = m.valorFinal ?? m.valorAlvo;
+      final trecho = trechoDaMeta(
+        m,
+        serieDaMetaCorporal(m.metrica, medidas: medidas, gordura: gordura, massa: massa),
+      );
+      // Salto que pede "Confira" não vira conquista; a meta segue concluída.
+      if (trecho?.suspeito ?? false) continue;
       final dif = final_ - m.valorInicial;
-      final dias = m.criadoEm == null ? 0 : concluida.difference(m.criadoEm!).inDays;
+      final dias =
+          trecho?.dias ??
+          (m.criadoEm == null ? 0 : concluida.difference(m.criadoEm!).inDays);
       final unidade = metaUnidade(m.metrica);
+      final valor =
+          '${dif > 0 ? '+' : '−'}${formatBrDecimal(dif.abs())}${unidade == '%' ? '%' : ' $unidade'}';
       lista.add(
         Conquista(
           chave: 'meta_${m.id}',
           tipo: ConquistaTipo.meta,
-          titulo:
-              '${dif > 0 ? '+' : '−'}${formatBrDecimal(dif.abs())}${unidade == '%' ? '%' : ' $unidade'}',
+          titulo: valor,
+          valor: valor,
           detalhe: ptS.conquistaMetaDetalhe(
             metaMetricaRotulo(m.metrica),
             metaValor(m.metrica, m.valorInicial),
@@ -164,6 +233,7 @@ List<Conquista> conquistasDe(
           chave: 'mantido_${m.id}',
           tipo: ConquistaTipo.mantido,
           titulo: ptS.conquistaMantidoTitulo,
+          valor: metaValor(m.metrica, m.valorAlvo),
           detalhe: ptS.conquistaMantidoDetalhe(metaValor(m.metrica, m.valorAlvo)),
           data: mantida,
         ),
@@ -187,6 +257,7 @@ List<Conquista> conquistasDe(
             chave: 'recorde_${r.id}',
             tipo: ConquistaTipo.recorde,
             titulo: formatBrKg(carga),
+            valor: formatBrKg(carga),
             detalhe: ptS.conquistaRecordeDetalhe(r.exercicioNome, dataCurta(data)),
             data: data,
           ),

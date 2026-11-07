@@ -7,6 +7,7 @@ import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../l10n/app_localizations.dart';
 import '../utils/aluno_home_view.dart';
+import '../../../core/theme/fx_icons.dart';
 
 enum AlunoFerramentaGrupo { treino, saude, relacao, conta }
 
@@ -29,98 +30,98 @@ class AlunoFerramentaAcao {
 /// Todas as ferramentas do aluno. Anamnese fica no Perfil.
 List<AlunoFerramentaAcao> alunoFerramentas(S s) => [
   AlunoFerramentaAcao(
-    icon: Icons.fitness_center,
+    icon: FxIcons.treino,
     title: s.alunoFerramentaTreinosTitulo,
     subtitle: s.alunoFerramentaTreinosDetalhe,
     route: '/checkin/treinos',
     group: AlunoFerramentaGrupo.treino,
   ),
   AlunoFerramentaAcao(
-    icon: Icons.trending_up_rounded,
+    icon: FxIcons.subindo,
     title: s.alunoFerramentaHistoricoTitulo,
     subtitle: s.alunoFerramentaHistoricoDetalhe,
     route: '/checkin/historico',
     group: AlunoFerramentaGrupo.treino,
   ),
   AlunoFerramentaAcao(
-    icon: Icons.calendar_month_outlined,
+    icon: FxIcons.calendario,
     title: s.alunoFerramentaAgendaTitulo,
     subtitle: s.alunoFerramentaAgendaDetalhe,
     route: '/agenda/aluno',
     group: AlunoFerramentaGrupo.treino,
   ),
   AlunoFerramentaAcao(
-    icon: Icons.videocam_outlined,
+    icon: FxIcons.video,
     title: s.alunoFerramentaFeedbackVideoTitulo,
     subtitle: s.alunoFerramentaFeedbackVideoDetalhe,
     route: alunoFeedbackVideoRoute,
     group: AlunoFerramentaGrupo.treino,
   ),
   AlunoFerramentaAcao(
-    icon: Icons.flag_outlined,
+    icon: FxIcons.meta,
     title: s.alunoFerramentaDesafiosTitulo,
     subtitle: s.alunoFerramentaDesafiosDetalhe,
     route: '/aluno/desafios',
     group: AlunoFerramentaGrupo.treino,
   ),
   AlunoFerramentaAcao(
-    icon: Icons.groups_outlined,
+    icon: FxIcons.grupo,
     title: s.alunoFerramentaAulasGrupoTitulo,
     subtitle: s.alunoFerramentaAulasGrupoDetalhe,
     route: '/aluno/grupo-aulas',
     group: AlunoFerramentaGrupo.treino,
   ),
   AlunoFerramentaAcao(
-    icon: Icons.track_changes_outlined,
+    icon: FxIcons.alvo,
     title: s.alunoFerramentaHabitosTitulo,
     subtitle: s.alunoFerramentaHabitosDetalhe,
     route: '/aluno/habitos',
     group: AlunoFerramentaGrupo.saude,
   ),
   AlunoFerramentaAcao(
-    icon: Icons.route_outlined,
+    icon: FxIcons.rota,
     title: s.alunoFerramentaTrilhasTitulo,
     subtitle: s.alunoFerramentaTrilhasDetalhe,
     route: '/aluno/trilhas',
     group: AlunoFerramentaGrupo.saude,
   ),
   AlunoFerramentaAcao(
-    icon: Icons.watch_outlined,
+    icon: FxIcons.relogioPulso,
     title: s.alunoFerramentaProntidaoTitulo,
     subtitle: s.alunoFerramentaProntidaoDetalhe,
     route: '/saude',
     group: AlunoFerramentaGrupo.saude,
   ),
   AlunoFerramentaAcao(
-    icon: Icons.chat_bubble_outline,
+    icon: FxIcons.chat,
     title: s.alunoFerramentaPersonalTitulo,
     subtitle: s.alunoFerramentaPersonalDetalhe,
     route: '/chat/aluno',
     group: AlunoFerramentaGrupo.relacao,
   ),
   AlunoFerramentaAcao(
-    icon: Icons.dynamic_feed_outlined,
+    icon: FxIcons.feed,
     title: s.alunoFerramentaFeedTitulo,
     subtitle: s.alunoFerramentaFeedDetalhe,
     route: '/feed/aluno',
     group: AlunoFerramentaGrupo.relacao,
   ),
   AlunoFerramentaAcao(
-    icon: Icons.rate_review_outlined,
+    icon: FxIcons.avaliacao,
     title: s.alunoFerramentaDepoimentosTitulo,
     subtitle: s.alunoFerramentaDepoimentosDetalhe,
     route: '/depoimentos-aluno',
     group: AlunoFerramentaGrupo.relacao,
   ),
   AlunoFerramentaAcao(
-    icon: Icons.payments_outlined,
+    icon: FxIcons.pagamento,
     title: s.alunoFerramentaFinanceiroTitulo,
     subtitle: s.alunoFerramentaFinanceiroDetalhe,
     route: '/financeiro/aluno',
     group: AlunoFerramentaGrupo.conta,
   ),
   AlunoFerramentaAcao(
-    icon: Icons.autorenew,
+    icon: FxIcons.renovar,
     title: s.alunoFerramentaRecorrenciaTitulo,
     subtitle: s.alunoFerramentaRecorrenciaDetalhe,
     route: '/aluno/recorrencia',

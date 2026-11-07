@@ -52,6 +52,6 @@ void main() {
     expect(screen, isNot(contains('LinearProgressIndicator')));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, isNot(contains('FxSettingsGroup')));
-    expect(screen, isNot(contains('Icons.refresh')));
+    expect(screen, isNot(contains('FxIcons.atualizar')));
   });
 }

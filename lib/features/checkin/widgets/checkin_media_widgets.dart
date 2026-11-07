@@ -10,6 +10,7 @@ import 'package:focux_app/core/widgets/fx_loading.dart';
 import '../../../l10n/app_localizations.dart';
 import '../utils/checkin_execucao_display.dart';
 import '../utils/checkin_video_badge.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Preferred preview height for thumbnails / loading, capped by screen.
 const double checkinMediaPreviewHeight = 228;
@@ -64,7 +65,7 @@ class CheckinExerciseThumbnailPreview extends StatelessWidget {
                   color:
                       dark ? EagleTokens.darkCardHi : TokensStrip.borderDefault,
                   alignment: Alignment.center,
-                  child: Icon(Icons.play_circle_outline_rounded, color: brand),
+                  child: Icon(FxIcons.playCirculo, color: brand),
                 ),
           ),
           Positioned.fill(
@@ -123,7 +124,7 @@ class CheckinExerciseMediaPreview extends StatelessWidget {
                   color:
                       dark ? EagleTokens.darkCardHi : TokensStrip.borderDefault,
                   alignment: Alignment.center,
-                  child: Icon(Icons.play_circle_outline_rounded, color: brand),
+                  child: Icon(FxIcons.playCirculo, color: brand),
                 ),
           ),
           Positioned.fill(
@@ -145,7 +146,7 @@ class CheckinExerciseMediaPreview extends StatelessWidget {
             bottom: 10,
             child: _CheckinMediaBadge(
               label: S.of(context).checkinMidiaTecnica,
-              icon: Icons.play_arrow_rounded,
+              icon: FxIcons.play,
             ),
           ),
         ],
@@ -395,7 +396,7 @@ class CheckinVideoPlayButton extends StatelessWidget {
               width: checkinMediaPlayMin,
               height: checkinMediaPlayMin,
               child: Icon(
-                playing ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                playing ? FxIcons.pausar : FxIcons.play,
                 color: Colors.white,
                 size: 24,
               ),
@@ -464,7 +465,7 @@ class CheckinVideoFallback extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.play_circle_fill_rounded, color: brand, size: 34),
+          Icon(FxIcons.playAtivo, color: brand, size: 34),
           const SizedBox(height: 6),
           Text(
             S.of(context).checkinMidiaVideoPersonal,

@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/widgets/fx_action_sheet.dart';
 
 import 'fx_kit_host.dart';
+import 'package:focux_app/core/theme/fx_icons.dart';
 
 enum _Acao { recomecar, duplicar, apagar }
 
@@ -16,17 +17,17 @@ Widget _abridor(void Function(_Acao?) aoFechar) => Builder(
           FxActionSheetItem(
             value: _Acao.recomecar,
             label: 'Recomeçar ficha',
-            icon: Icons.restart_alt_rounded,
+            icon: FxIcons.recomecar,
           ),
           FxActionSheetItem(
             value: _Acao.duplicar,
             label: 'Duplicar como base',
-            icon: Icons.copy_rounded,
+            icon: FxIcons.copiar,
           ),
           FxActionSheetItem(
             value: _Acao.apagar,
             label: 'Limpar semana',
-            icon: Icons.delete_outline_rounded,
+            icon: FxIcons.excluir,
             destructive: true,
           ),
         ],

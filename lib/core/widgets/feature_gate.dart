@@ -21,6 +21,7 @@ import 'fx_empty_state.dart';
 import 'fx_motion.dart';
 import 'fx_shell_scaffold.dart';
 import 'skeleton_loader.dart';
+import '../theme/fx_icons.dart';
 
 class FeatureGate extends ConsumerWidget {
   final SubscriptionPlan requiredPlan;
@@ -194,7 +195,7 @@ class _PlanSyncBannerShell extends StatelessWidget {
               child: Row(
                 children: [
                   Icon(
-                    Icons.cloud_off_rounded,
+                    FxIcons.semConexao,
                     color: EagleTokens.warnDark,
                     size: 18,
                   ),
@@ -215,7 +216,7 @@ class _PlanSyncBannerShell extends StatelessWidget {
                     visualDensity: VisualDensity.compact,
                     onPressed: onRefresh,
                     icon: const Icon(
-                      Icons.refresh_rounded,
+                      FxIcons.atualizar,
                       color: Colors.white,
                       size: 18,
                     ),

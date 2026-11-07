@@ -16,6 +16,7 @@ import '../utils/chat_system_event.dart';
 import 'conversation_media_widgets.dart';
 import 'conversation_outgoing_status.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class ConversationDateDivider extends StatelessWidget {
   final DateTime date;
@@ -80,7 +81,7 @@ class ConversationOlderMessagesLoader extends StatelessWidget {
     return Center(
       child: FxTonalButton(
         label: 'Carregar mensagens antigas',
-        icon: Icons.history_rounded,
+        icon: FxIcons.historico,
         loading: loading,
         compact: true,
         onPressed: loading ? null : onTap,
@@ -224,7 +225,7 @@ class _ConversationSwipeReplyWrapperState
               duration: const Duration(milliseconds: 120),
               opacity: _offset.abs() > 8 ? 1 : 0,
               child: Icon(
-                Icons.reply_rounded,
+                FxIcons.responder,
                 color: widget.accentColor,
                 size: 18,
               ),
@@ -272,7 +273,7 @@ class ConversationSystemEvent extends StatelessWidget {
     final evolucao = view.tipo == ChatEventoTipo.evolucao;
     final primary = Theme.of(context).colorScheme.primary;
     return _LinhaDeEvento(
-      icone: evolucao ? Icons.trending_up_rounded : Icons.check_rounded,
+      icone: evolucao ? FxIcons.subindo : FxIcons.check,
       corIcone: evolucao ? primary : null,
       texto: '${view.threadLabel} · $time',
       leitura: '${view.title}. ${view.threadLabel}, $time',
@@ -330,10 +331,10 @@ class _ConversationEventosGrupoState extends State<ConversationEventosGrupo> {
     return Column(
       children: [
         _LinhaDeEvento(
-          icone: Icons.check_rounded,
+          icone: FxIcons.check,
           texto: texto,
           leitura: texto,
-          seta: _aberto ? Icons.expand_less_rounded : Icons.expand_more_rounded,
+          seta: _aberto ? FxIcons.chevronCima : FxIcons.chevronBaixo,
           onTap: () => setState(() => _aberto = !_aberto),
         ),
         if (_aberto)

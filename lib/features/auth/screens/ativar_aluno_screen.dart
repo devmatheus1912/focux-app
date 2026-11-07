@@ -24,6 +24,7 @@ import '../widgets/auth_shell.dart';
 import '../widgets/auth_social_button.dart';
 import '../widgets/auth_text_link.dart';
 import '../widgets/password_strength_meter.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// `/aluno/ativar/:token` — link que o personal mandou: cria a senha e entra.
 class AtivarAlunoScreen extends ConsumerStatefulWidget {
@@ -258,7 +259,7 @@ class _AtivarAlunoScreenState extends ConsumerState<AtivarAlunoScreen> {
                     label: s.ativarEmailLabel,
                     controller: _emailCtrl,
                     hintText: s.ativarEmailDica,
-                    icon: Icons.alternate_email_rounded,
+                    icon: FxIcons.arroba,
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
                     autofillHints: const [AutofillHints.email],
@@ -275,7 +276,7 @@ class _AtivarAlunoScreenState extends ConsumerState<AtivarAlunoScreen> {
                             ? s.ativarEnviarCodigo
                             : s.ativarReenviarCodigo,
                     leading: const Icon(
-                      Icons.mail_outline_rounded,
+                      FxIcons.email,
                       size: 22,
                       color: Colors.white,
                     ),
@@ -294,7 +295,7 @@ class _AtivarAlunoScreenState extends ConsumerState<AtivarAlunoScreen> {
                       label: s.ativarCodigoLabel,
                       controller: _codigoCtrl,
                       hintText: '000000',
-                      icon: Icons.pin_outlined,
+                      icon: FxIcons.pin,
                       keyboardType: TextInputType.number,
                       textInputAction: TextInputAction.next,
                       autofillHints: const [AutofillHints.oneTimeCode],
@@ -311,7 +312,7 @@ class _AtivarAlunoScreenState extends ConsumerState<AtivarAlunoScreen> {
                   label: s.ativarSenhaLabel,
                   controller: _senhaCtrl,
                   hintText: s.ativarSenhaDica,
-                  icon: Icons.lock_outline_rounded,
+                  icon: FxIcons.cadeado,
                   obscureText: !_senhaVisivel,
                   textInputAction: TextInputAction.done,
                   autofillHints: const [AutofillHints.newPassword],
@@ -325,8 +326,8 @@ class _AtivarAlunoScreenState extends ConsumerState<AtivarAlunoScreen> {
                         () => setState(() => _senhaVisivel = !_senhaVisivel),
                     icon: Icon(
                       _senhaVisivel
-                          ? Icons.visibility_off_outlined
-                          : Icons.visibility_outlined,
+                          ? FxIcons.ocultar
+                          : FxIcons.ver,
                       color: heroTealSurface(0.82),
                       size: 18,
                     ),

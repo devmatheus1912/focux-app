@@ -19,6 +19,7 @@ import '../data/checkin_repository.dart';
 import '../utils/treino_ficha_status.dart';
 import '../utils/treinos_hub_texts.dart';
 import '../utils/treinos_hub_view.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Seção do hub: título + cartão de lista. Sem linhas, nada.
 class TreinosHubSecao extends StatelessWidget {
@@ -172,8 +173,8 @@ class TreinoPlanoRow extends StatelessWidget {
       onTap: onTap,
       icone:
           isTreinoAguardandoLiberacao(treino)
-              ? Icons.pending_actions_rounded
-              : Icons.fitness_center_rounded,
+              ? FxIcons.pendente
+              : FxIcons.treino,
       titulo: treino.treinoNome,
       detalhe: detalhe,
       extra:
@@ -207,7 +208,7 @@ class TreinoDepoisRow extends StatelessWidget {
     return _HubRow(
       semanticsLabel: '${treino.treinoNome}, $detalhe',
       onTap: onTap,
-      icone: Icons.fitness_center_rounded,
+      icone: FxIcons.treino,
       titulo: treino.treinoNome,
       detalhe: detalhe,
       trailing: FxActionChip(
@@ -286,7 +287,7 @@ class TreinoRecenteRow extends StatelessWidget {
     return _HubRow(
       semanticsLabel: '$dia, $nome, $detalhe',
       onTap: onTap,
-      icone: Icons.check_rounded,
+      icone: FxIcons.check,
       corIcone: EagleTokens.good,
       titulo: nome,
       detalhe: '$dia · $detalhe',
@@ -398,7 +399,7 @@ class _Seta extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ExcludeSemantics(
     child: Icon(
-      Icons.chevron_right_rounded,
+      FxIcons.chevronDireita,
       size: 20,
       color: ShellChrome.of(context).mute,
     ),

@@ -11,6 +11,7 @@ import '../data/checkin_repository.dart';
 import '../utils/semana_prevista.dart';
 import '../utils/treinos_hub_view.dart';
 import 'treinos_hub_rows.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Uma linha por dia da ficha: o que o aluno treina e o dia de hoje em destaque.
 class SuaSemanaRow extends StatelessWidget {
@@ -154,7 +155,7 @@ class SuaSemanaRow extends StatelessWidget {
                     child: status == null
                         ? null
                         : Icon(
-                            status! ? Icons.check_circle_rounded : Icons.remove_rounded,
+                            status! ? FxIcons.concluidoAtivo : FxIcons.remover,
                             size: 18,
                             color:
                                 status!
@@ -167,7 +168,7 @@ class SuaSemanaRow extends StatelessWidget {
                     child: onAbrir == null
                         ? null
                         : Icon(
-                            Icons.chevron_right_rounded,
+                            FxIcons.chevronDireita,
                             size: 20,
                             color: theme.colorScheme.onSurfaceVariant,
                           ),

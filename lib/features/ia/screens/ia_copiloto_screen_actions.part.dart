@@ -63,7 +63,7 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
                       title: 'Selecionar aluno',
                       subtitle: 'Escolha o aluno para analisar.',
                       leading: Icon(
-                        Icons.person_search_outlined,
+                        FxIcons.buscarPessoa,
                         color: primary,
                         size: 18,
                       ),
@@ -75,7 +75,7 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
                       textInputAction: TextInputAction.search,
                       decoration: InputDecoration(
                         hintText: 'Buscar por nome ou objetivo',
-                        prefixIcon: Icon(Icons.search, color: mute, size: 20),
+                        prefixIcon: Icon(FxIcons.buscar, color: mute, size: 20),
                         filled: true,
                         fillColor: cardBg,
                         contentPadding: const EdgeInsets.symmetric(
@@ -172,7 +172,7 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
                                       ),
                                       if (selected)
                                         Icon(
-                                          Icons.check_rounded,
+                                          FxIcons.check,
                                           color: primary,
                                           size: 20,
                                         ),

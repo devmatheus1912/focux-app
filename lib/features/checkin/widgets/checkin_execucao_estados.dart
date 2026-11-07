@@ -11,6 +11,7 @@ import '../../../core/widgets/fx_tela_carregando.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../l10n/app_localizations.dart';
 import '../utils/checkin_execucao_display.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class CheckinPreparandoView extends StatelessWidget {
   const CheckinPreparandoView({super.key});
@@ -52,7 +53,7 @@ class CheckinIniciarErroView extends StatelessWidget {
             ),
             FxTonalButton(
               label: s.checkinVoltarAosTreinos,
-              icon: Icons.arrow_back_rounded,
+              icon: FxIcons.voltar,
               onPressed: onVoltar,
             ),
           ],
@@ -94,7 +95,7 @@ class CheckinPendentesAviso extends StatelessWidget {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.cloud_off_rounded, size: 18, color: chrome.mute),
+                Icon(FxIcons.semConexao, size: 18, color: chrome.mute),
                 const SizedBox(width: TokensStrip.s2),
                 Flexible(
                   child: Text(
@@ -108,7 +109,7 @@ class CheckinPendentesAviso extends StatelessWidget {
             ),
             FxTonalButton(
               label: s.checkinPendentesTentar,
-              icon: Icons.refresh_rounded,
+              icon: FxIcons.atualizar,
               compact: true,
               onPressed: onTentar,
             ),
@@ -211,7 +212,7 @@ class CheckinDesfazerFaixa extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Icon(Icons.check_circle_rounded, color: brand, size: 20),
+                Icon(FxIcons.concluidoAtivo, color: brand, size: 20),
                 const SizedBox(width: TokensStrip.s2),
                 Expanded(
                   child: Text(
@@ -224,7 +225,7 @@ class CheckinDesfazerFaixa extends StatelessWidget {
                 const SizedBox(width: TokensStrip.s2),
                 FxTonalButton(
                   label: s.checkinDesfazerCurto,
-                  icon: Icons.undo_rounded,
+                  icon: FxIcons.desfazer,
                   compact: true,
                   onPressed: onDesfazer,
                 ),

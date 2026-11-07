@@ -21,6 +21,7 @@ import '../widgets/auth_operational_notice.dart';
 import '../widgets/auth_shell.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 part 'esqueci_senha_screen_actions.part.dart';
 
@@ -247,7 +248,7 @@ class _EsqueciSenhaScreenState extends ConsumerState<EsqueciSenhaScreen> {
                                       const SizedBox(height: TokensStrip.s2),
                                       FxTonalButton(
                                         label: esqueciAlunoCopiarLabel(),
-                                        icon: Icons.copy_rounded,
+                                        icon: FxIcons.copiar,
                                         expanded: true,
                                         onPressed: () async {
                                           await Clipboard.setData(
@@ -269,7 +270,7 @@ class _EsqueciSenhaScreenState extends ConsumerState<EsqueciSenhaScreen> {
                                         label: 'E-mail cadastrado',
                                         controller: _emailController,
                                         hintText: 'seu@email.com',
-                                        icon: Icons.person_outline_rounded,
+                                        icon: FxIcons.pessoa,
                                         keyboardType:
                                             TextInputType.emailAddress,
                                         textInputAction: TextInputAction.done,
@@ -289,7 +290,7 @@ class _EsqueciSenhaScreenState extends ConsumerState<EsqueciSenhaScreen> {
                                       if (_emailDeliveryAvailable == false) ...[
                                         AuthOperationalNotice(
                                           icon:
-                                              Icons.mark_email_unread_outlined,
+                                              FxIcons.emailNaoLido,
                                           title: esqueciEnvironmentTitle(
                                             issue?.title,
                                           ),

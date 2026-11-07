@@ -6,6 +6,7 @@ import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import 'perfil_biometria_tile.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Conta e segurança — grupo + sair em card separado.
 ///
@@ -39,7 +40,7 @@ class PerfilContaSegurancaSection extends StatelessWidget {
           header: 'Ajuda',
           children: [
             FxSettingsTile(
-              icon: Icons.support_agent_outlined,
+              icon: FxIcons.suporte,
               label: 'Ajuda e suporte',
               value: '',
               mute: mute,
@@ -56,7 +57,7 @@ class PerfilContaSegurancaSection extends StatelessWidget {
             PerfilBiometriaTile(mute: mute, line: line),
             if (showMfa)
               FxSettingsTile(
-                icon: Icons.phonelink_lock_outlined,
+                icon: FxIcons.cadeado,
                 label: 'Autenticação em duas etapas',
                 value: '',
                 mute: mute,
@@ -65,7 +66,7 @@ class PerfilContaSegurancaSection extends StatelessWidget {
               ),
             if (onConsentTap != null)
               FxSettingsTile(
-                icon: Icons.fact_check_outlined,
+                icon: FxIcons.conferir,
                 label: 'Consentimentos',
                 value: 'Termos e privacidade',
                 mute: mute,
@@ -74,7 +75,7 @@ class PerfilContaSegurancaSection extends StatelessWidget {
               )
             else ...[
               FxSettingsTile(
-                icon: Icons.gavel_outlined,
+                icon: FxIcons.juridico,
                 label: 'Termos de uso',
                 value: '',
                 mute: mute,
@@ -82,7 +83,7 @@ class PerfilContaSegurancaSection extends StatelessWidget {
                 onTap: () => FocuxLegal.openTerms(),
               ),
               FxSettingsTile(
-                icon: Icons.shield_outlined,
+                icon: FxIcons.seguranca,
                 label: 'Política de privacidade',
                 value: '',
                 mute: mute,
@@ -91,7 +92,7 @@ class PerfilContaSegurancaSection extends StatelessWidget {
               ),
             ],
             FxSettingsTile(
-              icon: Icons.logout,
+              icon: FxIcons.sair,
               label: 'Sair da conta',
               value: '',
               mute: mute,
@@ -105,7 +106,7 @@ class PerfilContaSegurancaSection extends StatelessWidget {
         FxSettingsGroup(
           children: [
             FxSettingsTile(
-              icon: Icons.delete_forever_outlined,
+              icon: FxIcons.excluir,
               label: 'Excluir minha conta',
               value: '',
               mute: mute,

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../theme/design_tokens.dart';
 import '../theme/tokens_strip.dart';
+import '../theme/fx_icons.dart';
 
 /// Seletor de 1–5 estrelas — S5 depoimento e reviews.
 class FxStarRating extends StatelessWidget {
@@ -47,7 +48,7 @@ class FxStarRating extends StatelessWidget {
                   height: size + 8,
                 ),
                 icon: Icon(
-                  i <= nota ? Icons.star_rounded : Icons.star_outline_rounded,
+                  i <= nota ? FxIcons.estrelaAtiva : FxIcons.estrela,
                   color: EagleTokens.goldStar,
                   size: size,
                 ),

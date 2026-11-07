@@ -39,6 +39,7 @@ import '../widgets/agenda_form_sheets.dart';
 import '../widgets/agenda_help_sheet.dart';
 import '../widgets/agenda_slot_picker_sheet.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class NovoAgendamentoScreen extends ConsumerStatefulWidget {
   const NovoAgendamentoScreen({super.key, this.seedDay, this.args});
@@ -421,7 +422,7 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
                   AlunoInsetFormField(
                     controller: _titulo,
                     label: 'Título (opcional)',
-                    icon: Icons.title_outlined,
+                    icon: FxIcons.titulo,
                     hint: 'Avaliação, retorno, foco da sessão…',
                     textCapitalization: TextCapitalization.sentences,
                     inputFormatters: [
@@ -432,7 +433,7 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
                   AlunoInsetFormField(
                     controller: _nota,
                     label: S.of(context).agendaNotaCampo,
-                    icon: Icons.notes_rounded,
+                    icon: FxIcons.notas,
                     maxLines: 3,
                     textCapitalization: TextCapitalization.sentences,
                     rotuloVisivel: true,

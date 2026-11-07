@@ -41,6 +41,7 @@ import '../utils/financeiro_numeros.dart';
 import '../utils/mensalidade_surface_actions.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../widgets/financeiro_aluno_etapa.dart';
+import '../../../core/theme/fx_icons.dart';
 
 part 'financeiro_mensalidades_tab_actions.part.dart';
 part 'financeiro_mensalidades_tab_forms.part.dart';
@@ -704,7 +705,7 @@ class _FinanceiroMensalidadesTabState
                                   ),
                                   child: FxLiquidPrimaryButton(
                                     label: 'Nova mensalidade',
-                                    icon: Icons.add_rounded,
+                                    icon: FxIcons.adicionar,
                                     onPressed: () {
                                       FxKeyboardDismissScope.dismiss();
                                       _abrirFormularioNovaMensalidade();

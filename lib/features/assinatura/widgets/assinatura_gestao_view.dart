@@ -9,6 +9,7 @@ import '../../../core/widgets/fx_status_pill.dart';
 import '../../../core/widgets/fx_strip_card.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../ia/widgets/ia_uso_linha.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Uma linha de consumo: nulo em [limite] é ilimitado.
 typedef AssinaturaUso = ({String rotulo, int usado, int? limite});
@@ -162,7 +163,7 @@ class _AssinaturaGestaoViewState extends State<AssinaturaGestaoView> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.check_rounded, size: 18, color: primary),
+                    Icon(FxIcons.check, size: 18, color: primary),
                     const SizedBox(width: TokensStrip.s2),
                     Expanded(
                       child: Text(

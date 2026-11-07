@@ -11,6 +11,7 @@ import '../../data/exercicio_repository.dart';
 import '../../services/biblioteca_media_config.dart';
 import '../../services/biblioteca_sync_status.dart';
 import 'exercise_media_thumb.dart';
+import '../../../../core/theme/fx_icons.dart';
 
 /// Abre prévia do vídeo próprio ou da demonstração da biblioteca (GIF/MoveKit).
 Future<void> showExerciseMediaPreview(
@@ -162,7 +163,7 @@ class _ExerciseGifPreviewSheetState extends State<ExerciseGifPreviewSheet> {
                   title: widget.exercicio.nomeDisplay,
                   subtitle: subtitle,
                   leading: Icon(
-                    Icons.gif_box_outlined,
+                    FxIcons.gif,
                     color: primary,
                     size: 18,
                   ),
@@ -370,7 +371,7 @@ class _ExerciseVideoPreviewSheetState extends State<ExerciseVideoPreviewSheet> {
                     ? 'Seu vídeo'
                     : 'Demonstração da biblioteca',
             leading: Icon(
-              Icons.play_circle_outline_rounded,
+              FxIcons.playCirculo,
               color: primary,
               size: 18,
             ),

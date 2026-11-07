@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../../auth/services/biometria_login.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// "Entrar com Face ID": só aparece quando está ativo neste aparelho; tocar
 /// desliga e apaga a credencial guardada.
@@ -47,7 +48,7 @@ class _PerfilBiometriaTileState extends State<PerfilBiometriaTile> {
     final tipo = _tipo;
     if (tipo == null) return const SizedBox.shrink();
     return FxSettingsTile(
-      icon: Icons.fingerprint_rounded,
+      icon: FxIcons.digital,
       label: 'Entrar com ${tipo.rotulo}',
       value: 'Ativado · toque para desativar',
       mute: widget.mute,

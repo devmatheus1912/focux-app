@@ -13,6 +13,7 @@ import '../data/command_action_item.dart';
 import '../utils/hoje_agora.dart';
 import '../utils/open_dashboard_command_action.dart';
 import 'dashboard_section_header.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// "Agora": até [kHojeAgoraVisiveis] pessoas com verbo; o resto abre no lugar.
 /// Dia quieto mostra "Tudo em dia" e a saída para crescer.
@@ -77,7 +78,7 @@ class _HojeAgoraSecaoState extends ConsumerState<HojeAgoraSecao> {
             FxTapRow(
               title: s.hojePersonalEmDiaTitulo,
               subtitle: s.hojePersonalEmDiaFrase,
-              leading: const Icon(Icons.check_circle_outline_rounded),
+              leading: const Icon(FxIcons.concluido),
               trailing: const SizedBox.shrink(),
               onTap: null,
             ),

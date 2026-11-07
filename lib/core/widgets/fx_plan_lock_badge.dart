@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../theme/brand_palette.dart';
 import '../theme/tokens_strip.dart';
+import '../theme/fx_icons.dart';
 
 /// Selo compacto de recurso trancado por plano — paridade Perfil / Home.
 ///
-/// Substitui `value` + `Icons.lock_outline` soltos na linha inset, evitando
+/// Substitui `value` + `FxIcons.cadeado` soltos na linha inset, evitando
 /// truncar subtítulo em tiles de upgrade.
 class FxPlanLockBadge extends StatelessWidget {
   const FxPlanLockBadge({
@@ -44,7 +45,7 @@ class FxPlanLockBadge extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              Icons.lock_rounded,
+              FxIcons.cadeado,
               size: compact ? 11 : 12,
               color: color,
             ),
@@ -91,7 +92,7 @@ class FxPlanLockTrailing extends StatelessWidget {
         FxPlanLockBadge(tier: tier, brand: brand, compact: true),
         const SizedBox(width: TokensStrip.s1),
         Icon(
-          Icons.chevron_right,
+          FxIcons.chevronDireita,
           size: 17,
           color: chevronColor,
         ),

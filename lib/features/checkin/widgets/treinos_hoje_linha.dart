@@ -4,6 +4,7 @@ import '../../../core/widgets/fx_action_row.dart';
 import '../../../l10n/app_localizations.dart';
 import '../utils/treinos_hub_texts.dart';
 import '../utils/treinos_hub_view.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// A linha do treino de hoje na aba Treinos: nome, estado e um verbo.
 /// Substitui o card grande, que repetia o foco da Hoje.
@@ -47,8 +48,8 @@ class TreinosHojeLinha extends StatelessWidget {
     final concluido = destaque.tipo == TreinosDestaqueTipo.concluidoHoje;
     return FxActionRow(
       leading: concluido
-          ? Icons.check_circle_outline_rounded
-          : Icons.fitness_center,
+          ? FxIcons.concluido
+          : FxIcons.treino,
       titulo: texto.titulo,
       motivo: [
         texto.eyebrow,

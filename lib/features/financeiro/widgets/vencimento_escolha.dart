@@ -7,6 +7,7 @@ import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_quick_chips.dart';
 import '../../../core/widgets/fx_sheet_frame.dart';
 import '../utils/vencimento_atalhos.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Vencimento por atalho ou calendário; data passada é permitida e avisa que
 /// a cobrança entra como atrasada. Devolve a data escolhida.
@@ -65,7 +66,7 @@ class _VencimentoSheetState extends State<_VencimentoSheet> {
     return FxSheetFrame(
       title: 'Vencimento',
       subtitle: 'Escolha um atalho ou o dia no calendário.',
-      leading: Icon(Icons.event_rounded, color: chrome.brand, size: 20),
+      leading: Icon(FxIcons.calendario, color: chrome.brand, size: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

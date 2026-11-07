@@ -14,6 +14,7 @@ import '../../data/exercicio_repository.dart';
 import '../../data/template_splits.dart';
 import '../../utils/template_split_catalog.dart';
 import 'padrao_exercicios_bottom_sheet.dart';
+import '../../../../core/theme/fx_icons.dart';
 
 /// Um modelo com só o dia [indice]: os blocos de uma sessão (ex.: só o B do ABC).
 TemplateSplit soODia(TemplateSplit template, int indice) => TemplateSplit(
@@ -76,7 +77,7 @@ class TemplateSplitPicker extends StatelessWidget {
         title: original.nome,
         itens: [
           for (final (i, dia) in original.dias.indexed)
-            FxActionSheetItem(value: i, label: dia.nome, icon: Icons.view_day_rounded),
+            FxActionSheetItem(value: i, label: dia.nome, icon: FxIcons.densidade),
         ],
       );
       if (indice == null || !context.mounted) return;
@@ -153,7 +154,7 @@ class _TemplateIntro extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(
-            Icons.calendar_view_week_rounded,
+            FxIcons.semana,
             color: BrandPalette.softened(primary),
             size: FxSettingsLayout.iconSize,
           ),
@@ -203,7 +204,7 @@ class _TemplateTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FxSettingsTile(
-      icon: Icons.view_week_rounded,
+      icon: FxIcons.semana,
       accent: accent,
       label: template.nome,
       subtitle: templateSplitTileSubtitle(template),
@@ -269,7 +270,7 @@ class _TemplateSlotEditorState extends ConsumerState<_TemplateSlotEditor> {
         ),
         leading: IconButton(
           tooltip: 'Voltar',
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(FxIcons.voltar),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -369,7 +370,7 @@ class _TemplateCompleteCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.check_circle_rounded, color: primary, size: 24),
+              Icon(FxIcons.concluidoAtivo, color: primary, size: 24),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
@@ -426,7 +427,7 @@ class _TemplateProgressCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.playlist_add_check_rounded, color: scheme.primary),
+              Icon(FxIcons.checklist, color: scheme.primary),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
@@ -494,8 +495,8 @@ class _SlotTile extends StatelessWidget {
     return FxSettingsTile(
       icon:
           done
-              ? Icons.check_circle_rounded
-              : Icons.add_circle_outline_rounded,
+              ? FxIcons.concluidoAtivo
+              : FxIcons.adicionarCirculo,
       accent: done ? good : accent,
       label: slot.label,
       subtitle: done ? 'Adicionado ao treino' : 'Escolher exercício',

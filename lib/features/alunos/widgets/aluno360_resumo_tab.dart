@@ -21,6 +21,7 @@ import 'aluno360_follow_up_card.dart';
 import 'aluno360_acao_sticky.dart';
 import 'aluno360_recovery_insight_card.dart';
 import '../utils/aluno360_ferramentas_grupos.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Aba Resumo do perfil 360: o que fazer agora, os números, a ficha, o
 /// dinheiro, o próximo contato e a sugestão do copiloto. Sem folha para o
@@ -140,7 +141,7 @@ class Aluno360ResumoTab extends ConsumerWidget {
           snapshot?.stickyAction.destination !=
               OperacaoStickyDestination.financeiro)
         FxActionRow(
-          leading: Icons.payments_outlined,
+          leading: FxIcons.pagamento,
           titulo: s.alunoResumoFinanceiroTitulo,
           motivo: s.alunoResumoFinanceiroMotivo,
           verbo: s.alunoResumoVerboCobrar,
@@ -149,7 +150,7 @@ class Aluno360ResumoTab extends ConsumerWidget {
       Aluno360FollowUpCard(aluno: aluno),
       if (mostraCopiloto)
         FxActionRow(
-          leading: Icons.auto_awesome_outlined,
+          leading: FxIcons.ia,
           titulo: s.alunoResumoCopilotoTitulo,
           motivo: acaoCopiloto,
           verbo: s.alunoResumoCopilotoVerbo,

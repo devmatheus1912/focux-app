@@ -175,7 +175,9 @@ class EvolucaoAneis {
 }
 
 /// Gordura por avaliação: medida não tem esse campo.
-typedef PontoGordura = ({String data, double valor});
+/// Ponto de gordura ou massa magra. [avaliacaoId] diz de que avaliação veio,
+/// para corrigir pelo histórico; nulo com backend antigo.
+typedef PontoGordura = ({String data, double valor, int? avaliacaoId});
 
 /// BFF `GET /api/alunos/{id}/evolucao/home`: tudo que a tela precisa.
 class EvolucaoHomeBundle {
@@ -222,6 +224,7 @@ class EvolucaoHomeBundle {
           (
             data: _medidaDataString((item as Map)['data']),
             valor: (item['valor'] as num).toDouble(),
+            avaliacaoId: (item['avaliacaoId'] as num?)?.toInt(),
           ),
       ],
       massa: [
@@ -229,6 +232,7 @@ class EvolucaoHomeBundle {
           (
             data: _medidaDataString((item as Map)['data']),
             valor: (item['valor'] as num).toDouble(),
+            avaliacaoId: (item['avaliacaoId'] as num?)?.toInt(),
           ),
       ],
       aneis:

@@ -5,6 +5,7 @@ import 'package:focux_app/features/chat/widgets/conversation_composer_acao.dart'
 import 'package:focux_app/features/chat/widgets/conversation_composer_widgets.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:focux_app/core/theme/fx_icons.dart';
 
 Widget _app(Widget child) => MaterialApp(
   theme: ThemeData(
@@ -71,7 +72,7 @@ void main() {
 
     await tester.tapAt(tester.getTopLeft(alvo) + const Offset(2, 2));
     expect(enviou, 1);
-    await tester.tap(find.byIcon(Icons.arrow_upward_rounded));
+    await tester.tap(find.byIcon(FxIcons.setaCima));
     expect(enviou, 2);
   });
 
@@ -81,10 +82,10 @@ void main() {
     await tester.pumpWidget(_app(_composer(comTexto: false, gravando: true)));
 
     final icones = [
-      Icons.add_rounded,
-      Icons.sentiment_satisfied_outlined,
-      Icons.delete_outline_rounded,
-      Icons.arrow_upward_rounded,
+      FxIcons.adicionar,
+      FxIcons.feliz,
+      FxIcons.excluir,
+      FxIcons.setaCima,
     ];
     for (final icone in icones) {
       final alvo = tester.getSize(find.widgetWithIcon(IconButton, icone));
@@ -124,12 +125,12 @@ void main() {
       isSemantics(label: 'Enviar mensagem', isButton: true),
     );
     expect(
-      tester.getSemantics(find.widgetWithIcon(IconButton, Icons.add_rounded)),
+      tester.getSemantics(find.widgetWithIcon(IconButton, FxIcons.adicionar)),
       isSemantics(tooltip: 'Anexar', isButton: true),
     );
     expect(
       tester.getSemantics(
-        find.widgetWithIcon(IconButton, Icons.sentiment_satisfied_outlined),
+        find.widgetWithIcon(IconButton, FxIcons.feliz),
       ),
       isSemantics(tooltip: 'Inserir emoji', isButton: true),
     );
@@ -143,7 +144,7 @@ void main() {
     await tester.pumpWidget(
       _app(
         ConversationComposerAcao(
-          icon: Icons.arrow_upward_rounded,
+          icon: FxIcons.setaCima,
           label: 'Enviar mensagem',
           color: EagleTokens.brandAccent,
           onPressed: () {},

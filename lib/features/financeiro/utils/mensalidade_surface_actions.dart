@@ -36,6 +36,7 @@ import 'financeiro_hub_display.dart';
 import 'pix_qr_display.dart';
 import '../widgets/vencimento_escolha.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 FinanceiroRepository mensalidadeRepo(WidgetRef ref) =>
     FinanceiroRepository(ref.read(apiClientProvider));
@@ -349,7 +350,7 @@ Future<bool> mostrarPixMensalidade({
                             ),
                             const SizedBox(height: TokensStrip.s4),
                             FxLiquidPrimaryButton(
-                              icon: Icons.copy,
+                              icon: FxIcons.copiar,
                               label: s.pixCopiarCodigo,
                               onPressed: () async {
                                 final code = pix?.pixCopiaECola.trim() ?? '';
@@ -544,7 +545,7 @@ Future<Mensalidade?> showEditarMensalidadeSheet({
                         title: 'Editar mensalidade',
                         subtitle: 'Valor, mês, vencimento e status.',
                         leading: Icon(
-                          Icons.edit_outlined,
+                          FxIcons.editar,
                           color: primary,
                           size: 18,
                         ),
@@ -556,7 +557,7 @@ Future<Mensalidade?> showEditarMensalidadeSheet({
                             controller: valorCtrl,
                             label: 'Valor (R\$)',
                             hint: '0,00',
-                            icon: Icons.attach_money,
+                            icon: FxIcons.dinheiro,
                             keyboardType: const TextInputType.numberWithOptions(
                               decimal: true,
                             ),
@@ -672,7 +673,7 @@ Future<Mensalidade?> showEditarMensalidadeSheet({
                                             financeiroSalvarMensalidadeConfirmTitle(),
                                         message:
                                             financeiroSalvarMensalidadeConfirmMessage(),
-                                        icon: Icons.payments_outlined,
+                                        icon: FxIcons.pagamento,
                                         confirmLabel:
                                             financeiroSalvarMensalidadeTileLabel(),
                                       );

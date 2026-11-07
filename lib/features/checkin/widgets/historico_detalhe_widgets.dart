@@ -14,6 +14,7 @@ import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../utils/historico_detalhe_texts.dart';
 import '../utils/historico_detalhe_view.dart';
 import '../utils/treinos_hub_texts.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Loading do detalhe: resumo, três números e três exercícios.
 class HistoricoDetalheSkeleton extends StatelessWidget {
@@ -267,8 +268,8 @@ class _HistoricoExercicioTileState extends State<HistoricoExercicioTile> {
                     if (temDetalhe)
                       Icon(
                         _aberto
-                            ? Icons.expand_less_rounded
-                            : Icons.expand_more_rounded,
+                            ? FxIcons.chevronCima
+                            : FxIcons.chevronBaixo,
                         size: 20,
                         color: chrome.mute,
                       ),

@@ -59,7 +59,7 @@ class _AlunosCompactToggleRow extends StatelessWidget {
           child: Row(
             children: [
               Icon(
-                Icons.density_small_rounded,
+                FxIcons.densidade,
                 size: FxSettingsLayout.iconSize,
                 color: brand,
               ),

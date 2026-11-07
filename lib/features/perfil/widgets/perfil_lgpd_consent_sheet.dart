@@ -15,6 +15,7 @@ import '../../../core/widgets/fx_motion.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/lgpd_consent_repository.dart';
 import '../utils/lgpd_consent_display.dart';
+import '../../../core/theme/fx_icons.dart';
 
 final lgpdConsentRepositoryProvider = Provider<LgpdConsentRepository>(
   (ref) => LgpdConsentRepository(ref.read(apiClientProvider)),
@@ -30,7 +31,7 @@ Future<void> showPerfilLgpdConsentSheet(
     builder: (ctx) => FxHomeSheetScaffold(
       isDark: isDark,
       leading: Icon(
-        Icons.privacy_tip_outlined,
+        FxIcons.privacidade,
         color: Theme.of(ctx).colorScheme.primary,
         size: 22,
       ),
@@ -244,12 +245,12 @@ class _ConsentRow extends StatelessWidget {
                     const SizedBox(width: 22, height: 22, child: FxLoading())
                   else if (aceito)
                     const Icon(
-                      Icons.check_circle_rounded,
+                      FxIcons.concluidoAtivo,
                       color: EagleTokens.good,
                       size: 22,
                     )
                   else
-                    Icon(Icons.chevron_right_rounded, color: mute, size: 22),
+                    Icon(FxIcons.chevronDireita, color: mute, size: 22),
                 ],
               ),
             ),

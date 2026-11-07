@@ -36,6 +36,7 @@ import '../widgets/recorrencia_nova_folha.dart';
 import '../data/recorrencia_repository.dart';
 import '../utils/recorrencia_display.dart';
 import '../../../core/widgets/fx_grouped_action_sheet.dart';
+import '../../../core/theme/fx_icons.dart';
 
 part 'recorrencia_screen_form.part.dart';
 

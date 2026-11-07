@@ -8,6 +8,7 @@ import '../theme/shell_chrome.dart';
 import '../theme/tokens_strip.dart';
 import 'fx_icon.dart';
 import 'fx_plan_lock_badge.dart';
+import '../theme/fx_icons.dart';
 
 /// Linha de ajustes inset — anatomia ChatGPT/iOS, pele da Home.
 class FxSettingsTile extends StatelessWidget {
@@ -232,14 +233,14 @@ class FxSettingsTile extends StatelessWidget {
                         ] else if (interactive && disclosure) ...[
                           const SizedBox(width: TokensStrip.s1),
                           Icon(
-                            Icons.expand_more,
+                            FxIcons.chevronBaixo,
                             size: FxSettingsLayout.chevronSize,
                             color: mute,
                           ),
                         ] else if (showChevron) ...[
                           const SizedBox(width: TokensStrip.s1),
                           Icon(
-                            Icons.chevron_right,
+                            FxIcons.chevronDireita,
                             size: FxSettingsLayout.chevronSize,
                             color: mute,
                           ),

@@ -5,6 +5,7 @@ import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../l10n/app_localizations.dart';
 import '../data/checkin_repository.dart';
 import '../utils/checkin_execucao_display.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Finalizar com exercício faltando pede confirmação; `true` finaliza.
 Future<bool> showCheckinFinalizarIncompleto(
@@ -18,7 +19,7 @@ Future<bool> showCheckinFinalizarIncompleto(
     message: s.checkinFaltamTexto,
     confirmLabel: s.checkinFinalizar,
     cancelLabel: s.checkinVoltarAoTreino,
-    icon: Icons.flag_rounded,
+    icon: FxIcons.meta,
   );
 }
 
@@ -30,7 +31,7 @@ Future<bool> showCheckinDescartarAberto(BuildContext context) {
     title: s.checkinDescartarAbertoTitulo,
     message: s.checkinDescartarAbertoTexto,
     confirmLabel: s.checkinDescartarEIniciar,
-    icon: Icons.delete_outline_rounded,
+    icon: FxIcons.excluir,
     destructive: true,
   );
 }
@@ -44,7 +45,7 @@ Future<bool> showCheckinDescartarTreino(BuildContext context) {
     message: s.checkinDescartarTreinoTexto,
     confirmLabel: s.checkinDescartar,
     cancelLabel: s.checkinVoltarAoTreino,
-    icon: Icons.delete_outline_rounded,
+    icon: FxIcons.excluir,
     destructive: true,
   );
 }
@@ -65,7 +66,7 @@ Future<int?> showCheckinFilaSheet(
     context,
     title: s.checkinFilaTitulo,
     subtitle: s.checkinFilaSub(exercicios.length),
-    headerIcon: Icons.format_list_numbered_rounded,
+    headerIcon: FxIcons.listaNumerada,
     selected: selectedId,
     items: [
       for (final item in exercicios)
@@ -78,8 +79,8 @@ Future<int?> showCheckinFilaSheet(
                   : s.checkinFilaSeries(item.seriesFeitas, item.series ?? 0),
           icon:
               item.concluido
-                  ? Icons.check_circle_outline_rounded
-                  : Icons.fitness_center_rounded,
+                  ? FxIcons.concluido
+                  : FxIcons.treino,
         ),
     ],
   );

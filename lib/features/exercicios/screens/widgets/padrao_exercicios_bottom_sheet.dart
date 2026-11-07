@@ -19,6 +19,7 @@ import '../../data/exercicio_repository.dart';
 import '../../data/exercicio_taxonomy_labels.dart';
 import 'exercise_media_thumb.dart';
 import 'exercise_video_preview_sheet.dart';
+import '../../../../core/theme/fx_icons.dart';
 
 class PadraoExerciciosBottomSheet extends ConsumerStatefulWidget {
   const PadraoExerciciosBottomSheet({
@@ -151,7 +152,7 @@ class _PadraoExerciciosBottomSheetState
             title: title,
             subtitle: 'Toque para revisar a prescrição e adicionar ao treino.',
             leading: Icon(
-              Icons.fitness_center_outlined,
+              FxIcons.treino,
               color: primary,
               size: 18,
             ),
@@ -287,7 +288,7 @@ class _ExerciseChoiceTile extends StatelessWidget {
     ].whereType<String>().join(' · ');
 
     return FxSettingsTile(
-      icon: Icons.fitness_center_rounded,
+      icon: FxIcons.treino,
       accent: primary,
       label: exercicio.nomeDisplay,
       subtitle: subtitle,
@@ -311,7 +312,7 @@ class _ExerciseChoiceTile extends StatelessWidget {
               ),
             ),
           const SizedBox(width: 6),
-          Icon(Icons.add_rounded, color: primary, size: 20),
+          Icon(FxIcons.adicionar, color: primary, size: 20),
         ],
       ),
     );

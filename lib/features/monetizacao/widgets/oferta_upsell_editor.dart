@@ -6,6 +6,7 @@ import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../data/upsell_repository.dart';
 import '../utils/oferta_upsell_display.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class OfertaUpsellDraft {
   const OfertaUpsellDraft({
@@ -41,7 +42,7 @@ Future<({OfertaUpsellDraft? draft, bool submitted})> showOfertaUpsellEditor(
       context,
       title: existing == null ? 'Nova oferta' : 'Editar oferta',
       subtitle: 'Dispara no gatilho que você escolher.',
-      icon: Icons.local_offer_outlined,
+      icon: FxIcons.oferta,
       confirmLabel: existing == null ? 'Criar oferta' : 'Salvar oferta',
       child: StatefulBuilder(
         builder:
@@ -51,24 +52,24 @@ Future<({OfertaUpsellDraft? draft, bool submitted})> showOfertaUpsellEditor(
                 AlunoInsetFormField(
                   controller: tituloCtrl,
                   label: 'Título',
-                  icon: Icons.title_outlined,
+                  icon: FxIcons.titulo,
                 ),
                 AlunoInsetFormField(
                   controller: descricaoCtrl,
                   label: 'Descrição',
-                  icon: Icons.notes_outlined,
+                  icon: FxIcons.notas,
                   maxLines: 2,
                 ),
                 AlunoInsetFormField(
                   controller: valorCtrl,
                   label: 'Valor (R\$)',
-                  icon: Icons.payments_outlined,
+                  icon: FxIcons.pagamento,
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
                 ),
                 FxInsetPickerRow(
-                  icon: Icons.bolt_outlined,
+                  icon: FxIcons.raio,
                   label: 'Gatilho',
                   value: ofertaGatilhoLabel(tipoGatilho),
                   onTap: () async {
@@ -90,7 +91,7 @@ Future<({OfertaUpsellDraft? draft, bool submitted})> showOfertaUpsellEditor(
                 ),
                 if (existing != null)
                   FxInsetPickerRow(
-                    icon: Icons.toggle_on_outlined,
+                    icon: FxIcons.interruptor,
                     label: 'Status',
                     value: ofertaStatusLabel(ativo: ativo),
                     showDivider: false,

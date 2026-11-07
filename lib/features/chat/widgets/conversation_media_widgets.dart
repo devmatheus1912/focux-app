@@ -11,6 +11,7 @@ import '../../../core/widgets/fx_cached_network_image.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/chat_repository.dart';
+import '../../../core/theme/fx_icons.dart';
 
 enum ConversationMediaType { photo, video, audio }
 
@@ -68,7 +69,7 @@ class ConversationMediaPreview extends StatelessWidget {
                           width: previewWidth,
                           color: Colors.black12,
                           alignment: Alignment.center,
-                          child: const Icon(Icons.broken_image_outlined),
+                          child: const Icon(FxIcons.imagemQuebrada),
                         ),
                   ),
                   Positioned(
@@ -101,13 +102,13 @@ class ConversationMediaPreview extends StatelessWidget {
       );
     }
 
-    IconData icon = Icons.insert_drive_file_outlined;
+    IconData icon = FxIcons.documento;
     String label = 'Arquivo';
     if (tipo == 'VIDEO') {
-      icon = Icons.play_circle_outline;
+      icon = FxIcons.playCirculo;
       label = 'Vídeo';
     } else if (tipo == 'AUDIO') {
-      icon = Icons.graphic_eq_outlined;
+      icon = FxIcons.audio;
       label = 'Áudio';
     }
 
@@ -164,7 +165,7 @@ class ConversationMediaPreview extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              Icon(Icons.open_in_new_rounded, color: textColor, size: 18),
+              Icon(FxIcons.abrirFora, color: textColor, size: 18),
             ],
           ),
         ),
@@ -278,7 +279,7 @@ class ConversationMediaGalleryTile extends StatelessWidget {
                           memCacheWidth: 108,
                           errorBuilder:
                               (_, __, ___) => Icon(
-                                Icons.broken_image_outlined,
+                                FxIcons.imagemQuebrada,
                                 color: primary,
                               ),
                         )
@@ -311,7 +312,7 @@ class ConversationMediaGalleryTile extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            Icon(Icons.chevron_right_rounded, color: muted),
+            Icon(FxIcons.chevronDireita, color: muted),
           ],
         ),
       ),
@@ -319,9 +320,9 @@ class ConversationMediaGalleryTile extends StatelessWidget {
   }
 
   static IconData _icon(String? tipo) {
-    if (tipo == 'VIDEO') return Icons.play_circle_outline_rounded;
-    if (tipo == 'AUDIO') return Icons.graphic_eq_rounded;
-    return Icons.image_outlined;
+    if (tipo == 'VIDEO') return FxIcons.playCirculo;
+    if (tipo == 'AUDIO') return FxIcons.audio;
+    return FxIcons.imagem;
   }
 
   static String _title(String? tipo) {
@@ -460,8 +461,8 @@ class _ConversationAudioInlinePlayerState
                           )
                           : Icon(
                             playing
-                                ? Icons.pause_rounded
-                                : Icons.play_arrow_rounded,
+                                ? FxIcons.pausar
+                                : FxIcons.play,
                           ),
                 );
               },
@@ -527,7 +528,7 @@ class _ConversationAudioInlinePlayerState
               tooltip: 'Abrir anexo',
               visualDensity: VisualDensity.compact,
               onPressed: widget.onFallbackOpen,
-              icon: Icon(Icons.open_in_new_rounded, color: muted, size: 18),
+              icon: Icon(FxIcons.abrirFora, color: muted, size: 18),
             ),
           ],
         ),

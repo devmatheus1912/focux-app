@@ -50,6 +50,7 @@ import 'features/perfil/data/perfil_repository.dart';
 import 'features/perfil/providers/perfil_provider.dart';
 import 'l10n/app_localizations.dart';
 import 'core/widgets/fx_tonal_button.dart';
+import 'core/theme/fx_icons.dart';
 
 /// Relógio do cold start — parado no primeiro frame de [FocuxApp].
 final Stopwatch _bootStopwatch = Stopwatch();
@@ -152,7 +153,7 @@ void main() {
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
-                        Icons.error_outline,
+                        FxIcons.erro,
                         color: Colors.redAccent,
                         size: 30,
                       ),

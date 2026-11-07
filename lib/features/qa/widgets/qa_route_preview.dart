@@ -35,6 +35,7 @@ import '../../assinatura/screens/assinatura_screen.dart';
 import '../../suporte/screens/suporte_web_redirect_screen.dart';
 import '../../treinos/screens/modelos_de_treino_view.dart';
 import 'qa_preview_session.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Builds smoke-test screen previews with GoRouter + mesh for QA pumps.
 Widget buildQaRoutePreview(String path) => buildQaRoutePreviewApp(path);
@@ -184,7 +185,7 @@ class QaRoutePreviewDialog extends StatelessWidget {
             isDark: isDark,
             title: 'Testando',
             subtitle: path,
-            leading: const Icon(Icons.bug_report_outlined, size: 18),
+            leading: const Icon(FxIcons.bug, size: 18),
           ),
           SizedBox(height: TokensStrip.s3),
           Expanded(child: preview),

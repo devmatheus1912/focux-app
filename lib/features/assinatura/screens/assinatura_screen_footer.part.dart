@@ -115,7 +115,7 @@ class _AssinaturaStickyFooter extends StatelessWidget {
     IconData? icon;
     if (mode == _AssinaturaCtaMode.manageStore ||
         mode == _AssinaturaCtaMode.goHome) {
-      icon = Icons.home_rounded;
+      icon = FxIcons.inicio;
     }
 
     return Column(
@@ -249,7 +249,7 @@ Future<void> _showAssinaturaTermosSheet(
               isDark: isDark,
               title: 'Termos e cobrança',
               subtitle: 'Legal e loja — fora do plano na tela',
-              leading: Icon(Icons.policy_outlined, color: primary, size: 18),
+              leading: Icon(FxIcons.politica, color: primary, size: 18),
             ),
             SizedBox(height: TokensStrip.s3),
             Expanded(
@@ -271,7 +271,7 @@ Future<void> _showAssinaturaTermosSheet(
                               restoring
                                   ? S.of(ctx).assinaturaRestaurando
                                   : S.of(ctx).assinaturaRestaurarCompras,
-                          icon: Icons.restore_rounded,
+                          icon: FxIcons.historico,
                           onPressed: restoring ? null : onRestore,
                         ),
                       ),

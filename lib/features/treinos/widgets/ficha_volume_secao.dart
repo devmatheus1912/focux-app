@@ -11,6 +11,7 @@ import '../../../l10n/app_localizations.dart';
 import '../models/ficha_volume.dart';
 import '../utils/ficha_volume_grupos.dart';
 import 'ficha_acoes.dart';
+import '../../../core/theme/fx_icons.dart';
 
 String rotuloDoGrupo(S s, GrupoDeLeitura grupo) => switch (grupo) {
   GrupoDeLeitura.peito => s.volumeGrupoPeito,
@@ -83,7 +84,7 @@ class _FichaVolumeSecaoState extends ConsumerState<FichaVolumeSecao> {
               ? s.volumeNaPrimeiraSemana(s.volumeSeriesDeTrabalho(volume.totalSeries))
               : s.volumeSeriesDeTrabalho(volume.totalSeries),
           trailing: Icon(
-            _aberta ? Icons.expand_less_rounded : Icons.expand_more_rounded,
+            _aberta ? FxIcons.chevronCima : FxIcons.chevronBaixo,
             color: chrome.mute,
           ),
           onTap: _alternar,

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/widgets/fx_grouped_action_sheet.dart';
 import '../../../l10n/app_localizations.dart';
 import '../data/retencao_repository.dart';
+import '../../../core/theme/fx_icons.dart';
 
 enum RetencaoAcao { mensagem, perfil, ficha, cobrar, adiar }
 
@@ -21,30 +22,30 @@ Future<RetencaoAcao?> showRetencaoAcoesSheet(
         FxActionItem(
           valor: RetencaoAcao.mensagem,
           rotulo: s.retencaoAcaoMensagem,
-          icone: Icons.chat_bubble_outline_rounded,
+          icone: FxIcons.chat,
         ),
         FxActionItem(
           valor: RetencaoAcao.perfil,
           rotulo: s.retencaoAcaoPerfil,
-          icone: Icons.person_outline_rounded,
+          icone: FxIcons.pessoa,
         ),
         if (score.semFicha)
           FxActionItem(
             valor: RetencaoAcao.ficha,
             rotulo: s.retencaoAcaoFicha,
-            icone: Icons.fitness_center_rounded,
+            icone: FxIcons.treino,
           ),
         if (score.cobravel)
           FxActionItem(
             valor: RetencaoAcao.cobrar,
             rotulo: s.retencaoAcaoCobrar,
-            icone: Icons.payments_outlined,
+            icone: FxIcons.pagamento,
           ),
         if (!score.adiado)
           FxActionItem(
             valor: RetencaoAcao.adiar,
             rotulo: s.retencaoAcaoAdiar,
-            icone: Icons.snooze_rounded,
+            icone: FxIcons.adiar,
           ),
       ]),
     ],

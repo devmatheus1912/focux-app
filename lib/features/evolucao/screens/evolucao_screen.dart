@@ -47,7 +47,9 @@ import '../widgets/evolucao_recordes_aba.dart';
 import '../widgets/medida_form_sheet.dart';
 import '../../../l10n/pt.dart';
 import '../widgets/evolucao_help_sheet.dart';
+import '../widgets/evolucao_historico_folha.dart';
 import 'evolucao_fotos_screen.dart';
+import '../../../core/theme/fx_icons.dart';
 
 
 class EvolucaoScreen extends ConsumerStatefulWidget {
@@ -91,43 +93,90 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
     }
   }
 
+  /// Muda a cada recarga: o Comparar busca de novo com outra chave.
+  var _versao = 0;
+
+  /// "Confira" do Comparar: o Histórico com as datas comparadas marcadas.
+  Future<void> _conferir(EvolucaoHomeBundle? home, Set<String> datas) async {
+    if (home == null) return;
+    final r = await abrirHistoricoDaEvolucao(
+      context,
+      registros: registrosDoHistorico(
+        home.medidas.where(evolucaoMedidaTemConteudo).toList(),
+        gordura: home.gordura,
+        massa: home.massa,
+      ),
+      destaque: datas,
+      podeAbrir: _podeAbrirRegistro,
+    );
+    if (r != null && mounted) await _abrirRegistro(r);
+  }
+
   Future<void> _atualizar() async {
+    if (mounted) setState(() => _versao++);
     EvolucaoHomeClientCache.invalidate(widget.alunoId);
     ref.invalidate(evolucaoHomeProvider(widget.alunoId));
     await ref.read(evolucaoHomeProvider(widget.alunoId).future);
   }
 
-  Future<void> _abrirMedida(MedidaCorporal medida) async {
-    final repo = EvolucaoRepository(ref.read(apiClientProvider));
+  /// Composição que dá para corrigir: veio de uma avaliação com id.
+  static bool _composicaoEditavel(RegistroDoHistorico r) =>
+      (r.gordura?.avaliacaoId ?? r.massa?.avaliacaoId) != null;
+
+  bool _podeAbrirRegistro(RegistroDoHistorico r) =>
+      r.medida != null || _composicaoEditavel(r);
+
+  Future<void> _abrirRegistro(RegistroDoHistorico r) async {
+    final api = ref.read(apiClientProvider);
+    final repo = EvolucaoRepository(api);
+    final medida = r.medida;
+    final medidaEditavel = medida != null && medida.registradoPor != 'ALUNO';
+    final composicao = _composicaoEditavel(r);
     final acao = await escolherAcaoDaMedida(
       context,
-      podeEditar: medida.registradoPor != 'ALUNO',
+      podeEditar: medidaEditavel || composicao,
+      podeExcluir: medida != null,
     );
     if (acao == null || !mounted) return;
     try {
       if (acao == AcaoDaMedida.editar) {
-        final novo = await editarMedidaSheet(context, medida);
-        if (novo == null || !mounted) return;
-        await repo.editarMedida(
-          widget.alunoId,
-          medida,
-          peso: novo.peso,
-          cintura: novo.cintura,
-          quadril: novo.quadril,
-          braco: novo.braco,
+        final novo = await editarMedidaSheet(
+          context,
+          medidaEditavel ? medida : null,
+          gordura: r.gordura?.valor,
+          massa: r.massa?.valor,
+          comComposicao: composicao,
         );
+        if (novo == null || !mounted) return;
+        if (medidaEditavel) {
+          await repo.editarMedida(
+            widget.alunoId,
+            medida,
+            peso: novo.peso,
+            cintura: novo.cintura,
+            quadril: novo.quadril,
+            braco: novo.braco,
+          );
+        }
+        if (composicao && (novo.gordura != r.gordura?.valor || novo.massa != r.massa?.valor)) {
+          await _corrigirComposicao(
+            (r.gordura?.avaliacaoId ?? r.massa?.avaliacaoId)!,
+            gordura: novo.gordura,
+            massa: novo.massa,
+          );
+        }
         if (mounted) FeedbackHelper.showSuccess(context, ptS.evolucaoMedidaSalva);
       } else {
         final ok = await showFxConfirmSheet(
           context,
           title: ptS.evolucaoExcluirTitulo,
           message: ptS.evolucaoExcluirMensagem,
-          icon: Icons.delete_outline_rounded,
+          icon: FxIcons.excluir,
           confirmLabel: ptS.evolucaoExcluir,
           destructive: true,
         );
         if (!ok || !mounted) return;
-        await repo.excluirMedida(widget.alunoId, medida.id);
+        await repo.excluirMedida(widget.alunoId, medida!.id);
         if (mounted) FeedbackHelper.showSuccess(context, ptS.evolucaoMedidaExcluida);
       }
       await _atualizar();
@@ -137,13 +186,30 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
     }
   }
 
+  /// O PUT da avaliação troca todos os campos: lê a avaliação inteira e
+  /// muda só gordura e massa magra.
+  Future<void> _corrigirComposicao(int avaliacaoId, {double? gordura, double? massa}) async {
+    final repo = AvaliacaoRepository(ref.read(apiClientProvider));
+    final pagina = await repo.listarPagina(widget.alunoId);
+    final av = pagina.content.firstWhere((a) => a.id == avaliacaoId);
+    await repo.editar(widget.alunoId, avaliacaoId, {
+      'pesoKg': av.pesoKg,
+      'alturaCm': av.alturaCm,
+      'percGordura': gordura,
+      'percMassa': massa,
+      'cinturaCm': av.cinturaCm,
+      'quadrilCm': av.quadrilCm,
+      'observacoes': av.observacoes,
+    });
+  }
+
   Future<void> _compartilharNoChat() async {
     HapticFeedback.mediumImpact();
     final ok = await showFxConfirmSheet(
       context,
       title: evolucaoComparativoConfirmTitle(),
       message: evolucaoComparativoConfirmMessage(),
-      icon: Icons.chat_bubble_outline_rounded,
+      icon: FxIcons.chat,
       confirmLabel: evolucaoComparativoConfirmLabel(),
     );
     if (!ok || !mounted) return;
@@ -159,10 +225,16 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
     }
   }
 
+  /// Rolagem de cada aba: ao trocar, o topo segue a posição da aba nova em
+  /// vez de pular entre anéis e faixa.
+  final _rolagem = <EvolucaoHubView, double>{};
+
   /// Anéis recolhem depois de um pouco de rolagem; voltam ao topo.
   Widget _aoRolar(Widget filho) => NotificationListener<ScrollUpdateNotification>(
     onNotification: (n) {
       if (n.metrics.axis != Axis.vertical) return false;
+      // Só a aba visível rola; guarda a posição de cada uma.
+      _rolagem[_view] = n.metrics.pixels;
       final recolher = n.metrics.pixels > 48;
       if (recolher != _recolhido) setState(() => _recolhido = recolher);
       return false;
@@ -183,7 +255,13 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
       for (final m in metas)
         if (m.aberta) m.metrica,
     };
-    final conquistas = conquistasDe(metas, recordes);
+    final conquistas = conquistasDe(
+      metas,
+      recordes,
+      medidas: medidas,
+      gordura: home?.gordura ?? const [],
+      massa: home?.massa ?? const [],
+    );
     final nome = _nome;
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
@@ -205,7 +283,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
             actions: [
               IconButton(
                 tooltip: ptS.evolucaoMais,
-                icon: const Icon(Icons.more_horiz_rounded),
+                icon: const Icon(FxIcons.mais),
                 onPressed: () => _maisAcoes(ocupadas, aneis.cicloMedidasDias),
               ),
             ],
@@ -258,6 +336,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                                         (value) => setState(() {
                                           _view = evolucaoHubViewFromSecao(value);
                                           _abertas.add(_view);
+                                          _recolhido = (_rolagem[_view] ?? 0) > 48;
                                         }),
                                   ),
                                 ],
@@ -271,10 +350,12 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                                     medidas: medidas,
                                     metas: metas,
                                     gordura: home?.gordura ?? const [],
+                                    massa: home?.massa ?? const [],
                                     vazioSubtitulo:
                                         'Registre peso e circunferências de ${satelliteFirstName(nome)} para acompanhar a evolução.',
                                     onAtualizar: _atualizar,
-                                    onAbrirMedida: _abrirMedida,
+                                    onAbrirRegistro: _abrirRegistro,
+                                    podeAbrirRegistro: _podeAbrirRegistro,
                                     topo: [
                                       EvolucaoMetasBloco(
                                         alunoId: widget.alunoId,
@@ -308,8 +389,11 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                                       : const SizedBox.shrink(),
                                   _abertas.contains(EvolucaoHubView.comparativo)
                                       ? EvolucaoComparativoScreen(
+                                        // Recarrega depois de corrigir um registro.
+                                        key: ValueKey(_versao),
                                         alunoId: widget.alunoId,
                                         alunoNome: nome,
+                                        onConfira: (datas) => _conferir(home, datas),
                                       )
                                       : const SizedBox.shrink(),
                                 ],
@@ -388,7 +472,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
         message: ptS.evolucaoConfirmeMedida(suspeitas.join(', ')),
         confirmLabel: S.of(context).aluno360ConfirmeValoresSalvar,
         cancelLabel: S.of(context).aluno360ConfirmeValoresCorrigir,
-        icon: Icons.warning_amber_rounded,
+        icon: FxIcons.alerta,
       );
       if (manter || !mounted) break;
     }
@@ -470,7 +554,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
       final saved = await showFxFormSheet(
         context,
         title: recorde == null ? ptS.evolucaoRecordeNovoTitulo : ptS.evolucaoRecordeEditarTitulo,
-        icon: Icons.emoji_events_outlined,
+        icon: FxIcons.trofeu,
         confirmLabel: ptS.evolucaoSalvar,
         podeConfirmar: () {
           final carga = lerCarga();
@@ -502,7 +586,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                   obrigatorio: true,
                   controller: cargaCtrl,
                   label: ptS.evolucaoCampoCarga,
-                  icon: Icons.tune_outlined,
+                  icon: FxIcons.filtros,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   ajuda: erroCarga,
                   ajudaErro: erroCarga != null,
@@ -511,7 +595,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                   rotuloVisivel: true,
                   controller: repsCtrl,
                   label: ptS.evolucaoCampoReps,
-                  icon: Icons.repeat_outlined,
+                  icon: FxIcons.repetir,
                   keyboardType: TextInputType.number,
                   showDivider: false,
                 ),
@@ -559,7 +643,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
       context,
       title: ptS.evolucaoRecordeExcluirTitulo,
       message: ptS.evolucaoRecordeExcluirTexto,
-      icon: Icons.delete_outline_rounded,
+      icon: FxIcons.excluir,
       confirmLabel: ptS.evolucaoExcluir,
       destructive: true,
     );
@@ -588,14 +672,14 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
     final dias = await showFxGroupedActionSheet<int>(
       context,
       titulo: ptS.evolucaoCiclo,
-      icone: Icons.event_repeat_outlined,
+      icone: FxIcons.recorrencia,
       grupos: [
         FxActionGroup<int>(ptS.evolucaoCicloTexto(satelliteFirstName(_nome)), [
           for (final d in const [15, 30, 45, 60])
             FxActionItem(
               valor: d,
               rotulo: ptS.evolucaoCicloOpcao('$d'),
-              icone: d == atual ? Icons.check_rounded : Icons.event_outlined,
+              icone: d == atual ? FxIcons.check : FxIcons.calendario,
             ),
         ]),
       ],
@@ -611,18 +695,19 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
   }
 
   Future<void> _maisAcoes(Set<String> ocupadas, int ciclo) async {
-    final podeMeta = !metaMetricas.every(ocupadas.contains);
+    // Sem meta, o caminho é o anel do topo; aqui só para criar outra.
+    final podeMeta = ocupadas.isNotEmpty && !metaMetricas.every(ocupadas.contains);
     final escolha = await showFxGroupedActionSheet<String>(
       context,
       titulo: ptS.evolucaoMais,
-      icone: Icons.more_horiz_rounded,
+      icone: FxIcons.mais,
       grupos: [
         FxActionGroup<String>(null, [
           if (podeMeta)
-            FxActionItem(valor: 'meta', rotulo: ptS.evolucaoDefinirMeta, icone: Icons.flag_outlined),
-          FxActionItem(valor: 'ciclo', rotulo: ptS.evolucaoCiclo, icone: Icons.event_repeat_outlined),
-          FxActionItem(valor: 'chat', rotulo: ptS.evolucaoEnviarNoChat, icone: Icons.chat_bubble_outline_rounded),
-          FxActionItem(valor: 'ajuda', rotulo: ptS.evolucaoAjuda, icone: Icons.help_outline_rounded),
+            FxActionItem(valor: 'meta', rotulo: ptS.evolucaoDefinirMeta, icone: FxIcons.meta),
+          FxActionItem(valor: 'ciclo', rotulo: ptS.evolucaoCiclo, icone: FxIcons.recorrencia),
+          FxActionItem(valor: 'chat', rotulo: ptS.evolucaoEnviarNoChat, icone: FxIcons.chat),
+          FxActionItem(valor: 'ajuda', rotulo: ptS.evolucaoAjuda, icone: FxIcons.ajuda),
         ]),
       ],
     );

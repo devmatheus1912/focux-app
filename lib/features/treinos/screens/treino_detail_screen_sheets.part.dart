@@ -196,7 +196,7 @@ class _DeleteTrainingSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     return TreinoInsetConfirmSheet(
       isDark: isDark,
-      headerIcon: Icons.delete_outline_rounded,
+      headerIcon: FxIcons.excluir,
       title: 'Excluir treino?',
       message:
           '$title sai da biblioteca. Históricos já concluídos continuam preservados.',

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Badge de procedência do vídeo no check-in — mesma regra no thumbnail e no player.
 ///
@@ -20,7 +21,7 @@ abstract final class CheckinVideoBadge {
     String? licenseStatus,
     String? videoSource,
   }) {
-    if (videoSource == 'PERSONAL_UPLOAD') return Icons.person_rounded;
+    if (videoSource == 'PERSONAL_UPLOAD') return FxIcons.pessoa;
     return null;
   }
 }

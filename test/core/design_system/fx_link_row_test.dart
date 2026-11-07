@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/widgets/fx_link_row.dart';
 import 'package:focux_app/core/widgets/fx_tonal_button.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:focux_app/core/theme/fx_icons.dart';
 
 void main() {
   setUp(() => GoogleFonts.config.allowRuntimeFetching = false);
@@ -22,7 +23,7 @@ void main() {
         ),
       ),
     );
-    expect(find.byIcon(Icons.chevron_right_rounded), findsOneWidget);
+    expect(find.byIcon(FxIcons.chevronDireita), findsOneWidget);
     expect(
       tester.getSize(find.byType(FxLinkRow)).height,
       greaterThanOrEqualTo(56),

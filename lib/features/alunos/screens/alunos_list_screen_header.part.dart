@@ -73,7 +73,7 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                           builder: (context, _) {
                             final focused = _searchFocusNode.hasFocus;
                             return Icon(
-                              Icons.search_rounded,
+                              FxIcons.buscar,
                               size: 18,
                               color: focused ? primary : mute,
                             );
@@ -117,7 +117,7 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                             borderRadius: BorderRadius.circular(999),
                             child: Padding(
                               padding: const EdgeInsets.all(6),
-                              child: Icon(Icons.close, size: 18, color: mute),
+                              child: Icon(FxIcons.fechar, size: 18, color: mute),
                             ),
                           )
                         else
@@ -134,7 +134,7 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                                   clipBehavior: Clip.none,
                                   children: [
                                     Icon(
-                                      Icons.tune_rounded,
+                                      FxIcons.filtros,
                                       size: FxSettingsLayout.iconSize,
                                       color: primary,
                                     ),

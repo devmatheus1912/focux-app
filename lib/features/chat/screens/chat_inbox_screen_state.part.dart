@@ -116,7 +116,7 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
       context,
       title: chatInboxDeleteConfirmTitle(ids.length),
       message: chatInboxDeleteConfirmMessage(ids.length),
-      icon: Icons.delete_outline_rounded,
+      icon: FxIcons.excluir,
       confirmLabel: 'Excluir',
       destructive: true,
     );
@@ -173,13 +173,13 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
             width: 38,
             height: 38,
             decoration: ShellChrome.of(context).headerAction(radius: 12),
-            child: Icon(Icons.close_rounded, color: ink, size: 18),
+            child: Icon(FxIcons.fechar, color: ink, size: 18),
           ),
         ),
         actions: [
           IconButton(
             tooltip: 'Excluir mensagens',
-            icon: const Icon(Icons.delete_outline_rounded),
+            icon: const Icon(FxIcons.excluir),
             color:
                 _selectedAlunoIds.isEmpty
                     ? mute.withValues(alpha: 0.45)
@@ -207,7 +207,7 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
         IconButton(
           tooltip: 'Nova conversa',
           onPressed: _showAlunoPicker,
-          icon: const Icon(Icons.edit_square),
+          icon: const Icon(FxIcons.editar),
         ),
         FxHelpIconButton(
           tooltip: 'Como usar as mensagens',
@@ -334,7 +334,7 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
                 decoration: InputDecoration(
                   hintText: 'Buscar conversas',
                   hintStyle: TextStyle(color: mute),
-                  prefixIcon: Icon(Icons.search_rounded, color: mute),
+                  prefixIcon: Icon(FxIcons.buscar, color: mute),
                   filled: true,
                   fillColor: chrome.cardFill,
                   border: FxInputDeco.outlineBorder(

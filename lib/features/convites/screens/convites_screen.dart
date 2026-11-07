@@ -32,6 +32,7 @@ import '../../perfil/providers/perfil_provider.dart';
 import '../../perfil/widgets/perfil_public_link_sheet.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class ConvitesScreen extends ConsumerStatefulWidget {
   const ConvitesScreen({super.key});
@@ -148,7 +149,7 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
         context,
         title: 'Gerar novo link?',
         message: 'O link atual deixa de valer na hora.',
-        icon: Icons.link_off_outlined,
+        icon: FxIcons.linkOff,
         confirmLabel: 'Gerar novo',
         destructive: true,
       );
@@ -195,7 +196,7 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
       title: 'Revogar link?',
       message:
           'Quem ainda não usou deixa de conseguir entrar com este convite.',
-      icon: Icons.link_off_outlined,
+      icon: FxIcons.linkOff,
       confirmLabel: 'Revogar',
       destructive: true,
     );
@@ -362,7 +363,7 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
                                         decoration: FxInputDeco.build(
                                           context,
                                           conviteEmailLabel,
-                                          icon: Icons.alternate_email_rounded,
+                                          icon: FxIcons.arroba,
                                           hint: conviteEmailHint,
                                         ),
                                       ),

@@ -14,6 +14,7 @@ import '../../../l10n/app_localizations.dart';
 import '../models/ficha_modelo.dart';
 import '../providers/ficha_modelos_provider.dart';
 import 'ficha_acoes.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// O que entra num dia: uma sessão nova (só o nome) ou a cópia de uma sessão de um modelo.
 sealed class EscolhaDeSessao {
@@ -41,11 +42,11 @@ Future<EscolhaDeSessao?> escolherSessaoParaODia(BuildContext context) async {
     context,
     title: s.rotinaAdicionarTreino,
     itens: [
-      FxActionSheetItem(value: _Origem.nova, label: s.adicionarSessaoNova, icon: Icons.add_rounded),
+      FxActionSheetItem(value: _Origem.nova, label: s.adicionarSessaoNova, icon: FxIcons.adicionar),
       FxActionSheetItem(
         value: _Origem.copiar,
         label: s.adicionarCopiarDeModelo,
-        icon: Icons.copy_all_rounded,
+        icon: FxIcons.copiar,
       ),
     ],
   );

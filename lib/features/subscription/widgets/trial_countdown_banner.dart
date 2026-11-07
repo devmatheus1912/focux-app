@@ -12,6 +12,7 @@ import '../../planos/providers/plano_features_provider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../models/subscription_plan.dart';
 import '../store_subscription_policy.dart';
+import '../../../core/theme/fx_icons.dart';
 
 final _trialStatusProvider = FutureProvider.autoDispose<TrialStatus>(
   (ref) => ref.read(planosRepositoryProvider).getTrialStatus(),
@@ -52,7 +53,7 @@ class TrialCountdownBanner extends ConsumerWidget {
             padding: const EdgeInsets.all(14),
             child: Row(
               children: [
-                Icon(Icons.timer_outlined, color: warn),
+                Icon(FxIcons.cronometro, color: warn),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Column(
@@ -81,7 +82,7 @@ class TrialCountdownBanner extends ConsumerWidget {
                     ],
                   ),
                 ),
-                Icon(Icons.chevron_right_rounded, color: primary),
+                Icon(FxIcons.chevronDireita, color: primary),
               ],
             ),
           ),

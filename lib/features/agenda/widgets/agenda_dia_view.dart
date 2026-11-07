@@ -15,6 +15,7 @@ import '../utils/agenda_schedule.dart';
 import '../utils/agenda_slots.dart';
 import '../utils/agenda_status.dart';
 import 'agenda_event_card.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Faixa da semana: cada dia com a contagem, setas trocam de semana.
 class AgendaSemanaFaixa extends StatelessWidget {
@@ -44,7 +45,7 @@ class AgendaSemanaFaixa extends StatelessWidget {
         IconButton(
           tooltip: s.agendaSemanaAnterior,
           onPressed: () => onDia(dia.subtract(const Duration(days: 7))),
-          icon: const Icon(Icons.chevron_left_rounded),
+          icon: const Icon(FxIcons.chevronEsquerda),
         ),
         for (var i = 0; i < 7; i++)
           Expanded(
@@ -105,7 +106,7 @@ class AgendaSemanaFaixa extends StatelessWidget {
         IconButton(
           tooltip: s.agendaProximaSemana,
           onPressed: () => onDia(dia.add(const Duration(days: 7))),
-          icon: const Icon(Icons.chevron_right_rounded),
+          icon: const Icon(FxIcons.chevronDireita),
         ),
       ],
     );
@@ -223,7 +224,7 @@ class AgendaDiaLista extends StatelessWidget {
             const SizedBox(height: TokensStrip.s3),
             FxTonalButton(
               label: s.agendaAgendarNoDia(agendaDayShortLabel(dia)),
-              icon: Icons.add_rounded,
+              icon: FxIcons.adicionar,
               expanded: true,
               onPressed: () => onNew(null, null),
             ),

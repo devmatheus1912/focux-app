@@ -33,6 +33,7 @@ import '../financeiro_hub_scope.dart';
 import '../providers/financeiro_provider.dart';
 import '../utils/financeiro_hub_display.dart';
 import '../utils/financeiro_resultados_logic.dart';
+import '../../../core/theme/fx_icons.dart';
 
 part 'financeiro_resultados_screen_state.part.dart';
 part 'financeiro_resultados_screen_widgets.part.dart';

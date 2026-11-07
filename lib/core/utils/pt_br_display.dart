@@ -186,24 +186,28 @@ String ptCountLabel(int count, String singular, String plural) {
   return '$count $plural';
 }
 
+const _mesesPtBr = [
+  'Janeiro',
+  'Fevereiro',
+  'Março',
+  'Abril',
+  'Maio',
+  'Junho',
+  'Julho',
+  'Agosto',
+  'Setembro',
+  'Outubro',
+  'Novembro',
+  'Dezembro',
+];
+
 /// Rótulo de mês/ano em português (ex.: Maio 2026).
-String monthYearLabelPtBr(DateTime date) {
-  const months = [
-    'Janeiro',
-    'Fevereiro',
-    'Março',
-    'Abril',
-    'Maio',
-    'Junho',
-    'Julho',
-    'Agosto',
-    'Setembro',
-    'Outubro',
-    'Novembro',
-    'Dezembro',
-  ];
-  return '${months[date.month - 1]} ${date.year}';
-}
+String monthYearLabelPtBr(DateTime date) =>
+    '${_mesesPtBr[date.month - 1]} ${date.year}';
+
+/// "6 de novembro de 2026".
+String dataPorExtenso(DateTime d) =>
+    '${d.day} de ${_mesesPtBr[d.month - 1].toLowerCase()} de ${d.year}';
 
 String _doisDigitos(int n) => n.toString().padLeft(2, '0');
 

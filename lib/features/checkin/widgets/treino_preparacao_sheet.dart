@@ -6,6 +6,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Ficha atribuída sem exercícios: explica por que ainda não dá para iniciar.
 Future<void> showTreinoPreparacaoSheet(
@@ -33,7 +34,7 @@ Future<void> showTreinoPreparacaoSheet(
                 title: treinoNome,
                 subtitle: s.treinosDestaqueEmPreparacao,
                 leading: Icon(
-                  Icons.pending_actions_rounded,
+                  FxIcons.pendente,
                   color: primary,
                   size: 18,
                 ),

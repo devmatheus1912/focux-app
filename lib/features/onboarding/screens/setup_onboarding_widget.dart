@@ -19,6 +19,7 @@ import '../data/setup_steps_catalog.dart';
 import '../providers/onboarding_provider.dart';
 import '../utils/setup_action_navigation.dart';
 import '../widgets/setup_step_widgets.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class SetupOnboardingWidget extends ConsumerWidget {
   const SetupOnboardingWidget({super.key, this.statusFromHome});
@@ -164,7 +165,7 @@ class _SetupSugestaoStripState extends ConsumerState<SetupSugestaoStrip> {
         trailing: IconButton(
           tooltip: 'Dispensar',
           onPressed: () => _dispensar(sugestao.id),
-          icon: const Icon(Icons.close_rounded),
+          icon: const Icon(FxIcons.fechar),
         ),
         onTap: () => pushSetupActionRoute(context, ref, sugestao.rota),
       ),

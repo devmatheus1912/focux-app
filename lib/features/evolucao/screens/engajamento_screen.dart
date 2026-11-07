@@ -34,6 +34,7 @@ import '../widgets/engajamento_quadro_semanas.dart';
 import '../../../l10n/pt.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../alunos/widgets/aluno360_timeline_full_sheet.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// O quadro mostra 5 semanas.
 const _diasDoQuadro = 35;
@@ -128,13 +129,13 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
             valor: 'evolucao',
             rotulo: ptS.engajamentoVerEvolucao,
             descricao: ptS.engajamentoVerEvolucaoApoio,
-            icone: Icons.show_chart_rounded,
+            icone: FxIcons.graficoLinha,
           ),
           FxActionItem(
             valor: 'relatorio',
             rotulo: ptS.engajamentoRelatorioPdf,
             descricao: ptS.engajamentoRelatorioApoio,
-            icone: Icons.picture_as_pdf_outlined,
+            icone: FxIcons.pdf,
           ),
         ]),
       ],
@@ -189,7 +190,7 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
             actions: [
               IconButton(
                 tooltip: ptS.engajamentoMaisOpcoes,
-                icon: const Icon(Icons.more_horiz_rounded),
+                icon: const Icon(FxIcons.mais),
                 onPressed: _maisOpcoes,
               ),
               FxHelpIconButton(

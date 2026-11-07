@@ -23,6 +23,7 @@ import '../providers/aluno_detail_providers.dart';
 import '../utils/alunos_list_utils.dart';
 import 'aluno_avatar.dart';
 import 'aluno_list_outreach_actions.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Badge de status quiet — fill soft, sem borda (paridade Home).
 class AlunoStatusPill extends StatelessWidget {
@@ -209,8 +210,8 @@ class AlunoListCard extends ConsumerWidget {
                         duration: const Duration(milliseconds: 150),
                         child: Icon(
                           isSelected
-                              ? Icons.check_circle
-                              : Icons.radio_button_unchecked,
+                              ? FxIcons.concluidoAtivo
+                              : FxIcons.circulo,
                           key: ValueKey(isSelected),
                           color:
                               isSelected
@@ -337,7 +338,7 @@ class AlunoListCard extends ConsumerWidget {
                     else if (!modoSelecao && (compact || triageContextActive))
                       ExcludeSemantics(
                         child: Icon(
-                          Icons.chevron_right_rounded,
+                          FxIcons.chevronDireita,
                           size: 17,
                           color: secondaryInk.withValues(alpha: 0.9),
                         ),
@@ -373,7 +374,7 @@ class AlunoListCard extends ConsumerWidget {
                           const SizedBox(height: 6),
                           ExcludeSemantics(
                             child: Icon(
-                              Icons.chevron_right_rounded,
+                              FxIcons.chevronDireita,
                               size: 17,
                               color: secondaryInk.withValues(alpha: 0.9),
                             ),

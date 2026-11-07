@@ -133,7 +133,7 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
         children: [
           if (widget.showPresets)
             FxSettingsTile(
-              icon: Icons.flag_outlined,
+              icon: FxIcons.meta,
               label: prescriptionObjetivo,
               value: selectedPreset.label,
               mute: mute,
@@ -144,7 +144,7 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
             ),
           _PrescriptionStepperRow(
             label: prescriptionSeries,
-            icon: Icons.format_list_numbered_rounded,
+            icon: FxIcons.listaNumerada,
             iconColor: brand,
             value: '$seriesValue',
             line: line,
@@ -163,7 +163,7 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
           ),
           _PrescriptionChipsRow(
             label: prescriptionRepsLabel,
-            icon: Icons.fitness_center_rounded,
+            icon: FxIcons.treino,
             iconColor: brand,
             ink: ink,
             line: line,
@@ -185,7 +185,7 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
           ),
           _PrescriptionStepperRow(
             label: prescriptionDescanso,
-            icon: Icons.timer_outlined,
+            icon: FxIcons.cronometro,
             iconColor: brand,
             value: '${restValue}s',
             line: line,
@@ -236,7 +236,7 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
         FxSettingsGroup(
           children: [
             FxSettingsTile(
-              icon: Icons.library_add_check_outlined,
+              icon: FxIcons.checklist,
               label: 'Aplicar a todo o bloco',
               subtitle: widget.outrosNoBloco == 1
                   ? 'Séries, repetições e descanso do outro exercício do bloco'
@@ -273,7 +273,7 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
         FxSettingsGroup(
           children: [
             FxSettingsTile(
-              icon: Icons.tune_rounded,
+              icon: FxIcons.filtros,
               label: prescriptionMaisDetalhes,
               subtitle: prescriptionMaisDetalhesSubtitulo,
               value: '',
@@ -297,7 +297,7 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
           if (_showCarga)
             _PrescriptionValueRow(
               label: prescriptionCarga,
-              icon: Icons.scale_rounded,
+              icon: FxIcons.balanca,
               iconColor: brand,
               controller: widget.cargaCtrl,
               hint: prescriptionOpcional,
@@ -312,7 +312,7 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
           else
             _PrescriptionExpandRow(
               label: prescriptionAddCarga,
-              icon: Icons.scale_rounded,
+              icon: FxIcons.balanca,
               iconColor: brand,
               line: line,
               mute: mute,
@@ -327,7 +327,7 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
             if (_showRpeAlvo)
               _PrescriptionValueRow(
                 label: prescriptionRpe,
-                icon: Icons.speed_rounded,
+                icon: FxIcons.velocidade,
                 iconColor: brand,
                 controller: widget.rpeAlvoCtrl!,
                 hint: prescriptionOpcional,
@@ -340,7 +340,7 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
             else
               _PrescriptionExpandRow(
                 label: prescriptionAddRpe,
-                icon: Icons.speed_rounded,
+                icon: FxIcons.velocidade,
                 iconColor: brand,
                 line: line,
                 mute: mute,
@@ -361,7 +361,7 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
           else
             _PrescriptionExpandRow(
               label: prescriptionAddNotas,
-              icon: Icons.notes_rounded,
+              icon: FxIcons.notas,
               iconColor: brand,
               line: line,
               mute: mute,
@@ -388,7 +388,7 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
         title: headerTitle,
         subtitle: headerSubtitle,
         leading: Icon(
-          Icons.edit_note_rounded,
+          FxIcons.anotar,
           color: brand,
           size: FxSettingsLayout.iconSize,
         ),
@@ -406,7 +406,7 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
                   icon: Icon(
-                    Icons.close_rounded,
+                    FxIcons.fechar,
                     size: FxSettingsLayout.iconSize,
                     color:
                         widget.isDark

@@ -16,6 +16,7 @@ import '../models/subscription_plan.dart';
 import '../plan_entitlements.dart';
 import '../services/upgrade_prompt_cooldown.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Corpo de venda: ganho, três benefícios, preço real e ação. Usado em folha,
 /// tela empilhada e aba.
@@ -76,7 +77,7 @@ class FxUpgradeSalesPanel extends ConsumerWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.check_rounded, color: primary, size: 20),
+                Icon(FxIcons.check, color: primary, size: 20),
                 const SizedBox(width: TokensStrip.s2),
                 Expanded(
                   child: Text(
@@ -167,7 +168,7 @@ abstract final class FxUpgradeSalesSheet {
         return FxHomeSheetScaffold(
           isDark: isDark,
           leading: Icon(
-            Icons.lock_outline_rounded,
+            FxIcons.cadeado,
             color: Theme.of(ctx).colorScheme.primary,
             size: 20,
           ),

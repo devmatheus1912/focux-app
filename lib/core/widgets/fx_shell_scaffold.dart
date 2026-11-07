@@ -15,6 +15,7 @@ import 'fx_keyboard_dismiss_scope.dart';
 import 'mesh_scope.dart';
 import 'fx_premium_entrance.dart';
 import '../../features/ferramentas/widgets/hub_embed_scope.dart';
+import '../theme/fx_icons.dart';
 
 /// Premium scaffold for shell tabs and standalone screens.
 class FxShellScaffold extends StatelessWidget {
@@ -436,7 +437,7 @@ class FxSatelliteListTile extends StatelessWidget {
                 ? null
                 : ExcludeSemantics(
                   child: Icon(
-                    Icons.chevron_right_rounded,
+                    FxIcons.chevronDireita,
                     size: 20,
                     color: mute.withValues(alpha: 0.9),
                   ),

@@ -26,6 +26,7 @@ import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../data/grupo_aula_repository.dart';
 import '../utils/grupo_aula_display.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class GrupoAulasAlunoScreen extends ConsumerStatefulWidget {
   const GrupoAulasAlunoScreen({super.key});
@@ -150,7 +151,7 @@ class _GrupoAulasAlunoScreenState extends ConsumerState<GrupoAulasAlunoScreen> {
       title: 'Inscrever nesta aula?',
       message: aula.titulo,
       confirmLabel: 'Inscrever',
-      icon: Icons.groups_outlined,
+      icon: FxIcons.grupo,
     );
     if (!ok || !mounted) return;
     try {
@@ -171,7 +172,7 @@ class _GrupoAulasAlunoScreenState extends ConsumerState<GrupoAulasAlunoScreen> {
       message: aula.titulo,
       confirmLabel: 'Sair',
       destructive: true,
-      icon: Icons.logout_rounded,
+      icon: FxIcons.sair,
     );
     if (!ok || !mounted) return;
     try {
@@ -274,7 +275,7 @@ class _GrupoAulasAlunoScreenState extends ConsumerState<GrupoAulasAlunoScreen> {
                         onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
                         decoration: InputDecoration(
                           hintText: 'Buscar aula',
-                          prefixIcon: const Icon(Icons.search_rounded),
+                          prefixIcon: const Icon(FxIcons.buscar),
                           border: FxInputDeco.outlineBorder(
                             borderRadius: BorderRadius.circular(16),
                           ),

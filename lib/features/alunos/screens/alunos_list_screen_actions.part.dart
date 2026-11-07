@@ -46,7 +46,7 @@ class _AlunosBulkActionsSheetState extends State<_AlunosBulkActionsSheet> {
       label: alunosSelectionTitle(widget.count),
       child: FxHomeSheetScaffold(
         isDark: widget.isDark,
-        leading: Icon(Icons.checklist_rounded, color: primary, size: 22),
+        leading: Icon(FxIcons.checklist, color: primary, size: 22),
         title: 'Ações',
         subtitle: 'Status, pagamento ou exclusão.',
         child: Column(
@@ -168,7 +168,7 @@ class _ExcluirAlunosSheet extends StatelessWidget {
             title: 'Excluir alunos?',
             subtitle: label,
             leading: const Icon(
-              Icons.delete_outline_rounded,
+              FxIcons.excluir,
               color: EagleTokens.bad,
               size: 18,
             ),

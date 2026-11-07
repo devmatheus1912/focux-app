@@ -20,6 +20,7 @@ import '../utils/login_display.dart';
 import '../utils/reset_senha_display.dart';
 import '../widgets/auth_shell.dart';
 import '../widgets/password_strength_meter.dart';
+import '../../../core/theme/fx_icons.dart';
 
 part 'resetar_senha_screen_actions.part.dart';
 
@@ -174,7 +175,7 @@ class _ResetarSenhaScreenState extends ConsumerState<ResetarSenhaScreen> {
                                 label: 'Nova senha',
                                 controller: _senhaController,
                                 hintText: 'Mín. $_minPasswordLength caracteres',
-                                icon: Icons.lock_outline_rounded,
+                                icon: FxIcons.cadeado,
                                 obscureText: !_showPassword,
                                 textInputAction: TextInputAction.next,
                                 autofillHints: const [
@@ -196,8 +197,8 @@ class _ResetarSenhaScreenState extends ConsumerState<ResetarSenhaScreen> {
                                   },
                                   icon: Icon(
                                     _showPassword
-                                        ? Icons.visibility_off_outlined
-                                        : Icons.visibility_outlined,
+                                        ? FxIcons.ocultar
+                                        : FxIcons.ver,
                                     color: heroTealSurface(0.82),
                                     size: 18,
                                   ),
@@ -215,7 +216,7 @@ class _ResetarSenhaScreenState extends ConsumerState<ResetarSenhaScreen> {
                                 label: 'Confirmar senha',
                                 controller: _confirmarController,
                                 hintText: 'Repita a senha',
-                                icon: Icons.lock_reset_rounded,
+                                icon: FxIcons.redefinirSenha,
                                 obscureText: !_showPassword,
                                 textInputAction: TextInputAction.done,
                                 autofillHints: const [

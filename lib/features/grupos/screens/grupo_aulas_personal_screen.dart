@@ -32,6 +32,7 @@ import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../data/grupo_aula_repository.dart';
 import '../utils/grupo_aula_display.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class GrupoAulasPersonalScreen extends ConsumerStatefulWidget {
   const GrupoAulasPersonalScreen({super.key});
@@ -182,7 +183,7 @@ class _GrupoAulasPersonalScreenState
             value: day,
             label: grupoAulaDateOptionLabel(day, today),
             subtitle: grupoAulaDateLabel(day),
-            icon: Icons.event_outlined,
+            icon: FxIcons.calendario,
           ),
       ],
     );
@@ -218,7 +219,7 @@ class _GrupoAulasPersonalScreenState
         context,
         title: 'Nova aula em grupo',
         subtitle: 'Defina horário, capacidade e local.',
-        icon: Icons.groups_outlined,
+        icon: FxIcons.grupo,
         confirmLabel: 'Criar aula',
         child: StatefulBuilder(
           builder:
@@ -228,17 +229,17 @@ class _GrupoAulasPersonalScreenState
                   AlunoInsetFormField(
                     controller: tituloCtrl,
                     label: 'Título',
-                    icon: Icons.title_outlined,
+                    icon: FxIcons.titulo,
                     hint: 'Ex: Funcional ao ar livre',
                   ),
                   AlunoInsetFormField(
                     controller: descricaoCtrl,
                     label: 'Descrição (opcional)',
-                    icon: Icons.notes_outlined,
+                    icon: FxIcons.notas,
                     maxLines: 2,
                   ),
                   FxInsetPickerRow(
-                    icon: Icons.event_outlined,
+                    icon: FxIcons.calendario,
                     label: 'Início',
                     value: grupoAulaWhenLabel(inicio),
                     onTap: () async {
@@ -260,7 +261,7 @@ class _GrupoAulasPersonalScreenState
                     },
                   ),
                   FxInsetPickerRow(
-                    icon: Icons.event_available_outlined,
+                    icon: FxIcons.eventoConfirmado,
                     label: 'Fim',
                     value: grupoAulaWhenLabel(fim),
                     onTap: () async {
@@ -277,13 +278,13 @@ class _GrupoAulasPersonalScreenState
                   AlunoInsetFormField(
                     controller: capacidadeCtrl,
                     label: 'Capacidade',
-                    icon: Icons.groups_outlined,
+                    icon: FxIcons.grupo,
                     keyboardType: TextInputType.number,
                   ),
                   AlunoInsetFormField(
                     controller: localCtrl,
                     label: 'Local (opcional)',
-                    icon: Icons.place_outlined,
+                    icon: FxIcons.local,
                     hint: 'Studio, Praia, Online…',
                     showDivider: false,
                   ),
@@ -354,7 +355,7 @@ class _GrupoAulasPersonalScreenState
             FxHomeSheetHeader(
               isDark: chrome.isDark,
               leading: Icon(
-                Icons.groups_outlined,
+                FxIcons.grupo,
                 color: Theme.of(sheetContext).colorScheme.primary,
                 size: 18,
               ),
@@ -470,7 +471,7 @@ class _GrupoAulasPersonalScreenState
                         vertical: 12,
                       ),
                       prefixIcon: Icon(
-                        Icons.search_rounded,
+                        FxIcons.buscar,
                         color: primary,
                         size: 20,
                       ),
@@ -480,7 +481,7 @@ class _GrupoAulasPersonalScreenState
                               tooltip: 'Limpar busca',
                               onPressed: _clearQuery,
                               icon: Icon(
-                                Icons.close_rounded,
+                                FxIcons.fechar,
                                 color: chrome.mute,
                                 size: 18,
                               ),

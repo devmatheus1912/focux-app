@@ -16,6 +16,7 @@ import '../../../l10n/pt.dart';
 import '../data/evolucao_repository.dart';
 import '../utils/evolucao_display.dart';
 import '../utils/evolucao_series.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Aba Recordes, igual para personal e aluno.
 class EvolucaoRecordesAba extends StatelessWidget {
@@ -68,7 +69,8 @@ class EvolucaoRecordesAba extends StatelessWidget {
           96,
         ),
         children: [
-          if (destaque != null) ...[
+          // Com um exercício só, o destaque repetia o cartão de baixo.
+          if (destaque != null && progresso.length > 1) ...[
             Text(
               ptS.evolucaoMaiorProgresso,
               style: FocuxHubTypography.chip(chrome.mute),
@@ -118,12 +120,12 @@ class _CartaoRecorde extends StatelessWidget {
           FxActionItem(
             valor: 'editar',
             rotulo: ptS.evolucaoRecordeEditar,
-            icone: Icons.edit_outlined,
+            icone: FxIcons.editar,
           ),
           FxActionItem(
             valor: 'excluir',
             rotulo: ptS.evolucaoRecordeExcluir,
-            icone: Icons.delete_outline_rounded,
+            icone: FxIcons.excluir,
             perigo: true,
           ),
         ]),
@@ -170,7 +172,7 @@ class _CartaoRecorde extends StatelessWidget {
                     trailing:
                         onEditar == null
                             ? const SizedBox.shrink()
-                            : const Icon(Icons.more_horiz_rounded),
+                            : const Icon(FxIcons.mais),
                     onTap: onEditar == null ? null : () => _acoes(ctx, r),
                   ),
               ],
@@ -221,15 +223,9 @@ class _CartaoRecorde extends StatelessWidget {
               ),
               if (progresso.historico.length > 1) ...[
                 const SizedBox(height: TokensStrip.s2),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(TokensStrip.s1),
-                  child: LinearProgressIndicator(
-                    value: progresso.fracaoDoInicio,
-                    minHeight: 6,
-                    color: primary,
-                    backgroundColor: chrome.line,
-                  ),
-                ),
+                // Dois tons: até a primeira marca (fraco) e o ganho (marca). A
+                // barra cheia de antes parecia "83% de algo".
+                _BarraDoGanho(progresso: progresso, cor: primary, trilho: chrome.line),
                 const SizedBox(height: TokensStrip.s1),
                 Text(
                   ptS.evolucaoGanhoDesdeInicio(
@@ -242,6 +238,57 @@ class _CartaoRecorde extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+
+class _BarraDoGanho extends StatelessWidget {
+  const _BarraDoGanho({required this.progresso, required this.cor, required this.trilho});
+
+  final ProgressoRecorde progresso;
+  final Color cor;
+  final Color trilho;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    final inicio = progresso.inicio.cargaKg ?? 0;
+    final ganho = progresso.ganhoKg.clamp(0, double.infinity);
+    final estilo = FocuxHubTypography.chip(chrome.mute)
+        .copyWith(fontFeatures: const [FontFeature.tabularFigures()]);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(TokensStrip.s1),
+          child: SizedBox(
+            height: 6,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (inicio > 0)
+                  Expanded(
+                    flex: (inicio * 10).round(),
+                    child: ColoredBox(color: cor.withValues(alpha: 0.28)),
+                  ),
+                if (ganho > 0)
+                  Expanded(flex: (ganho * 10).round(), child: ColoredBox(color: cor))
+                else if (inicio <= 0)
+                  Expanded(child: ColoredBox(color: trilho)),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 2),
+        Row(
+          children: [
+            Text(formatBrKg(inicio), style: estilo),
+            const Spacer(),
+            Text(formatBrKg(progresso.melhor.cargaKg ?? 0), style: estilo),
+          ],
+        ),
+      ],
     );
   }
 }

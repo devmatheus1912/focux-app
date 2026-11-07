@@ -9,6 +9,7 @@ import '../../../core/widgets/fx_input_deco.dart';
 import '../data/relatorio_repository.dart';
 import '../utils/relatorio_global_display.dart';
 import 'relatorio_ranking_tile.dart';
+import '../../../core/theme/fx_icons.dart';
 
 Future<void> showRelatorioRankingCatalogSheet(
   BuildContext context, {
@@ -78,7 +79,7 @@ class _RelatorioRankingCatalogSheetState
             title: widget.title,
             subtitle: '${widget.alunos.length} alunos neste recorte.',
             leading: Icon(
-              widget.attention ? Icons.warning_amber_outlined : Icons.emoji_events_outlined,
+              widget.attention ? FxIcons.alerta : FxIcons.trofeu,
               size: 18,
               color: primary,
             ),

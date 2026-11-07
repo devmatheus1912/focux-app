@@ -7,6 +7,7 @@ import '../utils/aluno360_copilot_logic.dart';
 import '../utils/aluno360_operacao_logic.dart';
 import '../widgets/aluno360_commitment_sheet.dart';
 import '../widgets/aluno_outreach_message_sheet.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Abre o destino da ação "Agora" do Resumo (chat, financeiro, ficha, cadastro…).
 void abrirOperacaoSticky({
@@ -30,7 +31,7 @@ void abrirOperacaoSticky({
           message: outreach,
           title: 'Mensagem sugerida',
           subtitle: 'Copiloto · revise antes de enviar.',
-          icon: Icons.auto_awesome_rounded,
+          icon: FxIcons.ia,
         );
         return;
       }

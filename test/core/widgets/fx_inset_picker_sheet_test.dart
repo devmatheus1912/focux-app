@@ -6,6 +6,7 @@ import 'package:focux_app/core/widgets/fx_inset_picker_option.dart';
 import 'package:focux_app/core/widgets/fx_inset_picker_sheet.dart';
 import 'package:focux_app/features/perfil/widgets/perfil_appearance_section.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focux_app/core/theme/fx_icons.dart';
 
 void main() {
   testWidgets('showFxInsetPickerSheet retorna valor selecionado', (tester) async {
@@ -22,7 +23,7 @@ void main() {
                       picked = await showFxInsetPickerSheet<ThemeMode>(
                         context,
                         title: 'Aparência',
-                        headerIcon: Icons.dark_mode_outlined,
+                        headerIcon: FxIcons.sono,
                         selected: ThemeMode.system,
                         items: const [
                           FxInsetPickerSheetItem(
@@ -95,6 +96,6 @@ void main() {
     expect(PerfilAppearanceSection.labelFor(ThemeMode.light), 'Claro');
     expect(source, contains('FxChoiceStrip'));
     expect(source, isNot(contains('showFxInsetPickerSheet')));
-    expect(source, isNot(contains('Icons.check,')));
+    expect(source, isNot(contains('FxIcons.check,')));
   });
 }

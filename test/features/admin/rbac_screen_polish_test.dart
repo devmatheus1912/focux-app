@@ -19,7 +19,7 @@ void main() {
     expect(screen, contains('FxHomeSheetChrome.dismissAndPop'));
     expect(screen, isNot(contains('DropdownButtonFormField')));
     expect(screen, isNot(contains('fxListTileCardShell')));
-    expect(screen, isNot(contains('IconButton(\n                        icon: const Icon(\n                          Icons.delete_outline')));
+    expect(screen, isNot(contains('IconButton(\n                        icon: const Icon(\n                          FxIcons.excluir')));
     expect(screen, anyOf(contains('friendlyError'), contains('FxErrorState')));
     expect(screen, contains('SkeletonList'));
   });

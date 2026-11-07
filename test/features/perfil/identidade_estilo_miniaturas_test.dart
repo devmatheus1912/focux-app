@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/theme/brand_style.dart';
 import 'package:focux_app/features/perfil/widgets/identidade_estilo_miniaturas.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:focux_app/core/theme/fx_icons.dart';
 
 Widget _app(Widget child) => MaterialApp(home: Scaffold(body: Padding(
   padding: const EdgeInsets.all(16),
@@ -25,7 +26,7 @@ void main() {
     expect(find.text('Clássico'), findsOneWidget);
     expect(find.text('Cinematográfico'), findsOneWidget);
     expect(find.text('Minimalista'), findsOneWidget);
-    expect(find.byIcon(Icons.check_circle_rounded), findsOneWidget);
+    expect(find.byIcon(FxIcons.concluidoAtivo), findsOneWidget);
   });
 
   testWidgets('tocar numa miniatura escolhe o estilo', (tester) async {

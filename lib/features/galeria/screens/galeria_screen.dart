@@ -23,6 +23,7 @@ import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/galeria_repository.dart';
 import '../utils/galeria_display.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class GaleriaScreen extends ConsumerStatefulWidget {
   const GaleriaScreen({super.key});
@@ -139,7 +140,7 @@ class _GaleriaScreenState extends ConsumerState<GaleriaScreen> {
       context,
       title: 'Remover foto?',
       message: 'Remover esta foto da galeria?',
-      icon: Icons.delete_outline_rounded,
+      icon: FxIcons.excluir,
       confirmLabel: 'Remover',
       destructive: true,
     );
@@ -310,7 +311,7 @@ class _GaleriaScreenState extends ConsumerState<GaleriaScreen> {
                                                 tooltip: 'Remover foto',
                                                 onPressed: () => _delete(f.id),
                                                 icon: Icon(
-                                                  Icons.close_rounded,
+                                                  FxIcons.fechar,
                                                   color: onSurface,
                                                 ),
                                               ),

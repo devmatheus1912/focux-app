@@ -49,6 +49,7 @@ import '../../alunos/utils/aluno360_copilot_executar_logic.dart';
 import '../../alunos/widgets/aluno360_copilot_executar_confirm.dart';
 import 'package:focux_app/core/widgets/fx_home_sheet.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
+import '../../../core/theme/fx_icons.dart';
 part 'ia_copiloto_screen_actions.part.dart';
 part 'ia_copiloto_screen_apply.part.dart';
 part 'ia_copiloto_screen_state.part.dart';

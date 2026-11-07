@@ -38,6 +38,7 @@ import '../data/loja_repository.dart';
 import '../models/loja_pedido.dart';
 import '../utils/loja_hub_display.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 part 'loja_screen_actions.part.dart';
 
@@ -255,7 +256,7 @@ class _LojaScreenState extends ConsumerState<LojaScreen> {
                           vertical: 12,
                         ),
                         prefixIcon: Icon(
-                          Icons.search_rounded,
+                          FxIcons.buscar,
                           color: scheme.primary,
                           size: 20,
                         ),
@@ -265,7 +266,7 @@ class _LojaScreenState extends ConsumerState<LojaScreen> {
                                 tooltip: 'Limpar busca',
                                 onPressed: _clearQuery,
                                 icon: Icon(
-                                  Icons.close_rounded,
+                                  FxIcons.fechar,
                                   color: chrome.mute,
                                   size: 18,
                                 ),

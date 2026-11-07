@@ -100,7 +100,7 @@ extension FinanceiroMensalidadesTabForms on _FinanceiroMensalidadesTabState {
                           title: 'Nova mensalidade',
                           subtitle: 'Valor, mês e vencimento da cobrança.',
                           leading: Icon(
-                            Icons.add_card_outlined,
+                            FxIcons.adicionarCartao,
                             color: primary,
                             size: 18,
                           ),
@@ -126,7 +126,7 @@ extension FinanceiroMensalidadesTabForms on _FinanceiroMensalidadesTabState {
                               controller: valorCtrl,
                               label: s.financeiroValorRotulo,
                               hint: 'R\$ 0,00',
-                              icon: Icons.attach_money,
+                              icon: FxIcons.dinheiro,
                               rotuloVisivel: true,
                               obrigatorio: true,
                               keyboardType:
@@ -229,7 +229,7 @@ extension FinanceiroMensalidadesTabForms on _FinanceiroMensalidadesTabState {
                                           financeiroLancarMensalidadeConfirmTitle(),
                                       message:
                                           financeiroLancarMensalidadeConfirmMessage(),
-                                      icon: Icons.payments_outlined,
+                                      icon: FxIcons.pagamento,
                                       confirmLabel:
                                           financeiroLancarMensalidadeTileLabel(),
                                     );

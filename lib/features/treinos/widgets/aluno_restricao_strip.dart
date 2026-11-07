@@ -8,6 +8,7 @@ import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
 import '../../anamnese/data/anamnese_repository.dart';
 import '../utils/aluno_restricao_match.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Faixa "Atenção do aluno: joelho · lombar". Só aviso: nunca bloqueia.
 class AlunoRestricaoStrip extends StatelessWidget {
@@ -50,7 +51,7 @@ class AlunoRestricaoStrip extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const Icon(Icons.health_and_safety_outlined, color: alerta, size: 20),
+                const Icon(FxIcons.saude, color: alerta, size: 20),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
@@ -67,7 +68,7 @@ class AlunoRestricaoStrip extends StatelessWidget {
                 IconButton(
                   tooltip: 'Dispensar aviso',
                   onPressed: onDispensar,
-                  icon: Icon(Icons.close_rounded, size: 20, color: chrome.mute),
+                  icon: Icon(FxIcons.fechar, size: 20, color: chrome.mute),
                 ),
               ],
             ),
@@ -107,7 +108,7 @@ Future<void> showAlunoRestricaoSheet(
       const SizedBox(height: TokensStrip.s3),
       FxTonalButton(
         label: 'Ver anamnese',
-        icon: Icons.assignment_outlined,
+        icon: FxIcons.prancheta,
         expanded: true,
         onPressed: onVerAnamnese,
       ),

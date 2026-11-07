@@ -269,7 +269,7 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
                       !hasUpgradeAbove) ...[
                     const SizedBox(height: TokensStrip.s3),
                     _PaywallInlineNote(
-                      icon: Icons.store_outlined,
+                      icon: FxIcons.loja,
                       text:
                           'Loja indisponível nesta sessão — use o botão abaixo para abrir ${subscriptionChannelWith(ChannelPreposition.artigo)} e gerenciar sua assinatura.',
                       ink: ink,
@@ -280,7 +280,7 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
                   if (kIsWeb) ...[
                     const SizedBox(height: TokensStrip.s3),
                     _PaywallInlineNote(
-                      icon: Icons.smartphone_outlined,
+                      icon: FxIcons.celular,
                       text: S.of(context).assinaturaWebLojasCelular,
                       ink: ink,
                       mute: mute,

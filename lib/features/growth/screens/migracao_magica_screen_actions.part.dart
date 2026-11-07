@@ -174,20 +174,20 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
                 subtitle:
                     'Tire foto só da lista de alunos, sem menus.\nFunciona com MFIT, Trainerize, planilha ou lista no WhatsApp.',
                 leading: Icon(
-                  Icons.add_a_photo_outlined,
+                  FxIcons.adicionarFoto,
                   color: primary,
                   size: 18,
                 ),
               ),
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: Icon(Icons.photo_library_outlined, color: primary),
+                leading: Icon(FxIcons.galeria, color: primary),
                 title: const Text('Escolher da galeria'),
                 onTap: () => Navigator.pop(ctx, ImageSource.gallery),
               ),
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: Icon(Icons.photo_camera_outlined, color: primary),
+                leading: Icon(FxIcons.camera, color: primary),
                 title: const Text('Tirar foto agora'),
                 onTap: () => Navigator.pop(ctx, ImageSource.camera),
               ),
@@ -661,7 +661,7 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
     final escolha = await showFxInsetPickerSheet<int>(
       context,
       title: 'Coluna de ${migracaoCampoLabel(campo)}',
-      headerIcon: Icons.table_chart_outlined,
+      headerIcon: FxIcons.tabela,
       items: [
         const FxInsetPickerSheetItem(value: -1, label: 'Não importar'),
         for (var i = 0; i < planilha.headers.length; i++)
@@ -724,7 +724,7 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
                   isDark: isDark,
                   title: 'Editar aluno',
                   leading: Icon(
-                    Icons.person_outline_rounded,
+                    FxIcons.pessoa,
                     color: primary,
                     size: 18,
                   ),

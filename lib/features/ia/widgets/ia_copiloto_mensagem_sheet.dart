@@ -5,6 +5,7 @@ import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Mensagem sugerida, editável, antes de ir para o chat do aluno.
 Future<String?> showIaCopilotoMensagemSheet(
@@ -20,7 +21,7 @@ Future<String?> showIaCopilotoMensagemSheet(
         (ctx) => FxHomeSheetScaffold(
           isDark: isDark,
           leading: Icon(
-            Icons.chat_bubble_outline_rounded,
+            FxIcons.chat,
             color: Theme.of(ctx).colorScheme.primary,
             size: 22,
           ),

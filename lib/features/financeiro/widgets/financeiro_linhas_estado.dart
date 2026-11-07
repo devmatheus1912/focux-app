@@ -8,6 +8,7 @@ import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../perfil/providers/perfil_provider.dart';
 import '../providers/financeiro_provider.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// "Como você recebe": a chave PIX é pré-requisito de PIX e de recorrência.
 /// Sem chave vira um convite com verbo; com chave, uma linha de estado.
@@ -31,7 +32,7 @@ class FinanceiroChavePixLinha extends ConsumerWidget {
         titulo: s.financeiroComoRecebe,
         motivo: s.financeiroChaveFalta,
         verbo: s.financeiroVerboCadastrar,
-        leading: Icons.account_balance_wallet_outlined,
+        leading: FxIcons.carteira,
         onTap: abrir,
       );
     }

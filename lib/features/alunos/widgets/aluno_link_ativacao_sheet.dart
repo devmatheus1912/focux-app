@@ -13,6 +13,7 @@ import '../../../core/widgets/fx_motion.dart';
 import '../../../l10n/app_localizations.dart';
 import '../utils/aluno_invite_copy.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Compartilha o link de ativação (aluno novo ou reenvio).
 Future<void> showAlunoLinkAtivacaoSheet({
@@ -52,7 +53,7 @@ Future<void> showAlunoLinkAtivacaoSheet({
       return FxHomeSheetScaffold(
         isDark: isDark,
         leading: Icon(
-          reenvio ? Icons.link_rounded : Icons.check_rounded,
+          reenvio ? FxIcons.link : FxIcons.check,
           color: EagleTokens.good,
           size: 22,
         ),

@@ -13,7 +13,7 @@ class _PerfilIndique extends StatelessWidget {
     return FxSettingsGroup(
       children: [
         FxSettingsTile(
-          icon: Icons.card_giftcard_outlined,
+          icon: FxIcons.presente,
           label: s.perfilIndiqueGanhe,
           value: s.perfilIndiqueValor,
           mute: mute,
@@ -51,7 +51,7 @@ class _PerfilAcessoAlunos extends StatelessWidget {
       caption: escolher ? s.perfilEscolhaCodigoTexto : null,
       children: [
         FxSettingsTile(
-          icon: Icons.key_outlined,
+          icon: FxIcons.chave,
           label: escolher ? s.perfilEscolhaCodigo : s.perfilSeuCodigo,
           value:
               escolher
@@ -91,7 +91,7 @@ class _PerfilVitrineTiles extends ConsumerWidget {
     return Column(
       children: [
         FxSettingsTile(
-          icon: Icons.language_outlined,
+          icon: FxIcons.idioma,
           label: S.of(context).perfilPaginaPublica,
           value: '',
           mute: mute,
@@ -101,7 +101,7 @@ class _PerfilVitrineTiles extends ConsumerWidget {
           onTap: onOpenEditor,
         ),
         FxSettingsTile(
-          icon: Icons.palette_outlined,
+          icon: FxIcons.paleta,
           label: 'Marca',
           value: '',
           mute: mute,

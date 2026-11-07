@@ -10,6 +10,7 @@ import 'fx_home_sheet.dart';
 import 'fx_settings_group.dart';
 import 'fx_settings_tile.dart';
 import 'fx_sheet_frame.dart';
+import '../theme/fx_icons.dart';
 
 /// Uma ação da folha. [valor] é o que a folha devolve ao ser tocada.
 class FxActionItem<T> {
@@ -45,7 +46,7 @@ Future<T?> showFxGroupedActionSheet<T>(
   required String titulo,
   required List<FxActionGroup<T>> grupos,
   String? subtitulo,
-  IconData icone = Icons.more_horiz_rounded,
+  IconData icone = FxIcons.mais,
   FxActionItem<T>? destrutiva,
   String? confirmarTitulo,
   String? confirmarMensagem,
@@ -72,7 +73,7 @@ class FxGroupedActionSheet<T> extends StatelessWidget {
     required this.titulo,
     required this.grupos,
     this.subtitulo,
-    this.icone = Icons.more_horiz_rounded,
+    this.icone = FxIcons.mais,
     this.destrutiva,
     this.confirmarTitulo,
     this.confirmarMensagem,

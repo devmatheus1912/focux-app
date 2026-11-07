@@ -4,6 +4,7 @@ import '../theme/design_tokens.dart';
 import '../theme/focux_hub_typography.dart';
 import '../theme/shell_chrome.dart';
 import '../theme/tokens_strip.dart';
+import '../theme/fx_icons.dart';
 
 enum FxPillTone { neutral, accent, success, warning, danger }
 
@@ -41,7 +42,7 @@ class FxStatusPill extends StatelessWidget {
         scheme.error.withValues(alpha: chrome.isDark ? 0.22 : 0.10),
       ),
     };
-    final simbolo = icon ?? (tone == FxPillTone.success ? Icons.check_rounded : null);
+    final simbolo = icon ?? (tone == FxPillTone.success ? FxIcons.check : null);
 
     return Semantics(
       label: label,

@@ -28,6 +28,7 @@ import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/coach_proativo_repository.dart';
 import '../utils/coach_display.dart';
 import '../widgets/coach_catalog_sheet.dart';
+import '../../../core/theme/fx_icons.dart';
 
 final coachHomeProvider = FutureProvider.autoDispose<CoachHome>((ref) {
   return CoachProativoRepository(ref.read(apiClientProvider)).getHome();
@@ -252,7 +253,7 @@ class _CoachFocusCard extends StatelessWidget {
       final chosen = await showFxInsetPickerSheet<CoachFocusActionId>(
         context,
         title: 'Mais ações',
-        headerIcon: Icons.more_horiz_rounded,
+        headerIcon: FxIcons.mais,
         selected: null,
         items: [
           for (final id in split.secondary)

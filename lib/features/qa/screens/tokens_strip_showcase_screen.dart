@@ -11,6 +11,7 @@ import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../widgets/fx_strip_components.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// QA board — visual reference for TOKENS STRIP v1.0.0 (debug only).
 class TokensStripShowcaseScreen extends StatefulWidget {
@@ -182,7 +183,7 @@ class _TokensStripShowcaseScreenState extends State<TokensStripShowcaseScreen> {
                         2,
                         'Empty state',
                         FxStripEmptyState(
-                          icon: Icons.terrain_outlined,
+                          icon: FxIcons.terreno,
                           title: 'Illustration and message',
                           message:
                               'This state is a message alone to use it in order to focus user activity.',
@@ -330,15 +331,15 @@ class _IconGrid extends StatelessWidget {
   final Color primary;
 
   static const _icons = [
-    Icons.settings_outlined,
-    Icons.hub_outlined,
-    Icons.copy_all_outlined,
-    Icons.share_outlined,
-    Icons.description_outlined,
-    Icons.swap_vert_rounded,
-    Icons.folder_outlined,
-    Icons.insert_drive_file_outlined,
-    Icons.subdirectory_arrow_right_rounded,
+    FxIcons.ajustes,
+    FxIcons.integracoes,
+    FxIcons.copiar,
+    FxIcons.compartilhar,
+    FxIcons.documento,
+    FxIcons.trocarVertical,
+    FxIcons.pasta,
+    FxIcons.documento,
+    FxIcons.subitem,
   ];
 
   @override
@@ -642,8 +643,8 @@ class _InputsPanel extends StatelessWidget {
               onPressed: onToggleObscure,
               icon: Icon(
                 obscure
-                    ? Icons.visibility_outlined
-                    : Icons.visibility_off_outlined,
+                    ? FxIcons.ver
+                    : FxIcons.ocultar,
                 size: 20,
               ),
             ),
@@ -655,7 +656,7 @@ class _InputsPanel extends StatelessWidget {
             context,
             'Search',
             hint: 'Search',
-            icon: Icons.search_rounded,
+            icon: FxIcons.buscar,
           ),
         ),
       ],
@@ -848,14 +849,14 @@ class _MiniCalendar extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Icon(Icons.chevron_left, size: 18, color: primary),
+            Icon(FxIcons.chevronEsquerda, size: 18, color: primary),
             Text(
               'June 2022',
               style: FocuxHubTypography.cardTitle(
                 color: TokensStrip.textPrimary,
               ),
             ),
-            Icon(Icons.chevron_right, size: 18, color: primary),
+            Icon(FxIcons.chevronDireita, size: 18, color: primary),
           ],
         ),
         const SizedBox(height: 8),
@@ -950,7 +951,7 @@ class _DropdownPanel extends StatelessWidget {
                     ),
                   ),
                   Icon(
-                    open ? Icons.expand_less : Icons.expand_more,
+                    open ? FxIcons.chevronCima : FxIcons.chevronBaixo,
                     size: 20,
                     color: TokensStrip.textSecondary,
                   ),
@@ -997,7 +998,7 @@ class _ButtonAnatomy extends StatelessWidget {
           'Icon left and text',
           _specButton(
             label: 'ICON',
-            icon: Icons.star_outline_rounded,
+            icon: FxIcons.estrela,
             fill: TokensStrip.specIdleFill,
             border: TokensStrip.specIdleBorder,
             shadow: TokensStrip.cardShadow(),

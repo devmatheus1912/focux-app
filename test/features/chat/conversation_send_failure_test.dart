@@ -17,6 +17,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../support/dynamic_type_harness.dart';
+import 'package:focux_app/core/theme/fx_icons.dart';
 
 const _historico = '/api/chat/aluno/historico/page';
 const _enviar = '/api/chat/aluno/enviar';
@@ -120,7 +121,7 @@ Future<void> _settle(WidgetTester tester) async {
 Future<void> _enviarTexto(WidgetTester tester) async {
   await tester.enterText(find.byType(TextField), _texto);
   await tester.pump();
-  await tester.tap(find.byIcon(Icons.arrow_upward_rounded));
+  await tester.tap(find.byIcon(FxIcons.setaCima));
   await _settle(tester);
 }
 

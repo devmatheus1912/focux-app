@@ -9,6 +9,7 @@ import '../api/offline_queued_ack.dart';
 import '../api/plan_upgrade_error_hub.dart';
 import '../theme/design_tokens.dart';
 import '../utils/friendly_error.dart';
+import '../theme/fx_icons.dart';
 
 /// Where transient feedback should anchor on screen.
 enum FeedbackPlacement {
@@ -93,7 +94,7 @@ class FeedbackHelper {
       context,
       message,
       fill: EagleTokens.good,
-      icon: Icons.check_circle_rounded,
+      icon: FxIcons.concluidoAtivo,
       reserveBottom: reserveBottom,
       placement: placement,
     );
@@ -136,7 +137,7 @@ class FeedbackHelper {
       context,
       message,
       fill: EagleTokens.bad,
-      icon: Icons.error_outline_rounded,
+      icon: FxIcons.erro,
       reserveBottom: reserveBottom,
       placement: placement,
     );
@@ -174,7 +175,7 @@ class FeedbackHelper {
       context,
       message,
       fill: Theme.of(context).colorScheme.primary,
-      icon: Icons.info_outline_rounded,
+      icon: FxIcons.info,
       reserveBottom: reserveBottom,
       placement: placement,
     );
@@ -191,7 +192,7 @@ class FeedbackHelper {
       context,
       message,
       fill: EagleTokens.warn,
-      icon: Icons.warning_amber_rounded,
+      icon: FxIcons.alerta,
       reserveBottom: reserveBottom,
       placement: placement,
     );

@@ -169,7 +169,7 @@ class _CheckinStepper extends StatelessWidget {
           children: [
             Expanded(
               child: _CheckinStepperButton(
-                icon: Icons.remove_rounded,
+                icon: FxIcons.remover,
                 tooltip: s.checkinDiminuir(label),
                 onPressed: onMinus,
                 ink: ink,
@@ -179,7 +179,7 @@ class _CheckinStepper extends StatelessWidget {
             const SizedBox(width: TokensStrip.s2),
             Expanded(
               child: _CheckinStepperButton(
-                icon: Icons.add_rounded,
+                icon: FxIcons.adicionar,
                 tooltip: s.checkinAumentar(label),
                 onPressed: onPlus,
                 ink: ink,

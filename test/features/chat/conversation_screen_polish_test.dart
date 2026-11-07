@@ -47,7 +47,7 @@ void main() {
     expect(widgets, isNot(contains("'Sistema'")));
     expect(widgets, isNot(contains('this.system = false')));
     expect(widgets, isNot(contains('ConversationChatBackdropPainter')));
-    expect(widgets, isNot(contains('Icons.done_all_rounded')));
+    expect(widgets, isNot(contains('FxIcons.checkDuplo')));
     expect(widgets, isNot(contains('BorderRadius.only')));
     expect(widgets, isNot(contains('LinearGradient')));
   });
@@ -75,7 +75,7 @@ void main() {
     expect(composer, contains('TokensStrip.rCard'));
     expect(composer, contains("hintText: 'Mensagem'"));
     expect(composer, isNot(contains('Icons.add_circle')));
-    expect(composer, isNot(contains('Icons.auto_awesome')));
+    expect(composer, isNot(contains('FxIcons.ia')));
     expect(composer, isNot(contains('BackdropFilter')));
     expect(composer, isNot(contains('ImageFilter.blur')));
     expect(screen, contains('ConversationMessageComposer'));

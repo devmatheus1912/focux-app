@@ -15,6 +15,7 @@ import '../../../l10n/app_localizations.dart';
 import '../data/checkin_repository.dart';
 import '../utils/checkin_serie_input.dart';
 import 'checkin_serie_campos_widgets.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class CheckinSeriePayload {
   final double? cargaKg;
@@ -176,7 +177,7 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
                 isDark: dark,
                 title: widget.title,
                 leading: Icon(
-                  Icons.fitness_center_rounded,
+                  FxIcons.treino,
                   color: brand,
                   size: 18,
                 ),
@@ -238,7 +239,7 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
               else
                 FxTonalButton(
                   label: s.checkinDetalharEsforco,
-                  icon: Icons.speed_rounded,
+                  icon: FxIcons.velocidade,
                   onPressed: () => setState(() => _useRpe = true),
                 ),
               const SizedBox(height: TokensStrip.s4),
@@ -246,7 +247,7 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
                 width: double.infinity,
                 child: FxLiquidPrimaryButton(
                   label: s.checkinSalvarSerie,
-                  icon: Icons.check_rounded,
+                  icon: FxIcons.check,
                   onPressed: _submit,
                 ),
               ),
@@ -317,7 +318,7 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
               IconButton(
                 tooltip: s.checkinRemoverEsforco,
                 onPressed: () => setState(() => _useRpe = false),
-                icon: Icon(Icons.close_rounded, color: mute),
+                icon: Icon(FxIcons.fechar, color: mute),
               ),
             ],
           ),

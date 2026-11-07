@@ -10,6 +10,7 @@ import '../../../core/widgets/fx_toggle_chip.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../l10n/app_localizations.dart';
 import '../utils/checkin_execucao_display.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// RPE gravado (1 a 10) -> o botão rápido mais próximo (4, 6 ou 8).
 int? _rpeNoGrupo(int? rpe) {
@@ -163,13 +164,13 @@ class CheckinRestFocusView extends StatelessWidget {
                   children: [
                     FxTonalButton(
                       label: s.checkinDescansoMenos15,
-                      icon: Icons.remove_rounded,
+                      icon: FxIcons.remover,
                       compact: true,
                       onPressed: () => onAjustar!(-15),
                     ),
                     FxTonalButton(
                       label: s.checkinDescansoMais15,
-                      icon: Icons.add_rounded,
+                      icon: FxIcons.adicionar,
                       compact: true,
                       onPressed: () => onAjustar!(15),
                     ),
@@ -182,13 +183,13 @@ class CheckinRestFocusView extends StatelessWidget {
                 children: [
                   FxTonalButton(
                     label: s.checkinPularDescanso,
-                    icon: Icons.skip_next_rounded,
+                    icon: FxIcons.proximo,
                     onPressed: onSkip,
                   ),
                   if (onTrocar != null)
                     FxTonalButton(
                       label: s.checkinTrocar,
-                      icon: Icons.swap_horiz_rounded,
+                      icon: FxIcons.trocar,
                       onPressed: onTrocar,
                     ),
                 ],

@@ -19,6 +19,7 @@ import '../providers/ferramentas_catalogo_provider.dart';
 import '../utils/ferramentas_agrupar.dart';
 import '../widgets/ferramentas_help_sheet.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Tudo o que o plano oferece, agrupado por tarefa. Substitui o catálogo em sheet.
 class FerramentasScreen extends ConsumerStatefulWidget {
@@ -76,7 +77,7 @@ class _FerramentasScreenState extends ConsumerState<FerramentasScreen> {
                     hintText: s.ferramentasBuscar,
                     hintStyle: FocuxHubTypography.bodyMuted(color: chrome.mute),
                     prefixIcon: Icon(
-                      Icons.search_rounded,
+                      FxIcons.buscar,
                       color: chrome.mute,
                       size: FxSettingsLayout.iconSize,
                     ),

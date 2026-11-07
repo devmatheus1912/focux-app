@@ -254,7 +254,7 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                                   IconButton.outlined(
                                     tooltip: 'Importar vários',
                                     onPressed: _importarVarios,
-                                    icon: const Icon(Icons.upload_file_rounded),
+                                    icon: const Icon(FxIcons.enviarArquivo),
                                     style: IconButton.styleFrom(
                                       minimumSize: const Size(48, 48),
                                     ),

@@ -78,7 +78,7 @@ extension ConversationScreenSheetsActions on _ConversationScreenState {
                     const SizedBox(height: TokensStrip.s2),
                     ListTile(
                       contentPadding: EdgeInsets.zero,
-                      leading: Icon(Icons.reply_rounded, color: primary),
+                      leading: Icon(FxIcons.responder, color: primary),
                       title: const Text('Responder'),
                       onTap: () {
                         Navigator.pop(sheetContext);
@@ -90,7 +90,7 @@ extension ConversationScreenSheetsActions on _ConversationScreenState {
                     ListTile(
                       contentPadding: EdgeInsets.zero,
                       leading: Icon(
-                        Icons.content_copy_outlined,
+                        FxIcons.copiar,
                         color: primary,
                       ),
                       title: const Text('Copiar mensagem'),
@@ -108,7 +108,7 @@ extension ConversationScreenSheetsActions on _ConversationScreenState {
                   if (canEdit)
                     ListTile(
                       contentPadding: EdgeInsets.zero,
-                      leading: Icon(Icons.edit_outlined, color: primary),
+                      leading: Icon(FxIcons.editar, color: primary),
                       title: const Text('Editar mensagem'),
                       onTap: () {
                         Navigator.pop(sheetContext);
@@ -119,7 +119,7 @@ extension ConversationScreenSheetsActions on _ConversationScreenState {
                     ListTile(
                       contentPadding: EdgeInsets.zero,
                       leading: const Icon(
-                        Icons.delete_outline_rounded,
+                        FxIcons.excluir,
                         color: EagleTokens.bad,
                       ),
                       title: const Text('Apagar mensagem'),
@@ -132,7 +132,7 @@ extension ConversationScreenSheetsActions on _ConversationScreenState {
                     ListTile(
                       contentPadding: EdgeInsets.zero,
                       leading: const Icon(
-                        Icons.flag_outlined,
+                        FxIcons.meta,
                         color: EagleTokens.bad,
                       ),
                       title: Text(S.of(context).moderacaoDenunciarMensagem),
@@ -224,26 +224,26 @@ extension ConversationScreenSheetsActions on _ConversationScreenState {
                 SizedBox(height: TokensStrip.s4),
                 for (final (icone, rotulo, valor) in <(IconData, String, Object)>[
                   (
-                    Icons.photo_camera_outlined,
+                    FxIcons.camera,
                     'Tirar foto',
                     (ConversationMediaType.photo, ImageSource.camera),
                   ),
                   (
-                    Icons.videocam_outlined,
+                    FxIcons.video,
                     'Filmar',
                     (ConversationMediaType.video, ImageSource.camera),
                   ),
                   (
-                    Icons.photo_library_outlined,
+                    FxIcons.galeria,
                     'Foto da galeria',
                     (ConversationMediaType.photo, ImageSource.gallery),
                   ),
                   (
-                    Icons.video_library_outlined,
+                    FxIcons.videos,
                     'Vídeo da galeria',
                     (ConversationMediaType.video, ImageSource.gallery),
                   ),
-                  (Icons.mic_none_outlined, 'Gravar áudio', 'audio'),
+                  (FxIcons.microfone, 'Gravar áudio', 'audio'),
                 ]) ...[
                   ConversationAttachOption(
                     icon: icone,

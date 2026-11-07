@@ -43,6 +43,7 @@ import '../widgets/checkin_resumo_view.dart';
 import '../widgets/checkin_serie_detail_widgets.dart';
 import '../widgets/checkin_sessao_aberta_state.dart';
 import '../widgets/checkin_timer_widgets.dart';
+import '../../../core/theme/fx_icons.dart';
 
 part 'checkin_screen_carga.part.dart';
 part 'checkin_screen_corpo.part.dart';

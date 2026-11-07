@@ -5,6 +5,7 @@ import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_tonal_button.dart';
 
 import '../../support/dynamic_type_harness.dart';
+import 'package:focux_app/core/theme/fx_icons.dart';
 
 Widget _app(Widget child, {bool dark = false}) => MaterialApp(
   theme: ThemeData(
@@ -57,12 +58,12 @@ void main() {
       _app(
         FxTonalButton(
           label: 'Adicionar',
-          icon: Icons.add_rounded,
+          icon: FxIcons.adicionar,
           onPressed: () => n++,
         ),
       ),
     );
-    expect(find.byIcon(Icons.add_rounded), findsOneWidget);
+    expect(find.byIcon(FxIcons.adicionar), findsOneWidget);
     expect(
       tester.getSize(find.byType(InkWell)).height,
       greaterThanOrEqualTo(36),
@@ -108,7 +109,7 @@ void main() {
               FxActionLink(label: 'Ver todos os 6 sinais', onTap: () {}),
               FxTonalButton(
                 label: 'Montar ficha',
-                icon: Icons.add_rounded,
+                icon: FxIcons.adicionar,
                 onPressed: () {},
               ),
             ],

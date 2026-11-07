@@ -6,6 +6,7 @@ import '../../../core/widgets/fx_status_pill.dart';
 import '../../../core/widgets/fx_tap_row.dart';
 import '../../../l10n/app_localizations.dart';
 import '../utils/ficha_vigencia.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Texto e tom do selo da vigência: "Até 30/11", "Vence em 7 dias", "Vencida há 3 dias".
 ({String texto, FxPillTone tom}) rotuloDaVigencia(
@@ -61,7 +62,7 @@ class FichaVigenciaLinha extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           FxStatusPill(label: rotulo.texto, tone: rotulo.tom),
-          Icon(Icons.chevron_right_rounded, color: chrome.mute),
+          Icon(FxIcons.chevronDireita, color: chrome.mute),
         ],
       ),
       onTap: ocupado
@@ -83,27 +84,27 @@ Future<AcaoDaVigencia?> mostrarMenuDaVigencia(BuildContext context) {
       FxActionSheetItem(
         value: AcaoDaVigencia.renovar4,
         label: s.vigenciaRenovarSemanas(4),
-        icon: Icons.event_repeat_rounded,
+        icon: FxIcons.recorrencia,
       ),
       FxActionSheetItem(
         value: AcaoDaVigencia.renovar8,
         label: s.vigenciaRenovarSemanas(8),
-        icon: Icons.event_repeat_rounded,
+        icon: FxIcons.recorrencia,
       ),
       FxActionSheetItem(
         value: AcaoDaVigencia.renovar12,
         label: s.vigenciaRenovarSemanas(12),
-        icon: Icons.event_repeat_rounded,
+        icon: FxIcons.recorrencia,
       ),
       FxActionSheetItem(
         value: AcaoDaVigencia.escolherData,
         label: s.vigenciaEscolherData,
-        icon: Icons.calendar_month_rounded,
+        icon: FxIcons.calendario,
       ),
       FxActionSheetItem(
         value: AcaoDaVigencia.semPrazo,
         label: s.vigenciaSemPrazo,
-        icon: Icons.all_inclusive_rounded,
+        icon: FxIcons.infinito,
         destructive: true,
       ),
     ],

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../brand/focux_microcopy.dart';
 import '../theme/design_tokens.dart';
 import 'fx_shell_scaffold.dart';
+import '../theme/fx_icons.dart';
 
 /// Erro de um bloco secundário: a mensagem e "Tentar novamente" no próprio
 /// card, sem ocupar a tela como o [FxErrorState]. Sem [onRetry], só a
@@ -31,7 +32,7 @@ class FxInlineRetryTile extends StatelessWidget {
         margin: margin,
         onTap: onRetry,
         leading: const Icon(
-          Icons.cloud_off_rounded,
+          FxIcons.semConexao,
           color: EagleTokens.bad,
           size: 20,
         ),

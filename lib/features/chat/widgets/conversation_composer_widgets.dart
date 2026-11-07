@@ -8,6 +8,7 @@ import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../l10n/app_localizations.dart';
 import 'conversation_composer_acao.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class ConversationAttachOption extends StatelessWidget {
   final IconData icon;
@@ -117,7 +118,7 @@ class ConversationReplyComposerBar extends StatelessWidget {
           IconButton(
             tooltip: 'Fechar',
             onPressed: onClose,
-            icon: const Icon(Icons.close_rounded, size: 18),
+            icon: const Icon(FxIcons.fechar, size: 18),
             splashRadius: 18,
           ),
         ],
@@ -226,7 +227,7 @@ class ConversationRecordingComposerBar extends StatelessWidget {
             tooltip: 'Cancelar áudio',
             visualDensity: VisualDensity.standard,
             onPressed: onCancel,
-            icon: Icon(Icons.delete_outline_rounded, color: mute),
+            icon: Icon(FxIcons.excluir, color: mute),
             style: IconButton.styleFrom(
               minimumSize: const Size.square(kMinInteractiveDimension),
             ),
@@ -236,7 +237,7 @@ class ConversationRecordingComposerBar extends StatelessWidget {
             visualDensity: VisualDensity.standard,
             onPressed: onSend,
             icon: Icon(
-              Icons.arrow_upward_rounded,
+              FxIcons.setaCima,
               color: Theme.of(context).colorScheme.onPrimary,
             ),
             style: IconButton.styleFrom(
@@ -326,7 +327,7 @@ class ConversationMessageComposer extends StatelessWidget {
             IconButton.filledTonal(
               onPressed: uploading ? null : onAttach,
               tooltip: S.of(context).chatAnexar,
-              icon: const Icon(Icons.add_rounded),
+              icon: const Icon(FxIcons.adicionar),
               style: IconButton.styleFrom(
                 visualDensity: VisualDensity.standard,
                 minimumSize: const Size.square(kMinInteractiveDimension),
@@ -408,7 +409,7 @@ class ConversationMessageComposer extends StatelessWidget {
                           IconButton(
                             onPressed: onEmoji,
                             tooltip: S.of(context).chatEmoji,
-                            icon: const Icon(Icons.sentiment_satisfied_outlined),
+                            icon: const Icon(FxIcons.feliz),
                             color: mute,
                             style: IconButton.styleFrom(
                               visualDensity: VisualDensity.standard,
@@ -419,7 +420,7 @@ class ConversationMessageComposer extends StatelessWidget {
                           ),
                           if (composerHasText)
                             ConversationComposerAcao(
-                              icon: Icons.arrow_upward_rounded,
+                              icon: FxIcons.setaCima,
                               label: s.chatEnviarMensagem,
                               color: primary,
                               onPressed: uploading ? null : onSendText,
@@ -428,8 +429,8 @@ class ConversationMessageComposer extends StatelessWidget {
                             ConversationComposerAcao(
                               icon:
                                   recordingAudio
-                                      ? Icons.stop_rounded
-                                      : Icons.mic_rounded,
+                                      ? FxIcons.parar
+                                      : FxIcons.microfone,
                               label:
                                   recordingAudio
                                       ? s.chatEnviarAudio

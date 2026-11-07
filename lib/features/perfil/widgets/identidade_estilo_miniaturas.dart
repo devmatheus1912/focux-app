@@ -8,6 +8,7 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../utils/identidade_visual_display.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Três miniaturas do card principal, uma por estilo: o personal vê a
 /// diferença em vez de ler uma descrição. A escolhida ganha contorno e marca.
@@ -109,7 +110,7 @@ class _Miniatura extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   if (selecionado) ...[
-                    Icon(Icons.check_circle_rounded, size: 14, color: primaria),
+                    Icon(FxIcons.concluidoAtivo, size: 14, color: primaria),
                     const SizedBox(width: 4),
                   ],
                   Flexible(

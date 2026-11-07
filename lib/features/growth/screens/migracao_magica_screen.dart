@@ -56,6 +56,7 @@ import '../utils/migracao_ocr_service.dart';
 import '../utils/migracao_texto_normalizer.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 part 'migracao_magica_screen_actions.part.dart';
 part 'migracao_magica_screen_state.part.dart';

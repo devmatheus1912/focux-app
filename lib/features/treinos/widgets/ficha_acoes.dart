@@ -7,6 +7,7 @@ import '../../alunos/data/aluno_repository.dart';
 import '../models/ficha_modelo.dart';
 import 'aplicar_em_alunos_folha.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 enum FichaAcao {
   mudarDivisao,
@@ -44,37 +45,37 @@ Future<FichaAcao?> mostrarMenuDaFicha(BuildContext context) {
       FxActionSheetItem(
         value: FichaAcao.mudarDivisao,
         label: s.rotinaMudarDivisao,
-        icon: Icons.view_week_outlined,
+        icon: FxIcons.semana,
       ),
       FxActionSheetItem(
         value: FichaAcao.aplicarModelo,
         label: s.rotinaAplicarModelo,
-        icon: Icons.view_week_rounded,
+        icon: FxIcons.semana,
       ),
       FxActionSheetItem(
         value: FichaAcao.salvarModelo,
         label: s.rotinaSalvarModelo,
-        icon: Icons.bookmark_add_outlined,
+        icon: FxIcons.salvar,
       ),
       FxActionSheetItem(
         value: FichaAcao.duplicarBase,
         label: s.rotinaDuplicarBase,
-        icon: Icons.copy_all_rounded,
+        icon: FxIcons.copiar,
       ),
       FxActionSheetItem(
         value: FichaAcao.usarEmOutro,
         label: s.rotinaUsarEmOutro,
-        icon: Icons.people_alt_outlined,
+        icon: FxIcons.grupo,
       ),
       FxActionSheetItem(
         value: FichaAcao.fichasAnteriores,
         label: s.historicoMenu,
-        icon: Icons.history_rounded,
+        icon: FxIcons.historico,
       ),
       FxActionSheetItem(
         value: FichaAcao.recomecar,
         label: s.rotinaRecomecar,
-        icon: Icons.restart_alt_rounded,
+        icon: FxIcons.recomecar,
         destructive: true,
       ),
     ],
@@ -94,29 +95,29 @@ Future<ModeloAcao?> mostrarMenuDoModelo(
       FxActionSheetItem(
         value: ModeloAcao.aplicar,
         label: s.modeloAplicarEmAluno,
-        icon: Icons.person_add_alt_1_rounded,
+        icon: FxIcons.adicionarPessoa,
       ),
       FxActionSheetItem(
         value: ModeloAcao.renomear,
         label: s.modeloRenomear,
-        icon: Icons.edit_outlined,
+        icon: FxIcons.editar,
       ),
       if (comRecomecar)
         FxActionSheetItem(
           value: ModeloAcao.mudarDivisao,
           label: s.rotinaMudarDivisao,
-          icon: Icons.view_week_outlined,
+          icon: FxIcons.semana,
         ),
       if (comRecomecar)
         FxActionSheetItem(
           value: ModeloAcao.recomecar,
           label: s.modeloRecomecar,
-          icon: Icons.restart_alt_rounded,
+          icon: FxIcons.recomecar,
         ),
       FxActionSheetItem(
         value: ModeloAcao.excluir,
         label: s.modeloExcluir,
-        icon: Icons.delete_outline_rounded,
+        icon: FxIcons.excluir,
         destructive: true,
       ),
     ],
@@ -136,29 +137,29 @@ Future<SessaoAcao?> mostrarMenuDaSessao(
       FxActionSheetItem(
         value: SessaoAcao.maisUm,
         label: s.rotinaMaisUmNesteDia,
-        icon: Icons.add_rounded,
+        icon: FxIcons.adicionar,
       ),
       if (podeCopiar)
         FxActionSheetItem(
           value: SessaoAcao.renomear,
           label: s.treinoRenomear,
-          icon: Icons.edit_outlined,
+          icon: FxIcons.editar,
         ),
       FxActionSheetItem(
         value: SessaoAcao.mover,
         label: s.rotinaMoverDia,
-        icon: Icons.swap_horiz_rounded,
+        icon: FxIcons.trocar,
       ),
       if (podeCopiar)
         FxActionSheetItem(
           value: SessaoAcao.copiar,
           label: s.rotinaCopiarDia,
-          icon: Icons.copy_rounded,
+          icon: FxIcons.copiar,
         ),
       FxActionSheetItem(
         value: SessaoAcao.descanso,
         label: s.rotinaMarcarDescanso,
-        icon: Icons.bedtime_outlined,
+        icon: FxIcons.sono,
         destructive: true,
       ),
     ],
@@ -180,18 +181,18 @@ Future<DiaAcao?> mostrarMenuDoDia(
         FxActionSheetItem(
           value: DiaAcao.treinar,
           label: s.rotinaTreinarNesteDia,
-          icon: Icons.repeat_rounded,
+          icon: FxIcons.repetir,
         ),
       FxActionSheetItem(
         value: DiaAcao.adicionar,
         label: segue ? s.rotinaAdicionarTreinoAqui : s.rotinaAdicionarTreino,
-        icon: Icons.add_rounded,
+        icon: FxIcons.adicionar,
       ),
       if (segue)
         FxActionSheetItem(
           value: DiaAcao.descanso,
           label: s.rotinaMarcarDescanso,
-          icon: Icons.bedtime_outlined,
+          icon: FxIcons.sono,
         ),
     ],
   );
@@ -210,7 +211,7 @@ Future<int?> escolherDia(BuildContext context, {int? excluir}) {
           FxActionSheetItem(
             value: dia,
             label: nomes[dia - 1],
-            icon: Icons.calendar_today_rounded,
+            icon: FxIcons.calendario,
           ),
     ],
   );
@@ -226,12 +227,12 @@ Future<bool?> escolherCargas(BuildContext context) {
       FxActionSheetItem(
         value: true,
         label: s.rotinaManterCargas,
-        icon: Icons.fitness_center_rounded,
+        icon: FxIcons.treino,
       ),
       FxActionSheetItem(
         value: false,
         label: s.rotinaCargasZero,
-        icon: Icons.restart_alt_rounded,
+        icon: FxIcons.recomecar,
       ),
     ],
   );
@@ -329,7 +330,7 @@ Future<FichaModelo?> escolherModelo(
         FxActionSheetItem(
           value: modelo.id,
           label: modelo.nome,
-          icon: Icons.view_week_rounded,
+          icon: FxIcons.semana,
         ),
     ],
   );

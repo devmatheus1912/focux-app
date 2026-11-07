@@ -21,6 +21,7 @@ import '../providers/ferramentas_catalogo_provider.dart';
 import '../utils/ferramentas_gates.dart';
 import '../utils/ferramentas_tab_screens.dart';
 import '../widgets/hub_embed_scope.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Hub com tabs → telas existentes (Captação / Vendas / Financeiro).
 class FerramentasHubScreen extends ConsumerStatefulWidget {
@@ -229,7 +230,7 @@ class _FerramentasHubScreenState extends ConsumerState<FerramentasHubScreen>
                                         Text(_hubTabLabel(aba)),
                                         const SizedBox(width: 4),
                                         const Icon(
-                                          Icons.lock_rounded,
+                                          FxIcons.cadeadoPequeno,
                                           size: 13,
                                           semanticLabel: 'Bloqueado no plano',
                                         ),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../theme/focux_hub_typography.dart';
 import '../theme/shell_chrome.dart';
 import '../theme/tokens_strip.dart';
+import '../theme/fx_icons.dart';
 
 /// Uma série na linha de bolinhas: [detalhe] ("40 kg × 10") só nas já feitas.
 class FxSetDot {
@@ -108,7 +109,7 @@ class _Dot extends StatelessWidget {
                 child:
                     feita
                         ? const Icon(
-                          Icons.check_rounded,
+                          FxIcons.checkPequeno,
                           key: ValueKey('feita'),
                           size: 16,
                           color: Colors.white,

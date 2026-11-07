@@ -32,6 +32,7 @@ import '../utils/financeiro_numeros.dart';
 import '../utils/mensalidade_surface_actions.dart';
 import '../widgets/financeiro_mensalidade_help_sheet.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class FinanceiroMensalidadeDetailScreen extends ConsumerStatefulWidget {
   const FinanceiroMensalidadeDetailScreen({
@@ -216,13 +217,13 @@ class _FinanceiroMensalidadeDetailScreenState
           value: _ViaCobranca.chat,
           label: s.financeiroCobrarChat,
           subtitle: s.financeiroCobrarChatDetalhe,
-          icon: Icons.chat_bubble_outline_rounded,
+          icon: FxIcons.chat,
         ),
         FxInsetPickerSheetItem(
           value: _ViaCobranca.pix,
           label: s.financeiroCobrarPix,
           subtitle: s.financeiroCobrarPixDetalhe,
-          icon: Icons.qr_code_2_rounded,
+          icon: FxIcons.qrCode,
         ),
       ],
     );

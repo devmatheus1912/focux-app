@@ -21,6 +21,7 @@ import '../../exercicios/data/exercicio_taxonomy_labels.dart';
 import '../../exercicios/data/exercise_enum_api.dart';
 import '../../exercicios/providers/exercicios_provider.dart';
 import '../../treinos/widgets/exercise_group_chips.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// `id` nulo: texto livre, fora da biblioteca.
 typedef ExercicioEscolhido = ({int? id, String nome});
@@ -70,7 +71,7 @@ class EscolherExercicioCampo extends StatelessWidget {
             constraints: const BoxConstraints(minHeight: 48),
             child: Row(
               children: [
-                Icon(Icons.fitness_center_outlined, color: chrome.mute),
+                Icon(FxIcons.treino, color: chrome.mute),
                 const SizedBox(width: TokensStrip.s2),
                 Expanded(
                   child: Text(
@@ -80,7 +81,7 @@ class EscolherExercicioCampo extends StatelessWidget {
                     ),
                   ),
                 ),
-                Icon(Icons.chevron_right_rounded, color: chrome.mute),
+                Icon(FxIcons.chevronDireita, color: chrome.mute),
               ],
             ),
           ),
@@ -262,7 +263,7 @@ class _BuscaExercicioState extends ConsumerState<BuscaExercicio> {
                   ],
                 ),
               ),
-              Icon(Icons.chevron_right_rounded, color: chrome.mute),
+              Icon(FxIcons.chevronDireita, color: chrome.mute),
             ],
           ),
         ),

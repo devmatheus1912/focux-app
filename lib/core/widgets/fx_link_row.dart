@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../theme/focux_hub_typography.dart';
 import '../theme/shell_chrome.dart';
 import '../theme/tokens_strip.dart';
+import '../theme/fx_icons.dart';
 
 /// Linha inteira tocável para "ver mais" / "abrir": fundo de cartão, ícone
 /// opcional, rótulo e seta. É a forma padrão de navegação que antes era um
@@ -78,7 +79,7 @@ class FxLinkRow extends StatelessWidget {
                     ),
                   ],
                   const SizedBox(width: TokensStrip.s1),
-                  Icon(Icons.chevron_right_rounded, color: chrome.mute),
+                  Icon(FxIcons.chevronDireita, color: chrome.mute),
                 ],
               ),
             ),

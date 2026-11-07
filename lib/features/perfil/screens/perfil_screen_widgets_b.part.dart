@@ -62,7 +62,7 @@ class _Avatar extends StatelessWidget {
                             color: primaryColor,
                           ),
                         )
-                        : Icon(Icons.edit, size: 14, color: primaryColor),
+                        : Icon(FxIcons.editarPequeno, size: 14, color: primaryColor),
               ),
             ),
           ],

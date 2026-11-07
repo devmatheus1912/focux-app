@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
+import '../theme/design_tokens.dart';
 import '../theme/focux_hub_typography.dart';
 import '../theme/shell_chrome.dart';
 import '../utils/motion_preferences.dart';
@@ -26,7 +27,11 @@ class FxGraficoLinha extends StatelessWidget {
     this.tendencia = const [],
     this.alvo,
     this.altura = 200,
+    this.suspeitos = const {},
   });
+
+  /// Índices dos pontos que pedem "Confira": círculo vazado em âmbar.
+  final Set<int> suspeitos;
 
   final List<PontoGrafico> pontos;
   final String unidade;
@@ -94,6 +99,11 @@ class FxGraficoLinha extends StatelessWidget {
     final maxX = _x(pontos.length - 1);
     final temTendencia = tendencia.length == pontos.length;
     final estiloEixo = FocuxHubTypography.chip(chrome.mute);
+    final alerta = chrome.isDark ? EagleTokens.warnDark : EagleTokens.warn;
+    // Com menos de duas marcas no meio, as pontas também ganham rótulo: um
+    // "100" sozinho não diz a escala.
+    final marcasNoMeio = ((maxY - minY) / eixo.passo).round() - 1;
+    final rotularPontas = marcasNoMeio < 2;
 
     final registros = LineChartBarData(
       spots: [
@@ -106,11 +116,19 @@ class FxGraficoLinha extends StatelessWidget {
       isStrokeCapRound: true,
       dotData: FlDotData(
         getDotPainter:
-            (_, __, ___, ____) => FlDotCirclePainter(
-              radius: temTendencia ? 2.5 : 3.5,
-              color: temTendencia ? primary.withValues(alpha: 0.4) : primary,
-              strokeWidth: 0,
-            ),
+            (_, __, ___, i) =>
+                suspeitos.contains(i)
+                    ? FlDotCirclePainter(
+                      radius: 4.5,
+                      color: Theme.of(context).colorScheme.surface,
+                      strokeWidth: 2,
+                      strokeColor: alerta,
+                    )
+                    : FlDotCirclePainter(
+                      radius: temTendencia ? 2.5 : 3.5,
+                      color: temTendencia ? primary.withValues(alpha: 0.4) : primary,
+                      strokeWidth: 0,
+                    ),
       ),
       belowBarData: BarAreaData(
         show: !temTendencia,
@@ -174,7 +192,7 @@ class FxGraficoLinha extends StatelessWidget {
                   interval: eixo.passo,
                   getTitlesWidget:
                       (valor, meta) =>
-                          valor == meta.min || valor == meta.max
+                          !rotularPontas && (valor == meta.min || valor == meta.max)
                               ? const SizedBox.shrink()
                               : Text(
                                 formatBrDecimal(valor, digits: casasDoEixo),
@@ -212,7 +230,8 @@ class FxGraficoLinha extends StatelessWidget {
                         spot.barIndex == 0
                             ? LineTooltipItem(
                               '${formatBrDecimal(pontos[spot.spotIndex].valor)} $unidade\n'
-                              '${_data(pontos[spot.spotIndex].data)}',
+                              '${_data(pontos[spot.spotIndex].data)}'
+                              '${suspeitos.contains(spot.spotIndex) ? '\n${ptS.comparacaoConfira}' : ''}',
                               FocuxHubTypography.chip(
                                 Theme.of(context).colorScheme.surface,
                               ),

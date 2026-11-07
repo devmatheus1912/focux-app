@@ -7,6 +7,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../utils/ia_copiloto_display.dart';
 import '../../../core/utils/pt_br_display.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Chip sticky S1 após gerar — paridade [DashboardPrioritiesOverlay].
 /// Overlay flutuante (não barra `bottomNavigationBar` / S3–S5).
@@ -50,7 +51,7 @@ class IaCopilotResultActionBar extends StatelessWidget {
             ),
             IconButton(
               tooltip: S.of(context).copilotoMenuTitulo,
-              icon: Icon(Icons.more_horiz_rounded, color: brand),
+              icon: Icon(FxIcons.mais, color: brand),
               onPressed: onMore,
             ),
           ],
@@ -90,7 +91,7 @@ class IaCopilotGenerationStatus extends StatelessWidget {
       return Row(
         children: [
           const Icon(
-            Icons.check_circle_rounded,
+            FxIcons.concluidoAtivo,
             color: EagleTokens.copilotSuccess,
             size: 16,
           ),

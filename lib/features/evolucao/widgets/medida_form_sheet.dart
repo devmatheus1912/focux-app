@@ -13,12 +13,15 @@ import '../../../l10n/pt.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../data/evolucao_repository.dart';
 import '../utils/evolucao_series.dart';
+import '../../../core/theme/fx_icons.dart';
 
 typedef MedidaEditada = ({
   double? peso,
   double? cintura,
   double? quadril,
   double? braco,
+  double? gordura,
+  double? massa,
 });
 
 typedef NovaMedida = ({
@@ -42,6 +45,7 @@ const _teclado = TextInputType.numberWithOptions(decimal: true);
 Future<AcaoDaMedida?> escolherAcaoDaMedida(
   BuildContext context, {
   required bool podeEditar,
+  bool podeExcluir = true,
 }) => showFxGroupedActionSheet<AcaoDaMedida>(
   context,
   titulo: ptS.evolucaoMedidaAcoes,
@@ -51,12 +55,13 @@ Future<AcaoDaMedida?> escolherAcaoDaMedida(
         FxActionItem(
           valor: AcaoDaMedida.editar,
           rotulo: ptS.evolucaoMedidaEditar,
-          icone: Icons.edit_outlined,
+          icone: FxIcons.editar,
         ),
-      FxActionItem(
+      if (podeExcluir)
+        FxActionItem(
         valor: AcaoDaMedida.excluir,
         rotulo: ptS.evolucaoMedidaExcluir,
-        icone: Icons.delete_outline_rounded,
+        icone: FxIcons.excluir,
         perigo: true,
       ),
     ]),
@@ -72,7 +77,12 @@ class _Campos extends StatelessWidget {
     this.gordura,
     this.massa,
     this.referencia = const {},
+    this.semMedida = false,
   });
+
+  /// Só a composição da avaliação (não há medida na data): esconde peso e
+  /// circunferências.
+  final bool semMedida;
 
   final TextEditingController peso;
   final TextEditingController cintura;
@@ -121,20 +131,22 @@ class _Campos extends StatelessWidget {
         ptS.evolucaoFormDica,
         style: FocuxHubTypography.bodyMuted(color: ShellChrome.of(context).mute),
       ),
-      _campo(peso, ptS.evolucaoCampoPeso, Icons.monitor_weight_outlined, metrica: EvolucaoMetrica.peso),
-      _campo(cintura, ptS.evolucaoCampoCintura, Icons.straighten_outlined, metrica: EvolucaoMetrica.cintura),
-      _campo(quadril, ptS.evolucaoCampoQuadril, Icons.straighten_outlined, metrica: EvolucaoMetrica.quadril),
-      _campo(
-        braco,
-        ptS.evolucaoCampoBraco,
-        Icons.straighten_outlined,
-        metrica: EvolucaoMetrica.braco,
-        divisor: gordura != null,
-      ),
+      if (!semMedida) ...[
+        _campo(peso, ptS.evolucaoCampoPeso, FxIcons.balanca, metrica: EvolucaoMetrica.peso),
+        _campo(cintura, ptS.evolucaoCampoCintura, FxIcons.fitaMetrica, metrica: EvolucaoMetrica.cintura),
+        _campo(quadril, ptS.evolucaoCampoQuadril, FxIcons.fitaMetrica, metrica: EvolucaoMetrica.quadril),
+        _campo(
+          braco,
+          ptS.evolucaoCampoBraco,
+          FxIcons.fitaMetrica,
+          metrica: EvolucaoMetrica.braco,
+          divisor: gordura != null,
+        ),
+      ],
       if (gordura case final g?)
-        _campo(g, ptS.evolucaoCampoGordura, Icons.pie_chart_outline_outlined),
+        _campo(g, ptS.evolucaoCampoGordura, FxIcons.pizza),
       if (massa case final m?)
-        _campo(m, ptS.evolucaoCampoMassa, Icons.fitness_center_outlined, divisor: false),
+        _campo(m, ptS.evolucaoCampoMassa, FxIcons.treino, divisor: false),
     ],
   );
 }
@@ -233,7 +245,7 @@ Future<NovaMedida?> novaMedidaSheet(
     final ok = await showFxFormSheet(
       context,
       title: ptS.evolucaoNovaMedida,
-      icon: Icons.monitor_weight_outlined,
+      icon: FxIcons.balanca,
       confirmLabel: ptS.evolucaoSalvar,
       child: StatefulBuilder(
         builder:
@@ -295,20 +307,33 @@ Future<NovaMedida?> novaMedidaSheet(
 /// Corrige uma medida. Nulo se a pessoa cancelar.
 Future<MedidaEditada?> editarMedidaSheet(
   BuildContext context,
-  MedidaCorporal medida,
-) async {
+  MedidaCorporal? medida, {
+  double? gordura,
+  double? massa,
+  bool comComposicao = false,
+}) async {
   String texto(double? v) => v == null ? '' : formatBrDecimal(v);
-  final peso = TextEditingController(text: texto(medida.peso));
-  final cintura = TextEditingController(text: texto(medida.cintura));
-  final quadril = TextEditingController(text: texto(medida.quadril));
-  final braco = TextEditingController(text: texto(medida.braco));
+  final peso = TextEditingController(text: texto(medida?.peso));
+  final cintura = TextEditingController(text: texto(medida?.cintura));
+  final quadril = TextEditingController(text: texto(medida?.quadril));
+  final braco = TextEditingController(text: texto(medida?.braco));
+  final gorduraCtrl = TextEditingController(text: texto(gordura));
+  final massaCtrl = TextEditingController(text: texto(massa));
   try {
     final ok = await showFxFormSheet(
       context,
       title: ptS.evolucaoMedidaEditar,
-      icon: Icons.edit_outlined,
+      icon: FxIcons.editar,
       confirmLabel: ptS.evolucaoSalvar,
-      child: _Campos(peso: peso, cintura: cintura, quadril: quadril, braco: braco),
+      child: _Campos(
+        peso: peso,
+        cintura: cintura,
+        quadril: quadril,
+        braco: braco,
+        semMedida: medida == null,
+        gordura: comComposicao ? gorduraCtrl : null,
+        massa: comComposicao ? massaCtrl : null,
+      ),
     );
     if (!ok) return null;
     return (
@@ -316,11 +341,12 @@ Future<MedidaEditada?> editarMedidaSheet(
       cintura: _ler(cintura),
       quadril: _ler(quadril),
       braco: _ler(braco),
+      gordura: _ler(gorduraCtrl),
+      massa: _ler(massaCtrl),
     );
   } finally {
-    peso.dispose();
-    cintura.dispose();
-    quadril.dispose();
-    braco.dispose();
+    for (final c in [peso, cintura, quadril, braco, gorduraCtrl, massaCtrl]) {
+      c.dispose();
+    }
   }
 }

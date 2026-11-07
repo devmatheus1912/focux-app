@@ -13,6 +13,7 @@ import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../l10n/app_localizations.dart';
 import '../data/perfil_repository.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Texto pronto para o aluno: código, link e o que fazer.
 String perfilCodigoMensagem(S s, {required String codigo, required String link}) =>
@@ -31,7 +32,7 @@ Future<void> showPerfilCodigoSheet(
     builder:
         (ctx) => FxHomeSheetScaffold(
           isDark: isDark,
-          leading: Icon(Icons.key_outlined, color: primary, size: 22),
+          leading: Icon(FxIcons.chave, color: primary, size: 22),
           title: s.perfilCodigoTitulo,
           subtitle: s.perfilCodigoSubtitulo,
           child: _PerfilCodigoBody(perfil: perfil, parent: context),

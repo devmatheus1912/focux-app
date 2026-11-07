@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/checkin/utils/checkin_video_badge.dart';
+import 'package:focux_app/core/theme/fx_icons.dart';
 
 void main() {
   group('CheckinVideoBadge', () {
@@ -15,7 +15,7 @@ void main() {
       );
       expect(
         CheckinVideoBadge.icon(videoSource: 'PERSONAL_UPLOAD'),
-        Icons.person_rounded,
+        FxIcons.pessoa,
       );
 
       expect(CheckinVideoBadge.label(videoSource: 'FOCUX_LIBRARY'), isNull);

@@ -40,6 +40,7 @@ import '../../../core/widgets/fx_action_chip.dart';
 
 import '../../../core/widgets/fx_video_em_breve.dart';
 import '../../../l10n/pt.dart';
+import '../../../core/theme/fx_icons.dart';
 
 part 'exercicio_detail_screen_state.part.dart';
 part 'exercicio_detail_screen_widgets.part.dart';

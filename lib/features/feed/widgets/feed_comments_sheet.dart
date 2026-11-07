@@ -13,6 +13,7 @@ import 'package:focux_app/core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 enum _AcaoComentario { apagar, denunciar, bloquear }
 
@@ -128,7 +129,7 @@ class _FeedCommentsSheetState extends State<FeedCommentsSheet> {
       message: mensagem,
       confirmLabel: titulo,
       destructive: true,
-      icon: Icons.flag_outlined,
+      icon: FxIcons.meta,
     );
     if (!ok || !mounted) return;
     try {
@@ -168,7 +169,7 @@ class _FeedCommentsSheetState extends State<FeedCommentsSheet> {
     final l10n = S.of(context);
     return PopupMenuButton<_AcaoComentario>(
       tooltip: l10n.feedComentarioOpcoes,
-      icon: Icon(Icons.more_vert_rounded, size: 18, color: mute),
+      icon: Icon(FxIcons.maisVertical, size: 18, color: mute),
       padding: EdgeInsets.zero,
       onSelected: (a) => _executar(a, c),
       itemBuilder: (_) => [
@@ -206,7 +207,7 @@ class _FeedCommentsSheetState extends State<FeedCommentsSheet> {
             isDark: isDark,
             title: 'Comentários',
             leading: Icon(
-              Icons.chat_bubble_outline_rounded,
+              FxIcons.chat,
               color: primary,
               size: 18,
             ),
@@ -369,7 +370,7 @@ class _FeedCommentsSheetState extends State<FeedCommentsSheet> {
                               color: EagleTokens.darkInk,
                             ),
                           )
-                          : const Icon(Icons.send),
+                          : const Icon(FxIcons.enviar),
                 ),
               ],
             ),

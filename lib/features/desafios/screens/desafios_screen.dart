@@ -34,6 +34,7 @@ import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../data/desafio_repository.dart';
 import '../utils/desafio_display.dart';
+import '../../../core/theme/fx_icons.dart';
 
 part 'desafios_screen_form.part.dart';
 
@@ -273,7 +274,7 @@ class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
                   onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
                   decoration: InputDecoration(
                     hintText: 'Buscar desafio',
-                    prefixIcon: const Icon(Icons.search_rounded),
+                    prefixIcon: const Icon(FxIcons.buscar),
                     border: FxInputDeco.outlineBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),

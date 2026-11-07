@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../utils/alerta_detalhe_display.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Confirma o texto antes de POST `/api/alertas/aluno/{id}/mensagem-chat`.
 Future<String?> showAlertaEnviarMensagemSheet(
@@ -15,7 +16,7 @@ Future<String?> showAlertaEnviarMensagemSheet(
       context,
       title: 'Enviar mensagem',
       subtitle: 'Revise antes de mandar. A sugestão não envia sozinha.',
-      icon: Icons.send_rounded,
+      icon: FxIcons.enviar,
       confirmLabel: alertaEnviarMensagemCtaLabel(),
       child: TextField(
         controller: ctrl,

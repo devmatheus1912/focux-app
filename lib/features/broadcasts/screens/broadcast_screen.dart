@@ -31,6 +31,7 @@ import '../data/broadcast_repository.dart';
 import '../utils/broadcast_display.dart';
 import 'widgets/broadcast_historico.dart';
 import '../../../l10n/pt.dart';
+import '../../../core/theme/fx_icons.dart';
 
 final _broadcastRepositoryProvider = Provider<BroadcastRepository>(
   (ref) => BroadcastRepository(ref.read(apiClientProvider)),
@@ -148,7 +149,7 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
         total: alcance?.total,
         comPush: alcance?.comPush,
       ),
-      icon: Icons.send_rounded,
+      icon: FxIcons.enviar,
       confirmLabel: broadcastConfirmLabel(),
     );
     if (!ok || !mounted) return;
@@ -283,7 +284,7 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
                         controller: _tituloCtrl,
                         label: ptS.agendaTituloGrupo,
                         hint: ptS.broadcastExLembreteDeTreino,
-                        icon: Icons.title_outlined,
+                        icon: FxIcons.titulo,
                         textCapitalization: TextCapitalization.sentences,
                         inputFormatters: [
                           LengthLimitingTextInputFormatter(100),
@@ -298,7 +299,7 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
                         controller: _mensagemCtrl,
                         label: ptS.copilotoMensagemCampo,
                         hint: ptS.broadcastOQueOsAlunosVao,
-                        icon: Icons.notes_outlined,
+                        icon: FxIcons.notas,
                         maxLines: 4,
                         textCapitalization: TextCapitalization.sentences,
                         inputFormatters: [
@@ -401,7 +402,7 @@ class _PreviaNotificacao extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.notifications_none_rounded, size: 20, color: chrome.brand),
+          Icon(FxIcons.notificacao, size: 20, color: chrome.brand),
           const SizedBox(width: TokensStrip.s2),
           Expanded(
             child: Column(

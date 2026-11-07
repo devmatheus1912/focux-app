@@ -27,6 +27,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/subscription/models/subscription_plan.dart';
 import '../data/habito_repository.dart';
 import '../utils/habitos_display.dart';
+import '../../../core/theme/fx_icons.dart';
 
 final _repoProvider = Provider(
   (ref) => HabitoRepository(ref.read(apiClientProvider)),
@@ -254,7 +255,7 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
                                 FxKeyboardDismissScope.dismiss(),
                             decoration: InputDecoration(
                               hintText: 'Buscar hábito',
-                              prefixIcon: const Icon(Icons.search_rounded),
+                              prefixIcon: const Icon(FxIcons.buscar),
                               border: FxInputDeco.outlineBorder(
                                 borderRadius: BorderRadius.circular(16),
                               ),

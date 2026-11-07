@@ -8,6 +8,7 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../constants/alunos_layout.dart';
 import '../data/aluno_contact_utils.dart';
 import '../providers/aluno_followup_provider.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class AlunoListOutreachActions extends ConsumerWidget {
   const AlunoListOutreachActions({
@@ -39,7 +40,7 @@ class AlunoListOutreachActions extends ConsumerWidget {
     final primaryContact = hasWhatsapp
         ? _AlunoQuickActionIcon(
           compact: compact,
-          icon: Icons.chat_rounded,
+          icon: FxIcons.chat,
           tooltip: 'WhatsApp',
           color: action,
           onTap:
@@ -52,7 +53,7 @@ class AlunoListOutreachActions extends ConsumerWidget {
         )
         : _AlunoQuickActionIcon(
           compact: compact,
-          icon: Icons.forum_outlined,
+          icon: FxIcons.conversas,
           tooltip: 'Chat in-app',
           color: action,
           onTap:
@@ -67,7 +68,7 @@ class AlunoListOutreachActions extends ConsumerWidget {
           const SizedBox(width: 3),
           _AlunoQuickActionIcon(
             compact: compact,
-            icon: Icons.forum_outlined,
+            icon: FxIcons.conversas,
             tooltip: 'Chat in-app',
             color: action,
             onTap:
@@ -78,7 +79,7 @@ class AlunoListOutreachActions extends ConsumerWidget {
           const SizedBox(width: 3),
           _AlunoQuickActionIcon(
             compact: compact,
-            icon: Icons.snooze_rounded,
+            icon: FxIcons.adiar,
             tooltip: 'Adiar 24h',
             color: mute,
             onTap: () async {
@@ -92,7 +93,7 @@ class AlunoListOutreachActions extends ConsumerWidget {
         const SizedBox(width: 3),
         _AlunoQuickActionIcon(
           compact: compact,
-          icon: Icons.check_circle_outline_rounded,
+          icon: FxIcons.concluido,
           tooltip: 'Contato feito',
           color: action,
           onTap: () async {
@@ -131,7 +132,7 @@ class AlunoChatQuickButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return _AlunoQuickActionIcon(
       compact: compact,
-      icon: Icons.forum_outlined,
+      icon: FxIcons.conversas,
       tooltip: 'Conversar com $displayName',
       color: BrandPalette.sectionAction(primary, dark: isDark),
       onTap: () => context.push('/alunos/$alunoId/chat', extra: displayName),

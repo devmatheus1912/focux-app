@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../data/aluno_repository.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Status do cadastro no backend. INATIVO = pausado (mantém acesso);
 /// BLOQUEADO = pausado e sem acesso ao app.
@@ -44,9 +45,9 @@ List<String> alunoStatusAcoesDisponiveis(String statusAtual) =>
 IconData alunoStatusIcon(String status) => switch (alunoStatusNormalizado(
   status,
 )) {
-  AlunoStatus.inativo => Icons.pause_circle_outline_rounded,
-  AlunoStatus.bloqueado => Icons.block_rounded,
-  _ => Icons.check_circle_outline_rounded,
+  AlunoStatus.inativo => FxIcons.pausarCirculo,
+  AlunoStatus.bloqueado => FxIcons.bloquear,
+  _ => FxIcons.concluido,
 };
 
 String alunoStatusAcaoLabel(String novoStatus) =>

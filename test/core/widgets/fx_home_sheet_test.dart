@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/widgets/fx_home_sheet.dart';
+import 'package:focux_app/core/theme/fx_icons.dart';
 
 void main() {
   testWidgets('showFxHomeSheet usa card flutuante e fecha no X', (
@@ -29,7 +30,7 @@ void main() {
                                     title: 'Todas as prioridades',
                                     subtitle:
                                         'Extra além do que já está na Home.',
-                                    leading: const Icon(Icons.flag_outlined),
+                                    leading: const Icon(FxIcons.meta),
                                   ),
                                 ],
                               ),
@@ -110,7 +111,7 @@ void main() {
                                 isDark: false,
                                 title: 'Ações',
                                 subtitle: 'Status, pagamento ou exclusão.',
-                                leading: const Icon(Icons.checklist_rounded),
+                                leading: const Icon(FxIcons.checklist),
                                 child: const Text('Item curto'),
                               ),
                         ),

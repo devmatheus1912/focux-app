@@ -8,6 +8,7 @@ import '../../../core/widgets/fx_sheet_frame.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../services/biometria_login.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Pergunta, depois de um login com senha, se o aluno ou personal quer entrar
 /// com biometria nas próximas vezes. `true` ativa; `false` ou fechar adia.
@@ -34,8 +35,8 @@ class _AuthBiometriaSheet extends StatelessWidget {
       subtitle: 'Nas próximas vezes, um toque e pronto.',
       leading: Icon(
         tipo == BiometriaTipo.faceId
-            ? Icons.face_unlock_outlined
-            : Icons.fingerprint_rounded,
+            ? FxIcons.rosto
+            : FxIcons.digital,
         color: Theme.of(context).colorScheme.primary,
         size: 22,
       ),

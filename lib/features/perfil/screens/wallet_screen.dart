@@ -33,6 +33,7 @@ import '../data/perfil_repository.dart';
 import '../providers/perfil_provider.dart';
 import '../utils/wallet_pix_validation.dart';
 import '../../../core/widgets/fx_action_chip.dart';
+import '../../../core/theme/fx_icons.dart';
 
 part 'wallet_screen_widgets.part.dart';
 

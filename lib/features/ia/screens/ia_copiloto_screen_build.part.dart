@@ -205,7 +205,7 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                                 chromeOnDark: dark,
                                 primary: brand,
                                 message: _erroIaTexto(_erro!),
-                                icon: Icons.error_outline_rounded,
+                                icon: FxIcons.erro,
                                 onRetry:
                                     _erroSugereUpgrade(_erro!)
                                         ? _mostrarUpgradePorErro
@@ -216,8 +216,8 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                                         : null,
                                 retryIcon:
                                     _erroSugereUpgrade(_erro!)
-                                        ? Icons.workspace_premium_rounded
-                                        : Icons.refresh_rounded,
+                                        ? FxIcons.premium
+                                        : FxIcons.atualizar,
                               ),
                             ),
                           ] else if (_gerado) ...[
@@ -297,7 +297,7 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                                           chromeOnDark: dark,
                                           primary: brand,
                                           message: _erroIaTexto(e),
-                                          icon: Icons.error_outline_rounded,
+                                          icon: FxIcons.erro,
                                           onRetry:
                                               () => ref.invalidate(
                                                 insightsProvider(query),

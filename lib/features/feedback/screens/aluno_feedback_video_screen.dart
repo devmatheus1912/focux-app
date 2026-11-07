@@ -26,6 +26,7 @@ import '../../../core/widgets/skeleton_loader.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../data/feedback_video_repository.dart';
 import '../utils/feedback_video_display.dart';
+import '../../../core/theme/fx_icons.dart';
 
 const _alunoHome = '/dashboard/aluno';
 
@@ -112,7 +113,7 @@ class _AlunoFeedbackVideoScreenState
       context,
       title: 'Qual exercício?',
       subtitle: 'Escolha o que você vai gravar.',
-      headerIcon: Icons.fitness_center,
+      headerIcon: FxIcons.treino,
       items: [
         for (final e in exercicios)
           FxInsetPickerSheetItem(value: e.id, label: e.nome),
@@ -124,17 +125,17 @@ class _AlunoFeedbackVideoScreenState
       context,
       title: 'Enviar vídeo',
       subtitle: 'Até 1 minuto. Filme o corpo inteiro de lado.',
-      headerIcon: Icons.videocam_outlined,
+      headerIcon: FxIcons.video,
       items: const [
         FxInsetPickerSheetItem(
           value: ImageSource.camera,
           label: 'Gravar agora',
-          icon: Icons.videocam_outlined,
+          icon: FxIcons.video,
         ),
         FxInsetPickerSheetItem(
           value: ImageSource.gallery,
           label: 'Escolher da galeria',
-          icon: Icons.video_library_outlined,
+          icon: FxIcons.videos,
         ),
       ],
     );
@@ -170,12 +171,12 @@ class _AlunoFeedbackVideoScreenState
         context,
         title: 'Quer avisar algo?',
         subtitle: 'Opcional. Ex.: senti o joelho na descida.',
-        icon: Icons.notes_outlined,
+        icon: FxIcons.notas,
         confirmLabel: 'Enviar vídeo',
         child: AlunoInsetFormField(
           controller: comentarioCtrl,
           label: 'Recado para o personal',
-          icon: Icons.notes_outlined,
+          icon: FxIcons.notas,
           maxLines: 3,
           showDivider: false,
         ),
@@ -298,7 +299,7 @@ class _AlunoFeedbackVideoScreenState
                   child: FxLiquidPrimaryButton(
                     key: const ValueKey('aluno-feedback-enviar'),
                     label: 'Enviar vídeo',
-                    icon: Icons.videocam_outlined,
+                    icon: FxIcons.video,
                     loading: _enviando,
                     loadingLabel: 'Enviando vídeo…',
                     onPressed: _enviar,
@@ -392,7 +393,7 @@ class _FeedbackDetalheSheet extends StatelessWidget {
     final resposta = item.respostaPersonal?.trim() ?? '';
     return FxHomeSheetScaffold(
       isDark: isDark,
-      leading: Icon(Icons.rate_review_outlined, color: primary, size: 20),
+      leading: Icon(FxIcons.avaliacao, color: primary, size: 20),
       title: feedbackVideoTitulo(
         exercicioNome: item.exercicioNome,
         comentario: item.comentario,
@@ -434,7 +435,7 @@ class _FeedbackDetalheSheet extends StatelessWidget {
           const SizedBox(height: TokensStrip.s5),
           FxLiquidSecondaryButton(
             label: 'Assistir meu vídeo',
-            icon: Icons.play_circle_outline_rounded,
+            icon: FxIcons.playCirculo,
             onPressed: onAssistir,
           ),
         ],

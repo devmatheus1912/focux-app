@@ -20,6 +20,6 @@ void main() {
     expect(screen, contains('FxFormPopGuard'));
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, isNot(contains('FxActionChip')));
-    expect(screen, isNot(contains('Icons.calendar_month')));
+    expect(screen, isNot(contains('FxIcons.calendario')));
   });
 }

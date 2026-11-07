@@ -5,6 +5,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_cached_network_image.dart';
 import '../../../core/widgets/fx_grouped_action_sheet.dart';
 import '../../../l10n/pt.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Foto em tela cheia, com zoom. Excluir fica no "⋯", à vista de quem pode.
 Future<void> abrirFotoEmTelaCheia(
@@ -35,7 +36,7 @@ class _FotoTelaCheia extends StatelessWidget {
           FxActionItem(
             valor: 'excluir',
             rotulo: ptS.evolucaoFotoExcluir,
-            icone: Icons.delete_outline_rounded,
+            icone: FxIcons.excluir,
             perigo: true,
           ),
         ]),
@@ -57,7 +58,7 @@ class _FotoTelaCheia extends StatelessWidget {
               IconButton(
                 tooltip: ptS.evolucaoFotoFechar,
                 color: Colors.white,
-                icon: const Icon(Icons.close_rounded),
+                icon: const Icon(FxIcons.fechar),
                 onPressed: () => Navigator.pop(context),
               ),
               Expanded(
@@ -71,7 +72,7 @@ class _FotoTelaCheia extends StatelessWidget {
                 IconButton(
                   tooltip: ptS.evolucaoFotoAcoes,
                   color: Colors.white,
-                  icon: const Icon(Icons.more_horiz_rounded),
+                  icon: const Icon(FxIcons.mais),
                   onPressed: () => _acoes(context),
                 )
               else

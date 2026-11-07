@@ -5,6 +5,7 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_action_row.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// O único lugar do Perfil que fala do cadastro incompleto: progresso, o que
 /// falta e um verbo. Em 100% não existe.
@@ -31,7 +32,7 @@ class PerfilAlunoCompletarCard extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         FxActionRow(
-          leading: Icons.person_outline,
+          leading: FxIcons.pessoa,
           titulo: s.alunoPerfilCompletarTitulo,
           motivo: queFalta.isEmpty
               ? s.alunoPerfilCompletarPct(score)

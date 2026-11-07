@@ -10,6 +10,7 @@ import 'package:focux_app/core/theme/curated_brand_palettes.dart';
 import 'package:focux_app/core/theme/design_tokens.dart';
 import 'package:focux_app/core/theme/focux_contrast.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:focux_app/core/theme/fx_icons.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -157,7 +158,7 @@ Future<ui.Image> _drawQaContactSheet(_BrandScenario scenario) async {
     theme,
     top: top,
     title: 'Auth',
-    icon: Icons.lock_outline,
+    icon: FxIcons.cadeado,
     primary: primary,
     onPrimary: onPrimary,
     rows: const ['Email do personal', 'Entrar com identidade visual'],
@@ -167,7 +168,7 @@ Future<ui.Image> _drawQaContactSheet(_BrandScenario scenario) async {
     theme,
     top: top,
     title: 'Dashboard',
-    icon: Icons.dashboard_outlined,
+    icon: FxIcons.painel,
     primary: primary,
     onPrimary: onPrimary,
     rows: const ['Alunos ativos 48', 'Check-ins hoje 12', 'Riscos 3'],
@@ -177,7 +178,7 @@ Future<ui.Image> _drawQaContactSheet(_BrandScenario scenario) async {
     theme,
     top: top,
     title: 'Chat iPhone-like',
-    icon: Icons.chat_bubble_outline,
+    icon: FxIcons.chat,
     primary: primary,
     onPrimary: onPrimary,
     rows: const ['Treino ajustado para hoje', 'Audio, emoji e midia'],
@@ -187,7 +188,7 @@ Future<ui.Image> _drawQaContactSheet(_BrandScenario scenario) async {
     theme,
     top: top,
     title: 'Treinos',
-    icon: Icons.fitness_center,
+    icon: FxIcons.treino,
     primary: primary,
     onPrimary: onPrimary,
     rows: const ['Treino A 45 min', 'Video do personal'],

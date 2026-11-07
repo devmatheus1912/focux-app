@@ -11,6 +11,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../alunos/widgets/aluno_avatar.dart';
 import '../data/checkin_repository.dart';
 import '../models/checkin_personal_home.dart';
+import '../../../core/theme/fx_icons.dart';
 
 Future<void> showCheckinPersonalCatalogSheet(
   BuildContext context, {
@@ -112,7 +113,7 @@ class _CheckinCatalogSheetState extends State<_CheckinCatalogSheet> {
           FxHomeSheetHeader(
             title: widget.title,
             subtitle: '$_total check-ins neste recorte.',
-            leading: Icon(Icons.fitness_center, size: 18, color: primary),
+            leading: Icon(FxIcons.treino, size: 18, color: primary),
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(

@@ -8,6 +8,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../constants/aluno_360_layout.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Tab bar for Aluno 360 (Resumo · Evolução · Ferramentas).
 class Aluno360DetailTabBar extends StatelessWidget {
@@ -190,7 +191,7 @@ class Aluno360HeaderToolbar extends StatelessWidget {
               width: 38,
               height: 38,
               decoration: ShellChrome.of(context).headerAction(radius: 12),
-              child: Icon(Icons.arrow_back_ios_new, size: 16, color: ink),
+              child: Icon(FxIcons.voltarPequeno, size: 16, color: ink),
             ),
           ),
         ),
@@ -230,7 +231,7 @@ class Aluno360HeaderToolbar extends StatelessWidget {
         if (onChat != null && actionsEnabled)
           _AcaoDoTopo(
             tooltip: s.aluno360ChatTooltip,
-            icone: Icons.chat_bubble_outline_rounded,
+            icone: FxIcons.chat,
             ink: ink,
             onPressed: onChat!,
           ),
@@ -244,7 +245,7 @@ class Aluno360HeaderToolbar extends StatelessWidget {
         if (onMenu != null && actionsEnabled)
           _AcaoDoTopo(
             tooltip: s.aluno360MenuTooltip,
-            icone: Icons.more_horiz_rounded,
+            icone: FxIcons.mais,
             ink: ink,
             onPressed: onMenu!,
           ),

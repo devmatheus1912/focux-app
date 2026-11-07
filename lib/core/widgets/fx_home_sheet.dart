@@ -9,6 +9,7 @@ import '../theme/hero_teal.dart';
 import '../theme/shell_chrome.dart';
 import '../theme/tokens_strip.dart';
 import 'fx_keyboard_dismiss_scope.dart';
+import '../theme/fx_icons.dart';
 
 /// Chrome canônico de sheet — paridade Command Priorities / ajuda da Home.
 abstract final class FxHomeSheetChrome {
@@ -340,7 +341,7 @@ class FxHomeSheetHeader extends StatelessWidget {
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 foregroundColor: caption,
               ),
-              icon: Icon(Icons.close_rounded, size: FxSettingsLayout.iconSize),
+              icon: Icon(FxIcons.fechar, size: FxSettingsLayout.iconSize),
             ),
       ],
     );

@@ -496,7 +496,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                 tooltip: AlunosMicrocopy.selectA11y,
                 onPressed: _toggleModoSelecao,
                 icon: Icon(
-                  _modoSelecao ? Icons.close_rounded : Icons.checklist_rounded,
+                  _modoSelecao ? FxIcons.fechar : FxIcons.checklist,
                 ),
               ),
             ],

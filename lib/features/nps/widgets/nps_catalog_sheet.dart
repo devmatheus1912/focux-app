@@ -9,6 +9,7 @@ import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/nps_repository.dart';
 import '../utils/nps_display.dart';
+import '../../../core/theme/fx_icons.dart';
 
 Future<void> showNpsCatalogSheet(
   BuildContext context, {
@@ -110,7 +111,7 @@ class _NpsCatalogSheetState extends State<_NpsCatalogSheet> {
           FxHomeSheetHeader(
             title: 'Respostas',
             subtitle: '$_total neste recorte.',
-            leading: Icon(Icons.star_outline, size: 18, color: primary),
+            leading: Icon(FxIcons.estrela, size: 18, color: primary),
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(

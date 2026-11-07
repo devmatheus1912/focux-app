@@ -22,7 +22,7 @@ class _StatusDoCadastro extends StatelessWidget {
         children: [
           if (pronto) ...[
             Icon(
-              Icons.check_circle_rounded,
+              FxIcons.concluidoAtivo,
               size: 18,
               color: Theme.of(context).colorScheme.primary,
             ),

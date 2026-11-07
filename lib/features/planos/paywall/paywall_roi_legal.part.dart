@@ -28,7 +28,7 @@ abstract final class PaywallUpgradeLegalCompact {
               FxHomeSheetHeader(
                 isDark: isDark,
                 title: 'Termos e cobrança',
-                leading: Icon(Icons.policy_outlined, color: primary, size: 18),
+                leading: Icon(FxIcons.politica, color: primary, size: 18),
               ),
               SizedBox(height: TokensStrip.s3),
               Expanded(

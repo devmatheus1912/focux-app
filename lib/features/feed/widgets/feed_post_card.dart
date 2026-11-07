@@ -15,6 +15,7 @@ import '../../../l10n/app_localizations.dart';
 import '../data/feed_repository.dart';
 import '../utils/feed_display.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Card de publicação do feed (personal + aluno).
 class FeedPostCard extends StatelessWidget {
@@ -80,7 +81,7 @@ class FeedPostCard extends StatelessWidget {
                     child: FeedPostAuthorHeader(post: post, primary: primary),
                   ),
                   if (post.fixado)
-                    Icon(Icons.push_pin, color: primary, size: 18),
+                    Icon(FxIcons.fixadoAtivo, color: primary, size: 18),
                   if (_canManage)
                     PopupMenuButton<String>(
                       tooltip: 'Ações',
@@ -97,7 +98,7 @@ class FeedPostCard extends StatelessWidget {
                             value: 'editar',
                             child: Row(
                               children: [
-                                Icon(Icons.edit_outlined, size: 20),
+                                Icon(FxIcons.editar, size: 20),
                                 SizedBox(width: 8),
                                 Text('Editar'),
                               ],
@@ -110,8 +111,8 @@ class FeedPostCard extends StatelessWidget {
                               children: [
                                 Icon(
                                   post.fixado
-                                      ? Icons.push_pin_outlined
-                                      : Icons.push_pin,
+                                      ? FxIcons.fixado
+                                      : FxIcons.fixadoAtivo,
                                   size: 20,
                                 ),
                                 const SizedBox(width: 8),
@@ -129,7 +130,7 @@ class FeedPostCard extends StatelessWidget {
                             child: Row(
                               children: [
                                 Icon(
-                                  Icons.delete_outline,
+                                  FxIcons.excluir,
                                   color: EagleTokens.bad,
                                   size: 20,
                                 ),
@@ -146,7 +147,7 @@ class FeedPostCard extends StatelessWidget {
                             value: 'denunciar',
                             child: Row(
                               children: [
-                                const Icon(Icons.flag_outlined, size: 20),
+                                const Icon(FxIcons.meta, size: 20),
                                 const SizedBox(width: 8),
                                 Text(S.of(ctx).moderacaoDenunciarPost),
                               ],
@@ -157,7 +158,7 @@ class FeedPostCard extends StatelessWidget {
                             value: 'bloquear',
                             child: Row(
                               children: [
-                                const Icon(Icons.block_rounded, size: 20),
+                                const Icon(FxIcons.bloquear, size: 20),
                                 const SizedBox(width: 8),
                                 Text(S.of(ctx).feedBloquearAutor),
                               ],
@@ -217,7 +218,7 @@ class FeedPostCard extends StatelessWidget {
               Row(
                 children: [
                   _FeedAcao(
-                    icon: curtido ? Icons.favorite : Icons.favorite_border,
+                    icon: curtido ? FxIcons.favoritoAtivo : FxIcons.favorito,
                     cor: curtido ? EagleTokens.bad : null,
                     total: curtidas,
                     rotulo: curtido ? 'Descurtir' : 'Curtir',
@@ -225,7 +226,7 @@ class FeedPostCard extends StatelessWidget {
                   ),
                   const SizedBox(width: TokensStrip.s2),
                   _FeedAcao(
-                    icon: Icons.chat_bubble_outline_rounded,
+                    icon: FxIcons.chat,
                     total: comentarios,
                     rotulo: 'Comentários',
                     onTap: onComentar,
@@ -404,7 +405,7 @@ class FeedImagePlaceholder extends StatelessWidget {
           end: Alignment.bottomRight,
         ),
       ),
-      child: Icon(Icons.image_outlined, color: primary, size: 28),
+      child: Icon(FxIcons.imagem, color: primary, size: 28),
     );
   }
 }
@@ -450,7 +451,7 @@ class FeedVideoAttachmentTile extends StatelessWidget {
           ),
           child: const Center(
             child: Icon(
-              Icons.play_circle_fill_rounded,
+              FxIcons.playAtivo,
               color: Colors.white,
               size: 44,
             ),
@@ -485,7 +486,7 @@ class _FeedVideoPreview extends StatelessWidget {
               child: ColoredBox(
                 color: BrandPalette.deep(primary),
                 child: Center(
-                  child: FxTonalButton(label: 'Abrir vídeo', icon: Icons.play_arrow_rounded, onPressed: () => launchSafeHttpUrl(url), compact: true),
+                  child: FxTonalButton(label: 'Abrir vídeo', icon: FxIcons.play, onPressed: () => launchSafeHttpUrl(url), compact: true),
                 ),
               ),
             ),
@@ -499,15 +500,15 @@ class _FeedVideoPreview extends StatelessWidget {
 IconData feedTipoIcon(String? tipo) {
   switch (tipo?.toUpperCase()) {
     case 'IMAGEM':
-      return Icons.image;
+      return FxIcons.imagem;
     case 'VIDEO':
-      return Icons.play_circle_fill;
+      return FxIcons.playAtivo;
     case 'ENQUETE':
-      return Icons.poll;
+      return FxIcons.enquete;
     case 'DICA':
-      return Icons.lightbulb;
+      return FxIcons.ideiaAtivo;
     default:
-      return Icons.article;
+      return FxIcons.artigo;
   }
 }
 

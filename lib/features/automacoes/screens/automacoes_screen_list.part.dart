@@ -138,7 +138,7 @@ extension on _AutomacoesScreenState {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
-              leading: Icon(Icons.bolt_outlined, color: primary),
+              leading: Icon(FxIcons.raio, color: primary),
               trailing: Text(
                 'Ativar',
                 style: FocuxHubTypography.bodyMuted(
@@ -156,8 +156,8 @@ extension on _AutomacoesScreenState {
             subtitle: Text(automacaoTriggerLabel(fluxo.triggerTipo)),
             leading: Icon(
               fluxo.ativo
-                  ? Icons.play_circle_rounded
-                  : Icons.pause_circle_rounded,
+                  ? FxIcons.playAtivo
+                  : FxIcons.pausarAtivo,
               color: primary,
             ),
             trailing: Text(

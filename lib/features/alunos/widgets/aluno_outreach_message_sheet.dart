@@ -22,6 +22,7 @@ import '../providers/aluno_followup_provider.dart';
 import '../utils/aluno360_operacao_logic.dart';
 import '../utils/aluno_outreach_display.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Opens a polished outreach sheet with copy + chat actions.
 Future<void> showAlunoOutreachMessageSheet(
@@ -31,7 +32,7 @@ Future<void> showAlunoOutreachMessageSheet(
   required String message,
   String title = 'Mensagem sugerida',
   String subtitle = 'Revise antes de enviar ao aluno.',
-  IconData icon = Icons.message_outlined,
+  IconData icon = FxIcons.chat,
 }) async {
   final reduceMotion = MediaQuery.maybeOf(context)?.disableAnimations ?? false;
   if (!reduceMotion) {
@@ -63,7 +64,7 @@ Future<void> showAlunoCheckinMessageSheet(
     message: checkinMensagemPronta(alunoNome),
     title: 'Mensagem de check-in',
     subtitle: 'Revise o texto antes de enviar.',
-    icon: Icons.fact_check_outlined,
+    icon: FxIcons.conferir,
   );
 }
 
@@ -95,7 +96,7 @@ class _AlunoOutreachMessageSheet extends ConsumerWidget {
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final displayName = fxTitleCaseName(alunoNome);
     final firstName = alunoPrimeiroNome(alunoNome, vazio: 'aluno');
-    final checkin = icon == Icons.fact_check_outlined;
+    final checkin = icon == FxIcons.conferir;
 
     Future<void> openChatWithDraft() async {
       unawaited(

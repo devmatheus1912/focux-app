@@ -21,6 +21,7 @@ import '../../../core/theme/tokens_strip.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 import '../utils/lead_display.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 const _kCols = leadFunilColunas;
 
@@ -139,7 +140,7 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
     final created = await showFxFormSheet(
       context,
       title: 'Novo lead',
-      icon: Icons.person_add_outlined,
+      icon: FxIcons.adicionarPessoa,
       confirmLabel: 'Criar',
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -191,7 +192,7 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
           subtitle: 'CRM',
           onBack: () => safePopOrGo(context, '/leads'),
           actions: [
-            FxTonalButton(label: 'Lead', icon: Icons.add, onPressed: _novoLeadRapido, compact: true),
+            FxTonalButton(label: 'Lead', icon: FxIcons.adicionar, onPressed: _novoLeadRapido, compact: true),
           ],
         ),
         body: SafeArea(
@@ -211,7 +212,7 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.swipe, color: brand, size: 20),
+                        Icon(FxIcons.deslizar, color: brand, size: 20),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
@@ -226,7 +227,7 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
                         IconButton(
                           tooltip: 'Fechar',
                           onPressed: _dismissIntro,
-                          icon: Icon(Icons.close, color: mute, size: 18),
+                          icon: Icon(FxIcons.fechar, color: mute, size: 18),
                         ),
                       ],
                     ),
@@ -387,7 +388,7 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
                                             Tooltip(
                                               message: leadFunilHint(col),
                                               child: Icon(
-                                                Icons.info_outline,
+                                                FxIcons.infoPequeno,
                                                 size: 13,
                                                 color: mute,
                                               ),
@@ -434,7 +435,7 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
                                                       MainAxisSize.min,
                                                   children: [
                                                     Icon(
-                                                      Icons.add,
+                                                      FxIcons.adicionarPequeno,
                                                       size: 14,
                                                       color: mute,
                                                     ),
@@ -622,7 +623,7 @@ class _LeadCard extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.chat_bubble_outline, size: 12, color: brand),
+                      Icon(FxIcons.chatPequeno, size: 12, color: brand),
                       const SizedBox(width: 4),
                       Text(
                         'WhatsApp',
@@ -648,7 +649,7 @@ class _LeadCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 alignment: Alignment.center,
-                child: Icon(Icons.chevron_right, size: 16, color: mute),
+                child: Icon(FxIcons.chevronDireitaPequeno, size: 16, color: mute),
               ),
             ],
           ),

@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/utils/aluno360_operacao_logic.dart';
 import 'package:focux_app/features/dashboard/data/command_center_data.dart';
+import 'package:focux_app/core/theme/fx_icons.dart';
 
 String _isoDay(DateTime day) {
   return '${day.year.toString().padLeft(4, '0')}-'
@@ -283,7 +283,7 @@ void main() {
     test('hides copilot chat when sticky is chat action', () {
       const sticky = OperacaoStickyAction(
         label: 'Abrir chat',
-        icon: Icons.chat_bubble_outline_rounded,
+        icon: FxIcons.chat,
         destination: OperacaoStickyDestination.chat,
       );
       expect(
@@ -295,7 +295,7 @@ void main() {
     test('shows secondary command center when task open and chat primary', () {
       const sticky = OperacaoStickyAction(
         label: 'Retomar contato',
-        icon: Icons.chat_bubble_outline_rounded,
+        icon: FxIcons.chat,
         destination: OperacaoStickyDestination.chat,
       );
       expect(
@@ -312,7 +312,7 @@ void main() {
       () {
         const sticky = OperacaoStickyAction(
           label: 'Ver tarefa',
-          icon: Icons.dashboard_outlined,
+          icon: FxIcons.painel,
           destination: OperacaoStickyDestination.commandCenter,
         );
         expect(
@@ -412,7 +412,7 @@ void main() {
       final label = resolveStickyDisplayLabel(
         sticky: const OperacaoStickyAction(
           label: 'Retomar contato · wearable',
-          icon: Icons.chat,
+          icon: FxIcons.chat,
           destination: OperacaoStickyDestination.chat,
         ),
         compact: true,
@@ -439,7 +439,7 @@ void main() {
         resolveStickyDisplayLabel(
           sticky: const OperacaoStickyAction(
             label: 'Completar cadastro',
-            icon: Icons.chat_bubble_outline_rounded,
+            icon: FxIcons.chat,
             destination: OperacaoStickyDestination.chat,
           ),
           compact: true,
@@ -460,7 +460,7 @@ void main() {
         resolveStickyDisplayLabel(
           sticky: const OperacaoStickyAction(
             label: 'Completar cadastro',
-            icon: Icons.chat_bubble_outline_rounded,
+            icon: FxIcons.chat,
             destination: OperacaoStickyDestination.chat,
           ),
           compact: true,
@@ -481,7 +481,7 @@ void main() {
         resolveStickyDisplayLabel(
           sticky: const OperacaoStickyAction(
             label: 'Retomar contato',
-            icon: Icons.chat_bubble_outline_rounded,
+            icon: FxIcons.chat,
             destination: OperacaoStickyDestination.chat,
           ),
           compact: true,

@@ -27,7 +27,7 @@ class _FeitasHoje extends StatelessWidget {
           for (final a in acoes)
             ListTile(
               dense: true,
-              leading: Icon(Icons.check_rounded, color: mute, size: 18),
+              leading: Icon(FxIcons.check, color: mute, size: 18),
               title: Text(
                 copilotActionsNome(a),
                 maxLines: 1,

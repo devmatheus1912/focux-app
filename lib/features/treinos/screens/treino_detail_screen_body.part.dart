@@ -25,13 +25,13 @@ Future<void> _openTreinoDetailMenu({
         return TreinoInsetActionSheet(
           isDark: isDark,
           maxHeight: maxHeight,
-          headerIcon: Icons.fitness_center_rounded,
+          headerIcon: FxIcons.treino,
           title: 'Ações do treino',
           subtitle: _displayWorkoutName(treino.nome),
           accent: Theme.of(sheetContext).colorScheme.primary,
           actions: [
             TreinoInsetActionSpec(
-              icon: Icons.add_rounded,
+              icon: FxIcons.adicionar,
               label: 'Adicionar exercício',
               grupo: 'Montar',
               showChevron: true,
@@ -39,7 +39,7 @@ Future<void> _openTreinoDetailMenu({
             ),
             if (naSemana || temSugestao)
               TreinoInsetActionSpec(
-                icon: Icons.auto_awesome_rounded,
+                icon: FxIcons.ia,
                 label: temSugestao
                     ? s.treinoSugerirDe(treino.nome.trim())
                     : s.treinoSugerirExercicios,
@@ -47,27 +47,27 @@ Future<void> _openTreinoDetailMenu({
                 onTap: () => Navigator.pop(sheetContext, 'sugerir'),
               ),
             TreinoInsetActionSpec(
-              icon: Icons.edit_outlined,
+              icon: FxIcons.editar,
               label: s.treinoRenomear,
               grupo: 'Montar',
               onTap: () => Navigator.pop(sheetContext, 'rename'),
             ),
             if (naSemana)
               TreinoInsetActionSpec(
-                icon: Icons.copy_rounded,
+                icon: FxIcons.copiar,
                 label: s.rotinaCopiarDia,
                 grupo: 'Semana',
                 onTap: () => Navigator.pop(sheetContext, 'copy_day'),
               )
             else ...[
               TreinoInsetActionSpec(
-                icon: Icons.control_point_duplicate_rounded,
+                icon: FxIcons.duplicar,
                 label: s.treinoDuplicarSessao,
                 grupo: 'Usar',
                 onTap: () => Navigator.pop(sheetContext, 'duplicate'),
               ),
               TreinoInsetActionSpec(
-                icon: Icons.person_add_alt_1_rounded,
+                icon: FxIcons.adicionarPessoa,
                 label: s.treinoAplicarNaFicha,
                 grupo: 'Usar',
                 subtitle: s.treinoDetalheCopiarSubtitulo,
@@ -76,14 +76,14 @@ Future<void> _openTreinoDetailMenu({
             ],
             if (naSemana)
               TreinoInsetActionSpec(
-                icon: Icons.remove_circle_outline_rounded,
+                icon: FxIcons.removerCirculo,
                 label: lugar == LugarDoTreino.ficha ? s.treinoTirarDaFicha : s.treinoTirarDoModelo,
                 danger: true,
                 onTap: () => Navigator.pop(sheetContext, 'remove_from'),
               )
             else
               TreinoInsetActionSpec(
-                icon: Icons.delete_outline_rounded,
+                icon: FxIcons.excluir,
                 label: 'Excluir treino',
                 danger: true,
                 onTap: () => Navigator.pop(sheetContext, 'delete'),

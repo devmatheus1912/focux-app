@@ -24,6 +24,7 @@ import '../widgets/auth_text_link.dart';
 import '../widgets/password_strength_meter.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../convites/utils/convite_display.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class RegisterAlunoScreen extends ConsumerStatefulWidget {
   final String? personalSlug;
@@ -249,7 +250,7 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
                                       child: Row(
                                         children: [
                                           Icon(
-                                            Icons.fitness_center_rounded,
+                                            FxIcons.treino,
                                             color: primary,
                                             size: 20,
                                           ),
@@ -278,7 +279,7 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
                                   label: 'Nome completo',
                                   controller: _nomeCtrl,
                                   hintText: 'Maria Souza',
-                                  icon: Icons.person_outline_rounded,
+                                  icon: FxIcons.pessoa,
                                   textInputAction: TextInputAction.next,
                                   autofillHints: const [AutofillHints.name],
                                   validator: (v) {
@@ -293,7 +294,7 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
                                   label: 'E-mail',
                                   controller: _emailCtrl,
                                   hintText: 'aluno@exemplo.com',
-                                  icon: Icons.alternate_email_rounded,
+                                  icon: FxIcons.arroba,
                                   keyboardType: TextInputType.emailAddress,
                                   textInputAction: TextInputAction.next,
                                   autofillHints: const [AutofillHints.email],
@@ -310,7 +311,7 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
                                   controller: _senhaCtrl,
                                   hintText: 'Crie uma senha',
                                   helperText: 'Mínimo de 8 caracteres.',
-                                  icon: Icons.lock_outline_rounded,
+                                  icon: FxIcons.cadeado,
                                   obscureText: !_senhaVisivel,
                                   textInputAction: TextInputAction.done,
                                   autofillHints: const [
@@ -336,8 +337,8 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
                                     },
                                     icon: Icon(
                                       _senhaVisivel
-                                          ? Icons.visibility_off_outlined
-                                          : Icons.visibility_outlined,
+                                          ? FxIcons.ocultar
+                                          : FxIcons.ver,
                                       color: heroTealSurface(0.82),
                                       size: 18,
                                     ),

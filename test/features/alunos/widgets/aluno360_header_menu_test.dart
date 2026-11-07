@@ -6,6 +6,7 @@ import 'package:focux_app/features/alunos/widgets/aluno360_composite_header.dart
 import 'package:focux_app/features/alunos/widgets/aluno360_menu_sheet.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:focux_app/core/theme/fx_icons.dart';
 
 Aluno _aluno({bool contaAtiva = false, String status = 'ATIVO'}) => Aluno(
   id: 1,
@@ -99,7 +100,7 @@ void main() {
 
   testWidgets('não há lixeira solta no cabeçalho', (tester) async {
     await _abrirCabecalho(tester, onMenu: () {});
-    expect(find.byIcon(Icons.delete_outline_rounded), findsNothing);
+    expect(find.byIcon(FxIcons.excluir), findsNothing);
     expect(find.byTooltip('Excluir aluno'), findsNothing);
   });
 

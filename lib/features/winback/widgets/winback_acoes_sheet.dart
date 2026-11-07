@@ -5,6 +5,7 @@ import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_action_chip.dart';
 import '../data/winback_repository.dart';
 import '../utils/winback_display.dart';
+import '../../../core/theme/fx_icons.dart';
 
 Future<void> showWinbackAcoesSheet(
   BuildContext context, {
@@ -62,7 +63,7 @@ class _WinbackAcoesSheet extends StatelessWidget {
           FxHomeSheetHeader(
             title: winbackAlunoLabel(entry.alunoNome),
             subtitle: winbackTipoLabel(entry.tipo),
-            leading: Icon(Icons.person_outline, size: 18, color: primary),
+            leading: Icon(FxIcons.pessoa, size: 18, color: primary),
           ),
           const SizedBox(height: TokensStrip.s4),
           Wrap(

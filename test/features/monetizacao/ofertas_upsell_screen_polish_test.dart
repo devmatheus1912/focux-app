@@ -41,7 +41,7 @@ void main() {
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('FontFeature.tabularFigures'));
     expect(screen, contains('Nenhuma oferta ainda'));
-    expect(screen, contains('lightbulb_outline_rounded'));
+    expect(screen, contains('FxIcons.ideiaPequeno'));
     expect(screen, isNot(contains('TabBar')));
     expect(screen, isNot(contains('TabBarView')));
     expect(screen, isNot(contains('DropdownButton')));

@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 
 import '../widgets/auth_shell.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Campo OTP 6 dígitos reutilizável (cadastro + reset de senha).
 class AuthOtpField extends StatelessWidget {
@@ -31,7 +32,7 @@ class AuthOtpField extends StatelessWidget {
       label: 'Código do e-mail',
       controller: controller,
       hintText: '6 dígitos',
-      icon: Icons.pin_outlined,
+      icon: FxIcons.pin,
       keyboardType: TextInputType.number,
       textInputAction: TextInputAction.done,
       autofillHints: const [AutofillHints.oneTimeCode],

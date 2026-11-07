@@ -7,6 +7,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../treinos/models/rotina_fila.dart';
 import '../../treinos/utils/ficha_vigencia.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// A ficha tem algo a dizer ao aluno: prazo ou troca recente.
 bool temAvisoDaFicha(RotinaFila rotina, DateTime agora) =>
@@ -62,7 +63,7 @@ class FichaVigenciaAluno extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Icon(
-          aviso ? Icons.event_busy_outlined : Icons.event_note_outlined,
+          aviso ? FxIcons.eventoCancelado : FxIcons.agendaNota,
           size: 18,
           color: cor,
         ),

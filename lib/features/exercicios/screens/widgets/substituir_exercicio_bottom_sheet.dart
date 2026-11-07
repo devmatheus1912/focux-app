@@ -23,6 +23,7 @@ import '../../data/exercicio_taxonomy_labels.dart';
 import '../../data/substituicao_engine.dart';
 import 'exercise_media_thumb.dart';
 import 'exercise_video_preview_sheet.dart';
+import '../../../../core/theme/fx_icons.dart';
 
 class SubstituirExercicioBottomSheet extends ConsumerStatefulWidget {
   const SubstituirExercicioBottomSheet({
@@ -160,7 +161,7 @@ class _SubstituirExercicioBottomSheetState
             title: 'Trocar por similar',
             subtitle: 'Substituindo ${widget.alvo.nomeDisplay}',
             leading: Icon(
-              Icons.swap_horiz_rounded,
+              FxIcons.trocar,
               color: BrandPalette.softened(primary),
               size: FxSettingsLayout.iconSize,
             ),
@@ -258,7 +259,7 @@ class _SubstituirExercicioBottomSheetState
                               accent: primary,
                               children: aluno360InsetEmptyActionTiles([
                                 Aluno360InsetEmptyActionSpec(
-                                  icon: Icons.add_rounded,
+                                  icon: FxIcons.adicionar,
                                   accent: BrandPalette.softened(primary),
                                   label: 'Criar exercício personalizado',
                                   subtitle:
@@ -301,7 +302,7 @@ class _AlternativaTile extends StatelessWidget {
     final meta = _metaParts(exercicio);
 
     return FxSettingsTile(
-      icon: Icons.fitness_center_rounded,
+      icon: FxIcons.treino,
       accent: primary,
       label: exercicio.nomeDisplay,
       subtitle: meta,
@@ -379,7 +380,7 @@ class _EmptyState extends StatelessWidget {
           caption: caption,
           children: aluno360InsetEmptyActionTiles([
             Aluno360InsetEmptyActionSpec(
-              icon: Icons.add_rounded,
+              icon: FxIcons.adicionar,
               accent: BrandPalette.softened(primary),
               label: 'Criar exercício personalizado',
               subtitle: 'Abre o cadastro e usa no lugar deste',

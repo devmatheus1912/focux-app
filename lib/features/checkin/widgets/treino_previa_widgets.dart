@@ -10,6 +10,7 @@ import '../../../l10n/app_localizations.dart';
 import '../models/treino_previa.dart';
 import '../utils/treino_previa_view.dart';
 import '../../../core/widgets/fx_video_em_breve.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class TreinoPreviaCabecalho extends StatelessWidget {
   const TreinoPreviaCabecalho({super.key, required this.texto});
@@ -104,7 +105,7 @@ class TreinoPreviaExercicioTile extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
-                          Icons.play_circle_outline_rounded,
+                          FxIcons.playCirculoPequeno,
                           size: 16,
                           color: primary,
                         ),

@@ -7,6 +7,7 @@ import '../../../core/theme/theme_provider.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_choice_strip.dart';
 import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Preferências — Aparência com as três opções à vista (sem abrir sheet).
 class PerfilAppearanceSection extends ConsumerWidget {
@@ -46,7 +47,7 @@ class PerfilAppearanceSection extends ConsumerWidget {
               Row(
                 children: [
                   Icon(
-                    Icons.dark_mode_outlined,
+                    FxIcons.sono,
                     size: FxSettingsLayout.iconSize,
                     color: chrome.mute,
                   ),

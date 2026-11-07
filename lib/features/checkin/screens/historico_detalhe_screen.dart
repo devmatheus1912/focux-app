@@ -24,6 +24,7 @@ import '../utils/historico_detalhe_texts.dart';
 import '../utils/historico_detalhe_view.dart';
 import '../utils/treinos_hub_view.dart';
 import '../widgets/historico_detalhe_widgets.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Uma sessão do histórico. Concluída: "Treinar de novo" abre a prévia.
 /// Aberta (link antigo ou push): "Continuar treino".
@@ -240,7 +241,7 @@ class _HistoricoDetalheScreenState
                 ),
                 child: FxLiquidPrimaryButton(
                   label: label,
-                  icon: Icons.play_arrow_rounded,
+                  icon: FxIcons.play,
                   onPressed: onPressed,
                 ),
               ),

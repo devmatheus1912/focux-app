@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/health/widgets/prontidao_card.dart';
 import 'package:focux_app/features/health/widgets/saude_cards.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:focux_app/core/theme/fx_icons.dart';
 
 Widget _app(Widget filho) => MaterialApp(home: Scaffold(body: Center(child: filho)));
 
@@ -15,7 +16,7 @@ void main() {
         const SizedBox(
           width: 180,
           child: SaudeMetricTile(
-            icone: Icons.local_fire_department_outlined,
+            icone: FxIcons.fogo,
             rotulo: 'Calorias ativas',
             valor: '--',
             unidade: 'kcal',

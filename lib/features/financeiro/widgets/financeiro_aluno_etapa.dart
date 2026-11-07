@@ -12,6 +12,7 @@ import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_sheet_search_field.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../../chat/utils/aluno_picker_list.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Etapa "escolher aluno" dentro da própria folha da nova mensalidade: troca o
 /// conteúdo em vez de abrir outra folha por cima.
@@ -60,7 +61,7 @@ class _FinanceiroAlunoEtapaState extends State<FinanceiroAlunoEtapa> {
               FxKeyboardDismissScope.dismiss();
               widget.onVoltar();
             },
-            icon: Icon(Icons.arrow_back_rounded, color: chrome.brand, size: 20),
+            icon: Icon(FxIcons.voltar, color: chrome.brand, size: 20),
           ),
         ),
         const SizedBox(height: TokensStrip.s3),

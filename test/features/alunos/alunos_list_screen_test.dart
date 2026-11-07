@@ -14,6 +14,7 @@ import 'package:focux_app/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:focux_app/core/theme/fx_icons.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -199,7 +200,7 @@ void main() {
     testWidgets('limpar a busca tira o q e mantém o filtro', (tester) async {
       await pumpAlunos(tester, '/alunos?filtro=risco&q=ana');
 
-      await tester.tap(find.byIcon(Icons.close));
+      await tester.tap(find.byIcon(FxIcons.fechar));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
 
@@ -292,7 +293,7 @@ void main() {
       expect(textoDaBusca(tester), 'ana');
       expect(qAtual(tester), 'ana');
 
-      await tester.tap(find.byIcon(Icons.close));
+      await tester.tap(find.byIcon(FxIcons.fechar));
       await settle(tester);
       expect(textoDaBusca(tester), isEmpty);
       expect(qAtual(tester), isEmpty);

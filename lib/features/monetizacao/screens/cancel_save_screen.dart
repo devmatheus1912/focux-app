@@ -23,6 +23,7 @@ import '../../../features/planos/paywall/paywall_catalog.dart';
 import '../../../features/planos/paywall/paywall_components.dart';
 import '../../../features/subscription/store_subscription_policy.dart';
 import '../data/cancel_save_repository.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class CancelSaveScreen extends ConsumerStatefulWidget {
   const CancelSaveScreen({super.key});
@@ -33,23 +34,23 @@ class CancelSaveScreen extends ConsumerStatefulWidget {
 
 class _CancelSaveScreenState extends ConsumerState<CancelSaveScreen> {
   static const _motivos = <_Motivo>[
-    _Motivo('MUITO_CARO', 'Está caro demais agora', Icons.attach_money_rounded),
+    _Motivo('MUITO_CARO', 'Está caro demais agora', FxIcons.dinheiro),
     _Motivo(
       'NAO_USO',
       'Não estou usando o suficiente',
-      Icons.timelapse_rounded,
+      FxIcons.progressoTempo,
     ),
     _Motivo(
       'FALTA_FUNCIONALIDADE',
       'Faltou uma funcionalidade que preciso',
-      Icons.extension_outlined,
+      FxIcons.extensao,
     ),
     _Motivo(
       'MUDANDO_FERRAMENTA',
       'Vou usar outra ferramenta',
-      Icons.swap_horiz_rounded,
+      FxIcons.trocar,
     ),
-    _Motivo('OUTRO', 'Outro motivo', Icons.help_outline_rounded),
+    _Motivo('OUTRO', 'Outro motivo', FxIcons.ajuda),
   ];
 
   String? _motivoSelecionado;
@@ -170,7 +171,7 @@ class _CancelSaveScreenState extends ConsumerState<CancelSaveScreen> {
       context,
       title: cancelSaveResultadoTitulo(r),
       message: r.mensagem,
-      icon: r.aceita ? Icons.celebration_rounded : Icons.exit_to_app_rounded,
+      icon: r.aceita ? FxIcons.celebrar : FxIcons.sair,
       actionLabel: 'Continuar',
     );
     if (!mounted) return;
@@ -362,7 +363,7 @@ class _MotivoTile extends StatelessWidget {
                   ),
                 ),
                 if (selected)
-                  Icon(Icons.check_circle_rounded, color: primary, size: 22),
+                  Icon(FxIcons.concluidoAtivo, color: primary, size: 22),
               ],
             ),
           ),
@@ -423,8 +424,8 @@ class _OfertaCard extends StatelessWidget {
                 ),
                 child: Icon(
                   oferta.temOferta
-                      ? Icons.local_offer_outlined
-                      : Icons.event_available_outlined,
+                      ? FxIcons.oferta
+                      : FxIcons.eventoConfirmado,
                   color: primary,
                   size: 22,
                 ),
@@ -483,7 +484,7 @@ class _OfertaCard extends StatelessWidget {
           if (oferta.temOferta)
             FxLiquidPrimaryButton(
               label: oferta.ctaLabel!,
-              icon: Icons.check_rounded,
+              icon: FxIcons.check,
               loading: enviando,
               loadingLabel: 'Salvando…',
               onPressed: enviando ? null : onAceitar,
@@ -491,7 +492,7 @@ class _OfertaCard extends StatelessWidget {
           else
             FxLiquidPrimaryButton(
               label: 'Manter meu plano',
-              icon: Icons.favorite_border_rounded,
+              icon: FxIcons.favorito,
               onPressed: enviando ? null : onManter,
             ),
           const SizedBox(height: 10),

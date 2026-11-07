@@ -26,6 +26,7 @@ import '../data/recorrencia_repository.dart';
 import '../utils/recorrencia_display.dart';
 import '../utils/recorrencia_sugestao.dart';
 import '../../financeiro/widgets/dia_vencimento_grade.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Folha curta de "Nova recorrência", usada pela lista e pelo perfil 360.
 /// Com [alunoId] a pessoa já vem escolhida. Devolve `true` se criou.
@@ -209,7 +210,7 @@ class _NovaRecorrenciaSheetState extends State<_NovaRecorrenciaSheet> {
                       title: s.recorrenciaNova,
                       subtitle: s.recorrenciaNovaSub,
                       leading: Icon(
-                        Icons.repeat_rounded,
+                        FxIcons.repetir,
                         color: primary,
                         size: 18,
                       ),
@@ -232,7 +233,7 @@ class _NovaRecorrenciaSheetState extends State<_NovaRecorrenciaSheet> {
                           controller: _valorCtrl,
                           label: s.recorrenciaValor,
                           hint: 'R\$ 0,00',
-                          icon: Icons.payments_outlined,
+                          icon: FxIcons.pagamento,
                           rotuloVisivel: true,
                           obrigatorio: true,
                           keyboardType: const TextInputType.numberWithOptions(

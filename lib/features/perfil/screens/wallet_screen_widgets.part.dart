@@ -92,7 +92,7 @@ class _WalletFormFields extends StatelessWidget {
             AlunoInsetFormField(
               controller: chavePixCtrl,
               label: 'Chave PIX',
-              icon: Icons.pix_rounded,
+              icon: FxIcons.pix,
               hint: WalletPixValidation.hintForTipo(tipoChavePix),
               keyboardType: WalletPixValidation.keyboardForTipo(tipoChavePix),
               inputFormatters: [
@@ -136,7 +136,7 @@ class _WalletFormFields extends StatelessWidget {
           AlunoInsetFormField(
             controller: bancoCtrl,
             label: 'Banco',
-            icon: Icons.account_balance_outlined,
+            icon: FxIcons.banco,
             hint: 'Ex.: Nubank, Itaú, Bradesco',
             textCapitalization: TextCapitalization.words,
             inputFormatters: [
@@ -146,7 +146,7 @@ class _WalletFormFields extends StatelessWidget {
           AlunoInsetFormField(
             controller: agenciaCtrl,
             label: 'Agência',
-            icon: Icons.tag_outlined,
+            icon: FxIcons.etiqueta,
             keyboardType: TextInputType.number,
             inputFormatters: [
               FilteringTextInputFormatter.digitsOnly,
@@ -156,7 +156,7 @@ class _WalletFormFields extends StatelessWidget {
           AlunoInsetFormField(
             controller: contaCtrl,
             label: 'Conta',
-            icon: Icons.numbers_rounded,
+            icon: FxIcons.numero,
             keyboardType: TextInputType.text,
             inputFormatters: WalletPixValidation.formattersForConta(),
             showDivider: false,

@@ -11,6 +11,7 @@ import '../../planos/providers/plano_features_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../../subscription/plan_entitlements.dart';
 import '../data/ia_repository.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Paywall contextual quando a cota de IA esgota ou o plano não inclui IA.
 class IaQuotaUpgrade {
@@ -101,7 +102,7 @@ class IaQuotaUpgrade {
             'IA Copiloto e Assinar Pro são da conta Focux do personal — '
             'não da sua. Peça ao personal se precisar de progressão de carga.',
         actionLabel: 'Entendi',
-        icon: Icons.info_outline_rounded,
+        icon: FxIcons.info,
       );
       return false;
     }
@@ -114,7 +115,7 @@ class IaQuotaUpgrade {
             message: offer.body,
             confirmLabel: offer.ctaLabel,
             cancelLabel: 'Agora não',
-            icon: Icons.lock_outline_rounded,
+            icon: FxIcons.cadeado,
           );
 
     if (upgrade == true && offer.targetPlan != null && context.mounted) {
@@ -164,7 +165,7 @@ class IaQuotaUpgrade {
       title: offer.headline,
       message: offer.body,
       actionLabel: offer.ctaLabel,
-      icon: Icons.lock_outline_rounded,
+      icon: FxIcons.cadeado,
     );
     return false;
   }

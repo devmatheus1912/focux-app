@@ -23,7 +23,7 @@ class _ExerciseQuickSetup {
 const _quickSetups = [
   _ExerciseQuickSetup(
     label: 'Academia',
-    icon: Icons.apartment_rounded,
+    icon: FxIcons.predio,
     modalidade: Modalidade.musculacao,
     dificuldade: Dificuldade.iniciante,
     padraoMovimento: null,
@@ -38,7 +38,7 @@ const _quickSetups = [
   ),
   _ExerciseQuickSetup(
     label: 'Casa',
-    icon: Icons.home_work_rounded,
+    icon: FxIcons.presencial,
     modalidade: Modalidade.musculacao,
     dificuldade: Dificuldade.iniciante,
     padraoMovimento: null,
@@ -52,7 +52,7 @@ const _quickSetups = [
   ),
   _ExerciseQuickSetup(
     label: 'Peso corporal',
-    icon: Icons.accessibility_new_rounded,
+    icon: FxIcons.acessibilidade,
     modalidade: Modalidade.musculacao,
     dificuldade: Dificuldade.iniciante,
     padraoMovimento: null,
@@ -61,7 +61,7 @@ const _quickSetups = [
   ),
   _ExerciseQuickSetup(
     label: 'Mobilidade',
-    icon: Icons.self_improvement_rounded,
+    icon: FxIcons.bemEstar,
     modalidade: Modalidade.mobilidade,
     dificuldade: Dificuldade.iniciante,
     padraoMovimento: PadraoMovimento.mobilidadeDinamica,

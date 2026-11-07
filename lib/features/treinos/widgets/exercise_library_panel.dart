@@ -33,6 +33,7 @@ import 'exercise_balance_strip.dart';
 import 'exercise_group_chips.dart';
 import 'exercise_library_row.dart';
 import '../utils/exercise_search_terms.dart';
+import '../../../core/theme/fx_icons.dart';
 
 typedef ExerciseLibraryPageLoader =
     Future<ExercicioPickerPage> Function({
@@ -499,7 +500,7 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
                 decoration: FxInputDeco.build(
                   context,
                   'Buscar',
-                  icon: Icons.search_rounded,
+                  icon: FxIcons.buscar,
                   hint: widget.searchPlaceholder,
                 ).copyWith(
                   suffixIcon:
@@ -511,7 +512,7 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
                               setState(() => _committedQuery = '');
                               _fetchPage(reset: true);
                             },
-                            icon: const Icon(Icons.close_rounded),
+                            icon: const Icon(FxIcons.fechar),
                             tooltip: 'Limpar busca',
                           ),
                 ),
@@ -752,7 +753,7 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
           ? null
           : FxLinkRow(
               label: 'Criar meu exercício',
-              icon: Icons.add_rounded,
+              icon: FxIcons.adicionar,
               onTap: () => widget.onCadastrar!(null),
             ),
     );

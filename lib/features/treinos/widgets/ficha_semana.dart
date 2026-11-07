@@ -6,6 +6,7 @@ import '../../../core/widgets/fx_status_pill.dart';
 import '../../../l10n/app_localizations.dart';
 import '../utils/semana_da_fila.dart';
 import 'ficha_acoes.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Sete linhas, uma por dia da semana. [hoje] segue `DateTime.weekday` (1 a 7).
 class FichaSemana extends StatelessWidget {
@@ -68,7 +69,7 @@ class FichaSemana extends StatelessWidget {
                   : IconButton(
                       tooltip: s.rotinaMaisAcoes,
                       onPressed: ocupado ? null : () => onMaisDoDia!(dia.dia),
-                      icon: const Icon(Icons.more_horiz_rounded),
+                      icon: const Icon(FxIcons.mais),
                     ),
               sessoes: [
                 for (final (j, sessao) in dia.sessoes.indexed)
@@ -90,7 +91,7 @@ class FichaSemana extends StatelessWidget {
                           IconButton(
                             tooltip: s.rotinaMaisAcoes,
                             onPressed: ocupado ? null : () => onMais!(dia.dia, j),
-                            icon: const Icon(Icons.more_horiz_rounded),
+                            icon: const Icon(FxIcons.mais),
                           ),
                       ],
                     ),

@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/widgets/fx_home_sheet.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_timeline_card.dart';
 import 'package:focux_app/core/theme/brand_palette.dart';
+import 'package:focux_app/core/theme/fx_icons.dart';
 
 const _longChatBodies = [
   'Primeira mensagem longa sobre treino: me manda carga e repetições para eu ajustar o plano completo.',
@@ -33,7 +34,7 @@ void main() {
                             'Como foi seu último treino? Me manda carga e repetições.',
                         meta: 'PERSONAL',
                         priority: 'P3',
-                        icon: Icons.chat_bubble_outline,
+                        icon: FxIcons.chat,
                         color: BrandPalette.defaultPrimary,
                         deepLink: '/alunos/42/chat',
                       ),
@@ -69,7 +70,7 @@ void main() {
           'Inclua também como se sentiu nas últimas séries e se teve alguma dor.',
       meta: 'PERSONAL',
       priority: 'P3',
-      icon: Icons.chat_bubble_outline,
+      icon: FxIcons.chat,
       color: BrandPalette.defaultPrimary,
       deepLink: '/alunos/42/chat',
     );
@@ -145,7 +146,7 @@ void main() {
                   'repetições para eu ajustar o plano completo desta semana.',
               meta: 'PERSONAL',
               priority: 'P3',
-              icon: Icons.chat_bubble_outline,
+              icon: FxIcons.chat,
               color: BrandPalette.defaultPrimary,
               deepLink: '/alunos/42/chat',
             ),
@@ -156,8 +157,8 @@ void main() {
       ),
     );
 
-    expect(find.byIcon(Icons.expand_more), findsOneWidget);
-    expect(find.byIcon(Icons.chevron_right), findsNothing);
+    expect(find.byIcon(FxIcons.chevronBaixo), findsOneWidget);
+    expect(find.byIcon(FxIcons.chevronDireita), findsNothing);
   });
 
   testWidgets('route-only timeline tile keeps chevron', (tester) async {
@@ -172,7 +173,7 @@ void main() {
               body: 'Curto.',
               meta: '',
               priority: 'P3',
-              icon: Icons.radar_outlined,
+              icon: FxIcons.radar,
               color: Colors.orange,
               deepLink: '/alunos/42',
             ),
@@ -183,7 +184,7 @@ void main() {
       ),
     );
 
-    expect(find.byIcon(Icons.chevron_right), findsOneWidget);
-    expect(find.byIcon(Icons.expand_more), findsNothing);
+    expect(find.byIcon(FxIcons.chevronDireita), findsOneWidget);
+    expect(find.byIcon(FxIcons.chevronBaixo), findsNothing);
   });
 }

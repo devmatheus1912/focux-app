@@ -25,6 +25,7 @@ import '../data/upsell_repository.dart';
 import '../utils/oferta_upsell_display.dart';
 import '../widgets/oferta_upsell_editor.dart';
 import '../../../core/utils/fx_utils.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class OfertasUpsellScreen extends ConsumerStatefulWidget {
   const OfertasUpsellScreen({super.key});
@@ -149,7 +150,7 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
         context,
         title: ofertaEnviarConfirmTitle(aluno.nome),
         message: ofertaEnviarConfirmMessage(oferta.titulo),
-        icon: Icons.send_rounded,
+        icon: FxIcons.enviar,
         confirmLabel: 'Enviar',
       );
       if (!ok || !mounted) return;
@@ -314,7 +315,7 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Icon(
-                          Icons.lightbulb_outline_rounded,
+                          FxIcons.ideiaPequeno,
                           size: 16,
                           color: mute,
                         ),
@@ -363,13 +364,13 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
           if (oferta.ativo)
             IconButton(
               tooltip: ofertaEnviarTooltip(),
-              icon: Icon(Icons.send_rounded, color: fxScreenMute(context)),
+              icon: Icon(FxIcons.enviar, color: fxScreenMute(context)),
               onPressed: () => _enviarParaAluno(oferta),
             )
           else
             const SizedBox(width: TokensStrip.s2),
           Icon(
-            Icons.chevron_right_rounded,
+            FxIcons.chevronDireita,
             color: fxScreenMute(context),
           ),
         ],

@@ -9,13 +9,14 @@ import '../../../core/utils/pt_br_display.dart';
 import '../../../core/widgets/fx_choice_strip.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_grafico_linha.dart';
-import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../l10n/pt.dart';
 import '../data/evolucao_repository.dart';
 import '../data/meta_corporal.dart';
 import '../utils/evolucao_display.dart';
 import '../utils/evolucao_series.dart';
+import 'evolucao_historico_folha.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Aba Medidas, igual para personal e aluno. A linha abre [onAbrirMedida].
 class EvolucaoMedidasAba extends StatefulWidget {
@@ -24,17 +25,24 @@ class EvolucaoMedidasAba extends StatefulWidget {
     required this.medidas,
     required this.vazioSubtitulo,
     required this.onAtualizar,
-    this.onAbrirMedida,
+    this.onAbrirRegistro,
+    this.podeAbrirRegistro,
     this.topo = const [],
     this.depois = const [],
     this.metas = const [],
     this.gordura = const [],
+    this.massa = const [],
   });
 
   final List<MedidaCorporal> medidas;
   final String vazioSubtitulo;
   final Future<void> Function() onAtualizar;
-  final ValueChanged<MedidaCorporal>? onAbrirMedida;
+
+  /// Linha do Histórico tocada.
+  final ValueChanged<RegistroDoHistorico>? onAbrirRegistro;
+
+  /// Quais linhas do Histórico abrem; padrão: as que têm medida.
+  final bool Function(RegistroDoHistorico)? podeAbrirRegistro;
 
   /// Pendências de meta, acima do gráfico.
   final List<Widget> topo;
@@ -43,8 +51,9 @@ class EvolucaoMedidasAba extends StatefulWidget {
   final List<Widget> depois;
   final List<MetaCorporal> metas;
 
-  /// Gordura vem das avaliações.
+  /// Gordura e massa magra vêm das avaliações.
   final List<PontoGordura> gordura;
+  final List<PontoGordura> massa;
 
   @override
   State<EvolucaoMedidasAba> createState() => _EvolucaoMedidasAbaState();
@@ -61,6 +70,34 @@ class _EvolucaoMedidasAbaState extends State<EvolucaoMedidasAba> {
 
   MetaCorporal? _metaDe(EvolucaoMetrica m) =>
       widget.metas.where((x) => x.aberta && x.metrica == m.codigoMeta).firstOrNull;
+
+  List<RegistroDoHistorico> get _registros => registrosDoHistorico(
+    widget.medidas.where(evolucaoMedidaTemConteudo).toList(),
+    gordura: widget.gordura,
+    massa: widget.massa,
+  );
+
+  bool _podeAbrir(RegistroDoHistorico r) =>
+      widget.onAbrirRegistro != null &&
+      (widget.podeAbrirRegistro?.call(r) ?? r.medida != null);
+
+  /// Histórico com [destaque] marcado (o par do "Confira").
+  Future<void> _abrirHistorico({Set<String> destaque = const {}}) async {
+    final r = await abrirHistoricoDaEvolucao(
+      context,
+      registros: _registros,
+      destaque: destaque,
+      podeAbrir: _podeAbrir,
+    );
+    if (r != null) widget.onAbrirRegistro?.call(r);
+  }
+
+  /// O salto que pede "Confira": a data de antes e a de depois.
+  Set<String> _datasDoSalto(List<PontoGrafico> serie) {
+    final i = serie.length - 1;
+    String iso(DateTime d) => d.toIso8601String().substring(0, 10);
+    return {iso(serie[i - 1].data), iso(serie[i].data)};
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -97,7 +134,7 @@ class _EvolucaoMedidasAbaState extends State<EvolucaoMedidasAba> {
         disponiveis.contains(_metrica) ? _metrica : disponiveis.first;
     final todos = _serie(medidas, metrica);
     final pontos = pontosDoPeriodo(todos, _periodo);
-    final recentes = medidasEmOrdem(medidas).reversed.toList();
+    final registros = _registros;
 
     return RefreshIndicator(
       onRefresh: widget.onAtualizar,
@@ -127,6 +164,7 @@ class _EvolucaoMedidasAbaState extends State<EvolucaoMedidasAba> {
             serieDe: (m) => _serie(medidas, m),
             metaDe: _metaDe,
             onSelecionar: (m) => setState(() => _metrica = m),
+            onConfira: (serie) => _abrirHistorico(destaque: _datasDoSalto(serie)),
           ),
           // Trocar o gráfico tocando na linha não se descobre sozinho.
           if (disponiveis.length > 1 && todos.length >= evolucaoPontosParaGrafico)
@@ -141,7 +179,11 @@ class _EvolucaoMedidasAbaState extends State<EvolucaoMedidasAba> {
             ),
           const SizedBox(height: TokensStrip.s4),
           ...widget.depois,
-          _LinhaHistorico(medidas: recentes, onAbrir: widget.onAbrirMedida),
+          FxSatelliteListTile(
+            title: ptS.evolucaoHistoricoLinha(registros.length),
+            titleCase: false,
+            onTap: _abrirHistorico,
+          ),
         ],
       ),
     );
@@ -195,6 +237,7 @@ class _BlocoDaSerie extends StatelessWidget {
                 unidade: metrica.unidade,
                 tendencia: tendencia,
                 alvo: alvo,
+                suspeitos: pontosSuspeitos(pontos, metrica.unidade),
                 resumo: resumoDaSerie(metrica, pontos),
               ),
             )
@@ -224,6 +267,7 @@ class _ListaDeMedidas extends StatelessWidget {
     required this.serieDe,
     required this.metaDe,
     required this.onSelecionar,
+    required this.onConfira,
   });
 
   final List<EvolucaoMetrica> metricas;
@@ -231,10 +275,16 @@ class _ListaDeMedidas extends StatelessWidget {
   final List<PontoGrafico> Function(EvolucaoMetrica) serieDe;
   final MetaCorporal? Function(EvolucaoMetrica) metaDe;
   final ValueChanged<EvolucaoMetrica> onSelecionar;
+  final ValueChanged<List<PontoGrafico>> onConfira;
 
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
+    final series = {for (final m in metricas) m: serieDe(m)};
+    // Data mais antiga da lista: quem começou depois diz "desde a 1ª medida".
+    final inicio = series.values
+        .map((s) => s.first.data)
+        .reduce((a, b) => a.isBefore(b) ? a : b);
     return Container(
       decoration: fxListCardDecoration(context),
       child: Column(
@@ -243,10 +293,15 @@ class _ListaDeMedidas extends StatelessWidget {
             if (i > 0) Divider(height: 1, color: chrome.line),
             _LinhaDeMetrica(
               metrica: m,
-              serie: serieDe(m),
+              serie: series[m]!,
               meta: metaDe(m),
               selecionada: m == selecionada,
+              basePropria: series[m]!.first.data.isAfter(inicio),
+              suspeita:
+                  series[m]!.length >= 2 &&
+                  pontosSuspeitos(series[m]!, m.unidade).contains(series[m]!.length - 1),
               onTap: () => onSelecionar(m),
+              onConfira: () => onConfira(series[m]!),
             ),
           ],
         ],
@@ -262,7 +317,10 @@ class _LinhaDeMetrica extends StatelessWidget {
     required this.serie,
     required this.selecionada,
     required this.onTap,
+    required this.onConfira,
     this.meta,
+    this.basePropria = false,
+    this.suspeita = false,
   });
 
   final EvolucaoMetrica metrica;
@@ -270,6 +328,13 @@ class _LinhaDeMetrica extends StatelessWidget {
   final bool selecionada;
   final VoidCallback onTap;
   final MetaCorporal? meta;
+
+  /// Começou depois das outras medidas: a base da diferença é outra data.
+  final bool basePropria;
+
+  /// Última mudança fora do comum: selo "Confira", que abre o Histórico.
+  final bool suspeita;
+  final VoidCallback onConfira;
 
   @override
   Widget build(BuildContext context) {
@@ -282,10 +347,16 @@ class _LinhaDeMetrica extends StatelessWidget {
     final detalhe =
         serie.length < 2
             ? dataCurta(serie.last.data)
+            : basePropria
+            ? ptS.evolucaoDesdePrimeira(
+              diferencaTexto(diferenca, metrica.unidade),
+              dataCurta(serie.first.data),
+            )
             : ptS.evolucaoDesde(
               diferencaTexto(diferenca, metrica.unidade),
               dataCurta(serie.first.data),
             );
+    final alerta = chrome.isDark ? EagleTokens.warnDark : EagleTokens.warn;
     final rumo = rumoDaMeta(meta, serie.last.valor);
     final corRumo = corDoRumo(chrome, rumo);
     final rumoTexto = switch (rumo) {
@@ -296,7 +367,13 @@ class _LinhaDeMetrica extends StatelessWidget {
     return Semantics(
       button: true,
       selected: selecionada,
-      label: [metrica.rotulo, valor, detalhe, if (rumoTexto != null) rumoTexto].join(', '),
+      label: [
+        metrica.rotulo,
+        valor,
+        detalhe,
+        if (rumoTexto != null) rumoTexto,
+        if (suspeita) ptS.comparacaoConfira,
+      ].join(', '),
       excludeSemantics: true,
       child: InkWell(
         onTap: onTap,
@@ -335,10 +412,33 @@ class _LinhaDeMetrica extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: TokensStrip.s2),
-                  Text(
-                    valor,
-                    style: FocuxHubTypography.cardTitle(color: chrome.ink)
-                        .copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        valor,
+                        style: FocuxHubTypography.cardTitle(color: chrome.ink)
+                            .copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
+                      ),
+                      if (suspeita)
+                        // Alvo de toque próprio: a linha troca o gráfico, o selo
+                        // abre o registro para conferir.
+                        InkWell(
+                          onTap: onConfira,
+                          borderRadius: BorderRadius.circular(TokensStrip.s2),
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(minHeight: 44, minWidth: 44),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(FxIcons.alertaPequeno, size: 14, color: alerta),
+                                const SizedBox(width: 2),
+                                Text(ptS.comparacaoConfira, style: FocuxHubTypography.chip(alerta)),
+                              ],
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 ],
               ),
@@ -389,91 +489,3 @@ Color? corDoRumo(ShellPalette chrome, RumoDaMeta? rumo) => switch (rumo) {
   null => null,
 };
 
-/// O histórico mora numa folha: a aba mostra gráfico e medidas sem cartões de data.
-class _LinhaHistorico extends StatelessWidget {
-  const _LinhaHistorico({required this.medidas, required this.onAbrir});
-
-  /// Da mais nova para a mais antiga.
-  final List<MedidaCorporal> medidas;
-  final ValueChanged<MedidaCorporal>? onAbrir;
-
-  Future<void> _abrir(BuildContext context) async {
-    final escolhida = await showFxHomeSheet<MedidaCorporal>(
-      context,
-      builder: (ctx) => _FolhaHistorico(medidas: medidas, podeAbrir: onAbrir != null),
-    );
-    if (escolhida != null) onAbrir?.call(escolhida);
-  }
-
-  @override
-  Widget build(BuildContext context) => FxSatelliteListTile(
-    title: ptS.evolucaoHistoricoLinha(medidas.length),
-    titleCase: false,
-    onTap: () => _abrir(context),
-  );
-}
-
-class _FolhaHistorico extends StatelessWidget {
-  const _FolhaHistorico({required this.medidas, required this.podeAbrir});
-
-  final List<MedidaCorporal> medidas;
-  final bool podeAbrir;
-
-  static String _mes(String data) {
-    final d = DateTime.tryParse(data);
-    return d == null ? data : evolucaoMesAno(d);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
-    final filhos = <Widget>[];
-    String? mes;
-    for (final m in medidas) {
-      final atual = _mes(m.data);
-      if (atual != mes) {
-        mes = atual;
-        filhos.add(
-          Padding(
-            padding: const EdgeInsets.only(
-              top: TokensStrip.s2,
-              bottom: TokensStrip.s1,
-            ),
-            child: Text(atual, style: FocuxHubTypography.chip(chrome.mute)),
-          ),
-        );
-      }
-      filhos.add(
-        FxSatelliteListTile(
-          title: evolucaoMedidaLabel(m),
-          subtitle: Text(
-            [
-              evolucaoMedidaSubtitle(m),
-              if (evolucaoAutorLabel(m.registradoPor) case final autor?) autor,
-            ].join('\n'),
-          ),
-          onTap: podeAbrir ? () => Navigator.of(context).pop(m) : null,
-        ),
-      );
-    }
-    return FxHomeSheetSurface(
-      isDark: chrome.isDark,
-      maxHeight:
-          MediaQuery.sizeOf(context).height * FxHomeSheetChrome.maxHeightFactor,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          FxHomeSheetHandle(isDark: chrome.isDark),
-          const SizedBox(height: TokensStrip.s3),
-          FxHomeSheetHeader(
-            isDark: chrome.isDark,
-            title: ptS.evolucaoHistoricoTitulo,
-          ),
-          const SizedBox(height: TokensStrip.s2),
-          Flexible(child: ListView(shrinkWrap: true, children: filhos)),
-        ],
-      ),
-    );
-  }
-}

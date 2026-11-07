@@ -31,6 +31,7 @@ import '../../subscription/models/subscription_plan.dart';
 import '../data/lead_repository.dart';
 import '../providers/leads_provider.dart';
 import '../utils/lead_display.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class LeadsListScreen extends ConsumerStatefulWidget {
   const LeadsListScreen({super.key});
@@ -263,7 +264,7 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
                       vertical: 12,
                     ),
                     prefixIcon: Icon(
-                      Icons.search_rounded,
+                      FxIcons.buscar,
                       color: primary,
                       size: 20,
                     ),
@@ -279,7 +280,7 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
                                 _load(reset: true);
                               },
                               icon: Icon(
-                                Icons.close_rounded,
+                                FxIcons.fechar,
                                 color: mute,
                                 size: 18,
                               ),

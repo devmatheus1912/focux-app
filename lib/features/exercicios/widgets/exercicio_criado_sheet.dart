@@ -7,6 +7,7 @@ import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_sheet_frame.dart';
 import '../models/exercicio_criado.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Folha logo depois de criar: diz onde o exercício ficou e oferece o próximo
 /// passo. Fechar a folha mantém o exercício onde está ("Meus exercícios").
@@ -52,7 +53,7 @@ class _ExercicioCriadoSheet extends StatelessWidget {
     return FxSheetFrame(
       title: 'Exercício criado',
       subtitle: nome,
-      leading: Icon(Icons.check_circle_rounded, color: chrome.brand, size: 20),
+      leading: Icon(FxIcons.concluidoAtivo, color: chrome.brand, size: 20),
       footer: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

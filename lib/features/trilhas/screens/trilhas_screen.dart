@@ -35,6 +35,7 @@ import '../providers/trilhas_provider.dart';
 import '../utils/trilhas_display.dart';
 import '../widgets/trilhas_help_sheet.dart';
 import '../../../core/widgets/fx_action_chip.dart';
+import '../../../core/theme/fx_icons.dart';
 
 part 'trilhas_screen_cards.part.dart';
 
@@ -124,7 +125,7 @@ class _TrilhasScreenState extends ConsumerState<TrilhasScreen> {
         context,
         title: 'Atribuir trilha',
         subtitle: 'Meta, valor e as primeiras etapas.',
-        icon: Icons.flag_outlined,
+        icon: FxIcons.meta,
         confirmLabel: 'Atribuir trilha',
         child: StatefulBuilder(
           builder:
@@ -134,16 +135,16 @@ class _TrilhasScreenState extends ConsumerState<TrilhasScreen> {
                   AlunoInsetFormField(
                     controller: tituloCtrl,
                     label: 'Título da trilha',
-                    icon: Icons.title_outlined,
+                    icon: FxIcons.titulo,
                   ),
                   AlunoInsetFormField(
                     controller: descCtrl,
                     label: 'Descrição (opcional)',
-                    icon: Icons.notes_outlined,
+                    icon: FxIcons.notas,
                     maxLines: 2,
                   ),
                   FxInsetPickerRow(
-                    icon: Icons.flag_outlined,
+                    icon: FxIcons.meta,
                     label: 'Tipo de meta',
                     value: trilhaMetaTipoLabel(metaTipo),
                     onTap: () async {
@@ -166,13 +167,13 @@ class _TrilhasScreenState extends ConsumerState<TrilhasScreen> {
                   AlunoInsetFormField(
                     controller: metaValorCtrl,
                     label: trilhaMetaValorHint(metaTipo),
-                    icon: Icons.tune_outlined,
+                    icon: FxIcons.filtros,
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
                   ),
                   FxInsetPickerRow(
-                    icon: Icons.event_outlined,
+                    icon: FxIcons.calendario,
                     label: 'Prazo',
                     value: trilhaPrazoOpcaoLabel(prazoDias == 0 ? null : prazoDias),
                     onTap: () async {
@@ -199,17 +200,17 @@ class _TrilhasScreenState extends ConsumerState<TrilhasScreen> {
                   AlunoInsetFormField(
                     controller: marco1,
                     label: 'Primeira etapa',
-                    icon: Icons.check_circle_outline,
+                    icon: FxIcons.concluido,
                   ),
                   AlunoInsetFormField(
                     controller: marco2,
                     label: 'Segunda etapa (opcional)',
-                    icon: Icons.check_circle_outline,
+                    icon: FxIcons.concluido,
                   ),
                   AlunoInsetFormField(
                     controller: marco3,
                     label: 'Terceira etapa (opcional)',
-                    icon: Icons.check_circle_outline,
+                    icon: FxIcons.concluido,
                     showDivider: false,
                   ),
                 ],
@@ -288,12 +289,12 @@ class _TrilhasScreenState extends ConsumerState<TrilhasScreen> {
         context,
         title: 'Atualizar progresso',
         subtitle: trilha.titulo,
-        icon: Icons.tune_outlined,
+        icon: FxIcons.filtros,
         confirmLabel: 'Salvar progresso',
         child: AlunoInsetFormField(
           controller: valorCtrl,
           label: trilhaMetaValorHint(trilha.metaTipo),
-          icon: Icons.tune_outlined,
+          icon: FxIcons.filtros,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           showDivider: false,
         ),
@@ -331,12 +332,12 @@ class _TrilhasScreenState extends ConsumerState<TrilhasScreen> {
         context,
         title: 'Nova etapa',
         subtitle: trilha.titulo,
-        icon: Icons.flag_outlined,
+        icon: FxIcons.meta,
         confirmLabel: 'Adicionar etapa',
         child: AlunoInsetFormField(
           controller: tituloCtrl,
           label: 'Título da etapa',
-          icon: Icons.check_circle_outline,
+          icon: FxIcons.concluido,
           showDivider: false,
         ),
       );

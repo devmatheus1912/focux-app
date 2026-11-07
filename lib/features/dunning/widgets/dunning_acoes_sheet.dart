@@ -6,6 +6,7 @@ import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_action_chip.dart';
 import '../data/dunning_repository.dart';
 import '../utils/dunning_ops_display.dart';
+import '../../../core/theme/fx_icons.dart';
 
 Future<void> showDunningAcoesSheet(
   BuildContext context, {
@@ -79,7 +80,7 @@ class _DunningAcoesSheet extends StatelessWidget {
               motivo: falha.motivo,
               tentativa: falha.tentativa,
             ),
-            leading: Icon(Icons.warning_amber_outlined, size: 18, color: primary),
+            leading: Icon(FxIcons.alerta, size: 18, color: primary),
           ),
           const SizedBox(height: TokensStrip.s4),
           Wrap(

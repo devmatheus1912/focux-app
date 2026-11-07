@@ -5,6 +5,7 @@ import '../../../l10n/app_localizations.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno360_followup_dates.dart';
 import 'aluno360_commitment_sheet.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// "Próximo contato": a data do retorno (ou o convite para agendar) e um
 /// verbo. Abre a folha de follow-up.
@@ -42,7 +43,7 @@ class Aluno360FollowUpCard extends StatelessWidget {
         !(aluno.snoozedUntilDate?.isAfter(DateTime.now()) ?? false);
     return FxActionRow(
       key: const ValueKey('aluno360_follow_up'),
-      leading: Icons.event_outlined,
+      leading: FxIcons.calendario,
       titulo: s.alunoResumoContatoTitulo,
       motivo: legenda(s, aluno),
       verbo: semData

@@ -13,7 +13,7 @@ extension on _DesafiosScreenState {
         context,
         title: 'Novo desafio',
         subtitle: 'Prazo, tipo e meta entram no ranking.',
-        icon: Icons.flag_outlined,
+        icon: FxIcons.meta,
         confirmLabel: 'Criar',
         child: StatefulBuilder(
           builder: (ctx, setDialogState) => Column(
@@ -22,16 +22,16 @@ extension on _DesafiosScreenState {
               AlunoInsetFormField(
                 controller: tituloCtrl,
                 label: 'Título',
-                icon: Icons.title_outlined,
+                icon: FxIcons.titulo,
               ),
               AlunoInsetFormField(
                 controller: descricaoCtrl,
                 label: 'Descrição (opcional)',
-                icon: Icons.notes_outlined,
+                icon: FxIcons.notas,
                 maxLines: 2,
               ),
               FxInsetPickerRow(
-                icon: Icons.category_outlined,
+                icon: FxIcons.categoria,
                 label: 'Tipo',
                 value: desafioTipoLabel(tipo),
                 onTap: () async {
@@ -52,7 +52,7 @@ extension on _DesafiosScreenState {
                 },
               ),
               FxInsetPickerRow(
-                icon: Icons.event_outlined,
+                icon: FxIcons.calendario,
                 label: 'Prazo',
                 value: desafioDuracaoLabel(dias),
                 onTap: () async {
@@ -73,7 +73,7 @@ extension on _DesafiosScreenState {
                 },
               ),
               FxInsetPickerRow(
-                icon: Icons.emoji_events_outlined,
+                icon: FxIcons.trofeu,
                 label: 'Meta',
                 value: desafioMetaLabel(metaPontos),
                 showDivider: false,

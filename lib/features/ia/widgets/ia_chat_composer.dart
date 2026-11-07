@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/widgets/fx_input_deco.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class IaChatComposer extends StatelessWidget {
   const IaChatComposer({
@@ -46,7 +47,7 @@ class IaChatComposer extends StatelessWidget {
           const SizedBox(width: 8),
           IconButton(
             tooltip: 'Enviar',
-            icon: const Icon(Icons.send_rounded),
+            icon: const Icon(FxIcons.enviar),
             onPressed: loading ? null : onSend,
           ),
         ],

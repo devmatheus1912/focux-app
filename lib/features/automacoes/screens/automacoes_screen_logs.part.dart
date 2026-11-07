@@ -36,7 +36,7 @@ extension on _AutomacoesScreenState {
         context,
         title: automacaoIniciarConfirmTitle(aluno.nome),
         message: automacaoIniciarConfirmMessage(),
-        icon: Icons.play_arrow_rounded,
+        icon: FxIcons.play,
         confirmLabel: 'Iniciar',
       );
       if (!ok || !mounted) return;
@@ -144,7 +144,7 @@ class _AutomacaoLogsSheetState extends State<_AutomacaoLogsSheet> {
           FxHomeSheetHeader(
             isDark: chrome.isDark,
             leading: Icon(
-              Icons.timeline_outlined,
+              FxIcons.linhaDoTempo,
               color: primary,
               size: 18,
             ),

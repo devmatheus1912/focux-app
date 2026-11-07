@@ -104,7 +104,7 @@ class _PrescriptionStepperRow extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   _StepperButton(
-                    icon: Icons.remove_rounded,
+                    icon: FxIcons.remover,
                     onTap: onDecrement,
                     mute: mute,
                   ),
@@ -119,7 +119,7 @@ class _PrescriptionStepperRow extends StatelessWidget {
                     ),
                   ),
                   _StepperButton(
-                    icon: Icons.add_rounded,
+                    icon: FxIcons.adicionar,
                     onTap: onIncrement,
                     mute: mute,
                   ),
@@ -302,7 +302,7 @@ class _PrescriptionExpandRow extends StatelessWidget {
                     ).copyWith(fontWeight: FontWeight.w700),
                   ),
                 ),
-                Icon(Icons.add_rounded, size: 20, color: mute),
+                Icon(FxIcons.adicionar, size: 20, color: mute),
               ],
             ),
           ),
@@ -340,7 +340,7 @@ class _PrescriptionNotesField extends StatelessWidget {
           ),
           decoration: FxInputDeco.insetGrouped(
             context,
-            icon: Icons.notes_rounded,
+            icon: FxIcons.notas,
             hint: 'Orientações curtas para o aluno',
             iconColor: iconColor,
           ),
@@ -380,7 +380,7 @@ class _RepeatPrescriptionTile extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         child: Row(
           children: [
-            Icon(Icons.history_rounded, color: primary, size: 20),
+            Icon(FxIcons.historico, color: primary, size: 20),
             const SizedBox(width: 10),
             Expanded(
               child: Text(

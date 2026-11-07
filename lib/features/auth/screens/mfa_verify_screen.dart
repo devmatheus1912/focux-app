@@ -14,6 +14,7 @@ import '../utils/auth_error_messages.dart';
 import '../utils/post_login_redirect.dart';
 import '../widgets/auth_shell.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Challenge MFA após login Personal (TOTP ou recovery).
 class MfaVerifyScreen extends ConsumerStatefulWidget {
@@ -153,7 +154,7 @@ class _MfaVerifyScreenState extends ConsumerState<MfaVerifyScreen> {
                                 : 'Código',
                         controller: _codeController,
                         hintText: _useRecovery ? 'AAAA-BBBB' : '123456',
-                        icon: Icons.security,
+                        icon: FxIcons.seguranca,
                         keyboardType:
                             _useRecovery
                                 ? TextInputType.text

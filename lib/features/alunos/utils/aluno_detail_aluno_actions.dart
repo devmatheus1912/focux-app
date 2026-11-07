@@ -19,6 +19,7 @@ import 'aluno360_copilot_logic.dart';
 import 'aluno360_copilot_task_actions.dart';
 import 'aluno_status.dart';
 import 'convite_marca_loader.dart';
+import '../../../core/theme/fx_icons.dart';
 
 String alunoDeleteConfirmToken(String nome) {
   final trimmed = nome.trim();
@@ -114,8 +115,8 @@ Future<void> confirmarReenviarLinkAlunoDetail(
         aindaNaoEntrou
             ? s.alunoReenviarConviteTexto
             : s.alunoReenviarLinkTexto(aluno.nome),
-    icon: Icons.link_rounded,
-    confirmIcon: Icons.link_rounded,
+    icon: FxIcons.link,
+    confirmIcon: FxIcons.link,
     confirmLabel: s.alunoReenviarLinkConfirma,
   );
   if (!confirm || !context.mounted) return;
@@ -160,7 +161,7 @@ void abrirChatAluno360(BuildContext context, WidgetRef ref, Aluno aluno) {
       message: draft,
       title: 'Mensagem sugerida',
       subtitle: 'Copiloto · revise antes de enviar.',
-      icon: Icons.auto_awesome_rounded,
+      icon: FxIcons.ia,
     );
     return;
   }

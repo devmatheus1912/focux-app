@@ -5,6 +5,7 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_sheet_frame.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Dia do mês (1 a [maximo]) em grade de 7 colunas: um toque escolhe.
 Future<int?> showDiaVencimentoSheet(
@@ -21,7 +22,7 @@ Future<int?> showDiaVencimentoSheet(
           title: titulo,
           subtitle: 'Toque no dia em que a cobrança vence todo mês.',
           leading: Icon(
-            Icons.event_repeat_rounded,
+            FxIcons.recorrencia,
             color: ShellChrome.of(sheetContext).brand,
             size: 20,
           ),

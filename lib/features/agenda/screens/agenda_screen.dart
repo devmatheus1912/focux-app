@@ -42,6 +42,7 @@ import '../../../core/widgets/fx_status_banner.dart';
 import '../widgets/agenda_meta_strip.dart';
 import '../widgets/agenda_slot_picker_sheet.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../core/theme/fx_icons.dart';
 
 part 'agenda_screen_actions.part.dart';
 part 'agenda_screen_widgets.part.dart';
@@ -198,14 +199,14 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen>
     final escolha = await showFxGroupedActionSheet<String>(
       context,
       titulo: s.agendaMenuTitulo,
-      icone: Icons.more_horiz_rounded,
+      icone: FxIcons.mais,
       grupos: [
         FxActionGroup<String>(null, [
           FxActionItem(
             valor: 'calendario',
             rotulo: s.agendaConectarCalendario,
             descricao: s.agendaConectarCalendarioTexto,
-            icone: Icons.event_available_outlined,
+            icone: FxIcons.eventoConfirmado,
           ),
         ]),
       ],
@@ -273,7 +274,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen>
           actions: [
             IconButton(
               tooltip: 'Como usar a agenda',
-              icon: const Icon(Icons.help_outline_rounded),
+              icon: const Icon(FxIcons.ajuda),
               onPressed: () {
                 AnalyticsService.instance.track(ProductEvents.agendaHelpOpened);
                 showAgendaHelpSheet(context);
@@ -282,12 +283,12 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen>
             IconButton(
               tooltip: 'Novo agendamento',
               onPressed: () => _novoAgendamento(),
-              icon: const Icon(Icons.add_rounded),
+              icon: const Icon(FxIcons.adicionar),
             ),
             IconButton(
               tooltip: s.agendaMenuTitulo,
               onPressed: _menu,
-              icon: const Icon(Icons.more_horiz_rounded),
+              icon: const Icon(FxIcons.mais),
             ),
           ],
         ),

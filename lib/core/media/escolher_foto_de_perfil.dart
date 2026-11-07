@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../l10n/pt.dart';
 import '../widgets/fx_grouped_action_sheet.dart';
+import '../theme/fx_icons.dart';
 
 /// Lado da foto salva. Maior avatar do app × 3 de densidade, com folga.
 const fotoDePerfilLado = 1024;
@@ -28,12 +29,12 @@ Future<FotoDePerfil?> escolherFotoDePerfil(BuildContext context) async {
         FxActionItem(
           valor: ImageSource.camera,
           rotulo: ptS.fotoCamera,
-          icone: Icons.photo_camera_outlined,
+          icone: FxIcons.camera,
         ),
         FxActionItem(
           valor: ImageSource.gallery,
           rotulo: ptS.fotoGaleria,
-          icone: Icons.photo_library_outlined,
+          icone: FxIcons.galeria,
         ),
       ]),
     ],

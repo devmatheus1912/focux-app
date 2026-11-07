@@ -9,6 +9,7 @@ import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../data/aluno_repository.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class AlunoDeleteConfirmSheet extends StatefulWidget {
   const AlunoDeleteConfirmSheet({
@@ -60,7 +61,7 @@ class _AlunoDeleteConfirmSheetState extends State<AlunoDeleteConfirmSheet> {
             title: 'Excluir aluno?',
             subtitle: '$displayName será removido permanentemente.',
             leading: const Icon(
-              Icons.delete_outline_rounded,
+              FxIcons.excluir,
               color: EagleTokens.bad,
               size: 18,
             ),
@@ -141,7 +142,7 @@ class _AlunoDeleteConfirmSheetState extends State<AlunoDeleteConfirmSheet> {
                         Navigator.of(context).pop(true);
                       }
                       : null,
-              icon: const Icon(Icons.delete_outline_rounded, size: 18),
+              icon: const Icon(FxIcons.excluir, size: 18),
               label: Text('Excluir $displayName'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: EagleTokens.bad,

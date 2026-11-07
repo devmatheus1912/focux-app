@@ -37,7 +37,7 @@ void main() {
     expect(screen, isNot(contains('_KanbanCard')));
     expect(screen, isNot(contains('FloatingActionButton')));
     expect(screen, isNot(contains("icon: 'plus'")));
-    expect(screen, isNot(contains('Icons.person_add')));
+    expect(screen, isNot(contains('FxIcons.adicionarPessoa')));
     expect(screen, isNot(contains(r'showError(context, $e)')));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });

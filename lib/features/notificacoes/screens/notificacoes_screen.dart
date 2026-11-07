@@ -36,6 +36,7 @@ import '../data/notificacoes_repository.dart';
 import '../notificacao_display.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../l10n/pt.dart';
+import '../../../core/theme/fx_icons.dart';
 
 part 'notificacoes_screen_widgets.part.dart';
 
@@ -221,7 +222,7 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
         title: ptS.notificacoesLimparLidas,
         message: ptS.notificacoesAsNotificacoesJaLidasSaem,
         confirmLabel: ptS.notificacoesLimparLidas2,
-        icon: Icons.delete_sweep_outlined,
+        icon: FxIcons.limpar,
         destructive: true,
       );
       if (!ok || !context.mounted) return;
@@ -327,7 +328,7 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
               ),
             IconButton(
               tooltip: ptS.agendaAlunoMaisOpcoes,
-              icon: const Icon(Icons.more_horiz_rounded),
+              icon: const Icon(FxIcons.mais),
               onPressed: () async {
                 final escolha = await showFxGroupedActionSheet<String>(
                   context,
@@ -337,13 +338,13 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
                       FxActionItem(
                         valor: 'ajuda',
                         rotulo: ptS.notificacoesComoUsarAsNotificacoes,
-                        icone: Icons.help_outline_rounded,
+                        icone: FxIcons.ajuda,
                       ),
                       if (lidasCount > 0)
                         FxActionItem(
                           valor: 'limpar',
                           rotulo: ptS.notificacoesLimparLidas2,
-                          icone: Icons.delete_sweep_outlined,
+                          icone: FxIcons.limpar,
                         ),
                     ]),
                   ],
@@ -412,7 +413,7 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
                       horizontal: 12,
                       vertical: 12,
                     ),
-                    prefixIcon: Icon(Icons.search_rounded, size: 20),
+                    prefixIcon: Icon(FxIcons.buscar, size: 20),
                   ),
                 ),
               ),

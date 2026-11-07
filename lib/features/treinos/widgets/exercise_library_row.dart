@@ -10,6 +10,7 @@ import '../../exercicios/data/exercicio_repository.dart';
 import '../../exercicios/screens/widgets/exercise_media_thumb.dart';
 import '../../exercicios/utils/biblioteca_aba.dart';
 import '../utils/exercise_library_meta.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Linha inset da biblioteca — paridade Perfil (48–52px, thumb opcional, check).
 class ExerciseLibraryRow extends StatelessWidget {
@@ -182,7 +183,7 @@ class ExerciseLibraryRow extends StatelessWidget {
                             child: Row(
                               children: [
                                 const Icon(
-                                  Icons.warning_amber_rounded,
+                                  FxIcons.alertaPequeno,
                                   size: 14,
                                   color: EagleTokens.warn,
                                 ),
@@ -221,17 +222,17 @@ class ExerciseLibraryRow extends StatelessWidget {
                       },
                       icon: Icon(
                         exercicio.favoritado
-                            ? Icons.star_rounded
-                            : Icons.star_outline_rounded,
+                            ? FxIcons.estrelaAtiva
+                            : FxIcons.estrela,
                         color: exercicio.favoritado ? EagleTokens.gold : mute,
                         size: 22,
                       ),
                     ),
                   if (selected)
-                    Icon(Icons.check_rounded, color: brand, size: 20)
+                    Icon(FxIcons.check, color: brand, size: 20)
                   else if (!picker)
                     Icon(
-                      Icons.chevron_right_rounded,
+                      FxIcons.chevronDireita,
                       color: mute,
                       size: FxSettingsLayout.chevronSize,
                     ),

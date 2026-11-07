@@ -9,6 +9,7 @@ import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/coach_proativo_repository.dart';
 import '../utils/coach_display.dart';
+import '../../../core/theme/fx_icons.dart';
 
 Future<void> showCoachCatalogSheet(
   BuildContext context, {
@@ -106,7 +107,7 @@ class _CoachCatalogSheetState extends State<_CoachCatalogSheet> {
           FxHomeSheetHeader(
             title: 'Alunos que pedem atenção',
             subtitle: _total == 1 ? '1 aluno nesta lista.' : '$_total alunos nesta lista.',
-            leading: Icon(Icons.auto_awesome_outlined, size: 18, color: primary),
+            leading: Icon(FxIcons.ia, size: 18, color: primary),
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(

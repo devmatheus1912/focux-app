@@ -61,6 +61,7 @@ import '../../../core/widgets/fx_motion.dart';
 import '../widgets/exercise_library_panel.dart';
 import '../widgets/prescription_editor_sheet.dart';
 import '../widgets/treino_no_lugar.dart';
+import '../../../core/theme/fx_icons.dart';
 
 part 'add_exercicio_to_treino_screen_actions.part.dart';
 
@@ -183,7 +184,7 @@ class _AddExercicioToTreinoScreenState
             leading: IconButton(
               tooltip: S.of(context).adicionarFechar,
               onPressed: _cancel,
-              icon: const Icon(Icons.close_rounded),
+              icon: const Icon(FxIcons.fechar),
             ),
             actions: [
               FxHelpIconButton(

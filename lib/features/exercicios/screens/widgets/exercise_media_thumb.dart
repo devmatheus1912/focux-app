@@ -4,6 +4,7 @@ import '../../../../core/widgets/fx_cached_network_image.dart';
 import '../../data/exercicio_repository.dart';
 import '../../services/biblioteca_media_config.dart';
 import '../../../../l10n/pt.dart';
+import '../../../../core/theme/fx_icons.dart';
 
 class ExerciseMediaThumb extends StatefulWidget {
   const ExerciseMediaThumb({
@@ -166,7 +167,7 @@ class _ExerciseMediaThumbState extends State<ExerciseMediaThumb>
                     borderRadius: BorderRadius.circular(widget.radius),
                   ),
                   child: Icon(
-                    Icons.check_rounded,
+                    FxIcons.check,
                     color: Colors.white,
                     size: widget.size * 0.46,
                   ),
@@ -209,7 +210,7 @@ class _ExerciseMediaThumbState extends State<ExerciseMediaThumb>
               border: Border.all(color: Colors.white, width: 1.5),
             ),
             child: Icon(
-              Icons.play_arrow_rounded,
+              FxIcons.play,
               color: Colors.white,
               size: widget.size * 0.26,
             ),
@@ -237,12 +238,12 @@ class _ExerciseMediaThumbState extends State<ExerciseMediaThumb>
       ),
       child: Icon(
         widget.videoEmBreve
-            ? Icons.videocam_outlined
+            ? FxIcons.video
             : personalPending
-            ? Icons.videocam_rounded
+            ? FxIcons.video
             : missing
-            ? Icons.cloud_sync_outlined
-            : Icons.fitness_center_rounded,
+            ? FxIcons.sincronizar
+            : FxIcons.treino,
         color: primary.withValues(alpha: missing ? 0.55 : 1),
         size: widget.iconSize,
       ),

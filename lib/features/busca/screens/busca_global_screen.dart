@@ -29,6 +29,7 @@ import '../data/busca_repository.dart';
 import '../models/busca_global_models.dart';
 import '../utils/busca_display.dart';
 import 'widgets/busca_global_results.dart';
+import '../../../core/theme/fx_icons.dart';
 
 final buscaQueryProvider = fxValueProvider<String>('');
 final buscaFilterProvider = fxValueProvider<BuscaTipo>(BuscaTipo.todos);
@@ -150,7 +151,7 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
       context,
       title: buscaExternalSheetTitle(),
       message: uri.toString(),
-      icon: Icons.open_in_new_rounded,
+      icon: FxIcons.abrirFora,
       confirmLabel: buscaExternalConfirmLabel(),
     );
     if (!ok) return;
@@ -228,12 +229,12 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
                     onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
                     decoration: InputDecoration(
                       hintText: buscaHint(),
-                      prefixIcon: const Icon(Icons.search_rounded),
+                      prefixIcon: const Icon(FxIcons.buscar),
                       suffixIcon: hasQuery
                           ? IconButton(
                               tooltip: 'Limpar busca',
                               onPressed: _clearQuery,
-                              icon: const Icon(Icons.close_rounded),
+                              icon: const Icon(FxIcons.fechar),
                             )
                           : null,
                       filled: true,

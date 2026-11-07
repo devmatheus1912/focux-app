@@ -29,6 +29,7 @@ import '../providers/pacotes_provider.dart';
 import '../utils/pacote_display.dart';
 import '../widgets/novo_pacote_sheet.dart';
 import '../widgets/pacotes_storefront_widgets.dart';
+import '../../../core/theme/fx_icons.dart';
 
 enum _PacoteMaisAcao { copiarLink, verVitrine }
 
@@ -271,7 +272,7 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
                 tooltip: 'Mais em pacotes',
                 onPressed: _abrirMais,
                 icon: Icon(
-                  Icons.more_horiz_rounded,
+                  FxIcons.mais,
                   color: chrome.mute,
                 ),
               ),
@@ -337,7 +338,7 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
                         vertical: 12,
                       ),
                       prefixIcon: Icon(
-                        Icons.search_rounded,
+                        FxIcons.buscar,
                         color: primary,
                         size: 20,
                       ),
@@ -347,7 +348,7 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
                               tooltip: 'Limpar busca',
                               onPressed: _clearQuery,
                               icon: Icon(
-                                Icons.close_rounded,
+                                FxIcons.fechar,
                                 color: chrome.mute,
                                 size: 18,
                               ),

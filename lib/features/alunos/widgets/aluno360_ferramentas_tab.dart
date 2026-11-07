@@ -10,6 +10,7 @@ import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno360_ferramentas_grupos.dart';
 import 'aluno360_entrance.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Aba Ferramentas: os módulos em grupos e os dados do cadastro. Quando falta
 /// algum dado, "Dados do aluno" abre a aba; completo, vai para o fim.
@@ -77,10 +78,10 @@ class Aluno360DadosDoAlunoGrupo extends StatelessWidget {
   final int alunoId;
 
   static IconData _icone(Aluno360DadoCampo c) => switch (c) {
-    Aluno360DadoCampo.contato => Icons.phone_outlined,
-    Aluno360DadoCampo.objetivo => Icons.flag_outlined,
-    Aluno360DadoCampo.nascimento => Icons.cake_outlined,
-    Aluno360DadoCampo.altura => Icons.height_outlined,
+    Aluno360DadoCampo.contato => FxIcons.telefone,
+    Aluno360DadoCampo.objetivo => FxIcons.meta,
+    Aluno360DadoCampo.nascimento => FxIcons.aniversario,
+    Aluno360DadoCampo.altura => FxIcons.altura,
   };
 
   static String _rotulo(S s, Aluno360DadoCampo c) => switch (c) {
@@ -113,7 +114,7 @@ class Aluno360DadosDoAlunoGrupo extends StatelessWidget {
             onTap: editar,
           ),
         FxSettingsTile(
-          icon: Icons.edit_outlined,
+          icon: FxIcons.editar,
           label: s.aluno360DadosEditar,
           subtitle: s.aluno360DadosEditarDetalhe,
           value: '',

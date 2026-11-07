@@ -35,6 +35,7 @@ import '../../evolucao/widgets/evolucao_hero.dart';
 import '../../evolucao/widgets/evolucao_medidas_aba.dart';
 import '../../evolucao/widgets/evolucao_recordes_aba.dart';
 import '../../evolucao/widgets/medida_form_sheet.dart';
+import '../../../core/theme/fx_icons.dart';
 
 const _chaveVistas = 'conquistas_celebradas_v1';
 
@@ -70,7 +71,7 @@ class _MeuProgressoScreenState extends ConsumerState<MeuProgressoScreen> {
     await prefs.setStringList(_chaveVistas, [...vistas, pendente.chave]);
     if (!mounted) return;
     HapticFeedback.lightImpact();
-    await mostrarConquista(context, pendente, compartilhar: true);
+    await mostrarConquista(context, pendente, compartilhar: true, celebrar: true);
   }
 
   Future<void> _maisAcoes() async {
@@ -82,7 +83,7 @@ class _MeuProgressoScreenState extends ConsumerState<MeuProgressoScreen> {
           FxActionItem(
             valor: 'sugerir',
             rotulo: ptS.metaSugerirAjuste,
-            icone: Icons.chat_bubble_outline_rounded,
+            icone: FxIcons.chat,
           ),
         ]),
       ],
@@ -123,7 +124,7 @@ class _MeuProgressoScreenState extends ConsumerState<MeuProgressoScreen> {
           context,
           title: ptS.evolucaoExcluirTitulo,
           message: ptS.evolucaoExcluirMensagem,
-          icon: Icons.delete_outline_rounded,
+          icon: FxIcons.excluir,
           confirmLabel: ptS.evolucaoExcluir,
           destructive: true,
         );
@@ -142,7 +143,7 @@ class _MeuProgressoScreenState extends ConsumerState<MeuProgressoScreen> {
       context,
       title: ptS.evolucaoExcluirFotoTitulo,
       message: ptS.evolucaoExcluirFotoMensagem,
-      icon: Icons.delete_outline_rounded,
+      icon: FxIcons.excluir,
       confirmLabel: ptS.evolucaoExcluir,
       destructive: true,
     );
@@ -185,7 +186,7 @@ class _MeuProgressoScreenState extends ConsumerState<MeuProgressoScreen> {
             if (metas.any((m) => m.aberta))
               IconButton(
                 tooltip: ptS.metaSugerirAjuste,
-                icon: const Icon(Icons.more_horiz_rounded),
+                icon: const Icon(FxIcons.mais),
                 onPressed: _maisAcoes,
               ),
           ],
@@ -206,7 +207,13 @@ class _MeuProgressoScreenState extends ConsumerState<MeuProgressoScreen> {
               ),
           data:
               (dados) {
-                final conquistas = conquistasDe(metas, dados.recordes);
+                final conquistas = conquistasDe(
+                  metas,
+                  dados.recordes,
+                  medidas: dados.medidas,
+                  gordura: dados.gordura,
+                  massa: dados.massa,
+                );
                 if (conquistas.isNotEmpty) {
                   WidgetsBinding.instance.addPostFrameCallback(
                     (_) => _celebrar(conquistas),
@@ -257,9 +264,15 @@ class _MeuProgressoScreenState extends ConsumerState<MeuProgressoScreen> {
                           medidas: dados.medidas,
                           vazioSubtitulo: ptS.meuProgressoSemMedida,
                           onAtualizar: _atualizar,
-                          onAbrirMedida: _abrirMedida,
+                          // O aluno corrige a própria medida; composição é da avaliação do personal.
+                          onAbrirRegistro: (r) {
+                            if (r.medida case final m?) _abrirMedida(m);
+                          },
+                          podeAbrirRegistro:
+                              (r) => r.medida != null && r.medida!.registradoPor != 'PERSONAL',
                           metas: metas,
                           gordura: dados.gordura,
+                          massa: dados.massa,
                           topo: [
                             if (conquistas.isNotEmpty) ...[
                               EvolucaoConquistas(

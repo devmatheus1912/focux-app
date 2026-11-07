@@ -44,6 +44,7 @@ import '../providers/perfil_provider.dart';
 import '../utils/landing_link_actions.dart';
 import '../utils/landing_studio_guidance.dart';
 import 'landing_preview_screen.dart';
+import '../../../core/theme/fx_icons.dart';
 
 part 'landing_editor_screen_actions.part.dart';
 part 'landing_studio_screen_entrevista.part.dart';

@@ -11,6 +11,7 @@ export 'aluno360_copilot_outreach_logic.dart';
 export 'aluno360_copilot_text_logic.dart';
 import 'aluno360_copilot_outreach_logic.dart';
 import 'aluno360_copilot_text_logic.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Signal chip shown in the copilot decision grid.
 class Aluno360CopilotSignal {
@@ -305,22 +306,22 @@ OperacaoStickyAction copilotoAcaoDaSugestao(
 }) => switch (tipoAcao) {
   'CONTATO' || 'WEARABLE' => OperacaoStickyAction(
     label: ptS.copilotoEnviarMensagem,
-    icon: Icons.chat_bubble_outline_rounded,
+    icon: FxIcons.chat,
     destination: OperacaoStickyDestination.chat,
   ),
   'PERFIL' => OperacaoStickyAction(
     label: ptS.copilotoCompletarCadastro,
-    icon: Icons.badge_outlined,
+    icon: FxIcons.cracha,
     destination: OperacaoStickyDestination.editAluno,
   ),
   'TREINO' => OperacaoStickyAction(
     label: ptS.copilotoAbrirFicha,
-    icon: Icons.fitness_center_rounded,
+    icon: FxIcons.treino,
     destination: OperacaoStickyDestination.treino,
   ),
   'FINANCEIRO' => OperacaoStickyAction(
     label: ptS.copilotoVerFinanceiro,
-    icon: Icons.payments_outlined,
+    icon: FxIcons.pagamento,
     destination: OperacaoStickyDestination.financeiro,
   ),
   _ => padrao,

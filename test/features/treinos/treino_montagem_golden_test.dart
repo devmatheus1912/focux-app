@@ -22,6 +22,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../support/tolerant_golden_comparator.dart';
+import 'package:focux_app/core/theme/fx_icons.dart';
 
 class _Adapter implements HttpClientAdapter {
   @override
@@ -200,13 +201,13 @@ void main() {
                           context,
                           titulo: 'Ações do treino',
                           subtitulo: 'Treino Hipertrofia',
-                          icone: Icons.fitness_center_rounded,
+                          icone: FxIcons.treino,
                           grupos: const [
                             FxActionGroup('Montar', [
                               FxActionItem(
                                 valor: 'a',
                                 rotulo: 'Adicionar exercício',
-                                icone: Icons.add_rounded,
+                                icone: FxIcons.adicionar,
                               ),
                               FxActionItem(
                                 valor: 'b',
@@ -220,14 +221,14 @@ void main() {
                                 rotulo: 'Atribuir a aluno',
                                 descricao:
                                     'Mesmo treino: suas edições chegam ao aluno',
-                                icone: Icons.person_add_alt_1_rounded,
+                                icone: FxIcons.adicionarPessoa,
                               ),
                             ]),
                           ],
                           destrutiva: const FxActionItem(
                             valor: 'd',
                             rotulo: 'Excluir treino',
-                            icone: Icons.delete_outline_rounded,
+                            icone: FxIcons.excluir,
                           ),
                         ),
                     child: const Text('abrir'),

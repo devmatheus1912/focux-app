@@ -7,6 +7,7 @@ import '../theme/focux_hub_typography.dart';
 import '../theme/tokens_strip.dart';
 import 'fx_home_sheet.dart';
 import 'fx_tonal_button.dart';
+import '../theme/fx_icons.dart';
 
 /// S8: tela acesa enquanto a execução está montada (§9).
 class FxExecutionKeepAwake extends StatefulWidget {
@@ -106,7 +107,7 @@ class _FxExecutionLeaveSheet extends StatelessWidget {
             isDark: isDark,
             title: s.checkinSairTitulo,
             subtitle: s.checkinSairSub,
-            leading: Icon(Icons.fitness_center_rounded, color: primary, size: 18),
+            leading: Icon(FxIcons.treino, color: primary, size: 18),
           ),
           const SizedBox(height: TokensStrip.s3),
           Text(
@@ -122,7 +123,7 @@ class _FxExecutionLeaveSheet extends StatelessWidget {
           _leaveButton(
             context,
             label: s.checkinContinuarDepois,
-            icon: Icons.pause_circle_outline_rounded,
+            icon: FxIcons.pausarCirculo,
             accent: primary,
             onPrimary: theme.colorScheme.onPrimary,
             onTap: () => onPick(FxExecutionLeaveChoice.continuarDepois),
@@ -131,7 +132,7 @@ class _FxExecutionLeaveSheet extends StatelessWidget {
           // Um só botão principal: encerrar é secundário (tonal).
           FxTonalButton(
             label: s.checkinEncerrarAgora,
-            icon: Icons.flag_rounded,
+            icon: FxIcons.meta,
             expanded: true,
             onPressed: () => onPick(FxExecutionLeaveChoice.encerrarAgora),
           ),
@@ -144,7 +145,7 @@ class _FxExecutionLeaveSheet extends StatelessWidget {
           // Destrutivo longe dos CTAs; o caller ainda pede confirmação.
           SizedBox(
             height: 48,
-            child: FxTonalButton(label: s.checkinDescartar, icon: Icons.delete_outline_rounded, onPressed: () => onPick(FxExecutionLeaveChoice.descartar), compact: true, danger: true),
+            child: FxTonalButton(label: s.checkinDescartar, icon: FxIcons.excluir, onPressed: () => onPick(FxExecutionLeaveChoice.descartar), compact: true, danger: true),
           ),
         ],
       ),

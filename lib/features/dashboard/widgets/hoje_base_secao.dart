@@ -10,6 +10,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../onboarding/data/setup_steps_catalog.dart';
 import '../constants/dashboard_layout.dart';
 import 'dashboard_section_header.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// "A base": três números, cada um leva à lista que o explica.
 class HojeBaseSecao extends StatelessWidget {
@@ -101,7 +102,7 @@ class HojeDinheiroLinha extends StatelessWidget {
           const SizedBox(height: FxSettingsLayout.headerToGroup),
           FxTapRow(
             title: partes.join(' · '),
-            leading: const Icon(Icons.account_balance_wallet_outlined),
+            leading: const Icon(FxIcons.carteira),
             onTap: () => openPersonalRoute(context, '/financeiro'),
           ),
         ],
@@ -149,7 +150,7 @@ class HojeFerramentasLinha extends StatelessWidget {
       child: FxTapRow(
         title: s.hojeFerramentas,
         subtitle: s.hojeFerramentasSub,
-        leading: const Icon(Icons.apps_rounded),
+        leading: const Icon(FxIcons.apps),
         onTap: () => openPersonalRoute(context, '/ferramentas'),
       ),
     );

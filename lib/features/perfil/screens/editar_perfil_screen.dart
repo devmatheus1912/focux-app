@@ -35,6 +35,7 @@ import '../data/perfil_repository.dart';
 import '../providers/perfil_provider.dart';
 import '../widgets/editar_perfil_help_sheet.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 part 'editar_perfil_screen_widgets.part.dart';
 
@@ -333,7 +334,7 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                             _PerfilFormField(
                               controller: _nomeCtrl,
                               label: 'Nome completo',
-                              icon: Icons.person_outline_rounded,
+                              icon: FxIcons.pessoa,
                               soft: soft,
                               validator:
                                   (v) =>
@@ -346,7 +347,7 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                               controller: _telefoneCtrl,
                               label: 'Telefone / WhatsApp',
                               hint: '(11) 99999-0000',
-                              icon: Icons.phone_iphone_rounded,
+                              icon: FxIcons.celular,
                               soft: soft,
                               keyboardType: TextInputType.phone,
                               inputFormatters: [BrPhone.formatter()],
@@ -368,7 +369,7 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                               controller: _especialidadeCtrl,
                               label: 'Especialidade principal',
                               hint: 'Especialidade',
-                              icon: Icons.fitness_center_outlined,
+                              icon: FxIcons.treino,
                               soft: soft,
                               textCapitalization: TextCapitalization.sentences,
                             ),
@@ -376,7 +377,7 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                               controller: _especialidadesCtrl,
                               label: 'Outras áreas',
                               hint: 'Funcional, emagrecimento…',
-                              icon: Icons.category_outlined,
+                              icon: FxIcons.categoria,
                               soft: soft,
                               textCapitalization: TextCapitalization.sentences,
                             ),
@@ -384,14 +385,14 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                               controller: _crefCtrl,
                               label: 'CREF',
                               hint: '012345-G/SP',
-                              icon: Icons.badge_outlined,
+                              icon: FxIcons.cracha,
                               soft: soft,
                             ),
                             _PerfilFormField(
                               controller: _instagramCtrl,
                               label: 'Instagram',
                               hint: '@seuusuario',
-                              icon: Icons.alternate_email_rounded,
+                              icon: FxIcons.arroba,
                               soft: soft,
                               showDivider: false,
                             ),
@@ -410,7 +411,7 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                               controller: _bioCtrl,
                               label: 'Sobre você (opcional)',
                               hint: 'Metodologia, público e diferenciais…',
-                              icon: Icons.notes_rounded,
+                              icon: FxIcons.notas,
                               soft: soft,
                               maxLines: 4,
                               maxLength: 500,

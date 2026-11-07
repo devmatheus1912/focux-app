@@ -9,6 +9,7 @@ import '../../../core/widgets/fx_sheet_frame.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../l10n/pt.dart';
 import '../utils/engajamento_display.dart';
+import '../../../core/theme/fx_icons.dart';
 
 const _tamanhoDoDia = 32.0;
 
@@ -25,10 +26,10 @@ class EngajamentoQuadroSemanas extends StatelessWidget {
 
   static (IconData?, String) _simbolo(EngajamentoDiaEstado estado) =>
       switch (estado) {
-        EngajamentoDiaEstado.treinou => (Icons.check_rounded, ptS.engajamentoTreinou),
-        EngajamentoDiaEstado.parcial => (Icons.contrast_rounded, ptS.historicoParcial),
-        EngajamentoDiaEstado.cancelou => (Icons.remove_rounded, ptS.engajamentoCancelou),
-        EngajamentoDiaEstado.faltou => (Icons.close_rounded, ptS.engajamentoFaltou),
+        EngajamentoDiaEstado.treinou => (FxIcons.check, ptS.engajamentoTreinou),
+        EngajamentoDiaEstado.parcial => (FxIcons.contraste, ptS.historicoParcial),
+        EngajamentoDiaEstado.cancelou => (FxIcons.remover, ptS.engajamentoCancelou),
+        EngajamentoDiaEstado.faltou => (FxIcons.fechar, ptS.engajamentoFaltou),
         EngajamentoDiaEstado.descanso => (null, ptS.engajamentoDescanso),
         EngajamentoDiaEstado.semRegistro => (null, ptS.engajamentoSemRegistro),
         EngajamentoDiaEstado.futuro => (null, ptS.engajamentoAindaNaoChegou),

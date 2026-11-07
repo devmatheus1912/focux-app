@@ -5,6 +5,7 @@ import '../theme/brand_palette.dart';
 import '../theme/design_tokens.dart';
 import '../theme/focux_hub_typography.dart';
 import '../theme/tokens_strip.dart';
+import '../theme/fx_icons.dart';
 
 /// Chip toggle inset — paridade Perfil (picker bar / filtros).
 class FxToggleChip extends StatelessWidget {
@@ -99,7 +100,7 @@ class FxToggleChip extends StatelessWidget {
                 ),
                 if (showCheckmark && selected) ...[
                   const SizedBox(width: 4),
-                  Icon(Icons.check_rounded, size: 16, color: fg),
+                  Icon(FxIcons.checkPequeno, size: 16, color: fg),
                 ],
               ],
             ),

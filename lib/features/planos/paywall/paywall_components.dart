@@ -12,6 +12,7 @@ import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../l10n/app_localizations.dart';
 import 'paywall_catalog.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 export 'paywall_glass.dart';
 export 'paywall_compare_stage.dart';

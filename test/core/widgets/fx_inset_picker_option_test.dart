@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/widgets/fx_inset_picker_option.dart';
 import 'package:focux_app/core/widgets/fx_settings_group.dart';
+import 'package:focux_app/core/theme/fx_icons.dart';
 
 void main() {
   testWidgets('picker option preenche largura do grupo inset', (tester) async {
@@ -49,6 +50,6 @@ void main() {
 
     expect(rowRect.left, cardRect.left);
     expect(rowRect.right, cardRect.right);
-    expect(find.byIcon(Icons.check_rounded), findsOneWidget);
+    expect(find.byIcon(FxIcons.check), findsOneWidget);
   });
 }

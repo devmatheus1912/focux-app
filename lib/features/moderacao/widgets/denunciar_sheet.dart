@@ -11,6 +11,7 @@ import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../l10n/app_localizations.dart';
 import '../data/moderacao_repository.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Abre o fluxo de denúncia e envia para a moderação Focux.
 /// Retorna `true` se a denúncia foi enviada.
@@ -104,7 +105,7 @@ class _DenunciarSheetState extends State<_DenunciarSheet> {
 
     return FxHomeSheetScaffold(
       isDark: dark,
-      leading: Icon(Icons.flag_outlined, color: brand, size: 18),
+      leading: Icon(FxIcons.meta, color: brand, size: 18),
       title: l10n.moderacaoTitulo,
       subtitle: l10n.moderacaoSubtitulo,
       child: Column(

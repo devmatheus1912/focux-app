@@ -11,6 +11,7 @@ import '../../auth/providers/auth_provider.dart';
 import '../../../core/widgets/fx_action_chip.dart';
 import '../data/smart_pricing_repository.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class SmartPricingCard extends ConsumerStatefulWidget {
   const SmartPricingCard({super.key});
@@ -81,7 +82,7 @@ class _SmartPricingCardState extends ConsumerState<SmartPricingCard> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(Icons.auto_graph_rounded, color: chrome.mute, size: 18),
+            Icon(FxIcons.graficoIa, color: chrome.mute, size: 18),
             const SizedBox(width: TokensStrip.s2),
             Expanded(
               child: Column(
@@ -146,7 +147,7 @@ class _SmartPricingCardState extends ConsumerState<SmartPricingCard> {
         children: [
           Row(
             children: [
-              Icon(Icons.auto_graph_rounded, color: primary, size: 16),
+              Icon(FxIcons.graficoIaPequeno, color: primary, size: 16),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
@@ -189,7 +190,7 @@ class _SmartPricingCardState extends ConsumerState<SmartPricingCard> {
               Padding(
                 padding: const EdgeInsets.only(bottom: 4, left: 4, right: 4),
                 child: Icon(
-                  Icons.arrow_forward_rounded,
+                  FxIcons.avancarPequeno,
                   size: 14,
                   color: chrome.mute,
                 ),

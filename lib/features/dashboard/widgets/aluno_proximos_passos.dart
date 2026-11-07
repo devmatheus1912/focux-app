@@ -7,6 +7,7 @@ import '../../../l10n/app_localizations.dart';
 import '../utils/aluno_home_texts.dart';
 import '../utils/aluno_pendencias.dart';
 import 'dashboard_section_header.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Até [alunoPendenciasMax] passos, cada um com um verbo. O que passa disso
 /// vira "Ver mais (N)". Lista vazia → nada.
@@ -120,9 +121,9 @@ class AlunoPassoRow extends StatelessWidget {
 }
 
 IconData _icone(AlunoPendenciaTipo tipo) => switch (tipo) {
-  AlunoPendenciaTipo.perfil => Icons.person_outline,
-  AlunoPendenciaTipo.foto => Icons.add_a_photo_outlined,
-  AlunoPendenciaTipo.medida => Icons.straighten_outlined,
-  AlunoPendenciaTipo.chat => Icons.chat_bubble_outline,
-  AlunoPendenciaTipo.agenda => Icons.calendar_month_outlined,
+  AlunoPendenciaTipo.perfil => FxIcons.pessoa,
+  AlunoPendenciaTipo.foto => FxIcons.adicionarFoto,
+  AlunoPendenciaTipo.medida => FxIcons.fitaMetrica,
+  AlunoPendenciaTipo.chat => FxIcons.chat,
+  AlunoPendenciaTipo.agenda => FxIcons.calendario,
 };

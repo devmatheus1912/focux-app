@@ -10,6 +10,7 @@ import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_sheet_frame.dart';
 import '../utils/health_plausibilidade.dart';
 import '../utils/saude_meta_passos.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Estado desconectado: o que lemos, o que não fazemos e a ação de conectar.
 class SaudeDesconectadoView extends StatelessWidget {
@@ -74,7 +75,7 @@ class SaudeDesconectadoView extends StatelessWidget {
                       color: primary.withValues(alpha: 0.14),
                     ),
                     child: Icon(
-                      Icons.favorite_rounded,
+                      FxIcons.favoritoAtivo,
                       size: 40,
                       color: primary,
                     ),
@@ -92,15 +93,15 @@ class SaudeDesconectadoView extends StatelessWidget {
                 ),
                 const SizedBox(height: TokensStrip.s5),
                 linha(
-                  Icons.bedtime_outlined,
+                  FxIcons.sono,
                   'Lemos seu sono, batimentos e passos',
                 ),
                 linha(
-                  Icons.lock_outline_rounded,
+                  FxIcons.cadeado,
                   'Não escrevemos nada no $fonte',
                 ),
                 linha(
-                  Icons.visibility_outlined,
+                  FxIcons.ver,
                   'Você escolhe se seu personal vê seus dados',
                 ),
               ],
@@ -179,7 +180,7 @@ class _MetaPassosSheetState extends State<_MetaPassosSheet> {
     return FxSheetFrame(
       title: 'Meta diária',
       subtitle: 'Quantos passos por dia você quer buscar.',
-      leading: Icon(Icons.directions_walk_rounded, color: primary, size: 20),
+      leading: Icon(FxIcons.caminhada, color: primary, size: 20),
       footer: FxLiquidPrimaryButton(
         label: 'Salvar meta',
         onPressed: () => FxHomeSheetChrome.dismissAndPop(context, _valor),

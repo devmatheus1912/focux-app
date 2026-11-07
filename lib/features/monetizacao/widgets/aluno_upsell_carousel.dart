@@ -13,6 +13,7 @@ import '../../dashboard/providers/dashboard_provider.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/upsell_repository.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Texto livre do personal, sem limite no servidor: corta aqui para uma oferta
 /// longa não esticar todas as do carrossel (a altura é a da mais alta).
@@ -51,7 +52,7 @@ class _AlunoUpsellCarouselState extends ConsumerState<AlunoUpsellCarousel> {
           aceitar
               ? s.alunoOfertaAceitarConfirmar
               : s.alunoOfertaRecusarConfirmar,
-      icon: aceitar ? Icons.local_offer_outlined : Icons.close_rounded,
+      icon: aceitar ? FxIcons.oferta : FxIcons.fechar,
     );
     if (!ok || !mounted || !_enviando.add(oferta.alunoOfertaId)) return;
     setState(() {});

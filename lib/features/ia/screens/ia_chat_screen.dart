@@ -21,6 +21,7 @@ import '../widgets/ia_quota_upgrade.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class _IaMsg {
   final String texto;
@@ -244,7 +245,7 @@ class _IaChatScreenState extends ConsumerState<IaChatScreen> {
                                 bubble,
                                 FxTonalButton(
                                   label: S.of(context).moderacaoDenunciarIa,
-                                  icon: Icons.flag_outlined,
+                                  icon: FxIcons.meta,
                                   onPressed:
                                       () => showDenunciarSheet(
                                         context,

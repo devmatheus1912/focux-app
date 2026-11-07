@@ -1,6 +1,7 @@
 import '../../../core/money/fx_money.dart';
 import '../../../core/utils/fx_utils.dart';
 import 'package:flutter/material.dart';
+import '../../../core/theme/fx_icons.dart';
 
 String recorrenciaAlunoLabel(String? alunoNome) {
   final nome = alunoNome?.trim();
@@ -95,9 +96,9 @@ String recorrenciaAcaoDescricao(RecorrenciaAcao acao) => switch (acao) {
 };
 
 IconData recorrenciaAcaoIcone(RecorrenciaAcao acao) => switch (acao) {
-  RecorrenciaAcao.pausar => Icons.pause_circle_outline_rounded,
-  RecorrenciaAcao.retomar => Icons.play_circle_outline_rounded,
-  RecorrenciaAcao.cancelar => Icons.stop_circle_outlined,
+  RecorrenciaAcao.pausar => FxIcons.pausarCirculo,
+  RecorrenciaAcao.retomar => FxIcons.playCirculo,
+  RecorrenciaAcao.cancelar => FxIcons.pararCirculo,
 };
 
 String recorrenciaAcaoPath(RecorrenciaAcao acao) => switch (acao) {

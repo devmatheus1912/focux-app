@@ -458,7 +458,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                                   controller: _nomeCtrl,
                                   label: 'Nome do exercício',
                                   hint: 'Ex.: Elevação lateral',
-                                  icon: Icons.fitness_center_outlined,
+                                  icon: FxIcons.treino,
                                   rotuloVisivel: true,
                                   obrigatorio: true,
                                   validator:
@@ -475,7 +475,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                                 _EnumDropdown<GrupoMuscular>(
                                   label: 'Grupo principal',
                                   obrigatorio: true,
-                                  icon: Icons.accessibility_new_rounded,
+                                  icon: FxIcons.acessibilidade,
                                   iconColor: soft,
                                   sheetContextLabel: screenTitle,
                                   value: _grupoMuscularPrimario,
@@ -491,7 +491,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                                 ),
                                 _EnumDropdown<Modalidade>(
                                   label: 'Modalidade',
-                                  icon: Icons.sports_gymnastics_rounded,
+                                  icon: FxIcons.alongamento,
                                   iconColor: soft,
                                   sheetContextLabel: screenTitle,
                                   value: _modalidade,
@@ -502,7 +502,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                                 ),
                                 _EnumDropdown<Dificuldade>(
                                   label: 'Dificuldade',
-                                  icon: Icons.signal_cellular_alt_rounded,
+                                  icon: FxIcons.nivel,
                                   iconColor: soft,
                                   sheetContextLabel: screenTitle,
                                   value: _dificuldade,
@@ -513,7 +513,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                                 ),
                                 _EnumDropdown<PadraoMovimento>(
                                   label: 'Padrão de movimento',
-                                  icon: Icons.sync_alt_rounded,
+                                  icon: FxIcons.trocar,
                                   iconColor: soft,
                                   sheetContextLabel: screenTitle,
                                   value: _padraoMovimento,
@@ -524,7 +524,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                                           setState(() => _padraoMovimento = v),
                                 ),
                                 FxSettingsTile(
-                                  icon: Icons.swap_horiz_rounded,
+                                  icon: FxIcons.trocar,
                                   accent: soft,
                                   label: 'Unilateral',
                                   subtitle:
@@ -551,7 +551,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                               accent: primary,
                               children: [
                                 FxSettingsTile(
-                                  icon: Icons.inventory_2_outlined,
+                                  icon: FxIcons.estoque,
                                   accent: soft,
                                   label: 'Equipamentos e espaços',
                                   subtitle: _filterSummary(
@@ -575,7 +575,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                               accent: primary,
                               children: [
                                 FxSettingsTile(
-                                  icon: Icons.videocam_outlined,
+                                  icon: FxIcons.video,
                                   accent: soft,
                                   label:
                                       _videoPath == null
@@ -592,7 +592,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                                 ),
                                 if (_videoPath != null)
                                   FxSettingsTile(
-                                    icon: Icons.delete_outline_rounded,
+                                    icon: FxIcons.excluir,
                                     label: 'Tirar vídeo',
                                     value: '',
                                     danger: true,
@@ -606,7 +606,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                           FxStaggerItem(
                             index: 2,
                             child: _CollapsibleSection(
-                              icon: Icons.co_present_outlined,
+                              icon: FxIcons.apresentacao,
                               title: 'Orientação',
                               subtitle:
                                   _showGuidance
@@ -625,7 +625,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                                     rotuloVisivel: true,
                                     hint:
                                         'Como executar em uma frase objetiva.',
-                                    icon: Icons.notes_rounded,
+                                    icon: FxIcons.notas,
                                     maxLines: 2,
                                   ),
                                   AlunoInsetFormField(
@@ -634,7 +634,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                                     rotuloVisivel: true,
                                     hint:
                                         'Ex.: elevar os ombros, roubar com o tronco.',
-                                    icon: Icons.warning_amber_rounded,
+                                    icon: FxIcons.alerta,
                                     maxLines: 2,
                                   ),
                                   AlunoInsetFormField(
@@ -643,7 +643,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                                     rotuloVisivel: true,
                                     hint:
                                         'Quando evitar ou adaptar este exercício.',
-                                    icon: Icons.health_and_safety_outlined,
+                                    icon: FxIcons.saude,
                                     maxLines: 2,
                                     showDivider: false,
                                   ),

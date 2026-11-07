@@ -21,6 +21,7 @@ import '../../subscription/models/subscription_plan.dart';
 import '../../subscription/subscription_products.dart';
 import '../utils/assinatura_review_display.dart';
 import '../../../l10n/pt.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Revisão honesta antes da compra na loja (App Store / Play compliant).
 class AssinaturaReviewScreen extends StatefulWidget {
@@ -210,7 +211,7 @@ class _AssinaturaReviewScreenState extends State<AssinaturaReviewScreen> {
                         child: Row(
                           children: [
                             Icon(
-                              Icons.check_circle_rounded,
+                              FxIcons.concluidoAtivo,
                               size: 18,
                               color: accent,
                             ),

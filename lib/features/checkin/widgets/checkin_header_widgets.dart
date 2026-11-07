@@ -9,6 +9,7 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../l10n/app_localizations.dart';
 import '../utils/checkin_execucao_display.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class CheckinWorkoutHeader extends StatelessWidget {
   final String treinoNome;
@@ -85,7 +86,7 @@ class CheckinWorkoutHeader extends StatelessWidget {
                     style: IconButton.styleFrom(
                       minimumSize: const Size(checkinExecutionControlMin, checkinExecutionControlMin),
                     ),
-                    icon: Icon(Icons.more_horiz_rounded, color: chrome.ink),
+                    icon: Icon(FxIcons.mais, color: chrome.ink),
                   ),
                 SizedBox(
                   height: checkinExecutionControlMin,

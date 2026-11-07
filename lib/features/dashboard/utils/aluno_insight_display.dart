@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../l10n/app_localizations.dart';
 import '../data/aluno_home_insight.dart';
+import '../../../core/theme/fx_icons.dart';
 
 typedef AlunoInsightTexto = ({String titulo, String detalhe});
 
@@ -13,8 +14,8 @@ AlunoInsightTexto alunoInsightTexto(S s, AlunoHomeInsight insight) {
 }
 
 IconData alunoInsightIcone(AlunoInsightTipo tipo) => switch (tipo) {
-  AlunoInsightTipo.volumeSubindo => Icons.trending_up_rounded,
-  AlunoInsightTipo.ritmoCaiu => Icons.trending_down_rounded,
+  AlunoInsightTipo.volumeSubindo => FxIcons.subindo,
+  AlunoInsightTipo.ritmoCaiu => FxIcons.descendo,
 };
 
 (String, String)? _localizado(S s, AlunoHomeInsight insight) {

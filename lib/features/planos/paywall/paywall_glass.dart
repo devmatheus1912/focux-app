@@ -4,11 +4,12 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_glass_surface.dart';
 import '../../subscription/models/subscription_plan.dart';
 import 'paywall_catalog.dart';
+import '../../../core/theme/fx_icons.dart';
 
 IconData _tierIconFor(SubscriptionPlan plan) => switch (plan) {
-  SubscriptionPlan.PRO => Icons.trending_up_rounded,
-  SubscriptionPlan.ENTERPRISE => Icons.diamond_outlined,
-  _ => Icons.layers_outlined,
+  SubscriptionPlan.PRO => FxIcons.subindo,
+  SubscriptionPlan.ENTERPRISE => FxIcons.diamante,
+  _ => FxIcons.camadas,
 };
 
 /// Card glass padrão Focux — mesmo sistema de Convites / shell.

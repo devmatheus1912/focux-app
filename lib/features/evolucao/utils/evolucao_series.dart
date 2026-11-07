@@ -177,12 +177,6 @@ class ProgressoRecorde {
 
   double get ganhoKg => (melhor.cargaKg ?? 0) - (inicio.cargaKg ?? 0);
 
-  /// Da primeira marca até a melhor; 1 quando só há um registro.
-  double get fracaoDoInicio {
-    final fim = melhor.cargaKg ?? 0;
-    if (fim <= 0 || historico.length < 2) return 1;
-    return ((inicio.cargaKg ?? 0) / fim).clamp(0.0, 1.0);
-  }
 }
 
 /// Fórmula de Epley. Nulo fora da faixa em que a estimativa presta.
@@ -306,3 +300,16 @@ List<String> variacoesSuspeitas({
       item,
   ];
 }
+
+
+/// Índices dos pontos que mudaram demais desde o anterior, pela mesma regra
+/// do "Confira" ([variacaoSuspeita]). [pontos] em ordem de data.
+Set<int> pontosSuspeitos(List<PontoGrafico> pontos, String unidade) => {
+  for (var i = 1; i < pontos.length; i++)
+    if (variacaoSuspeita(
+      unidade,
+      pontos[i].valor - pontos[i - 1].valor,
+      pontos[i].data.difference(pontos[i - 1].data).inDays.abs(),
+    ))
+      i,
+};

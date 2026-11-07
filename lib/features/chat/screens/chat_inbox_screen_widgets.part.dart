@@ -41,7 +41,7 @@ class _AlunoPickerSheetState extends ConsumerState<_AlunoPickerSheet> {
             isDark: isDark,
             title: 'Nova conversa',
             leading: Icon(
-              Icons.chat_bubble_outline_rounded,
+              FxIcons.chat,
               color: primary,
               size: 18,
             ),
@@ -232,7 +232,7 @@ class _InboxTile extends StatelessWidget {
       subtitle: Text(preview, maxLines: 1, overflow: TextOverflow.ellipsis),
       leading:
           selecting && selected
-              ? Icon(Icons.check_rounded, color: primary)
+              ? Icon(FxIcons.check, color: primary)
               : AlunoAvatar(
                 name: item.alunoNome,
                 photoUrl: item.fotoUrl,
@@ -381,14 +381,14 @@ class _InboxTabPane extends StatelessWidget {
                   alignment: Alignment.centerLeft,
                   padding: const EdgeInsets.only(left: 24),
                   color: primary.withValues(alpha: 0.12),
-                  child: Icon(Icons.push_pin, color: primary),
+                  child: Icon(FxIcons.fixadoAtivo, color: primary),
                 ),
                 secondaryBackground: Container(
                   alignment: Alignment.centerRight,
                   padding: const EdgeInsets.only(right: 24),
                   color: EagleTokens.warn.withValues(alpha: 0.12),
                   child: Icon(
-                    isArchived ? Icons.unarchive : Icons.archive,
+                    isArchived ? FxIcons.desarquivar : FxIcons.arquivar,
                     color: EagleTokens.warn,
                   ),
                 ),

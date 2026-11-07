@@ -5,6 +5,7 @@ import '../ia/utils/ia_cota.dart';
 import '../planos/data/plano_recurso.dart';
 import '../subscription/models/subscription_plan.dart';
 import '../subscription/utils/plano_ia_limits.dart';
+import '../../core/theme/fx_icons.dart';
 
 /// Copy e plano-alvo para paywalls contextuais (fonte única no app).
 class PlanEntitlements {
@@ -239,119 +240,119 @@ class PlanEntitlements {
     return switch (PlanoRecursoKeys.toCopyCapability(capability)) {
       'iaCopiloto' => const [
         UpgradeSalesBenefit(
-          icon: Icons.bolt_rounded,
+          icon: FxIcons.raio,
           label: 'Prioridade do dia sob medida',
           detail: 'O que fazer agora com cada aluno',
         ),
         UpgradeSalesBenefit(
-          icon: Icons.psychology_outlined,
+          icon: FxIcons.mente,
           label: 'Contexto operacional completo',
           detail: 'Treinos, check-ins, risco e aderência',
         ),
         UpgradeSalesBenefit(
-          icon: Icons.task_alt_rounded,
+          icon: FxIcons.concluido,
           label: 'Da sugestão à ação em um toque',
           detail: 'Tarefa ou mensagem prontas',
         ),
       ],
       'financeiro' => const [
         UpgradeSalesBenefit(
-          icon: Icons.payments_outlined,
+          icon: FxIcons.pagamento,
           label: 'Cobrança PIX no fluxo',
           detail: 'Menos inadimplência, menos cobrança manual',
         ),
         UpgradeSalesBenefit(
-          icon: Icons.receipt_long_outlined,
+          icon: FxIcons.recibo,
           label: 'Mensalidades sob controle',
           detail: 'Vencidos, a receber e histórico',
         ),
         UpgradeSalesBenefit(
-          icon: Icons.insights_outlined,
+          icon: FxIcons.insights,
           label: 'Resumo financeiro claro',
           detail: 'Saiba onde está o dinheiro da operação',
         ),
       ],
       'landingCompleta' => const [
         UpgradeSalesBenefit(
-          icon: Icons.web_outlined,
+          icon: FxIcons.site,
           label: 'Landing que vende 24h',
           detail: 'Depoimentos, galeria, FAQ e captura',
         ),
         UpgradeSalesBenefit(
-          icon: Icons.campaign_outlined,
+          icon: FxIcons.megafone,
           label: 'Leads no funil',
           detail: 'Formulário Meta e link público',
         ),
         UpgradeSalesBenefit(
-          icon: Icons.brush_outlined,
+          icon: FxIcons.pincel,
           label: 'Sua marca no ar',
           detail: 'Página com a cara do seu negócio',
         ),
       ],
       'leads' => const [
         UpgradeSalesBenefit(
-          icon: Icons.people_outline,
+          icon: FxIcons.grupo,
           label: 'CRM completo',
           detail: 'Pipeline completo de prospects',
         ),
         UpgradeSalesBenefit(
-          icon: Icons.trending_up_rounded,
+          icon: FxIcons.subindo,
           label: 'Funil sob controle',
           detail: 'Status, follow-up e conversão',
         ),
         UpgradeSalesBenefit(
-          icon: Icons.notifications_active_outlined,
+          icon: FxIcons.notificacaoAtiva,
           label: 'Não perde lead frio',
           detail: 'Lembretes e próximos passos',
         ),
       ],
       'lojaDigital' => const [
         UpgradeSalesBenefit(
-          icon: Icons.storefront_outlined,
+          icon: FxIcons.loja,
           label: 'Vitrine digital',
           detail: 'Programas e pacotes no seu link',
         ),
         UpgradeSalesBenefit(
-          icon: Icons.payments_outlined,
+          icon: FxIcons.pagamento,
           label: 'Checkout PIX',
           detail: 'Cliente paga sem atrito',
         ),
         UpgradeSalesBenefit(
-          icon: Icons.inventory_2_outlined,
+          icon: FxIcons.estoque,
           label: 'Catálogo organizado',
           detail: 'Nome, preço e o que está incluso',
         ),
       ],
       'feedbackVideo' => const [
         UpgradeSalesBenefit(
-          icon: Icons.videocam_outlined,
+          icon: FxIcons.video,
           label: 'Vídeo do exercício',
           detail: 'O aluno grava e envia pelo app',
         ),
         UpgradeSalesBenefit(
-          icon: Icons.rate_review_outlined,
+          icon: FxIcons.avaliacao,
           label: 'Sua correção por escrito',
           detail: 'Fica salva junto do vídeo',
         ),
         UpgradeSalesBenefit(
-          icon: Icons.school_outlined,
+          icon: FxIcons.escola,
           label: 'Aluno aprende mais rápido',
           detail: 'Correção clara entre as aulas',
         ),
       ],
       _ => [
         UpgradeSalesBenefit(
-          icon: Icons.lock_open_rounded,
+          icon: FxIcons.cadeadoAberto,
           label: 'Acesso a $featureName',
           detail: 'Liberado no plano $planLabel',
         ),
         UpgradeSalesBenefit(
-          icon: Icons.speed_rounded,
+          icon: FxIcons.velocidade,
           label: 'Operação mais rápida',
           detail: 'Menos planilha, mais alunos atendidos',
         ),
         UpgradeSalesBenefit(
-          icon: Icons.workspace_premium_rounded,
+          icon: FxIcons.premium,
           label: 'Upgrade em um passo',
           detail: 'Compare planos e assine no app',
         ),

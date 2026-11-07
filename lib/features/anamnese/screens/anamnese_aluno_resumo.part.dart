@@ -129,7 +129,7 @@ extension on _AnamneseAlunoScreenState {
                     ),
                     IconButton(
                       tooltip: s.anamneseAlunoEditar,
-                      icon: Icon(Icons.edit_outlined, color: chrome.mute),
+                      icon: Icon(FxIcons.editar, color: chrome.mute),
                       onPressed: () {
                         setState(() => _editando = true);
                         _irPara(etapa);

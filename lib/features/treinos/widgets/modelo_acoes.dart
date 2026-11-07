@@ -13,6 +13,7 @@ import '../providers/treinos_provider.dart';
 import 'aplicar_em_alunos_folha.dart';
 import 'ficha_acoes.dart';
 import 'ficha_vazia.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Aplicar, renomear, excluir e criar modelo: as mesmas ações na tela do modelo
 /// e no "…" do card da lista. Cada uma devolve true quando mudou algo.
@@ -32,12 +33,12 @@ Future<bool> aplicarModeloEmAluno(BuildContext context, WidgetRef ref, FichaMode
       FxActionSheetItem(
         value: true,
         label: s.modeloAplicarMantendo,
-        icon: Icons.fitness_center_rounded,
+        icon: FxIcons.treino,
       ),
       FxActionSheetItem(
         value: false,
         label: s.modeloAplicarDoZero,
-        icon: Icons.restart_alt_rounded,
+        icon: FxIcons.recomecar,
       ),
     ],
   );

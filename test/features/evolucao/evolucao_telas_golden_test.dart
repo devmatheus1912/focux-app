@@ -139,7 +139,7 @@ void main() {
             medidas: _medidas,
             vazioSubtitulo: '',
             onAtualizar: () async {},
-            onAbrirMedida: (_) {},
+            onAbrirRegistro: (_) {},
           ),
           escuro: escuro,
         ),

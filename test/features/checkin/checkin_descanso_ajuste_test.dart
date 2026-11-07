@@ -4,6 +4,7 @@ import 'package:focux_app/features/checkin/utils/checkin_descanso_relogio.dart';
 import 'package:focux_app/features/checkin/widgets/checkin_timer_widgets.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:focux_app/core/theme/fx_icons.dart';
 
 void main() {
   setUp(() => GoogleFonts.config.allowRuntimeFetching = false);
@@ -70,8 +71,8 @@ void main() {
         ),
       ),
     );
-    await tester.tap(find.byIcon(Icons.add_rounded));
-    await tester.tap(find.byIcon(Icons.remove_rounded));
+    await tester.tap(find.byIcon(FxIcons.adicionar));
+    await tester.tap(find.byIcon(FxIcons.remover));
     expect(ajustes, [15, -15]);
   });
 }

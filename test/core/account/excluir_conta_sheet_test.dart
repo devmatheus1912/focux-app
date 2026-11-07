@@ -5,6 +5,7 @@ import 'package:focux_app/core/account/excluir_conta_sheet.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
 import 'package:focux_app/l10n/app_localizations_pt.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:focux_app/core/theme/fx_icons.dart';
 
 class _Abertura {
   Future<ExcluirContaCredencial?>? resultado;
@@ -190,20 +191,20 @@ void main() {
     final cartao = find.byKey(const ValueKey('excluir-conta-consequencias'));
     expect(cartao, findsOneWidget);
     expect(
-      find.descendant(of: cartao, matching: find.byIcon(Icons.check_rounded)),
+      find.descendant(of: cartao, matching: find.byIcon(FxIcons.check)),
       findsNothing,
     );
     expect(
       find.descendant(
         of: cartao,
-        matching: find.byIcon(Icons.group_off_outlined),
+        matching: find.byIcon(FxIcons.grupoOff),
       ),
       findsOneWidget,
     );
     expect(
       find.descendant(
         of: cartao,
-        matching: find.byIcon(Icons.warning_amber_rounded),
+        matching: find.byIcon(FxIcons.alerta),
       ),
       findsOneWidget,
     );

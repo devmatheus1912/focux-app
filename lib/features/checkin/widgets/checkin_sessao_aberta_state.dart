@@ -7,6 +7,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../l10n/app_localizations.dart';
 import '../utils/checkin_sessao_aberta.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Conflito de sessão aberta — estado de decisão, não de falha.
 class CheckinSessaoAbertaState extends StatelessWidget {
@@ -49,7 +50,7 @@ class CheckinSessaoAbertaState extends StatelessWidget {
                   borderRadius: BorderRadius.circular(TokensStrip.rCard),
                 ),
                 child: Icon(
-                  Icons.play_circle_outline_rounded,
+                  FxIcons.playCirculo,
                   size: 30,
                   color: scheme.primary,
                 ),
@@ -78,7 +79,7 @@ class CheckinSessaoAbertaState extends StatelessWidget {
               const SizedBox(height: TokensStrip.s5),
               FxLiquidPrimaryButton(
                 label: s.checkinSessaoAbertaContinuar,
-                icon: Icons.play_arrow_rounded,
+                icon: FxIcons.play,
                 onPressed: descartando ? null : onContinuar,
               ),
               if (onDescartar != null) ...[

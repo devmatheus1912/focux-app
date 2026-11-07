@@ -15,6 +15,7 @@ import '../../../l10n/app_localizations.dart';
 import '../utils/aluno360_resumo_agora.dart';
 import 'aluno_avatar.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class AlunoDetailHeroCard extends StatelessWidget {
   const AlunoDetailHeroCard({
@@ -272,7 +273,7 @@ class _IdentityObjectiveRow extends StatelessWidget {
         if (status != null) status!,
         FxTonalButton(
           label: 'Definir objetivo',
-          icon: Icons.flag_outlined,
+          icon: FxIcons.meta,
           compact: true,
           onPressed: onDefineObjective,
         ),

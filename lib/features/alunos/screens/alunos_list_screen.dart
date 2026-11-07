@@ -52,6 +52,7 @@ import '../../../core/widgets/fx_toggle_chip.dart';
 import '../../../core/widgets/fx_action_chip.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 export '../constants/alunos_list_filters.dart';
 

@@ -4,6 +4,7 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/curated_brand_palettes.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Paletas curadas em grade de amostras (3 por linha): amostra redonda com
 /// gradiente primária → secundária, nome embaixo e marca de escolhida.
@@ -63,7 +64,7 @@ class IdentidadePaletasGrade extends StatelessWidget {
                   child:
                       escolhida
                           ? Icon(
-                            Icons.check_rounded,
+                            FxIcons.check,
                             size: 26,
                             color: CuratedBrandPalette.readableOn(p.primary),
                           )

@@ -28,6 +28,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../../leads/utils/lead_display.dart';
 import '../data/captura_repository.dart';
 import '../utils/leads_publicos_display.dart';
+import '../../../core/theme/fx_icons.dart';
 
 final _repoProvider = Provider(
   (ref) => CapturaRepository(ref.read(apiClientProvider)),
@@ -307,7 +308,7 @@ class _LeadsPublicosScreenState extends ConsumerState<LeadsPublicosScreen> {
                         vertical: 12,
                       ),
                       prefixIcon: Icon(
-                        Icons.search_rounded,
+                        FxIcons.buscar,
                         color: primary,
                         size: 20,
                       ),
@@ -317,7 +318,7 @@ class _LeadsPublicosScreenState extends ConsumerState<LeadsPublicosScreen> {
                               tooltip: 'Limpar busca',
                               onPressed: _clearQuery,
                               icon: Icon(
-                                Icons.close_rounded,
+                                FxIcons.fechar,
                                 color: chrome.mute,
                                 size: 18,
                               ),

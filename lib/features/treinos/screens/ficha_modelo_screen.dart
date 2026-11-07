@@ -28,6 +28,7 @@ import '../widgets/ficha_volume_secao.dart';
 import '../widgets/modelo_acoes.dart';
 import '../widgets/estado_do_salvo.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Um modelo de ficha: a semana inteira, editada como a ficha de um aluno.
 class FichaModeloScreen extends ConsumerStatefulWidget {
@@ -122,7 +123,7 @@ class _FichaModeloScreenState extends ConsumerState<FichaModeloScreen>
               IconButton(
                 tooltip: s.rotinaMenuFicha,
                 onPressed: _ocupado ? null : () => _menu(modelo),
-                icon: const Icon(Icons.more_horiz_rounded),
+                icon: const Icon(FxIcons.mais),
               ),
           ],
         ),

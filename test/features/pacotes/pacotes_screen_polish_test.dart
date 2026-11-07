@@ -55,7 +55,7 @@ void main() {
     expect(sheet, isNot(contains('confirmDesativarPacote')));
     expect(hub, isNot(contains('StorefrontLinkCard')));
     expect(hub, isNot(contains('PacotesComoFuncionaCard')));
-    expect(hub, contains('Icons.more_vert_rounded'));
+    expect(hub, contains('FxIcons.maisVertical'));
     expect(hub, contains('Desativar plano'));
     expect(hub, isNot(contains('DESTAQUE NA PÁGINA')));
     expect(sheet, isNot(contains('FxLiquidSecondaryButton')));

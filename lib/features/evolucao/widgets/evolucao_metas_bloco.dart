@@ -21,6 +21,7 @@ import '../data/meta_corporal.dart';
 import '../providers/evolucao_home_provider.dart';
 import '../utils/evolucao_series.dart';
 import '../../alunos/providers/aluno_detail_providers.dart';
+import '../../../core/theme/fx_icons.dart';
 
 double? _numero(String texto) =>
     double.tryParse(texto.trim().replaceAll(',', '.'));
@@ -88,7 +89,7 @@ Future<bool> abrirFormularioDeMeta(
     final ok = await showFxFormSheet(
       context,
       title: meta == null ? ptS.metaDefinir : ptS.metaEditar,
-      icon: Icons.flag_outlined,
+      icon: FxIcons.meta,
       confirmLabel: ptS.evolucaoSalvar,
       podeConfirmar: () {
         final valor = _numero(alvo.text);
@@ -160,7 +161,7 @@ Future<bool> abrirFormularioDeMeta(
                 obrigatorio: true,
                 controller: alvo,
                 label: ptS.metaAlvoCampo(metaUnidade(metrica)),
-                icon: Icons.flag_outlined,
+                icon: FxIcons.meta,
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
@@ -198,7 +199,7 @@ Future<bool> abrirFormularioDeMeta(
                 rotuloVisivel: true,
                 controller: observacao,
                 label: ptS.metaObservacaoCampo,
-                icon: Icons.notes_rounded,
+                icon: FxIcons.notas,
                 showDivider: false,
               ),
             ],
@@ -283,12 +284,12 @@ class EvolucaoMetasBloco extends ConsumerWidget {
           FxActionItem(
             valor: 'editar',
             rotulo: ptS.metaEditar,
-            icone: Icons.edit_outlined,
+            icone: FxIcons.editar,
           ),
           FxActionItem(
             valor: 'encerrar',
             rotulo: ptS.metaEncerrar,
-            icone: Icons.close_rounded,
+            icone: FxIcons.fechar,
             perigo: true,
           ),
         ]),
@@ -309,7 +310,7 @@ class EvolucaoMetasBloco extends ConsumerWidget {
         context,
         title: ptS.metaEncerrarTitulo,
         message: ptS.metaEncerrarMensagem,
-        icon: Icons.close_rounded,
+        icon: FxIcons.fechar,
         confirmLabel: ptS.metaEncerrar,
         destructive: true,
       );
@@ -333,13 +334,13 @@ class EvolucaoMetasBloco extends ConsumerWidget {
             valor: 'confirmar',
             rotulo: ptS.metaConfirmarAcao,
             descricao: ptS.metaConfirmarDescricao,
-            icone: Icons.verified_outlined,
+            icone: FxIcons.verificado,
           ),
           FxActionItem(
             valor: 'devolver',
             rotulo: ptS.metaDevolver,
             descricao: ptS.metaDevolverDescricao,
-            icone: Icons.undo_rounded,
+            icone: FxIcons.desfazer,
           ),
         ]),
       ],
@@ -362,19 +363,19 @@ class EvolucaoMetasBloco extends ConsumerWidget {
             valor: 'nova',
             rotulo: ptS.metaNova,
             descricao: ptS.metaNovaDescricao,
-            icone: Icons.flag_outlined,
+            icone: FxIcons.meta,
           ),
           FxActionItem(
             valor: 'manter',
             rotulo: ptS.metaManter,
             descricao: ptS.metaManterDescricao,
-            icone: Icons.shield_outlined,
+            icone: FxIcons.seguranca,
           ),
           FxActionItem(
             valor: 'sem',
             rotulo: ptS.metaSemNova,
             descricao: ptS.metaSemNovaDescricao,
-            icone: Icons.close_rounded,
+            icone: FxIcons.fechar,
           ),
         ]),
       ],
@@ -527,7 +528,7 @@ class _LinhaMeta extends StatelessWidget {
           ),
           IconButton(
             tooltip: ptS.metaOpcoes,
-            icon: Icon(Icons.more_horiz_rounded, color: chrome.mute),
+            icon: Icon(FxIcons.mais, color: chrome.mute),
             onPressed: onMais,
           ),
         ],

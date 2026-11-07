@@ -7,6 +7,7 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Faixa "Adicionado · Desfazer" logo depois de adicionar um exercício.
 /// Some sozinha em [duracao]; o botão remove o item recém-criado.
@@ -63,7 +64,7 @@ class _AddUndoBarState extends State<AddUndoBar> {
         ),
         child: Row(
           children: [
-            Icon(Icons.check_circle_rounded, size: 20, color: chrome.ink),
+            Icon(FxIcons.concluidoAtivo, size: 20, color: chrome.ink),
             const SizedBox(width: TokensStrip.s2),
             Expanded(
               child: Text(
@@ -77,7 +78,7 @@ class _AddUndoBarState extends State<AddUndoBar> {
             ),
             FxTonalButton(
               label: 'Desfazer',
-              icon: Icons.undo_rounded,
+              icon: FxIcons.desfazer,
               compact: true,
               onPressed: () {
                 _timer?.cancel();

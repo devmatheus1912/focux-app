@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../theme/fx_settings_layout.dart';
 import '../theme/shell_chrome.dart';
 import '../theme/tokens_strip.dart';
+import '../theme/fx_icons.dart';
 
 /// Especificação de uma linha para [FxInsetPickerOption.list].
 class FxInsetPickerOptionSpec {
@@ -181,7 +182,7 @@ class FxInsetPickerOption extends StatelessWidget {
                     ),
                     if (selected)
                       Icon(
-                        Icons.check_rounded,
+                        FxIcons.check,
                         color: accent,
                         size: FxSettingsLayout.iconSize,
                       ),

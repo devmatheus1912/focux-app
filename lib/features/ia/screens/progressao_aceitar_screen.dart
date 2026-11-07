@@ -47,6 +47,7 @@ import '../utils/progressao_copy.dart';
 import '../../../core/widgets/fx_action_link.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_strip_card.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class ProgressaoAceitarScreen extends ConsumerStatefulWidget {
   const ProgressaoAceitarScreen({super.key});
@@ -110,17 +111,17 @@ class _ProgressaoAceitarScreenState
           FxActionItem(
             valor: 'copiar',
             rotulo: ptS.cargasCopiar,
-            icone: Icons.copy_rounded,
+            icone: FxIcons.copiar,
           ),
           FxActionItem(
             valor: 'pdf',
             rotulo: ptS.cargasPdf,
-            icone: Icons.picture_as_pdf_outlined,
+            icone: FxIcons.pdf,
           ),
           FxActionItem(
             valor: 'denunciar',
             rotulo: ptS.cargasDenunciar,
-            icone: Icons.flag_outlined,
+            icone: FxIcons.meta,
           ),
         ]),
       ],
@@ -204,7 +205,7 @@ class _ProgressaoAceitarScreenState
       context,
       title: ptS.cargasAplicarConfirmaTitulo,
       message: ptS.cargasAplicarConfirma,
-      icon: Icons.done_all_rounded,
+      icon: FxIcons.checkDuplo,
       confirmLabel: ptS.cargasAplicarBotao,
     );
     if (!ok || !mounted) return;
@@ -359,7 +360,7 @@ class _ProgressaoAceitarScreenState
             if (bruta.isNotEmpty)
               IconButton(
                 tooltip: ptS.cargasMais,
-                icon: const Icon(Icons.more_horiz_rounded),
+                icon: const Icon(FxIcons.mais),
                 onPressed: _busy ? null : () => _maisOpcoes(args, bruta),
               ),
           ],
@@ -553,7 +554,7 @@ class _ProgressaoAceitarScreenState
           Center(
             child: FxTonalButton(
               label: 'Voltar ao Aluno 360',
-              icon: Icons.arrow_back_rounded,
+              icon: FxIcons.voltar,
               onPressed:
                   () => safePopOrGo(
                     context,
@@ -601,7 +602,7 @@ class _ProgressaoAceitarScreenState
       context,
       title: progressaoDescartarTodas,
       message: progressaoDescartarForaConfirm(count),
-      icon: Icons.delete_sweep_rounded,
+      icon: FxIcons.limpar,
       confirmLabel: 'Descartar',
       destructive: true,
     );
@@ -639,7 +640,7 @@ class _ProgressaoAceitarScreenState
       title: 'Descartar sugestão?',
       message:
           'A sugestão de ${sugestao.exercicio} (${sugestao.cargaSugerida}) será removida.',
-      icon: Icons.delete_sweep_rounded,
+      icon: FxIcons.limpar,
       confirmLabel: 'Descartar',
       destructive: true,
     );
@@ -755,7 +756,7 @@ class _ForaDoTreinoPanel extends StatelessWidget {
           Row(
             children: [
               const Icon(
-                Icons.search_off_rounded,
+                FxIcons.buscaVazia,
                 size: 18,
                 color: EagleTokens.warn,
               ),
@@ -816,7 +817,7 @@ class _SuccessBanner extends StatelessWidget {
         ),
         child: Row(
           children: [
-            const Icon(Icons.check_circle, color: EagleTokens.good, size: 22),
+            const Icon(FxIcons.concluidoAtivo, color: EagleTokens.good, size: 22),
             const SizedBox(width: 10),
             Expanded(
               child: Text(

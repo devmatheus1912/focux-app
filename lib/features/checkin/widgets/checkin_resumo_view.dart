@@ -18,6 +18,7 @@ import '../utils/checkin_resumo.dart';
 import '../utils/historico_detalhe_texts.dart';
 import '../utils/treinos_hub_texts.dart';
 import 'checkin_execucao_sheets.dart';
+import '../../../core/theme/fx_icons.dart';
 
 enum CheckinResumoAcao { concluir, detalhes }
 
@@ -92,7 +93,7 @@ class CheckinResumoView extends StatelessWidget {
       width: 88,
       height: 88,
       decoration: BoxDecoration(shape: BoxShape.circle, color: primary),
-      child: Icon(Icons.check_rounded, color: FocuxContrast.readableOn(primary), size: 48),
+      child: Icon(FxIcons.check, color: FocuxContrast.readableOn(primary), size: 48),
     );
     if (!reduce) {
       check = check
@@ -187,7 +188,7 @@ class CheckinResumoView extends StatelessWidget {
                           if (resumo.seriesSemCarga > 0) ...[
                             const SizedBox(height: TokensStrip.s4),
                             _Linha(
-                              icone: Icons.fitness_center_rounded,
+                              icone: FxIcons.treino,
                               cor: chrome.mute,
                               texto:
                                   '${s.checkinResumoSemCarga(resumo.seriesSemCarga)}. '
@@ -206,14 +207,14 @@ class CheckinResumoView extends StatelessWidget {
                             const SizedBox(height: TokensStrip.s2),
                             for (final e in resumo.recordes.take(5))
                               _Linha(
-                                icone: Icons.emoji_events_rounded,
+                                icone: FxIcons.trofeu,
                                 cor: EagleTokens.good,
                                 texto: checkinEvolucaoLinha(s, e),
                               ),
                           ] else if (destaque != null) ...[
                             const SizedBox(height: TokensStrip.s4),
                             _Linha(
-                              icone: Icons.trending_up_rounded,
+                              icone: FxIcons.subindo,
                               cor: primary,
                               texto: s.historicoDestaqueCarga(
                                 destaque.exercicio,

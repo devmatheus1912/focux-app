@@ -10,6 +10,7 @@ import '../theme/tokens_strip.dart';
 import 'fx_home_sheet.dart';
 import 'fx_motion.dart';
 import 'fx_tonal_button.dart';
+import '../theme/fx_icons.dart';
 
 /// Sheet de formulário curto — substitui `AlertDialog` com campos.
 ///
@@ -25,7 +26,7 @@ Future<bool> showFxFormSheet(
   required Widget child,
   required String confirmLabel,
   String? subtitle,
-  IconData icon = Icons.edit_outlined,
+  IconData icon = FxIcons.editar,
   String cancelLabel = FocuxMicrocopy.cancelar,
   bool destructive = false,
   bool Function()? podeConfirmar,
@@ -74,7 +75,7 @@ Future<void> showFxNoticeSheet(
   String? message,
   Widget? body,
   String actionLabel = 'Entendi',
-  IconData icon = Icons.info_outline_rounded,
+  IconData icon = FxIcons.info,
   List<Widget> extraActions = const [],
 }) {
   return showFxHomeSheet<void>(

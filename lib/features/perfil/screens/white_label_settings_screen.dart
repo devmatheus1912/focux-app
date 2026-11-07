@@ -34,6 +34,7 @@ import '../../subscription/utils/landing_editor_access.dart';
 import '../../subscription/widgets/upgrade_prompt_sheet.dart';
 import '../data/white_label_repository.dart';
 import '../utils/white_label_display.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class WhiteLabelSettingsScreen extends ConsumerStatefulWidget {
   const WhiteLabelSettingsScreen({super.key});
@@ -285,7 +286,7 @@ class _WhiteLabelSettingsScreenState
                                 'Depois do login o aluno vê a sua marca. Tela de login e ícone da loja continuam Focux.',
                             children: [
                               FxSettingsTile(
-                                icon: Icons.visibility_off_outlined,
+                                icon: FxIcons.ocultar,
                                 label: 'Ocultar marca Focux',
                                 value: '',
                                 showDivider: true,
@@ -381,7 +382,7 @@ class _WhiteLabelSettingsScreenState
                                 ),
                                 if (config.dominioVerificado)
                                   FxSettingsTile(
-                                    icon: Icons.verified_rounded,
+                                    icon: FxIcons.verificado,
                                     label: 'Domínio verificado',
                                     value: '',
                                     accent: EagleTokens.success,
@@ -414,7 +415,7 @@ class _WhiteLabelSettingsScreenState
                                                   ),
                                                 )
                                                 : const Icon(
-                                                  Icons.dns_outlined,
+                                                  FxIcons.servidor,
                                                 ),
                                         label: const Text('Verificar domínio'),
                                       ),
@@ -514,8 +515,8 @@ class _WhiteLabelSettingsScreenState
                                       FxSettingsTile(
                                         icon:
                                             config.checklist[i].done
-                                                ? Icons.check_circle_outline
-                                                : Icons.radio_button_unchecked,
+                                                ? FxIcons.concluido
+                                                : FxIcons.circulo,
                                         label: config.checklist[i].label,
                                         value: whiteLabelChecklistValue(
                                           config.checklist[i].done,
@@ -567,7 +568,7 @@ class _WhiteLabelSettingsScreenState
     final urlToCopy = copyUrl.isNotEmpty ? copyUrl : displayLabel;
 
     return FxSettingsTile(
-      icon: Icons.link_outlined,
+      icon: FxIcons.link,
       label: title,
       value: displayLabel,
       mute: chrome.mute,

@@ -33,6 +33,7 @@ import '../../../l10n/app_localizations.dart';
 import '../widgets/auth_social_button.dart';
 import '../widgets/auth_social_stack.dart';
 import '../widgets/auth_text_link.dart';
+import '../../../core/theme/fx_icons.dart';
 
 part 'register_screen_actions.part.dart';
 
@@ -234,7 +235,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               const SizedBox(height: 18),
                               if (_emailDeliveryAvailable == false) ...[
                                 AuthOperationalNotice(
-                                  icon: Icons.mail_lock_outlined,
+                                  icon: FxIcons.emailSeguro,
                                   title: 'E-mail temporariamente indisponível',
                                   text:
                                       Env.googleWebClientId.isNotEmpty
@@ -249,7 +250,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                 label: 'Nome completo',
                                 controller: _nameController,
                                 hintText: 'Seu nome',
-                                icon: Icons.person_outline_rounded,
+                                icon: FxIcons.pessoa,
                                 textInputAction: TextInputAction.next,
                                 autofillHints: const [AutofillHints.name],
                                 validator: (value) {
@@ -264,7 +265,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                 label: 'E-mail',
                                 controller: _emailController,
                                 hintText: 'seu@email.com',
-                                icon: Icons.mail_outline_rounded,
+                                icon: FxIcons.email,
                                 keyboardType: TextInputType.emailAddress,
                                 textInputAction: TextInputAction.next,
                                 autofillHints: const [AutofillHints.email],
@@ -287,7 +288,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                         ? registerReenviarCodigoLabel()
                                         : registerEnviarCodigoLabel(),
                                 leading: const Icon(
-                                  Icons.mail_outline_rounded,
+                                  FxIcons.email,
                                   size: 22,
                                   color: Colors.white,
                                 ),
@@ -309,7 +310,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                   },
                                   helperText:
                                       'Código enviado. Válido por 10 minutos.',
-                                  icon: Icons.pin_outlined,
+                                  icon: FxIcons.pin,
                                   keyboardType: TextInputType.number,
                                   textInputAction: TextInputAction.next,
                                   autofillHints: const [
@@ -334,7 +335,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                 controller: _passwordController,
                                 hintText: 'Crie uma senha',
                                 helperText: 'Mínimo de 8 caracteres.',
-                                icon: Icons.lock_outline_rounded,
+                                icon: FxIcons.cadeado,
                                 obscureText: !_showPassword,
                                 textInputAction: TextInputAction.next,
                                 autofillHints: const [
@@ -356,8 +357,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                   },
                                   icon: Icon(
                                     _showPassword
-                                        ? Icons.visibility_off_outlined
-                                        : Icons.visibility_outlined,
+                                        ? FxIcons.ocultar
+                                        : FxIcons.ver,
                                     color: heroTealSurface(0.82),
                                     size: 18,
                                   ),
@@ -377,7 +378,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                   label: 'Telefone / WhatsApp (opcional)',
                                   controller: _phoneController,
                                   hintText: '(11) 99999-0000',
-                                  icon: Icons.phone_iphone_rounded,
+                                  icon: FxIcons.celular,
                                   keyboardType: TextInputType.phone,
                                   textInputAction: TextInputAction.done,
                                   autofillHints: const [
@@ -405,7 +406,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                   label: S.of(context).registerIndicacaoLabel,
                                   controller: _referralController,
                                   hintText: S.of(context).registerIndicacaoHint,
-                                  icon: Icons.card_giftcard_outlined,
+                                  icon: FxIcons.presente,
                                   textInputAction: TextInputAction.done,
                                   inputFormatters: [
                                     FilteringTextInputFormatter.allow(

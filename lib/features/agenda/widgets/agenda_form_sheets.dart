@@ -10,6 +10,7 @@ import '../../../core/widgets/fx_input_deco.dart';
 import '../../alunos/data/aluno_contact_utils.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../../alunos/widgets/aluno_avatar.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class AgendaAlunoSheet extends StatefulWidget {
   final List<Aluno> alunos;
@@ -67,7 +68,7 @@ class _AgendaAlunoSheetState extends State<AgendaAlunoSheet> {
               title: 'Selecionar aluno',
               subtitle: '${alunos.length} de ${widget.alunos.length}',
               leading: Icon(
-                Icons.person_outline_rounded,
+                FxIcons.pessoa,
                 color: primary,
                 size: 18,
               ),
@@ -81,7 +82,7 @@ class _AgendaAlunoSheetState extends State<AgendaAlunoSheet> {
                 onChanged: (_) => setState(() {}),
                 decoration: InputDecoration(
                   hintText: 'Buscar por nome, e-mail ou objetivo',
-                  prefixIcon: Icon(Icons.search, size: 19, color: chrome.mute),
+                  prefixIcon: Icon(FxIcons.buscar, size: 19, color: chrome.mute),
                   filled: true,
                   fillColor:
                       chrome.isDark
@@ -188,8 +189,8 @@ class _AgendaAlunoSheetState extends State<AgendaAlunoSheet> {
                                     ),
                                     Icon(
                                       selected
-                                          ? Icons.check_circle
-                                          : Icons.check_circle_outline,
+                                          ? FxIcons.concluidoAtivo
+                                          : FxIcons.concluido,
                                       color: selected ? primary : chrome.mute,
                                     ),
                                   ],

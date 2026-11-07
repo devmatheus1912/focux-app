@@ -16,6 +16,7 @@ import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../auth/widgets/auth_shell.dart';
 import '../../auth/widgets/auth_text_link.dart';
 import '../data/brand_pulse_repository.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Primeira abertura: uma tela por perfil (Personal ou Aluno), com o que o app
 /// faz em três linhas e uma ação principal. Sem carrossel.
@@ -207,12 +208,12 @@ class _Conteudo extends StatelessWidget {
   final String socialProofLine;
 
   static IconData _icone(OnboardingIcone icone) => switch (icone) {
-    OnboardingIcone.treino => Icons.fitness_center_rounded,
-    OnboardingIcone.cobranca => Icons.payments_outlined,
-    OnboardingIcone.atencao => Icons.notifications_active_outlined,
-    OnboardingIcone.video => Icons.play_circle_outline_rounded,
-    OnboardingIcone.evolucao => Icons.trending_up_rounded,
-    OnboardingIcone.chat => Icons.chat_bubble_outline_rounded,
+    OnboardingIcone.treino => FxIcons.treino,
+    OnboardingIcone.cobranca => FxIcons.pagamento,
+    OnboardingIcone.atencao => FxIcons.notificacaoAtiva,
+    OnboardingIcone.video => FxIcons.playCirculo,
+    OnboardingIcone.evolucao => FxIcons.subindo,
+    OnboardingIcone.chat => FxIcons.chat,
   };
 
   @override

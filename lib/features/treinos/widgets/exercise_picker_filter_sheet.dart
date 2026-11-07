@@ -12,6 +12,7 @@ import '../../../core/widgets/fx_settings_group.dart';
 import '../../exercicios/data/enums.dart';
 import '../../exercicios/data/exercicio_taxonomy_labels.dart';
 import '../utils/exercise_picker_filter.dart';
+import '../../../core/theme/fx_icons.dart';
 
 Future<void> showExercisePickerFilterSheet(
   BuildContext context, {
@@ -93,13 +94,13 @@ class _ExercisePickerFilterSheetState extends State<_ExercisePickerFilterSheet> 
     return FxSheetFrame(
       title: 'Filtros',
       subtitle: 'Escolha mais de um equipamento se quiser.',
-      leading: Icon(Icons.tune_rounded, color: brand, size: 20),
+      leading: Icon(FxIcons.filtros, color: brand, size: 20),
       footer: Row(
         children: [
           if (_hasAdvanced) ...[
             FxTonalButton(
               label: 'Limpar',
-              icon: Icons.close_rounded,
+              icon: FxIcons.fechar,
               onPressed: () {
                 HapticFeedback.selectionClick();
                 _apply(

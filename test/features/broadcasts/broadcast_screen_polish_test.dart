@@ -46,7 +46,7 @@ void main() {
     expect(historico, contains('FxEmptyState'));
     expect(historico, contains('FxSheetFrame'));
     expect(historico, isNot(contains('showFxHelpSheet')));
-    expect(historico, isNot(contains('Icons.people_outline_rounded')));
+    expect(historico, isNot(contains('FxIcons.grupo')));
     expect(historico, isNot(contains('FxLiquidPrimaryButton')));
   });
 }

@@ -8,7 +8,7 @@ extension on _LojaScreenState {
       context,
       title: 'Checkout — ${pacote.titulo}',
       subtitle: formatBrlCurrency(pacote.valor),
-      icon: Icons.qr_code_rounded,
+      icon: FxIcons.qrCode,
       confirmLabel: 'Gerar PIX',
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -16,13 +16,13 @@ extension on _LojaScreenState {
           AlunoInsetFormField(
             controller: emailCtrl,
             label: 'Email do comprador',
-            icon: Icons.mail_outline,
+            icon: FxIcons.email,
             keyboardType: TextInputType.emailAddress,
           ),
           AlunoInsetFormField(
             controller: nomeCtrl,
             label: 'Nome (opcional)',
-            icon: Icons.person_outline,
+            icon: FxIcons.pessoa,
             textCapitalization: TextCapitalization.words,
             showDivider: false,
           ),
@@ -54,7 +54,7 @@ extension on _LojaScreenState {
       await showFxNoticeSheet(
         context,
         title: 'PIX gerado',
-        icon: Icons.qr_code_rounded,
+        icon: FxIcons.qrCode,
         actionLabel: 'OK',
         message: pix.isEmpty ? 'Pedido criado.' : pix,
         extraActions: [
@@ -91,7 +91,7 @@ extension on _LojaScreenState {
         buyerNome: pedido.buyerNome,
         buyerEmail: pedido.buyerEmail,
       ),
-      icon: Icons.qr_code_rounded,
+      icon: FxIcons.qrCode,
       message: lojaPedidoSubtitle(
         buyerNome: pedido.buyerNome,
         buyerEmail: pedido.buyerEmail,

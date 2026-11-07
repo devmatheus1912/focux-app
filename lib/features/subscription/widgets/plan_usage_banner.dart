@@ -8,6 +8,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../planos/providers/plano_features_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../plan_entitlements.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Aviso soft (~80% do limite) para converter antes do hard stop do backend.
 class PlanUsageBanner extends ConsumerWidget {
@@ -52,7 +53,7 @@ class PlanUsageBanner extends ConsumerWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.trending_up_rounded, color: warn, size: 22),
+                Icon(FxIcons.subindo, color: warn, size: 22),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Column(
@@ -88,7 +89,7 @@ class PlanUsageBanner extends ConsumerWidget {
                     ],
                   ),
                 ),
-                Icon(Icons.chevron_right_rounded, color: primary),
+                Icon(FxIcons.chevronDireita, color: primary),
               ],
             ),
           ),

@@ -23,6 +23,7 @@ import '../utils/auth_error_messages.dart';
 import '../utils/mfa_disable_otp_copy.dart';
 import '../utils/mfa_setup_help_sheet.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Setup / status / disable MFA TOTP do Personal.
 class MfaSetupScreen extends ConsumerStatefulWidget {
@@ -248,7 +249,7 @@ class _MfaSetupScreenState extends ConsumerState<MfaSetupScreen> {
         appBar: AppBar(
           title: const Text('Autenticação em duas etapas'),
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
+            icon: const Icon(FxIcons.voltar),
             onPressed: _pop,
           ),
           actions: [
@@ -276,7 +277,7 @@ class _MfaSetupScreenState extends ConsumerState<MfaSetupScreen> {
                       header: 'Status',
                       children: [
                         FxSettingsTile(
-                          icon: Icons.phonelink_lock_outlined,
+                          icon: FxIcons.cadeado,
                           label: 'MFA TOTP',
                           value:
                               _status?.enabled == true ? 'Ativo' : 'Desativado',
@@ -286,7 +287,7 @@ class _MfaSetupScreenState extends ConsumerState<MfaSetupScreen> {
                         ),
                         if (_status?.enabled == true)
                           FxSettingsTile(
-                            icon: Icons.vpn_key_outlined,
+                            icon: FxIcons.chave,
                             label: 'Códigos de recuperação',
                             value:
                                 ptCountLabel(

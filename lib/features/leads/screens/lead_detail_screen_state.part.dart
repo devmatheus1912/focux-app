@@ -153,7 +153,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
       context,
       title: 'Arquivar lead?',
       message: 'O lead será marcado como Cancelado.',
-      icon: Icons.archive_outlined,
+      icon: FxIcons.arquivar,
       confirmLabel: 'Arquivar',
       destructive: true,
     );
@@ -183,7 +183,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
       context,
       title: 'Follow-up',
       subtitle: 'Quando você fala de novo com este lead.',
-      headerIcon: Icons.event_outlined,
+      headerIcon: FxIcons.calendario,
       selected: alunoFollowUpDateSelected(
         options: options,
         current: inicial,
@@ -196,7 +196,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
             value: option.date,
             label: option.label,
             subtitle: option.subtitle,
-            icon: Icons.event_outlined,
+            icon: FxIcons.calendario,
           ),
       ],
     );
@@ -248,7 +248,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
         context,
         title: 'Nova interação',
         subtitle: 'Registre o contato com este lead.',
-        icon: Icons.chat_bubble_outline_rounded,
+        icon: FxIcons.chat,
         confirmLabel: 'Salvar',
         child: StatefulBuilder(
           builder:
@@ -256,7 +256,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   FxInsetPickerRow(
-                    icon: Icons.category_outlined,
+                    icon: FxIcons.categoria,
                     label: 'Tipo',
                     value: leadInteracaoTipoLabel(tipo),
                     onTap: () async {
@@ -279,7 +279,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                   AlunoInsetFormField(
                     controller: descCtrl,
                     label: 'Descrição',
-                    icon: Icons.notes_outlined,
+                    icon: FxIcons.notas,
                     maxLines: 3,
                     showDivider: false,
                   ),

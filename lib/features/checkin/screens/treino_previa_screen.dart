@@ -25,6 +25,7 @@ import '../providers/checkin_provider.dart';
 import '../utils/treino_previa_view.dart';
 import '../widgets/checkin_resumo_view.dart';
 import '../widgets/treino_previa_widgets.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Prescrição antes de treinar. Só o botão Iniciar abre sessão; ao iniciar a
 /// tela fecha com `true` e quem abriu leva à execução.
@@ -60,7 +61,7 @@ class _TreinoPreviaScreenState extends ConsumerState<TreinoPreviaScreen> {
       message: s.treinoJaFizConfirmMensagem,
       confirmLabel: s.treinoJaFizConfirmar,
       cancelLabel: s.treinoJaFizVoltar,
-      icon: Icons.check_circle_outline_rounded,
+      icon: FxIcons.concluido,
     );
     if (!ok || !mounted) return;
     setState(() => _registrando = true);
@@ -230,14 +231,14 @@ class _PreviaBody extends StatelessWidget {
                           continuar
                               ? s.treinosContinuarCta
                               : s.treinosIniciarCta,
-                      icon: Icons.play_arrow_rounded,
+                      icon: FxIcons.play,
                       onPressed: registrando ? null : onIniciar,
                     ),
                     if (treinoPreviaMostraJaFiz(situacao)) ...[
                       const SizedBox(height: TokensStrip.s1),
                       FxTonalButton(
                         label: s.treinoJaFizCta,
-                        icon: Icons.check_rounded,
+                        icon: FxIcons.check,
                         expanded: true,
                         onPressed: registrando ? null : onJaFiz,
                       ),

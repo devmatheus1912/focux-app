@@ -8,6 +8,7 @@ import '../../../core/widgets/fx_loading.dart';
 import '../../../l10n/app_localizations.dart';
 import '../utils/chat_outbox.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 String chatOutgoingStatusLabel(ChatOutgoingStatus status, S s) {
   return switch (status) {
@@ -44,7 +45,7 @@ class ConversationDeliveryStatus extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.error_outline_rounded, size: 12, color: bad),
+          Icon(FxIcons.erroPequeno, size: 12, color: bad),
           const SizedBox(width: 3),
           Text(
             label,
@@ -83,7 +84,7 @@ class ConversationSendFailedActions extends StatelessWidget {
         MergeSemantics(
           child: Semantics(
             hint: canRetry ? null : s.chatReenvioAguardaAnexo,
-            child: FxTonalButton(label: s.retry, icon: Icons.refresh_rounded, onPressed: onRetry, compact: true),
+            child: FxTonalButton(label: s.retry, icon: FxIcons.atualizar, onPressed: onRetry, compact: true),
           ),
         ),
         FxTonalButton(label: s.chatDescartarNaoEnviada, onPressed: onDiscard, compact: true),

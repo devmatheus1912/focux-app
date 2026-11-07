@@ -4,6 +4,7 @@ import 'package:focux_app/core/widgets/fx_inset_picker_option.dart';
 import 'package:focux_app/features/exercicios/data/enums.dart';
 import 'package:focux_app/features/exercicios/data/exercicio_taxonomy_labels.dart';
 import 'package:focux_app/features/exercicios/widgets/add_exercicio_enum_picker_sheet.dart';
+import 'package:focux_app/core/theme/fx_icons.dart';
 
 void main() {
   testWidgets('enum picker usa linhas inset e retorna seleção', (tester) async {
@@ -20,7 +21,7 @@ void main() {
                       context,
                       title: 'Dificuldade',
                       contextLabel: 'Novo exercício',
-                      icon: Icons.signal_cellular_alt_rounded,
+                      icon: FxIcons.nivel,
                       values: Dificuldade.values,
                       labels: TaxonomyLabels.dificuldade,
                       selected: Dificuldade.iniciante,

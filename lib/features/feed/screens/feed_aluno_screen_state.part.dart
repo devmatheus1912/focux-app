@@ -65,7 +65,7 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
       message: l10n.chatBloquearConfirmaAluno,
       confirmLabel: l10n.feedBloquearAutor,
       destructive: true,
-      icon: Icons.block_rounded,
+      icon: FxIcons.bloquear,
     );
     if (!ok || !mounted) return;
     try {
@@ -389,7 +389,7 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
                                 vertical: 12,
                               ),
                               prefixIcon: Icon(
-                                Icons.search_rounded,
+                                FxIcons.buscar,
                                 color: primary,
                                 size: 20,
                               ),
@@ -399,7 +399,7 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
                                       tooltip: 'Limpar busca',
                                       onPressed: _clearQuery,
                                       icon: Icon(
-                                        Icons.close_rounded,
+                                        FxIcons.fechar,
                                         color: mute,
                                         size: 18,
                                       ),

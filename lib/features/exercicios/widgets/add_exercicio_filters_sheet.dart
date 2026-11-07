@@ -11,6 +11,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_toggle_chip.dart';
 import '../data/enums.dart';
 import '../data/exercicio_taxonomy_labels.dart';
+import '../../../core/theme/fx_icons.dart';
 
 typedef AddExercicioFiltersResult = ({
   Set<Equipamento> equipamentos,
@@ -176,7 +177,7 @@ class _AddExercicioFiltersSheetState extends State<_AddExercicioFiltersSheet> {
             isDark: widget.isDark,
             title: 'Equipamentos e espaços',
             subtitle: summary,
-            leading: Icon(Icons.inventory_2_outlined, color: soft, size: 20),
+            leading: Icon(FxIcons.estoque, color: soft, size: 20),
           ),
           const SizedBox(height: TokensStrip.s3),
           FxSheetSearchField(

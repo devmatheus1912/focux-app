@@ -20,6 +20,7 @@ import '../utils/aluno_delete_account.dart';
 import '../utils/aluno_perfil_completion.dart';
 import 'perfil_aluno_completar_card.dart';
 import 'perfil_progresso_bloco.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Identidade e conta. As ferramentas moram em `/aluno/ferramentas`, abertas
 /// pela Hoje.
@@ -137,7 +138,7 @@ class PerfilAlunoHubBody extends ConsumerWidget {
               header: s.alunoPerfilGrupoConta,
               children: [
                 FxSettingsTile(
-                  icon: Icons.badge_outlined,
+                  icon: FxIcons.cracha,
                   label: s.alunoPerfilEditar,
                   subtitle: s.alunoPerfilEditarDetalhe,
                   value: '',
@@ -146,7 +147,7 @@ class PerfilAlunoHubBody extends ConsumerWidget {
                   onTap: editar,
                 ),
                 FxSettingsTile(
-                  icon: Icons.fact_check_outlined,
+                  icon: FxIcons.conferir,
                   label: s.alunoPerfilConsentimentos,
                   subtitle: s.alunoPerfilConsentimentosDetalhe,
                   value: '',
@@ -168,7 +169,7 @@ class PerfilAlunoHubBody extends ConsumerWidget {
               header: s.alunoPerfilGrupoSaude,
               children: [
                 FxSettingsTile(
-                  icon: Icons.assignment_outlined,
+                  icon: FxIcons.prancheta,
                   label: s.alunoPerfilAnamnese,
                   subtitle: s.alunoPerfilAnamneseDetalhe,
                   value: '',
@@ -186,7 +187,7 @@ class PerfilAlunoHubBody extends ConsumerWidget {
             child: FxSettingsGroup(
               children: [
                 FxSettingsTile(
-                  icon: Icons.logout_rounded,
+                  icon: FxIcons.sair,
                   label: s.alunoPerfilSair,
                   value: '',
                   mute: chrome.mute,
@@ -195,7 +196,7 @@ class PerfilAlunoHubBody extends ConsumerWidget {
                   onTap: () => confirmAlunoLogout(context, ref),
                 ),
                 FxSettingsTile(
-                  icon: Icons.delete_forever_outlined,
+                  icon: FxIcons.excluir,
                   label: s.alunoPerfilExcluir,
                   subtitle: s.alunoPerfilExcluirDetalhe,
                   value: '',

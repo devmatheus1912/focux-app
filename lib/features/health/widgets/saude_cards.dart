@@ -8,6 +8,7 @@ import '../../../core/widgets/fx_status_pill.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
 import '../data/health_repository.dart';
 import '../utils/health_plausibilidade.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Cartão de métrica do dia: ícone em círculo tonal, valor grande, unidade
 /// menor e, quando há meta, uma barra fina de progresso. Sem cores de alarme.
@@ -99,7 +100,7 @@ class SaudeMetricTile extends StatelessWidget {
                     ),
                     if (onTap != null)
                       Icon(
-                        Icons.chevron_right_rounded,
+                        FxIcons.chevronDireita,
                         size: 18,
                         color: chrome.mute,
                       ),
@@ -365,7 +366,7 @@ class SaudeConexaoCard extends StatelessWidget {
                   shape: BoxShape.circle,
                   color: primary.withValues(alpha: 0.14),
                 ),
-                child: Icon(Icons.favorite_rounded, size: 20, color: chrome.ink),
+                child: Icon(FxIcons.favoritoAtivo, size: 20, color: chrome.ink),
               ),
               const SizedBox(width: 12),
               Expanded(

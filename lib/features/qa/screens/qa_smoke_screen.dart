@@ -7,6 +7,7 @@ import '../data/qa_smoke_catalog.dart';
 import '../widgets/qa_route_preview.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Tela QA — navega por todas as rotas de smoke test catalogadas.
 ///
@@ -39,11 +40,11 @@ class _QaSmokeScreenState extends State<QaSmokeScreen> {
         elevation: 0,
         title: const Text('🧪 QA Smoke Test'),
         actions: [
-          FxTonalButton(label: 'TOKENS', icon: Icons.palette_outlined, onPressed: _running ? null : () => context.go('/qa/tokens-strip'), compact: true),
-          FxTonalButton(label: 'Públicas', icon: Icons.play_arrow, onPressed: _running ? null : _runPublicRoutes, compact: true),
-          FxTonalButton(label: 'Logadas', icon: Icons.lock_open, onPressed: _running ? null : _runPrivateRoutes, compact: true),
-          FxTonalButton(label: 'APIs', icon: Icons.cloud_outlined, onPressed: _running ? null : _runEndpoints, compact: true),
-          FxTonalButton(label: 'Limpar', icon: Icons.refresh, onPressed: _resetResults, compact: true),
+          FxTonalButton(label: 'TOKENS', icon: FxIcons.paleta, onPressed: _running ? null : () => context.go('/qa/tokens-strip'), compact: true),
+          FxTonalButton(label: 'Públicas', icon: FxIcons.play, onPressed: _running ? null : _runPublicRoutes, compact: true),
+          FxTonalButton(label: 'Logadas', icon: FxIcons.cadeadoAberto, onPressed: _running ? null : _runPrivateRoutes, compact: true),
+          FxTonalButton(label: 'APIs', icon: FxIcons.nuvem, onPressed: _running ? null : _runEndpoints, compact: true),
+          FxTonalButton(label: 'Limpar', icon: FxIcons.atualizar, onPressed: _resetResults, compact: true),
         ],
       ),
       body: Column(
@@ -142,7 +143,7 @@ class _QaSmokeScreenState extends State<QaSmokeScreen> {
                           const SizedBox(width: 8),
                           IconButton(
                             tooltip: 'Abrir',
-                            icon: const Icon(Icons.open_in_new, size: 18),
+                            icon: const Icon(FxIcons.abrirFora, size: 18),
                             onPressed:
                                 _running
                                     ? null
@@ -227,11 +228,11 @@ class _QaSmokeScreenState extends State<QaSmokeScreen> {
 
   Widget _statusIcon(_RouteResult? result) {
     if (result == null) {
-      return const Icon(Icons.radio_button_unchecked, color: Colors.grey);
+      return const Icon(FxIcons.circulo, color: Colors.grey);
     }
     return result.ok
-        ? const Icon(Icons.check_circle, color: Colors.green)
-        : const Icon(Icons.error, color: Colors.red);
+        ? const Icon(FxIcons.concluidoAtivo, color: Colors.green)
+        : const Icon(FxIcons.erroAtivo, color: Colors.red);
   }
 
   Widget _endpointStatusIcon(_EndpointResult? result) {
@@ -239,7 +240,7 @@ class _QaSmokeScreenState extends State<QaSmokeScreen> {
       return _methodChip('…');
     }
     return Icon(
-      result.ok ? Icons.check_circle : Icons.error,
+      result.ok ? FxIcons.concluidoAtivo : FxIcons.erroAtivo,
       color: result.ok ? Colors.green : Colors.red,
       size: 18,
     );

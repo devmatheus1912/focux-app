@@ -4,6 +4,7 @@ import '../../l10n/app_localizations.dart';
 import '../theme/focux_hub_typography.dart';
 import '../theme/shell_chrome.dart';
 import '../theme/tokens_strip.dart';
+import '../theme/fx_icons.dart';
 
 /// Aviso no lugar da demonstração de um exercício oficial ainda sem vídeo.
 /// Não é botão e não abre nada.
@@ -32,7 +33,7 @@ class FxVideoEmBreve extends StatelessWidget {
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.videocam_outlined, size: 16, color: primary),
+          Icon(FxIcons.videoPequeno, size: 16, color: primary),
           const SizedBox(width: TokensStrip.s1),
           Text(
             s.videoEmBreve,
@@ -55,7 +56,7 @@ class FxVideoEmBreve extends StatelessWidget {
                 color: primary.withValues(alpha: chrome.isDark ? 0.22 : 0.10),
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.videocam_outlined, color: primary, size: 26),
+              child: Icon(FxIcons.video, color: primary, size: 26),
             ),
             const SizedBox(height: TokensStrip.s2),
             Text(

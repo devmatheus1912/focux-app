@@ -14,6 +14,7 @@ import '../../dashboard/utils/aluno_semana_faixa.dart';
 import '../../treinos/providers/treinos_provider.dart';
 import '../../treinos/utils/semana_da_fila.dart';
 import '../../treinos/widgets/ficha_vigencia_linha.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// A ficha de treino do aluno no Resumo: a semana em sete dias, a validade e
 /// um verbo que abre a ficha de verdade (`/alunos/:id/rotina`).
@@ -100,7 +101,7 @@ class Aluno360FichaCard extends ConsumerWidget {
                       if (vazia)
                         FxTonalButton(
                           label: verbo,
-                          icon: Icons.add_rounded,
+                          icon: FxIcons.adicionar,
                           compact: true,
                           onPressed: abrir,
                         )

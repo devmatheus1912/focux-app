@@ -8,6 +8,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../l10n/pt.dart';
 import '../data/avaliacao_repository.dart';
 import '../utils/evolucao_comparativo_display.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Composição corporal e, em cartão único, início e atual de cada métrica.
 class EvolucaoComparacaoLinhas extends StatelessWidget {
@@ -15,10 +16,15 @@ class EvolucaoComparacaoLinhas extends StatelessWidget {
     super.key,
     required this.primeira,
     required this.atual,
+    this.onConfira,
   });
 
   final SnapshotAvaliacao primeira;
   final SnapshotAvaliacao atual;
+
+  /// Tocar no "Confira" abre o registro para conferir; recebe as duas datas
+  /// (aaaa-mm-dd) comparadas.
+  final ValueChanged<Set<String>>? onConfira;
 
   @override
   Widget build(BuildContext context) {
@@ -45,6 +51,13 @@ class EvolucaoComparacaoLinhas extends StatelessWidget {
                 _Linha(
                   metrica: m,
                   suspeita: evolucaoComparativoSuspeita(m, dias),
+                  onConfira:
+                      onConfira == null
+                          ? null
+                          : () => onConfira!({
+                            for (final d in [primeira.avaliadoEm, atual.avaliadoEm])
+                              if (d != null && d.length >= 10) d.substring(0, 10),
+                          }),
                 ),
               ],
             ],
@@ -123,9 +136,10 @@ class _Composicao extends StatelessWidget {
 /// Nome, "90,0 → 105,0 kg" e a diferença à direita. Sem cor: subir ou descer
 /// depende do objetivo.
 class _Linha extends StatelessWidget {
-  const _Linha({required this.metrica, this.suspeita = false});
+  const _Linha({required this.metrica, this.suspeita = false, this.onConfira});
 
   final EvolucaoComparativoMetrica metrica;
+  final VoidCallback? onConfira;
 
   /// Variação fora do comum para o intervalo: marca "Confira".
   final bool suspeita;
@@ -176,13 +190,20 @@ class _Linha extends StatelessWidget {
                     ).copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
                   ),
                   if (suspeita)
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.warning_amber_rounded, size: 14, color: alerta),
-                        const SizedBox(width: 2),
-                        Text(ptS.comparacaoConfira, style: FocuxHubTypography.chip(alerta)),
-                      ],
+                    InkWell(
+                      onTap: onConfira,
+                      borderRadius: BorderRadius.circular(TokensStrip.s2),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(minHeight: onConfira == null ? 0 : 44),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(FxIcons.alertaPequeno, size: 14, color: alerta),
+                            const SizedBox(width: 2),
+                            Text(ptS.comparacaoConfira, style: FocuxHubTypography.chip(alerta)),
+                          ],
+                        ),
+                      ),
                     ),
                 ],
               ),

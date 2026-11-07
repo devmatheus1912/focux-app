@@ -5,6 +5,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../l10n/app_localizations.dart';
 import '../models/ia_copilot_insight.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class IaCopilotInsightItem extends StatefulWidget {
   const IaCopilotInsightItem({
@@ -78,8 +79,8 @@ class _IaCopilotInsightItemState extends State<IaCopilotInsightItem> {
                       ),
                       Icon(
                         _expanded
-                            ? Icons.expand_less_rounded
-                            : Icons.expand_more_rounded,
+                            ? FxIcons.chevronCima
+                            : FxIcons.chevronBaixo,
                         size: 20,
                         color: widget.mute,
                       ),
@@ -135,7 +136,7 @@ class IaCopilotInsightsLoading extends StatelessWidget {
                   color: soft,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(Icons.auto_awesome, color: brand, size: 17),
+                child: Icon(FxIcons.ia, color: brand, size: 17),
               ),
               const SizedBox(width: 10),
               Expanded(

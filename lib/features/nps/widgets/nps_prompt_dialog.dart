@@ -14,6 +14,7 @@ import '../../auth/providers/auth_provider.dart';
 import '../../dashboard/data/aluno_onboarding_prefs.dart';
 import '../data/nps_repository.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Pergunta o NPS que o BFF liberou. Fechar sem responder adia por
 /// [alunoNpsAdiadoDias] dias neste aparelho.
@@ -85,7 +86,7 @@ class _NpsPromptSheetState extends State<_NpsPromptSheet> {
             isDark: isDark,
             title: s.npsPromptTitulo,
             subtitle: s.npsPromptSubtitulo,
-            leading: Icon(Icons.favorite_outline, color: primary, size: 18),
+            leading: Icon(FxIcons.favorito, color: primary, size: 18),
           ),
           const SizedBox(height: TokensStrip.s4),
           Text(

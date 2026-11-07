@@ -24,6 +24,7 @@ import '../../evolucao/data/evolucao_repository.dart';
 import '../data/avaliacao_repository.dart';
 import '../utils/evolucao_comparativo_display.dart';
 import '../widgets/evolucao_comparacao_linhas.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class EvolucaoComparativoScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -33,7 +34,11 @@ class EvolucaoComparativoScreen extends ConsumerStatefulWidget {
     super.key,
     required this.alunoId,
     this.alunoNome = 'Aluno',
+    this.onConfira,
   });
+
+  /// "Confira" numa linha: as datas comparadas, para abrir o registro.
+  final ValueChanged<Set<String>>? onConfira;
   @override
   ConsumerState<EvolucaoComparativoScreen> createState() =>
       _EvolucaoComparativoScreenState();
@@ -92,7 +97,7 @@ class _EvolucaoComparativoScreenState
       context,
       title: evolucaoComparativoConfirmTitle(),
       message: evolucaoComparativoConfirmMessage(),
-      icon: Icons.chat_bubble_outline_rounded,
+      icon: FxIcons.chat,
       confirmLabel: evolucaoComparativoConfirmLabel(),
     );
     if (!ok || !mounted) return;
@@ -131,7 +136,7 @@ class _EvolucaoComparativoScreenState
         context,
         title: 'Nova avaliação',
         subtitle: 'Peso é obrigatório. O resto entra se você tiver.',
-        icon: Icons.monitor_weight_outlined,
+        icon: FxIcons.balanca,
         confirmLabel: 'Salvar',
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -140,35 +145,35 @@ class _EvolucaoComparativoScreenState
               rotuloVisivel: true,
               controller: peso,
               label: 'Peso (kg)',
-              icon: Icons.monitor_weight_outlined,
+              icon: FxIcons.balanca,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
             ),
             AlunoInsetFormField(
               rotuloVisivel: true,
               controller: altura,
               label: 'Altura (cm)',
-              icon: Icons.height_outlined,
+              icon: FxIcons.altura,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
             ),
             AlunoInsetFormField(
               rotuloVisivel: true,
               controller: gordura,
               label: '% Gordura',
-              icon: Icons.percent_outlined,
+              icon: FxIcons.percentual,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
             ),
             AlunoInsetFormField(
               rotuloVisivel: true,
               controller: massaMagra,
               label: '% Massa magra',
-              icon: Icons.fitness_center_outlined,
+              icon: FxIcons.treino,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
             ),
             AlunoInsetFormField(
               rotuloVisivel: true,
               controller: cintura,
               label: 'Cintura (cm)',
-              icon: Icons.straighten_outlined,
+              icon: FxIcons.fitaMetrica,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
               showDivider: false,
             ),
@@ -327,7 +332,11 @@ class _EvolucaoComparativoScreenState
             style: FocuxHubTypography.bodyMuted(color: chrome.mute),
           ),
           const SizedBox(height: TokensStrip.s3),
-          EvolucaoComparacaoLinhas(primeira: c.primeira, atual: c.atual),
+          EvolucaoComparacaoLinhas(
+            primeira: c.primeira,
+            atual: c.atual,
+            onConfira: widget.onConfira,
+          ),
         ],
       ),
     );

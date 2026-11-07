@@ -153,7 +153,7 @@ class _PerfilPhotoEditor extends StatelessWidget {
                               ),
                             )
                             : Icon(
-                              Icons.camera_alt_rounded,
+                              FxIcons.cameraPequeno,
                               size: 14,
                               color: onPrimary,
                             ),

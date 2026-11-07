@@ -5,6 +5,7 @@ import '../theme/design_tokens.dart';
 import '../theme/focux_hub_typography.dart';
 import '../theme/shell_chrome.dart';
 import '../theme/tokens_strip.dart';
+import '../theme/fx_icons.dart';
 
 enum FxWeekDayState { treino, descanso, concluido }
 
@@ -141,10 +142,10 @@ class _Dia extends StatelessWidget {
                 )
               : null,
           child: concluido
-              ? const Icon(Icons.check_rounded, size: 18, color: Colors.white)
+              ? const Icon(FxIcons.check, size: 18, color: Colors.white)
               : treino
               ? (dia.letra == null
-                    ? Icon(Icons.fitness_center, size: 14, color: sobre ?? Colors.white)
+                    ? Icon(FxIcons.treinoPequeno, size: 14, color: sobre ?? Colors.white)
                     : Center(
                         child: Text(
                           dia.letra!,

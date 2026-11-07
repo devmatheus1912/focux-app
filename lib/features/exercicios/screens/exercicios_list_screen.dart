@@ -33,6 +33,7 @@ import 'widgets/exercicios_filter_bar.dart';
 import 'widgets/exercicios_list_view.dart';
 import '../../alunos/widgets/aluno_form_choices.dart';
 import '../models/exercicio_criado.dart';
+import '../../../core/theme/fx_icons.dart';
 
 part 'exercicios_list_screen_body.part.dart';
 
@@ -200,7 +201,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
       title: 'Excluir exercício?',
       message:
           'Isso remove "${exercicio.nome}" da biblioteca. Se estiver em treino, o backend pode bloquear.',
-      icon: Icons.delete_outline_rounded,
+      icon: FxIcons.excluir,
       confirmLabel: 'Excluir',
       destructive: true,
     );
@@ -287,7 +288,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
           'Esta acao remove os exercicios selecionados da biblioteca. '
           'Se algum estiver cadastrado em treino de aluno, ele sera mantido '
           'e eu vou te mostrar quais foram bloqueados.',
-      icon: Icons.delete_outline_rounded,
+      icon: FxIcons.excluir,
       confirmLabel: 'Excluir',
       destructive: true,
     );
@@ -349,7 +350,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
     await showFxNoticeSheet(
       context,
       title: 'Alguns exercicios nao foram excluidos',
-      icon: Icons.info_outline_rounded,
+      icon: FxIcons.info,
       body: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -439,12 +440,12 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                                 : () => setState(
                                   () => _selected.add(visible.first.id),
                                 ),
-                        icon: const Icon(Icons.checklist_rounded),
+                        icon: const Icon(FxIcons.checklist),
                       ),
                       IconButton(
                         tooltip: 'Carregar biblioteca completa',
                         onPressed: _abrirBiblioteca,
-                        icon: const Icon(Icons.menu_book_rounded),
+                        icon: const Icon(FxIcons.livro),
                       ),
                     ],
                   )

@@ -19,6 +19,7 @@ import '../utils/aluno360_timeline_logic.dart';
 import 'aluno360_timeline_card.dart';
 import 'aluno360_timeline_sheet_motion.dart';
 import '../../../l10n/pt.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Full Histórico 360 sheet with cursor pagination (load-more).
 class Aluno360TimelineFullSheet extends ConsumerStatefulWidget {
@@ -114,7 +115,7 @@ class _Aluno360TimelineFullSheetState
             isDark: isDark,
             title: ptS.anamneseAlunoHistorico,
             subtitle: headerSubtitle,
-            leading: Icon(Icons.timeline_rounded, color: primary, size: 18),
+            leading: Icon(FxIcons.linhaDoTempo, color: primary, size: 18),
           ),
           SizedBox(height: TokensStrip.s3),
           FxChoiceStrip<String?>(

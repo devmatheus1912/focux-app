@@ -26,7 +26,7 @@ void main() {
     expect(screen, isNot(contains('TabBarView')));
     expect(screen, isNot(contains('PopupMenuButton')));
     expect(screen, isNot(contains('Aluno #')));
-    expect(screen, isNot(contains('Icons.dashboard')));
+    expect(screen, isNot(contains('FxIcons.painel')));
     expect(screen, isNot(contains('bar_chart')));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, contains('constrainWidth: false'));

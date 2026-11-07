@@ -15,6 +15,7 @@ import '../utils/historico_detalhe_texts.dart';
 import '../utils/historico_fichas.dart';
 import '../utils/treinos_hub_texts.dart';
 import '../utils/treinos_hub_view.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Loading do histórico: cabeçalho de semana e quatro linhas.
 class HistoricoSkeleton extends StatelessWidget {
@@ -182,7 +183,7 @@ class HistoricoSessaoRow extends StatelessWidget {
                 ],
                 const SizedBox(width: TokensStrip.s1),
                 Icon(
-                  Icons.chevron_right_rounded,
+                  FxIcons.chevronDireita,
                   size: 20,
                   color: chrome.mute,
                 ),
@@ -297,7 +298,7 @@ class _HistoricoMaisRodapeState extends State<HistoricoMaisRodape> {
         const SizedBox(width: TokensStrip.s2),
         FxTonalButton(
           label: s.historicoTentarDeNovo,
-          icon: Icons.refresh_rounded,
+          icon: FxIcons.atualizar,
           compact: true,
           onPressed: widget.onCarregar,
         ),

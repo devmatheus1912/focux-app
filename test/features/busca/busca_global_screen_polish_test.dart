@@ -33,7 +33,7 @@ void main() {
     expect(screen, isNot(contains('DropdownButton')));
     expect(screen, isNot(contains('Map<String, dynamic>')));
     expect(screen, isNot(contains('Icons.clear')));
-    expect(screen, isNot(contains('Icons.person')));
+    expect(screen, isNot(contains('FxIcons.pessoa')));
     expect(screen, isNot(contains('FilledButton')));
     expect(screen, isNot(contains('context.pop()')));
   });
@@ -48,7 +48,7 @@ void main() {
     expect(results, isNot(contains('FxSettingsGroup')));
     expect(results, isNot(contains('FilterChip')));
     expect(results, isNot(contains('CircleAvatar')));
-    expect(results, isNot(contains('Icons.person')));
+    expect(results, isNot(contains('FxIcons.pessoa')));
     expect(results, isNot(contains('Map<String, dynamic>')));
   });
 }

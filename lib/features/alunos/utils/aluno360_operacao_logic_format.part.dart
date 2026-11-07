@@ -93,13 +93,13 @@ bool acaoSugereCommitment(String acao) {
 
 IconData stickyIconForDestination(OperacaoStickyDestination destination) {
   return switch (destination) {
-    OperacaoStickyDestination.chat => Icons.chat_bubble_outline_rounded,
-    OperacaoStickyDestination.evolucao => Icons.monitor_weight_outlined,
-    OperacaoStickyDestination.editAluno => Icons.edit_outlined,
-    OperacaoStickyDestination.commandCenter => Icons.dashboard_outlined,
-    OperacaoStickyDestination.financeiro => Icons.payments_outlined,
-    OperacaoStickyDestination.treino => Icons.fitness_center_outlined,
-    OperacaoStickyDestination.commitment => Icons.bedtime_outlined,
+    OperacaoStickyDestination.chat => FxIcons.chat,
+    OperacaoStickyDestination.evolucao => FxIcons.balanca,
+    OperacaoStickyDestination.editAluno => FxIcons.editar,
+    OperacaoStickyDestination.commandCenter => FxIcons.painel,
+    OperacaoStickyDestination.financeiro => FxIcons.pagamento,
+    OperacaoStickyDestination.treino => FxIcons.treino,
+    OperacaoStickyDestination.commitment => FxIcons.sono,
   };
 }
 

@@ -16,6 +16,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/feed_repository.dart';
 import '../utils/feed_display.dart';
 import '../../../l10n/pt.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class FeedComposerSheet extends StatefulWidget {
   const FeedComposerSheet({super.key, required this.ref, this.post});
@@ -188,8 +189,8 @@ class _FeedComposerSheetState extends State<FeedComposerSheet> {
               children: [
                 Icon(
                   _tipoSelecionado == 'VIDEO'
-                      ? Icons.videocam_outlined
-                      : Icons.image_outlined,
+                      ? FxIcons.video
+                      : FxIcons.imagem,
                   color: primary,
                   size: 20,
                 ),
@@ -208,7 +209,7 @@ class _FeedComposerSheetState extends State<FeedComposerSheet> {
                       _salvando
                           ? null
                           : () => setState(() => _midiaSelecionada = null),
-                  icon: const Icon(Icons.close_rounded),
+                  icon: const Icon(FxIcons.fechar),
                 ),
               ],
             ),
@@ -223,7 +224,7 @@ class _FeedComposerSheetState extends State<FeedComposerSheet> {
                     _salvando || _escolhendoMidia
                         ? null
                         : () => _escolherMidia('IMAGEM'),
-                icon: Icon(Icons.image_outlined, color: primary),
+                icon: Icon(FxIcons.imagem, color: primary),
               ),
               IconButton(
                 tooltip: ptS.feedVideo,
@@ -231,13 +232,13 @@ class _FeedComposerSheetState extends State<FeedComposerSheet> {
                     _salvando || _escolhendoMidia
                         ? null
                         : () => _escolherMidia('VIDEO'),
-                icon: Icon(Icons.videocam_outlined, color: primary),
+                icon: Icon(FxIcons.video, color: primary),
               ),
               ],
               IconButton(
                 tooltip: ptS.agendaTituloGrupo,
                 onPressed: () => setState(() => _comTitulo = !_comTitulo),
-                icon: Icon(Icons.title_rounded, color: primary),
+                icon: Icon(FxIcons.titulo, color: primary),
               ),
               const Spacer(),
               if (!_editando)

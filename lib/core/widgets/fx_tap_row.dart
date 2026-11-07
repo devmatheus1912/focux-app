@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../theme/focux_hub_typography.dart';
 import '../theme/shell_chrome.dart';
 import '../theme/tokens_strip.dart';
+import '../theme/fx_icons.dart';
 
 /// Linha tocável com forma: borda fina, seta no fim e estado pressionado.
 /// A variante `vazio` usa borda pontilhada e "+" para "Adicionar".
@@ -38,7 +39,7 @@ class FxTapRow extends StatelessWidget {
     final fim =
         trailing ??
         Icon(
-          vazio ? Icons.add_rounded : Icons.chevron_right_rounded,
+          vazio ? FxIcons.adicionar : FxIcons.chevronDireita,
           color: chrome.mute,
         );
     final titulo = FocuxHubTypography.cardTitle(

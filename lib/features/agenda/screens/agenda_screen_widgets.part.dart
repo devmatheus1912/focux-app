@@ -87,7 +87,7 @@ class _AgendaEventSheetState extends State<_AgendaEventSheet> {
     final commandTiles = <FxSettingsTile>[
       if (completePrimary)
         FxSettingsTile(
-          icon: Icons.check_rounded,
+          icon: FxIcons.check,
           label: agendaEventPrimaryLabel(completePrimary: true),
           value: '',
           showDivider: widget.onWhatsapp != null ||
@@ -114,7 +114,7 @@ class _AgendaEventSheetState extends State<_AgendaEventSheet> {
         ),
       if (widget.onConfirm != null)
         FxSettingsTile(
-          icon: Icons.verified_outlined,
+          icon: FxIcons.verificado,
           label: 'Confirmar horário',
           value: '',
           showDivider: widget.onReschedule != null ||
@@ -131,7 +131,7 @@ class _AgendaEventSheetState extends State<_AgendaEventSheet> {
         ),
       if (!completePrimary && widget.onComplete != null)
         FxSettingsTile(
-          icon: Icons.check_circle_outline,
+          icon: FxIcons.concluido,
           label: 'Marcar concluído',
           value: '',
           showDivider: false,

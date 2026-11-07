@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class AuthBackButton extends StatelessWidget {
   const AuthBackButton({
@@ -35,7 +36,7 @@ class AuthBackButton extends StatelessWidget {
           ),
           child: Center(
             child: Icon(
-              Icons.chevron_left_rounded,
+              FxIcons.chevronEsquerda,
               color: Colors.white.withValues(alpha: 0.92),
               size: 22,
             ),

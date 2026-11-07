@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../theme/focux_hub_typography.dart';
 import '../theme/tokens_strip.dart';
 import 'fx_shell_scaffold.dart';
+import '../theme/fx_icons.dart';
 
 /// Shared surface styling for operational KPI tiles (Aluno 360).
 enum OperationalMetricEmphasis { normal, alert, muted }
@@ -92,7 +93,7 @@ class OperationalMetricTile extends StatelessWidget {
               if (onInfo != null) ...[
                 const SizedBox(width: 4),
                 Icon(
-                  Icons.help_outline_rounded,
+                  FxIcons.ajuda,
                   size: dense ? 13 : 15,
                   color: labelColor,
                 ),

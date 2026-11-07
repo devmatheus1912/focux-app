@@ -36,7 +36,7 @@ extension on _PrescriptionEditorSheetState {
                     title: prescriptionRepsLabel,
                     subtitle: prescriptionRepsSubtitle,
                     leading: Icon(
-                      Icons.fitness_center_rounded,
+                      FxIcons.treino,
                       color: brand,
                       size: FxSettingsLayout.iconSize,
                     ),
@@ -113,7 +113,7 @@ extension on _PrescriptionEditorSheetState {
       context,
       title: prescriptionObjetivo,
       subtitle: prescriptionObjetivoSubtitle,
-      headerIcon: Icons.flag_outlined,
+      headerIcon: FxIcons.meta,
       selected: _presetId,
       items: [
         for (final preset in workoutBuilderPresets)
@@ -121,7 +121,7 @@ extension on _PrescriptionEditorSheetState {
             value: preset.id,
             label: preset.label,
             subtitle: preset.summary,
-            icon: Icons.flag_outlined,
+            icon: FxIcons.meta,
           ),
       ],
     );
@@ -161,7 +161,7 @@ extension _DescansoPicker on _PrescriptionEditorSheetState {
     final picked = await showFxInsetPickerSheet<int>(
       context,
       title: prescriptionDescanso,
-      headerIcon: Icons.timer_outlined,
+      headerIcon: FxIcons.cronometro,
       selected: atual,
       items: [
         for (final s in opcoesDescansoSeg)

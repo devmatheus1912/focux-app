@@ -17,6 +17,7 @@ import '../data/aluno_copilot_ia_cache_store.dart';
 import '../providers/aluno_detail_providers.dart';
 import '../utils/aluno360_ia_upgrade.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class Aluno360CopilotIaRefreshButton extends ConsumerStatefulWidget {
   const Aluno360CopilotIaRefreshButton({
@@ -136,7 +137,7 @@ class Aluno360CopilotIaRefreshButtonState
           width: double.infinity,
           child: OutlinedButton.icon(
             onPressed: () => _openUpgrade(ia.planoMinimo),
-            icon: const Icon(Icons.lock_rounded, size: 18),
+            icon: const Icon(FxIcons.cadeado, size: 18),
             label: Text('Gerar com IA · $tier'),
           ),
         ),
@@ -149,7 +150,7 @@ class Aluno360CopilotIaRefreshButtonState
         key: const ValueKey('aluno360_copilot_ia_locked'),
         onPressed: () => _openUpgrade(ia.planoMinimo),
         constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
-        icon: Icon(Icons.lock_rounded, size: 18, color: widget.primary),
+        icon: Icon(FxIcons.cadeado, size: 18, color: widget.primary),
         tooltip: label,
         visualDensity: VisualDensity.compact,
       ),
@@ -179,7 +180,7 @@ class Aluno360CopilotIaRefreshButtonState
                       strokeWidth: 2,
                       color: Colors.white,
                     )
-                    : const Icon(Icons.auto_awesome_rounded, size: 18),
+                    : const Icon(FxIcons.ia, size: 18),
             label: Text(_refreshing ? 'Gerando…' : 'Gerar com IA'),
             style: Aluno360Layout.operacaoFilledButtonStyle(
               context,
@@ -200,7 +201,7 @@ class Aluno360CopilotIaRefreshButtonState
             _refreshing
                 ? 'Atualizando sugestão com IA'
                 : 'Atualizar sugestão com IA',
-        icon: Icons.refresh_rounded,
+        icon: FxIcons.atualizar,
         compact: true,
         loading: _refreshing,
         onPressed: _refreshIa,
@@ -223,7 +224,7 @@ class Aluno360CopilotIaRefreshButtonState
                   strokeWidth: 2,
                   color: widget.primary,
                 )
-                : Icon(Icons.refresh_rounded, size: iconSize),
+                : Icon(FxIcons.atualizar, size: iconSize),
         tooltip: _refreshing ? 'Atualizando…' : 'Regenerar sugestão com IA',
         visualDensity: VisualDensity.compact,
       ),

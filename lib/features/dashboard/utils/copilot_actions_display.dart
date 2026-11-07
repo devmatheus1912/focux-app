@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../l10n/pt.dart';
 import '../data/command_center_data.dart';
 import 'dashboard_command_copy.dart';
+import '../../../core/theme/fx_icons.dart';
 
 const copilotActionsStatusAberto = 'ABERTO';
 const copilotActionsStatusAdiado = 'ADIADO';
@@ -164,10 +165,10 @@ List<FilaAcaoResumo> copilotActionsFeitasHoje(
 IconData copilotActionsIcone(FilaAcaoResumo a) {
   final tipo = a.tipo.toUpperCase();
   if (tipo.contains('FINANC') || tipo.contains('COBRAN')) {
-    return Icons.payments_outlined;
+    return FxIcons.pagamento;
   }
-  if (tipo.contains('AGENDA')) return Icons.event_outlined;
-  return Icons.checklist_rounded;
+  if (tipo.contains('AGENDA')) return FxIcons.calendario;
+  return FxIcons.checklist;
 }
 
 /// O verbo da linha, vindo da tarefa ("Responder", "Cobrar").

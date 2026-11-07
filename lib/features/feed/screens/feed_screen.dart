@@ -29,6 +29,7 @@ import '../utils/feed_display.dart';
 import '../widgets/feed_comments_sheet.dart';
 import '../widgets/feed_composer_sheet.dart';
 import '../widgets/feed_post_card.dart';
+import '../../../core/theme/fx_icons.dart';
 
 part 'feed_screen_state.part.dart';
 

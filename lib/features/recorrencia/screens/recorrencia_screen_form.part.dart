@@ -35,7 +35,7 @@ extension on _RecorrenciaScreenState {
     final acao = await showFxGroupedActionSheet<RecorrenciaAcao>(
       context,
       titulo: recorrenciaAlunoLabel(item.alunoNome),
-      icone: Icons.repeat_rounded,
+      icone: FxIcons.repetir,
       grupos: [
         FxActionGroup<RecorrenciaAcao>(null, [
           for (final a in acoes)

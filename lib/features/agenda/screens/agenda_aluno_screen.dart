@@ -34,6 +34,7 @@ import '../utils/agenda_display.dart';
 import '../utils/agenda_schedule.dart';
 import '../utils/agenda_status.dart';
 import '../widgets/agenda_meta_strip.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class AgendaAlunoScreen extends ConsumerStatefulWidget {
   const AgendaAlunoScreen({super.key});
@@ -190,14 +191,14 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen>
     final escolha = await showFxGroupedActionSheet<String>(
       context,
       titulo: s.agendaAlunoMaisOpcoes,
-      icone: Icons.more_horiz_rounded,
+      icone: FxIcons.mais,
       grupos: [
         FxActionGroup<String>(null, [
           FxActionItem(
             valor: 'calendario',
             rotulo: s.agendaAlunoAdicionarCalendario,
             descricao: s.agendaAlunoCalendarioTexto,
-            icone: Icons.event_available_outlined,
+            icone: FxIcons.eventoConfirmado,
           ),
         ]),
       ],
@@ -237,7 +238,7 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen>
       title: s.agendaNaoVouTitulo,
       message: s.agendaNaoVouTexto,
       confirmLabel: s.agendaNaoVouAvisar,
-      icon: Icons.event_busy_outlined,
+      icon: FxIcons.eventoCancelado,
     );
     if (!ok || !mounted) return;
     try {
@@ -265,7 +266,7 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen>
           (ctx) => FxHomeSheetScaffold(
             isDark: chrome.isDark,
             leading: Icon(
-              Icons.event_outlined,
+              FxIcons.calendario,
               color: Theme.of(ctx).colorScheme.primary,
               size: 22,
             ),
@@ -337,7 +338,7 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen>
           actions: [
             IconButton(
               tooltip: s.agendaAlunoMaisOpcoes,
-              icon: const Icon(Icons.more_horiz_rounded),
+              icon: const Icon(FxIcons.mais),
               onPressed: _menu,
             ),
           ],

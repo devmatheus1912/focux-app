@@ -15,6 +15,7 @@ import '../../evolucao/data/evolucao_repository.dart';
 import '../../evolucao/providers/evolucao_home_provider.dart';
 import '../../evolucao/utils/evolucao_series.dart';
 import '../../evolucao/widgets/evolucao_hero.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// "105,0 kg · +15,0 kg"; sem medida, o texto de vazio.
 String perfilPesoLinha(S s, List<MedidaCorporal> medidas) {
@@ -77,7 +78,7 @@ class PerfilProgressoBloco extends ConsumerWidget {
               const SizedBox(height: TokensStrip.s3),
               FxTonalButton(
                 label: s.alunoPerfilRegistrarMedida,
-                icon: Icons.add_chart,
+                icon: FxIcons.grafico,
                 expanded: true,
                 onPressed:
                     () => context.push('/aluno/perfil/editar?acao=medida'),

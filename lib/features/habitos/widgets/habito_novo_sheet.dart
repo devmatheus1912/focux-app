@@ -9,6 +9,7 @@ import '../../alunos/data/aluno_repository.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../data/habito_repository.dart';
 import '../utils/habitos_display.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Sheet de criação — título, template e aluno (todos ou um).
 Future<bool> showHabitoNovoSheet({
@@ -43,7 +44,7 @@ Future<bool> showHabitoNovoSheet({
       context,
       title: 'Novo hábito',
       subtitle: 'Todos os alunos, ou só um.',
-      icon: Icons.add_task_outlined,
+      icon: FxIcons.adicionarTarefa,
       confirmLabel: 'Criar',
       child: StatefulBuilder(
         builder: (ctx, setDialogState) => Column(
@@ -51,7 +52,7 @@ Future<bool> showHabitoNovoSheet({
           children: [
             if (templates.isNotEmpty)
               FxInsetPickerRow(
-                icon: Icons.auto_awesome_outlined,
+                icon: FxIcons.ia,
                 label: 'Template',
                 value: habitoTemplateValue(
                   selected?.titulo,
@@ -92,7 +93,7 @@ Future<bool> showHabitoNovoSheet({
               ),
             if (alunos.isNotEmpty)
               FxInsetPickerRow(
-                icon: Icons.person_outline,
+                icon: FxIcons.pessoa,
                 label: 'Aluno',
                 value: alunoLabel,
                 onTap: () async {
@@ -138,12 +139,12 @@ Future<bool> showHabitoNovoSheet({
             AlunoInsetFormField(
               controller: tituloCtrl,
               label: 'Título',
-              icon: Icons.title_outlined,
+              icon: FxIcons.titulo,
             ),
             AlunoInsetFormField(
               controller: descricaoCtrl,
               label: 'Descrição (opcional)',
-              icon: Icons.notes_outlined,
+              icon: FxIcons.notas,
               maxLines: 2,
               showDivider: false,
             ),

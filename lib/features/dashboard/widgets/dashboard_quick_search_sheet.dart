@@ -14,6 +14,7 @@ import '../utils/dashboard_microcopy.dart';
 import '../utils/dashboard_readability.dart';
 import '../utils/dashboard_shortcut_navigation.dart';
 import '../utils/dashboard_tool_groups.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Busca rápida: alunos + ferramentas do catálogo.
 Future<void> showDashboardQuickSearchSheet(
@@ -89,7 +90,7 @@ class _QuickSearchSheetState extends ConsumerState<_QuickSearchSheet> {
                     ),
                   ),
                 ),
-                Icon(Icons.chevron_right_rounded, color: mute, size: 20),
+                Icon(FxIcons.chevronDireita, color: mute, size: 20),
               ],
             ),
           ),
@@ -129,7 +130,7 @@ class _QuickSearchSheetState extends ConsumerState<_QuickSearchSheet> {
             title: DashboardMicrocopy.buscaRapida,
             subtitle: DashboardMicrocopy.buscaRapidaHint,
             leading: Icon(
-              Icons.search_rounded,
+              FxIcons.buscar,
               color: widget.primary,
               size: 18,
             ),
@@ -142,7 +143,7 @@ class _QuickSearchSheetState extends ConsumerState<_QuickSearchSheet> {
             decoration: InputDecoration(
               hintText: DashboardMicrocopy.buscaRapidaHint,
               isDense: true,
-              prefixIcon: Icon(Icons.search_rounded, color: widget.primary),
+              prefixIcon: Icon(FxIcons.buscar, color: widget.primary),
               border: FxInputDeco.outlineBorder(
                 borderRadius: BorderRadius.circular(TokensStrip.rInput),
                 borderSide: const BorderSide(),

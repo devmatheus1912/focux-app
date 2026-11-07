@@ -33,6 +33,7 @@ import '../widgets/ficha_vazia.dart';
 import '../widgets/ficha_volume_secao.dart';
 import '../widgets/ficha_vigencia_linha.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class AlunoRotinaScreen extends ConsumerStatefulWidget {
   const AlunoRotinaScreen({
@@ -186,7 +187,7 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen>
               IconButton(
                 tooltip: s.rotinaMenuFicha,
                 onPressed: _salvando ? null : _menuDaFicha,
-                icon: const Icon(Icons.more_horiz_rounded),
+                icon: const Icon(FxIcons.mais),
               ),
           ],
         ),
@@ -244,7 +245,7 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen>
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(Icons.schedule_rounded, size: 18, color: chrome.mute),
+                      Icon(FxIcons.relogio, size: 18, color: chrome.mute),
                       const SizedBox(width: TokensStrip.s2),
                       Expanded(
                         child: Text(

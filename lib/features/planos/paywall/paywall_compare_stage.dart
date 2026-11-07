@@ -9,6 +9,7 @@ import '../../subscription/subscription_products.dart';
 import 'paywall_catalog.dart';
 import 'paywall_compare_logic.dart';
 import 'paywall_glass.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Colunas de valor — mesma largura no header e na célula (eixo único).
 const double _kValueCol = 80;
@@ -630,7 +631,7 @@ class _Cell extends StatelessWidget {
           )
         : value.trim() == '✓'
         ? Icon(
-            Icons.check_rounded,
+            FxIcons.check,
             size: 20,
             color: muted ? accent.withValues(alpha: 0.7) : accent,
           )

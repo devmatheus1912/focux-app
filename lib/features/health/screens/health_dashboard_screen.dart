@@ -30,6 +30,7 @@ import '../utils/saude_meta_passos.dart';
 import '../widgets/prontidao_card.dart';
 import '../widgets/saude_cards.dart';
 import '../widgets/saude_estados.dart';
+import '../../../core/theme/fx_icons.dart';
 
 typedef HealthDashboardCheckAuthorization = Future<bool> Function();
 typedef HealthDashboardLoadTodaySummary = Future<HealthSummary> Function();
@@ -302,20 +303,20 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
       titulo: 'Quem vê seus dados de saúde?',
       subtitulo:
           'Você pode mudar isso depois, na seção Conexão desta tela.',
-      icone: Icons.favorite_rounded,
+      icone: FxIcons.favoritoAtivo,
       grupos: [
         FxActionGroup<bool>(null, [
           FxActionItem(
             valor: true,
             rotulo: 'Compartilhar com meu personal',
             descricao: 'Ele vê sua nota de prontidão e os dados do dia.',
-            icone: Icons.group_outlined,
+            icone: FxIcons.grupo,
           ),
           FxActionItem(
             valor: false,
             rotulo: 'Só eu vejo',
             descricao: 'Seu personal não recebe nada de saúde.',
-            icone: Icons.lock_outline_rounded,
+            icone: FxIcons.cadeado,
           ),
         ]),
       ],
@@ -428,14 +429,14 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
       context,
       titulo: rotuloPlataformaSaude(),
       subtitulo: 'Conexão com os seus dados de saúde',
-      icone: Icons.favorite_rounded,
+      icone: FxIcons.favoritoAtivo,
       grupos: [
         FxActionGroup<String>(null, [
           FxActionItem(
             valor: 'desconectar',
             rotulo: saudeDesconectarLabel(),
             descricao: saudeDesconectarConfirmMessage(),
-            icone: Icons.link_off_rounded,
+            icone: FxIcons.linkOff,
             perigo: true,
           ),
         ]),
@@ -605,7 +606,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
               children: [
                 Expanded(
                   child: SaudeMetricTile(
-                    icone: Icons.directions_walk_rounded,
+                    icone: FxIcons.caminhada,
                     rotulo: 'Passos até agora',
                     valor: s.steps > 0 ? milhar(s.steps) : '--',
                     apoio:
@@ -621,14 +622,14 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
                   child:
                       temSono
                           ? SaudeMetricTile(
-                            icone: Icons.bedtime_outlined,
+                            icone: FxIcons.sono,
                             rotulo: 'Sono',
                             valor: duracaoDeSono(s.sleepHours),
                             apoio: 'Última noite',
                             progresso: s.sleepHours / 8,
                           )
                           : SaudeMetricTile(
-                            icone: Icons.bedtime_outlined,
+                            icone: FxIcons.sono,
                             rotulo: 'Sono',
                             valor: 'Registrar sono',
                             apoio: 'Use o relógio para dormir',
@@ -647,7 +648,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
               children: [
                 Expanded(
                   child: SaudeMetricTile(
-                    icone: Icons.favorite_border_rounded,
+                    icone: FxIcons.favorito,
                     rotulo: fcRepouso > 0 ? 'FC em repouso' : 'FC média do dia',
                     valor:
                         fcRepouso > 0
@@ -669,7 +670,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
                 const SizedBox(width: TokensStrip.s2),
                 Expanded(
                   child: SaudeMetricTile(
-                    icone: Icons.local_fire_department_outlined,
+                    icone: FxIcons.fogo,
                     rotulo: 'Calorias ativas',
                     valor:
                         caloriasOk && s.caloriesBurned >= 1

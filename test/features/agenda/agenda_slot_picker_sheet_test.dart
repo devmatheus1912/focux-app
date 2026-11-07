@@ -5,6 +5,7 @@ import 'package:focux_app/features/agenda/data/agenda_repository.dart';
 import 'package:focux_app/features/agenda/widgets/agenda_slot_picker_sheet.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:focux_app/core/theme/fx_icons.dart';
 
 final _now = DateTime(2026, 11, 20, 10, 10);
 final _dia = DateTime(2026, 11, 20);
@@ -127,7 +128,7 @@ void main() {
       tester
           .widget<IconButton>(
             find.ancestor(
-              of: find.byIcon(Icons.chevron_left_rounded),
+              of: find.byIcon(FxIcons.chevronEsquerda),
               matching: find.byType(IconButton),
             ),
           )

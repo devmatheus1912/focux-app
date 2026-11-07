@@ -12,6 +12,7 @@ import '../../alunos/data/aluno_repository.dart';
 import '../models/rotina_fila.dart';
 import '../providers/treinos_provider.dart';
 import '../utils/ficha_vigencia.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Situação da ficha numa linha: "Treinando agora", "Sem ficha" ou "Ficha até 12/12".
 String situacaoDaFicha(RotinaFila? fila) {
@@ -158,7 +159,7 @@ class _LinhaDoAluno extends ConsumerWidget {
               ),
               if (varios)
                 Icon(
-                  marcado ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
+                  marcado ? FxIcons.concluidoAtivo : FxIcons.circulo,
                   color: marcado ? primary : chrome.mute,
                 ),
             ],

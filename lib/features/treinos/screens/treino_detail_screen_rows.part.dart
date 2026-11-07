@@ -60,7 +60,7 @@ class _ExercicioRow extends StatelessWidget {
                 width: 40,
                 height: TreinosLayout.touchTarget,
                 child: Icon(
-                  Icons.drag_indicator_rounded,
+                  FxIcons.arrastar,
                   size: 22,
                   color: mute.withValues(alpha: 0.85),
                 ),
@@ -150,7 +150,7 @@ class _ExercicioRow extends StatelessWidget {
                 visualDensity: VisualDensity.compact,
                 padding: EdgeInsets.zero,
               ),
-              icon: Icon(Icons.more_horiz_rounded, color: mute, size: 20),
+              icon: Icon(FxIcons.mais, color: mute, size: 20),
             ),
           ),
         ],

@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/widgets/fx_tap_row.dart';
 
 import 'fx_kit_host.dart';
+import 'package:focux_app/core/theme/fx_icons.dart';
 
 void main() {
   testWidgets('mostra título, subtítulo e seta, e o toque chama o callback', (
@@ -20,7 +21,7 @@ void main() {
     );
     expect(find.text('Treino A'), findsOneWidget);
     expect(find.text('5 exercícios'), findsOneWidget);
-    expect(find.byIcon(Icons.chevron_right_rounded), findsOneWidget);
+    expect(find.byIcon(FxIcons.chevronDireita), findsOneWidget);
 
     await tester.tap(find.text('Treino A'));
     expect(toques, 1);
@@ -30,8 +31,8 @@ void main() {
     await tester.pumpWidget(
       kitHost(FxTapRow(title: 'Adicionar treino', vazio: true, onTap: () {})),
     );
-    expect(find.byIcon(Icons.add_rounded), findsOneWidget);
-    expect(find.byIcon(Icons.chevron_right_rounded), findsNothing);
+    expect(find.byIcon(FxIcons.adicionar), findsOneWidget);
+    expect(find.byIcon(FxIcons.chevronDireita), findsNothing);
   });
 
   testWidgets('trailing substitui a seta', (tester) async {
@@ -41,7 +42,7 @@ void main() {
       ),
     );
     expect(find.text('Montar'), findsOneWidget);
-    expect(find.byIcon(Icons.chevron_right_rounded), findsNothing);
+    expect(find.byIcon(FxIcons.chevronDireita), findsNothing);
   });
 
   testWidgets('altura mínima de 56 dp e Semantics de botão', (tester) async {

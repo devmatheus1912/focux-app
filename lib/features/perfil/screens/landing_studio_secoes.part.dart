@@ -292,12 +292,12 @@ class _LandingListaEditavelState extends State<_LandingListaEditavel> {
                 IconButton(
                   tooltip: s.landingSubir,
                   onPressed: () => _subir(i),
-                  icon: const Icon(Icons.arrow_upward_rounded),
+                  icon: const Icon(FxIcons.setaCima),
                 ),
               IconButton(
                 tooltip: s.landingRemover,
                 onPressed: () => _remover(i),
-                icon: const Icon(Icons.delete_outline_rounded),
+                icon: const Icon(FxIcons.excluir),
               ),
             ],
           ),
@@ -318,7 +318,7 @@ class _LandingListaEditavelState extends State<_LandingListaEditavel> {
         ],
         FxTonalButton(
           label: s.landingAdicionarItem,
-          icon: Icons.add_rounded,
+          icon: FxIcons.adicionar,
           expanded: true,
           onPressed: _adicionar,
         ),

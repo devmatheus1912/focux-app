@@ -38,7 +38,7 @@ class _LandingStudioRevisaoBody extends StatelessWidget {
                   child: capa.isEmpty
                       ? ColoredBox(
                           color: primary.withValues(alpha: 0.12),
-                          child: Icon(Icons.web_outlined, color: primary),
+                          child: Icon(FxIcons.site, color: primary),
                         )
                       : FxCachedNetworkImage(
                           imageUrl: capa,
@@ -69,12 +69,12 @@ class _LandingStudioRevisaoBody extends StatelessWidget {
               IconButton(
                 tooltip: 'Copiar link',
                 onPressed: state._copyLink,
-                icon: Icon(Icons.copy_outlined, color: primary),
+                icon: Icon(FxIcons.copiar, color: primary),
               ),
               IconButton(
                 tooltip: 'Ver página',
                 onPressed: state._openPublicOrPreview,
-                icon: Icon(Icons.open_in_new, color: primary),
+                icon: Icon(FxIcons.abrirFora, color: primary),
               ),
             ],
           ),
@@ -99,7 +99,7 @@ class _LandingStudioRevisaoBody extends StatelessWidget {
             FxSatelliteListTile(
               title: p.texto,
               titleCase: false,
-              leading: Icon(Icons.info_outline, color: EagleTokens.warn, size: 20),
+              leading: Icon(FxIcons.info, color: EagleTokens.warn, size: 20),
               onTap: () => state._abrirSecao(context, p.secao),
             ),
         ],
@@ -201,7 +201,7 @@ class _LandingStudioImageSlot extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
-                          Icons.add_photo_alternate_outlined,
+                          FxIcons.adicionarImagem,
                           color: primary,
                         ),
                         const SizedBox(height: TokensStrip.s1),

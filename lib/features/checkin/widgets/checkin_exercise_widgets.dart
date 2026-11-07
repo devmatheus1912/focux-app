@@ -21,6 +21,7 @@ import '../utils/checkin_execucao_estado.dart';
 import '../utils/checkin_exercise_tips.dart';
 import 'checkin_media_widgets.dart';
 import '../../../core/widgets/fx_video_em_breve.dart';
+import '../../../core/theme/fx_icons.dart';
 
 part 'checkin_serie_steppers.part.dart';
 
@@ -210,7 +211,7 @@ class CheckinSerieCard extends StatelessWidget {
   Widget _botaoVerVideo(BuildContext context) {
     return FxTonalButton(
       label: S.of(context).checkinVerVideo,
-      icon: Icons.play_circle_outline_rounded,
+      icon: FxIcons.playCirculo,
       compact: true,
       onPressed: () => _abrirVideoEmFolha(context),
     );
@@ -344,7 +345,7 @@ class CheckinSerieCard extends StatelessWidget {
     if (ultima == null) return null;
     return FxTonalButton(
       label: s.checkinUltimaVezChip(_resumoUltimaVez(s, ultima)),
-      icon: Icons.history_rounded,
+      icon: FxIcons.historico,
       compact: true,
       onPressed: onEditarCarga == null && onEditarReps == null
           ? null

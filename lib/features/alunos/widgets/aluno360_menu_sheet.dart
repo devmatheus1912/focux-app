@@ -5,6 +5,7 @@ import '../../../l10n/app_localizations.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno360_menu_acoes.dart';
 import '../utils/aluno_status.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Folha do ⋮ do perfil 360: cadastro, acesso e, por último, o que é perigoso.
 /// Devolve o item escolhido; quem chama roda o fluxo (cada um já confirma).
@@ -18,24 +19,24 @@ Future<Aluno360MenuItem?> showAluno360MenuSheet(
   FxActionItem<Aluno360MenuItem> linha(Aluno360MenuItem i) {
     final (icone, rotulo, descricao) = switch (i.acao) {
       Aluno360MenuAcao.editar => (
-        Icons.edit_outlined,
+        FxIcons.editar,
         s.aluno360MenuEditar,
         s.aluno360MenuEditarSub,
       ),
       Aluno360MenuAcao.criarTarefa => (
-        Icons.playlist_add_check_rounded,
+        FxIcons.checklist,
         s.aluno360MenuCriarTarefa,
         s.aluno360MenuCriarTarefaSub,
       ),
       Aluno360MenuAcao.reenviarLink =>
         aluno.contaAtiva
             ? (
-              Icons.lock_reset_rounded,
+              FxIcons.redefinirSenha,
               s.aluno360MenuLinkNovaSenha,
               s.aluno360MenuLinkNovaSenhaSub,
             )
             : (
-              Icons.link_rounded,
+              FxIcons.link,
               s.alunoReenviarLinkAcao,
               s.aluno360MenuLinkAcessoSub,
             ),
@@ -49,7 +50,7 @@ Future<Aluno360MenuItem?> showAluno360MenuSheet(
         },
       ),
       Aluno360MenuAcao.excluir => (
-        Icons.delete_outline_rounded,
+        FxIcons.excluir,
         s.aluno360MenuExcluir,
         s.aluno360MenuExcluirSub,
       ),

@@ -314,28 +314,28 @@ class _TreinoListaUnicaState extends State<_TreinoListaUnica> {
       context,
       titulo: 'Ações do exercício',
       subtitulo: te.exercicio.nomeDisplay,
-      icone: Icons.fitness_center_rounded,
+      icone: FxIcons.treino,
       grupos: [
         FxActionGroup<String>(null, [
           FxActionItem(
             valor: 'edit',
             rotulo: 'Editar prescrição',
-            icone: Icons.edit_note_rounded,
+            icone: FxIcons.anotar,
           ),
           FxActionItem(
             valor: 'move',
             rotulo: 'Mover para…',
-            icone: Icons.drive_file_move_outline,
+            icone: FxIcons.mover,
           ),
           FxActionItem(
             valor: 'duplicate',
             rotulo: 'Duplicar',
-            icone: Icons.copy_rounded,
+            icone: FxIcons.copiar,
           ),
           FxActionItem(
             valor: 'substitute',
             rotulo: 'Substituir',
-            icone: Icons.swap_horiz_rounded,
+            icone: FxIcons.trocar,
           ),
         ]),
         // Combinar é aqui, na lista: bi-set, tri-set, circuito.
@@ -345,7 +345,7 @@ class _TreinoListaUnicaState extends State<_TreinoListaUnica> {
               FxActionItem(
                 valor: 'combinar',
                 rotulo: 'Combinar com o próximo',
-                icone: Icons.link_rounded,
+                icone: FxIcons.link,
               ),
             if (combinado && tamanhoDoGrupo == 2)
               FxActionItem(
@@ -354,20 +354,20 @@ class _TreinoListaUnicaState extends State<_TreinoListaUnica> {
                     te.metodo.grupoRotulo == 'SUPERSET'
                         ? 'Chamar de Bi-set'
                         : 'Chamar de Superset',
-                icone: Icons.label_outline_rounded,
+                icone: FxIcons.etiqueta,
               ),
             if (combinado)
               FxActionItem(
                 valor: 'separar',
                 rotulo: 'Separar',
-                icone: Icons.link_off_rounded,
+                icone: FxIcons.linkOff,
               ),
           ]),
       ],
       destrutiva: FxActionItem(
         valor: 'remove',
         rotulo: 'Remover do treino',
-        icone: Icons.remove_circle_outline_rounded,
+        icone: FxIcons.removerCirculo,
       ),
       confirmar: false,
     );
@@ -550,7 +550,7 @@ class _SecaoDoTreino extends StatelessWidget {
               FxTonalButton(
                 label: 'Adicionar',
                 semanticLabel: 'Adicionar em $nome',
-                icon: Icons.add_rounded,
+                icon: FxIcons.adicionar,
                 compact: true,
                 onPressed: onAdd,
               ),
@@ -620,7 +620,7 @@ class _ComColcheteDoCombinado extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.link_rounded, size: 16, color: primary),
+                  Icon(FxIcons.linkPequeno, size: 16, color: primary),
                   const SizedBox(width: TokensStrip.s1),
                   Expanded(
                     child: Text(

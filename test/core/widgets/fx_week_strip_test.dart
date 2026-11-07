@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/widgets/fx_week_strip.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
+import 'package:focux_app/core/theme/fx_icons.dart';
 
 List<FxWeekDay> _dias() => [
   for (var i = 1; i <= 7; i++)
@@ -44,8 +45,8 @@ void main() {
 
   testWidgets('concluído tem marca e treino tem haltere', (tester) async {
     await _abrir(tester, _dias());
-    expect(find.byIcon(Icons.check_rounded), findsOneWidget);
-    expect(find.byIcon(Icons.fitness_center), findsNWidgets(2));
+    expect(find.byIcon(FxIcons.check), findsOneWidget);
+    expect(find.byIcon(FxIcons.treinoPequeno), findsNWidgets(2));
   });
 
   testWidgets('lista vazia não ocupa lugar', (tester) async {

@@ -292,7 +292,7 @@ class _SeletorDeMes extends StatelessWidget {
           IconButton(
             tooltip: s.agendaMesAnterior,
             onPressed: onAnterior,
-            icon: const Icon(Icons.chevron_left_rounded),
+            icon: const Icon(FxIcons.chevronEsquerda),
           ),
           Expanded(
             child: Center(
@@ -307,7 +307,7 @@ class _SeletorDeMes extends StatelessWidget {
           IconButton(
             tooltip: s.agendaProximoMes,
             onPressed: onProximo,
-            icon: const Icon(Icons.chevron_right_rounded),
+            icon: const Icon(FxIcons.chevronDireita),
           ),
         ],
       ),

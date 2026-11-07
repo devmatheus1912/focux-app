@@ -30,6 +30,7 @@ import '../data/alertas_repository.dart';
 import '../utils/alerta_detalhe_display.dart';
 import '../widgets/alerta_enviar_mensagem_sheet.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class AlertasScreen extends ConsumerStatefulWidget {
   const AlertasScreen({super.key});
@@ -236,7 +237,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
               const SizedBox(height: FxSettingsLayout.headerToGroup),
               FxHomeSheetHeader(
                 isDark: isDark,
-                leading: const Icon(Icons.person_outline_rounded, size: 18),
+                leading: const Icon(FxIcons.pessoa, size: 18),
                 title: alerta.alunoNome,
                 subtitle:
                     alerta.motivos.isEmpty
@@ -400,7 +401,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                                 vertical: 12,
                               ),
                               prefixIcon: Icon(
-                                Icons.search_rounded,
+                                FxIcons.buscar,
                                 color: brand,
                                 size: 20,
                               ),
@@ -411,7 +412,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                                         tooltip: 'Limpar busca',
                                         onPressed: _clearQuery,
                                         icon: Icon(
-                                          Icons.close_rounded,
+                                          FxIcons.fechar,
                                           color: mute,
                                           size: 18,
                                         ),

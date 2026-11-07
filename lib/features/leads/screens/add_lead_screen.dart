@@ -25,6 +25,7 @@ import '../../subscription/widgets/upgrade_prompt_sheet.dart';
 import '../data/lead_repository.dart';
 import '../utils/lead_display.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class AddLeadScreen extends ConsumerStatefulWidget {
   const AddLeadScreen({super.key});
@@ -139,7 +140,7 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
       context,
       title: leadConfirmTitle(),
       message: leadConfirmMessage(_nome.text),
-      icon: Icons.badge_outlined,
+      icon: FxIcons.cracha,
       confirmLabel: leadConfirmLabel(),
     );
     if (!ok || !mounted) return;
@@ -241,7 +242,7 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
                   AlunoInsetFormField(
                     controller: _nome,
                     label: 'Nome',
-                    icon: Icons.badge_outlined,
+                    icon: FxIcons.cracha,
                     textCapitalization: TextCapitalization.words,
                     inputFormatters: [
                       LengthLimitingTextInputFormatter(leadNomeMax),
@@ -255,7 +256,7 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
                   AlunoInsetFormField(
                     controller: _telefone,
                     label: 'Telefone / WhatsApp',
-                    icon: Icons.phone_outlined,
+                    icon: FxIcons.telefone,
                     keyboardType: TextInputType.phone,
                     inputFormatters: [
                       LengthLimitingTextInputFormatter(leadTelefoneMax),
@@ -264,7 +265,7 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
                   AlunoInsetFormField(
                     controller: _email,
                     label: 'E-mail (opcional)',
-                    icon: Icons.mail_outline_rounded,
+                    icon: FxIcons.email,
                     keyboardType: TextInputType.emailAddress,
                     validator: (v) => leadEmailInvalido(v ?? ''),
                   ),
@@ -279,7 +280,7 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
                     controller: _objetivo,
                     label: 'Objetivo',
                     hint: 'Ex.: emagrecer, hipertrofiar',
-                    icon: Icons.flag_outlined,
+                    icon: FxIcons.meta,
                     inputFormatters: [
                       LengthLimitingTextInputFormatter(leadObjetivoMax),
                     ],
@@ -287,7 +288,7 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
                   AlunoInsetFormField(
                     controller: _observacoes,
                     label: 'Observações',
-                    icon: Icons.notes_outlined,
+                    icon: FxIcons.notas,
                     maxLines: 3,
                     showDivider: false,
                     inputFormatters: [

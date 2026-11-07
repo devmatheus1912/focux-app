@@ -14,6 +14,7 @@ import '../../data/exercicio_taxonomy_labels.dart';
 import '../../providers/exercicios_provider.dart';
 import 'exercise_media_thumb.dart';
 import '../../../../l10n/pt.dart';
+import '../../../../core/theme/fx_icons.dart';
 
 class ExercicioCard extends ConsumerWidget {
   final Exercicio exercicio;
@@ -78,7 +79,7 @@ class ExercicioCard extends ConsumerWidget {
       onTap:
           onTapOverride ?? () => context.push('/exercicios/${exercicio.id}'),
       leading: Icon(
-        Icons.fitness_center_rounded,
+        FxIcons.treino,
         color: primary,
         size: 20,
       ),
@@ -113,7 +114,7 @@ class ExercicioCard extends ConsumerWidget {
               if (meu && semVideo)
                 FxTonalButton(
                   label: 'Adicionar vídeo',
-                  icon: Icons.videocam_outlined,
+                  icon: FxIcons.video,
                   compact: true,
                   onPressed: onUploadVideo,
                 ),
@@ -138,7 +139,7 @@ class ExercicioCard extends ConsumerWidget {
             constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
             iconSize: 20,
             icon: Icon(
-              exercicio.favoritado ? Icons.star : Icons.star_border,
+              exercicio.favoritado ? FxIcons.estrelaAtiva : FxIcons.estrela,
               color:
                   exercicio.favoritado ? EagleTokens.gold : mute,
             ),
@@ -149,7 +150,7 @@ class ExercicioCard extends ConsumerWidget {
             onPressed: () => _toggleFavorito(ref, context),
           ),
           if (selected)
-            Icon(Icons.check_circle_rounded, color: primary, size: 20)
+            Icon(FxIcons.concluidoAtivo, color: primary, size: 20)
           else
             PopupMenuButton<String>(
               tooltip: 'Ações do exercício',
@@ -158,7 +159,7 @@ class ExercicioCard extends ConsumerWidget {
               offset: const Offset(0, 36),
               position: PopupMenuPosition.under,
               constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
-              icon: Icon(Icons.more_vert_rounded, color: mute, size: 20),
+              icon: Icon(FxIcons.maisVertical, color: mute, size: 20),
               onSelected: (value) {
                 if (value == 'criar') onCriarMeu?.call();
                 if (value == 'video') onUploadVideo();
@@ -180,8 +181,8 @@ class ExercicioCard extends ConsumerWidget {
                         children: [
                           Icon(
                             hasPersonalVideo
-                                ? Icons.swap_horiz_rounded
-                                : Icons.upload_rounded,
+                                ? FxIcons.trocar
+                                : FxIcons.upload,
                             size: 20,
                           ),
                           const SizedBox(width: 10),
@@ -200,7 +201,7 @@ class ExercicioCard extends ConsumerWidget {
                       child: Row(
                         children: [
                           Icon(
-                            Icons.delete_outline_rounded,
+                            FxIcons.excluir,
                             size: 20,
                             color: EagleTokens.bad,
                           ),

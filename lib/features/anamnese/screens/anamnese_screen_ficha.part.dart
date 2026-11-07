@@ -130,7 +130,7 @@ class _AnamnesePontos extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Icon(
-                  Icons.warning_amber_rounded,
+                  FxIcons.alerta,
                   size: 20,
                   color: EagleTokens.warn,
                 ),

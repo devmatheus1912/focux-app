@@ -189,7 +189,7 @@ class _MarcoTile extends StatelessWidget {
         leading: IconButton(
           tooltip: marco.concluido ? 'Marco concluído' : 'Concluir marco',
           icon: Icon(
-            marco.concluido ? Icons.check_circle : Icons.radio_button_unchecked,
+            marco.concluido ? FxIcons.concluidoAtivo : FxIcons.circulo,
             color:
                 marco.concluido
                     ? EagleTokens.good

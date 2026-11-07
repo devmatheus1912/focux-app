@@ -7,6 +7,7 @@ import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/dunning_repository.dart';
 import '../utils/dunning_ops_display.dart';
+import '../../../core/theme/fx_icons.dart';
 
 Future<void> showDunningCatalogSheet(
   BuildContext context, {
@@ -79,7 +80,7 @@ class _DunningCatalogSheetState extends State<_DunningCatalogSheet> {
           FxHomeSheetHeader(
             title: 'Em aberto',
             subtitle: '${widget.firstPage.snapshot.abertas} falhas neste recorte.',
-            leading: Icon(Icons.warning_amber_outlined, size: 18, color: primary),
+            leading: Icon(FxIcons.alerta, size: 18, color: primary),
           ),
           if (_falhas.isEmpty)
             const FxEmptyState(

@@ -24,6 +24,7 @@ import '../../../core/widgets/skeleton_loader.dart';
 import '../providers/dashboard_provider.dart';
 import '../utils/aluno_activation_display.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class AlunoActivationScreen extends ConsumerWidget {
   const AlunoActivationScreen({super.key});
@@ -107,7 +108,7 @@ class AlunoActivationScreen extends ConsumerWidget {
               ),
               bottomNavigationBar: FxWizardStickyBar(
                 primary: FxLiquidPrimaryButton(
-                  icon: Icons.arrow_forward,
+                  icon: FxIcons.avancar,
                   label:
                       progress.allDone ? 'Entrar no app' : step.cta,
                   onPressed: () async {

@@ -6,14 +6,14 @@ extension IaCopilotScreenApply on _IaCopilotoScreenState {
       'REDUZIR_CARGA' => CopilotExecutarAcaoSpec(
         backendTipo: spec.backendTipo,
         label: spec.label,
-        icon: Icons.fitness_center_rounded,
+        icon: FxIcons.treino,
         executingLabel: 'Aplicando…',
         executingSemantics: 'Aplicando ajuste de carga',
       ),
       'ENVIAR_PUSH' => CopilotExecutarAcaoSpec(
         backendTipo: spec.backendTipo,
         label: spec.label,
-        icon: Icons.notifications_active_outlined,
+        icon: FxIcons.notificacaoAtiva,
         executingLabel: 'Enviando…',
         executingSemantics: 'Enviando notificação ao aluno',
         parametros: spec.parametros,
@@ -21,7 +21,7 @@ extension IaCopilotScreenApply on _IaCopilotoScreenState {
       _ => CopilotExecutarAcaoSpec(
         backendTipo: spec.backendTipo,
         label: spec.label,
-        icon: Icons.warning_amber_rounded,
+        icon: FxIcons.alerta,
         executingLabel: 'Registrando…',
         executingSemantics: 'Registrando contato prioritário',
       ),
@@ -126,29 +126,29 @@ extension IaCopilotScreenApply on _IaCopilotoScreenState {
       context,
       titulo: s.copilotoMenuTitulo,
       subtitulo: _selectedAlunoNome,
-      icone: Icons.tune_outlined,
+      icone: FxIcons.filtros,
       grupos: [
         FxActionGroup<String>(null, [
           if (_applySpec != null)
             FxActionItem(
               valor: 'criar',
               rotulo: iaCopilotoCriarTarefaLabel(),
-              icone: Icons.assignment_turned_in_outlined,
+              icone: FxIcons.pranchetaFeita,
             ),
           FxActionItem(
             valor: 'progressao',
             rotulo: s.copilotoProgressaoCarga,
-            icone: Icons.trending_up_rounded,
+            icone: FxIcons.subindo,
           ),
           FxActionItem(
             valor: 'refazer',
             rotulo: s.copilotoRefazer,
-            icone: Icons.refresh_rounded,
+            icone: FxIcons.atualizar,
           ),
           FxActionItem(
             valor: 'denunciar',
             rotulo: S.of(context).moderacaoDenunciarIa,
-            icone: Icons.flag_outlined,
+            icone: FxIcons.meta,
           ),
         ]),
       ],

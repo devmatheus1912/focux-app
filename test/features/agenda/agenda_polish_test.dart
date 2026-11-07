@@ -72,7 +72,7 @@ void main() {
     );
     expect(screen, contains('_eventActions'));
     expect(screen, contains('_perigo'));
-    expect(screen, isNot(contains('Icons.delete_outline_rounded')));
+    expect(screen, isNot(contains('FxIcons.excluir')));
     expect(screen, isNot(contains('? () {}')));
     expect(screen, isNot(contains('label: agendaHorarioConfirmLabel')));
     expect(screen, isNot(contains('agendaHorarioConfirmLabel()')));

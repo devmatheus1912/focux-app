@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../utils/exercise_video_upload_spec.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Câmera ou galeria, com a mesma regra de formato e tamanho do envio no
 /// treino. Devolve o caminho do arquivo, ou nulo se desistiu ou foi recusado
@@ -13,7 +14,7 @@ Future<String?> escolherVideoDoExercicio(BuildContext context) async {
     context,
     title: exerciseVideoSourceSheetTitle(),
     subtitle: exerciseVideoSourceSheetSubtitle(),
-    headerIcon: Icons.videocam_rounded,
+    headerIcon: FxIcons.video,
     items: [
       FxInsetPickerSheetItem(
         value: ImageSource.camera,
@@ -21,7 +22,7 @@ Future<String?> escolherVideoDoExercicio(BuildContext context) async {
         subtitle:
             '${ExerciseVideoUploadSpec.aspectLabel} · '
             '${ExerciseVideoUploadSpec.idealResolution}',
-        icon: Icons.photo_camera_rounded,
+        icon: FxIcons.camera,
       ),
       FxInsetPickerSheetItem(
         value: ImageSource.gallery,
@@ -29,7 +30,7 @@ Future<String?> escolherVideoDoExercicio(BuildContext context) async {
         subtitle:
             '${ExerciseVideoUploadSpec.formatsLabel} · '
             '${ExerciseVideoUploadSpec.sizeLabel}',
-        icon: Icons.video_library_rounded,
+        icon: FxIcons.videos,
       ),
     ],
   );

@@ -6,6 +6,7 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../exercicios/data/enums.dart';
 import '../utils/exercise_balance.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// "No treino: Peito 3 · Tríceps 1", com um aviso discreto de antagonista.
 class ExerciseBalanceStrip extends StatefulWidget {
@@ -60,7 +61,7 @@ class _ExerciseBalanceStripState extends State<ExerciseBalanceStrip> {
         children: [
             Row(
               children: [
-                Icon(Icons.info_outline_rounded, size: 16, color: mute),
+                Icon(FxIcons.infoPequeno, size: 16, color: mute),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
@@ -72,7 +73,7 @@ class _ExerciseBalanceStripState extends State<ExerciseBalanceStrip> {
                   tooltip: 'Dispensar aviso',
                   visualDensity: VisualDensity.compact,
                   onPressed: _dispensar,
-                  icon: Icon(Icons.close_rounded, size: 18, color: mute),
+                  icon: Icon(FxIcons.fechar, size: 18, color: mute),
                 ),
               ],
             ),

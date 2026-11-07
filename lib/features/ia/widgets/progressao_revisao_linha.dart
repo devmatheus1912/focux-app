@@ -9,6 +9,7 @@ import '../../../core/widgets/fx_status_pill.dart';
 import '../../../l10n/pt.dart';
 import '../models/progressao_sugestao.dart';
 import '../utils/progressao_copy.dart';
+import '../../../core/theme/fx_icons.dart';
 
 enum _Acao { editar, descartar }
 
@@ -50,12 +51,12 @@ class ProgressaoRevisaoLinha extends StatelessWidget {
             FxActionItem(
               valor: _Acao.editar,
               rotulo: ptS.cargasEditar,
-              icone: Icons.edit_outlined,
+              icone: FxIcons.editar,
             ),
           FxActionItem(
             valor: _Acao.descartar,
             rotulo: ptS.cargasDescartar,
-            icone: Icons.delete_outline_rounded,
+            icone: FxIcons.excluir,
             perigo: true,
           ),
         ]),
@@ -165,7 +166,7 @@ class ProgressaoRevisaoLinha extends StatelessWidget {
           ),
           IconButton(
             tooltip: ptS.cargasMais,
-            icon: Icon(Icons.more_horiz_rounded, color: chrome.mute),
+            icon: Icon(FxIcons.mais, color: chrome.mute),
             onPressed: () => _acoes(context),
           ),
         ],

@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/widgets/fx_status_pill.dart';
 
 import 'fx_kit_host.dart';
+import 'package:focux_app/core/theme/fx_icons.dart';
 
 void main() {
   for (final tom in FxPillTone.values) {
@@ -23,12 +23,12 @@ void main() {
     await tester.pumpWidget(
       kitHost(const FxStatusPill(label: 'Pronto', tone: FxPillTone.success)),
     );
-    expect(find.byIcon(Icons.check_rounded), findsOneWidget);
+    expect(find.byIcon(FxIcons.check), findsOneWidget);
 
     await tester.pumpWidget(
       kitHost(const FxStatusPill(label: 'Em montagem', tone: FxPillTone.warning)),
     );
-    expect(find.byIcon(Icons.check_rounded), findsNothing);
+    expect(find.byIcon(FxIcons.check), findsNothing);
   });
 
   testWidgets('ícone próprio vale em qualquer tom', (tester) async {
@@ -37,11 +37,11 @@ void main() {
         const FxStatusPill(
           label: 'Vencida',
           tone: FxPillTone.danger,
-          icon: Icons.schedule_rounded,
+          icon: FxIcons.relogio,
         ),
       ),
     );
-    expect(find.byIcon(Icons.schedule_rounded), findsOneWidget);
+    expect(find.byIcon(FxIcons.relogio), findsOneWidget);
   });
 
   testWidgets('expõe o rótulo em Semantics', (tester) async {

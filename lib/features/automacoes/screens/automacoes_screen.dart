@@ -41,6 +41,7 @@ import '../utils/automacao_display.dart';
 import '../../../core/widgets/fx_action_chip.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 part 'automacoes_screen_logs.part.dart';
 part 'automacoes_screen_list.part.dart';
@@ -178,7 +179,7 @@ class _AutomacoesScreenState extends ConsumerState<AutomacoesScreen> {
       context,
       title: automacaoAtivarTitle(t.nome),
       message: automacaoAtivarMessage(),
-      icon: Icons.bolt_outlined,
+      icon: FxIcons.raio,
       confirmLabel: 'Ativar',
     );
     if (!ok || !mounted) return;
@@ -227,7 +228,7 @@ class _AutomacoesScreenState extends ConsumerState<AutomacoesScreen> {
       message: pausar
           ? automacaoPausarConfirmMessage()
           : automacaoRetomarConfirmMessage(),
-      icon: pausar ? Icons.pause_circle_rounded : Icons.play_circle_rounded,
+      icon: pausar ? FxIcons.pausarAtivo : FxIcons.playAtivo,
       confirmLabel: pausar ? 'Pausar' : 'Retomar',
     );
     if (!ok || !mounted) return null;
@@ -357,7 +358,7 @@ class _AutomacoesScreenState extends ConsumerState<AutomacoesScreen> {
                           vertical: 12,
                         ),
                         prefixIcon: Icon(
-                          Icons.search_rounded,
+                          FxIcons.buscar,
                           color: primary,
                           size: 20,
                         ),
@@ -367,7 +368,7 @@ class _AutomacoesScreenState extends ConsumerState<AutomacoesScreen> {
                                 tooltip: 'Limpar busca',
                                 onPressed: _clearQuery,
                                 icon: Icon(
-                                  Icons.close_rounded,
+                                  FxIcons.fechar,
                                   color: chrome.mute,
                                   size: 18,
                                 ),

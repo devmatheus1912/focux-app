@@ -366,7 +366,7 @@ extension ConversationScreenMessaging on _ConversationScreenState {
     final saved = await showFxFormSheet(
       context,
       title: 'Editar mensagem',
-      icon: Icons.edit_outlined,
+      icon: FxIcons.editar,
       confirmLabel: 'Salvar',
       child: TextField(
         controller: ctrl,
@@ -406,7 +406,7 @@ extension ConversationScreenMessaging on _ConversationScreenState {
       context,
       title: 'Apagar mensagem?',
       message: 'A conversa vai mostrar que a mensagem foi apagada.',
-      icon: Icons.delete_outline_rounded,
+      icon: FxIcons.excluir,
       confirmLabel: 'Apagar',
       destructive: true,
     );

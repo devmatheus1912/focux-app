@@ -19,6 +19,7 @@ import 'aluno360_timeline_full_sheet.dart';
 import 'aluno360_timeline_sheet_motion.dart';
 import 'aluno_outreach_message_sheet.dart';
 import '../../../core/widgets/fx_action_link.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class Aluno360TimelineCard extends StatelessWidget {
   const Aluno360TimelineCard({
@@ -45,37 +46,37 @@ class Aluno360TimelineCard extends StatelessWidget {
     String kind;
     switch (tipo) {
       case 'RADAR':
-        icon = Icons.radar_outlined;
+        icon = FxIcons.radar;
         color = EagleTokens.warn;
         kind = 'Radar';
         break;
       case 'CHECKIN':
-        icon = Icons.fitness_center_outlined;
+        icon = FxIcons.treino;
         color = EagleTokens.good;
         kind = 'Check-in';
         break;
       case 'MEDIDA':
-        icon = Icons.straighten_outlined;
+        icon = FxIcons.fitaMetrica;
         color = EagleTokens.purple;
         kind = 'Medida';
         break;
       case 'AUTONOMIA':
-        icon = Icons.touch_app_outlined;
+        icon = FxIcons.toque;
         color = EagleTokens.warn;
         kind = 'Autonomia';
         break;
       case 'FINANCEIRO':
-        icon = Icons.payments_outlined;
+        icon = FxIcons.pagamento;
         color = EagleTokens.bad;
         kind = 'Financeiro';
         break;
       default:
         if (tipo.startsWith('CHAT_')) {
-          icon = Icons.chat_bubble_outline;
+          icon = FxIcons.chat;
           color = primary;
           kind = 'Chat';
         } else {
-          icon = Icons.bolt_outlined;
+          icon = FxIcons.raio;
           color = TokensStrip.textSecondary;
           kind = tipo;
         }
@@ -393,8 +394,8 @@ void showTimeline360BodySheet(
                           },
                           icon: Icon(
                             item.kind == 'Chat'
-                                ? Icons.chat_bubble_outline
-                                : Icons.open_in_new_rounded,
+                                ? FxIcons.chat
+                                : FxIcons.abrirFora,
                             size: 18,
                           ),
                           label: Text(
@@ -588,8 +589,8 @@ class Timeline360Tile extends StatelessWidget {
                   const SizedBox(width: TokensStrip.s1),
                   Icon(
                     expandable
-                        ? Icons.expand_more
-                        : Icons.chevron_right,
+                        ? FxIcons.chevronBaixo
+                        : FxIcons.chevronDireita,
                     size: 18,
                     color: mute,
                   ),

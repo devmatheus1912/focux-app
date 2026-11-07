@@ -18,7 +18,7 @@ void main() {
     expect(screen, contains('viewInsetsOf'));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('galeriaCountLabel'));
-    expect(screen, isNot(contains('Icons.add_photo_alternate_outlined')));
+    expect(screen, isNot(contains('FxIcons.adicionarImagem')));
     expect(screen, isNot(contains('focux_unsigned')));
     expect(screen, isNot(contains('api.cloudinary.com')));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));

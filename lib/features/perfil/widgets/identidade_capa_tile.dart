@@ -8,6 +8,7 @@ import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
 import '../../dashboard/widgets/aluno_capa_banner.dart';
 import '../utils/identidade_visual_display.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Capa 16:9 do personal: mostra a imagem atual (ou um convite) e as ações de
 /// adicionar, trocar e remover.
@@ -47,7 +48,7 @@ class IdentidadeCapaTile extends StatelessWidget {
                 uploading
                     ? const FxLoading(size: 24)
                     : Icon(
-                      Icons.panorama_outlined,
+                      FxIcons.imagem,
                       size: 34,
                       color: chrome.mute,
                     ),
@@ -64,7 +65,7 @@ class IdentidadeCapaTile extends StatelessWidget {
           children: [
             FxTonalButton(
               label: temCapa ? identidadeCapaTrocar() : identidadeCapaAdicionar(),
-              icon: Icons.add_photo_alternate_outlined,
+              icon: FxIcons.adicionarImagem,
               loading: uploading,
               onPressed: onEscolher,
             ),

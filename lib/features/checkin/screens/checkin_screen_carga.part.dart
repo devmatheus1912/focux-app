@@ -65,7 +65,7 @@ extension _CheckinCarga on _CheckinScreenState {
               valor: 'ajustar',
               rotulo: s.checkinAjustar,
               descricao: s.checkinAjustarSub,
-              icone: Icons.tune_rounded,
+              icone: FxIcons.filtros,
             ),
           if (faltaSerie)
             FxActionItem(
@@ -76,33 +76,33 @@ extension _CheckinCarga on _CheckinScreenState {
                 total: ee.series,
               ),
               descricao: s.checkinConfirmarRestanteSub,
-              icone: Icons.done_all_rounded,
+              icone: FxIcons.checkDuplo,
             ),
           if (livre && ee.seriesFeitas > 0)
             FxActionItem(
               valor: 'desfazer',
               rotulo: s.checkinDesfazerSerie,
               descricao: s.checkinDesfazerSub,
-              icone: Icons.undo_rounded,
+              icone: FxIcons.desfazer,
             ),
           if (onTrocar != null)
             FxActionItem(
               valor: 'trocar',
               rotulo: s.checkinTrocarExercicio,
               descricao: s.checkinTrocarExercicioSub,
-              icone: Icons.swap_horiz_rounded,
+              icone: FxIcons.trocar,
             ),
           if (checkinExerciseHasTips(ee))
             FxActionItem(
               valor: 'dicas',
               rotulo: s.checkinDicasExercicio,
-              icone: Icons.help_outline_rounded,
+              icone: FxIcons.ajuda,
             ),
           FxActionItem(
             valor: 'finalizar',
             rotulo: s.checkinFinalizarTreino,
             descricao: s.checkinFinalizarSub,
-            icone: Icons.flag_rounded,
+            icone: FxIcons.meta,
           ),
         ]),
       ],

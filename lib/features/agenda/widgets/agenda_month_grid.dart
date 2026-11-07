@@ -11,6 +11,7 @@ import '../data/agenda_repository.dart';
 import '../utils/agenda_month.dart';
 import '../utils/agenda_schedule.dart';
 import '../utils/agenda_status.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Mês: título grande, grade de borda a borda e a contagem de atendimentos.
 /// Arrastar na horizontal troca o mês; o dia abre na visão Dia.
@@ -205,8 +206,8 @@ class _MonthTitle extends StatelessWidget {
               ),
             ),
           ),
-          seta(Icons.chevron_left_rounded, 'Mês anterior', onPrev),
-          seta(Icons.chevron_right_rounded, 'Próximo mês', onNext),
+          seta(FxIcons.chevronEsquerda, 'Mês anterior', onPrev),
+          seta(FxIcons.chevronDireita, 'Próximo mês', onNext),
         ],
       ),
     );

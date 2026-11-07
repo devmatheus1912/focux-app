@@ -41,6 +41,7 @@ import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../utils/chat_inbox_display.dart';
 import '../utils/chat_remetente.dart';
 import '../utils/aluno_picker_list.dart';
+import '../../../core/theme/fx_icons.dart';
 
 part 'chat_inbox_screen_state.part.dart';
 part 'chat_inbox_screen_paging.part.dart';

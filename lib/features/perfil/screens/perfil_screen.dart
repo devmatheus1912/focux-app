@@ -54,6 +54,7 @@ import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/media/escolher_foto_de_perfil.dart';
 import '../../../core/widgets/fx_strip_card.dart';
 import '../../alunos/widgets/aluno_avatar.dart';
+import '../../../core/theme/fx_icons.dart';
 
 part 'perfil_screen_widgets_a.part.dart';
 part 'perfil_screen_widgets_b.part.dart';
@@ -168,7 +169,7 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
       title: 'Sair da conta',
       message: 'Deseja encerrar esta sessão neste aparelho?',
       confirmLabel: 'Sair',
-      icon: Icons.logout_rounded,
+      icon: FxIcons.sair,
       destructive: true,
     );
     if (confirmed != true || !mounted) return;

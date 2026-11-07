@@ -16,6 +16,7 @@ import '../widgets/fx_keyboard_dismiss_scope.dart';
 import '../widgets/fx_sheet_frame.dart';
 import '../widgets/fx_tonal_button.dart';
 import 'excluir_conta_flow.dart';
+import '../theme/fx_icons.dart';
 
 /// Quem está excluindo: muda só as linhas de "O que acontece".
 enum ExcluirContaPapel { personal, aluno }
@@ -196,15 +197,15 @@ class _ExcluirContaSheetState extends State<_ExcluirContaSheet> {
             .toList();
     final icones = switch (widget.papel) {
       ExcluirContaPapel.aluno => const [
-        Icons.shield_outlined,
-        Icons.receipt_long_outlined,
-        Icons.person_off_outlined,
+        FxIcons.seguranca,
+        FxIcons.recibo,
+        FxIcons.pessoaOff,
       ],
       ExcluirContaPapel.personal => const [
-        Icons.shield_outlined,
-        Icons.group_off_outlined,
-        Icons.receipt_long_outlined,
-        Icons.credit_card_off_outlined,
+        FxIcons.seguranca,
+        FxIcons.grupoOff,
+        FxIcons.recibo,
+        FxIcons.cartaoOff,
       ],
     };
 
@@ -244,7 +245,7 @@ class _ExcluirContaSheetState extends State<_ExcluirContaSheet> {
     return FxSheetFrame(
       title: l10n.excluirContaTitulo,
       subtitle: l10n.excluirContaSubtitulo,
-      leading: const Icon(Icons.delete_forever_outlined, color: perigo, size: 20),
+      leading: const Icon(FxIcons.excluir, color: perigo, size: 20),
       maxHeightFactor: 0.92,
       footer: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -301,7 +302,7 @@ class _ExcluirContaSheetState extends State<_ExcluirContaSheet> {
                 ],
                 const SizedBox(height: TokensStrip.s3),
                 linha(
-                  Icons.warning_amber_rounded,
+                  FxIcons.alerta,
                   perigo,
                   l10n.excluirContaAcComum,
                   corTexto: perigo,
@@ -322,7 +323,7 @@ class _ExcluirContaSheetState extends State<_ExcluirContaSheet> {
                 ),
               ),
               child: linha(
-                Icons.info_outline_rounded,
+                FxIcons.info,
                 EagleTokens.warn,
                 l10n.excluirContaAvisoAssinatura,
               ),
@@ -331,7 +332,7 @@ class _ExcluirContaSheetState extends State<_ExcluirContaSheet> {
           const SizedBox(height: TokensStrip.s3),
           FxTonalButton(
             label: l10n.excluirContaWebBotao,
-            icon: Icons.open_in_new_rounded,
+            icon: FxIcons.abrirFora,
             compact: true,
             onPressed: FocuxLegal.openDeleteAccount,
           ),
@@ -371,7 +372,7 @@ class _ExcluirContaSheetState extends State<_ExcluirContaSheet> {
                     _usarCodigo
                         ? l10n.excluirContaReenviarCodigo
                         : l10n.excluirContaPedirCodigo,
-                icon: Icons.mail_outline_rounded,
+                icon: FxIcons.email,
                 compact: true,
                 loading: _enviando,
                 onPressed: _enviando ? null : _pedirCodigo,
@@ -379,7 +380,7 @@ class _ExcluirContaSheetState extends State<_ExcluirContaSheet> {
               if (_usarCodigo)
                 FxTonalButton(
                   label: l10n.excluirContaUsarSenha,
-                  icon: Icons.password_rounded,
+                  icon: FxIcons.senha,
                   compact: true,
                   onPressed: () => setState(() => _usarCodigo = false),
                 ),

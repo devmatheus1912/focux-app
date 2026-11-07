@@ -9,6 +9,7 @@ import 'package:focux_app/features/perfil/widgets/identidade_paletas_grade.dart'
 import 'package:focux_app/features/perfil/widgets/identidade_previa_app.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:focux_app/core/theme/fx_icons.dart';
 
 Widget _app(Widget child, {bool dark = false}) => MaterialApp(
   theme: ThemeData(
@@ -160,7 +161,7 @@ void main() {
       for (final p in CuratedBrandPalette.premium) {
         expect(find.text(p.name), findsOneWidget, reason: p.name);
       }
-      expect(find.byIcon(Icons.check_rounded), findsOneWidget);
+      expect(find.byIcon(FxIcons.check), findsOneWidget);
       await tester.tap(find.text('Midnight Gold'));
       expect(escolhida?.id, 'midnight_gold');
     });

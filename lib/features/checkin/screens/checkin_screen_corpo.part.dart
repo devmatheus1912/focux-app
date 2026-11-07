@@ -163,7 +163,7 @@ extension _CheckinCorpo on _CheckinScreenState {
       ),
       CheckinRodape.proximo => CheckinRodapeBar(
         label: s.checkinProximoExercicio,
-        icon: Icons.arrow_forward_rounded,
+        icon: FxIcons.avancar,
         loading: false,
         loadingLabel: s.checkinProximoExercicio,
         onPressed: () {
@@ -173,7 +173,7 @@ extension _CheckinCorpo on _CheckinScreenState {
       ),
       CheckinRodape.finalizar => CheckinRodapeBar(
         label: s.checkinFinalizarTreino,
-        icon: Icons.flag_rounded,
+        icon: FxIcons.meta,
         loading: _concluindo,
         loadingLabel: s.checkinFinalizando,
         onPressed: _finalizar,

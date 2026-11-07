@@ -39,6 +39,7 @@ import '../providers/anamnese_provider.dart';
 import '../utils/anamnese_display.dart';
 import '../utils/anamnese_etapas.dart';
 import '../widgets/anamnese_aluno_campos.dart';
+import '../../../core/theme/fx_icons.dart';
 
 part 'anamnese_aluno_etapas.part.dart';
 part 'anamnese_aluno_resumo.part.dart';

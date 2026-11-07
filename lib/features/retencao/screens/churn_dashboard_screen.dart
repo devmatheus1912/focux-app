@@ -35,6 +35,7 @@ import '../data/retencao_repository.dart';
 import '../utils/retencao_display.dart';
 import '../utils/retencao_fila.dart';
 import '../widgets/retencao_acoes_sheet.dart';
+import '../../../core/theme/fx_icons.dart';
 
 part 'churn_dashboard_screen_cards.part.dart';
 part 'churn_dashboard_screen_content.part.dart';
@@ -251,13 +252,13 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
             valor: '/winback',
             rotulo: s.retencaoEntradaHistorico,
             descricao: s.retencaoEntradaHistoricoSub,
-            icone: Icons.notifications_none_rounded,
+            icone: FxIcons.notificacao,
           ),
           FxActionItem(
             valor: '/dunning',
             rotulo: s.retencaoEntradaCobranca,
             descricao: s.retencaoEntradaCobrancaSub,
-            icone: Icons.repeat_rounded,
+            icone: FxIcons.repetir,
           ),
         ]),
       ],
@@ -304,7 +305,7 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
               FxHelpIconButton(tooltip: s.retencaoComoUsar, onTap: _ajuda),
               IconButton(
                 tooltip: s.retencaoMaisAcoes,
-                icon: const Icon(Icons.more_horiz_rounded),
+                icon: const Icon(FxIcons.mais),
                 onPressed: _maisAcoes,
               ),
             ],

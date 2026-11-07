@@ -10,6 +10,7 @@ import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/fx_action_chip.dart';
 import '../data/dunning_repository.dart';
 import '../utils/dunning_ops_display.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class DunningFocusCard extends StatelessWidget {
   const DunningFocusCard({
@@ -56,7 +57,7 @@ class DunningFocusCard extends StatelessWidget {
     final chosen = await showFxInsetPickerSheet<DunningFocusActionId>(
       context,
       title: 'Mais ações',
-      headerIcon: Icons.more_horiz_rounded,
+      headerIcon: FxIcons.mais,
       selected: null,
       items: [
         for (final id in secondary)

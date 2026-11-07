@@ -28,6 +28,7 @@ import '../../auth/providers/auth_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../data/desafio_repository.dart';
 import '../utils/desafio_display.dart';
+import '../../../core/theme/fx_icons.dart';
 
 final _repo = Provider((ref) => DesafioRepository(ref.read(apiClientProvider)));
 
@@ -238,7 +239,7 @@ class _DesafiosAlunoScreenState extends ConsumerState<DesafiosAlunoScreen> {
                                 FxKeyboardDismissScope.dismiss(),
                             decoration: InputDecoration(
                               hintText: 'Buscar desafio',
-                              prefixIcon: const Icon(Icons.search_rounded),
+                              prefixIcon: const Icon(FxIcons.buscar),
                               border: FxInputDeco.outlineBorder(
                                 borderRadius: BorderRadius.circular(16),
                               ),

@@ -17,6 +17,7 @@ import 'package:focux_app/l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../support/tolerant_golden_comparator.dart';
+import 'package:focux_app/core/theme/fx_icons.dart';
 
 Widget _app(Widget home, {bool dark = false}) => ProviderScope(
   overrides: [notificacoesNaoLidasProvider.overrideWith((ref) async => 0)],
@@ -120,13 +121,13 @@ void main() {
                 const SizedBox(height: 8),
                 FxTonalButton(
                   label: 'Montar ficha',
-                  icon: Icons.add_rounded,
+                  icon: FxIcons.adicionar,
                   onPressed: () {},
                 ),
                 const SizedBox(height: 8),
                 FxTonalButton(
                   label: 'Definir',
-                  icon: Icons.flag_outlined,
+                  icon: FxIcons.meta,
                   compact: true,
                   onPressed: () {},
                 ),

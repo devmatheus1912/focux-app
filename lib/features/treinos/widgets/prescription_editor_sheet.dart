@@ -24,6 +24,7 @@ import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/fx_choice_strip.dart';
 import '../models/metodo_exercicio.dart';
+import '../../../core/theme/fx_icons.dart';
 
 part 'prescription_editor_rows.part.dart';
 part 'prescription_editor_pickers.part.dart';

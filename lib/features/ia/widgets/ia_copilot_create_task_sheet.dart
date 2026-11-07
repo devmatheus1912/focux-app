@@ -10,6 +10,7 @@ import '../../../core/widgets/fx_motion.dart';
 import '../providers/ia_copilot_providers.dart';
 import '../utils/ia_copiloto_display.dart';
 import 'ia_copilot_shell_widgets.dart';
+import '../../../core/theme/fx_icons.dart';
 
 Future<IaCopilotTaskDraft?> showIaCopilotCreateTaskSheet(
   BuildContext context, {
@@ -56,7 +57,7 @@ class _IaCopilotCreateTaskSheet extends StatelessWidget {
     return FxHomeSheetScaffold(
       isDark: dark,
       leading: Icon(
-        Icons.assignment_turned_in_outlined,
+        FxIcons.pranchetaFeita,
         color: brand,
         size: 18,
       ),
@@ -124,21 +125,21 @@ class _IaCopilotCreateTaskSheet extends StatelessWidget {
                 children: [
                   IaCopilotMetaChip(
                     label: 'Destino: ${FocuxMicrocopy.commandCenter}',
-                    icon: Icons.space_dashboard_outlined,
+                    icon: FxIcons.painel,
                     brand: brand,
                     ink: ink,
                     line: line,
                   ),
                   IaCopilotMetaChip(
                     label: 'Prioridade P1',
-                    icon: Icons.flag_outlined,
+                    icon: FxIcons.meta,
                     brand: brand,
                     ink: ink,
                     line: line,
                   ),
                   IaCopilotMetaChip(
                     label: 'SLA 24h',
-                    icon: Icons.timer_outlined,
+                    icon: FxIcons.cronometro,
                     brand: brand,
                     ink: ink,
                     line: line,

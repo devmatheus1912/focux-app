@@ -15,6 +15,7 @@ import '../utils/agenda_month.dart';
 import '../utils/agenda_schedule.dart';
 import '../utils/agenda_slots.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class AgendaSlotPick {
   const AgendaSlotPick({required this.inicio, required this.duracaoMin});
@@ -240,7 +241,7 @@ class _AgendaSlotPickerSheetState extends State<AgendaSlotPickerSheet> {
               isDark: chrome.isDark,
               title: dayLabel[0].toUpperCase() + dayLabel.substring(1),
               subtitle: widget.title,
-              leading: Icon(Icons.schedule_outlined, color: primary, size: 18),
+              leading: Icon(FxIcons.relogio, color: primary, size: 18),
               trailing: FxTonalButton(label: s.agendaTrocarDia, onPressed: () => setState(() {
                       _choosingDay = !_choosingDay;
                       _calMonth = agendaMonthOf(_day);
@@ -448,7 +449,7 @@ class _AgendaSlotPickerSheetState extends State<AgendaSlotPickerSheet> {
                         () => _calMonth = agendaShiftMonth(_calMonth, -1),
                       )
                       : null,
-              icon: const Icon(Icons.chevron_left_rounded),
+              icon: const Icon(FxIcons.chevronEsquerda),
             ),
             Expanded(
               child: Text(
@@ -463,7 +464,7 @@ class _AgendaSlotPickerSheetState extends State<AgendaSlotPickerSheet> {
                   () => setState(
                     () => _calMonth = agendaShiftMonth(_calMonth, 1),
                   ),
-              icon: const Icon(Icons.chevron_right_rounded),
+              icon: const Icon(FxIcons.chevronDireita),
             ),
           ],
         ),

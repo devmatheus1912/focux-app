@@ -339,8 +339,8 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                             children: [
                               Icon(
                                 _importedPhotoBytes != null
-                                    ? Icons.image_rounded
-                                    : Icons.insert_drive_file_rounded,
+                                    ? FxIcons.imagem
+                                    : FxIcons.documento,
                                 size: 14,
                                 color: brand,
                               ),
@@ -424,7 +424,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                         padding: const EdgeInsets.only(top: TokensStrip.s2),
                         child: OutlinedButton.icon(
                           onPressed: _captureBusy ? null : _colarClipboard,
-                          icon: const Icon(Icons.content_paste_rounded, size: 18),
+                          icon: const Icon(FxIcons.colar, size: 18),
                           label: Text(migracaoColarLabel()),
                           style: OutlinedButton.styleFrom(
                             minimumSize: const Size.fromHeight(48),
@@ -815,7 +815,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                         ),
                       ),
                     ),
-                    Icon(Icons.unfold_more_rounded, size: 18, color: mute),
+                    Icon(FxIcons.expandir, size: 18, color: mute),
                   ],
                 ),
               ),

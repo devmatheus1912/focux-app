@@ -241,7 +241,7 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
             FxActionItem(
               valor: o.valor,
               rotulo: o.rotulo,
-              icone: Icons.chevron_right_rounded,
+              icone: FxIcons.chevronDireita,
             ),
         ]),
       ],
@@ -393,7 +393,7 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
                       isDark: Theme.of(ctx).brightness == Brightness.dark,
                       title: 'Registrar medida',
                       leading: Icon(
-                        Icons.monitor_weight_outlined,
+                        FxIcons.balanca,
                         color: Theme.of(ctx).colorScheme.primary,
                         size: 18,
                       ),
@@ -401,7 +401,7 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
                     const SizedBox(height: TokensStrip.s3),
                     FxTonalButton(
                       label: _dataCurta(data),
-                      icon: Icons.calendar_today_outlined,
+                      icon: FxIcons.calendario,
                       compact: true,
                       onPressed: escolherData,
                     ),
@@ -461,7 +461,7 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
                       children: [
                         FxTonalButton(
                           label: fotoUrl == null ? 'Adicionar foto' : 'Trocar foto',
-                          icon: Icons.add_a_photo_outlined,
+                          icon: FxIcons.adicionarFoto,
                           compact: true,
                           loading: uploading,
                           onPressed: uploading ? null : selecionarFoto,
@@ -493,7 +493,7 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
                       width: double.infinity,
                       child: FxLiquidPrimaryButton(
                         loading: saving,
-                        icon: Icons.check_circle_outline,
+                        icon: FxIcons.concluido,
                         label: 'Salvar medida',
                         onPressed: saving ? null : salvar,
                       ),
@@ -627,7 +627,7 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
                                                 ),
                                               )
                                               : const Icon(
-                                                Icons.camera_alt,
+                                                FxIcons.cameraPequeno,
                                                 size: 16,
                                               ),
                                     ),
@@ -671,7 +671,7 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
                         AlunoInsetFormField(
                           controller: _nome,
                           label: 'Nome',
-                          icon: Icons.person_outline,
+                          icon: FxIcons.pessoa,
                           rotuloFlutuante: true,
                           validator:
                               (v) =>
@@ -682,7 +682,7 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
                         AlunoInsetFormField(
                           controller: _email,
                           label: 'E-mail',
-                          icon: Icons.email_outlined,
+                          icon: FxIcons.email,
                           keyboardType: TextInputType.emailAddress,
                           rotuloFlutuante: true,
                           validator: (v) {
@@ -696,7 +696,7 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
                         AlunoInsetFormField(
                           controller: _whatsapp,
                           label: 'WhatsApp',
-                          icon: Icons.chat_outlined,
+                          icon: FxIcons.chat,
                           keyboardType: TextInputType.phone,
                           inputFormatters: [BrPhone.formatter()],
                           rotuloFlutuante: true,
@@ -724,7 +724,7 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
                           AlunoInsetFormField(
                             controller: _telefone,
                             label: 'Telefone',
-                            icon: Icons.phone_outlined,
+                            icon: FxIcons.telefone,
                             keyboardType: TextInputType.phone,
                             inputFormatters: [BrPhone.formatter()],
                             rotuloFlutuante: true,
@@ -732,13 +732,13 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
                         CampoDeEscolha(
                           rotulo: 'Gênero',
                           valor: rotuloDoGenero(_genero.text),
-                          icone: Icons.badge_outlined,
+                          icone: FxIcons.cracha,
                           onTap: () => _escolher('Gênero', _genero, generosDoAluno),
                         ),
                         CampoDeEscolha(
                           rotulo: 'Nascimento',
                           valor: _dataNascimento.text.replaceAll('-', '/'),
-                          icone: Icons.cake_outlined,
+                          icone: FxIcons.aniversario,
                           onTap: _escolherNascimento,
                         ),
                       ],
@@ -752,7 +752,7 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
                         CampoDeEscolha(
                           rotulo: 'Objetivo',
                           valor: _objetivo.text,
-                          icone: Icons.flag_outlined,
+                          icone: FxIcons.meta,
                           onTap: () => _escolher(
                             'Objetivo',
                             _objetivo,
@@ -765,7 +765,7 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
                         AlunoInsetFormField(
                           controller: _altura,
                           label: 'Altura (m)',
-                          icon: Icons.height,
+                          icon: FxIcons.altura,
                           rotuloFlutuante: true,
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
@@ -774,7 +774,7 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
                         CampoDeEscolha(
                           rotulo: 'Peso',
                           valor: _peso.text.isEmpty ? '' : '${_peso.text} kg',
-                          icone: Icons.monitor_weight_outlined,
+                          icone: FxIcons.balanca,
                           acao: FxTonalButton(
                             label: 'Registrar',
                             compact: true,
@@ -785,7 +785,7 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
                           CampoDeEscolha(
                             rotulo: 'Consultoria',
                             valor: rotuloDaConsultoria(_tipoConsultoria.text),
-                            icone: Icons.fitness_center,
+                            icone: FxIcons.treino,
                           ),
                       ],
                     ),

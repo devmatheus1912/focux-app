@@ -32,6 +32,7 @@ import '../../../l10n/pt.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 import 'package:focux_app/core/widgets/skeleton_loader.dart';
+import '../../../core/theme/fx_icons.dart';
 
 part 'copilot_actions_screen_widgets.part.dart';
 
@@ -444,25 +445,25 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
       context,
       titulo: copilotActionsNome(action),
       subtitulo: copilotActionsMotivo(action),
-      icone: Icons.checklist_rounded,
+      icone: FxIcons.checklist,
       grupos: [
         FxActionGroup<String>(null, [
           if (concluida)
             FxActionItem(
               valor: 'reabrir',
               rotulo: copilotActionsReabrirLabel(),
-              icone: Icons.undo_rounded,
+              icone: FxIcons.desfazer,
             )
           else ...[
             FxActionItem(
               valor: 'adiar',
               rotulo: copilotActionsAdiarLabel(),
-              icone: Icons.schedule_rounded,
+              icone: FxIcons.relogio,
             ),
             FxActionItem(
               valor: 'concluir',
               rotulo: copilotActionsConcluirLabel(),
-              icone: Icons.check_rounded,
+              icone: FxIcons.check,
             ),
           ],
         ]),

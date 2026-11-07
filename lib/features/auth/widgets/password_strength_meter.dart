@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class PasswordStrengthMeter extends StatelessWidget {
   const PasswordStrengthMeter({
@@ -87,7 +88,7 @@ class PasswordStrengthMeter extends StatelessWidget {
         const SizedBox(height: 6),
         Row(
           children: [
-            Icon(Icons.shield_outlined, size: 13, color: strength.color),
+            Icon(FxIcons.segurancaPequeno, size: 13, color: strength.color),
             const SizedBox(width: 5),
             Text(
               strength.label,

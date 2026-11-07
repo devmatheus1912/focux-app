@@ -4,6 +4,7 @@ import '../theme/focux_hub_typography.dart';
 import '../theme/shell_chrome.dart';
 import '../theme/tokens_strip.dart';
 import 'fx_tap_row.dart';
+import '../theme/fx_icons.dart';
 
 class FxDaySession {
   const FxDaySession({
@@ -98,7 +99,7 @@ class FxDayRow extends StatelessWidget {
               if (sessoes.isEmpty && segueLabel != null)
                 FxTapRow(
                   title: segueLabel!,
-                  leading: Icon(Icons.repeat_rounded, size: 20, color: chrome.mute),
+                  leading: Icon(FxIcons.repetir, size: 20, color: chrome.mute),
                   vazio: true,
                   trailing: fimVazio ?? const SizedBox.shrink(),
                   onTap: null,

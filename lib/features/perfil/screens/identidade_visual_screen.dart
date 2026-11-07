@@ -44,6 +44,7 @@ import '../widgets/identidade_previa_app.dart';
 import '../widgets/identidade_capa_tile.dart';
 import '../widgets/identidade_paletas_grade.dart';
 import '../widgets/identidade_estilo_miniaturas.dart';
+import '../../../core/theme/fx_icons.dart';
 
 part 'identidade_visual_screen_actions.part.dart';
 part 'identidade_visual_screen_widgets.part.dart';
@@ -411,7 +412,7 @@ class _IdentidadeVisualScreenState
                                         controller: _sloganCtrl,
                                         enabled: hasWhiteLabel,
                                         accent: chromeAccent,
-                                        icon: Icons.format_quote_outlined,
+                                        icon: FxIcons.citacao,
                                         hint:
                                             'Transformando vidas através do movimento',
                                         maxLength: 200,
@@ -456,7 +457,7 @@ class _IdentidadeVisualScreenState
                                               CrossAxisAlignment.start,
                                           children: [
                                             Icon(
-                                              Icons.visibility_outlined,
+                                              FxIcons.verPequeno,
                                               size: 16,
                                               color: chrome.mute,
                                             ),

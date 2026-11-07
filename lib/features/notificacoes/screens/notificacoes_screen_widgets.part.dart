@@ -3,18 +3,18 @@ part of 'notificacoes_screen.dart';
 IconData _iconeDoTipo(String tipo) {
   final t = tipo.toUpperCase();
   if (t.startsWith('MENSALIDADE') || t == 'DUNNING' || t == 'TRIAL') {
-    return Icons.payments_outlined;
+    return FxIcons.pagamento;
   }
   if (t == 'FOCUX_SCORE' || t == 'RADAR' || t == 'ENGAJAMENTO') {
-    return Icons.person_outline_rounded;
+    return FxIcons.pessoa;
   }
   if (t == 'EVOLUCAO' || t == 'FICHA_VIGENCIA') {
-    return Icons.fitness_center_rounded;
+    return FxIcons.treino;
   }
   if (t == 'FEED' || t == 'BROADCAST' || t == 'DEPOIMENTO') {
-    return Icons.campaign_outlined;
+    return FxIcons.megafone;
   }
-  return Icons.notifications_none_rounded;
+  return FxIcons.notificacao;
 }
 
 /// Dinheiro tem verbo visível na linha; o resto abre no toque, com a seta.
@@ -111,7 +111,7 @@ class _NotificacaoTile extends StatelessWidget {
                   FxTonalButton(label: cta, compact: true, onPressed: onTap),
                 ] else if (temDestino) ...[
                   const SizedBox(width: TokensStrip.s1),
-                  Icon(Icons.chevron_right_rounded, color: chrome.mute),
+                  Icon(FxIcons.chevronDireita, color: chrome.mute),
                 ],
               ],
             ),
@@ -142,7 +142,7 @@ class _ApagarFundo extends StatelessWidget {
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
           ),
           SizedBox(width: TokensStrip.s2),
-          Icon(Icons.delete_outline_rounded, color: Colors.white),
+          Icon(FxIcons.excluir, color: Colors.white),
         ],
       ),
     );

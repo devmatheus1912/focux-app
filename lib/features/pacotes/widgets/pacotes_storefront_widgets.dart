@@ -18,6 +18,7 @@ import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/pacote_repository.dart';
 import '../utils/pacote_display.dart';
+import '../../../core/theme/fx_icons.dart';
 
 part 'pacotes_storefront_widgets_private.part.dart';
 
@@ -27,7 +28,7 @@ Future<bool> confirmDesativarPacote(BuildContext context, String titulo) {
     context,
     title: pacoteDesativarConfirmTitle(),
     message: pacoteDesativarConfirmMessage(titulo),
-    icon: Icons.delete_outline_rounded,
+    icon: FxIcons.excluir,
     confirmLabel: pacoteDesativarConfirmLabel(),
     destructive: true,
   );
@@ -145,7 +146,7 @@ class PacoteStorefrontCard extends StatelessWidget {
         FxInsetPickerSheetItem(
           value: true,
           label: 'Desativar plano',
-          icon: Icons.delete_outline_rounded,
+          icon: FxIcons.excluir,
         ),
       ],
     );
@@ -193,7 +194,7 @@ class PacoteStorefrontCard extends StatelessWidget {
                   minHeight: 48,
                 ),
                 onPressed: () => _abrirMenu(context),
-                icon: Icon(Icons.more_vert_rounded, color: mute),
+                icon: Icon(FxIcons.maisVertical, color: mute),
               ),
             ],
           ),

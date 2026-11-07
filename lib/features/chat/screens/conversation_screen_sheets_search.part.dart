@@ -48,7 +48,7 @@ extension ConversationScreenSheetsSearch on _ConversationScreenState {
                       },
                       decoration: InputDecoration(
                         hintText: 'Buscar na conversa',
-                        prefixIcon: const Icon(Icons.search_rounded),
+                        prefixIcon: const Icon(FxIcons.buscar),
                         suffixIcon: IconButton(
                           onPressed: () async {
                             await _performSearch(
@@ -63,7 +63,7 @@ extension ConversationScreenSheetsSearch on _ConversationScreenState {
                                   }),
                             );
                           },
-                          icon: const Icon(Icons.arrow_forward_rounded),
+                          icon: const Icon(FxIcons.avancar),
                         ),
                         filled: true,
                         fillColor:
@@ -81,7 +81,7 @@ extension ConversationScreenSheetsSearch on _ConversationScreenState {
                       child:
                           query.trim().isEmpty
                               ? const ConversationSearchState(
-                                icon: Icons.search_rounded,
+                                icon: FxIcons.buscar,
                                 title: 'Digite para buscar',
                                 subtitle:
                                     'Encontre mensagens antigas da conversa.',
@@ -98,7 +98,7 @@ extension ConversationScreenSheetsSearch on _ConversationScreenState {
                               )
                               : searched && results.isEmpty
                               ? const ConversationSearchState(
-                                icon: Icons.chat_bubble_outline,
+                                icon: FxIcons.chat,
                                 title: 'Nada encontrado',
                                 subtitle: 'Tente outra palavra-chave.',
                               )

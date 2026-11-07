@@ -56,7 +56,7 @@ extension AlunosListScreenFilters on _AlunosListScreenState {
 
         return FxHomeSheetScaffold(
           isDark: isDark,
-          leading: Icon(Icons.tune_rounded, color: brand, size: 22),
+          leading: Icon(FxIcons.filtros, color: brand, size: 22),
           title: 'Organizar alunos',
           subtitle: 'Como a lista aparece agora.',
           trailing: FxTonalButton(label: 'Redefinir', onPressed: () {
@@ -82,7 +82,7 @@ extension AlunosListScreenFilters on _AlunosListScreenState {
                     FxInsetPickerOptionSpec(
                       label: 'Prioridade do dia',
                       subtitle: 'Risco, inadimplência e convites primeiro.',
-                      icon: Icons.priority_high_rounded,
+                      icon: FxIcons.erro,
                       selected: _ordenacao == AlunoOrdenacao.prioridade,
                       onTap: () {
                         _setOrdenacao(AlunoOrdenacao.prioridade);
@@ -92,7 +92,7 @@ extension AlunosListScreenFilters on _AlunosListScreenState {
                     FxInsetPickerOptionSpec(
                       label: 'Nome A-Z',
                       subtitle: 'Ordem alfabética.',
-                      icon: Icons.sort_by_alpha_rounded,
+                      icon: FxIcons.ordenarAz,
                       selected: _ordenacao == AlunoOrdenacao.nome,
                       onTap: () {
                         _setOrdenacao(AlunoOrdenacao.nome);
@@ -102,7 +102,7 @@ extension AlunosListScreenFilters on _AlunosListScreenState {
                     FxInsetPickerOptionSpec(
                       label: 'Sem foto primeiro',
                       subtitle: 'Perfis genéricos no topo.',
-                      icon: Icons.no_photography_outlined,
+                      icon: FxIcons.semFoto,
                       selected: _ordenacao == AlunoOrdenacao.semFoto,
                       onTap: () {
                         _setOrdenacao(AlunoOrdenacao.semFoto);
@@ -134,7 +134,7 @@ extension AlunosListScreenFilters on _AlunosListScreenState {
                 label: 'Ajuda da lista de alunos',
                 child: FxTonalButton(
                   label: 'Como usar a lista',
-                  icon: Icons.help_outline_rounded,
+                  icon: FxIcons.ajuda,
                   expanded: true,
                   onPressed: () {
                     Navigator.pop(ctx);

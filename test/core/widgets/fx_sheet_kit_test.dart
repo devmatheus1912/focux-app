@@ -7,6 +7,7 @@ import 'package:focux_app/core/widgets/fx_sheet_frame.dart';
 import 'package:focux_app/core/widgets/fx_sheet_search_field.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:focux_app/core/theme/fx_icons.dart';
 
 Widget _app(Widget home, {double scale = 1.0}) => MaterialApp(
   theme: ThemeData(
@@ -62,21 +63,21 @@ void main() {
         FxActionItem(
           valor: 'add',
           rotulo: 'Adicionar exercício',
-          icone: Icons.add,
+          icone: FxIcons.adicionar,
         ),
       ]),
       FxActionGroup('Guardar', [
         FxActionItem(
           valor: 'dup',
           rotulo: 'Duplicar treino',
-          icone: Icons.copy,
+          icone: FxIcons.copiar,
         ),
       ]),
     ],
     destrutiva: FxActionItem(
       valor: 'del',
       rotulo: 'Excluir treino',
-      icone: Icons.delete_outline,
+      icone: FxIcons.excluir,
     ),
     confirmarTitulo: 'Excluir treino?',
     confirmarMensagem: 'Sai da biblioteca.',

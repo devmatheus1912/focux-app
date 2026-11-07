@@ -17,6 +17,7 @@ import '../../../core/widgets/fx_sheet_frame.dart';
 import '../data/aluno_repository.dart';
 import '../providers/aluno_followup_provider.dart';
 import '../utils/aluno360_followup_dates.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Compromisso do personal com o aluno — follow-up ou sono (mesmo contrato).
 enum Aluno360CommitmentKind { followUp, sleep }
@@ -153,7 +154,7 @@ class _Aluno360CommitmentSheetState
           _isSleep
               ? 'Data para falar do sono com ${aluno.nome}.'
               : 'Quando você fala de novo com ${aluno.nome}.',
-      headerIcon: Icons.event_outlined,
+      headerIcon: FxIcons.calendario,
       selected: alunoFollowUpDateSelected(
         options: options,
         current: aluno.followUpDate,
@@ -166,7 +167,7 @@ class _Aluno360CommitmentSheetState
             value: option.date,
             label: option.label,
             subtitle: option.subtitle,
-            icon: Icons.event_outlined,
+            icon: FxIcons.calendario,
           ),
       ],
     );
@@ -190,19 +191,19 @@ class _Aluno360CommitmentSheetState
           _isSleep
               ? 'Quando voltar a combinar o sono com ${aluno.nome}.'
               : 'Escolha por quanto tempo adiar o contato com ${aluno.nome}.',
-      headerIcon: Icons.snooze_rounded,
+      headerIcon: FxIcons.adiar,
       items: const [
         FxInsetPickerSheetItem(
           value: Duration(hours: 24),
           label: 'Adiar 24 horas',
           subtitle: 'Amanhã no mesmo horário',
-          icon: Icons.snooze_rounded,
+          icon: FxIcons.adiar,
         ),
         FxInsetPickerSheetItem(
           value: Duration(days: 3),
           label: 'Adiar 3 dias',
           subtitle: 'Reabrir daqui a 72 horas',
-          icon: Icons.date_range_rounded,
+          icon: FxIcons.calendario,
         ),
       ],
     );
@@ -225,7 +226,7 @@ class _Aluno360CommitmentSheetState
       message:
           'Remove a data combinada de ${aluno.nome}. '
           'Você pode definir outra data depois.',
-      icon: Icons.event_busy_rounded,
+      icon: FxIcons.eventoCancelado,
       confirmLabel: 'Limpar',
     );
     if (!confirmed) return;
@@ -285,7 +286,7 @@ class _Aluno360CommitmentSheetState
       title: _title,
       subtitle: _subtitle,
       leading: Icon(
-        _isSleep ? Icons.bedtime_outlined : Icons.event_outlined,
+        _isSleep ? FxIcons.sono : FxIcons.calendario,
         color: primary,
         size: 20,
       ),
@@ -300,13 +301,13 @@ class _Aluno360CommitmentSheetState
           FxSettingsGroup(
             children: [
               FxSettingsTile(
-                icon: Icons.history_rounded,
+                icon: FxIcons.historico,
                 label: 'Último contato',
                 value: ultimo == null ? 'Ainda não registrado' : _formatDate(ultimo),
                 showDivider: true,
               ),
               FxSettingsTile(
-                icon: Icons.event_available_outlined,
+                icon: FxIcons.eventoConfirmado,
                 label: _isSleep ? 'Combinado para' : 'Próximo contato',
                 value: isSnoozed
                     ? 'Adiado até ${_formatDate(snoozedUntil)} ${_formatTime(snoozedUntil)}'
@@ -347,7 +348,7 @@ class _Aluno360CommitmentSheetState
           FxSettingsGroup(
             children: [
               FxSettingsTile(
-                icon: Icons.snooze_rounded,
+                icon: FxIcons.adiar,
                 label: 'Adiar',
                 subtitle: 'Volta a avisar em 24 horas ou 3 dias',
                 value: '',
@@ -357,7 +358,7 @@ class _Aluno360CommitmentSheetState
               ),
               if (followUpDate != null || isSnoozed)
                 FxSettingsTile(
-                  icon: Icons.event_busy_rounded,
+                  icon: FxIcons.eventoCancelado,
                   label: _isSleep ? 'Limpar combinação' : 'Limpar follow-up',
                   value: '',
                   danger: true,

@@ -17,6 +17,7 @@ import '../providers/ficha_modelos_provider.dart';
 import 'ficha_acoes.dart';
 import 'modelo_acoes.dart';
 import 'sessoes_sem_uso_aviso.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Aba "Semanas" de Modelos de treino: um card por modelo e "Novo modelo".
 /// [abas] é a fileira Semanas | Sessões, que o dono da tela desenha.
@@ -118,7 +119,7 @@ class FichaModeloCard extends ConsumerWidget {
           IconButton(
             tooltip: s.rotinaMenuFicha,
             onPressed: () => _menu(context, ref),
-            icon: const Icon(Icons.more_horiz_rounded),
+            icon: const Icon(FxIcons.mais),
           ),
         ],
       ),

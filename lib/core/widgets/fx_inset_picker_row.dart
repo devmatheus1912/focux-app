@@ -6,6 +6,7 @@ import '../theme/fx_settings_layout.dart';
 import '../theme/shell_chrome.dart';
 import 'fx_input_deco.dart';
 import 'fx_shell_scaffold.dart';
+import '../theme/fx_icons.dart';
 
 /// Picker inset dentro de [FxSettingsGroup] — paridade pixel-perfect com
 /// [AlunoInsetFormField] via [FxInputDeco.insetGrouped].
@@ -88,7 +89,7 @@ class _FxInsetPickerRowState extends State<FxInsetPickerRow> {
               hint: widget.label,
               iconColor: soft,
               suffix: Icon(
-                Icons.unfold_more,
+                FxIcons.expandir,
                 size: FxSettingsLayout.chevronSize,
                 color: mute,
               ),

@@ -3,6 +3,7 @@ import 'package:focux_app/features/alunos/utils/aluno360_medida_plausivel.dart';
 import 'package:focux_app/features/avaliacao/utils/evolucao_comparativo_display.dart';
 import 'package:focux_app/features/evolucao/data/evolucao_repository.dart';
 import 'package:focux_app/features/evolucao/data/meta_corporal.dart';
+import 'package:focux_app/core/widgets/fx_grafico_linha.dart';
 import 'package:focux_app/features/evolucao/utils/evolucao_series.dart';
 
 MetaCorporal _meta({
@@ -145,5 +146,16 @@ void main() {
         isFalse,
       );
     });
+  });
+
+  test('pontosSuspeitos marca o ponto do salto, com a regra do Confira', () {
+    final serie = [
+      PontoGrafico(DateTime(2026, 10, 30), 90),
+      PontoGrafico(DateTime(2026, 11, 1), 91),
+      PontoGrafico(DateTime(2026, 11, 2), 105),
+      PontoGrafico(DateTime(2026, 11, 6), 106),
+    ];
+    expect(pontosSuspeitos(serie, 'kg'), {2});
+    expect(pontosSuspeitos(serie.take(2).toList(), 'kg'), isEmpty);
   });
 }

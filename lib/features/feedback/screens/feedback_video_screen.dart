@@ -28,6 +28,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
 import '../data/feedback_video_repository.dart';
 import '../utils/feedback_video_display.dart';
+import '../../../core/theme/fx_icons.dart';
 
 enum _FeedbackVideoAcao { abrir, responder, deletar }
 
@@ -163,17 +164,17 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
         const FxInsetPickerSheetItem(
           value: _FeedbackVideoAcao.abrir,
           label: 'Assistir vídeo',
-          icon: Icons.play_circle_outline_rounded,
+          icon: FxIcons.playCirculo,
         ),
         FxInsetPickerSheetItem(
           value: _FeedbackVideoAcao.responder,
           label: feedbackVideoResponderLabel(respondido: item.respondido),
-          icon: Icons.rate_review_outlined,
+          icon: FxIcons.avaliacao,
         ),
         const FxInsetPickerSheetItem(
           value: _FeedbackVideoAcao.deletar,
           label: 'Remover',
-          icon: Icons.delete_outline_rounded,
+          icon: FxIcons.excluir,
         ),
       ],
     );
@@ -200,7 +201,7 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
           exercicioNome: item.exercicioNome,
           comentario: item.comentario,
         ),
-        icon: Icons.rate_review_outlined,
+        icon: FxIcons.avaliacao,
         confirmLabel: 'Enviar ao aluno',
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -212,14 +213,14 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
                   comentario.isEmpty
                       ? null
                       : Text(feedbackVideoComentarioAluno(comentario)),
-              leading: const Icon(Icons.play_circle_outline_rounded),
+              leading: const Icon(FxIcons.playCirculo),
               onTap: () => _abrirVideo(item.videoUrl),
             ),
             const SizedBox(height: TokensStrip.s2),
             AlunoInsetFormField(
               controller: ctrl,
               label: 'Sua correção',
-              icon: Icons.notes_outlined,
+              icon: FxIcons.notas,
               hint: 'Ex.: desça mais devagar e mantenha o joelho alinhado.',
               maxLines: 5,
               showDivider: false,
@@ -329,7 +330,7 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
                         vertical: 12,
                       ),
                       prefixIcon: Icon(
-                        Icons.search_rounded,
+                        FxIcons.buscar,
                         color: primary,
                         size: 20,
                       ),
@@ -345,7 +346,7 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
                                   _load(reset: true);
                                 },
                                 icon: Icon(
-                                  Icons.close_rounded,
+                                  FxIcons.fechar,
                                   color: mute,
                                   size: 18,
                                 ),

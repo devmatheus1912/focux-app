@@ -8,6 +8,7 @@ import '../../../l10n/pt.dart';
 import '../../alunos/widgets/aluno_avatar.dart';
 import '../data/command_center_data.dart';
 import '../utils/copilot_actions_display.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Uma tarefa: quem, por quê e um verbo. Concluir é direto; o resto, no "⋯".
 class TarefaRow extends StatelessWidget {
@@ -130,14 +131,14 @@ class TarefaRow extends StatelessWidget {
                 IconButton(
                   tooltip: copilotActionsConcluirLabel(),
                   icon: Icon(
-                    Icons.check_circle_outline_rounded,
+                    FxIcons.concluido,
                     color: primary,
                   ),
                   onPressed: onConcluir,
                 ),
               IconButton(
                 tooltip: 'Opções da tarefa',
-                icon: Icon(Icons.more_horiz_rounded, color: mute),
+                icon: Icon(FxIcons.mais, color: mute),
                 onPressed: onMais,
               ),
             ],
@@ -173,7 +174,7 @@ class TarefasNadaPendente extends StatelessWidget {
           CircleAvatar(
             radius: 28,
             backgroundColor: primary.withValues(alpha: 0.12),
-            child: Icon(Icons.check_rounded, color: primary, size: 28),
+            child: Icon(FxIcons.check, color: primary, size: 28),
           ),
           const SizedBox(height: TokensStrip.s3),
           Text(titulo, style: FocuxHubTypography.cardTitle(color: ink)),

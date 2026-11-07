@@ -399,7 +399,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                                 vertical: 12,
                               ),
                               prefixIcon: Icon(
-                                Icons.search_rounded,
+                                FxIcons.buscar,
                                 color: primary,
                                 size: 20,
                               ),
@@ -409,7 +409,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                                       tooltip: 'Limpar busca',
                                       onPressed: _clearQuery,
                                       icon: Icon(
-                                        Icons.close_rounded,
+                                        FxIcons.fechar,
                                         color: mute,
                                         size: 18,
                                       ),
@@ -489,7 +489,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       context,
       title: 'Excluir publicação?',
       message: 'Esta ação não pode ser desfeita.',
-      icon: Icons.delete_outline_rounded,
+      icon: FxIcons.excluir,
       confirmLabel: 'Excluir',
       destructive: true,
     );

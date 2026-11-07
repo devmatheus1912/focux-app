@@ -226,19 +226,19 @@ extension _AddExercicioToTreinoScreenActions
         context,
         titulo: exercicio.nomeDisplay,
         subtitulo: 'Já está neste treino',
-        icone: Icons.fitness_center_rounded,
+        icone: FxIcons.treino,
         grupos: [
           FxActionGroup<String>(null, [
             FxActionItem(
               valor: 'ajustar',
               rotulo: 'Ajustar prescrição',
-              icone: Icons.edit_note_rounded,
+              icone: FxIcons.anotar,
             ),
             FxActionItem(
               valor: 'repetir',
               rotulo: 'Adicionar de novo',
               descricao: 'Entra como outra linha do treino',
-              icone: Icons.control_point_duplicate_rounded,
+              icone: FxIcons.duplicar,
             ),
           ]),
         ],
@@ -502,7 +502,7 @@ class _PrescriptionActiveStrip extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.tune_rounded, color: brand, size: 18),
+                    Icon(FxIcons.filtros, color: brand, size: 18),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Column(
@@ -523,7 +523,7 @@ class _PrescriptionActiveStrip extends StatelessWidget {
                       ),
                     ),
                     Icon(
-                      Icons.chevron_right_rounded,
+                      FxIcons.chevronDireita,
                       color: mute,
                       size: FxSettingsLayout.chevronSize,
                     ),
@@ -595,7 +595,7 @@ class _BibliotecaSyncBanner extends StatelessWidget {
               )
             else
               Icon(
-                warning ? Icons.info_outline_rounded : Icons.sync_rounded,
+                warning ? FxIcons.info : FxIcons.renovar,
                 color: warning ? EagleTokens.warn : primary,
                 size: 18,
               ),
@@ -614,7 +614,7 @@ class _BibliotecaSyncBanner extends StatelessWidget {
               IconButton(
                 onPressed: onDismiss,
                 tooltip: 'Dispensar',
-                icon: const Icon(Icons.close_rounded, size: 16),
+                icon: const Icon(FxIcons.fecharPequeno, size: 16),
                 visualDensity: VisualDensity.compact,
               ),
           ],
