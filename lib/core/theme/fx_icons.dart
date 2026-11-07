@@ -176,7 +176,7 @@ abstract final class FxIcons {
   static const IconData nivel = IconData(0xe144, fontFamily: _light); // cellSignalHigh
   static const IconData notas = IconData(0xe348, fontFamily: _light); // note
   static const IconData notificacao = IconData(0xe0ce, fontFamily: _light); // bell
-  static const IconData notificacaoAtiva = IconData(0xe5e8, fontFamily: _light); // bellRinging
+  static const IconData notificacaoTocando = IconData(0xe5e8, fontFamily: _light); // bellRinging
   static const IconData numero = IconData(0xe2a2, fontFamily: _light); // hash
   static const IconData nuvem = IconData(0xe1aa, fontFamily: _light); // cloud
   static const IconData nuvemOk = IconData(0xe1b0, fontFamily: _light); // cloudCheck
@@ -291,4 +291,19 @@ abstract final class FxIcons {
   static const IconData verPequeno = IconData(0xe220, fontFamily: _regular); // eye
   static const IconData videoPequeno = IconData(0xe4da, fontFamily: _regular); // videoCamera
   static const IconData voltarPequeno = IconData(0xe058, fontFamily: _regular); // arrowLeft
+
+  // Barra inferior: a aba ativa usa o par Fill.
+  static const IconData sol = IconData(0xe472, fontFamily: _light); // sun
+  static const IconData atividade = IconData(0xe000, fontFamily: _light); // pulse
+  static const IconData caixaEntrada = IconData(0xe4aa, fontFamily: _light); // tray
+  static const IconData habito = IconData(0xe210, fontFamily: _light); // drop
+  static const IconData saudeVida = IconData(0xe2ac, fontFamily: _light); // heartbeat
+  static const IconData inicioAtivo = IconData(0xe2c2, fontFamily: _fill); // house
+  static const IconData grupoAtivo = IconData(0xe4d6, fontFamily: _fill); // users
+  static const IconData treinoAtivo = IconData(0xe0b6, fontFamily: _fill); // barbell
+  static const IconData calendarioAtivo = IconData(0xe10a, fontFamily: _fill); // calendarBlank
+  static const IconData iaAtivo = IconData(0xe6a2, fontFamily: _fill); // sparkle
+  static const IconData saudeVidaAtivo = IconData(0xe2ac, fontFamily: _fill); // heartbeat
+  static const IconData chatAtivo = IconData(0xe168, fontFamily: _fill); // chatCircle
+  static const IconData pessoaAtivo = IconData(0xe4c2, fontFamily: _fill); // user
 }

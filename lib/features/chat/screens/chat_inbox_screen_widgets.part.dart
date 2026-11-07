@@ -77,7 +77,7 @@ class _AlunoPickerSheetState extends ConsumerState<_AlunoPickerSheet> {
       final filtered = filterAlunoPickerAlunos(alunos, _query);
       if (filtered.isEmpty) {
         return FxEmptyState(
-          icon: _query.isEmpty ? 'users' : 'search',
+          icon: _query.isEmpty ? FxIcons.grupo : FxIcons.buscar,
           title:
               _query.isEmpty
                   ? 'Nenhum aluno cadastrado'
@@ -138,7 +138,7 @@ class _AlunoContactTile extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(isDark || !isDark);
     return FxSettingsTile(
-      fxIcon: 'chat',
+      icon: FxIcons.chat,
       label: fxTitleCaseName(aluno.nome),
       subtitle: aluno.email.isNotEmpty ? aluno.email : 'Aluno',
       value: 'Abrir',
@@ -330,7 +330,7 @@ class _InboxTabPane extends StatelessWidget {
         if (items.isEmpty) {
           // Sticky "Nova conversa" é o único CTA (§11) — empty quieto no topo.
           return FxEmptyState(
-            icon: isArchived ? 'article' : 'chat',
+            icon: isArchived ? FxIcons.artigo : FxIcons.chat,
             title: chatInboxEmptyTitle(view),
             subtitle: chatInboxEmptySubtitle(view),
             quiet: true,

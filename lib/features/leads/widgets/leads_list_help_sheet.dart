@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/theme/fx_icons.dart';
 
 Future<void> showLeadsListHelpSheet(BuildContext context) {
   return showFxHelpSheet(
@@ -11,17 +12,17 @@ Future<void> showLeadsListHelpSheet(BuildContext context) {
       FxHelpTip(
         'Busca',
         'Nome, objetivo ou origem. A lista pagina no servidor.',
-        icon: 'search',
+        icon: FxIcons.buscar,
       ),
       FxHelpTip(
         'Filtros',
         'Toque num estágio para recortar. Toque de novo para ver todos.',
-        icon: 'users',
+        icon: FxIcons.grupo,
       ),
       FxHelpTip(
         'Novo lead',
         'O botão de baixo cadastra. O Kanban no topo mostra o mesmo funil em colunas.',
-        icon: 'spark',
+        icon: FxIcons.ia,
       ),
     ],
   );

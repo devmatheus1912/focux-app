@@ -27,6 +27,7 @@ import '../providers/analytics_provider.dart';
 import '../utils/analytics_display.dart';
 import '../../../core/utils/pt_br_display.dart';
 import '../../../core/widgets/fx_action_chip.dart';
+import '../../../core/theme/fx_icons.dart';
 
 part 'analytics_screen_widgets.part.dart';
 
@@ -127,7 +128,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                     children: [
                       const SizedBox(height: 48),
                       FxEmptyState(
-                        icon: 'bar-chart-2',
+                        icon: FxIcons.enquete,
                         title: 'Sem dados ainda',
                         subtitle:
                             'Cadastre alunos para ver analytics operacional da base.',

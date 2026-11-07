@@ -24,7 +24,7 @@ void main() {
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('showRecorrenciaNovaFolha'));
     expect(screen, contains('FinanceiroChavePixLinha'));
-    expect(screen, contains('FinanceiroCobrancaAutoLinha'));
+    expect(screen, contains('FinanceiroLembretesLinha'));
     expect(screen, contains('recorrenciaMostrarFiltros'));
     expect(screen, contains('recorrenciaFaltaPixTitulo'));
     expect(screen, isNot(contains('assinatura')));

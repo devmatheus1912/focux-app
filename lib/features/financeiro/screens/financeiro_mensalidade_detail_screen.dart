@@ -14,7 +14,6 @@ import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
-import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_status_pill.dart';
@@ -250,12 +249,12 @@ class _FinanceiroMensalidadeDetailScreenState
       for (final a in acoes)
         if (a != MensalidadeDetailActionId.cancelar) a,
     ];
-    const iconeDe = <MensalidadeDetailActionId, String>{
-      MensalidadeDetailActionId.edit: 'article',
-      MensalidadeDetailActionId.contato: 'chat',
-      MensalidadeDetailActionId.aluno: 'users',
-      MensalidadeDetailActionId.desfazerPagamento: 'refresh-cw',
-      MensalidadeDetailActionId.cancelar: 'x',
+    const iconeDe = <MensalidadeDetailActionId, IconData>{
+      MensalidadeDetailActionId.edit: FxIcons.editar,
+      MensalidadeDetailActionId.contato: FxIcons.chat,
+      MensalidadeDetailActionId.aluno: FxIcons.pessoa,
+      MensalidadeDetailActionId.desfazerPagamento: FxIcons.desfazer,
+      MensalidadeDetailActionId.cancelar: FxIcons.fechar,
     };
     final escolha = await showFxHomeSheet<MensalidadeDetailActionId>(
       context,
@@ -263,7 +262,7 @@ class _FinanceiroMensalidadeDetailScreenState
         final isDark = Theme.of(ctx).brightness == Brightness.dark;
         Widget tile(MensalidadeDetailActionId id, {bool ultimo = false}) =>
             FxSettingsTile(
-              fxIcon: iconeDe[id]!,
+              icon: iconeDe[id]!,
               label: mensalidadeDetailActionLabel(id, s),
               value: '',
               danger: id == MensalidadeDetailActionId.cancelar,
@@ -349,7 +348,7 @@ class _FinanceiroMensalidadeDetailScreenState
             actions: [
               if (m != null) ...[
                 ShellHeaderIconButton(
-                  icon: 'more',
+                  icon: FxIcons.maisVertical,
                   tooltip: S.of(context).financeiroMenuTooltip,
                   onTap: _abrirMenu,
                 ),
@@ -377,7 +376,7 @@ class _FinanceiroMensalidadeDetailScreenState
                   )
                   : m == null
                   ? FxEmptyState(
-                    icon: 'dollar-sign',
+                    icon: FxIcons.dinheiro,
                     title: 'Mensalidade não encontrada',
                     subtitle: 'Puxe para atualizar ou volte ao financeiro.',
                     action: FxEmptyAction(
@@ -589,7 +588,7 @@ class _CartaoMensalidade extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 4),
-                  FxIcon(name: 'chevron-right', size: 16, color: chrome.mute),
+                  Icon(FxIcons.chevronDireita, size: 16, color: chrome.mute),
                 ],
               ),
             ),

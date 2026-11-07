@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../utils/dashboard_microcopy.dart';
+import '../../../core/theme/fx_icons.dart';
 
 Future<void> showDashboardHomeHelpSheet(BuildContext context) {
   AnalyticsService.instance.track(ProductEvents.homeHelpOpened);
@@ -15,27 +16,27 @@ Future<void> showDashboardHomeHelpSheet(BuildContext context) {
       FxHelpTip(
         DashboardMicrocopy.helpHomeAgoraTitle,
         DashboardMicrocopy.helpHomeAgoraBody,
-        icon: 'zap',
+        icon: FxIcons.raio,
       ),
       FxHelpTip(
         DashboardMicrocopy.helpHomeBaseTitle,
         DashboardMicrocopy.helpHomeBaseBody,
-        icon: 'trend',
+        icon: FxIcons.grafico,
       ),
       FxHelpTip(
         DashboardMicrocopy.helpHomeDinheiroTitle,
         DashboardMicrocopy.helpHomeDinheiroBody,
-        icon: 'dollar-sign',
+        icon: FxIcons.dinheiro,
       ),
       FxHelpTip(
         DashboardMicrocopy.helpHomeSearchTitle,
         DashboardMicrocopy.helpHomeSearchBody,
-        icon: 'search',
+        icon: FxIcons.buscar,
       ),
       FxHelpTip(
         'Índice Focux',
         DashboardMicrocopy.scoreComoCalculamos,
-        icon: 'star',
+        icon: FxIcons.estrela,
       ),
     ],
     footer: DashboardMicrocopy.helpHomeFooter,

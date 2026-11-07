@@ -12,6 +12,7 @@ import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../l10n/app_localizations.dart';
 import '../utils/ia_copiloto_display.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Abertura do Copiloto: quem precisa de atenção, depois qualquer outro aluno.
 class CopilotoCardView extends StatelessWidget {
@@ -60,7 +61,7 @@ class CopilotoCardView extends StatelessWidget {
           ],
           if (prioridades.isEmpty)
             FxEmptyState(
-              icon: 'spark',
+              icon: FxIcons.ia,
               title: s.copilotoSemPrioridadesTitulo,
               subtitle: s.copilotoRevisaoFrase,
               action:

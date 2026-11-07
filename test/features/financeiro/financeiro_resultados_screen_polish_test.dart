@@ -22,7 +22,8 @@ void main() {
     expect(screen, contains('OperationalMetricTile'));
     expect(screen, contains('showFxInsetPickerSheet'));
     expect(screen, contains('take(3)'));
-    expect(screen, contains('SmartPricingCard'));
+    // Preço sugerido saiu: benchmark e "inflação" sem fonte.
+    expect(screen, isNot(contains('SmartPricingCard')));
     // Panorama e Receita viraram uma tela só
     expect(screen, isNot(contains('FinanceiroResumoScreen')));
     expect(screen, isNot(contains('Mais no panorama')));

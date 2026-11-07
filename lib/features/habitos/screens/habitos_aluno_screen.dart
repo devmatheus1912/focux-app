@@ -285,7 +285,7 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
               children: [
                 const SizedBox(height: 48),
                 FxEmptyState(
-                  icon: searching ? 'search' : 'dumbbell',
+                  icon: searching ? FxIcons.buscar : FxIcons.treino,
                   title: searching
                       ? 'Nenhum hábito encontrado'
                       : 'Nenhum hábito ainda',

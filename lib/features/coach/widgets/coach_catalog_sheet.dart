@@ -132,7 +132,7 @@ class _CoachCatalogSheetState extends State<_CoachCatalogSheet> {
           ),
           if (_itens.isEmpty)
             const FxEmptyState(
-              icon: 'spark',
+              icon: FxIcons.ia,
               title: 'Nenhum aluno nessa busca',
               subtitle: 'Tente outro nome ou limpe o filtro.',
             )

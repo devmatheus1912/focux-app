@@ -317,7 +317,7 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                                           16,
                                         ),
                                         child: FxEmptyState(
-                                          icon: 'spark',
+                                          icon: FxIcons.ia,
                                           title: 'Sem insights no momento',
                                           subtitle:
                                               'Adicione mais treinos e check-ins para que a IA gere recomendações personalizadas.',

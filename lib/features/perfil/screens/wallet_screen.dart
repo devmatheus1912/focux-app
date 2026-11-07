@@ -150,12 +150,12 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
         FxHelpTip(
           'Receber',
           'A chave PIX é o que o aluno usa para te pagar. Banco e agência são opcionais.',
-          icon: 'pix',
+          icon: FxIcons.pix,
         ),
         FxHelpTip(
           'Salvar',
           'Confirme em "Salvar dados". Só então aparece "Chave cadastrada" e ela vale nos recebimentos.',
-          icon: 'circle-check',
+          icon: FxIcons.concluido,
         ),
       ],
     );

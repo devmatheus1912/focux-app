@@ -5,6 +5,7 @@ import '../../../../core/widgets/fx_empty_state.dart';
 import '../../../../core/widgets/fx_loading.dart';
 import '../../data/exercicio_repository.dart';
 import 'exercicio_card.dart';
+import '../../../../core/theme/fx_icons.dart';
 
 class ExerciciosListView extends StatelessWidget {
   const ExerciciosListView({
@@ -38,7 +39,7 @@ class ExerciciosListView extends StatelessWidget {
   Widget build(BuildContext context) {
     if (exercicios.isEmpty) {
       return const FxEmptyState(
-        icon: 'search',
+        icon: FxIcons.buscar,
         title: 'Nenhum exercício encontrado',
         subtitle: 'Ajuste os filtros ou cadastre um novo exercício.',
       );

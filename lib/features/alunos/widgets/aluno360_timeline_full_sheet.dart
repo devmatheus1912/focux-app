@@ -148,7 +148,7 @@ class _Aluno360TimelineFullSheetState
                 final comBotao = state.hasMore && !automatico;
                 if (items.isEmpty && !state.hasMore) {
                   return FxEmptyState(
-                    icon: 'trend',
+                    icon: FxIcons.grafico,
                     title: ptS.financeiroVazioFiltroTitulo,
                     subtitle: ptS.aluno360EscolhaOutroFiltroParaVer,
                   );

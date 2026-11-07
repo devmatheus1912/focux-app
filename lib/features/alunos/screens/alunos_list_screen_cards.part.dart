@@ -131,7 +131,7 @@ class _EmptyAlunosState extends StatelessWidget {
             : filteredEmpty
             ? 'Não há alunos $filtroLabel no momento. Limpe o filtro ou mude a visualização.'
             : context.alunosL10n.alunosEmptyNoneSubtitle;
-    final icon = hasQuery || filteredEmpty ? 'search' : 'users';
+    final icon = hasQuery || filteredEmpty ? FxIcons.buscar : FxIcons.grupo;
 
     FxEmptyAction? action;
     if (onClearFilter != null) {

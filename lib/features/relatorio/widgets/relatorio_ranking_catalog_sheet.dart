@@ -108,7 +108,7 @@ class _RelatorioRankingCatalogSheetState
           ),
           if (filtered.isEmpty)
             const FxEmptyState(
-              icon: 'users',
+              icon: FxIcons.grupo,
               title: 'Nenhum aluno nessa busca',
               subtitle: 'Tente outro nome ou limpe o filtro.',
             )

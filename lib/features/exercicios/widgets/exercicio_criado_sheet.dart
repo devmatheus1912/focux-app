@@ -53,7 +53,7 @@ class _ExercicioCriadoSheet extends StatelessWidget {
     return FxSheetFrame(
       title: 'Exercício criado',
       subtitle: nome,
-      leading: Icon(FxIcons.concluidoAtivo, color: chrome.brand, size: 20),
+      leading: Icon(FxIcons.concluido, color: chrome.brand, size: 20),
       footer: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

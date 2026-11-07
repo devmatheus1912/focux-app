@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/theme/fx_icons.dart';
 
 Future<void> showAlertaDetalheHelpSheet(BuildContext context) {
   return showFxHelpSheet(
@@ -11,17 +12,17 @@ Future<void> showAlertaDetalheHelpSheet(BuildContext context) {
       FxHelpTip(
         'Situação',
         'Último treino, check-ins do mês e a mensalidade. Toque no aluno da lista para voltar.',
-        icon: 'alert-triangle',
+        icon: FxIcons.alerta,
       ),
       FxHelpTip(
         'Sugestão',
         'Texto local na hora. Melhorar com IA é opt-in e não muda treino nem cobra.',
-        icon: 'spark',
+        icon: FxIcons.ia,
       ),
       FxHelpTip(
         'Ações',
         'Enviar mensagem confirma o texto e manda no chat. Aluno, chat e cobrar (se atrasado) estão nos chips. Adiar 24h tira da caixa por um dia.',
-        icon: 'message-circle',
+        icon: FxIcons.chat,
       ),
     ],
   );

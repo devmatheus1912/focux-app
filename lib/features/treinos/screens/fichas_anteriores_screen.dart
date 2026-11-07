@@ -75,7 +75,7 @@ class _FichasAnterioresScreenState extends ConsumerState<FichasAnterioresScreen>
           data: (lista) => lista.isEmpty
               ? Center(
                   child: FxEmptyState(
-                    icon: 'dumbbell',
+                    icon: FxIcons.treino,
                     title: s.fichasAnterioresVazioTitulo,
                     subtitle: s.fichasAnterioresVazioSubtitulo,
                   ),

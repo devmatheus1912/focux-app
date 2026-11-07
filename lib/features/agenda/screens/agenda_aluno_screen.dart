@@ -426,7 +426,7 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen>
           children: [
             const SizedBox(height: 48),
             FxEmptyState(
-              icon: 'calendar',
+              icon: FxIcons.calendario,
               title: 'Nenhuma sessão marcada',
               subtitle:
                   'Seu personal ainda não agendou nada com você. Quando marcar, aparece aqui.',

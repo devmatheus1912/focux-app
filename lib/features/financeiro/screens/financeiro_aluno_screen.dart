@@ -17,7 +17,6 @@ import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_hub_header.dart';
-import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -32,6 +31,7 @@ import '../utils/financeiro_hub_display.dart';
 import '../utils/mensalidade_surface_actions.dart';
 import '../widgets/financeiro_aluno_cobranca_sheet.dart';
 import '../widgets/financeiro_aluno_help_sheet.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class FinanceiroAlunoScreen extends ConsumerStatefulWidget {
   const FinanceiroAlunoScreen({super.key});
@@ -304,7 +304,7 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
                                       ),
                                       const SizedBox(height: TokensStrip.s4),
                                       FxEmptyState(
-                                        icon: 'coin',
+                                        icon: FxIcons.dinheiro,
                                         title: 'Nenhuma mensalidade',
                                         subtitle:
                                             'Quando seu personal lançar uma cobrança, ela aparece aqui.',
@@ -348,11 +348,7 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
                                               _carregandoMais
                                                   ? null
                                                   : _carregarMais,
-                                          leading: FxIcon(
-                                            name: 'plus',
-                                            size: 18,
-                                            color: primary,
-                                          ),
+                                          leading: Icon(FxIcons.adicionar, size: 18, color: primary),
                                         );
                                       }
                                       final item = _mensalidades[itemIndex];
@@ -391,19 +387,14 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
                                             overdue
                                                 ? EagleTokens.bad
                                                 : primary,
-                                        leading: FxIcon(
-                                          name:
-                                              overdue
-                                                  ? 'alert-triangle'
+                                        leading: Icon(overdue
+                                                  ? FxIcons.alerta
                                                   : item.status == 'PAGO'
-                                                  ? 'circle-check'
-                                                  : 'coin',
-                                          size: 18,
-                                          color:
+                                                  ? FxIcons.concluido
+                                                  : FxIcons.dinheiro, size: 18, color:
                                               overdue
                                                   ? EagleTokens.bad
-                                                  : primary,
-                                        ),
+                                                  : primary),
                                         trailing: Text(
                                           item.valor.formatCobranca(),
                                           style: FocuxHubTypography.metric(

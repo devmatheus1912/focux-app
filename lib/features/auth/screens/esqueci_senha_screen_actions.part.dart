@@ -11,11 +11,11 @@ extension on _EsqueciSenhaScreenState {
       subtitle: esqueciHelpSubtitle(isAluno: _isAluno),
       tips: [
         if (esqueciMostraCodigo(isAluno: _isAluno))
-          FxHelpTip('Código', esqueciHelpCodigoBody(), icon: 'spark'),
+          FxHelpTip('Código', esqueciHelpCodigoBody(), icon: FxIcons.ia),
         FxHelpTip(
           'Papel',
           esqueciHelpPapelBody(isAluno: _isAluno),
-          icon: 'users',
+          icon: FxIcons.grupo,
         ),
       ],
     );

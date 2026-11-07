@@ -30,6 +30,7 @@ import '../utils/progressao_copy.dart';
 import '../widgets/ia_progressao_loading_skeleton.dart';
 import '../widgets/ia_progressao_pedido_card.dart';
 import '../widgets/ia_quota_upgrade.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class IaProgressaoScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -98,17 +99,17 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
         FxHelpTip(
           'Dados reais',
           'A IA lê o treino ativo e as execuções das últimas 4 semanas. Você só escolhe o objetivo.',
-          icon: 'target',
+          icon: FxIcons.alvo,
         ),
         FxHelpTip(
           'Você decide',
           'Nada é gerado sozinho. A cota só é usada quando a sugestão chega.',
-          icon: 'spark',
+          icon: FxIcons.ia,
         ),
         FxHelpTip(
           'Reversível',
           'Sugestões ficam pendentes. Carga, séries e repetições só mudam se você aceitar.',
-          icon: 'circle-check',
+          icon: FxIcons.concluido,
         ),
       ],
     );

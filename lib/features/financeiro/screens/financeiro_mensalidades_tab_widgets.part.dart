@@ -15,20 +15,20 @@ extension FinanceiroMensalidadesTabWidgets on _FinanceiroMensalidadesTabState {
         _filtro == MensalidadeFiltro.atrasadas ||
         _filtro == MensalidadeFiltro.pagas) {
       return FxEmptyState(
-        icon: 'search',
+        icon: FxIcons.buscar,
         title: s.financeiroVazioFiltroTitulo,
         subtitle: s.financeiroVazioFiltroTexto,
       );
     }
     if (_filtro == MensalidadeFiltro.abertas) {
       return FxEmptyState(
-        icon: 'circle-check',
+        icon: FxIcons.concluido,
         title: s.financeiroVazioAbertasTitulo,
         subtitle: s.financeiroVazioAbertasTexto,
       );
     }
     return const FxEmptyState(
-      icon: 'coin',
+      icon: FxIcons.dinheiro,
       title: 'Nenhuma mensalidade',
       subtitle: 'Lance a primeira cobrança para começar o mês.',
     );

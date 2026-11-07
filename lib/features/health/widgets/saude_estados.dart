@@ -75,7 +75,7 @@ class SaudeDesconectadoView extends StatelessWidget {
                       color: primary.withValues(alpha: 0.14),
                     ),
                     child: Icon(
-                      FxIcons.favoritoAtivo,
+                      FxIcons.saudeVida,
                       size: 40,
                       color: primary,
                     ),

@@ -463,7 +463,7 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
     }
     if (conversations.isEmpty && _searchResults.isEmpty) {
       return const FxEmptyState(
-        icon: 'search',
+        icon: FxIcons.buscar,
         title: 'Nenhum resultado encontrado',
         subtitle: 'Tente o nome do aluno ou um trecho da mensagem.',
         quiet: true,

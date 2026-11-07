@@ -11,7 +11,8 @@ void main() {
     expect(screen, contains('FxHubFreshness'));
     expect(screen, contains('seedFromHome'));
     expect(screen, contains('FxHelpIconButton'));
-    expect(screen, contains('FxChoiceStrip'));
+    // Mesmo seletor de abas da Evolução.
+    expect(screen, contains('AlunoSegmentedChoice'));
     expect(screen, contains('IndexedStack'));
     expect(screen, contains('financeiroViewed'));
     expect(screen, contains('financeiroHelpOpened'));

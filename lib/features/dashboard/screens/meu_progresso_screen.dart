@@ -344,7 +344,7 @@ class _Fotos extends ConsumerWidget {
                       ? ListView(
                         children: [
                           FxEmptyState(
-                            icon: 'spark',
+                            icon: FxIcons.ia,
                             title: ptS.meuProgressoSemFotoTitulo,
                             subtitle: ptS.meuProgressoSemFoto,
                           ),

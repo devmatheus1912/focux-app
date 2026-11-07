@@ -1,4 +1,6 @@
+import 'package:flutter/widgets.dart';
 import '../../../l10n/pt.dart';
+import '../../../core/theme/fx_icons.dart';
 
 final broadcastPublicos = ['TODOS', 'ONLINE', 'PRESENCIAL', 'HIBRIDO'];
 
@@ -10,11 +12,11 @@ String broadcastPublicoLabel(String? raw) =>
       _ => ptS.retencaoFiltroTodos,
     };
 
-String broadcastPublicoFxIcon(String raw) => switch (raw.trim().toUpperCase()) {
-  'ONLINE' => 'message-circle',
-  'PRESENCIAL' => 'home',
-  'HIBRIDO' => 'users',
-  _ => 'users',
+IconData broadcastPublicoFxIcon(String raw) => switch (raw.trim().toUpperCase()) {
+  'ONLINE' => FxIcons.chat,
+  'PRESENCIAL' => FxIcons.inicio,
+  'HIBRIDO' => FxIcons.grupo,
+  _ => FxIcons.grupo,
 };
 
 /// Rótulo do público com o alcance, quando já chegou.

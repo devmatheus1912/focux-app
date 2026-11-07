@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'fx_icon.dart';
 import 'fx_tonal_button.dart';
+import '../theme/fx_icons.dart';
 
 /// Ação de navegação ("Ver todos", "Abrir ficha"): chip tonal com seta. Nunca
 /// é só texto: tem fundo e borda, e a seta diz que leva a outra tela. Para
@@ -22,7 +22,7 @@ class FxActionLink extends StatelessWidget {
   final VoidCallback? onTap;
 
   /// Troca a seta final por outro ícone do conjunto [FxIcon] (ex.: 'plus').
-  final String? icon;
+  final IconData? icon;
   final bool destructive;
 
   /// Cores explícitas (link sobre um card sólido da marca).
@@ -38,11 +38,7 @@ class FxActionLink extends StatelessWidget {
       fundo: fundo,
       texto: texto,
       onPressed: onTap,
-      trailing: FxIcon(
-        name: icon ?? 'chevron-right',
-        size: 16,
-        color: texto ?? _cor(context),
-      ),
+      trailing: Icon(icon ?? FxIcons.chevronDireitaPequeno, size: 16, color: texto ?? _cor(context)),
     );
   }
 

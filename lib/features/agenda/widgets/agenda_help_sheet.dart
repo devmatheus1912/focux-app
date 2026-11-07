@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/widgets/fx_help.dart';
 import '../utils/agenda_display.dart';
+import '../../../core/theme/fx_icons.dart';
 
 Future<void> showAgendaHelpSheet(BuildContext context) {
   return showFxHelpSheet(
@@ -13,27 +14,27 @@ Future<void> showAgendaHelpSheet(BuildContext context) {
       FxHelpTip(
         'Próximo',
         'O card em destaque é o próximo atendimento de hoje. Toque para abrir, confirmar ou concluir.',
-        icon: 'spark',
+        icon: FxIcons.ia,
       ),
       FxHelpTip(
         'Mês',
         'Pontos marcam dias com atendimento. Arraste o calendário para trocar o mês; Hoje volta para o dia atual.',
-        icon: 'calendar',
+        icon: FxIcons.calendario,
       ),
       FxHelpTip(
         'Lacuna',
         'Faixas “min livres” são buracos na agenda. Encaixar preenche o espaço.',
-        icon: 'calendar',
+        icon: FxIcons.calendario,
       ),
       FxHelpTip(
         'Atendimento',
         'Toque no aluno para abrir a ficha, remarcar, WhatsApp, confirmar ou concluir.',
-        icon: 'users',
+        icon: FxIcons.grupo,
       ),
       FxHelpTip(
         'Calendário',
         'O ícone no topo copia o link iCal para o Google Calendar ou o Apple Calendar.',
-        icon: 'article',
+        icon: FxIcons.artigo,
       ),
     ],
   );

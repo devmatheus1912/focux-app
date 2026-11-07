@@ -192,7 +192,7 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
           fallbackLocation: '/assinatura',
           actions: [
             ShellHeaderIconButton(
-              icon: 'plus',
+              icon: FxIcons.adicionar,
               tooltip: ofertaStickyCtaLabel(),
               onTap: () => _abrirEditor(),
             ),
@@ -270,7 +270,7 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
                 ),
                 children: [
                   FxEmptyState(
-                    icon: 'spark',
+                    icon: FxIcons.ia,
                     title: 'Nenhuma oferta ainda',
                     subtitle:
                         'Crie a primeira oferta. Ela aparece para o aluno no gatilho escolhido (manual, check-in ou trilha).',

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/fx_settings_layout.dart';
 import '../../../../core/theme/tokens_strip.dart';
 import '../../../../core/widgets/fx_home_sheet.dart';
-import '../../../../core/widgets/fx_icon.dart';
 import '../../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../../core/widgets/fx_settings_group.dart';
 import '../../../../core/widgets/fx_settings_tile.dart';
@@ -11,6 +10,7 @@ import '../../data/enums.dart';
 import '../../data/exercicio_taxonomy_labels.dart';
 import '../../models/exercicios_ui_filter.dart';
 import '../../utils/exercicios_filter_display.dart';
+import '../../../../core/theme/fx_icons.dart';
 
 Future<void> showExerciciosLibraryFiltersSheet(
   BuildContext context, {
@@ -104,11 +104,7 @@ class _ExerciciosFilterSheetState extends State<_ExerciciosFilterSheet> {
             isDark: widget.isDark,
             title: exerciciosFiltrosHeader(),
             subtitle: exerciciosFilterSummary(_filter),
-            leading: FxIcon(
-              name: 'target',
-              size: 20,
-              color: Theme.of(context).colorScheme.primary,
-            ),
+            leading: Icon(FxIcons.alvo, size: 20, color: Theme.of(context).colorScheme.primary),
           ),
           const SizedBox(height: FxSettingsLayout.headerToGroup),
           Flexible(
@@ -120,7 +116,7 @@ class _ExerciciosFilterSheetState extends State<_ExerciciosFilterSheet> {
                     header: 'Taxonomia',
                     children: [
                       FxSettingsTile(
-                        fxIcon: 'dumbbell',
+                        icon: FxIcons.treino,
                         label: 'Modalidade',
                         value: exerciciosEnumValue(
                           _filter.modalidade,
@@ -140,7 +136,7 @@ class _ExerciciosFilterSheetState extends State<_ExerciciosFilterSheet> {
                             ),
                       ),
                       FxSettingsTile(
-                        fxIcon: 'target',
+                        icon: FxIcons.alvo,
                         label: 'Grupo',
                         value: exerciciosEnumValue(
                           _filter.grupo,
@@ -159,7 +155,7 @@ class _ExerciciosFilterSheetState extends State<_ExerciciosFilterSheet> {
                             ),
                       ),
                       FxSettingsTile(
-                        fxIcon: 'home',
+                        icon: FxIcons.inicio,
                         label: 'Equipamento',
                         value: exerciciosEnumValue(
                           _filter.equipamento,
@@ -179,7 +175,7 @@ class _ExerciciosFilterSheetState extends State<_ExerciciosFilterSheet> {
                             ),
                       ),
                       FxSettingsTile(
-                        fxIcon: 'trend',
+                        icon: FxIcons.grafico,
                         label: 'Nível',
                         value: exerciciosEnumValue(
                           _filter.dificuldade,
@@ -207,7 +203,7 @@ class _ExerciciosFilterSheetState extends State<_ExerciciosFilterSheet> {
                     header: 'Biblioteca',
                     children: [
                       FxSettingsTile(
-                        fxIcon: 'star',
+                        icon: FxIcons.estrela,
                         label: exerciciosFavoritosLabel(),
                         value: _filter.favoritos ? 'Ativo' : '',
                         highlight: _filter.favoritos,
@@ -219,7 +215,7 @@ class _ExerciciosFilterSheetState extends State<_ExerciciosFilterSheet> {
                         ),
                       ),
                       FxSettingsTile(
-                        fxIcon: 'circle-check',
+                        icon: FxIcons.concluido,
                         label: exerciciosComVideoLabel(),
                         value: _filter.comVideo ? 'Ativo' : '',
                         highlight: _filter.comVideo,
@@ -236,7 +232,7 @@ class _ExerciciosFilterSheetState extends State<_ExerciciosFilterSheet> {
                         ),
                       ),
                       FxSettingsTile(
-                        fxIcon: 'x',
+                        icon: FxIcons.fechar,
                         label: exerciciosSemVideoLabel(),
                         value: _filter.semVideo ? 'Ativo' : '',
                         highlight: _filter.semVideo,

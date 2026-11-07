@@ -74,7 +74,7 @@ class _AgendaEventSheetState extends State<_AgendaEventSheet> {
     final nav = <FxSettingsTile>[
       if (widget.onOpenAluno != null)
         FxSettingsTile(
-          fxIcon: 'users',
+          icon: FxIcons.grupo,
           label:
               completePrimary
                   ? 'Ver aluno'
@@ -104,7 +104,7 @@ class _AgendaEventSheetState extends State<_AgendaEventSheet> {
         ),
       if (widget.onWhatsapp != null)
         FxSettingsTile(
-          fxIcon: 'message-circle',
+          icon: FxIcons.chat,
           label: 'WhatsApp',
           value: '',
           showDivider: widget.onConfirm != null ||
@@ -123,7 +123,7 @@ class _AgendaEventSheetState extends State<_AgendaEventSheet> {
         ),
       if (widget.onReschedule != null)
         FxSettingsTile(
-          fxIcon: 'calendar',
+          icon: FxIcons.calendario,
           label: 'Remarcar',
           value: '',
           showDivider: !completePrimary && widget.onComplete != null,

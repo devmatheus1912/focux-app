@@ -51,7 +51,7 @@ class FichaModelosAba extends ConsumerWidget {
             data: (lista) => lista.isEmpty
                 ? Center(
                     child: FxEmptyState(
-                      icon: 'dumbbell',
+                      icon: FxIcons.treino,
                       title: s.modelosVazioTitulo,
                       subtitle: s.modelosVazioSubtitulo,
                     ),

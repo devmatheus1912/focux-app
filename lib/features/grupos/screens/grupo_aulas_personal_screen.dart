@@ -567,7 +567,7 @@ class _GrupoAulasPersonalScreenState
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           children: [
             FxEmptyState(
-              icon: filtered ? 'search' : 'calendar',
+              icon: filtered ? FxIcons.buscar : FxIcons.calendario,
               title: filtered
                   ? 'Nenhuma aula encontrada'
                   : 'Nenhuma aula criada ainda',

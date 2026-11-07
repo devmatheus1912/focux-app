@@ -461,7 +461,7 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
             if (dados == null || dados.treinosTotal == 0) ...[
               const SizedBox(height: TokensStrip.s5),
               FxEmptyState(
-                icon: 'trend',
+                icon: FxIcons.grafico,
                 title: 'Sem dados neste período',
                 subtitle:
                     'Quando ${satelliteFirstName(widget.alunoNome)} concluir treinos, o relatório aparece aqui.',

@@ -395,7 +395,7 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
           children: [
             if (filtered)
               FxEmptyState(
-                icon: 'search',
+                icon: FxIcons.buscar,
                 title: 'Nenhum feedback encontrado',
                 subtitle: 'Ajuste a busca para ver outros comentários.',
                 action: FxEmptyAction(
@@ -412,7 +412,7 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
             else
               FxEmptyState(
                 key: const ValueKey('feedback_video_empty'),
-                icon: 'spark',
+                icon: FxIcons.ia,
                 title: 'Nenhum feedback de vídeo',
                 subtitle:
                     widget.alunoNome != null

@@ -27,6 +27,7 @@ import '../providers/checkin_provider.dart';
 import '../utils/checkin_personal_display.dart';
 import '../widgets/checkin_personal_catalog_sheet.dart';
 import '../widgets/checkin_personal_help_sheet.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class CheckinPersonalHubScreen extends ConsumerStatefulWidget {
   const CheckinPersonalHubScreen({super.key});
@@ -147,7 +148,7 @@ class _CheckinPersonalHubScreenState
                 home.semana.isEmpty &&
                 home.pendentes.isEmpty) {
               return FxEmptyState(
-                icon: 'dumbbell',
+                icon: FxIcons.treino,
                 title: 'Nenhum check-in nesta semana',
                 subtitle:
                     'Quando o aluno concluir um treino, ele aparece aqui. '

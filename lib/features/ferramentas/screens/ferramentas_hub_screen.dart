@@ -176,7 +176,7 @@ class _FerramentasHubScreenState extends ConsumerState<FerramentasHubScreen>
             ),
             body: const FxContentWidthLimiter(
               child: FxEmptyState(
-                icon: 'spark',
+                icon: FxIcons.ia,
                 title: 'Hub indisponível',
                 subtitle: 'Este agrupamento não está no catálogo atual.',
               ),

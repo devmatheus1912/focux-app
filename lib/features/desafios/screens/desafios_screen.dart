@@ -322,7 +322,7 @@ class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
               itemBuilder: (context, index) {
                 if (_desafios.isEmpty) {
                   return FxEmptyState(
-                    icon: searching ? 'search' : 'spark',
+                    icon: searching ? FxIcons.buscar : FxIcons.ia,
                     title: searching
                         ? 'Nada neste filtro'
                         : 'Nenhum desafio',

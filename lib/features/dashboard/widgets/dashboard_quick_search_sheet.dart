@@ -5,7 +5,6 @@ import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
-import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../alunos/constants/alunos_list_filters.dart';
 import '../../ferramentas/providers/ferramentas_catalogo_provider.dart';
@@ -60,7 +59,7 @@ class _QuickSearchSheetState extends ConsumerState<_QuickSearchSheet> {
   }
 
   Widget _row({
-    required String icon,
+    required IconData icon,
     required String label,
     required VoidCallback onTap,
   }) {
@@ -78,7 +77,7 @@ class _QuickSearchSheetState extends ConsumerState<_QuickSearchSheet> {
             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
             child: Row(
               children: [
-                FxIcon(name: icon, color: widget.primary, size: 18),
+                Icon(icon, color: widget.primary, size: 20),
                 SizedBox(width: TokensStrip.s3),
                 Expanded(
                   child: Text(
@@ -157,7 +156,7 @@ class _QuickSearchSheetState extends ConsumerState<_QuickSearchSheet> {
               physics: const BouncingScrollPhysics(),
               children: [
                 _row(
-                  icon: 'users',
+                  icon: FxIcons.grupo,
                   label:
                       q.isEmpty ? 'Ver alunos' : 'Buscar “$_query” em alunos',
                   onTap: () {

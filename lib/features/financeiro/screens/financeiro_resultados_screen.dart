@@ -26,7 +26,6 @@ import '../../../l10n/app_localizations.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../dashboard/widgets/dashboard_error_state.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
-import '../../pricing/widgets/smart_pricing_card.dart';
 import '../../relatorio/data/business_repository.dart';
 import '../data/financeiro_repository.dart';
 import '../financeiro_hub_scope.dart';

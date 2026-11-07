@@ -22,6 +22,7 @@ import '../utils/historico_fichas.dart';
 import '../utils/historico_semanas.dart';
 import '../widgets/historico_lista_widgets.dart';
 import '../widgets/treinos_hub_rows.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Sessões concluídas, semana a semana. Cada linha abre a própria sessão.
 class HistoricoCheckinScreen extends ConsumerStatefulWidget {
@@ -182,7 +183,7 @@ class _HistoricoCheckinScreenState
     if (filtro != null) {
       final nome = fichas.where((f) => f.treinoId == filtro).firstOrNull?.nome;
       return FxEmptyState(
-        icon: 'search',
+        icon: FxIcons.buscar,
         title: s.historicoFiltradoVazioTitulo(nome ?? ''),
         action: FxEmptyAction(
           label: s.historicoFiltradoVazioCta,
@@ -191,7 +192,7 @@ class _HistoricoCheckinScreenState
       );
     }
     return FxEmptyState(
-      icon: 'dumbbell',
+      icon: FxIcons.treino,
       title: s.historicoVazioTitulo,
       subtitle: s.historicoVazioSubtitulo,
       action: FxEmptyAction(

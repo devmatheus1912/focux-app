@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+
+import '../../alunos/widgets/aluno_form_choices.dart';
 import '../../../core/utils/fx_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -13,7 +15,6 @@ import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_help.dart';
-import '../../../core/widgets/fx_choice_strip.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../l10n/app_localizations.dart';
@@ -38,10 +39,14 @@ class FinanceiroScreen extends ConsumerStatefulWidget {
     super.key,
     this.initialAlunoId,
     this.initialSegmento = FinanceiroSegmento.mensalidades,
+    this.initialFiltro,
   });
 
   final int? initialAlunoId;
   final FinanceiroSegmento initialSegmento;
+
+  /// Filtro de Mensalidades pedido pela rota (`?filtro=atrasadas`).
+  final MensalidadeFiltro? initialFiltro;
 
   @override
   ConsumerState<FinanceiroScreen> createState() => _FinanceiroScreenState();
@@ -60,8 +65,8 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen> {
   int _novaMensalidadeToken = 0;
 
   /// Filtro pedido pelos números do mês (valem quando o token muda).
-  MensalidadeFiltro? _filtroPedido;
-  int _filtroToken = 0;
+  late MensalidadeFiltro? _filtroPedido = widget.initialFiltro;
+  late int _filtroToken = widget.initialFiltro == null ? 0 : 1;
 
   void _trocarSegmento(FinanceiroSegmento segmento) {
     if (segmento == _segmento) return;
@@ -204,21 +209,19 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen> {
                       FxSettingsLayout.pageInset,
                       0,
                     ),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: FxChoiceStrip<FinanceiroSegmento>(
-                        itens: [
-                          for (final seg in FinanceiroSegmento.values)
-                            FxChoiceItem(
-                              value: seg,
-                              label: financeiroSegmentoLabel(
-                                seg,
-                                S.of(context),
-                              ),
-                            ),
-                        ],
-                        selecionado: _segmento,
-                        onSelecionar: _trocarSegmento,
+                    // Mesmo seletor de abas da Evolução.
+                    child: AlunoSegmentedChoice(
+                      options: [
+                        for (final seg in FinanceiroSegmento.values)
+                          (
+                            value: seg.name,
+                            label: financeiroSegmentoLabel(seg, S.of(context)),
+                          ),
+                      ],
+                      selected: _segmento.name,
+                      isDark: ShellChrome.of(context).isDark,
+                      onSelect: (v) => _trocarSegmento(
+                        FinanceiroSegmento.values.byName(v),
                       ),
                     ),
                   ),

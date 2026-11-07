@@ -1,3 +1,5 @@
+import 'package:flutter/widgets.dart';
+import '../../../core/theme/fx_icons.dart';
 /// Contrato de gravação do vídeo do personal — alinhado ao POST /api/exercicios/{id}/video.
 abstract final class ExerciseVideoUploadSpec {
   ExerciseVideoUploadSpec._();
@@ -18,25 +20,25 @@ abstract final class ExerciseVideoUploadSpec {
       title: 'Celular em pé (9:16)',
       body:
           'Filme na vertical, como o aluno vê no app. Horizontal corta o movimento.',
-      icon: 'spark',
+      icon: FxIcons.ia,
     ),
     ExerciseVideoSpecTip(
       title: '1080 × 1920 (ideal)',
       body:
           'Full HD vertical. O mínimo que ainda fica nítido é 720 × 1280. Evite 4K: pesa e o app reduz.',
-      icon: 'target',
+      icon: FxIcons.alvo,
     ),
     ExerciseVideoSpecTip(
       title: '10 a 45 segundos',
       body:
           'Um movimento completo, de frente ou ¾. Sem intro, música alta ou corte no meio da repetição.',
-      icon: 'flame',
+      icon: FxIcons.fogo,
     ),
     ExerciseVideoSpecTip(
       title: 'MP4 ou MOV · até 120 MB',
       body:
           'O celular já exporta nesse formato. Arquivo maior que 120 MB o servidor recusa.',
-      icon: 'article',
+      icon: FxIcons.artigo,
     ),
   ];
 
@@ -110,5 +112,5 @@ class ExerciseVideoSpecTip {
 
   final String title;
   final String body;
-  final String? icon;
+  final IconData? icon;
 }

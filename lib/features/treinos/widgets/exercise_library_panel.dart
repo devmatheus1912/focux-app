@@ -687,7 +687,7 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
           12,
         ),
         child: FxEmptyState(
-          icon: 'search',
+          icon: FxIcons.buscar,
           title:
               _committedQuery.isNotEmpty
                   ? 'Nada encontrado para "$_committedQuery"'

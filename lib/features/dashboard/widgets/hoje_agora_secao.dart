@@ -39,7 +39,7 @@ class _HojeAgoraSecaoState extends ConsumerState<HojeAgoraSecao> {
       context: context,
       ref: ref,
       item: CommandActionItem(
-        icon: 'zap',
+        icon: FxIcons.raio,
         title: item.titulo,
         subtitle: item.motivo,
         route: item.rota,

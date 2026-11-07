@@ -5,8 +5,8 @@ import '../theme/design_tokens.dart';
 import '../theme/focux_hub_typography.dart';
 import '../theme/fx_settings_layout.dart';
 import '../theme/tokens_strip.dart';
-import 'fx_icon.dart';
 import 'fx_shell_scaffold.dart';
+import '../theme/fx_icons.dart';
 
 enum FxBannerTone { info, warn, success }
 
@@ -49,15 +49,11 @@ class FxStatusBanner extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              FxIcon(
-                name: tone == FxBannerTone.warn
-                    ? 'alert-triangle'
+              Icon(tone == FxBannerTone.warn
+                    ? FxIcons.alerta
                     : tone == FxBannerTone.success
-                    ? 'circle-check'
-                    : 'bell',
-                size: 22,
-                color: accent,
-              ),
+                    ? FxIcons.concluido
+                    : FxIcons.notificacao, size: 22, color: accent),
               const SizedBox(width: TokensStrip.s3),
               Expanded(
                 child: Column(

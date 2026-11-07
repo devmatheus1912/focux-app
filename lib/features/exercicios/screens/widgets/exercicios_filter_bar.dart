@@ -6,12 +6,12 @@ import 'package:flutter/services.dart';
 import '../../../../core/theme/fx_settings_layout.dart';
 import '../../../../core/theme/shell_chrome.dart';
 import '../../../../core/theme/tokens_strip.dart';
-import '../../../../core/widgets/fx_icon.dart';
 import '../../../../core/widgets/fx_input_deco.dart';
 import '../../../../core/widgets/fx_toggle_chip.dart';
 import '../../models/exercicios_ui_filter.dart';
 import '../../utils/exercicios_filter_display.dart';
 import 'exercicios_filter_sheet.dart';
+import '../../../../core/theme/fx_icons.dart';
 
 export '../../models/exercicios_ui_filter.dart';
 
@@ -107,7 +107,7 @@ class _ExerciciosFilterBarState extends State<ExerciciosFilterBar> {
               ),
               prefixIcon: Padding(
                 padding: const EdgeInsets.all(12),
-                child: FxIcon(name: 'search', size: 18, color: mute),
+                child: Icon(FxIcons.buscar, size: 18, color: mute),
               ),
               filled: true,
               fillColor: chrome.cardFill,

@@ -205,17 +205,17 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
                         FxHelpTip(
                           'Entrevista rápida',
                           'Responda em linguagem simples. O Focux escreve a página.',
-                          icon: 'mic',
+                          icon: FxIcons.microfone,
                         ),
                         FxHelpTip(
                           'Gerar',
                           'O backend monta título, método, FAQ e fechamento.',
-                          icon: 'sparkles',
+                          icon: FxIcons.ia,
                         ),
                         FxHelpTip(
                           'Publicar',
                           'Revise textos e fotos. O link fica em focuxpersonal.com/p/…',
-                          icon: 'link',
+                          icon: FxIcons.link,
                         ),
                       ],
                     );

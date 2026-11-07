@@ -13,8 +13,8 @@ extension on _ResetarSenhaVerificarCodigoScreenState {
       title: resetCodigoHelpTitle(),
       subtitle: resetCodigoHelpSubtitle(),
       tips: [
-        FxHelpTip('Código', resetCodigoHelpCodigoBody(), icon: 'spark'),
-        FxHelpTip('Papel', resetCodigoHelpPapelBody(), icon: 'users'),
+        FxHelpTip('Código', resetCodigoHelpCodigoBody(), icon: FxIcons.ia),
+        FxHelpTip('Papel', resetCodigoHelpPapelBody(), icon: FxIcons.grupo),
       ],
     );
   }

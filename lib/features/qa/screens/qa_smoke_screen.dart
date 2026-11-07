@@ -231,8 +231,8 @@ class _QaSmokeScreenState extends State<QaSmokeScreen> {
       return const Icon(FxIcons.circulo, color: Colors.grey);
     }
     return result.ok
-        ? const Icon(FxIcons.concluidoAtivo, color: Colors.green)
-        : const Icon(FxIcons.erroAtivo, color: Colors.red);
+        ? const Icon(FxIcons.concluido, color: Colors.green)
+        : const Icon(FxIcons.erro, color: Colors.red);
   }
 
   Widget _endpointStatusIcon(_EndpointResult? result) {
@@ -240,7 +240,7 @@ class _QaSmokeScreenState extends State<QaSmokeScreen> {
       return _methodChip('…');
     }
     return Icon(
-      result.ok ? FxIcons.concluidoAtivo : FxIcons.erroAtivo,
+      result.ok ? FxIcons.concluido : FxIcons.erro,
       color: result.ok ? Colors.green : Colors.red,
       size: 18,
     );

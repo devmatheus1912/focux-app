@@ -36,8 +36,8 @@ void main() {
     expect(screen, contains('FocuxHubTypography.metric'));
     expect(screen, contains('showFinanceiroAlunoCobrancaSheet'));
     expect(screen, contains('mostrarPixMensalidade'));
-    expect(screen, contains('circle-check'));
-    expect(screen, isNot(contains('check-circle')));
+    expect(screen, contains('FxIcons.concluido'));
+    expect(screen, isNot(contains('FxIcons.concluidoAtivo')));
     expect(screen, isNot(contains('Aluno #')));
     expect(screen, isNot(contains("showError(context, '\$e')")));
     final cobranca = readScreenSourceBundle(

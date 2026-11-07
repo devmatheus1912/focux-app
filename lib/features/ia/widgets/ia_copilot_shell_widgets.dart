@@ -91,7 +91,7 @@ class IaCopilotGenerationStatus extends StatelessWidget {
       return Row(
         children: [
           const Icon(
-            FxIcons.concluidoAtivo,
+            FxIcons.concluido,
             color: EagleTokens.copilotSuccess,
             size: 16,
           ),

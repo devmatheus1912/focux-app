@@ -174,7 +174,7 @@ class _IaChatScreenState extends ConsumerState<IaChatScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           FxEmptyState(
-                            icon: 'spark',
+                            icon: FxIcons.ia,
                             title: 'Comece uma conversa',
                             subtitle:
                                 'Pergunte ao seu assistente de fitness sobre treino ou negócio.',

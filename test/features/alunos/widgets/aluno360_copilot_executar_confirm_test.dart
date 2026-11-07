@@ -31,7 +31,7 @@ void main() {
     const spec = CopilotExecutarAcaoSpec(
       backendTipo: 'ENVIAR_PUSH',
       label: 'Enviar notificação ao aluno',
-      icon: FxIcons.notificacaoAtiva,
+      icon: FxIcons.notificacaoTocando,
       executingLabel: 'Enviando…',
       executingSemantics: 'Enviando notificação ao aluno',
       parametros: 'Oi, Beatriz.',

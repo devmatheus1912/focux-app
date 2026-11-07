@@ -275,7 +275,7 @@ class _TreinoDetailBody extends StatelessWidget {
                     32,
                   ),
                   child: FxEmptyState(
-                    icon: 'dumbbell',
+                    icon: FxIcons.treino,
                     title: 'Nenhum exercício ainda',
                     subtitle:
                         'Adicione da biblioteca ou monte rápido por um modelo de split.',

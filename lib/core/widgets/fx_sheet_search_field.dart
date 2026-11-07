@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../theme/shell_chrome.dart';
 import '../theme/tokens_strip.dart';
-import 'fx_icon.dart';
 import 'fx_input_deco.dart';
 import 'fx_keyboard_dismiss_scope.dart';
+import '../theme/fx_icons.dart';
 
 /// Busca com borda e ícone para usar dentro de folhas.
 class FxSheetSearchField extends StatefulWidget {
@@ -62,7 +62,7 @@ class _FxSheetSearchFieldState extends State<FxSheetSearchField> {
           hintStyle: TextStyle(color: chrome.mute, fontWeight: FontWeight.w600),
           prefixIcon: Padding(
             padding: const EdgeInsets.all(12),
-            child: FxIcon(name: 'search', size: 18, color: chrome.mute),
+            child: Icon(FxIcons.buscar, size: 18, color: chrome.mute),
           ),
           filled: true,
           fillColor: chrome.cardFill,

@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import '../../ferramentas/data/ferramentas_catalogo_models.dart';
 import '../../ferramentas/utils/ferramentas_icons.dart';
 import '../../ferramentas/utils/ferramentas_gates.dart';
@@ -19,7 +20,7 @@ class DashboardToolShortcut {
     this.preferredAbaId,
   });
 
-  final String icon;
+  final IconData icon;
   final String label;
   final CatalogoEntrada entrada;
   final String? route;

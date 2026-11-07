@@ -122,7 +122,7 @@ class _EvolucaoMedidasAbaState extends State<EvolucaoMedidasAba> {
             ...widget.depois,
             FxEmptyState(
               key: const ValueKey('evolucao_medidas_empty'),
-              icon: 'trend',
+              icon: FxIcons.grafico,
               title: ptS.evolucaoSemMedidaTitulo,
               subtitle: widget.vazioSubtitulo,
             ),

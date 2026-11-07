@@ -29,6 +29,7 @@ import '../../../core/widgets/fx_action_chip.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../data/habito_repository.dart';
 import '../utils/habitos_display.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class HabitoDetailScreen extends ConsumerStatefulWidget {
   const HabitoDetailScreen({
@@ -213,7 +214,7 @@ class _HabitoDetailScreenState extends ConsumerState<HabitoDetailScreen> {
                   )
                 : habito == null
                 ? FxEmptyState(
-                    icon: 'circle-check',
+                    icon: FxIcons.concluido,
                     title: 'Hábito não encontrado',
                     subtitle:
                         'Ele pode ter sido desativado. Volte à lista e escolha outro.',

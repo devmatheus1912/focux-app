@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 enum CommandActionTone { primary, hot, money }
 
 /// Enchimento da fila quando o dia não tem ação. A Hoje do personal ignora
@@ -5,7 +6,7 @@ enum CommandActionTone { primary, hot, money }
 const String kCommandActionCriarOportunidade = 'criar-oportunidade';
 
 class CommandActionItem {
-  final String icon;
+  final IconData icon;
   final String title;
   final String subtitle;
   final String route;

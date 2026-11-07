@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/loja/utils/loja_hub_display.dart';
+import 'package:focux_app/core/theme/fx_icons.dart';
 
 void main() {
   test('lojaHubViewLabel e contagem', () {
@@ -50,8 +51,8 @@ void main() {
       ),
       'Pendente · ana@ex.com',
     );
-    expect(lojaPedidoFxIcon('PAGO'), 'circle-check');
-    expect(lojaPedidoFxIcon('PENDENTE'), 'pix');
+    expect(lojaPedidoFxIcon('PAGO'), FxIcons.concluido);
+    expect(lojaPedidoFxIcon('PENDENTE'), FxIcons.pix);
     expect(lojaPedidoPendente('PENDENTE'), isTrue);
     expect(lojaPedidoPendente('PAGO'), isFalse);
     expect(lojaPedidoPix('  abc  '), 'abc');

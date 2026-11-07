@@ -14,7 +14,6 @@ import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_form_chrome.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_hub_header.dart';
-import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
@@ -26,6 +25,7 @@ import '../providers/aluno_detail_providers.dart';
 import '../providers/alunos_provider.dart';
 import '../utils/equipamento_aluno_display.dart';
 import '../utils/satellite_screen_utils.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class AlunoEquipamentosScreen extends ConsumerStatefulWidget {
   const AlunoEquipamentosScreen({super.key, required this.alunoId});
@@ -82,17 +82,17 @@ class _AlunoEquipamentosScreenState
         FxHelpTip(
           'Restrição',
           'Marque só o que dá para usar. Substituições do copiloto respeitam essa lista.',
-          icon: 'dumbbell',
+          icon: FxIcons.treino,
         ),
         FxHelpTip(
           'Sem restrição',
           'Lista vazia = sem filtro. Qualquer equipamento pode entrar nas sugestões.',
-          icon: 'spark',
+          icon: FxIcons.ia,
         ),
         FxHelpTip(
           'Salvar',
           'O botão Salvar só aparece depois que você muda alguma opção.',
-          icon: 'target',
+          icon: FxIcons.alvo,
         ),
       ],
     );
@@ -237,14 +237,10 @@ class _AlunoEquipamentosScreenState
                               subtitle: const Text(
                                 'Não filtrar substituições por equipamento.',
                               ),
-                              leading: FxIcon(
-                                name: 'spark',
-                                size: FxSettingsLayout.iconSize,
-                                color:
+                              leading: Icon(FxIcons.ia, size: FxSettingsLayout.iconSize, color:
                                     noneSelected
                                         ? primary
-                                        : fxScreenMute(context),
-                              ),
+                                        : fxScreenMute(context)),
                               trailing: Switch.adaptive(
                                 value: noneSelected,
                                 onChanged:
@@ -270,14 +266,10 @@ class _AlunoEquipamentosScreenState
                           label: label,
                           child: FxSatelliteListTile(
                             title: label,
-                            leading: FxIcon(
-                              name: equipamentoFxIcon(equipamento),
-                              size: FxSettingsLayout.iconSize,
-                              color:
+                            leading: Icon(equipamentoFxIcon(equipamento), size: FxSettingsLayout.iconSize, color:
                                   selected
                                       ? primary
-                                      : fxScreenMute(context),
-                            ),
+                                      : fxScreenMute(context)),
                             trailing: Switch.adaptive(
                               value: selected,
                               onChanged:

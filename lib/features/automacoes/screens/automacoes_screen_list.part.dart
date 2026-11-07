@@ -18,7 +18,7 @@ extension on _AutomacoesScreenState {
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           children: [
             FxEmptyState(
-              icon: filtered ? 'search' : 'zap',
+              icon: filtered ? FxIcons.buscar : FxIcons.raio,
               title: filtered
                   ? 'Nenhuma automação encontrada'
                   : 'Nenhuma automação ainda',
@@ -156,8 +156,8 @@ extension on _AutomacoesScreenState {
             subtitle: Text(automacaoTriggerLabel(fluxo.triggerTipo)),
             leading: Icon(
               fluxo.ativo
-                  ? FxIcons.playAtivo
-                  : FxIcons.pausarAtivo,
+                  ? FxIcons.play
+                  : FxIcons.pausar,
               color: primary,
             ),
             trailing: Text(

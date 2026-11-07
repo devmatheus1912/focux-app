@@ -7,7 +7,10 @@ import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../perfil/providers/perfil_provider.dart';
-import '../providers/financeiro_provider.dart';
+import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/theme/shell_chrome.dart';
+import '../../../core/widgets/fx_home_sheet.dart';
+import '../../../core/widgets/fx_sheet_frame.dart';
 import '../../../core/theme/fx_icons.dart';
 
 /// "Como você recebe": a chave PIX é pré-requisito de PIX e de recorrência.
@@ -39,7 +42,7 @@ class FinanceiroChavePixLinha extends ConsumerWidget {
     return FxSettingsGroup(
       children: [
         FxSettingsTile(
-          fxIcon: 'wallet',
+          icon: FxIcons.carteira,
           label: s.financeiroComoRecebe,
           value: s.financeiroChaveCadastrada,
           showDivider: false,
@@ -50,23 +53,34 @@ class FinanceiroChavePixLinha extends ConsumerWidget {
   }
 }
 
-/// "Cobrança automática": liga a tela de falhas e do agendador.
-class FinanceiroCobrancaAutoLinha extends ConsumerWidget {
-  const FinanceiroCobrancaAutoLinha({super.key});
+/// "Lembretes automáticos": o que o app faz sozinho por cobrança (lembrete
+/// semanal ao aluno, aviso ao personal 5 dias antes, atraso marcado de
+/// manhã). Só leitura; substitui a antiga "Cobrança automática", que lia
+/// falhas de cartão que a cobrança por PIX nunca gera.
+class FinanceiroLembretesLinha extends StatelessWidget {
+  const FinanceiroLembretesLinha({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final s = S.of(context);
-    final snapshot = ref.watch(financeiroCobrancaAutoProvider).value;
-    final falhas = snapshot?.abertas ?? 0;
     return FxSettingsGroup(
       children: [
         FxSettingsTile(
-          fxIcon: 'repeat',
-          label: s.financeiroCobrancaAuto,
-          value: snapshot == null ? '' : s.financeiroCobrancaAutoStatus(falhas),
+          icon: FxIcons.notificacao,
+          label: s.financeiroLembretes,
+          value: s.financeiroLembretesValor,
           showDivider: false,
-          onTap: () => context.push('/dunning'),
+          onTap: () => showFxHomeSheet<void>(
+            context,
+            builder: (_) => FxSheetFrame(
+              title: s.financeiroLembretes,
+              leading: Icon(FxIcons.notificacao, size: 20, color: Theme.of(context).colorScheme.primary),
+              child: Text(
+                s.financeiroLembretesTexto,
+                style: FocuxHubTypography.body(color: ShellChrome.of(context).ink),
+              ),
+            ),
+          ),
         ),
       ],
     );

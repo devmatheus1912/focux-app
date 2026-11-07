@@ -301,7 +301,7 @@ class PlanEntitlements {
           detail: 'Status, follow-up e conversão',
         ),
         UpgradeSalesBenefit(
-          icon: FxIcons.notificacaoAtiva,
+          icon: FxIcons.notificacaoTocando,
           label: 'Não perde lead frio',
           detail: 'Lembretes e próximos passos',
         ),

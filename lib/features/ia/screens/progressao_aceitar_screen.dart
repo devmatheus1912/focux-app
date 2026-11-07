@@ -351,9 +351,9 @@ class _ProgressaoAceitarScreenState
                     title: ptS.cargasRevisarTitulo,
                     subtitle: args.alunoNome ?? ptS.cargasComoRevisar,
                     tips: [
-                      FxHelpTip(ptS.cargasComoRevisar, ptS.cargasAjudaDiferenca, icon: 'trend'),
-                      FxHelpTip(ptS.cargasSoOAplicado, ptS.cargasAjudaSelecao, icon: 'circle-check'),
-                      FxHelpTip(ptS.cargasMais, ptS.cargasAjudaEditar, icon: 'spark'),
+                      FxHelpTip(ptS.cargasComoRevisar, ptS.cargasAjudaDiferenca, icon: FxIcons.grafico),
+                      FxHelpTip(ptS.cargasSoOAplicado, ptS.cargasAjudaSelecao, icon: FxIcons.concluido),
+                      FxHelpTip(ptS.cargasMais, ptS.cargasAjudaEditar, icon: FxIcons.ia),
                     ],
                   ),
             ),
@@ -527,7 +527,7 @@ class _ProgressaoAceitarScreenState
           const SizedBox(height: TokensStrip.s2),
         ],
         FxEmptyState(
-          icon: 'circle-check',
+          icon: FxIcons.concluido,
           title:
               _successBanner != null
                   ? 'Tudo em dia'
@@ -817,7 +817,7 @@ class _SuccessBanner extends StatelessWidget {
         ),
         child: Row(
           children: [
-            const Icon(FxIcons.concluidoAtivo, color: EagleTokens.good, size: 22),
+            const Icon(FxIcons.concluido, color: EagleTokens.good, size: 22),
             const SizedBox(width: 10),
             Expanded(
               child: Text(

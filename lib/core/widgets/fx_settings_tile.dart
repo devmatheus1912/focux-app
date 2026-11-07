@@ -6,7 +6,6 @@ import '../theme/design_tokens.dart';
 import '../theme/fx_settings_layout.dart';
 import '../theme/shell_chrome.dart';
 import '../theme/tokens_strip.dart';
-import 'fx_icon.dart';
 import 'fx_plan_lock_badge.dart';
 import '../theme/fx_icons.dart';
 
@@ -15,7 +14,6 @@ class FxSettingsTile extends StatelessWidget {
   const FxSettingsTile({
     super.key,
     this.icon,
-    this.fxIcon,
     required this.label,
     this.subtitle,
     required this.value,
@@ -34,12 +32,10 @@ class FxSettingsTile extends StatelessWidget {
     this.upgradeTierLabel,
     this.semanticsLabel,
     this.accessory,
-    this.iconeComFundo = false,
-  }) : assert(icon != null || fxIcon != null),
+  }) : assert(icon != null),
        assert(!(picker && disclosure));
 
   final IconData? icon;
-  final String? fxIcon;
   final String label;
   final String? subtitle;
   final String value;
@@ -60,9 +56,6 @@ class FxSettingsTile extends StatelessWidget {
   final String? upgradeTierLabel;
   final String? semanticsLabel;
   final Widget? accessory;
-
-  /// Ícone sobre um fundo leve da marca: Perfil, Ferramentas e atalhos.
-  final bool iconeComFundo;
 
   @override
   Widget build(BuildContext context) {
@@ -97,13 +90,8 @@ class FxSettingsTile extends StatelessWidget {
     final showChevron =
         interactive && !danger && !locked && !disclosure && !picker;
 
-    final Widget icone = fxIcon != null
-    ? FxIcon(
-      name: fxIcon!,
-      size: FxSettingsLayout.iconSize,
-      color: iconColor,
-    )
-    : Icon(
+    // Ícone solto na linha: fundo colorido só onde o ícone é o assunto.
+    final Widget icone = Icon(
       icon!,
       size: FxSettingsLayout.iconSize,
       color: iconColor,
@@ -138,18 +126,7 @@ class FxSettingsTile extends StatelessWidget {
           ),
           child: Row(
             children: [
-              iconeComFundo
-                  ? DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: iconColor.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(6),
-                      child: icone,
-                    ),
-                  )
-                  : icone,
+              icone,
               const SizedBox(width: FxSettingsLayout.iconGap),
               Expanded(
                 child: DecoratedBox(

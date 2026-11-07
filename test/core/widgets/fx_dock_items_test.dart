@@ -6,6 +6,7 @@ import 'package:focux_app/core/widgets/fx_dock.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
 
 import '../../support/dynamic_type_harness.dart';
+import 'package:focux_app/core/theme/fx_icons.dart';
 
 Widget _app(
   List<FxDockItem> Function(S s) items, {
@@ -90,7 +91,7 @@ void main() {
     expect(find.text('2'), findsOneWidget);
     expect(find.text('Alunos'), findsNothing);
     final s = await _s(tester);
-    expect(FxDockItems.aluno(s).last.icon, 'user');
+    expect(FxDockItems.aluno(s).last.icon, FxIcons.pessoa);
   });
 
   testWidgets('leitor de tela diz quantas não lidas e quantos em risco', (
@@ -129,7 +130,7 @@ void main() {
 
   test('FxDock não usa poço nem underline de ativo', () {
     final dock = File('lib/core/widgets/fx_dock.dart').readAsStringSync();
-    expect(dock, contains('FxSettingsLayout.iconSize'));
+    expect(dock, contains('size: 24'));
     expect(dock, contains('shellClearance'));
     expect(dock, contains('withClampedTextScaling'));
     expect(dock, isNot(contains('glowSize')));

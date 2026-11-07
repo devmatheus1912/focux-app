@@ -484,7 +484,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                 const SizedBox(height: TokensStrip.s3),
               ],
               FxEmptyState(
-                icon: 'search',
+                icon: FxIcons.buscar,
                 title: migracaoVazioTitle(),
                 subtitle: _ignorados > 0
                     ? '${migracaoIgnoradasLabel(_ignorados)}. ${migracaoVazioDica(deFoto: _fonte == MigracaoFonte.foto)}'

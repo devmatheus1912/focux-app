@@ -24,7 +24,7 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
 
     if (sortedPlans.isEmpty) {
       return FxEmptyState(
-        icon: 'dollar-sign',
+        icon: FxIcons.dinheiro,
         title: 'Planos em sincronização',
         subtitle:
             'Tente de novo em instantes.',

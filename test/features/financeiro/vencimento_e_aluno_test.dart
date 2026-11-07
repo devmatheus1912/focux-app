@@ -3,6 +3,7 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/theme/design_tokens.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
+import 'package:focux_app/features/financeiro/data/financeiro_repository.dart';
 import 'package:focux_app/features/financeiro/utils/vencimento_atalhos.dart';
 import 'package:focux_app/features/financeiro/widgets/dia_vencimento_grade.dart';
 import 'package:focux_app/features/financeiro/widgets/financeiro_aluno_etapa.dart';
@@ -30,12 +31,12 @@ void main() {
   group('vencimentoAtalhos', () {
     final hoje = DateTime(2026, 10, 27);
 
-    test('mês corrente: Hoje, Dia 5, Dia 10 e Fim do mês', () {
+    test('mês corrente: Hoje, Dia 5, 10, 15 e Último dia', () {
       final a = vencimentoAtalhos(
         mesReferencia: DateTime(2026, 10, 1),
         hoje: hoje,
       );
-      expect(a.map((e) => e.rotulo), ['Hoje', 'Dia 5', 'Dia 10', 'Fim do mês']);
+      expect(a.map((e) => e.rotulo), ['Hoje', 'Dia 5', 'Dia 10', 'Dia 15', 'Último dia']);
       expect(a.last.data, DateTime(2026, 10, 31));
     });
 
@@ -44,7 +45,7 @@ void main() {
         mesReferencia: DateTime(2026, 11, 1),
         hoje: hoje,
       );
-      expect(a.map((e) => e.rotulo), ['Dia 5', 'Dia 10', 'Fim do mês']);
+      expect(a.map((e) => e.rotulo), ['Dia 5', 'Dia 10', 'Dia 15', 'Último dia']);
     });
 
     test('fevereiro: fim do mês é o dia 28 (e 29 em ano bissexto)', () {
@@ -94,7 +95,6 @@ void main() {
                   onPressed: () async {
                     resultado = await showVencimentoSheet(
                       context,
-                      mesReferencia: DateTime(2026, 10, 1),
                       atual: atual,
                       hoje: DateTime(2026, 10, 27),
                     );
@@ -110,14 +110,13 @@ void main() {
       return resultado;
     }
 
-    testWidgets('atalho escolhe e fecha', (tester) async {
+    testWidgets('atalho escolhe o dia e o botão confirma', (tester) async {
       await abrir(tester, atual: DateTime(2026, 10, 27));
       expect(find.text('Vencimento'), findsOneWidget);
-      expect(find.text('Dia 10'), findsOneWidget);
+      await tester.ensureVisible(find.text('Dia 10'));
       await tester.tap(find.text('Dia 10'));
-      await tester.pump(const Duration(milliseconds: 400));
-      await tester.pump(const Duration(milliseconds: 400));
-      expect(find.text('Vencimento'), findsNothing);
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(find.textContaining('Vence 10/10'), findsOneWidget);
     });
 
     testWidgets('data passada avisa que entra como atrasada', (tester) async {
@@ -227,6 +226,75 @@ void main() {
       await tester.enterText(find.byType(TextField), 'zzz');
       await tester.pump();
       expect(find.text('Nenhum aluno encontrado.'), findsOneWidget);
+    });
+  });
+
+  group('mês já lançado', () {
+    Mensalidade m(int id, String ref, String status) => Mensalidade.fromJson({
+      'id': id,
+      'alunoId': 1,
+      'alunoNome': 'Julio',
+      'valor': '175.00',
+      'mesReferencia': ref,
+      'vencimento': ref.replaceFirst('-01', '-12'),
+      'status': status,
+    });
+
+    test('lançado bloqueia; cancelado não; a própria mensalidade não conta', () {
+      final occ = vencimentoMesesOcupados([
+        m(1, '2026-11-01', 'PAGO'),
+        m(2, '2026-10-01', 'CANCELADO'),
+        m(3, '2026-12-01', 'PENDENTE'),
+      ], ignorarId: 3);
+      expect(occ['2026-11']!.bloqueia, isTrue);
+      expect(occ['2026-11']!.rotulo, 'Já lançada · R\$ 175,00 · paga');
+      expect(occ['2026-10']!.bloqueia, isFalse);
+      expect(occ.containsKey('2026-12'), isFalse);
+    });
+
+    test('sugestão pula o mês ocupado e usa o dia da última cobrança', () {
+      final doAluno = [m(1, '2026-11-01', 'PAGO')];
+      final d = vencimentoSugerido(
+        hoje: DateTime(2026, 11, 7),
+        ocupados: vencimentoMesesOcupados(doAluno),
+        dia: vencimentoDiaPreferido(doAluno),
+      );
+      expect(d, DateTime(2026, 12, 12));
+    });
+
+    testWidgets('na folha, o mês lançado aparece marcado e não responde ao toque', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(390, 1400));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      DateTime? resultado;
+      await tester.pumpWidget(
+        _app(
+          Builder(
+            builder: (context) => TextButton(
+              onPressed: () async {
+                resultado = await showVencimentoSheet(
+                  context,
+                  atual: DateTime(2026, 12, 12),
+                  hoje: DateTime(2026, 11, 7),
+                  ocupados: vencimentoMesesOcupados([m(1, '2026-11-01', 'PAGO')]),
+                );
+              },
+              child: const Text('abrir'),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('abrir'));
+      await tester.pumpAndSettle();
+      expect(find.text('Já lançada · R\$ 175,00 · paga'), findsOneWidget);
+      await tester.tap(find.text('Novembro 2026'));
+      await tester.pump();
+      // Continua em dezembro.
+      expect(find.textContaining('Vence 12/12'), findsOneWidget);
+      await tester.ensureVisible(find.textContaining('Vence 12/12'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.textContaining('Vence 12/12'), warnIfMissed: true);
+      await tester.pumpAndSettle();
+      expect(resultado, DateTime(2026, 12, 12));
     });
   });
 }

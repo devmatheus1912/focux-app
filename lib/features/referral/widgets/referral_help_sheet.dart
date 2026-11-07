@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/widgets/fx_help.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../core/theme/fx_icons.dart';
 
 Future<void> showReferralHelpSheet(BuildContext context) {
   final l10n = S.of(context);
@@ -10,9 +11,9 @@ Future<void> showReferralHelpSheet(BuildContext context) {
     title: l10n.referralHelpTooltip,
     subtitle: l10n.referralHelpSubtitle,
     tips: [
-      FxHelpTip(l10n.referralHelpCodeTitle, l10n.referralHelpCodeBody, icon: 'users'),
-      FxHelpTip(l10n.referralHelpInviteTitle, l10n.referralHelpInviteBody, icon: 'spark'),
-      FxHelpTip(l10n.referralHelpRulesTitle, l10n.referralHelpRulesBody, icon: 'lock'),
+      FxHelpTip(l10n.referralHelpCodeTitle, l10n.referralHelpCodeBody, icon: FxIcons.grupo),
+      FxHelpTip(l10n.referralHelpInviteTitle, l10n.referralHelpInviteBody, icon: FxIcons.ia),
+      FxHelpTip(l10n.referralHelpRulesTitle, l10n.referralHelpRulesBody, icon: FxIcons.cadeado),
     ],
   );
 }

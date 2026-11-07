@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/theme/fx_icons.dart';
 
 Future<void> showFinanceiroMensalidadeHelpSheet(BuildContext context) {
   return showFxHelpSheet(
@@ -11,19 +12,19 @@ Future<void> showFinanceiroMensalidadeHelpSheet(BuildContext context) {
       FxHelpTip(
         'Marcar como paga',
         'Confirme só quando o valor já entrou. Dá para desfazer pelo menu ⋮.',
-        icon: 'coin',
+        icon: FxIcons.dinheiro,
       ),
       FxHelpTip(
         'Cobrar',
         'Escolha entre mandar a cobrança no chat ou gerar o PIX copia e cola. '
             'Registrar contato, só anota que você falou.',
-        icon: 'message-circle',
+        icon: FxIcons.chat,
       ),
       FxHelpTip(
         'Editar e cancelar',
         'No menu ⋮: ajuste valor ou vencimento, ou cancele a cobrança. '
             'Se o vencimento já passou, ela fica atrasada sozinha.',
-        icon: 'dollar-sign',
+        icon: FxIcons.dinheiro,
       ),
     ],
   );

@@ -19,7 +19,7 @@ class _AnamneseBody extends StatelessWidget {
           const SizedBox(height: TokensStrip.s5),
           // CTA único no sticky S3 — empty sem action (§11 / §13).
           const FxEmptyState(
-            icon: 'article',
+            icon: FxIcons.artigo,
             title: 'Nenhuma ficha ainda',
             subtitle: 'O aluno preenche a anamnese. Você solicita e revisa.',
             quiet: true,
@@ -27,7 +27,7 @@ class _AnamneseBody extends StatelessWidget {
         ] else if (a.isSolicitada && !a.temRespostas) ...[
           const SizedBox(height: TokensStrip.s5),
           const FxEmptyState(
-            icon: 'calendar',
+            icon: FxIcons.calendario,
             title: 'Aguardando preenchimento',
             subtitle:
                 'O aluno foi notificado. Quando enviar, você revisa aqui.',

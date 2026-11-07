@@ -6,7 +6,6 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/theme/fx_icons.dart';
 
@@ -77,11 +76,7 @@ class DashboardHomeActivationStrip extends StatelessWidget {
                       ),
                       child: Row(
                         children: [
-                          FxIcon(
-                            name: 'spark',
-                            size: FxSettingsLayout.iconSize,
-                            color: brand,
-                          ),
+                          Icon(FxIcons.ia, size: FxSettingsLayout.iconSize, color: brand),
                           const SizedBox(width: FxSettingsLayout.iconGap),
                           Expanded(
                             child: Column(

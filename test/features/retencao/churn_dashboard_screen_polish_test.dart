@@ -37,7 +37,7 @@ void main() {
     expect(screen, contains('PopScope'));
     expect(screen, contains('FxKeyboardPopScope'));
     expect(screen, contains("'/winback'"));
-    expect(screen, contains("'/dunning'"));
+    expect(screen, contains("'/financeiro?aba=mensalidades&filtro=atrasadas'"));
     expect(screen, contains('retencaoEntradaHistorico'));
     expect(screen, contains('retencaoEntradaCobranca'));
     // O que saiu desta tela

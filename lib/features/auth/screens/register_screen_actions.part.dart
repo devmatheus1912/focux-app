@@ -7,9 +7,9 @@ extension on _RegisterScreenState {
       title: registerHelpTitle(),
       subtitle: registerHelpSubtitle(),
       tips: [
-        FxHelpTip('Código', registerHelpCodigoBody(), icon: 'spark'),
-        FxHelpTip('Apple', registerHelpAppleBody(), icon: 'users'),
-        FxHelpTip('Google', registerHelpGoogleBody(), icon: 'users'),
+        FxHelpTip('Código', registerHelpCodigoBody(), icon: FxIcons.ia),
+        FxHelpTip('Apple', registerHelpAppleBody(), icon: FxIcons.grupo),
+        FxHelpTip('Google', registerHelpGoogleBody(), icon: FxIcons.grupo),
       ],
     );
   }

@@ -19,6 +19,7 @@ import '../utils/login_display.dart';
 import '../utils/reset_codigo_display.dart';
 import '../widgets/auth_otp_field.dart';
 import '../widgets/auth_shell.dart';
+import '../../../core/theme/fx_icons.dart';
 
 part 'resetar_senha_verificar_codigo_screen_actions.part.dart';
 

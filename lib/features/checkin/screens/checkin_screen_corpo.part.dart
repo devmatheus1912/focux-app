@@ -189,14 +189,14 @@ extension _CheckinCorpo on _CheckinScreenState {
   ) {
     if (exercicios.isEmpty) {
       return FxEmptyState(
-        icon: 'dumbbell',
+        icon: FxIcons.treino,
         title: s.checkinSemExerciciosTitulo,
         subtitle: s.checkinSemExerciciosTexto,
       );
     }
     if (current == null) {
       return FxEmptyState(
-        icon: 'dumbbell',
+        icon: FxIcons.treino,
         title: s.checkinNenhumAtivoTitulo,
         subtitle: s.checkinNenhumAtivoTexto,
       );

@@ -380,12 +380,12 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
               onTap: () => showLeadDetailHelpSheet(context),
             ),
             ShellHeaderIconButton(
-              icon: 'trend',
+              icon: FxIcons.grafico,
               tooltip: 'Mudar status',
               onTap: _abrirStatus,
             ),
             ShellHeaderIconButton(
-              icon: 'plus',
+              icon: FxIcons.adicionar,
               tooltip: 'Nova interação',
               onTap: _novaInteracao,
             ),

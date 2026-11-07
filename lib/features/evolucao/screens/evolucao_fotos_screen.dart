@@ -208,7 +208,7 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
                                 ScrollViewKeyboardDismissBehavior.onDrag,
                             children: [
                               FxEmptyState(
-                                icon: 'spark',
+                                icon: FxIcons.ia,
                                 title: 'Nenhuma foto de evolução',
                                 subtitle:
                                     'Tire a primeira foto para acompanhar ${satelliteFirstName(widget.alunoNome)}.',

@@ -65,11 +65,7 @@ void main() {
     final winback =
         File('lib/features/winback/data/winback_repository.dart')
             .readAsStringSync();
-    final dunning =
-        File('lib/features/dunning/data/dunning_repository.dart')
-            .readAsStringSync();
 
     expect(winback, contains('/api/winback/log'));
-    expect(dunning, contains('/api/dunning/home'));
   });
 }

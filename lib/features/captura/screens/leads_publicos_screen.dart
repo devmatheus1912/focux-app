@@ -409,7 +409,7 @@ class _LeadsPublicosScreenState extends ConsumerState<LeadsPublicosScreen> {
               ),
               children: [
                 FxEmptyState(
-                  icon: filtered ? 'search' : 'users',
+                  icon: filtered ? FxIcons.buscar : FxIcons.grupo,
                   title: filtered
                       ? 'Nenhum lead encontrado'
                       : 'Nenhum lead ainda',

@@ -1,17 +1,19 @@
+import 'package:flutter/widgets.dart';
 import '../../exercicios/data/enums.dart';
+import '../../../core/theme/fx_icons.dart';
 
-String equipamentoFxIcon(Equipamento equipamento) {
+IconData equipamentoFxIcon(Equipamento equipamento) {
   return switch (equipamento) {
     Equipamento.barra ||
     Equipamento.halter ||
     Equipamento.kettlebell ||
-    Equipamento.smith => 'dumbbell',
-    Equipamento.maquina || Equipamento.polia => 'target',
-    Equipamento.pesoCorporal => 'users',
-    Equipamento.banda || Equipamento.trx || Equipamento.bolaSuica => 'spark',
-    Equipamento.banco || Equipamento.caixa => 'home',
-    Equipamento.corda => 'flame',
-    Equipamento.outros => 'plus',
+    Equipamento.smith => FxIcons.treino,
+    Equipamento.maquina || Equipamento.polia => FxIcons.alvo,
+    Equipamento.pesoCorporal => FxIcons.grupo,
+    Equipamento.banda || Equipamento.trx || Equipamento.bolaSuica => FxIcons.ia,
+    Equipamento.banco || Equipamento.caixa => FxIcons.inicio,
+    Equipamento.corda => FxIcons.fogo,
+    Equipamento.outros => FxIcons.adicionar,
   };
 }
 

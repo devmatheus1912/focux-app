@@ -360,7 +360,7 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
       ],
       if (_habitos.isEmpty)
         FxEmptyState(
-          icon: 'circle-check',
+          icon: FxIcons.concluido,
           title: habitoEmptyTitle(hasCompliance: _compliance.isNotEmpty),
           subtitle: habitoEmptySubtitle(hasCompliance: _compliance.isNotEmpty),
         )
@@ -404,7 +404,7 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
       const SizedBox(height: FxSettingsLayout.groupGap),
       if (_compliance.isEmpty)
         FxEmptyState(
-          icon: 'trend',
+          icon: FxIcons.grafico,
           title: habitoComplianceEmptyTitle(_query),
           subtitle: habitoComplianceEmptySubtitle(_query),
           action:

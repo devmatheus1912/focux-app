@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../data/notificacoes_repository.dart';
 import '../../../l10n/pt.dart';
+import '../../../core/theme/fx_icons.dart';
 
 String notificacaoBadgeTooltip(int count) {
   if (count <= 0) return ptS.notifications;
@@ -31,7 +32,7 @@ class NotificacaoBadgeButton extends ConsumerWidget {
     final count = countOverride ?? live ?? 0;
 
     return ShellHeaderIconButton(
-      icon: 'bell',
+      icon: FxIcons.notificacao,
       size: size,
       badgeCount: count,
       tooltip: notificacaoBadgeTooltip(count),

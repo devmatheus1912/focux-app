@@ -30,8 +30,8 @@ extension on _DefinirSenhaAlunoScreenState {
       subtitle: definirSenhaHelpSubtitle(),
       forceDark: true,
       tips: [
-        FxHelpTip('Provisória', definirSenhaHelpAtualBody(), icon: 'route'),
-        FxHelpTip('Nova', definirSenhaHelpNovaBody(), icon: 'spark'),
+        FxHelpTip('Provisória', definirSenhaHelpAtualBody(), icon: FxIcons.rota),
+        FxHelpTip('Nova', definirSenhaHelpNovaBody(), icon: FxIcons.ia),
       ],
     );
   }

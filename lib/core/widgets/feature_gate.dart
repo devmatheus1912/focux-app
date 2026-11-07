@@ -350,7 +350,7 @@ class _LockedScreenState extends ConsumerState<_LockedScreen> {
         ),
       ),
       body: FxEmptyState(
-        icon: 'lock',
+        icon: FxIcons.cadeado,
         title: 'Indisponível no momento',
         subtitle:
             'Seu personal ainda não liberou ${widget.featureName.toLowerCase()} '

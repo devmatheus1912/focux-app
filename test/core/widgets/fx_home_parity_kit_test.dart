@@ -5,6 +5,7 @@ import 'package:focux_app/core/widgets/fx_error_state.dart';
 import 'package:focux_app/core/widgets/fx_empty_state.dart';
 import 'package:focux_app/core/widgets/fx_hub_header.dart';
 import 'package:focux_app/core/theme/brand_palette.dart';
+import 'package:focux_app/core/theme/fx_icons.dart';
 
 void main() {
   group('FxHubFreshness', () {
@@ -54,7 +55,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: FxEmptyState(
-            icon: 'users',
+            icon: FxIcons.grupo,
             title: 'Vazio',
             subtitle: 'Sub',
             action: FxEmptyAction(label: 'Ir', onTap: () => tapped = true),

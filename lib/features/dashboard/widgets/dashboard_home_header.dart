@@ -11,6 +11,7 @@ import '../utils/dashboard_microcopy.dart';
 import '../utils/dashboard_readability.dart';
 import '../utils/dashboard_screen_helpers.dart';
 import 'dashboard_header_profile_avatar.dart';
+import '../../../core/theme/fx_icons.dart';
 
 String dashboardConversasTooltip(int semResposta) {
   if (semResposta <= 0) return 'Conversas';
@@ -186,7 +187,7 @@ class _HeaderChromeCluster extends StatelessWidget {
       children: [
         if (onQuickSearch != null) ...[
           ShellHeaderIconButton(
-            icon: 'search',
+            icon: FxIcons.buscar,
             size: size,
             tooltip: DashboardMicrocopy.buscaRapida,
             onTap: onQuickSearch!,
@@ -203,7 +204,7 @@ class _HeaderChromeCluster extends StatelessWidget {
         ],
         if (onConversas != null) ...[
           ShellHeaderIconButton(
-            icon: 'chat',
+            icon: FxIcons.chat,
             size: size,
             badgeCount: conversasCount,
             tooltip: dashboardConversasTooltip(conversasCount),

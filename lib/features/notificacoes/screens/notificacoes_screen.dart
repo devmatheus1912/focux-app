@@ -470,7 +470,7 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
                 children: [
                   const SizedBox(height: 48),
                   FxEmptyState(
-                    icon: query.isEmpty ? 'circle-check' : 'search',
+                    icon: query.isEmpty ? FxIcons.concluido : FxIcons.buscar,
                     title: notificacaoVazioTitle(
                       query: query,
                       soNaoLidas: soNaoLidas,

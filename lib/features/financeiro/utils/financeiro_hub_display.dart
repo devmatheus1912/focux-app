@@ -18,6 +18,15 @@ FinanceiroSegmento financeiroSegmentoDaRota(String? aba) => switch (aba) {
   _ => FinanceiroSegmento.mensalidades,
 };
 
+/// `?filtro=` da rota de Financeiro; nulo quando não vem ou não existe.
+MensalidadeFiltro? financeiroFiltroDaRota(String? filtro) => switch (filtro) {
+  'atrasadas' => MensalidadeFiltro.atrasadas,
+  'abertas' => MensalidadeFiltro.abertas,
+  'pagas' => MensalidadeFiltro.pagas,
+  'todas' => MensalidadeFiltro.todas,
+  _ => null,
+};
+
 String financeiroHubSubtitle({String? freshness}) {
   final fresh = freshness?.trim();
   return fresh == null || fresh.isEmpty ? 'Cobranças e resultados' : fresh;
@@ -277,28 +286,6 @@ List<FinanceiroMesOpcao> financeiroMesOpcoes({
   return out;
 }
 
-String financeiroMesReferenciaKey(String atual, {DateTime? agora}) {
-  final now = agora ?? DateTime.now();
-  final parsed = DateTime.tryParse(atual) ?? DateTime(now.year, now.month, 1);
-  return FinanceiroMesOpcao(ano: parsed.year, mes: parsed.month).key;
-}
-
-String financeiroMesReferenciaIso(String key) => '$key-01';
-
-List<FinanceiroMesOpcao> financeiroMesReferenciaOpcoes({
-  required String atual,
-  DateTime? agora,
-}) {
-  final now = agora ?? DateTime.now();
-  final parsed = DateTime.tryParse(atual) ?? DateTime(now.year, now.month, 1);
-  final current = FinanceiroMesOpcao(ano: parsed.year, mes: parsed.month);
-  var ops = financeiroMesOpcoes(agora: now);
-  if (!ops.any((o) => o.key == current.key)) {
-    ops = [current, ...ops];
-  }
-  return ops;
-}
-
 String financeiroIsoDate(int year, int month, int day) {
   final y = year.toString().padLeft(4, '0');
   final m = month.toString().padLeft(2, '0');
@@ -326,21 +313,6 @@ String financeiroIsoDateLabel(String iso) {
   return '$d/$m/${parsed.year}';
 }
 
-String financeiroVencimentoPickerValue(String vencimento) {
-  final raw = vencimento.trim();
-  if (raw.isEmpty) return 'Selecionar';
-  return financeiroIsoDateLabel(raw);
-}
-
-String financeiroVencimentoAposTrocaDeMes({
-  required String mesAntigo,
-  required String mesNovo,
-  required String vencimentoAtual,
-}) {
-  if (vencimentoAtual.trim() == mesAntigo.trim()) return mesNovo;
-  return vencimentoAtual;
-}
-
 String financeiroVencimentoDashboardSubtitle({
   required String mesReferencia,
   String? vencimento,
@@ -356,13 +328,7 @@ String financeiroVencimentoDashboardSubtitle({
 
 String financeiroSalvarMensalidadeConfirmTitle() => 'Salvar mensalidade?';
 
-String financeiroSalvarMensalidadeConfirmMessage() =>
-    'Valor, mês, vencimento e status entram no financeiro do aluno.';
-
 String financeiroLancarMensalidadeConfirmTitle() => 'Lançar mensalidade?';
-
-String financeiroLancarMensalidadeConfirmMessage() =>
-    'O valor entra na cobrança deste aluno.';
 
 String financeiroSalvarMensalidadeTileLabel() => 'Salvar';
 
@@ -393,12 +359,6 @@ String financeiroLotePagoSuccess(int cobrancas) =>
     cobrancas == 1
         ? 'Cobrança marcada como paga.'
         : '$cobrancas cobranças marcadas como pagas.';
-
-String financeiroMesPickerValue(String mesReferencia) {
-  final raw = mesReferencia.trim();
-  if (raw.isEmpty) return 'Selecionar';
-  return financeiroMensalidadeMesPorExtenso(raw);
-}
 
 String financeiroAlunoPickerValue(String? nome) {
   final n = nome?.trim();

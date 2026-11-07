@@ -35,7 +35,7 @@ void main() {
     expect(tab, contains('loadingLabel:'));
     expect(tab, isNot(contains("'Lançando…' : 'Confirmar'")));
     expect(tab, contains('showFxConfirmSheet'));
-    expect(tab, contains('pickMensalidadeMesReferencia'));
+    expect(tab, isNot(contains('pickMensalidadeMesReferencia')));
     expect(
       File(
         'lib/features/financeiro/utils/mensalidade_surface_actions.dart',
@@ -68,7 +68,7 @@ void main() {
     final resultados = readScreenSourceBundle(
       'lib/features/financeiro/screens/financeiro_resultados_screen.dart',
     );
-    expect(resultados, contains('SmartPricingCard'));
+    expect(resultados, isNot(contains('SmartPricingCard')));
     expect(resultados, contains('FxStripCard'));
     expect(resultados, isNot(contains('FinanceiroResumoScreen')));
     expect(resultados, isNot(contains('PieChart')));

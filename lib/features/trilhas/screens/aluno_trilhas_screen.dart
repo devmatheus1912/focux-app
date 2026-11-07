@@ -19,7 +19,6 @@ import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/fx_hub_header.dart';
-import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -32,6 +31,7 @@ import '../models/trilha.dart';
 import '../providers/trilhas_provider.dart';
 import '../utils/trilhas_display.dart';
 import '../widgets/trilhas_help_sheet.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class AlunoTrilhasScreen extends ConsumerStatefulWidget {
   const AlunoTrilhasScreen({super.key});
@@ -130,7 +130,7 @@ class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
               FxHomeSheetHeader(
                 isDark: isDark,
                 title: trilha.titulo,
-                leading: FxIcon(name: 'route', size: 18, color: primary),
+                leading: Icon(FxIcons.rota, size: 18, color: primary),
               ),
               const SizedBox(height: TokensStrip.s3),
               Expanded(
@@ -384,7 +384,7 @@ class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
               padding: pagePadding.copyWith(top: 0),
               sliver: SliverToBoxAdapter(
                 child: FxEmptyState(
-                  icon: 'route',
+                  icon: FxIcons.rota,
                   title: 'Nenhuma trilha atribuída',
                   subtitle:
                       'Quando o personal criar uma meta, o progresso aparece aqui.',
@@ -396,7 +396,7 @@ class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
               padding: pagePadding.copyWith(top: 0),
               sliver: SliverToBoxAdapter(
                 child: FxEmptyState(
-                  icon: 'route',
+                  icon: FxIcons.rota,
                   title:
                       _filtro == trilhaFiltroConcluidas
                           ? 'Nenhuma trilha concluída'
@@ -496,11 +496,7 @@ class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
                           subtitle: Text(
                             '${trilhaStatusLabel(trilha.concluida)} · ${trilhaPercentLabel(trilha.percentualConclusao)}',
                           ),
-                          leading: FxIcon(
-                            name: trilha.concluida ? 'circle-check' : 'route',
-                            size: 18,
-                            color: primary,
-                          ),
+                          leading: Icon(trilha.concluida ? FxIcons.concluido : FxIcons.rota, size: 18, color: primary),
                           trailing: Text(trilhaValorAtualLabel(trilha)),
                         ),
                         if (trilhaProximoMarco(trilha) case final marco?)

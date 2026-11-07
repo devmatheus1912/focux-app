@@ -7,8 +7,8 @@ extension on _OnboardingWizardScreenState {
       title: wizardHelpTitle(),
       subtitle: wizardHelpSubtitle(),
       tips: [
-        FxHelpTip('Passos', wizardHelpPassosBody(), icon: 'route'),
-        FxHelpTip('Concluir', wizardHelpConcluirBody(), icon: 'circle-check'),
+        FxHelpTip('Passos', wizardHelpPassosBody(), icon: FxIcons.rota),
+        FxHelpTip('Concluir', wizardHelpConcluirBody(), icon: FxIcons.concluido),
       ],
     );
   }

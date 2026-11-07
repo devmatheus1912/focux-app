@@ -322,7 +322,7 @@ class _AlunoFeedbackVideoScreenState
           children: const [
             FxEmptyState(
               key: ValueKey('aluno-feedback-vazio'),
-              icon: 'spark',
+              icon: FxIcons.ia,
               title: 'Nenhum vídeo ainda',
               subtitle:
                   'Grave uma série do exercício e seu personal responde com a correção.',

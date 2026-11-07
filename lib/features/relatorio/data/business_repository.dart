@@ -12,8 +12,6 @@ class BusinessSnapshot {
   final int alunosAtivos;
   final int alunosTotal;
   final int inadimplentes;
-  final double dunningRecoveryPct;
-  final int dunningAbertas;
   final int pqlScore;
   final String pqlClassificacao;
   final int alunosPagantes;
@@ -33,8 +31,6 @@ class BusinessSnapshot {
     required this.alunosAtivos,
     required this.alunosTotal,
     required this.inadimplentes,
-    required this.dunningRecoveryPct,
-    required this.dunningAbertas,
     required this.pqlScore,
     required this.pqlClassificacao,
     this.alunosPagantes = 0,
@@ -53,8 +49,6 @@ class BusinessSnapshot {
     alunosAtivos: (j['alunosAtivos'] as num?)?.toInt() ?? 0,
     alunosTotal: (j['alunosTotal'] as num?)?.toInt() ?? 0,
     inadimplentes: (j['inadimplentes'] as num?)?.toInt() ?? 0,
-    dunningRecoveryPct: (j['dunningRecoveryPct'] as num?)?.toDouble() ?? 0,
-    dunningAbertas: (j['dunningAbertas'] as num?)?.toInt() ?? 0,
     pqlScore: (j['pqlScore'] as num?)?.toInt() ?? 0,
     pqlClassificacao: j['pqlClassificacao'] as String? ?? 'EARLY',
     alunosPagantes: (j['alunosPagantes'] as num?)?.toInt() ?? 0,

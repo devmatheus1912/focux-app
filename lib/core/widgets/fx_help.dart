@@ -6,7 +6,7 @@ import '../theme/fx_settings_layout.dart';
 import '../theme/shell_chrome.dart';
 import '../theme/tokens_strip.dart';
 import 'fx_home_sheet.dart';
-import 'fx_icon.dart';
+import '../theme/fx_icons.dart';
 
 /// Chrome canônico do ícone de ajuda — paridade Home (`DashboardHomeHeader` 36pt).
 abstract final class FxHelpChrome {
@@ -16,7 +16,7 @@ abstract final class FxHelpChrome {
   static const double glyphSize = FxSettingsLayout.iconSize;
   static const double gap = 3;
   static const double touchTarget = 48;
-  static const String iconName = 'help';
+  static const IconData icon = FxIcons.ajuda;
 }
 
 class FxHelpTip {
@@ -24,7 +24,7 @@ class FxHelpTip {
 
   final String title;
   final String body;
-  final String? icon;
+  final IconData? icon;
 }
 
 /// `?` no well circular da Home. Use em todo header e ajuda inline.
@@ -48,7 +48,7 @@ class FxHelpIconButton extends StatelessWidget {
       button: true,
       label: tooltip,
       child: ShellHeaderIconButton(
-        icon: FxHelpChrome.iconName,
+        icon: FxHelpChrome.icon,
         size: size,
         tooltip: tooltip,
         onTap: onTap,
@@ -121,11 +121,7 @@ class FxHelpSheetFrame extends StatelessWidget {
 
     return FxHomeSheetScaffold(
       isDark: isDark,
-      leading: FxIcon(
-        name: FxHelpChrome.iconName,
-        color: brand,
-        size: FxHelpChrome.glyphSize,
-      ),
+      leading: Icon(FxHelpChrome.icon, color: brand, size: FxHelpChrome.glyphSize),
       title: title,
       subtitle: subtitle,
       child: Column(
@@ -180,11 +176,7 @@ class FxHelpTipRow extends StatelessWidget {
             if (iconName != null) ...[
               Padding(
                 padding: const EdgeInsets.only(top: 2),
-                child: FxIcon(
-                  name: iconName,
-                  size: FxSettingsLayout.iconSize,
-                  color: brand,
-                ),
+                child: Icon(iconName, size: FxSettingsLayout.iconSize, color: brand),
               ),
               const SizedBox(width: FxSettingsLayout.iconGap),
             ],

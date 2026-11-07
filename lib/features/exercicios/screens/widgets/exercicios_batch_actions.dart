@@ -50,7 +50,7 @@ class ExerciciosBatchActions extends StatelessWidget {
               ),
               IconButton(
                 tooltip: 'Favoritar',
-                icon: const Icon(FxIcons.estrelaAtiva),
+                icon: const Icon(FxIcons.estrela),
                 onPressed: onFavorite,
               ),
               IconButton(

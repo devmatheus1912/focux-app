@@ -29,7 +29,7 @@ void main() {
     expect(screen, contains('_CartaoMensalidade'));
     expect(screen, contains('FxStatusPill'));
     expect(screen, contains('FxLiquidSecondaryButton'));
-    expect(screen, contains("icon: 'more'"));
+    expect(screen, contains('FxIcons.maisVertical'));
     expect(screen, contains('financeiroCobrarEscolha'));
     expect(screen, isNot(contains('Mais ações')));
     expect(screen, isNot(contains('OperationalMetricTile')));

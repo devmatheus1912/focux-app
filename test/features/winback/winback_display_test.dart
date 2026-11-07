@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/winback/data/winback_repository.dart';
 import 'package:focux_app/features/winback/utils/winback_display.dart';
+import 'package:focux_app/core/theme/fx_icons.dart';
 
 void main() {
   test('winbackTipoLabel em PT-BR', () {
@@ -16,9 +17,9 @@ void main() {
     expect(winbackAlunoLabel('Ana'), 'Ana');
     expect(winbackAlunoLabel('  '), 'Aluno');
     expect(winbackAlunoLabel(null), 'Aluno');
-    expect(winbackFxIcon('ALUNO_INATIVO_7D'), 'bell');
-    expect(winbackFxIcon('ALUNO_INATIVO_30D'), 'trend');
-    expect(winbackFxIcon('ALUNO_INATIVO_60D'), 'alert-triangle');
+    expect(winbackFxIcon('ALUNO_INATIVO_7D'), FxIcons.notificacao);
+    expect(winbackFxIcon('ALUNO_INATIVO_30D'), FxIcons.grafico);
+    expect(winbackFxIcon('ALUNO_INATIVO_60D'), FxIcons.alerta);
     expect(
       winbackWhenLabel('2026-09-01T14:05:00', now: DateTime(2026, 9, 24)),
       '01/09 às 14:05',

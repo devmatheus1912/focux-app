@@ -29,6 +29,9 @@ import '../../../core/widgets/skeleton_loader.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../financeiro/widgets/financeiro_linhas_estado.dart';
+import '../../financeiro/data/financeiro_repository.dart';
+import '../../financeiro/utils/financeiro_hub_display.dart';
+import '../../../core/utils/pt_br_display.dart';
 import '../../perfil/providers/perfil_provider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../utils/recorrencia_sugestao.dart';
@@ -55,7 +58,11 @@ class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
   final _searchFocus = FocusNode();
   Timer? _debounce;
   var _query = '';
-  var _filtro = RecorrenciaHubFiltro.todos;
+  // Abre nas ativas: cancelada e pausada ficam a um toque.
+  var _filtro = RecorrenciaHubFiltro.ativa;
+
+  /// O usuário trocou o filtro (ou já caímos em "Todas"): não volta sozinho.
+  var _filtroEscolhido = false;
   List<RecorrenciaAssinatura> _items = [];
   var _page = 0;
   var _hasMore = false;
@@ -111,6 +118,15 @@ class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
         status: recorrenciaHubFiltroStatus(_filtro),
       );
       if (!mounted) return;
+      if (reset &&
+          pagina.content.isEmpty &&
+          _query.isEmpty &&
+          _filtro == RecorrenciaHubFiltro.ativa &&
+          !_filtroEscolhido) {
+        _filtroEscolhido = true;
+        _filtro = RecorrenciaHubFiltro.todos;
+        return await _load(reset: true);
+      }
       setState(() {
         if (reset) {
           _items = pagina.content;
@@ -145,7 +161,7 @@ class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
 
   bool get _mostrarFiltros => recorrenciaMostrarFiltros(
     temItens: _items.isNotEmpty,
-    filtroAtivo: _filtro != RecorrenciaHubFiltro.todos,
+    filtroAtivo: _filtro != RecorrenciaHubFiltro.todos && _filtro != RecorrenciaHubFiltro.ativa,
     buscaAtiva: _query.isNotEmpty,
   );
 
@@ -258,6 +274,7 @@ class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
                         isDark: chrome.isDark,
                         onTap: () {
                           if (_filtro == filtro) return;
+                          _filtroEscolhido = true;
                           setState(() => _filtro = filtro);
                           _load(reset: true);
                         },
@@ -290,7 +307,7 @@ class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
   List<Widget> _cabecalhoDeEstado() => const [
     FinanceiroChavePixLinha(soSeFaltar: true),
     SizedBox(height: TokensStrip.s2),
-    FinanceiroCobrancaAutoLinha(),
+    FinanceiroLembretesLinha(),
     SizedBox(height: TokensStrip.s4),
   ];
 
@@ -315,8 +332,8 @@ class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
                   FxEmptyState(
                     icon:
                         _query.isEmpty && _filtro == RecorrenciaHubFiltro.todos
-                            ? 'coin'
-                            : 'search',
+                            ? FxIcons.dinheiro
+                            : FxIcons.buscar,
                     title:
                         _query.isEmpty && _filtro == RecorrenciaHubFiltro.todos
                             ? S.of(context).recorrenciaVazioTitulo

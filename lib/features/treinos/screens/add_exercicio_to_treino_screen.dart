@@ -271,7 +271,7 @@ class _AddExercicioToTreinoScreenState
                               return const SkeletonList(count: 4);
                             }
                             return FxEmptyState(
-                              icon: 'dumbbell',
+                              icon: FxIcons.treino,
                               title: 'Biblioteca padrão pronta para usar',
                               subtitle:
                                   pickerHints.emptyLibraryHint ??

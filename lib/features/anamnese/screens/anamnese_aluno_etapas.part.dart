@@ -190,7 +190,7 @@ extension on _AnamneseAlunoScreenState {
     caption: s.anamneseAlunoHabitosTexto,
     children: [
       FxSettingsTile(
-        fxIcon: 'moon',
+        icon: FxIcons.sono,
         label: s.anamneseAlunoHorasSono,
         value:
             _sonoHoras == null
@@ -285,7 +285,7 @@ extension on _AnamneseAlunoScreenState {
         ),
         if (faltaObjetivo) pendencia(s.anamneseAlunoFaltaObjetivo),
         FxSettingsTile(
-          fxIcon: 'calendar',
+          icon: FxIcons.calendario,
           label: s.anamneseAlunoDias,
           value:
               _dispSemanal == null

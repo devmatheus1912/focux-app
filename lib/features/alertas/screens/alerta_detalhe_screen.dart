@@ -34,6 +34,7 @@ import '../utils/alerta_detalhe_display.dart';
 import '../widgets/alerta_detalhe_help_sheet.dart';
 import '../widgets/alerta_detalhe_situacao.dart';
 import '../widgets/alerta_enviar_mensagem_sheet.dart';
+import '../../../core/theme/fx_icons.dart';
 
 part 'alerta_detalhe_screen_nav.part.dart';
 
@@ -278,7 +279,7 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
                               ),
                               const SizedBox(height: TokensStrip.s4),
                               FxEmptyState(
-                                icon: 'alert-triangle',
+                                icon: FxIcons.alerta,
                                 title: 'Sem dados deste alerta',
                                 subtitle:
                                     'Não encontramos o detalhe agora. Puxe para atualizar.',

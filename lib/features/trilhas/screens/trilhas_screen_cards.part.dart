@@ -344,14 +344,14 @@ class _TrilhasListBody extends StatelessWidget {
           const SizedBox(height: TokensStrip.s5),
           if (trilhas.isEmpty)
             const FxEmptyState(
-              icon: 'route',
+              icon: FxIcons.rota,
               title: 'Nenhuma trilha atribuída',
               subtitle:
                   'Crie uma meta com etapas para acompanhar o progresso deste aluno.',
             )
           else if (visiveis.isEmpty)
             FxEmptyState(
-              icon: 'route',
+              icon: FxIcons.rota,
               title:
                   filtro == trilhaFiltroConcluidas
                       ? 'Nenhuma trilha concluída'

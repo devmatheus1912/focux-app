@@ -1,3 +1,6 @@
+import 'package:flutter/widgets.dart';
+
+import '../../../core/theme/fx_icons.dart';
 import '../data/ferramentas_catalogo_models.dart';
 
 /// Deep link helper: `/ferramentas/hub/:id?aba=`
@@ -8,7 +11,7 @@ String ferramentasHubLocation(String itemId, {String? abaId}) {
 }
 
 /// Ícones FxIcon por rota/legacy — pele, não lista de ferramentas.
-String ferramentasIconFor(CatalogoEntrada entrada) {
+IconData ferramentasIconFor(CatalogoEntrada entrada) {
   final keys = <String>[
     entrada.id.toLowerCase(),
     ...entrada.legacyIds.map((e) => e.toLowerCase()),
@@ -27,74 +30,75 @@ String ferramentasIconFor(CatalogoEntrada entrada) {
       }
     }
   }
-  return 'spark';
+  return FxIcons.ia;
 }
 
-const _byKey = <String, String>{
-  'exercicios': 'dumbbell',
-  '/exercicios': 'dumbbell',
-  'feed': 'article',
-  '/feed': 'article',
-  'habitos': 'flame',
-  '/habitos': 'flame',
-  'desafios': 'target',
-  '/desafios': 'target',
-  'leads': 'trend',
-  '/leads': 'trend',
-  'indique': 'users',
-  'referral': 'users',
-  '/referral': 'users',
-  'lead-publico': 'users',
-  'lead_publico': 'users',
-  'leads-publicos': 'users',
-  '/leads-publicos': 'users',
-  'captacao': 'users',
-  'captação': 'users',
-  'recuperacao': 'route',
-  'winback': 'route',
-  '/winback': 'route',
-  'landing': 'sun',
-  '/perfil/landing-editor': 'sun',
-  'nps': 'star',
-  '/nps': 'star',
-  'ofertas': 'spark',
-  '/ofertas-upsell': 'spark',
-  'pacotes': 'coin',
-  '/pacotes': 'coin',
-  'loja': 'pix',
-  '/loja': 'pix',
-  'vendas': 'dollar-sign',
-  'receita-recorrente': 'trend',
-  'receita_recorrente': 'trend',
-  '/relatorio/business': 'trend',
-  'cobranca-auto': 'alert-triangle',
-  'cobranca_auto': 'alert-triangle',
-  '/dunning': 'alert-triangle',
-  'recorrencia': 'calendar',
-  '/recorrencia': 'calendar',
-  'financeiro': 'dollar-sign',
-  'marca-propria': 'moon',
-  'white-label': 'moon',
-  '/white-label': 'moon',
-  'automacoes': 'zap',
-  '/automacoes': 'zap',
-  'equipe': 'users',
-  '/perfil/equipe': 'users',
-  'grupo': 'chat',
-  '/grupo-aulas': 'chat',
-  'configuracao-inicial': 'arrow-left',
-  'onboarding': 'arrow-left',
-  '/onboarding/wizard': 'arrow-left',
-  'qualidade': 'circle-check',
-  '/dashboard/qualidade': 'circle-check',
-  'broadcasts': 'bell',
-  '/broadcasts': 'bell',
-  'operacao': 'dumbbell',
-  'retenção': 'route',
-  'retencao': 'route',
-  'engajamento': 'flame',
-  'studio': 'moon',
-  'conta': 'users',
+/// Ícone pelo significado da ferramenta (não pelo desenho que "parecia").
+const _byKey = <String, IconData>{
+  'exercicios': FxIcons.treino,
+  '/exercicios': FxIcons.treino,
+  'feed': FxIcons.feed,
+  '/feed': FxIcons.feed,
+  'habitos': FxIcons.habito,
+  '/habitos': FxIcons.habito,
+  'desafios': FxIcons.trofeu,
+  '/desafios': FxIcons.trofeu,
+  'leads': FxIcons.megafone,
+  '/leads': FxIcons.megafone,
+  'indique': FxIcons.presente,
+  'referral': FxIcons.presente,
+  '/referral': FxIcons.presente,
+  'lead-publico': FxIcons.megafone,
+  'lead_publico': FxIcons.megafone,
+  'leads-publicos': FxIcons.megafone,
+  '/leads-publicos': FxIcons.megafone,
+  'captacao': FxIcons.megafone,
+  'captação': FxIcons.megafone,
+  'recuperacao': FxIcons.historico,
+  'winback': FxIcons.historico,
+  '/winback': FxIcons.historico,
+  'landing': FxIcons.site,
+  '/perfil/landing-editor': FxIcons.site,
+  'nps': FxIcons.estrela,
+  '/nps': FxIcons.estrela,
+  'ofertas': FxIcons.oferta,
+  '/ofertas-upsell': FxIcons.oferta,
+  'pacotes': FxIcons.etiqueta,
+  '/pacotes': FxIcons.etiqueta,
+  'loja': FxIcons.loja,
+  '/loja': FxIcons.loja,
+  'vendas': FxIcons.loja,
+  'receita-recorrente': FxIcons.grafico,
+  'receita_recorrente': FxIcons.grafico,
+  '/relatorio/business': FxIcons.grafico,
+  'cobranca-auto': FxIcons.alerta,
+  'cobranca_auto': FxIcons.alerta,
+  '/dunning': FxIcons.alerta,
+  'recorrencia': FxIcons.repetir,
+  '/recorrencia': FxIcons.repetir,
+  'financeiro': FxIcons.pagamento,
+  'marca-propria': FxIcons.paleta,
+  'white-label': FxIcons.paleta,
+  '/white-label': FxIcons.paleta,
+  'automacoes': FxIcons.raio,
+  '/automacoes': FxIcons.raio,
+  'equipe': FxIcons.grupo,
+  '/perfil/equipe': FxIcons.grupo,
+  'grupo': FxIcons.conversas,
+  '/grupo-aulas': FxIcons.conversas,
+  'configuracao-inicial': FxIcons.checklist,
+  'onboarding': FxIcons.checklist,
+  '/onboarding/wizard': FxIcons.checklist,
+  'qualidade': FxIcons.verificado,
+  '/dashboard/qualidade': FxIcons.verificado,
+  'broadcasts': FxIcons.megafone,
+  '/broadcasts': FxIcons.megafone,
+  'operacao': FxIcons.treino,
+  'retenção': FxIcons.alerta,
+  'retencao': FxIcons.alerta,
+  'engajamento': FxIcons.fogo,
+  'studio': FxIcons.paleta,
+  'conta': FxIcons.pessoa,
 };
 
 /// Normaliza `rotaApp` do BFF para path GoRouter.
@@ -117,9 +121,9 @@ String? normalizeFerramentasRotaApp(String? rotaApp) {
     case '/cobranca-auto':
     case '/cobranca':
     case '/financeiro/cobranca-auto':
-      return '/dunning';
+      return '/financeiro?aba=mensalidades&filtro=atrasadas';
     case '/financeiro/recorrencia':
-      return '/recorrencia';
+      return '/financeiro?aba=recorrencias';
     case '/financeiro/receita':
       return '/relatorio/business';
     case '/retencao/recuperacao':

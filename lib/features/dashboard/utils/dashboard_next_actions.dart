@@ -3,6 +3,7 @@ import '../data/command_action_item.dart';
 import '../data/command_center_data.dart';
 import 'dashboard_command_copy.dart';
 import 'dashboard_screen_helpers.dart';
+import '../../../core/theme/fx_icons.dart';
 
 export '../data/command_action_item.dart';
 
@@ -60,7 +61,7 @@ List<CommandActionItem> buildDashboardNextActions({
                   )
               ? null
               : CommandActionItem(
-                icon: 'zap',
+                icon: FxIcons.raio,
                 title: dashboardClampActionCopy(
                   dashboardFormatActionCopy(
                     queueCandidates.first.titulo.isNotEmpty
@@ -81,12 +82,12 @@ List<CommandActionItem> buildDashboardNextActions({
       CommandActionItem(
         icon:
             leadRiskStudent != null
-                ? 'users'
+                ? FxIcons.grupo
                 : riskOwnedByDayFocus
-                ? 'route'
+                ? FxIcons.rota
                 : hideRiskSummary
-                ? 'zap'
-                : 'alert-triangle',
+                ? FxIcons.raio
+                : FxIcons.alerta,
         title:
             leadRiskStudent != null
                 ? fxTitleCaseName(leadRiskStudent.nome)
@@ -114,7 +115,7 @@ List<CommandActionItem> buildDashboardNextActions({
       ),
     if (cobrancasPendentes > 0)
       CommandActionItem(
-        icon: 'dollar-sign',
+        icon: FxIcons.dinheiro,
         title: 'Cobrar pendências',
         subtitle:
             '$cobrancasPendentes mensalidade${cobrancasPendentes == 1 ? '' : 's'} no radar',
@@ -124,7 +125,7 @@ List<CommandActionItem> buildDashboardNextActions({
       ),
     if (unreadCount > 0)
       CommandActionItem(
-        icon: 'message-circle',
+        icon: FxIcons.chat,
         title: 'Responder mensagens',
         subtitle:
             '$unreadCount conversa${unreadCount == 1 ? '' : 's'} aguardando',
@@ -134,7 +135,7 @@ List<CommandActionItem> buildDashboardNextActions({
       ),
     if (copilotAcoes.isNotEmpty)
       CommandActionItem(
-        icon: 'zap',
+        icon: FxIcons.raio,
         title: dashboardClampActionCopy(
           dashboardFormatActionCopy(
             copilotAcoes.first.titulo.isNotEmpty
@@ -150,7 +151,7 @@ List<CommandActionItem> buildDashboardNextActions({
     if (queueAction != null && !showRiskP0) queueAction,
     if (agendaHoje > 0)
       CommandActionItem(
-        icon: 'calendar',
+        icon: FxIcons.calendario,
         title: 'Preparar agenda',
         subtitle: '$agendaHoje compromisso${agendaHoje == 1 ? '' : 's'} hoje',
         route: '/agenda',
@@ -161,7 +162,7 @@ List<CommandActionItem> buildDashboardNextActions({
   if (nextActions.isEmpty && !isCommandPreparing) {
     nextActions.add(
       const CommandActionItem(
-        icon: 'plus',
+        icon: FxIcons.adicionar,
         title: 'Criar próxima oportunidade',
         subtitle: 'Aluno, treino ou lead antes do pico',
         route: '/alunos/novo',
@@ -185,7 +186,7 @@ CommandActionItem sheetItemFromFila(FilaAcaoResumo action) {
     ctaLabel: action.ctaLabel,
   );
   return CommandActionItem(
-    icon: 'zap',
+    icon: FxIcons.raio,
     title:
         radarName ??
         dashboardClampActionCopy(
@@ -354,7 +355,7 @@ List<CommandActionItem> buildDashboardSheetActions({
     final isLead = radarIndex == 0;
     radar.add(
       CommandActionItem(
-        icon: 'users',
+        icon: FxIcons.grupo,
         title: displayName,
         subtitle: dashboardRiskStudentSheetSubtitle(
           isLead: isLead,
@@ -422,7 +423,7 @@ List<CommandActionItem> _collapseRepeatedImpact(List<CommandActionItem> items) {
       if (id == null || !emittedAlunos.add(id)) continue;
       out.add(
         CommandActionItem(
-          icon: 'users',
+          icon: FxIcons.grupo,
           title: _collapsedStudentLabel(g),
           subtitle: 'Abrir conversa',
           route: g.route,

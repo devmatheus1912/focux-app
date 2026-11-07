@@ -255,7 +255,7 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
             icone: FxIcons.notificacao,
           ),
           FxActionItem(
-            valor: '/dunning',
+            valor: '/financeiro?aba=mensalidades&filtro=atrasadas',
             rotulo: s.retencaoEntradaCobranca,
             descricao: s.retencaoEntradaCobrancaSub,
             icone: FxIcons.repetir,
@@ -335,7 +335,7 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
                               children: [
                                 const SizedBox(height: 48),
                                 FxEmptyState(
-                                  icon: 'activity',
+                                  icon: FxIcons.atividade,
                                   title: s.retencaoVazioTitulo,
                                   subtitle: s.retencaoVazioTexto,
                                   action: FxEmptyAction(

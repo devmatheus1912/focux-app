@@ -423,7 +423,7 @@ class _TrilhasScreenState extends ConsumerState<TrilhasScreen> {
               onTap: () => showTrilhasHelpSheet(context),
             ),
             ShellHeaderIconButton(
-              icon: 'plus',
+              icon: FxIcons.adicionar,
               tooltip: 'Atribuir trilha',
               onTap: _criarTrilha,
             ),

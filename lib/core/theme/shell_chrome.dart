@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../widgets/fx_icon.dart';
 import 'design_tokens.dart';
 import 'tokens_strip.dart';
 
@@ -135,7 +134,7 @@ class ShellHeaderIconButton extends StatelessWidget {
     this.tooltip,
   });
 
-  final String icon;
+  final IconData icon;
   final VoidCallback? onTap;
   final double size;
   final int badgeCount;
@@ -163,7 +162,7 @@ class ShellHeaderIconButton extends StatelessWidget {
             clipBehavior: Clip.none,
             alignment: Alignment.center,
             children: [
-              FxIcon(name: icon, size: size * 0.48, color: chrome.ink),
+              Icon(icon, size: size * 0.48, color: chrome.ink),
               if (badgeCount > 0)
                 Positioned(
                   top: compact ? -1 : size * 0.06,

@@ -218,7 +218,6 @@ void main() {
                     onPressed:
                         () => showVencimentoSheet(
                           context,
-                          mesReferencia: DateTime(2026, 10, 1),
                           atual: DateTime(2026, 10, 10),
                           hoje: DateTime(2026, 10, 27),
                         ),

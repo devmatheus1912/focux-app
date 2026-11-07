@@ -173,11 +173,7 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
                               ? 'Remover dos favoritos'
                               : 'Adicionar aos favoritos',
                       onPressed: () => _toggleFavorito(context, ex.favoritado),
-                      icon: FxIcon(
-                        name: 'star',
-                        size: 22,
-                        color: ex.favoritado ? EagleTokens.warn : mute,
-                      ),
+                      icon: Icon(ex.favoritado ? FxIcons.estrelaAtiva : FxIcons.estrela, size: 22, color: ex.favoritado ? EagleTokens.warn : mute),
                     ),
                   ],
               orElse: () => const <Widget>[],

@@ -38,7 +38,7 @@ void main() {
     final tonal =
         File('lib/core/widgets/fx_tonal_button.dart').readAsStringSync();
     expect(link, contains('FxTonalButton('));
-    expect(link, contains("'chevron-right'"));
+    expect(link, contains('FxIcons.chevronDireitaPequeno'));
     expect(tonal, contains('alturaToque = 48'));
   });
 

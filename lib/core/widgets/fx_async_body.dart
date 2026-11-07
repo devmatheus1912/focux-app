@@ -5,6 +5,7 @@ import '../utils/friendly_error.dart';
 import 'fx_empty_state.dart';
 import 'fx_error_state.dart';
 import 'skeleton_loader.dart';
+import '../theme/fx_icons.dart';
 
 /// Home-parity AsyncValue body: skeleton → FxErrorState → empty → data.
 class FxAsyncBody<T> extends StatelessWidget {
@@ -68,7 +69,7 @@ class FxAsyncBody<T> extends StatelessWidget {
         if (isEmpty != null && isEmpty!(data)) {
           return empty ??
               const FxEmptyState(
-                icon: 'inbox',
+                icon: FxIcons.caixaEntrada,
                 title: 'Nada por aqui',
                 subtitle: 'Quando houver dados, eles aparecem nesta tela.',
               );

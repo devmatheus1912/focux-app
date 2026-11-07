@@ -345,7 +345,7 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     FxEmptyState(
-                      icon: 'dollar-sign',
+                      icon: FxIcons.dinheiro,
                       title: 'Planos em sincronização',
                       subtitle:
                           'Não carregamos os planos agora. Tente de novo em instantes.',

@@ -13,6 +13,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/referral_info.dart';
 import '../utils/referral_display.dart';
+import '../../../core/theme/fx_icons.dart';
 
 Color referralToneColor(ReferralTone tone, Color neutral) {
   switch (tone) {
@@ -74,7 +75,7 @@ class ReferralBody extends StatelessWidget {
         const SizedBox(height: TokensStrip.s2),
         if (info.indicacoes.isEmpty)
           FxEmptyState(
-            icon: 'users',
+            icon: FxIcons.grupo,
             title: l10n.referralListEmptyTitle,
             subtitle: l10n.referralListEmptySubtitle,
             quiet: true,

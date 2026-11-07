@@ -303,7 +303,7 @@ class _EvolucaoComparativoScreenState
           ),
           children: [
             FxEmptyState(
-              icon: 'trend',
+              icon: FxIcons.grafico,
               title: 'Nenhuma avaliação para comparar',
               subtitle:
                   'Registre ao menos duas avaliações físicas para ver a evolução.',

@@ -366,7 +366,7 @@ class SaudeConexaoCard extends StatelessWidget {
                   shape: BoxShape.circle,
                   color: primary.withValues(alpha: 0.14),
                 ),
-                child: Icon(FxIcons.favoritoAtivo, size: 20, color: chrome.ink),
+                child: Icon(FxIcons.saudeVida, size: 20, color: chrome.ink),
               ),
               const SizedBox(width: 12),
               Expanded(

@@ -210,7 +210,7 @@ class _Conteudo extends StatelessWidget {
   static IconData _icone(OnboardingIcone icone) => switch (icone) {
     OnboardingIcone.treino => FxIcons.treino,
     OnboardingIcone.cobranca => FxIcons.pagamento,
-    OnboardingIcone.atencao => FxIcons.notificacaoAtiva,
+    OnboardingIcone.atencao => FxIcons.notificacaoTocando,
     OnboardingIcone.video => FxIcons.playCirculo,
     OnboardingIcone.evolucao => FxIcons.subindo,
     OnboardingIcone.chat => FxIcons.chat,

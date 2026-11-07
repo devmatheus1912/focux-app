@@ -228,7 +228,7 @@ class _AutomacoesScreenState extends ConsumerState<AutomacoesScreen> {
       message: pausar
           ? automacaoPausarConfirmMessage()
           : automacaoRetomarConfirmMessage(),
-      icon: pausar ? FxIcons.pausarAtivo : FxIcons.playAtivo,
+      icon: pausar ? FxIcons.pausar : FxIcons.play,
       confirmLabel: pausar ? 'Pausar' : 'Retomar',
     );
     if (!ok || !mounted) return null;

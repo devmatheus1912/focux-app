@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/theme/fx_icons.dart';
 
 Future<void> showTreinosListHelpSheet(BuildContext context) {
   return showFxHelpSheet(
@@ -11,27 +12,27 @@ Future<void> showTreinosListHelpSheet(BuildContext context) {
       FxHelpTip(
         'Semanas e Sessões',
         'Semanas são modelos de ficha completos ("Hipertrofia 4 dias"). Sessões são os treinos soltos da sua biblioteca.',
-        icon: 'calendar',
+        icon: FxIcons.calendario,
       ),
       FxHelpTip(
         'Novo modelo',
         'Crie por dias da semana ou salve a ficha de um aluno como modelo. As sessões nascem vazias para você preencher.',
-        icon: 'plus',
+        icon: FxIcons.adicionar,
       ),
       FxHelpTip(
         'Aplicar',
         'Dentro do modelo, "Aplicar em aluno" troca a ficha dele por uma cópia. Editar o modelo depois não muda quem já recebeu.',
-        icon: 'users',
+        icon: FxIcons.grupo,
       ),
       FxHelpTip(
         'Abrir e ações',
         'Toque no card para abrir. Nas sessões, o menu do card atribui, copia ou remove.',
-        icon: 'dumbbell',
+        icon: FxIcons.treino,
       ),
       FxHelpTip(
         'Seleção',
         'Segure um card ou use o checklist. A busca some e as ações sobem para a barra de baixo.',
-        icon: 'circle-check',
+        icon: FxIcons.concluido,
       ),
     ],
   );

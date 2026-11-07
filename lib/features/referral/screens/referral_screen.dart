@@ -23,6 +23,7 @@ import '../data/referral_repository.dart';
 import '../utils/referral_display.dart';
 import '../widgets/referral_body.dart';
 import '../widgets/referral_help_sheet.dart';
+import '../../../core/theme/fx_icons.dart';
 
 final referralRepositoryProvider = Provider(
   (ref) => ReferralRepository(ref.read(apiClientProvider)),
@@ -159,7 +160,7 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
                         children: [
                           const SizedBox(height: 48),
                           FxEmptyState(
-                            icon: 'users',
+                            icon: FxIcons.grupo,
                             title: l10n.referralNoCodeTitle,
                             subtitle: l10n.referralNoCodeSubtitle,
                             action: FxEmptyAction(

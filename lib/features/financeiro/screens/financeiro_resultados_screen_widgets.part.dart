@@ -315,29 +315,48 @@ class _SeletorDeMes extends StatelessWidget {
   }
 }
 
-/// Destaque do mês: o que entrou, sobre o que foi lançado.
+/// Destaque do mês: o que entrou no caixa (e de onde veio) e, ao lado, o
+/// previsto para o mês. Sem barra comparando as duas bases: o recebido conta
+/// pela data do pagamento e o previsto pelo mês da cobrança.
 class _BlocoQuantoEntrou extends StatelessWidget {
-  const _BlocoQuantoEntrou({required this.resumo, this.variacaoPct});
+  const _BlocoQuantoEntrou({
+    required this.resumo,
+    required this.mesTitulo,
+    this.variacaoPct,
+  });
 
   final ResumoMensal resumo;
+  final String mesTitulo;
   final int? variacaoPct;
 
   @override
   Widget build(BuildContext context) {
     final s = S.of(context);
+    final mes = mesTitulo.split(' ').first.toLowerCase();
     final variacao = variacaoPct;
-    final apoio = [
-      s.resultadosDeLancado(resumo.totalPrevisto.formatCompact()),
-      if (resumo.totalEmAberto.isPositive)
-        s.resultadosAReceber(resumo.totalEmAberto.formatCompact()),
-      if (variacao != null)
-        s.resultadosVariacao('${variacao > 0 ? '+' : ''}$variacao'),
+    // De onde veio o que entrou: só as partes que existem.
+    final partes = [
+      if (resumo.recebidoDoMes.isPositive)
+        s.resultadosParteDoMes(resumo.recebidoDoMes.formatCompact()),
       if (resumo.recebidoDeMesesAnteriores.isPositive)
-        s.financeiroDeMesesAnteriores(
-          resumo.recebidoDeMesesAnteriores.formatCompact(),
-        ),
-      if (resultadosRecebidoMaiorQueLancado(resumo)) s.resultadosExplicaRecebido,
+        s.resultadosParteAnteriores(resumo.recebidoDeMesesAnteriores.formatCompact()),
+      if (resumo.recebidoAdiantado.isPositive)
+        s.resultadosParteAdiantado(resumo.recebidoAdiantado.formatCompact()),
     ];
+    final apoio = [
+      if (partes.length > 1) partes.join(' · '),
+      if (variacao != null) s.resultadosVariacao('${variacao > 0 ? '+' : ''}$variacao'),
+      if (resumo.totalPrevisto.isPositive)
+        s.resultadosPrevisto(
+          mes,
+          resumo.totalPrevisto.formatCompact(),
+          resumo.pagoDoMes.formatCompact(),
+          resumo.emAbertoDoMes.formatCompact(),
+        ),
+      if (resumo.ticketMedio.isPositive)
+        s.resultadosTicketMedio(resumo.ticketMedio.formatCompact()),
+    ];
+    final titulo = s.resultadosEntrouNoCaixa(mes);
     final valor = resumo.totalRecebido.formatCompact();
     final sobre = fxPaletaSobreMarca(context);
     return Padding(
@@ -347,14 +366,11 @@ class _BlocoQuantoEntrou extends StatelessWidget {
       child: FxStripCard(
         marca: true,
         padding: const EdgeInsets.all(TokensStrip.s3),
-        semanticsLabel: '${s.resultadosQuantoEntrou} $valor. ${apoio.join('. ')}',
+        semanticsLabel: '$titulo $valor. ${apoio.join('. ')}',
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              s.resultadosQuantoEntrou,
-              style: FocuxHubTypography.chip(sobre.mute),
-            ),
+            Text(titulo, style: FocuxHubTypography.chip(sobre.mute)),
             const SizedBox(height: TokensStrip.s1),
             FittedBox(
               fit: BoxFit.scaleDown,
@@ -368,16 +384,6 @@ class _BlocoQuantoEntrou extends StatelessWidget {
                   letterSpacing: 0,
                   fontFeatures: const [FontFeature.tabularFigures()],
                 ),
-              ),
-            ),
-            const SizedBox(height: TokensStrip.s2),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(TokensStrip.s1),
-              child: LinearProgressIndicator(
-                minHeight: 6,
-                value: resultadosProgresso(resumo),
-                color: sobre.brand,
-                backgroundColor: sobre.brand.withValues(alpha: 0.12),
               ),
             ),
             for (final linha in apoio) ...[
@@ -411,7 +417,7 @@ class _BlocoQuemAtrasa extends StatelessWidget {
         title: s.resultadosQuemAtrasa,
         titleCase: false,
         subtitle: Text(atrasa ? '$alunos · $valor' : s.resultadosAtrasaAlunos(0)),
-        accent: atrasa ? EagleTokens.bad : null,
+        accent: atrasa ? (Theme.of(context).brightness == Brightness.dark ? EagleTokens.warnDark : EagleTokens.warn) : null,
         onTap: atrasa ? onTap : null,
       ),
     );

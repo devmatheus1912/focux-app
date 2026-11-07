@@ -30,6 +30,7 @@ import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/winback_repository.dart';
 import '../utils/winback_display.dart';
 import '../widgets/winback_acoes_sheet.dart';
+import '../../../core/theme/fx_icons.dart';
 
 final winbackRepositoryProvider = Provider(
   (ref) => WinbackRepository(ref.read(apiClientProvider)),
@@ -286,7 +287,7 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
                     children: [
                       const SizedBox(height: 48),
                       FxEmptyState(
-                        icon: 'bell',
+                        icon: FxIcons.notificacao,
                         title: _query.trim().isEmpty
                             ? S.of(context).winbackVazioTitulo
                             : winbackSearchEmptyTitle(_query),

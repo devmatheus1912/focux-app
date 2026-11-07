@@ -156,7 +156,7 @@ class _AutomacaoLogsSheetState extends State<_AutomacaoLogsSheet> {
             height: 280,
             child: logs.isEmpty
                 ? const FxEmptyState(
-                    icon: 'zap',
+                    icon: FxIcons.raio,
                     title: 'Nenhuma execução ainda',
                     subtitle:
                         'Quando o gatilho disparar, o histórico aparece aqui.',

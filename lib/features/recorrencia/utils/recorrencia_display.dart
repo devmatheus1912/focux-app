@@ -31,6 +31,9 @@ String recorrenciaSubtitle({
   String? proximaCobranca,
 }) {
   final label = recorrenciaStatusLabel(status);
+  // Cancelada não vence mais; pausada só volta a cobrar quando retomar.
+  final s = status.trim().toUpperCase();
+  if (s == 'CANCELADA' || s == 'PAUSADA') return label;
   final prox = proximaCobranca?.trim();
   if (prox == null || prox.isEmpty) return label;
   return '$label · Vence ${recorrenciaProximaValue(prox)}';

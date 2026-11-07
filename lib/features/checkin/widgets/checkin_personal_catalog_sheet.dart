@@ -138,7 +138,7 @@ class _CheckinCatalogSheetState extends State<_CheckinCatalogSheet> {
           ),
           if (_itens.isEmpty)
             FxEmptyState(
-              icon: 'users',
+              icon: FxIcons.grupo,
               title: 'Nenhum check-in nessa busca',
               subtitle: 'Tente outro nome ou limpe o filtro.',
             )

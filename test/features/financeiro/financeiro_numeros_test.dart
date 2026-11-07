@@ -40,67 +40,6 @@ void main() {
     });
   });
 
-  group('financeiroVencimentoSugerido', () {
-    test('mês corrente com dia 5 já passado vale hoje + 5 dias', () {
-      expect(
-        financeiroVencimentoSugerido(
-          mesReferenciaIso: '2026-10-01',
-          hoje: hoje,
-        ),
-        '2026-10-31',
-      );
-    });
-    test('mês corrente antes do dia 5 fica no dia 5', () {
-      expect(
-        financeiroVencimentoSugerido(
-          mesReferenciaIso: '2026-10-01',
-          hoje: DateTime(2026, 10, 3),
-        ),
-        '2026-10-05',
-      );
-    });
-    test('mês futuro fica no dia 5 do mês', () {
-      expect(
-        financeiroVencimentoSugerido(
-          mesReferenciaIso: '2026-11-01',
-          hoje: hoje,
-        ),
-        '2026-11-05',
-      );
-    });
-    test(
-      'mês passado fica no dia 5 daquele mês (nasce atrasada, de propósito)',
-      () {
-        expect(
-          financeiroVencimentoSugerido(
-            mesReferenciaIso: '2026-08-01',
-            hoje: hoje,
-          ),
-          '2026-08-05',
-        );
-      },
-    );
-    test('hoje + 5 atravessa a virada do mês', () {
-      expect(
-        financeiroVencimentoSugerido(
-          mesReferenciaIso: '2026-10-01',
-          hoje: DateTime(2026, 10, 29),
-        ),
-        '2026-11-03',
-      );
-    });
-    test('o vencimento sugerido nunca é anterior a hoje no mês corrente', () {
-      for (var dia = 1; dia <= 31; dia++) {
-        final h = DateTime(2026, 10, dia);
-        final iso = financeiroVencimentoSugerido(
-          mesReferenciaIso: '2026-10-01',
-          hoje: h,
-        );
-        expect(DateTime.parse(iso).isBefore(h), isFalse, reason: 'dia $dia');
-      }
-    });
-  });
-
   group('financeiroDiasDeAtraso', () {
     test('conta a partir do vencimento', () {
       expect(

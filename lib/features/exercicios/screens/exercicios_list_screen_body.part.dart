@@ -52,7 +52,7 @@ extension on _ExerciciosListScreenState {
         physics: const AlwaysScrollableScrollPhysics(),
         children: [
           FxEmptyState(
-            icon: 'dumbbell',
+            icon: FxIcons.treino,
             title: 'Nenhum exercício seu ainda.',
             subtitle:
                 widget.embedded
@@ -75,7 +75,7 @@ extension on _ExerciciosListScreenState {
         physics: const AlwaysScrollableScrollPhysics(),
         children: [
           FxEmptyState(
-            icon: 'dumbbell',
+            icon: FxIcons.treino,
             title: 'Sua biblioteca está vazia',
             subtitle:
                 'Carregue a biblioteca curada ou cadastre o primeiro exercício.',
@@ -97,7 +97,7 @@ extension on _ExerciciosListScreenState {
         physics: const AlwaysScrollableScrollPhysics(),
         children: [
           FxEmptyState(
-            icon: 'search',
+            icon: FxIcons.buscar,
             title: 'Nenhum exercício encontrado',
             subtitle:
                 'Ajuste os filtros ou a busca para ver outros exercícios.',

@@ -142,7 +142,7 @@ class _AssinaturaReviewScreenState extends State<AssinaturaReviewScreen> {
         body:
             price.isEmpty
                 ? FxEmptyState(
-                  icon: 'dollar-sign',
+                  icon: FxIcons.dinheiro,
                   title: assinaturaReviewEmptyTitle(),
                   subtitle: assinaturaReviewEmptySubtitle(),
                   action: FxEmptyAction(
@@ -211,7 +211,7 @@ class _AssinaturaReviewScreenState extends State<AssinaturaReviewScreen> {
                         child: Row(
                           children: [
                             Icon(
-                              FxIcons.concluidoAtivo,
+                              FxIcons.concluido,
                               size: 18,
                               color: accent,
                             ),

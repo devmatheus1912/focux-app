@@ -1,5 +1,7 @@
+import 'package:flutter/widgets.dart';
 import '../data/evolucao_repository.dart';
 import '../../../l10n/pt.dart';
+import '../../../core/theme/fx_icons.dart';
 
 String engajamentoTipoLabel(String? tipo) {
   switch ((tipo ?? '').trim().toUpperCase()) {
@@ -21,18 +23,18 @@ String engajamentoTipoLabel(String? tipo) {
   }
 }
 
-String engajamentoFxIcon(String? tipo) {
+IconData engajamentoFxIcon(String? tipo) {
   switch ((tipo ?? '').trim().toUpperCase()) {
     case 'TREINO':
     case 'TREINO_INICIADO':
     case 'CHECKIN_CONCLUIDO':
-      return 'dumbbell';
+      return FxIcons.treino;
     case 'MEDIDA':
-      return 'trend';
+      return FxIcons.grafico;
     case 'MENSAGEM':
-      return 'chat';
+      return FxIcons.chat;
     default:
-      return 'calendar';
+      return FxIcons.calendario;
   }
 }
 

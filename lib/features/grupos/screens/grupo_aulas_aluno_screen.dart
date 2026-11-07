@@ -304,7 +304,7 @@ class _GrupoAulasAlunoScreenState extends ConsumerState<GrupoAulasAlunoScreen> {
               children: [
                 const SizedBox(height: 48),
                 FxEmptyState(
-                  icon: searching ? 'search' : 'calendar',
+                  icon: searching ? FxIcons.buscar : FxIcons.calendario,
                   title: searching
                       ? 'Nenhuma aula encontrada'
                       : 'Nenhuma aula disponível',

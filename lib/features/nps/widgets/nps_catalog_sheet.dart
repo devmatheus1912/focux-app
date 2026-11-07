@@ -136,7 +136,7 @@ class _NpsCatalogSheetState extends State<_NpsCatalogSheet> {
           ),
           if (npsItemsForFiltro(_itens, widget.filtro).isEmpty)
             FxEmptyState(
-              icon: 'star',
+              icon: FxIcons.estrela,
               title:
                   widget.filtro == npsFiltroDetratores
                       ? 'Nenhum detrator nesse recorte'

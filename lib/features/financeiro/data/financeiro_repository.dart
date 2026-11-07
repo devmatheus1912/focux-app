@@ -239,6 +239,19 @@ class ResumoMensal {
   /// Parte do recebido no mês que veio de mensalidades de meses anteriores.
   final FxMoney recebidoDeMesesAnteriores;
 
+  /// Parte do recebido no mês que é de meses seguintes (pago adiantado).
+  final FxMoney recebidoAdiantado;
+
+  /// Do lançado para o mês (por referência), quanto já está pago.
+  final FxMoney pagoDoMes;
+
+  /// Recebido no mês que é do próprio mês.
+  FxMoney get recebidoDoMes =>
+      (totalRecebido - recebidoDeMesesAnteriores - recebidoAdiantado).positiveOrZero;
+
+  /// Do previsto para o mês, o que ainda falta (em aberto + atrasado do mês).
+  FxMoney get emAbertoDoMes => (totalPrevisto - pagoDoMes).positiveOrZero;
+
   ResumoMensal({
     required Object? totalRecebido,
     required Object? totalPrevisto,
@@ -249,7 +262,11 @@ class ResumoMensal {
     Object? totalAtrasado = 0,
     this.quantidadeAtrasadas = 0,
     Object? recebidoDeMesesAnteriores = 0,
-  }) : totalRecebido = FxMoney.parse(totalRecebido),
+    Object? recebidoAdiantado = 0,
+    Object? pagoDoMes = 0,
+  }) : recebidoAdiantado = FxMoney.parse(recebidoAdiantado),
+       pagoDoMes = FxMoney.parse(pagoDoMes),
+       totalRecebido = FxMoney.parse(totalRecebido),
        totalPrevisto = FxMoney.parse(totalPrevisto),
        ticketMedio = FxMoney.parse(ticketMedio),
        acumuladoAnual = FxMoney.parse(acumuladoAnual),
@@ -269,6 +286,8 @@ class ResumoMensal {
     totalAtrasado: j['totalAtrasado'] ?? 0,
     quantidadeAtrasadas: (j['quantidadeAtrasadas'] as num? ?? 0).toInt(),
     recebidoDeMesesAnteriores: j['recebidoDeMesesAnteriores'] ?? 0,
+    recebidoAdiantado: j['recebidoAdiantado'] ?? 0,
+    pagoDoMes: j['pagoDoMes'] ?? 0,
   );
 }
 
@@ -451,13 +470,12 @@ class FinanceiroRepository {
     FxMoney? valor,
     String? mesReferencia,
     String? vencimento,
-    String? status,
   }) async {
+    // Sem status: ele vem da regra de atraso no backend.
     final body = <String, dynamic>{};
     if (valor != null) body['valor'] = valor.wire;
     if (mesReferencia != null) body['mesReferencia'] = mesReferencia;
     if (vencimento != null) body['vencimento'] = vencimento;
-    if (status != null) body['status'] = status;
     final r = await _dio.put('/api/financeiro/mensalidades/$id', data: body);
     return Mensalidade.fromJson(r.data as Map<String, dynamic>);
   }

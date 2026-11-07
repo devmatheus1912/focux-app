@@ -223,7 +223,7 @@ class _GaleriaScreenState extends ConsumerState<GaleriaScreen> {
                                           .onDrag,
                                   children: [
                                     FxEmptyState(
-                                      icon: 'image',
+                                      icon: FxIcons.imagem,
                                       title: 'Nenhuma foto ainda',
                                       subtitle:
                                           'Adicione até $galeriaMaxFotos fotos para o seu perfil público.',

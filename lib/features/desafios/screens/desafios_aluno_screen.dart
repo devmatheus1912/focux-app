@@ -294,7 +294,7 @@ class _DesafiosAlunoScreenState extends ConsumerState<DesafiosAlunoScreen> {
               children: [
                 const SizedBox(height: 48),
                 FxEmptyState(
-                  icon: searching ? 'search' : 'spark',
+                  icon: searching ? FxIcons.buscar : FxIcons.ia,
                   title: searching
                       ? 'Nenhum desafio encontrado'
                       : 'Nenhum desafio agora',

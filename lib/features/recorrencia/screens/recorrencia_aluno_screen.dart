@@ -28,6 +28,7 @@ import '../../../core/widgets/fx_action_chip.dart';
 import '../data/recorrencia_repository.dart';
 import '../utils/recorrencia_display.dart';
 import '../widgets/recorrencia_aluno_help_sheet.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class RecorrenciaAlunoScreen extends ConsumerStatefulWidget {
   const RecorrenciaAlunoScreen({super.key});
@@ -330,7 +331,7 @@ class _RecorrenciaAlunoScreenState
                                 _chips(primary: primary, isDark: isDark),
                                 const SizedBox(height: TokensStrip.s4),
                                 FxEmptyState(
-                                  icon: 'coin',
+                                  icon: FxIcons.dinheiro,
                                   title: 'Sem assinatura recorrente ainda',
                                   subtitle:
                                       'Seu personal ainda não configurou cobrança automática mensal.',

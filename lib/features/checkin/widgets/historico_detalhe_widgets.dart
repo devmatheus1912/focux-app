@@ -5,7 +5,6 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
-import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/skeleton_loader.dart';
@@ -243,11 +242,7 @@ class _HistoricoExercicioTileState extends State<HistoricoExercicioTile> {
                 padding: const EdgeInsets.all(TokensStrip.s3),
                 child: Row(
                   children: [
-                    FxIcon(
-                      name: linha.feito ? 'circle-check' : 'target',
-                      size: 18,
-                      color: linha.feito ? EagleTokens.good : chrome.mute,
-                    ),
+                    Icon(linha.feito ? FxIcons.concluido : FxIcons.alvo, size: 18, color: linha.feito ? EagleTokens.good : chrome.mute),
                     const SizedBox(width: TokensStrip.s3),
                     Expanded(
                       child: Column(
@@ -353,13 +348,13 @@ class HistoricoInfoTile extends StatelessWidget {
 
   final String titulo;
   final String detalhe;
-  final String icone;
+  final IconData icone;
 
   @override
   Widget build(BuildContext context) => FxSatelliteListTile(
     title: titulo,
     margin: const EdgeInsets.only(bottom: 2),
     subtitle: Text(detalhe),
-    leading: FxIcon(name: icone, size: 20, color: EagleTokens.good),
+    leading: Icon(icone, size: 20, color: EagleTokens.good),
   );
 }

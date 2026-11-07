@@ -423,7 +423,7 @@ class _State extends ConsumerState<DepoimentosPersonalScreen> {
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           children: [
             FxEmptyState(
-              icon: filtered ? 'search' : 'star',
+              icon: filtered ? FxIcons.buscar : FxIcons.estrela,
               title: filtered
                   ? 'Nenhum depoimento encontrado'
                   : 'Nenhum depoimento ainda',

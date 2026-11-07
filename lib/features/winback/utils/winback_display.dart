@@ -1,4 +1,6 @@
+import 'package:flutter/widgets.dart';
 import '../../../core/utils/fx_utils.dart';
+import '../../../core/theme/fx_icons.dart';
 
 String winbackAlunoLabel(String? nome) {
   final value = nome?.trim();
@@ -21,14 +23,14 @@ String winbackTipoLabel(String? tipo) {
   }
 }
 
-String winbackFxIcon(String? tipo) {
+IconData winbackFxIcon(String? tipo) {
   switch ((tipo ?? '').trim().toUpperCase()) {
     case 'ALUNO_INATIVO_60D':
-      return 'alert-triangle';
+      return FxIcons.alerta;
     case 'ALUNO_INATIVO_30D':
-      return 'trend';
+      return FxIcons.grafico;
     default:
-      return 'bell';
+      return FxIcons.notificacao;
   }
 }
 

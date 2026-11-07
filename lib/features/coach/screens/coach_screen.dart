@@ -119,7 +119,7 @@ class CoachScreen extends ConsumerWidget {
                   children: [
                     const SizedBox(height: 48),
                     FxEmptyState(
-                      icon: 'spark',
+                      icon: FxIcons.ia,
                       title: coachEmptyTitle,
                       subtitle: coachEmptySubtitle,
                       action: FxEmptyAction(

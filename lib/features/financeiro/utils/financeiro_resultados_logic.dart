@@ -13,11 +13,6 @@ bool resultadosDetalhesVisiveis({
   required int mesesComCobranca,
 }) => pagantes >= resultadosMinPagantes && mesesComCobranca >= resultadosMinMeses;
 
-/// O recebido (por data de pagamento) passou do lançado (por mês da cobrança):
-/// a tela explica a diferença em vez de deixar parecer erro.
-bool resultadosRecebidoMaiorQueLancado(ResumoMensal r) =>
-    r.totalRecebido > r.totalPrevisto;
-
 /// Mês da coorte = mês atual. Para outro mês, só os números do próprio mês.
 bool resultadosEhMesAtual(int ano, int mes, DateTime hoje) =>
     ano == hoje.year && mes == hoje.month;
@@ -38,12 +33,6 @@ List<FinanceiroMesOpcao> resultadosMesOpcoes(DateTime agora) => [
 bool resultadosMesFuturo(int ano, int mes, DateTime agora) =>
     ano > agora.year || (ano == agora.year && mes > agora.month);
 
-/// Parte do lançado que já entrou, de 0 a 1.
-double resultadosProgresso(ResumoMensal r) {
-  if (!r.totalPrevisto.isPositive) return 0;
-  return (r.totalRecebido.cents / r.totalPrevisto.cents).clamp(0.0, 1.0);
-}
-
 /// `2026-10` em ano e mês; nulo se não vier nesse formato.
 ({int ano, int mes})? resultadosMesDoItem(String raw) {
   final partes = raw.split('-');
@@ -63,4 +52,17 @@ int? resultadosVariacaoPct(List<EvolucaoMensalItem> itens, int ano, int mes) {
   final antes = itens[i - 1].recebido.cents;
   if (antes <= 0) return null;
   return ((itens[i].recebido.cents - antes) / antes * 100).round();
+}
+
+/// Do primeiro mês com recebido até o fim; o mês escolhido sempre entra.
+List<EvolucaoMensalItem> resultadosDesdePrimeiroMes(
+  List<EvolucaoMensalItem> itens,
+  int ano,
+  int mes,
+) {
+  final i = itens.indexWhere((e) {
+    final m = resultadosMesDoItem(e.mes);
+    return e.recebido.isPositive || (m?.ano == ano && m?.mes == mes);
+  });
+  return i < 0 ? const [] : itens.sublist(i);
 }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../l10n/app_localizations.dart';
 import '../data/checkin_repository.dart';
+import '../../../core/theme/fx_icons.dart';
 
 const _enStopwords = {
   'the',
@@ -102,25 +103,25 @@ Future<void> showCheckinExerciseTipsSheet(
       FxHelpTip(
         s.checkinDicasObservacao,
         ee.observacoes!.trim(),
-        icon: 'file-text',
+        icon: FxIcons.documento,
       ),
     if (ee.errosComuns?.trim().isNotEmpty == true)
       FxHelpTip(
         s.checkinDicasErrosComuns,
         checkinErrosComunsBody(s, ee.errosComuns),
-        icon: 'alert-triangle',
+        icon: FxIcons.alerta,
       ),
     if (ee.contraindicacoes?.trim().isNotEmpty == true)
       FxHelpTip(
         s.checkinDicasContraindicacoes,
         ee.contraindicacoes!.trim(),
-        icon: 'heart',
+        icon: FxIcons.favorito,
       ),
     if (ee.substitutos?.trim().isNotEmpty == true)
       FxHelpTip(
         s.checkinDicasSubstitutos,
         ee.substitutos!.trim(),
-        icon: 'refresh-cw',
+        icon: FxIcons.atualizar,
       ),
   ];
   if (tips.isEmpty) {
@@ -128,7 +129,7 @@ Future<void> showCheckinExerciseTipsSheet(
       FxHelpTip(
         s.checkinDicasVazioTitulo,
         s.checkinDicasVazioTexto,
-        icon: 'info',
+        icon: FxIcons.info,
       ),
     );
   }

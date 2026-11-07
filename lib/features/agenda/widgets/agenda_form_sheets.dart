@@ -108,7 +108,7 @@ class _AgendaAlunoSheetState extends State<AgendaAlunoSheet> {
               child:
                   alunos.isEmpty
                       ? FxEmptyState(
-                        icon: 'search',
+                        icon: FxIcons.buscar,
                         title:
                             query.isEmpty
                                 ? 'Nenhum aluno'

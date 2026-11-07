@@ -253,7 +253,7 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
               else if (boardEmpty)
                 Expanded(
                   child: FxEmptyState(
-                    icon: 'users',
+                    icon: FxIcons.grupo,
                     title: 'Nenhum lead no funil',
                     subtitle:
                         'Cadastre o primeiro lead para começar a acompanhar o funil.',

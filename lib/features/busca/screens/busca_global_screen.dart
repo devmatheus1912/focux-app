@@ -101,17 +101,17 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
         FxHelpTip(
           'Consulta',
           'Digite ao menos 2 caracteres. A busca espera você terminar de escrever.',
-          icon: 'search',
+          icon: FxIcons.buscar,
         ),
         FxHelpTip(
           'Filtro',
           'Use Alunos, Treinos ou Cobranças para enxugar o que já veio.',
-          icon: 'users',
+          icon: FxIcons.grupo,
         ),
         FxHelpTip(
           'Destino',
           'Toque no resultado para abrir. Links externos pedem confirmação.',
-          icon: 'chevron-right',
+          icon: FxIcons.chevronDireita,
         ),
       ],
     );

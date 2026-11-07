@@ -1,15 +1,14 @@
-import 'dart:io';
-
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/core/theme/fx_icons.dart';
+import 'package:focux_app/core/widgets/fx_dock.dart';
+import 'package:focux_app/l10n/app_localizations_pt.dart';
 
 void main() {
-  test('Saúde tem ícone próprio no dock e o atualizar não cai no fallback', () {
-    final icon = File('lib/core/widgets/fx_icon.dart').readAsStringSync();
-    final dock = File('lib/core/widgets/fx_dock.dart').readAsStringSync();
-
-    expect(icon, contains("case 'heart-pulse':"));
-    expect(icon, contains("case 'refresh-cw':"));
-    expect(dock, contains("FxDockItem(icon: 'heart-pulse', label: s.dockSaude)"));
-    expect(dock, isNot(contains("FxDockItem(icon: 'trend'")));
+  test('Saúde tem ícone próprio no dock, com par Fill na aba ativa', () {
+    final saude = FxDockItems.aluno(SPt())[2];
+    expect(saude.icon, FxIcons.saudeVida);
+    expect(saude.iconAtivo, FxIcons.saudeVidaAtivo);
+    expect(saude.iconAtivo.fontFamily, 'PhosphorFill');
+    expect(saude.icon, isNot(FxIcons.grafico));
   });
 }

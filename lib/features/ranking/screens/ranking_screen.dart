@@ -25,6 +25,7 @@ import '../../../core/widgets/fx_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/ranking_repository.dart';
 import '../utils/ranking_display.dart';
+import '../../../core/theme/fx_icons.dart';
 
 final _repoProvider = Provider(
   (ref) => RankingRepository(ref.read(apiClientProvider)),
@@ -220,7 +221,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
                     children: [
                       const SizedBox(height: 48),
                       FxEmptyState(
-                        icon: 'star',
+                        icon: FxIcons.estrela,
                         title: rankingSearchEmptyTitle(_query),
                         subtitle: rankingSearchEmptySubtitle(_query),
                         action: _query.isEmpty

@@ -30,6 +30,7 @@ import '../../subscription/models/subscription_plan.dart';
 import '../data/desafio_repository.dart';
 import '../../../l10n/pt.dart';
 import '../utils/desafio_display.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class DesafioDetailScreen extends ConsumerStatefulWidget {
   const DesafioDetailScreen({
@@ -199,7 +200,7 @@ class _DesafioDetailScreenState extends ConsumerState<DesafioDetailScreen> {
                   )
                 : desafio == null
                 ? FxEmptyState(
-                    icon: 'spark',
+                    icon: FxIcons.ia,
                     title: 'Desafio não encontrado',
                     subtitle:
                         'Ele pode ter sido encerrado. Volte à lista e escolha outro.',
@@ -421,7 +422,7 @@ class _DesafioDetailBody extends StatelessWidget {
                     (descricao == null || descricao.isEmpty)
                         ? (forAluno
                             ? FxEmptyState(
-                                icon: 'spark',
+                                icon: FxIcons.ia,
                                 title: desafioCampanhaEmpty(),
                                 subtitle:
                                     'Prazo e meta continuam nos números acima.',
@@ -446,7 +447,7 @@ class _DesafioDetailBody extends StatelessWidget {
                           )
                   else if (ranking.isEmpty)
                     FxEmptyState(
-                      icon: 'spark',
+                      icon: FxIcons.ia,
                       title: desafioLeaderboardEmpty(),
                       subtitle: 'Quando alguém pontuar, o lugar aparece aqui.',
                       action: forAluno

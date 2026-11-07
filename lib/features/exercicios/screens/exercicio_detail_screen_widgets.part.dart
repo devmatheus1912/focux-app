@@ -817,7 +817,7 @@ class _VideoPlayerState extends State<_VideoPlayer> {
   Widget build(BuildContext context) {
     if (_failed) {
       return const FxEmptyState(
-        icon: 'alert-triangle',
+        icon: FxIcons.alerta,
         title: 'Prévia indisponível',
         subtitle:
             'Vídeo enviado, mas a prévia ainda não ficou disponível. Tente abrir novamente em instantes.',

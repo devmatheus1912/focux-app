@@ -168,7 +168,13 @@ class _FinanceiroResultadosScreenState
                 d.vencimentosProximos.isEmpty &&
                 d.topAlunos.isEmpty));
     final titulo = financeiroMesTitulo(_mes, _ano);
-    final variacao = resultadosVariacaoPct(d.evolucaoMensal, _ano, _mes);
+    // Porcentagem com base pequena (R$ 100 para R$ 600 = +500%) assusta mais
+    // do que informa: só com 3 alunos pagantes ou mais.
+    final variacao = d.topAlunos.length >= 3
+        ? resultadosVariacaoPct(d.evolucaoMensal, _ano, _mes)
+        : null;
+    // O gráfico começa no primeiro mês com dinheiro, não em meses vazios.
+    final evolucao = resultadosDesdePrimeiroMes(d.evolucaoMensal, _ano, _mes);
 
     return fxScreenA11yScope(
       label: 'Resultados do financeiro',
@@ -203,7 +209,7 @@ class _FinanceiroResultadosScreenState
               Padding(
                 padding: const EdgeInsets.all(FxSettingsLayout.pageInset),
                 child: FxEmptyState(
-                  icon: 'coin',
+                  icon: FxIcons.dinheiro,
                   title: _mesAtual ? s.resultadosVazioTitulo : s.resultadosVazioMes(titulo),
                   subtitle: _mesAtual ? s.resultadosVazioTexto : null,
                   action: _mesAtual
@@ -218,17 +224,21 @@ class _FinanceiroResultadosScreenState
               )
             else ...[
               if (resumo != null) ...[
-                _BlocoQuantoEntrou(resumo: resumo, variacaoPct: variacao),
+                _BlocoQuantoEntrou(
+                  resumo: resumo,
+                  mesTitulo: titulo,
+                  variacaoPct: variacao,
+                ),
                 const SizedBox(height: TokensStrip.s3),
                 _BlocoQuemAtrasa(
                   resumo: resumo,
                   onTap: () => _abrirLista(MensalidadeFiltro.atrasadas),
                 ),
               ],
-              if (d.evolucaoMensal.isNotEmpty) ...[
+              if (evolucao.length >= 2) ...[
                 const SizedBox(height: FxSettingsLayout.groupGap),
                 _EvolucaoChart(
-                  items: d.evolucaoMensal,
+                  items: evolucao,
                   isDark: isDark,
                   ano: _ano,
                   mes: _mes,
@@ -239,25 +249,10 @@ class _FinanceiroResultadosScreenState
                 const SizedBox(height: FxSettingsLayout.groupGap),
                 _FinanceiroVencimentosGroup(items: d.vencimentosProximos),
               ],
-              if (_mesAtual && d.topAlunos.isNotEmpty) ...[
+              // Ranking com 1 ou 2 alunos não é ranking.
+              if (_mesAtual && d.topAlunos.length >= 3) ...[
                 const SizedBox(height: FxSettingsLayout.groupGap),
                 _FinanceiroTopAlunosGroup(items: d.topAlunos),
-              ],
-              if (_mesAtual) ...[
-                const SizedBox(height: FxSettingsLayout.groupGap),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: FxSettingsLayout.pageInset,
-                  ),
-                  child: DashboardSectionHeader(title: s.resultadosSecaoPreco),
-                ),
-                const SizedBox(height: TokensStrip.s2),
-                const Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: FxSettingsLayout.pageInset,
-                  ),
-                  child: SmartPricingCard(),
-                ),
               ],
               if (_mesAtual && _coorte != null) ...[
                 const SizedBox(height: FxSettingsLayout.groupGap),

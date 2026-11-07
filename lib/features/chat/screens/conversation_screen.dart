@@ -754,7 +754,7 @@ class _ConversationQuietEmpty extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FxEmptyState(
-      icon: 'chat',
+      icon: FxIcons.chat,
       title: 'Envie a primeira mensagem',
       subtitle:
           isAluno

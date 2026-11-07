@@ -7,6 +7,7 @@ import 'package:focux_app/features/dashboard/utils/open_dashboard_command_action
 import 'package:focux_app/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:focux_app/core/theme/fx_icons.dart';
 
 /// Shell com a Hoje numa aba e telas empilhadas fora do dock, como no app.
 GoRouter _router(Widget hoje) {
@@ -64,7 +65,7 @@ Future<void> _pumpApp(WidgetTester tester, GoRouter router) async {
 }
 
 const _acaoFinanceiro = CommandActionItem(
-  icon: 'pix',
+  icon: FxIcons.pix,
   title: 'Cobrar mensalidades',
   subtitle: '2 em atraso',
   route: '/financeiro',
@@ -121,7 +122,7 @@ void main() {
             context: context,
             ref: ref,
             item: const CommandActionItem(
-              icon: 'users',
+              icon: FxIcons.grupo,
               title: 'Alunos em risco',
               subtitle: '3 alunos',
               route: '/alunos',

@@ -324,7 +324,7 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
                 header: 'Atendimento',
                 children: [
                   FxSettingsTile(
-                    fxIcon: 'users',
+                    icon: FxIcons.grupo,
                     label: 'Aluno',
                     subtitle:
                         _alunoSelecionado == null
@@ -353,7 +353,7 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
                 onHelpTap: () => showAgendaHelpSheet(context),
                 children: [
                   FxSettingsTile(
-                    fxIcon: 'calendar',
+                    icon: FxIcons.calendario,
                     label: 'Quando',
                     subtitle:
                         _inicio == null

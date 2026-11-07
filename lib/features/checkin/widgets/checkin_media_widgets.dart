@@ -465,7 +465,7 @@ class CheckinVideoFallback extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(FxIcons.playAtivo, color: brand, size: 34),
+          Icon(FxIcons.playCirculo, color: brand, size: 34),
           const SizedBox(height: 6),
           Text(
             S.of(context).checkinMidiaVideoPersonal,

@@ -114,7 +114,7 @@ class PacotesEmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const FxEmptyState(
-      icon: 'coin',
+      icon: FxIcons.dinheiro,
       title: 'Crie seu primeiro plano',
       subtitle:
           'Um plano tem nome, preço e o que está incluso (treino, consultoria…). '

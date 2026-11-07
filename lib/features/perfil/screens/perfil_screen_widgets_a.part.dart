@@ -109,27 +109,27 @@ class _PerfilBodyState extends State<_PerfilBody> {
                     FxHelpTip(
                       'Completar o perfil',
                       'O percentual mostra o quanto do perfil está pronto. O cartão logo abaixo diz o próximo passo e abre direto onde resolver.',
-                      icon: 'user',
+                      icon: FxIcons.pessoa,
                     ),
                     FxHelpTip(
                       'Sua página',
                       'Código, página pública, marca e personalização da sua landing.',
-                      icon: 'spark',
+                      icon: FxIcons.ia,
                     ),
                     FxHelpTip(
                       'Negócio',
                       'Plano e assinatura, carteira com PIX e o link de convite para novos alunos.',
-                      icon: 'coin',
+                      icon: FxIcons.dinheiro,
                     ),
                     FxHelpTip(
                       'Preferências',
                       'Aparência: Sistema, Claro ou Escuro, trocada na hora.',
-                      icon: 'sun',
+                      icon: FxIcons.sol,
                     ),
                     FxHelpTip(
                       'Conta',
                       'Sair fica no grupo de conta e segurança. Excluir a conta fica sozinha no fim, em vermelho.',
-                      icon: 'shield',
+                      icon: FxIcons.seguranca,
                     ),
                   ],
                 ),

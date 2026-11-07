@@ -8,13 +8,17 @@ import '../theme/focux_hub_typography.dart';
 import '../theme/fx_settings_layout.dart';
 import '../theme/tokens_strip.dart';
 import '../../l10n/app_localizations.dart';
-import 'fx_icon.dart';
+import '../theme/fx_icons.dart';
 
 /// Tom do selo: `alerta` pede ação (vermelho); `info` só informa (cor da marca).
 enum FxDockBadgeTone { alerta, info }
 
 class FxDockItem {
-  final String icon;
+  /// Light quando a aba não está ativa.
+  final IconData icon;
+
+  /// Fill na aba ativa: o estado escolhido pelo usuário.
+  final IconData iconAtivo;
   final String label;
   final int badgeCount;
   final FxDockBadgeTone badgeTone;
@@ -24,6 +28,7 @@ class FxDockItem {
 
   const FxDockItem({
     required this.icon,
+    required this.iconAtivo,
     required this.label,
     this.badgeCount = 0,
     this.badgeTone = FxDockBadgeTone.alerta,
@@ -37,35 +42,62 @@ class FxDockItems {
     int alunosEmRisco = 0,
     int agendaHoje = 0,
   }) => [
-    FxDockItem(icon: 'home', label: s.dockHoje),
     FxDockItem(
-      icon: 'users',
+      icon: FxIcons.inicio,
+      iconAtivo: FxIcons.inicioAtivo,
+      label: s.dockHoje,
+    ),
+    FxDockItem(
+      icon: FxIcons.grupo,
+      iconAtivo: FxIcons.grupoAtivo,
       label: s.dockAlunos,
       badgeCount: alunosEmRisco,
       badgeLabel: alunosEmRisco > 0 ? s.dockBadgeEmRisco(alunosEmRisco) : null,
     ),
-    FxDockItem(icon: 'dumbbell', label: s.dockTreinos),
     FxDockItem(
-      icon: 'calendar',
+      icon: FxIcons.treino,
+      iconAtivo: FxIcons.treinoAtivo,
+      label: s.dockTreinos,
+    ),
+    FxDockItem(
+      icon: FxIcons.calendario,
+      iconAtivo: FxIcons.calendarioAtivo,
       label: s.dockAgenda,
       badgeCount: agendaHoje,
       badgeTone: FxDockBadgeTone.info,
       badgeLabel: agendaHoje > 0 ? s.dockBadgeHoje(agendaHoje) : null,
     ),
-    FxDockItem(icon: 'spark', label: s.dockIa),
+    FxDockItem(icon: FxIcons.ia, iconAtivo: FxIcons.iaAtivo, label: s.dockIa),
   ];
 
   static List<FxDockItem> aluno(S s, {int chatUnread = 0}) => [
-    FxDockItem(icon: 'home', label: s.dockHoje),
-    FxDockItem(icon: 'dumbbell', label: s.dockTreinos),
-    FxDockItem(icon: 'heart-pulse', label: s.dockSaude),
     FxDockItem(
-      icon: 'chat',
+      icon: FxIcons.inicio,
+      iconAtivo: FxIcons.inicioAtivo,
+      label: s.dockHoje,
+    ),
+    FxDockItem(
+      icon: FxIcons.treino,
+      iconAtivo: FxIcons.treinoAtivo,
+      label: s.dockTreinos,
+    ),
+    FxDockItem(
+      icon: FxIcons.saudeVida,
+      iconAtivo: FxIcons.saudeVidaAtivo,
+      label: s.dockSaude,
+    ),
+    FxDockItem(
+      icon: FxIcons.chat,
+      iconAtivo: FxIcons.chatAtivo,
       label: s.dockChat,
       badgeCount: chatUnread,
       badgeLabel: chatUnread > 0 ? s.dockBadgeNaoLidas(chatUnread) : null,
     ),
-    FxDockItem(icon: 'user', label: s.dockPerfil),
+    FxDockItem(
+      icon: FxIcons.pessoa,
+      iconAtivo: FxIcons.pessoaAtivo,
+      label: s.dockPerfil,
+    ),
   ];
 }
 
@@ -107,9 +139,10 @@ class FxDock extends StatelessWidget {
               marca.secundaria,
               marca.primaria,
               dark: isDark,
-              background: isDark
-                  ? BrandPalette.fundoEscuroReferencia
-                  : BrandPalette.fundoClaroReferencia,
+              background:
+                  isDark
+                      ? BrandPalette.fundoEscuroReferencia
+                      : BrandPalette.fundoClaroReferencia,
             )
             : Theme.of(context).colorScheme.primary;
     final width = MediaQuery.sizeOf(context).width;
@@ -227,9 +260,7 @@ class _FxDockNavItemState extends State<_FxDockNavItem> {
   @override
   Widget build(BuildContext context) {
     final inactive =
-        widget.isDark
-            ? const Color(0xFFA9B4C0)
-            : const Color(0xFF51606B);
+        widget.isDark ? const Color(0xFFA9B4C0) : const Color(0xFF51606B);
     final color = widget.active ? widget.primary : inactive;
     final reduceMotion = TokensStrip.prefersReducedMotion(context);
     final item = widget.item;
@@ -286,11 +317,10 @@ class _FxDockNavItemState extends State<_FxDockNavItem> {
                         clipBehavior: Clip.none,
                         alignment: Alignment.center,
                         children: [
-                          FxIcon(
-                            name: item.icon,
-                            size: FxSettingsLayout.iconSize,
+                          Icon(
+                            widget.active ? item.iconAtivo : item.icon,
+                            size: 24,
                             color: color,
-                            strokeWidth: widget.active ? 2.0 : 1.7,
                           ),
                           if (item.badgeCount > 0)
                             Positioned(

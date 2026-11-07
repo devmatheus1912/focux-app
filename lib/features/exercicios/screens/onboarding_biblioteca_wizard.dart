@@ -25,6 +25,7 @@ import '../providers/exercicios_provider.dart';
 import '../utils/biblioteca_wizard_display.dart';
 import 'widgets/biblioteca_wizard_steps.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class OnboardingBibliotecaWizard extends ConsumerStatefulWidget {
   const OnboardingBibliotecaWizard({super.key});
@@ -189,7 +190,7 @@ class _OnboardingBibliotecaWizardState
       title: bibliotecaHelpTitle(),
       subtitle: bibliotecaHelpSubtitle(),
       tips: [
-        FxHelpTip('Etapas', bibliotecaHelpPassosBody(), icon: 'route'),
+        FxHelpTip('Etapas', bibliotecaHelpPassosBody(), icon: FxIcons.rota),
       ],
     );
   }

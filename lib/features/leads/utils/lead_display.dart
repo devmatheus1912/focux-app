@@ -1,6 +1,8 @@
+import 'package:flutter/widgets.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/utils/br_phone.dart';
 import '../../../core/utils/fx_utils.dart';
+import '../../../core/theme/fx_icons.dart';
 
 const leadOrigemValues = [
   'Instagram',
@@ -181,18 +183,18 @@ String leadInteracaoTipoLabel(String? tipo) {
   }
 }
 
-String leadInteracaoFxIcon(String? tipo) {
+IconData leadInteracaoFxIcon(String? tipo) {
   switch ((tipo ?? '').trim().toUpperCase()) {
     case 'WHATSAPP':
-      return 'chat';
+      return FxIcons.chat;
     case 'LIGACAO':
-      return 'message-circle';
+      return FxIcons.chat;
     case 'EMAIL':
-      return 'article';
+      return FxIcons.artigo;
     case 'PRESENCIAL':
-      return 'users';
+      return FxIcons.grupo;
     default:
-      return 'spark';
+      return FxIcons.ia;
   }
 }
 

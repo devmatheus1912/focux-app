@@ -27,6 +27,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/depoimento_repository.dart';
 import '../utils/depoimento_display.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class DepoimentoAlunoScreen extends ConsumerStatefulWidget {
   const DepoimentoAlunoScreen({super.key});
@@ -313,7 +314,7 @@ class _DepoimentoEnviadoBody extends StatelessWidget {
       padding: const EdgeInsets.all(TokensStrip.s4),
       children: [
         FxEmptyState(
-          icon: aprovado ? 'circle-check' : 'clock',
+          icon: aprovado ? FxIcons.concluido : FxIcons.relogio,
           title: aprovado ? 'Depoimento publicado' : 'Aguardando aprovação',
           subtitle: aprovado
               ? 'Seu texto já pode aparecer no perfil do personal.'

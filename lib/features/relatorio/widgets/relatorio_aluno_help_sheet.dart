@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/theme/fx_icons.dart';
 
 Future<void> showRelatorioAlunoHelpSheet(BuildContext context) {
   return showFxHelpSheet(
@@ -11,17 +12,17 @@ Future<void> showRelatorioAlunoHelpSheet(BuildContext context) {
       FxHelpTip(
         'Período',
         '7 dias a 6 meses, ou um mês do calendário. O versus usa o mesmo tamanho, logo antes.',
-        icon: 'calendar',
+        icon: FxIcons.calendario,
       ),
       FxHelpTip(
         'Aderência',
         'Treinos concluídos sobre o total no recorte. Abaixo de 50% vale pedir o check-in.',
-        icon: 'trend',
+        icon: FxIcons.grafico,
       ),
       FxHelpTip(
         'PDF',
         'Com treinos no recorte, o botão de baixo exporta o PDF. Sem dados, ele abre a evolução.',
-        icon: 'article',
+        icon: FxIcons.artigo,
       ),
     ],
   );

@@ -64,7 +64,7 @@ class _AddUndoBarState extends State<AddUndoBar> {
         ),
         child: Row(
           children: [
-            Icon(FxIcons.concluidoAtivo, size: 20, color: chrome.ink),
+            Icon(FxIcons.concluido, size: 20, color: chrome.ink),
             const SizedBox(width: TokensStrip.s2),
             Expanded(
               child: Text(

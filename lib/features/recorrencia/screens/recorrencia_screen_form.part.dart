@@ -54,10 +54,52 @@ extension on _RecorrenciaScreenState {
       ).acaoPersonal(item.id, recorrenciaAcaoPath(acao));
       if (!mounted) return;
       FeedbackHelper.showSuccess(context, recorrenciaAcaoFeito(acao));
+      if (acao == RecorrenciaAcao.cancelar) await _perguntarMensalidadeGerada(item);
       await _load(reset: true);
     } catch (e) {
       if (!mounted) return;
       FeedbackHelper.showError(context, friendlyError(e));
+    }
+  }
+
+  /// Ao encerrar: a mensalidade do próximo ciclo pode já ter sido gerada
+  /// (5 dias antes do vencimento). Pergunta se cancela também.
+  Future<void> _perguntarMensalidadeGerada(RecorrenciaAssinatura item) async {
+    final repo = FinanceiroRepository(ref.read(apiClientProvider));
+    Mensalidade? gerada;
+    try {
+      final page = await repo.listarPagina(
+        alunoId: item.alunoId,
+        size: 10,
+        filtro: MensalidadeFiltro.abertas,
+      );
+      final hoje = DateTime.now();
+      final dia = DateTime(hoje.year, hoje.month, hoje.day);
+      gerada = page.mensalidades.where((m) {
+        final v = DateTime.tryParse(m.vencimento ?? '');
+        return m.status == 'PENDENTE' && v != null && !v.isBefore(dia);
+      }).firstOrNull;
+    } catch (_) {
+      return;
+    }
+    if (gerada == null || !mounted) return;
+    final venc = DateTime.parse(gerada.vencimento!);
+    final cancelar = await showFxConfirmSheet(
+      context,
+      title: 'Cancelar a mensalidade gerada?',
+      message:
+          'A mensalidade de ${financeiroMesTitulo(venc.month, venc.year).toLowerCase()} '
+          '(${gerada.valor.formatCobranca()}, vence ${dataCurta(venc)}) já foi gerada.',
+      confirmLabel: 'Cancelar também',
+      cancelLabel: 'Manter',
+      destructive: true,
+    );
+    if (!cancelar || !mounted) return;
+    try {
+      await repo.cancelar(gerada.id);
+      if (mounted) FeedbackHelper.showSuccess(context, 'Mensalidade cancelada.');
+    } catch (e) {
+      if (mounted) FeedbackHelper.showError(context, friendlyError(e));
     }
   }
 }

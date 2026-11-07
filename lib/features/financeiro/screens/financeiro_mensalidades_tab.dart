@@ -8,14 +8,14 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/money/fx_money.dart';
+import '../../../core/money/fx_money_input.dart';
+import '../utils/vencimento_atalhos.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
-import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
@@ -28,7 +28,6 @@ import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/widgets/fx_action_chip.dart';
 import '../../../core/widgets/fx_toggle_chip.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../alunos/utils/satellite_screen_utils.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
@@ -320,13 +319,33 @@ class _FinanceiroMensalidadesTabState
     final chrome = ShellChrome.of(context);
     final mute = chrome.mute;
     final primary = Theme.of(context).colorScheme.primary;
+    // Atraso é estado, não erro: âmbar, como no resto do app.
+    final alerta = chrome.isDark ? EagleTokens.warnDark : EagleTokens.warn;
+    // Busca só ajuda com lista grande; com poucas cobranças é ruído.
+    final mostrarBusca = _searchCtrl.text.isNotEmpty ||
+        _homeItems.length >= 6 ||
+        _homeHasMore ||
+        _items.length >= 6;
+    final atrasoNoMes = (ref
+                .watch(financeiroHomeProvider)
+                .value
+                ?.resumoMesAtual
+                .quantidadeAtrasadas ??
+            0) >
+        0;
+    // Com atraso, "Atrasadas" vem primeiro.
+    final filtros = [
+      if (atrasoNoMes) MensalidadeFiltro.atrasadas,
+      for (final f in MensalidadeFiltro.values)
+        if (!(atrasoNoMes && f == MensalidadeFiltro.atrasadas)) f,
+    ];
     return fxScreenA11yScope(
       label: 'Mensalidades',
       child: FxKeyboardPopScope(
         child: FxKeyboardDismissScope(
           child: Column(
             children: [
-              if (widget.initialAlunoId == null)
+              if (widget.initialAlunoId == null && mostrarBusca)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(
                     FxSettingsLayout.pageInset,
@@ -347,13 +366,13 @@ class _FinanceiroMensalidadesTabState
                       ),
                       prefixIcon: Padding(
                         padding: const EdgeInsets.all(12),
-                        child: FxIcon(name: 'search', size: 18, color: mute),
+                        child: Icon(FxIcons.buscar, size: 18, color: mute),
                       ),
                       suffixIcon:
                           _searchCtrl.text.isNotEmpty
                               ? IconButton(
                                 tooltip: 'Limpar busca',
-                                icon: FxIcon(name: 'x', size: 16, color: mute),
+                                icon: Icon(FxIcons.fecharPequeno, size: 16, color: mute),
                                 onPressed: () {
                                   _searchCtrl.clear();
                                   setState(() {
@@ -398,7 +417,7 @@ class _FinanceiroMensalidadesTabState
                   spacing: TokensStrip.s2,
                   runSpacing: TokensStrip.s2,
                   children: [
-                    for (final f in MensalidadeFiltro.values)
+                    for (final f in filtros)
                       FxToggleChip(
                         label: mensalidadeFiltroLabel(f, S.of(context)),
                         selected: _filtro == f,
@@ -559,9 +578,9 @@ class _FinanceiroMensalidadesTabState
                                                     _carregandoMais
                                                         ? null
                                                         : _carregarMais,
-                                                leading: FxIcon(
-                                                  name: 'plus',
-                                                  size: 18,
+                                                leading: Icon(
+                                                  FxIcons.adicionar,
+                                                  size: 20,
                                                   color: primary,
                                                 ),
                                               );
@@ -591,8 +610,9 @@ class _FinanceiroMensalidadesTabState
                                             final tile = FxSatelliteListTile(
                                               title: item.alunoNome,
                                               subtitle: Text(
-                                                financeiroMensalidadeStatusLabel(
-                                                  item.status,
+                                                financeiroMensalidadeEstado(
+                                                  item,
+                                                  hoje: DateTime.now(),
                                                 ),
                                               ),
                                               onTap:
@@ -611,25 +631,26 @@ class _FinanceiroMensalidadesTabState
                                                       : null,
                                               accent:
                                                   overdue
-                                                      ? EagleTokens.bad
+                                                      ? alerta
                                                       : cancelada
                                                       ? mute
                                                       : primary,
-                                              leading: FxIcon(
-                                                name:
-                                                    _modoSelecao && selected
-                                                        ? 'circle-check'
-                                                        : overdue
-                                                        ? 'alert-triangle'
-                                                        : item.status == 'PAGO'
-                                                        ? 'circle-check'
-                                                        : cancelada
-                                                        ? 'x'
-                                                        : 'clock',
-                                                size: 18,
+                                              leading: Icon(
+                                                _modoSelecao && selected
+                                                    ? FxIcons.concluidoAtivo
+                                                    : _modoSelecao
+                                                    ? FxIcons.circulo
+                                                    : overdue
+                                                    ? FxIcons.alerta
+                                                    : item.status == 'PAGO'
+                                                    ? FxIcons.concluido
+                                                    : cancelada
+                                                    ? FxIcons.fechar
+                                                    : FxIcons.relogio,
+                                                size: 20,
                                                 color:
                                                     overdue
-                                                        ? EagleTokens.bad
+                                                        ? alerta
                                                         : cancelada
                                                         ? mute
                                                         : primary,
@@ -650,8 +671,8 @@ class _FinanceiroMensalidadesTabState
                                                     ),
                                                   ),
                                                   const SizedBox(width: 4),
-                                                  FxIcon(
-                                                    name: 'chevron-right',
+                                                  Icon(
+                                                    FxIcons.chevronDireitaPequeno,
                                                     size: 16,
                                                     color: mute,
                                                   ),

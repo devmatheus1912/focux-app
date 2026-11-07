@@ -9,6 +9,9 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/api/api_error.dart';
 import '../../../core/money/fx_money.dart';
+import '../../../core/money/fx_money_input.dart';
+import '../../../core/utils/pt_br_display.dart';
+import 'vencimento_atalhos.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -19,7 +22,6 @@ import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
-import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
@@ -27,7 +29,6 @@ import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../alunos/utils/satellite_screen_utils.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../chat/screens/chat_inbox_screen.dart';
@@ -88,44 +89,38 @@ Widget _pixQrVisual({
   );
 }
 
-Future<String?> pickMensalidadeMesReferencia(
-  BuildContext ctx, {
-  required String atual,
+/// Meses que o aluno já tem (para bloquear na folha de vencimento).
+/// Falha de rede não bloqueia nada: o backend recusa mês repetido com 409.
+Future<Map<String, MesOcupado>> carregarMesesOcupados(
+  WidgetRef ref,
+  int alunoId, {
+  int? ignorarId,
 }) async {
-  final ops = financeiroMesReferenciaOpcoes(atual: atual);
-  final selected = financeiroMesReferenciaKey(atual);
-  final picked = await showFxInsetPickerSheet<String>(
-    ctx,
-    title: 'Mês de referência',
-    selected: selected,
-    items: [
-      for (final o in ops)
-        FxInsetPickerSheetItem(value: o.key, label: o.label),
-    ],
-  );
-  if (picked == null) return null;
-  return financeiroMesReferenciaIso(picked);
+  try {
+    final page = await mensalidadeRepo(ref).listarPagina(alunoId: alunoId, size: 50);
+    return vencimentoMesesOcupados(page.mensalidades, ignorarId: ignorarId);
+  } catch (_) {
+    return const {};
+  }
 }
 
-Future<String?> pickMensalidadeVencimento(
+/// Folha de vencimento (mês e dia numa escolha só).
+Future<DateTime?> pickMensalidadeVencimento(
   BuildContext ctx, {
-  required String mesReferencia,
-  required String atual,
-}) async {
-  final hoje = DateTime.now();
-  final mes =
-      financeiroParseIsoDate(mesReferencia) ??
-      DateTime(hoje.year, hoje.month, 1);
-  final dataAtual = financeiroParseIsoDate(atual) ?? hoje;
-  final picked = await showVencimentoSheet(
-    ctx,
-    mesReferencia: mes,
-    atual: dataAtual,
-    hoje: hoje,
-  );
-  if (picked == null) return null;
-  return financeiroIsoDate(picked.year, picked.month, picked.day);
-}
+  required DateTime atual,
+  Map<String, MesOcupado> ocupados = const {},
+}) => showVencimentoSheet(ctx, atual: atual, ocupados: ocupados);
+
+/// "Vence 12/11 · novembro de 2026".
+String mensalidadeVencimentoRotulo(DateTime d) =>
+    'Vence ${dataCurta(d)} · ${financeiroMesTitulo(d.month, d.year).toLowerCase()}';
+
+/// Texto da confirmação: o personal confere o que vai ser gravado.
+String mensalidadeConfirmacaoTexto({
+  required String aluno,
+  required FxMoney valor,
+  required DateTime vencimento,
+}) => '$aluno · ${valor.formatCobranca()} · ${mensalidadeVencimentoRotulo(vencimento).toLowerCase()}';
 
 Future<Mensalidade?> confirmarPagarMensalidade({
   required BuildContext context,
@@ -259,7 +254,7 @@ Future<bool> mostrarPixMensalidade({
                   FxHomeSheetHeader(
                     isDark: isDark,
                     title: 'PIX - Escaneie ou copie',
-                    leading: FxIcon(name: 'pix', color: primary, size: 18),
+                    leading: Icon(FxIcons.pix, color: primary, size: 18),
                   ),
                   SizedBox(height: TokensStrip.s3),
                   Flexible(
@@ -509,16 +504,20 @@ Future<Mensalidade?> showEditarMensalidadeSheet({
   required WidgetRef ref,
   required Mensalidade m,
 }) async {
-  const statuses = ['PENDENTE', 'PAGO', 'ATRASADO'];
-  final valorCtrl = TextEditingController(text: m.valor.wire);
-  var mesReferencia = m.mesReferencia;
+  // Status não se edita: vem da regra de atraso. Paga se corrige com
+  // "Desfazer pagamento"; cancelada não volta.
+  final valorCtrl = TextEditingController(text: fxMoneyCampoTexto(m.valor));
   var vencimento =
-      (m.vencimento != null && m.vencimento!.trim().isNotEmpty)
-          ? m.vencimento!.trim()
-          : m.mesReferencia;
-  var selectedStatus = m.status;
+      DateTime.tryParse(m.vencimento ?? '') ??
+      DateTime.tryParse(m.mesReferencia) ??
+      DateTime.now();
+  final ocupados = await carregarMesesOcupados(ref, m.alunoId, ignorarId: m.id);
   var salvando = false;
   final formKey = GlobalKey<FormState>();
+  if (!context.mounted) {
+    valorCtrl.dispose();
+    return null;
+  }
 
   try {
     return await showFxHomeSheet<Mensalidade>(
@@ -543,105 +542,36 @@ Future<Mensalidade?> showEditarMensalidadeSheet({
                       FxHomeSheetHeader(
                         isDark: isDark,
                         title: 'Editar mensalidade',
-                        subtitle: 'Valor, mês, vencimento e status.',
-                        leading: Icon(
-                          FxIcons.editar,
-                          color: primary,
-                          size: 18,
-                        ),
+                        subtitle: 'Valor e vencimento.',
+                        leading: Icon(FxIcons.editar, color: primary, size: 18),
                       ),
                       SizedBox(height: TokensStrip.s3),
                       FxSettingsGroup(
                         children: [
                           AlunoInsetFormField(
                             controller: valorCtrl,
-                            label: 'Valor (R\$)',
-                            hint: '0,00',
+                            label: 'Valor',
+                            hint: 'R\$ 0,00',
                             icon: FxIcons.dinheiro,
-                            keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true,
-                            ),
-                            inputFormatters: [
-                              FilteringTextInputFormatter.allow(
-                                RegExp(r'^\d+\.?\d{0,2}'),
-                              ),
-                            ],
-                            validator: (v) {
-                              if (v == null || v.trim().isEmpty) {
-                                return 'Informe o valor';
-                              }
-                              final parsed = double.tryParse(
-                                v.trim().replaceAll(',', '.'),
-                              );
-                              if (parsed == null || parsed <= 0) {
-                                return 'Valor inválido';
-                              }
-                              return null;
-                            },
+                            rotuloVisivel: true,
+                            keyboardType: TextInputType.number,
+                            inputFormatters: const [FxMoneyInputFormatter()],
+                            validator: fxMoneyValidar,
                           ),
                           FxSettingsTile(
-                            fxIcon: 'calendar',
-                            label: 'Mês de referência',
-                            value: financeiroMesPickerValue(mesReferencia),
-                            onTap: () async {
-                              final picked = await pickMensalidadeMesReferencia(
-                                ctx,
-                                atual: mesReferencia,
-                              );
-                              if (picked != null) {
-                                setModalState(() {
-                                  vencimento = financeiroVencimentoAposTrocaDeMes(
-                                    mesAntigo: mesReferencia,
-                                    mesNovo: picked,
-                                    vencimentoAtual: vencimento,
-                                  );
-                                  mesReferencia = picked;
-                                });
-                              }
-                            },
-                          ),
-                          FxSettingsTile(
-                            fxIcon: 'calendar',
+                            icon: FxIcons.calendario,
                             label: 'Vencimento',
-                            value: financeiroVencimentoPickerValue(vencimento),
+                            value: mensalidadeVencimentoRotulo(vencimento),
+                            picker: true,
+                            showDivider: false,
                             onTap: () async {
                               final picked = await pickMensalidadeVencimento(
                                 ctx,
-                                mesReferencia: mesReferencia,
                                 atual: vencimento,
+                                ocupados: ocupados,
                               );
                               if (picked != null) {
                                 setModalState(() => vencimento = picked);
-                              }
-                            },
-                          ),
-                          FxSettingsTile(
-                            fxIcon:
-                                selectedStatus == 'ATRASADO'
-                                    ? 'alert-triangle'
-                                    : selectedStatus == 'PAGO'
-                                    ? 'circle-check'
-                                    : 'coin',
-                            label: 'Status',
-                            value: financeiroMensalidadeStatusLabel(
-                              selectedStatus,
-                            ),
-                            showDivider: false,
-                            onTap: () async {
-                              final picked = await showFxInsetPickerSheet<String>(
-                                ctx,
-                                title: 'Status',
-                                selected: selectedStatus,
-                                items: [
-                                  for (final s in statuses)
-                                    FxInsetPickerSheetItem(
-                                      value: s,
-                                      label: financeiroMensalidadeStatusLabel(s),
-                                    ),
-                                ],
-                              );
-                              if (picked != null) {
-                                setModalState(() => selectedStatus = picked);
                               }
                             },
                           ),
@@ -656,55 +586,36 @@ Future<Mensalidade?> showEditarMensalidadeSheet({
                             salvando
                                 ? null
                                 : () async {
-                                      if (!formKey.currentState!.validate()) {
-                                        return;
-                                      }
-                                      if (mesReferencia.trim().isEmpty) {
-                                        FeedbackHelper.showError(
-                                          ctx,
-                                          'Selecione o mês de referência',
-                                        );
-                                        return;
-                                      }
-                                      HapticFeedback.mediumImpact();
-                                      final ok = await showFxConfirmSheet(
-                                        ctx,
-                                        title:
-                                            financeiroSalvarMensalidadeConfirmTitle(),
-                                        message:
-                                            financeiroSalvarMensalidadeConfirmMessage(),
-                                        icon: FxIcons.pagamento,
-                                        confirmLabel:
-                                            financeiroSalvarMensalidadeTileLabel(),
-                                      );
-                                      if (!ok) return;
-                                      setModalState(() => salvando = true);
-                                      try {
-                                        final valor = FxMoney.fromInput(
-                                          valorCtrl.text,
-                                        );
-                                        final updated = await mensalidadeRepo(
-                                          ref,
-                                        ).editarMensalidade(
-                                          m.id,
-                                          valor: valor,
-                                          mesReferencia: mesReferencia.trim(),
-                                          vencimento: vencimento.trim(),
-                                          status: selectedStatus,
-                                        );
-                                        if (ctx.mounted) {
-                                          Navigator.of(ctx).pop(updated);
-                                        }
-                                      } catch (e) {
-                                        setModalState(() => salvando = false);
-                                        if (ctx.mounted) {
-                                          FeedbackHelper.showError(
-                                            ctx,
-                                            friendlyError(e),
-                                          );
-                                        }
-                                      }
-                                    },
+                                  if (!formKey.currentState!.validate()) return;
+                                  final valor = fxMoneyDoCampo(valorCtrl.text)!;
+                                  HapticFeedback.mediumImpact();
+                                  final ok = await showFxConfirmSheet(
+                                    ctx,
+                                    title: financeiroSalvarMensalidadeConfirmTitle(),
+                                    message: mensalidadeConfirmacaoTexto(
+                                      aluno: m.alunoNome,
+                                      valor: valor,
+                                      vencimento: vencimento,
+                                    ),
+                                    icon: FxIcons.pagamento,
+                                    confirmLabel: financeiroSalvarMensalidadeTileLabel(),
+                                  );
+                                  if (!ok) return;
+                                  setModalState(() => salvando = true);
+                                  try {
+                                    final updated = await mensalidadeRepo(ref).editarMensalidade(
+                                      m.id,
+                                      valor: valor,
+                                      vencimento: vencimentoIso(vencimento),
+                                    );
+                                    if (ctx.mounted) Navigator.of(ctx).pop(updated);
+                                  } catch (e) {
+                                    setModalState(() => salvando = false);
+                                    if (ctx.mounted) {
+                                      FeedbackHelper.showError(ctx, friendlyError(e));
+                                    }
+                                  }
+                                },
                       ),
                     ],
                   ),

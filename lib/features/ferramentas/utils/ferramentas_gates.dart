@@ -18,7 +18,7 @@ String? recursoFromRota(String? rotaApp) {
     '/pacotes' || '/loja' => PlanoRecursoKeys.loja,
     '/perfil/landing-editor' => PlanoRecursoKeys.landing,
     '/leads' || '/leads/kanban' => PlanoRecursoKeys.leads,
-    '/financeiro' || '/dunning' => PlanoRecursoKeys.financeiro,
+    '/financeiro' => PlanoRecursoKeys.financeiro,
     '/recorrencia' => PlanoRecursoKeys.recorrencia,
     '/perfil/wallet' => PlanoRecursoKeys.carteira,
     '/relatorio/business' || '/relatorios/global' => PlanoRecursoKeys.relatorios,

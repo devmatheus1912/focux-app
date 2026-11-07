@@ -196,7 +196,7 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
               onTap: () => showLeadsListHelpSheet(context),
             ),
             ShellHeaderIconButton(
-              icon: 'route',
+              icon: FxIcons.rota,
               tooltip: 'Visão Kanban',
               onTap: _abrirKanban,
             ),
@@ -372,7 +372,7 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
             children: [
               if (filtered)
                 FxEmptyState(
-                  icon: 'search',
+                  icon: FxIcons.buscar,
                   title: 'Nenhum lead encontrado',
                   subtitle: 'Ajuste a busca para ver outros prospects.',
                   action: FxEmptyAction(
@@ -388,7 +388,7 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
                 )
               else
                 FxEmptyState(
-                  icon: 'users',
+                  icon: FxIcons.grupo,
                   title:
                       _status == null
                           ? 'Nenhum lead cadastrado'

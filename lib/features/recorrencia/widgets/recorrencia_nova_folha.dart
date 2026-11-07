@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+import '../../../core/money/fx_money_input.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -123,7 +125,7 @@ class _NovaRecorrenciaSheetState extends State<_NovaRecorrenciaSheet> {
       if (!mounted || sugerido == null || _valorCtrl.text.trim().isNotEmpty) {
         return;
       }
-      _valorCtrl.text = sugerido.wire;
+      _valorCtrl.text = fxMoneyCampoTexto(sugerido);
     } catch (_) {}
   }
 
@@ -219,7 +221,7 @@ class _NovaRecorrenciaSheetState extends State<_NovaRecorrenciaSheet> {
                     FxSettingsGroup(
                       children: [
                         FxSettingsTile(
-                          fxIcon: 'users',
+                          icon: FxIcons.grupo,
                           label: s.recorrenciaAluno,
                           value: _alunoNome ?? s.recorrenciaSelecionar,
                           picker: !fixo,
@@ -236,17 +238,11 @@ class _NovaRecorrenciaSheetState extends State<_NovaRecorrenciaSheet> {
                           icon: FxIcons.pagamento,
                           rotuloVisivel: true,
                           obrigatorio: true,
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
-                          inputFormatters: [
-                            FilteringTextInputFormatter.allow(
-                              RegExp(r'[\d.,]'),
-                            ),
-                          ],
+                          keyboardType: TextInputType.number,
+                          inputFormatters: const [FxMoneyInputFormatter()],
                         ),
                         FxSettingsTile(
-                          fxIcon: 'calendar',
+                          icon: FxIcons.calendario,
                           label: s.recorrenciaDia,
                           value: recorrenciaDiaLabel(_dia),
                           picker: true,

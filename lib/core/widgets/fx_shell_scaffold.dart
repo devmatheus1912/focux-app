@@ -10,7 +10,6 @@ import '../utils/fx_utils.dart';
 import 'cinematic_mesh_background.dart';
 import 'fx_content_width_limiter.dart';
 import 'fx_glass_surface.dart';
-import 'fx_icon.dart';
 import 'fx_keyboard_dismiss_scope.dart';
 import 'mesh_scope.dart';
 import 'fx_premium_entrance.dart';
@@ -198,7 +197,7 @@ class FxShellAppBar extends StatelessWidget implements PreferredSizeWidget {
           height: 38,
           decoration: chrome.headerAction(radius: 12),
           child: Center(
-            child: FxIcon(name: 'arrow-left', size: 18, color: ink),
+            child: Icon(FxIcons.voltar, size: 18, color: ink),
           ),
         ),
       );

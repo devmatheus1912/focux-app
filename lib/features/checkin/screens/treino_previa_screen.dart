@@ -125,7 +125,7 @@ class _TreinoPreviaScreenState extends ConsumerState<TreinoPreviaScreen> {
               _recarregarHomeUmaVez();
               return FxContentWidthLimiter(
                 child: FxEmptyState(
-                  icon: 'dumbbell',
+                  icon: FxIcons.treino,
                   title: s.treinoPreviaNaoEncontrado,
                   action: FxEmptyAction(
                     label: s.treinoPreviaVoltar,

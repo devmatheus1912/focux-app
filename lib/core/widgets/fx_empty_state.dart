@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/focux_hub_typography.dart';
 import '../theme/tokens_strip.dart';
-import 'fx_icon.dart';
+import 'fx_icon_badge.dart';
 import 'fx_motion.dart';
 
 class FxEmptyAction {
@@ -34,7 +34,7 @@ class FxEmptyState extends StatelessWidget {
     this.quiet = false,
   });
 
-  final String icon;
+  final IconData icon;
   final String title;
   final String? subtitle;
   final FxEmptyAction? action;
@@ -59,7 +59,7 @@ class FxEmptyState extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              FxIcon(name: icon, size: 18, color: colorScheme.primary),
+              Icon(icon, size: 18, color: colorScheme.primary),
               const SizedBox(width: TokensStrip.s2),
               Expanded(
                 child: Column(
@@ -103,17 +103,7 @@ class FxEmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 64,
-              height: 64,
-              decoration: BoxDecoration(
-                color: colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(TokensStrip.rCard),
-              ),
-              child: Center(
-                child: FxIcon(name: icon, size: 28, color: colorScheme.primary),
-              ),
-            ),
+            FxIconBadge(icon),
             const SizedBox(height: 16),
             Text(
               title,

@@ -1529,6 +1529,7 @@
   "financeiroNumRecebido": "Recebido",
   "financeiroNumAReceber": "A receber",
   "financeiroNumAtrasado": "Atrasado",
+  "financeiroAtrasadoTodosMeses": "O atrasado soma todos os meses.",
   "financeiroDeMesesAnteriores": "{valor} de meses anteriores",
   "@financeiroDeMesesAnteriores": {"placeholders": {"valor": {"type": "String"}}},
   "financeiroSegMensalidades": "Mensalidades",
@@ -1538,9 +1539,9 @@
   "financeiroChaveCadastrada": "Chave PIX cadastrada",
   "financeiroChaveFalta": "Cadastre sua chave PIX para cobrar",
   "financeiroVerboCadastrar": "Cadastrar",
-  "financeiroCobrancaAuto": "Cobrança automática",
-  "financeiroCobrancaAutoStatus": "{n, plural, =0{Ligada · sem falhas} =1{Ligada · 1 falha} other{Ligada · {n} falhas}}",
-  "@financeiroCobrancaAutoStatus": {"placeholders": {"n": {"type": "int"}}},
+  "financeiroLembretes": "Lembretes automáticos",
+  "financeiroLembretesValor": "Ligados",
+  "financeiroLembretesTexto": "O aluno recebe um lembrete por semana enquanto a mensalidade estiver em aberto ou atrasada. Você é avisado 5 dias antes de cada vencimento. Atrasada é marcada todo dia de manhã.",
   "financeiroSeloPendente": "Pendente",
   "financeiroSeloAtrasadaHa": "{n, plural, =1{Atrasada há 1 dia} other{Atrasada há {n} dias}}",
   "@financeiroSeloAtrasadaHa": {"placeholders": {"n": {"type": "int"}}},
@@ -1587,22 +1588,11 @@
   "alunoRecorrenciaProxima": "Próxima cobrança {data}",
   "@alunoRecorrenciaProxima": {"placeholders": {"data": {"type": "String"}}},
   "alunoRecorrenciaSubVazio": "Cobrar todo mês e gerar o PIX sozinho",
-  "dunningTitulo": "Cobrança automática",
-  "dunningVazioTitulo": "Tudo em dia",
-  "dunningVazioTexto": "Todo dia às 6h10 o Focux marca como atrasadas as mensalidades vencidas e, às 9h, avisa você dos vencimentos dos próximos 5 dias.",
-  "dunningVazioBotao": "Ver mensalidades atrasadas",
-  "dunningBlocoAlunos": "Mensalidades dos alunos",
-  "dunningBlocoAssinatura": "Sua assinatura Focux",
-  "dunningBlocoAssinaturaNota": "É a cobrança do seu plano no app, não a mensalidade de um aluno.",
-  "dunningAjudaSubtitulo": "Falhas de pagamento das mensalidades dos alunos e da sua assinatura Focux.",
-  "resultadosQuantoEntrou": "Quanto entrou",
-  "resultadosExplicaRecebido": "O recebido conta pela data do pagamento; o lançado, pelo mês da cobrança. Por isso um pode ser maior que o outro.",
   "resultadosQuemAtrasa": "Quem atrasa",
   "resultadosAtrasaAlunos": "{n, plural, =0{Ninguém atrasado} =1{1 aluno} other{{n} alunos}}",
   "@resultadosAtrasaAlunos": {"placeholders": {"n": {"type": "int"}}},
   "resultadosAtrasaValor": "{valor} em atraso",
   "@resultadosAtrasaValor": {"placeholders": {"valor": {"type": "String"}}},
-  "resultadosSecaoPreco": "Preço sugerido",
   "resultadosDetalhes": "Detalhes",
   "resultadosDetalhesAbrir": "Ver detalhes",
   "resultadosDetalhesFechar": "Esconder detalhes",
@@ -1867,10 +1857,63 @@
   "agendaAlunoTitulo": "Minha Agenda",
   "treinosProximaSessao": "Próxima sessão: {quando}",
   "@treinosProximaSessao": {"placeholders": {"quando": {"type": "String"}}},
-  "resultadosDeLancado": "de {valor} lançados",
-  "@resultadosDeLancado": {"placeholders": {"valor": {"type": "String"}}},
-  "resultadosAReceber": "{valor} a receber",
-  "@resultadosAReceber": {"placeholders": {"valor": {"type": "String"}}},
+  "resultadosEntrouNoCaixa": "Entrou no caixa em {mes}",
+  "@resultadosEntrouNoCaixa": {
+    "placeholders": {
+      "mes": {
+        "type": "String"
+      }
+    }
+  },
+  "resultadosParteDoMes": "deste mês {valor}",
+  "@resultadosParteDoMes": {
+    "placeholders": {
+      "valor": {
+        "type": "String"
+      }
+    }
+  },
+  "resultadosParteAnteriores": "de meses anteriores {valor}",
+  "@resultadosParteAnteriores": {
+    "placeholders": {
+      "valor": {
+        "type": "String"
+      }
+    }
+  },
+  "resultadosParteAdiantado": "adiantado {valor}",
+  "@resultadosParteAdiantado": {
+    "placeholders": {
+      "valor": {
+        "type": "String"
+      }
+    }
+  },
+  "resultadosPrevisto": "Previsto para {mes}: {total} · pago {pago} · em aberto {aberto}",
+  "@resultadosPrevisto": {
+    "placeholders": {
+      "mes": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      },
+      "pago": {
+        "type": "String"
+      },
+      "aberto": {
+        "type": "String"
+      }
+    }
+  },
+  "resultadosTicketMedio": "Ticket médio: {valor}",
+  "@resultadosTicketMedio": {
+    "placeholders": {
+      "valor": {
+        "type": "String"
+      }
+    }
+  },
   "resultadosVariacao": "{pct}% sobre o mês anterior",
   "@resultadosVariacao": {"placeholders": {"pct": {"type": "String"}}},
   "resultadosVazioMes": "Nenhuma mensalidade em {mes}.",

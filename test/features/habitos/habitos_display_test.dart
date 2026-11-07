@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/habitos/data/habito_repository.dart';
 import 'package:focux_app/features/habitos/utils/habitos_display.dart';
+import 'package:focux_app/core/theme/fx_icons.dart';
 
 void main() {
   test('habitoTemplateLabel e value', () {
@@ -37,9 +38,9 @@ void main() {
     expect(habitoComplianceValue(80), '80%');
     expect(habitoComplianceSubtitle(1), '1 check na semana');
     expect(habitoComplianceSubtitle(4), '4 checks na semana');
-    expect(habitoComplianceFxIcon(80), 'circle-check');
-    expect(habitoComplianceFxIcon(50), 'trend');
-    expect(habitoComplianceFxIcon(10), 'alert-triangle');
+    expect(habitoComplianceFxIcon(80), FxIcons.concluido);
+    expect(habitoComplianceFxIcon(50), FxIcons.grafico);
+    expect(habitoComplianceFxIcon(10), FxIcons.alerta);
     expect(habitoComplianceDanger(39), isTrue);
     expect(habitoComplianceDanger(40), isFalse);
     expect(

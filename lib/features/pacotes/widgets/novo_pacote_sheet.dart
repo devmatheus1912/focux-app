@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../core/money/fx_money_input.dart';
+
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
-import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_settings_group.dart';
@@ -96,7 +97,7 @@ class _NovoPacoteSheetState extends State<_NovoPacoteSheet> {
       await widget.repo.criar(
         titulo: _tituloCtrl.text.trim(),
         descricao: _descCtrl.text.trim().isEmpty ? null : _descCtrl.text.trim(),
-        valor: double.parse(_valorCtrl.text.trim().replaceAll(',', '.')),
+        valor: fxMoneyDoCampo(_valorCtrl.text)!.asReais,
         duracaoMeses: _duracao,
         incluiTreino: _treino,
         incluiConsultoria: _consultoria,
@@ -141,7 +142,7 @@ class _NovoPacoteSheetState extends State<_NovoPacoteSheet> {
                   title: 'Novo plano',
                   subtitle:
                       'Quem abrir seu link verá este plano na sua página de vendas.',
-                  leading: FxIcon(name: 'coin', color: primary, size: 18),
+                  leading: Icon(FxIcons.dinheiro, color: primary, size: 18),
                   trailing: IconButton(
                     tooltip: 'Fechar',
                     onPressed:
@@ -193,20 +194,12 @@ class _NovoPacoteSheetState extends State<_NovoPacoteSheet> {
                   ),
                   AlunoInsetFormField(
                     controller: _valorCtrl,
-                    label: 'Valor que o cliente paga (R\$)',
+                    label: 'Valor que o cliente paga',
+                    hint: 'R\$ 0,00',
                     icon: FxIcons.pagamento,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    validator: (v) {
-                      if (v == null || v.trim().isEmpty) {
-                        return 'Informe o valor';
-                      }
-                      final valor =
-                          double.tryParse(v.trim().replaceAll(',', '.')) ?? 0;
-                      if (valor <= 0) return 'Valor deve ser maior que zero';
-                      return null;
-                    },
+                    keyboardType: TextInputType.number,
+                    inputFormatters: const [FxMoneyInputFormatter()],
+                    validator: fxMoneyValidar,
                     showDivider: false,
                   ),
                 ],
@@ -216,14 +209,14 @@ class _NovoPacoteSheetState extends State<_NovoPacoteSheet> {
                 header: 'Plano',
                 children: [
                   FxSettingsTile(
-                    fxIcon: 'calendar',
+                    icon: FxIcons.calendario,
                     label: 'Duração',
                     value: pacoteDuracaoLabel(_duracao),
                     picker: true,
                     onTap: _enviando ? null : _abrirDuracao,
                   ),
                   FxSettingsTile(
-                    fxIcon: 'target',
+                    icon: FxIcons.alvo,
                     label: 'Treino',
                     value: pacoteIncluiValue(_treino),
                     accessory: Switch.adaptive(
@@ -235,7 +228,7 @@ class _NovoPacoteSheetState extends State<_NovoPacoteSheet> {
                     ),
                   ),
                   FxSettingsTile(
-                    fxIcon: 'message-circle',
+                    icon: FxIcons.chat,
                     label: 'Consultoria',
                     value: pacoteIncluiValue(_consultoria),
                     showDivider: false,
@@ -253,7 +246,7 @@ class _NovoPacoteSheetState extends State<_NovoPacoteSheet> {
               FxSettingsGroup(
                 children: [
                   FxSettingsTile(
-                    fxIcon: 'star',
+                    icon: FxIcons.estrela,
                     label: 'Mostrar em destaque',
                     value: pacoteIncluiValue(_destaque),
                     showDivider: false,

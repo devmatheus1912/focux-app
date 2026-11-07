@@ -160,7 +160,7 @@ class AgendaDiaLista extends StatelessWidget {
         children: [
           if (visiveis.isEmpty)
             FxEmptyState(
-              icon: 'calendar',
+              icon: FxIcons.calendario,
               title: passado ? s.agendaDiaPassadoVazio : s.agendaDiaLivre,
               subtitle: passado ? null : agendaEmptyDayHint(),
               quiet: true,

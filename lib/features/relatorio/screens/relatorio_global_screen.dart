@@ -27,6 +27,7 @@ import '../utils/relatorio_global_display.dart';
 import '../widgets/relatorio_ranking_catalog_sheet.dart';
 import '../widgets/relatorio_ranking_tile.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class RelatorioGlobalScreen extends ConsumerStatefulWidget {
   const RelatorioGlobalScreen({super.key});
@@ -199,7 +200,7 @@ class _RelatorioGlobalScreenState extends ConsumerState<RelatorioGlobalScreen> {
                       children: [
                         const SizedBox(height: 48),
                         FxEmptyState(
-                          icon: 'users',
+                          icon: FxIcons.grupo,
                           title: 'Nenhum aluno na base',
                           subtitle:
                               'Quando houver alunos, a média de aderência e os rankings aparecem aqui.',

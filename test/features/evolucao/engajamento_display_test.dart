@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/evolucao/data/evolucao_repository.dart';
 import 'package:focux_app/features/evolucao/utils/engajamento_display.dart';
+import 'package:focux_app/core/theme/fx_icons.dart';
 
 void main() {
 
@@ -16,11 +17,11 @@ void main() {
   });
 
   test('engajamentoFxIcon por tipo', () {
-    expect(engajamentoFxIcon('TREINO'), 'dumbbell');
-    expect(engajamentoFxIcon('CHECKIN_CONCLUIDO'), 'dumbbell');
-    expect(engajamentoFxIcon('MEDIDA'), 'trend');
-    expect(engajamentoFxIcon('MENSAGEM'), 'chat');
-    expect(engajamentoFxIcon(null), 'calendar');
+    expect(engajamentoFxIcon('TREINO'), FxIcons.treino);
+    expect(engajamentoFxIcon('CHECKIN_CONCLUIDO'), FxIcons.treino);
+    expect(engajamentoFxIcon('MEDIDA'), FxIcons.grafico);
+    expect(engajamentoFxIcon('MENSAGEM'), FxIcons.chat);
+    expect(engajamentoFxIcon(null), FxIcons.calendario);
   });
 
 

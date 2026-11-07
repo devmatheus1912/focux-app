@@ -9,8 +9,8 @@ Future<void> _abrirIdentidadeAjuda(BuildContext context) {
     title: identidadeHelpTitle(),
     subtitle: identidadeHelpSubtitle(),
     tips: [
-      FxHelpTip('Marca', identidadeHelpMarcaBody(), icon: 'spark'),
-      FxHelpTip('Salvar', identidadeHelpSalvarBody(), icon: 'circle-check'),
+      FxHelpTip('Marca', identidadeHelpMarcaBody(), icon: FxIcons.ia),
+      FxHelpTip('Salvar', identidadeHelpSalvarBody(), icon: FxIcons.concluido),
     ],
   );
 }

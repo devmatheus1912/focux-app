@@ -442,7 +442,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                                       SizedBox(
                                         height: 280,
                                         child: FxEmptyState(
-                                          icon: 'search',
+                                          icon: FxIcons.buscar,
                                           title: 'Nada encontrado',
                                           subtitle:
                                               'Ajuste a busca para achar outro aluno em risco.',
@@ -473,7 +473,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                                       SizedBox(
                                         height: 280,
                                         child: FxEmptyState(
-                                          icon: 'circle-check',
+                                          icon: FxIcons.concluido,
                                           title: 'Nenhum aluno em risco',
                                           subtitle:
                                               'Avisamos aqui quando alguém esfriar. Você pode apertar ou folgar os limiares.',

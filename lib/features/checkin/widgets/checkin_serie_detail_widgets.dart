@@ -131,7 +131,7 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
       title: s.checkinRpeTitulo,
       subtitle: s.checkinRpeAjudaSub,
       tips: [
-        FxHelpTip(s.checkinRpeEsforco, _rpeHintBody(s), icon: 'dumbbell'),
+        FxHelpTip(s.checkinRpeEsforco, _rpeHintBody(s), icon: FxIcons.treino),
       ],
     );
   }

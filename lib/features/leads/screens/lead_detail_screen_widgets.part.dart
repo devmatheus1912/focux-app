@@ -220,7 +220,7 @@ class _LeadDetailContent extends StatelessWidget {
         const SkeletonList(count: 3)
       else if (interacoes.isEmpty)
         FxEmptyState(
-          icon: 'chat',
+          icon: FxIcons.chat,
           title: 'Nenhuma interação registrada',
           subtitle:
               'Registre ligações, mensagens e visitas para não perder o histórico.',

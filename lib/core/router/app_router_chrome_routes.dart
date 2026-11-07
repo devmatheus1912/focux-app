@@ -59,7 +59,6 @@ import '../../features/coach/screens/coach_screen.dart';
 import '../../features/perfil/screens/identidade_visual_screen.dart';
 import '../../features/perfil/screens/white_label_settings_screen.dart';
 import '../../features/perfil/screens/landing_editor_screen.dart';
-import '../../features/dunning/screens/dunning_ops_screen.dart';
 import '../../features/winback/screens/winback_screen.dart';
 import '../../features/evolucao/screens/engajamento_screen.dart';
 import '../../features/financeiro/screens/financeiro_aluno_screen.dart';
@@ -97,7 +96,6 @@ import '../../features/desafios/screens/desafio_detail_screen.dart';
 import '../../features/desafios/screens/desafios_screen.dart';
 import '../../features/loja/screens/loja_screen.dart';
 import '../../features/pacotes/screens/pacotes_screen.dart';
-import '../../features/recorrencia/screens/recorrencia_screen.dart';
 import '../../features/nps/screens/nps_dashboard_screen.dart';
 import '../../features/grupos/screens/grupo_aulas_personal_screen.dart';
 import '../../features/onboarding/screens/onboarding_wizard_screen.dart';
@@ -526,6 +524,9 @@ RouteBase buildChromeShellRoute() {
                 initialSegmento: financeiroSegmentoDaRota(
                   state.uri.queryParameters['aba'],
                 ),
+                initialFiltro: financeiroFiltroDaRota(
+                  state.uri.queryParameters['filtro'],
+                ),
               );
             },
           ),
@@ -903,7 +904,9 @@ RouteBase buildChromeShellRoute() {
           ),
           GoRoute(
             path: '/dunning',
-            builder: (context, state) => const DunningOpsScreen(),
+            // A cobrança automática saiu: falha de pagamento de aluno virou
+            // mensalidade atrasada. Link e notificação antigos caem aqui.
+            redirect: (context, state) => '/financeiro?aba=mensalidades&filtro=atrasadas',
           ),
           GoRoute(
             path: '/winback',
@@ -922,13 +925,8 @@ RouteBase buildChromeShellRoute() {
           ),
           GoRoute(
             path: '/recorrencia',
-            builder:
-                (context, state) => const FeatureGate(
-                  featureName: 'Recorrência PIX',
-                  requiredPlan: SubscriptionPlan.PRO,
-                  capability: 'recorrencia',
-                  child: RecorrenciaScreen(),
-                ),
+            // Um Financeiro só: Recorrências é uma aba dele.
+            redirect: (context, state) => '/financeiro?aba=recorrencias',
           ),
           GoRoute(
             path: '/nps',

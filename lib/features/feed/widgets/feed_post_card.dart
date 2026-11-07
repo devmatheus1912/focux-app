@@ -451,7 +451,7 @@ class FeedVideoAttachmentTile extends StatelessWidget {
           ),
           child: const Center(
             child: Icon(
-              FxIcons.playAtivo,
+              FxIcons.playCirculo,
               color: Colors.white,
               size: 44,
             ),
@@ -502,11 +502,11 @@ IconData feedTipoIcon(String? tipo) {
     case 'IMAGEM':
       return FxIcons.imagem;
     case 'VIDEO':
-      return FxIcons.playAtivo;
+      return FxIcons.playCirculo;
     case 'ENQUETE':
       return FxIcons.enquete;
     case 'DICA':
-      return FxIcons.ideiaAtivo;
+      return FxIcons.ideia;
     default:
       return FxIcons.artigo;
   }

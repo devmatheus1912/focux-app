@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/theme/fx_icons.dart';
 
 Future<void> showChatInboxHelpSheet(BuildContext context) {
   return showFxHelpSheet(
@@ -11,22 +12,22 @@ Future<void> showChatInboxHelpSheet(BuildContext context) {
       FxHelpTip(
         'Conversas',
         'Toque no aluno para abrir o fio. A lista só aponta o caminho — não envia mensagem.',
-        icon: 'chat',
+        icon: FxIcons.chat,
       ),
       FxHelpTip(
         'Abas',
         'Todas, não lidas e arquivadas. O recorte vem do BFF da caixa.',
-        icon: 'article',
+        icon: FxIcons.artigo,
       ),
       FxHelpTip(
         'Arquivar e fixar',
         'Arraste para a esquerda para arquivar. Para a direita, fixa no topo.',
-        icon: 'clock',
+        icon: FxIcons.relogio,
       ),
       FxHelpTip(
         'Nova conversa',
         'O botão de baixo escolhe o aluno. Segure uma linha para selecionar e limpar.',
-        icon: 'plus',
+        icon: FxIcons.adicionar,
       ),
     ],
   );

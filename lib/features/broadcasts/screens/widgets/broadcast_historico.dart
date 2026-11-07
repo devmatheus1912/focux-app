@@ -12,6 +12,7 @@ import '../../../../core/widgets/fx_tonal_button.dart';
 import '../../data/broadcast_repository.dart';
 import '../../utils/broadcast_display.dart';
 import '../../../../l10n/pt.dart';
+import '../../../../core/theme/fx_icons.dart';
 
 class BroadcastHistorico extends StatelessWidget {
   const BroadcastHistorico({
@@ -27,7 +28,7 @@ class BroadcastHistorico extends StatelessWidget {
   Widget build(BuildContext context) {
     if (itens.isEmpty) {
       return FxEmptyState(
-        icon: 'message-circle',
+        icon: FxIcons.chat,
         title: broadcastEmptyTitle(),
         subtitle: broadcastEmptySubtitle(),
       );
@@ -38,7 +39,7 @@ class BroadcastHistorico extends StatelessWidget {
       children: [
         for (var i = 0; i < itens.length; i++)
           FxSettingsTile(
-            fxIcon: broadcastPublicoFxIcon(
+            icon: broadcastPublicoFxIcon(
               itens[i].tipoConsultoriaAlvo ?? 'TODOS',
             ),
             label: itens[i].titulo,

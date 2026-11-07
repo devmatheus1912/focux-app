@@ -8,6 +8,7 @@ import '../../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../dashboard/widgets/dashboard_section_header.dart';
 import '../../models/busca_global_models.dart';
 import '../../utils/busca_display.dart';
+import '../../../../core/theme/fx_icons.dart';
 
 class BuscaGlobalResults extends StatelessWidget {
   const BuscaGlobalResults({
@@ -27,14 +28,14 @@ class BuscaGlobalResults extends StatelessWidget {
   Widget build(BuildContext context) {
     if (query.trim().length < buscaMinQueryLength) {
       return FxEmptyState(
-        icon: 'search',
+        icon: FxIcons.buscar,
         title: buscaMinQueryTitle(),
         subtitle: buscaMinQuerySubtitle(),
       );
     }
     if (result.isEmpty) {
       return FxEmptyState(
-        icon: 'search',
+        icon: FxIcons.buscar,
         title: buscaEmptyTitle(query),
         subtitle: buscaEmptySubtitle(),
       );
@@ -43,7 +44,7 @@ class BuscaGlobalResults extends StatelessWidget {
       final items = buscaFilterByTipo(result, filter);
       if (items.isEmpty) {
         return FxEmptyState(
-          icon: 'search',
+          icon: FxIcons.buscar,
           title: buscaEmptyFilterTitle(filter.label),
           subtitle: buscaEmptyFilterSubtitle(),
         );

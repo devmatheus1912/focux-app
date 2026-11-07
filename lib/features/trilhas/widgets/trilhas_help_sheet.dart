@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/theme/fx_icons.dart';
 
 Future<void> showTrilhasHelpSheet(BuildContext context) {
   return showFxHelpSheet(
@@ -11,17 +12,17 @@ Future<void> showTrilhasHelpSheet(BuildContext context) {
       FxHelpTip(
         'Atribuir',
         'O botão de baixo cria a trilha com tipo de meta e as primeiras etapas.',
-        icon: 'plus',
+        icon: FxIcons.adicionar,
       ),
       FxHelpTip(
         'Progresso',
         'Toque no marco pendente para concluir. Nova etapa entra no card. Se a trilha tem valor, atualize ali.',
-        icon: 'target',
+        icon: FxIcons.alvo,
       ),
       FxHelpTip(
         'Encerrar',
         'Uma trilha errada pode ser excluída no card. Isso não apaga o aluno.',
-        icon: 'x',
+        icon: FxIcons.fechar,
       ),
     ],
   );
@@ -36,12 +37,12 @@ Future<void> showAlunoTrilhasHelpSheet(BuildContext context) {
       FxHelpTip(
         'Progresso',
         'O percentual sobe quando o personal marca um marco ou atualiza a meta.',
-        icon: 'trend',
+        icon: FxIcons.grafico,
       ),
       FxHelpTip(
         'Treinos',
         'O botão de baixo abre seus treinos — é o caminho mais comum de avançar.',
-        icon: 'dumbbell',
+        icon: FxIcons.treino,
       ),
     ],
   );

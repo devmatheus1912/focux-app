@@ -263,7 +263,7 @@ class _MigracaoConviteTile extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        FxIcons.concluidoAtivo,
+                        FxIcons.concluido,
                         size: 16,
                         color: EagleTokens.good,
                       ),
@@ -423,7 +423,7 @@ class _MigracaoEmailEnviadoTile extends StatelessWidget {
         decoration: fxListCardDecoration(context, accent: EagleTokens.good),
         child: Row(
           children: [
-            Icon(FxIcons.concluidoAtivo,
+            Icon(FxIcons.concluido,
                 size: 16, color: EagleTokens.good),
             const SizedBox(width: 8),
             Expanded(

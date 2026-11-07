@@ -1,3 +1,4 @@
+import '../../../core/utils/pt_br_display.dart';
 import '../../../core/widgets/fx_status_pill.dart';
 import '../../../l10n/app_localizations.dart';
 import '../data/financeiro_repository.dart';
@@ -8,32 +9,6 @@ MensalidadeFiltro financeiroFiltroInicial({required int quantidadeAtrasadas}) =>
     quantidadeAtrasadas > 0
         ? MensalidadeFiltro.atrasadas
         : MensalidadeFiltro.abertas;
-
-/// Primeiro dia do mês de [hoje] no formato da API (`yyyy-MM-01`).
-String financeiroMesAtualIso(DateTime hoje) =>
-    financeiroIsoDate(hoje.year, hoje.month, 1);
-
-/// Dia sugerido para o vencimento de uma mensalidade nova.
-///
-/// Dia 5 do mês de referência. No mês corrente, se o dia 5 já passou, vale
-/// hoje + 5 dias: uma cobrança lançada agora não pode nascer atrasada.
-String financeiroVencimentoSugerido({
-  required String mesReferenciaIso,
-  required DateTime hoje,
-}) {
-  final mes =
-      financeiroParseIsoDate(mesReferenciaIso) ??
-      DateTime(hoje.year, hoje.month, 1);
-  final ultimo = DateTime(mes.year, mes.month + 1, 0).day;
-  final dia5 = DateTime(mes.year, mes.month, ultimo < 5 ? ultimo : 5);
-  final hojeDia = DateTime(hoje.year, hoje.month, hoje.day);
-  final mesCorrente = mes.year == hoje.year && mes.month == hoje.month;
-  if (mesCorrente && dia5.isBefore(hojeDia)) {
-    final d = hojeDia.add(const Duration(days: 5));
-    return financeiroIsoDate(d.year, d.month, d.day);
-  }
-  return financeiroIsoDate(dia5.year, dia5.month, dia5.day);
-}
 
 /// Quantos dias a cobrança está vencida; 0 se vence hoje ou ainda não venceu.
 /// Sem vencimento, vale o primeiro dia do mês de referência (regra do servidor).
@@ -90,5 +65,30 @@ bool financeiroTemRecebidoAnterior(ResumoMensal r) =>
       );
     default:
       return (texto: s.financeiroSeloPendente, tom: FxPillTone.accent);
+  }
+}
+
+/// Estado da linha: "vence 12/11", "vence hoje", "atrasada há 3 dias",
+/// "paga em 05/11", "cancelada".
+String financeiroMensalidadeEstado(Mensalidade m, {required DateTime hoje}) {
+  switch (m.status) {
+    case 'PAGO':
+      final pago = DateTime.tryParse(m.pagoEm ?? '');
+      return pago == null ? 'paga' : 'paga em ${dataCurta(pago)}';
+    case 'CANCELADO':
+      return 'cancelada';
+    case 'ATRASADO':
+      final dias = financeiroDiasDeAtraso(
+        mesReferencia: m.mesReferencia,
+        vencimento: m.vencimento,
+        hoje: hoje,
+      );
+      return dias <= 1 ? 'atrasada desde ontem' : 'atrasada há $dias dias';
+    default:
+      final v = financeiroParseIsoDate(m.vencimento) ??
+          financeiroParseIsoDate(m.mesReferencia);
+      if (v == null) return 'em aberto';
+      final dia = DateTime(hoje.year, hoje.month, hoje.day);
+      return v == dia ? 'vence hoje' : 'vence ${dataCurta(v)}';
   }
 }

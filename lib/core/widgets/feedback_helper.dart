@@ -94,7 +94,7 @@ class FeedbackHelper {
       context,
       message,
       fill: EagleTokens.good,
-      icon: FxIcons.concluidoAtivo,
+      icon: FxIcons.concluido,
       reserveBottom: reserveBottom,
       placement: placement,
     );

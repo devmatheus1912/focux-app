@@ -124,7 +124,7 @@ class _HistoricoDetalheScreenState
             naoEncontrada
                 ? FxContentWidthLimiter(
                   child: FxEmptyState(
-                    icon: 'dumbbell',
+                    icon: FxIcons.treino,
                     title: s.historicoDetalheNaoEncontrado,
                     action: FxEmptyAction(
                       label: s.historicoDetalheVoltar,
@@ -194,7 +194,7 @@ class _HistoricoDetalheScreenState
                           HistoricoInfoTile(
                             titulo: r.exercicio,
                             detalhe: historicoRecordeDetalhe(s, r),
-                            icone: 'star',
+                            icone: FxIcons.trofeu,
                           ),
                       ],
                     ),

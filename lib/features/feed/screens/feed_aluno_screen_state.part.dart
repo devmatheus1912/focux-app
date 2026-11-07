@@ -222,7 +222,7 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
                   constraints: BoxConstraints(minHeight: constraints.maxHeight),
                   child: Center(
                     child: FxEmptyState(
-                      icon: searching ? 'search' : 'rss',
+                      icon: searching ? FxIcons.buscar : FxIcons.feed,
                       title: searching
                           ? 'Nada encontrado'
                           : 'Nenhuma publicação ainda',

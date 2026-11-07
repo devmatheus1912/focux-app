@@ -91,8 +91,8 @@ extension on _LoginScreenState {
       title: loginHelpTitle(),
       subtitle: loginHelpSubtitle(),
       tips: [
-        FxHelpTip('Personal', loginHelpPersonalBody(), icon: 'users'),
-        FxHelpTip('Aluno', loginHelpAlunoBody(), icon: 'route'),
+        FxHelpTip('Personal', loginHelpPersonalBody(), icon: FxIcons.grupo),
+        FxHelpTip('Aluno', loginHelpAlunoBody(), icon: FxIcons.rota),
       ],
     );
   }

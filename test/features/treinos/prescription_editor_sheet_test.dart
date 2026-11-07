@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/core/theme/fx_icons.dart';
 import 'package:focux_app/core/theme/design_tokens.dart';
 import 'package:focux_app/core/widgets/fx_home_sheet.dart';
 import 'package:focux_app/core/widgets/fx_settings_group.dart';
@@ -73,7 +74,7 @@ void main() {
                             stickyFooter: FxSettingsGroup(
                               children: [
                                 FxSettingsTile(
-                                  fxIcon: 'circle-check',
+                                  icon: FxIcons.concluido,
                                   label: 'Salvar prescrição',
                                   value: '',
                                   showDivider: false,

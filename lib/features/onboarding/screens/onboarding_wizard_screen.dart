@@ -260,7 +260,7 @@ class _OnboardingWizardScreenState
                 )
                 : wizard == null
                 ? FxEmptyState(
-                  icon: 'spark',
+                  icon: FxIcons.ia,
                   title: 'Setup ainda não disponível',
                   subtitle: 'Não encontramos os passos iniciais agora.',
                   action: FxEmptyAction(

@@ -27,6 +27,7 @@ import '../data/nps_repository.dart';
 import '../utils/nps_display.dart';
 import '../widgets/nps_catalog_sheet.dart';
 import '../../../core/utils/pt_br_display.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class NpsDashboardScreen extends ConsumerStatefulWidget {
   const NpsDashboardScreen({super.key});
@@ -172,7 +173,7 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
                             children: [
                               const SizedBox(height: 48),
                               FxEmptyState(
-                                icon: 'star',
+                                icon: FxIcons.estrela,
                                 title: 'Nenhuma resposta ainda',
                                 subtitle:
                                     'Assim que seus alunos responderem à pesquisa, o feedback aparece aqui.',
@@ -277,7 +278,7 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
                                 const SizedBox(height: TokensStrip.s2),
                                 if (npsRecentPreview(recentes).isEmpty)
                                   FxEmptyState(
-                                    icon: 'star',
+                                    icon: FxIcons.estrela,
                                     title:
                                         filtro == npsFiltroDetratores
                                             ? 'Nenhum detrator neste recorte'

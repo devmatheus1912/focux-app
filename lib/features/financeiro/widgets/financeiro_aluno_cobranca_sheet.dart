@@ -5,6 +5,7 @@ import '../../../core/widgets/fx_motion.dart';
 import '../../../features/alunos/utils/satellite_screen_utils.dart';
 import '../data/financeiro_repository.dart';
 import '../utils/financeiro_hub_display.dart';
+import '../../../core/theme/fx_icons.dart';
 
 Future<void> showFinanceiroAlunoCobrancaSheet(
   BuildContext context, {
@@ -20,11 +21,11 @@ Future<void> showFinanceiroAlunoCobrancaSheet(
     title: financeiroMensalidadeMesPorExtenso(item.mesReferencia),
     subtitle: financeiroMensalidadeStatusLabel(item.status),
     tips: [
-      FxHelpTip('Valor', item.valor.format(), icon: 'coin'),
+      FxHelpTip('Valor', item.valor.format(), icon: FxIcons.dinheiro),
       FxHelpTip(
         'Situação',
         financeiroMensalidadeStatusLabel(item.status),
-        icon: item.status == 'ATRASADO' ? 'alert-triangle' : 'circle-check',
+        icon: item.status == 'ATRASADO' ? FxIcons.alerta : FxIcons.concluido,
       ),
       FxHelpTip(
         'Como pagar',
@@ -33,7 +34,7 @@ Future<void> showFinanceiroAlunoCobrancaSheet(
             : item.status == 'PAGO'
             ? 'Esta cobrança já está quitada.'
             : 'Fale com o personal se precisar de ajuda com o pagamento.',
-        icon: 'pix',
+        icon: FxIcons.pix,
       ),
     ],
     extra: [

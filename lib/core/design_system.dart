@@ -87,5 +87,4 @@ export 'widgets/fx_motion.dart' show FxLiquidPrimaryButton, FxStaggerItem;
 export 'widgets/fx_content_width_limiter.dart' show FxContentWidthLimiter;
 export 'widgets/cinematic_mesh_background.dart' show CinematicMeshBackground;
 export 'widgets/mesh_scope.dart' show MeshScope;
-export 'widgets/fx_icon.dart' show FxIcon;
 export 'widgets/fx_screen_a11y.dart';

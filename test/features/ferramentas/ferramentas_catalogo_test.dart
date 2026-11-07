@@ -48,16 +48,12 @@ void main() {
     expect(groups.indexOf(studio), greaterThan(0));
   });
 
-  test('ícones Pacotes e Loja distintos; Cobrança ≠ Receita', () {
+  test('ícones Pacotes e Loja distintos', () {
     final vendas = catalogo.hubs.firstWhere((h) => h.id == 'vendas').itens.single;
     final pacotes = vendas.abas.firstWhere((a) => a.id == 'pacotes');
     final loja = vendas.abas.firstWhere((a) => a.id == 'loja');
     expect(ferramentasIconFor(pacotes), isNot(ferramentasIconFor(loja)));
 
-    final fin = catalogo.hubs.firstWhere((h) => h.id == 'financeiro').itens.single;
-    final cobranca = fin.abas.firstWhere((a) => a.id == 'cobranca-auto');
-    final receita = fin.abas.firstWhere((a) => a.id == 'receita-recorrente');
-    expect(ferramentasIconFor(cobranca), isNot(ferramentasIconFor(receita)));
   });
 
   test('resolveNavTarget de legacy abre item com abas', () {

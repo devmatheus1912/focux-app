@@ -26,6 +26,7 @@ import '../data/qualidade_operacional.dart';
 import '../utils/qualidade_operacional_display.dart';
 import '../widgets/dashboard_section_header.dart';
 import '../../../l10n/pt.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class QualidadeOperacionalScreen extends ConsumerStatefulWidget {
   const QualidadeOperacionalScreen({super.key});
@@ -174,7 +175,7 @@ class _QualidadeOperacionalScreenState
                   children: [
                     const SizedBox(height: 48),
                     FxEmptyState(
-                      icon: 'bar-chart-2',
+                      icon: FxIcons.enquete,
                       title: ptS.qualidadeSemDadosAinda,
                       subtitle:
                           ptS.qualidadeCadastreAlunosERegistreMensalidades,

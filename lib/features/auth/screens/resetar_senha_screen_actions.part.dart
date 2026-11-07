@@ -15,8 +15,8 @@ extension on _ResetarSenhaScreenState {
       title: resetSenhaHelpTitle(),
       subtitle: resetSenhaHelpSubtitle(),
       tips: [
-        FxHelpTip('Senha', resetSenhaHelpSenhaBody(), icon: 'spark'),
-        FxHelpTip('Código', resetSenhaHelpSessaoBody(), icon: 'route'),
+        FxHelpTip('Senha', resetSenhaHelpSenhaBody(), icon: FxIcons.ia),
+        FxHelpTip('Código', resetSenhaHelpSessaoBody(), icon: FxIcons.rota),
       ],
     );
   }

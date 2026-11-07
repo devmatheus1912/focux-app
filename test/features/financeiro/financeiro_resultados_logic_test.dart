@@ -2,15 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/financeiro/data/financeiro_repository.dart';
 import 'package:focux_app/features/financeiro/utils/financeiro_resultados_logic.dart';
 
-ResumoMensal _r({required String recebido, required String previsto}) =>
-    ResumoMensal(
-      totalRecebido: recebido,
-      totalPrevisto: previsto,
-      inadimplentes: 0,
-      ticketMedio: '0',
-      acumuladoAnual: '0',
-    );
-
 void main() {
   group('resultadosDetalhesVisiveis (10 pagantes e 3 meses)', () {
     test('limites exatos', () {
@@ -43,29 +34,27 @@ void main() {
     });
   });
 
-  group('recebido maior que lançado', () {
-    test('recebido de mês anterior passa do lançado do mês', () {
-      expect(
-        resultadosRecebidoMaiorQueLancado(
-          _r(recebido: '100.00', previsto: '0.00'),
-        ),
-        isTrue,
-      );
+  group('de onde veio o recebido', () {
+    test('divide em do mês, anteriores e adiantado', () {
+      final r = ResumoMensal.fromJson({
+        'totalRecebido': '600.00',
+        'totalPrevisto': '200.00',
+        'recebidoDeMesesAnteriores': '200.00',
+        'recebidoAdiantado': '200.00',
+        'pagoDoMes': '200.00',
+      });
+      expect(r.recebidoDoMes.cents, 20000);
+      expect(r.emAbertoDoMes.cents, 0);
     });
-    test('igual ou menor não precisa de explicação', () {
-      expect(
-        resultadosRecebidoMaiorQueLancado(
-          _r(recebido: '100.00', previsto: '100.00'),
-        ),
-        isFalse,
-      );
-      expect(
-        resultadosRecebidoMaiorQueLancado(
-          _r(recebido: '0.00', previsto: '100.00'),
-        ),
-        isFalse,
-      );
-    });
+  });
+
+  test('gráfico começa no primeiro mês com dinheiro', () {
+    final itens = [
+      for (final (m, v) in [('2026-06', '0'), ('2026-07', '0'), ('2026-10', '100'), ('2026-11', '600')])
+        EvolucaoMensalItem.fromJson({'mes': m, 'recebido': v}),
+    ];
+    final r = resultadosDesdePrimeiroMes(itens, 2026, 11);
+    expect(r.map((e) => e.mes), ['2026-10', '2026-11']);
   });
 
   test('mês atual', () {

@@ -303,7 +303,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
       titulo: 'Quem vê seus dados de saúde?',
       subtitulo:
           'Você pode mudar isso depois, na seção Conexão desta tela.',
-      icone: FxIcons.favoritoAtivo,
+      icone: FxIcons.saudeVida,
       grupos: [
         FxActionGroup<bool>(null, [
           FxActionItem(
@@ -429,7 +429,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
       context,
       titulo: rotuloPlataformaSaude(),
       subtitulo: 'Conexão com os seus dados de saúde',
-      icone: FxIcons.favoritoAtivo,
+      icone: FxIcons.saudeVida,
       grupos: [
         FxActionGroup<String>(null, [
           FxActionItem(

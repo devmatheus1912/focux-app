@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/widgets/fx_help.dart';
 import '../../../l10n/pt.dart';
+import '../../../core/theme/fx_icons.dart';
 
 Future<void> showEngajamentoHelpSheet(BuildContext context) {
   return showFxHelpSheet(
@@ -12,12 +13,12 @@ Future<void> showEngajamentoHelpSheet(BuildContext context) {
       FxHelpTip(
         ptS.engajamentoAderencia2,
         ptS.engajamentoOMesmoNumeroDoPerfil,
-        icon: 'calendar',
+        icon: FxIcons.calendario,
       ),
       FxHelpTip(
         ptS.engajamentoAtividade,
         ptS.engajamentoFiltrePorTreinosMedidasOu,
-        icon: 'trend',
+        icon: FxIcons.grafico,
       ),
     ],
   );

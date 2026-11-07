@@ -28,7 +28,6 @@ class PerfilOperacaoSection extends ConsumerWidget {
     return Column(
       children: [
         FxSettingsTile(
-          iconeComFundo: true,
           icon: FxIcons.premium,
           label: 'Planos e assinatura',
           value: planoLabel,
@@ -37,7 +36,6 @@ class PerfilOperacaoSection extends ConsumerWidget {
           onTap: () => context.push('/assinatura'),
         ),
         FxSettingsTile(
-          iconeComFundo: true,
           icon: FxIcons.carteira,
           label: 'Carteira e PIX',
           value:
@@ -60,7 +58,6 @@ class PerfilOperacaoSection extends ConsumerWidget {
           ),
         ),
         FxSettingsTile(
-          iconeComFundo: true,
           icon: FxIcons.adicionarPessoa,
           label: 'Convites',
           value: 'Link de cadastro',

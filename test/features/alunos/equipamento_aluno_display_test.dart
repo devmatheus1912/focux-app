@@ -11,7 +11,7 @@ void main() {
 
   test('equipamentoFxIcon cobre o enum', () {
     for (final item in Equipamento.values) {
-      expect(equipamentoFxIcon(item), isNotEmpty);
+      expect(equipamentoFxIcon(item).fontFamily, 'PhosphorLight');
     }
   });
 }

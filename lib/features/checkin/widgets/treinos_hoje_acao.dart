@@ -17,6 +17,7 @@ import '../data/checkin_repository.dart';
 import '../providers/checkin_provider.dart';
 import '../utils/treinos_hub_texts.dart';
 import '../utils/treinos_hub_view.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Sem nenhum treino: pedir a ficha ao personal.
 class TreinosHubVazio extends StatelessWidget {
@@ -26,7 +27,7 @@ class TreinosHubVazio extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = S.of(context);
     return FxEmptyState(
-      icon: 'dumbbell',
+      icon: FxIcons.treino,
       title: s.treinosHubVazioTitulo,
       subtitle: s.treinosHubVazioSubtitulo,
       action: FxEmptyAction(

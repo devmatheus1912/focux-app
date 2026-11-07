@@ -122,8 +122,6 @@ Map<String, Object> _coorte({required int pagantes, required int meses}) => {
   'alunosAtivos': pagantes,
   'alunosTotal': pagantes,
   'inadimplentes': 0,
-  'dunningRecoveryPct': 0.0,
-  'dunningAbertas': 0,
   'pqlScore': 95,
   'pqlClassificacao': 'PRIORIDADE',
   'alunosPagantes': pagantes,
@@ -194,8 +192,9 @@ void main() {
       _app(_Adapter(resumo: _resumo(), coorte: _coorte(pagantes: 5, meses: 1))),
     );
     await _settle(tester);
-    expect(find.text('Quanto entrou'), findsOneWidget);
-    expect(find.text('de R\$ 600 lançados'), findsOneWidget);
+    expect(find.textContaining('Entrou no caixa em'), findsOneWidget);
+    expect(find.textContaining('Previsto para'), findsOneWidget);
+    expect(find.textContaining('R\$ 600'), findsWidgets);
     expect(find.text('Quem atrasa'), findsOneWidget);
     expect(
       find.text(
@@ -242,10 +241,10 @@ void main() {
     await tester.pumpWidget(_app(_Adapter(resumo: _resumo())));
     await _settle(tester);
     expect(find.text('Detalhes'), findsNothing);
-    expect(find.text('Quanto entrou'), findsOneWidget);
+    expect(find.textContaining('Entrou no caixa em'), findsOneWidget);
   });
 
-  testWidgets('recebido maior que lançado tem a explicação na própria tela', (
+  testWidgets('recebido de outro mês aparece dividido, sem parágrafo explicando', (
     tester,
   ) async {
     telaAlta(tester);
@@ -262,24 +261,19 @@ void main() {
       ),
     );
     await _settle(tester);
-    expect(
-      find.textContaining('O recebido conta pela data do pagamento'),
-      findsOneWidget,
-    );
-    expect(find.text('R\$ 100 de meses anteriores'), findsOneWidget);
+    // Só uma parte (de meses anteriores): não há o que dividir.
+    expect(find.textContaining('O recebido conta pela data do pagamento'), findsNothing);
+    expect(find.textContaining('Entrou no caixa em'), findsOneWidget);
   });
 
-  testWidgets('recebido menor que lançado não precisa de explicação', (
+  testWidgets('previsto do mês mostra pago e em aberto', (
     tester,
   ) async {
     telaAlta(tester);
     await tester.pumpWidget(_app(_Adapter(resumo: _resumo())));
     await _settle(tester);
-    expect(
-      find.textContaining('O recebido conta pela data do pagamento'),
-      findsNothing,
-    );
-    expect(find.text('R\$ 100 a receber'), findsOneWidget);
+    expect(find.textContaining('Previsto para'), findsOneWidget);
+    expect(find.textContaining('em aberto'), findsOneWidget);
   });
 
   testWidgets('Quem atrasa abre a lista de atrasadas', (tester) async {
@@ -332,7 +326,7 @@ void main() {
     await _settle(tester);
     await tester.tap(find.text('${meses[anterior.month]} ${anterior.year}'));
     await _settle(tester);
-    expect(find.text('de R\$ 250 lançados'), findsOneWidget);
+    expect(find.textContaining('R\$ 250'), findsWidgets);
     // a coorte é do mês atual: some ao olhar outro mês
     expect(find.text('Detalhes'), findsNothing);
   });

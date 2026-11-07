@@ -468,7 +468,7 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
           if (visible.isEmpty) {
             return filtered
                 ? FxEmptyState(
-                    icon: 'search',
+                    icon: FxIcons.buscar,
                     title: 'Nenhum plano encontrado',
                     subtitle: 'Ajuste a busca ou o filtro.',
                     action: FxEmptyAction(

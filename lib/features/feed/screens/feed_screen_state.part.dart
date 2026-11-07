@@ -191,7 +191,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                   isDark: isDark,
                   title: post == null ? 'Nova publicação' : 'Editar publicação',
                   subtitle: 'Os alunos veem no feed deles.',
-                  leading: FxIcon(name: 'article', color: accent, size: 18),
+                  leading: Icon(FxIcons.artigo, color: accent, size: 18),
                 ),
               ),
               Flexible(child: FeedComposerSheet(ref: ref, post: post)),
@@ -227,7 +227,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                   constraints: BoxConstraints(minHeight: constraints.maxHeight),
                   child: Center(
                     child: FxEmptyState(
-                      icon: searching ? 'search' : 'rss',
+                      icon: searching ? FxIcons.buscar : FxIcons.feed,
                       title:
                           searching
                               ? 'Nada encontrado'

@@ -32,7 +32,7 @@ void main() {
     expect(screen, contains('viewInsetsOf'));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('exercicioHubSubtitle'));
-    expect(screen, contains("name: 'star'"));
+    expect(screen, contains('FxIcons.estrelaAtiva'));
     expect(screen, contains('exercicioVideoMetric'));
     expect(screen, contains("label: 'Biblioteca'"));
     expect(screen, contains("label: 'Lista'"));

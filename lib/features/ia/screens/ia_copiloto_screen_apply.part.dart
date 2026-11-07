@@ -13,7 +13,7 @@ extension IaCopilotScreenApply on _IaCopilotoScreenState {
       'ENVIAR_PUSH' => CopilotExecutarAcaoSpec(
         backendTipo: spec.backendTipo,
         label: spec.label,
-        icon: FxIcons.notificacaoAtiva,
+        icon: FxIcons.notificacaoTocando,
         executingLabel: 'Enviando…',
         executingSemantics: 'Enviando notificação ao aluno',
         parametros: spec.parametros,

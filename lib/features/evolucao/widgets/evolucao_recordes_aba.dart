@@ -50,7 +50,7 @@ class EvolucaoRecordesAba extends StatelessWidget {
           children: [
             FxEmptyState(
               key: const ValueKey('evolucao_recordes_empty'),
-              icon: 'star',
+              icon: FxIcons.estrela,
               title: ptS.evolucaoSemRecordeTitulo,
               subtitle: vazioSubtitulo,
             ),

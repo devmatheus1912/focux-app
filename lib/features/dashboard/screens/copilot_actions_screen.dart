@@ -223,7 +223,7 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
                               )
                             else
                               FxEmptyState(
-                                icon: 'circle-check',
+                                icon: FxIcons.concluido,
                                 title: copilotActionsEmptyTitle(_status),
                                 subtitle: copilotActionsEmptySubtitle(_status),
                                 action: FxEmptyAction(

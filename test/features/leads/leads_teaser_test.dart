@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/core/theme/fx_icons.dart';
 import 'package:focux_app/core/widgets/fx_settings_tile.dart';
 import 'package:focux_app/features/dashboard/data/dashboard_tool_shortcuts.dart';
 import 'package:focux_app/features/dashboard/utils/dashboard_home_client_cache.dart';
@@ -13,7 +14,7 @@ import 'package:focux_app/features/planos/data/planos_repository.dart';
 import '../../support/riverpod_seeds.dart';
 
 const _leads = DashboardToolShortcut(
-  icon: 'leads',
+  icon: FxIcons.megafone,
   label: 'Leads',
   entrada: CatalogoEntrada(id: 'leads', titulo: 'Leads'),
   route: '/leads',

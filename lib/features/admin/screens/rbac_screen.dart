@@ -72,12 +72,12 @@ class RbacScreen extends ConsumerWidget {
                       FxHelpTip(
                         'Conceder',
                         'Escolha recurso e nível. Nada muda sozinho.',
-                        icon: 'key',
+                        icon: FxIcons.chave,
                       ),
                       FxHelpTip(
                         'Revogar',
                         'Abra a linha e confirme. Ação destrutiva.',
-                        icon: 'alert-triangle',
+                        icon: FxIcons.alerta,
                       ),
                     ],
                   ),
@@ -106,7 +106,7 @@ class RbacScreen extends ConsumerWidget {
           data: (permissoes) {
             if (permissoes.isEmpty) {
               return FxEmptyState(
-                icon: 'users',
+                icon: FxIcons.grupo,
                 title: 'Nenhuma permissão configurada',
                 subtitle:
                     'Defina níveis de acesso por recurso (Alunos, Financeiro, Treinos…).',

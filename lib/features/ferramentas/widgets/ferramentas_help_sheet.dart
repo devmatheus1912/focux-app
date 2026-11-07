@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/theme/fx_icons.dart';
 
 /// Ajuda da tela Ferramentas.
 Future<void> showFerramentasHelpSheet(BuildContext context) {
@@ -12,17 +13,17 @@ Future<void> showFerramentasHelpSheet(BuildContext context) {
       FxHelpTip(
         'Buscar',
         'Digite o nome da ferramenta. Nomes antigos também funcionam.',
-        icon: 'search',
+        icon: FxIcons.buscar,
       ),
       FxHelpTip(
         'Plano',
         'O selo "Pro" ou "Enterprise" mostra em qual plano a ferramenta entra. Tocar abre o upgrade.',
-        icon: 'star',
+        icon: FxIcons.estrela,
       ),
       FxHelpTip(
         'Descrição',
         'A linha abaixo do nome diz para que serve a ferramenta.',
-        icon: 'help',
+        icon: FxIcons.ajuda,
       ),
     ],
   );

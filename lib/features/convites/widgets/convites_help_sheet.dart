@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/theme/fx_icons.dart';
 
 Future<void> showConvitesHelpSheet(BuildContext context) {
   return showFxHelpSheet(
@@ -11,17 +12,17 @@ Future<void> showConvitesHelpSheet(BuildContext context) {
       FxHelpTip(
         'Gerar',
         'Cria um link seguro. Se já existe um válido, ele aparece na hora — sem gerar outro.',
-        icon: 'plus',
+        icon: FxIcons.adicionar,
       ),
       FxHelpTip(
         'Compartilhar',
         'Copiar some do clipboard em 1 minuto. WhatsApp abre com o texto pronto.',
-        icon: 'message-circle',
+        icon: FxIcons.chat,
       ),
       FxHelpTip(
         'Cadastro',
         'O aluno entra pelo link, troca a senha no primeiro acesso. Não envie o token solto.',
-        icon: 'users',
+        icon: FxIcons.grupo,
       ),
     ],
   );

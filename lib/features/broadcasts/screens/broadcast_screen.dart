@@ -126,12 +126,12 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
         FxHelpTip(
           ptS.broadcastPublico,
           ptS.broadcastTodosOnlinePresencialOuHibrido,
-          icon: 'users',
+          icon: FxIcons.grupo,
         ),
         FxHelpTip(
           ptS.broadcastEnvio,
           ptS.broadcastVoceVeQuantosRecebemAntes,
-          icon: 'message-circle',
+          icon: FxIcons.chat,
         ),
       ],
     );
@@ -258,7 +258,7 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
                     children: [
                     if (semAlunos)
                       FxEmptyState(
-                        icon: 'users',
+                        icon: FxIcons.grupo,
                         title: ptS.broadcastSemAlunosParaAvisar,
                         subtitle: ptS.broadcastCadastreUmAlunoParaEnviar,
                         action: FxEmptyAction(

@@ -5,7 +5,6 @@ import '../../broadcasts/screens/broadcast_screen.dart';
 import '../../captura/screens/leads_publicos_screen.dart';
 import '../../dashboard/screens/qualidade_operacional_screen.dart';
 import '../../desafios/screens/desafios_screen.dart';
-import '../../dunning/screens/dunning_ops_screen.dart';
 import '../../financeiro/screens/financeiro_resultados_screen.dart';
 import '../../exercicios/screens/exercicios_list_screen.dart';
 import '../../feed/screens/feed_screen.dart';
@@ -60,8 +59,6 @@ Widget? buildFerramentasTabScreen(String? rotaApp) {
       return const LojaScreen();
     case '/relatorio/business':
       return const FinanceiroResultadosScreen();
-    case '/dunning':
-      return const DunningOpsScreen();
     case '/recorrencia':
       return const RecorrenciaScreen();
     case '/white-label':

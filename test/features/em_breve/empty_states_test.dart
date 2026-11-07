@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/widgets/fx_empty_state.dart';
 import 'package:focux_app/features/planos/paywall/paywall_catalog.dart';
+import 'package:focux_app/core/theme/fx_icons.dart';
 
 void main() {
   testWidgets('FxEmptyState renders automacoes empty copy', (tester) async {
@@ -9,7 +10,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: FxEmptyState(
-            icon: 'zap',
+            icon: FxIcons.raio,
             title: 'Nenhum fluxo ativo',
             subtitle: 'Ative um template acima para começar automações.',
           ),

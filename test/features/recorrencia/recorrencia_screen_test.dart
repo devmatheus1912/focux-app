@@ -226,8 +226,8 @@ void main() {
         );
         await _settle(tester);
         expect(find.text('Cadastre sua chave PIX para cobrar'), findsNothing);
-        expect(find.text('Cobrança automática'), findsOneWidget);
-        expect(find.text('Ligada · sem falhas'), findsOneWidget);
+        expect(find.text('Lembretes automáticos'), findsOneWidget);
+        expect(find.text('Ligados'), findsOneWidget);
       },
     );
 
@@ -299,7 +299,7 @@ void main() {
       expect(find.text('Beto'), findsOneWidget);
       expect(find.text('199'), findsNothing);
       final campo = tester.widget<TextFormField>(find.byType(TextFormField));
-      expect(campo.controller?.text, '150.00');
+      expect(campo.controller?.text, 'R\$ 150,00');
       expect(
         find.text(
           'Todo dia ${recorrenciaDiaPadrao(DateTime.now())} · R\$ 150,00 · PIX',

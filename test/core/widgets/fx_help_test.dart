@@ -5,23 +5,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/theme/fx_settings_layout.dart';
 import 'package:focux_app/core/widgets/fx_help.dart';
 import 'package:focux_app/features/dashboard/utils/dashboard_microcopy.dart';
+import 'package:focux_app/core/theme/fx_icons.dart';
 
 void main() {
-  test('glifo help continua o ? no círculo', () {
-    final icon = File('lib/core/widgets/fx_icon.dart').readAsStringSync();
+  test('ajuda usa o ? no círculo do Phosphor', () {
     final help = File('lib/core/widgets/fx_help.dart').readAsStringSync();
-    final helpStart = icon.indexOf("case 'help':");
-    final nextCase = icon.indexOf("case '", helpStart + 1);
-    expect(helpStart, greaterThanOrEqualTo(0));
-    expect(nextCase, greaterThan(helpStart));
-    final block = icon.substring(helpStart, nextCase);
-    expect(block, contains('Offset(12, 12), 9'));
-    expect(block, contains('Offset(12, 16.5)'));
     expect(help, contains('HapticFeedback.selectionClick()'));
     expect(help, isNot(contains('FxSettingsGroup')));
     expect(help, contains('FxHelpTipRow'));
     expect(FxHelpChrome.glyphSize, FxSettingsLayout.iconSize);
-    expect(FxHelpChrome.iconName, 'help');
+    expect(FxHelpChrome.icon, FxIcons.ajuda);
   });
 
   test('Home help tem tips inset e footnote, sem muro no subtítulo', () {
@@ -59,7 +52,7 @@ void main() {
                           FxHelpTip(
                             'Adicionar',
                             'O botão principal inclui.',
-                            icon: 'plus',
+                            icon: FxIcons.adicionar,
                           ),
                         ],
                         footer: 'Sugestão opcional — você decide se aplica.',

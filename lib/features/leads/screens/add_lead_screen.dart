@@ -82,12 +82,12 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
         FxHelpTip(
           'Nome',
           'É o único campo obrigatório. O prospect entra no funil como Lead.',
-          icon: 'users',
+          icon: FxIcons.grupo,
         ),
         FxHelpTip(
           'Plano Pro',
           'O CRM de leads faz parte do plano Pro.',
-          icon: 'spark',
+          icon: FxIcons.ia,
         ),
       ],
     );
@@ -270,7 +270,7 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
                     validator: (v) => leadEmailInvalido(v ?? ''),
                   ),
                   FxSettingsTile(
-                    fxIcon: 'spark',
+                    icon: FxIcons.ia,
                     label: 'Origem',
                     value: leadOrigemLabel(_origem),
                     picker: true,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/theme/fx_icons.dart';
 
 Future<void> showEvolucaoHelpSheet(BuildContext context) {
   return showFxHelpSheet(
@@ -11,12 +12,12 @@ Future<void> showEvolucaoHelpSheet(BuildContext context) {
       FxHelpTip(
         'Registrar',
         'O botão de baixo grava peso e circunferências, ou um recorde, conforme a visão.',
-        icon: 'plus',
+        icon: FxIcons.adicionar,
       ),
       FxHelpTip(
         'Visão',
         'Troque entre medidas e recordes no ícone de tendência. Fotos, comparativo e enviar no chat abrem pelos chips.',
-        icon: 'trend',
+        icon: FxIcons.grafico,
       ),
     ],
   );

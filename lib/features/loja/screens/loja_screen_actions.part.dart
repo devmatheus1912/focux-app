@@ -215,7 +215,7 @@ extension on _LojaScreenState {
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           children: [
             FxEmptyState(
-              icon: filtered ? 'search' : 'spark',
+              icon: filtered ? FxIcons.buscar : FxIcons.ia,
               title: filtered
                   ? 'Nenhum pacote encontrado'
                   : 'Nenhum pacote na vitrine',
@@ -290,7 +290,7 @@ extension on _LojaScreenState {
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           children: [
             FxEmptyState(
-              icon: filtered ? 'search' : 'article',
+              icon: filtered ? FxIcons.buscar : FxIcons.artigo,
               title: filtered
                   ? 'Nenhum pedido encontrado'
                   : 'Nenhum pedido ainda',

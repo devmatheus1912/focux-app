@@ -51,6 +51,15 @@ class FinanceiroNumerosMes extends StatelessWidget {
             ),
           ],
         ),
+        // Recebido e a receber são do mês; o atrasado junta todos os meses.
+        if (resumo.totalAtrasado.isPositive)
+          Padding(
+            padding: const EdgeInsets.only(top: TokensStrip.s2),
+            child: Text(
+              s.financeiroAtrasadoTodosMeses,
+              style: FocuxHubTypography.cardSubtitle(color: chrome.mute),
+            ),
+          ),
         if (financeiroTemRecebidoAnterior(resumo))
           Padding(
             padding: const EdgeInsets.only(top: TokensStrip.s2),
