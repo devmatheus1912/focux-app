@@ -186,9 +186,15 @@ class ProgressoRecorde {
 }
 
 /// Fórmula de Epley. Nulo fora da faixa em que a estimativa presta.
-/// Exercício de peso do corpo, core ou mobilidade: 1RM não faz sentido ali.
-/// O recorde guarda só o nome, então a decisão sai dele.
-bool exercicioSemUmRm(String nome) {
+/// Grupos em que 1RM não faz sentido: core, corpo inteiro, cardio, mobilidade.
+const _gruposSemUmRm = {
+  'ABDOMEN', 'OBLIQUO', 'LOMBAR', 'FULL_BODY', 'CARDIO', 'MOBILIDADE',
+};
+
+/// Exercício de core, peso do corpo ou mobilidade. Vale o grupo muscular que
+/// o servidor manda; sem ele (exercício digitado à mão), decide pelo nome.
+bool exercicioSemUmRm(String nome, {String? grupoMuscular}) {
+  if (grupoMuscular != null) return _gruposSemUmRm.contains(grupoMuscular);
   final n = nome.toLowerCase();
   const termos = [
     'abdominal', 'abdômen', 'abdomen', 'prancha', 'crunch', 'sit-up',
@@ -201,7 +207,7 @@ double? umRmEstimado(RecordePessoal r) {
   final carga = r.cargaKg;
   final reps = r.repeticoes;
   if (carga == null || reps == null || reps < 2 || reps > 12) return null;
-  if (exercicioSemUmRm(r.exercicioNome)) return null;
+  if (exercicioSemUmRm(r.exercicioNome, grupoMuscular: r.grupoMuscular)) return null;
   return carga * (1 + reps / 30);
 }
 

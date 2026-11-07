@@ -241,11 +241,15 @@ class EvolucaoMiniAneis extends StatelessWidget {
     this.onTap,
     this.pesoLinha,
     this.pesoRotulo,
+    this.metaNome,
   });
 
   final EvolucaoAneis aneis;
   final bool doPersonal;
   final VoidCallback? onTap;
+
+  /// Medida da meta do anel ([nomeDaMetaPrincipal]): "Meta · Braço: 25%".
+  final String? metaNome;
 
   /// Perfil e 360: a quarta linha, com o peso.
   final String? pesoLinha;
@@ -255,7 +259,11 @@ class EvolucaoMiniAneis extends StatelessWidget {
   Widget build(BuildContext context) {
     final chrome = fxListCardDecoration(context);
     final scheme = Theme.of(context).colorScheme;
-    final leituras = leiturasDosAneis(aneis, doPersonal: doPersonal);
+    final leituras = leiturasDosAneis(
+      aneis,
+      doPersonal: doPersonal,
+      metaNome: metaNome,
+    );
     final cores = fxCoresDeAnel(scheme.surface, marca: scheme.primary);
     return Material(
       color: Colors.transparent,

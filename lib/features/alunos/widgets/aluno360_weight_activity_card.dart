@@ -1,3 +1,4 @@
+import '../../evolucao/utils/evolucao_aneis.dart';
 import 'package:flutter/material.dart';
 
 import '../../evolucao/providers/evolucao_home_provider.dart';
@@ -58,9 +59,10 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
         children: [
           DashboardSectionHeader(title: S.of(context).corpoTitulo),
           const SizedBox(height: TokensStrip.s3),
-          if (ref.watch(evolucaoHomeProvider(alunoId)).value?.aneis case final aneis?)
+          if (ref.watch(evolucaoHomeProvider(alunoId)).value case final evolucao?)
             EvolucaoMiniAneis(
-              aneis: aneis,
+              aneis: evolucao.aneis,
+              metaNome: nomeDaMetaPrincipal(evolucao.metas),
               doPersonal: true,
               onTap: () => _openEvolucao(context),
               pesoLinha: peso == null

@@ -92,6 +92,30 @@ void main() {
     expect(umRmEstimado(r('Supino reto')), isNotNull);
   });
 
+  test('1RM vai pelo grupo muscular quando o servidor manda', () {
+    RecordePessoal r(String nome, String grupo) => RecordePessoal(
+      id: 1,
+      exercicioId: 1,
+      exercicioNome: nome,
+      data: '2026-11-04',
+      cargaKg: 40,
+      repeticoes: 10,
+      grupoMuscular: grupo,
+    );
+    expect(umRmEstimado(r('Elevação de pernas', 'ABDOMEN')), isNull);
+    expect(umRmEstimado(r('Remada com abdominal no nome', 'COSTAS_LATISSIMO')), isNotNull);
+    expect(
+      RecordePessoal.fromJson({
+        'id': 1,
+        'exercicioId': 2,
+        'exercicioNome': 'Supino',
+        'data': '2026-11-04',
+        'grupoMuscular': 'PEITO',
+      }).grupoMuscular,
+      'PEITO',
+    );
+  });
+
   group('Comparar', () {
     const massa = EvolucaoComparativoMetrica(
       label: 'Massa magra',

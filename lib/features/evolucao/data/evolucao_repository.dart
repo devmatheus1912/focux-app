@@ -59,6 +59,10 @@ class RecordePessoal {
   final String data;
   final double? cargaKg;
   final int? repeticoes;
+
+  /// Grupo muscular principal do exercício ("ABDOMEN"). Nulo em exercício
+  /// digitado à mão ou em backend antigo.
+  final String? grupoMuscular;
   RecordePessoal({
     required this.id,
     required this.exercicioId,
@@ -66,6 +70,7 @@ class RecordePessoal {
     required this.data,
     this.cargaKg,
     this.repeticoes,
+    this.grupoMuscular,
   });
   factory RecordePessoal.fromJson(Map<String, dynamic> j) => RecordePessoal(
     id: (j['id'] as num?)?.toInt() ?? 0,
@@ -74,6 +79,7 @@ class RecordePessoal {
     data: _medidaDataString(j['data']),
     cargaKg: (j['cargaKg'] as num?)?.toDouble(),
     repeticoes: (j['repeticoes'] as num?)?.toInt(),
+    grupoMuscular: j['grupoMuscular'] as String?,
   );
 }
 

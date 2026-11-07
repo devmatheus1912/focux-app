@@ -1,3 +1,4 @@
+import '../../evolucao/utils/evolucao_aneis.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -434,9 +435,13 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
           ),
           children: [
             _topo(dados),
-            if (ref.watch(evolucaoHomeProvider(widget.alunoId)).value?.aneis case final aneis?) ...[
+            if (ref.watch(evolucaoHomeProvider(widget.alunoId)).value case final evolucao?) ...[
               const SizedBox(height: TokensStrip.s3),
-              EvolucaoMiniAneis(aneis: aneis, doPersonal: true),
+              EvolucaoMiniAneis(
+                aneis: evolucao.aneis,
+                doPersonal: true,
+                metaNome: nomeDaMetaPrincipal(evolucao.metas),
+              ),
             ],
             const SizedBox(height: TokensStrip.s3),
             Align(

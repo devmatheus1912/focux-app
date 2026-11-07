@@ -1,3 +1,4 @@
+import '../../evolucao/utils/evolucao_aneis.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -47,9 +48,10 @@ class PerfilProgressoBloco extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (evolucao.value?.aneis case final aneis?)
+              if (evolucao.value case final dados?)
                 EvolucaoMiniAneis(
-                  aneis: aneis,
+                  aneis: dados.aneis,
+                  metaNome: nomeDaMetaPrincipal(dados.metas),
                   doPersonal: false,
                   onTap: () => _abrirProgresso(context),
                   pesoLinha: peso,

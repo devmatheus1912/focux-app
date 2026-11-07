@@ -49,7 +49,11 @@ class ExerciseGroupChips extends ConsumerWidget {
     this.marcadosPrimeiro = const {},
     this.antes = const [],
     this.extras = const [],
+    this.ocultos = const {},
   });
+
+  /// Grupos que não fazem sentido nesta busca (recorde: mobilidade, cardio).
+  final Set<GrupoMuscular> ocultos;
 
   final Set<GrupoMuscular> selecionados;
   final Map<GrupoMuscular, int> noTreino;
@@ -78,7 +82,7 @@ class ExerciseGroupChips extends ConsumerWidget {
       naBiblioteca: naBiblioteca,
       noTreino: noTreino,
       marcados: marcadosPrimeiro,
-    );
+    )..removeWhere(ocultos.contains);
     if (grupos.isEmpty && extras.isEmpty && antes.isEmpty) return const SizedBox.shrink();
     return Semantics(
       container: true,

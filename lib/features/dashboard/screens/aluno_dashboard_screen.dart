@@ -1,3 +1,4 @@
+import '../../evolucao/utils/evolucao_aneis.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -411,11 +412,12 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
             },
           ),
         ),
-      if (ref.watch(minhaEvolucaoProvider).value?.aneis case final aneis?)
+      if (ref.watch(minhaEvolucaoProvider).value case final evolucao?)
         (
           TokensStrip.s3,
           EvolucaoMiniAneis(
-            aneis: aneis,
+            aneis: evolucao.aneis,
+            metaNome: nomeDaMetaPrincipal(evolucao.metas),
             doPersonal: false,
             onTap: () => context.push('/aluno/progresso'),
           ),

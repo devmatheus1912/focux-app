@@ -326,6 +326,7 @@ class _BuscaExercicioState extends ConsumerState<BuscaExercicio> {
           ExerciseGroupChips(
             selecionados: {if (_grupo != null) _grupo!},
             noTreino: const {},
+            ocultos: const {GrupoMuscular.mobilidade, GrupoMuscular.cardio},
             primary: primary,
             isDark: chrome.isDark,
             onToggle: (g) {
