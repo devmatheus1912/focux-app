@@ -58,8 +58,9 @@ extension _CheckinCarga on _CheckinScreenState {
       context,
       titulo: s.checkinMaisTitulo,
       subtitulo: ee.exercicioNome,
+      icone: null,
       grupos: [
-        FxActionGroup<String>(null, [
+        FxActionGroup<String>(s.checkinMaisGrupoSerie, [
           if (podeRegistrar && livre)
             FxActionItem(
               valor: 'ajustar',
@@ -96,8 +97,12 @@ extension _CheckinCarga on _CheckinScreenState {
             FxActionItem(
               valor: 'dicas',
               rotulo: s.checkinDicasExercicio,
+              descricao: s.checkinDicasExercicioSub,
               icone: FxIcons.ajuda,
             ),
+        ]),
+        // Encerra o treino todo: separado das ações da série.
+        FxActionGroup<String>(s.checkinMaisGrupoTreino, [
           FxActionItem(
             valor: 'finalizar',
             rotulo: s.checkinFinalizarTreino,

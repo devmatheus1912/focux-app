@@ -45,7 +45,7 @@ void main() {
       ),
     );
     expect(find.byType(ProntidaoAnel), findsNothing);
-    expect(find.text('Sem sono registrado'), findsOneWidget);
+    expect(find.text('Sua nota sai com o sono da noite'), findsOneWidget);
     expect(tester.getSize(find.byType(ProntidaoCard)).height, lessThan(160));
     await tester.tap(find.text('Como registrar'));
     expect(registrou, isTrue);

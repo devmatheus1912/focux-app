@@ -22,7 +22,9 @@ class HealthService {
     HealthDataType.STEPS,
     HealthDataType.HEART_RATE,
     HealthDataType.ACTIVE_ENERGY_BURNED,
-    HealthDataType.SLEEP_ASLEEP,
+    // O Apple Watch (iOS 16+) e o Health Connect gravam o sono por fase;
+    // SLEEP_ASLEEP sozinho é só o "dormindo, sem fase" e chega vazio.
+    ...tiposDeSonoDormido,
     HealthDataType.RESTING_HEART_RATE,
     // O mesmo conceito tem tipos diferentes por plataforma.
     if (defaultTargetPlatform == TargetPlatform.iOS)
@@ -125,7 +127,7 @@ class HealthService {
     final noite = await getHealthData(
       start: inicioDaJanelaDeSono(now),
       end: now,
-      types: [HealthDataType.SLEEP_ASLEEP],
+      types: tiposDeSonoDormido,
     );
     final steps = await getTodaySteps();
 
@@ -166,8 +168,14 @@ class HealthService {
       }
     }
 
-    // Sono: soma só as sessões que terminam hoje (a noite passada).
-    final sleepMinutes = minutosDeSonoDaNoite(noite, hoje: midnight);
+    // Sono: as fases dormidas da noite passada, sem contar duas vezes.
+    final sleepMinutes = minutosDormidos(
+      [
+        for (final p in noite)
+          (tipo: p.type, de: p.dateFrom, ate: p.dateTo),
+      ],
+      inicio: inicioDaJanelaDeSono(now),
+    );
     for (final p in noite) {
       fontes.add(p.sourceName);
     }
@@ -183,21 +191,21 @@ class HealthService {
     );
   }
 
-  /// Minutos dormidos na noite que termina em [hoje]: só os trechos que
-  /// terminam a partir da meia-noite de hoje e sem contar o mesmo intervalo
-  /// duas vezes (relógio e iPhone gravam o mesmo sono).
+  /// Minutos dormidos desde [inicio] (18h de ontem): só as fases dormidas,
+  /// unindo trechos que se sobrepõem (relógio e iPhone gravam o mesmo sono).
   @visibleForTesting
-  static double minutosDeSonoDaNoite(
-    List<HealthDataPoint> pontos, {
-    required DateTime hoje,
+  static double minutosDormidos(
+    Iterable<({HealthDataType tipo, DateTime de, DateTime ate})> trechos, {
+    required DateTime inicio,
   }) {
-    final trechos = <(DateTime, DateTime)>[];
-    for (final p in pontos) {
-      if (p.type != HealthDataType.SLEEP_ASLEEP) continue;
-      if (p.dateTo.isBefore(hoje)) continue;
-      trechos.add((p.dateFrom, p.dateTo));
-    }
-    return minutosUnidos(trechos);
+    final validos = <(DateTime, DateTime)>[
+      for (final t in trechos)
+        if (tiposDeSonoDormido.contains(t.tipo) &&
+            !t.de.isBefore(inicio) &&
+            t.ate.isAfter(t.de))
+          (t.de, t.ate),
+    ];
+    return minutosUnidos(validos);
   }
 
   /// Soma dos minutos de uma lista de intervalos, unindo os que se sobrepõem.
@@ -232,6 +240,14 @@ class HealthService {
     await prefs.remove(_tiposKey);
   }
 }
+
+/// Fases em que a pessoa está dormindo. Acordado e "na cama" não contam.
+const tiposDeSonoDormido = <HealthDataType>[
+  HealthDataType.SLEEP_ASLEEP,
+  HealthDataType.SLEEP_LIGHT,
+  HealthDataType.SLEEP_DEEP,
+  HealthDataType.SLEEP_REM,
+];
 
 /// Lista de tipos em ordem estável, para comparar entre versões do app.
 String assinaturaDosTipos(Iterable<String> tipos) => (tipos.toList()..sort()).join(',');

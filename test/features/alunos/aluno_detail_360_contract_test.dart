@@ -514,7 +514,7 @@ void main() {
       allOf(
         contains('DashboardSectionHeader'),
         contains('FxActionChip'),
-        contains('_EvolucaoMetricChip'),
+        contains('_EvolucaoNumeros'),
         contains('_VolumeSparklineRow'),
         contains('formatAlunoVolumeKg'),
       ),

@@ -46,7 +46,7 @@ Future<T?> showFxGroupedActionSheet<T>(
   required String titulo,
   required List<FxActionGroup<T>> grupos,
   String? subtitulo,
-  IconData icone = FxIcons.mais,
+  IconData? icone = FxIcons.mais,
   FxActionItem<T>? destrutiva,
   String? confirmarTitulo,
   String? confirmarMensagem,
@@ -82,7 +82,9 @@ class FxGroupedActionSheet<T> extends StatelessWidget {
 
   final String titulo;
   final String? subtitulo;
-  final IconData icone;
+
+  /// Ícone do cabeçalho; `null` = só o título (sem enfeite).
+  final IconData? icone;
   final List<FxActionGroup<T>> grupos;
   final FxActionItem<T>? destrutiva;
   final String? confirmarTitulo;
@@ -115,7 +117,10 @@ class FxGroupedActionSheet<T> extends StatelessWidget {
     return FxSheetFrame(
       title: titulo,
       subtitle: subtitulo,
-      leading: Icon(icone, color: primary, size: FxSettingsLayout.iconSize),
+      leading:
+          icone == null
+              ? null
+              : Icon(icone, color: primary, size: FxSettingsLayout.iconSize),
       maxHeightFactor: 0.82,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

@@ -123,7 +123,7 @@ void main() {
       final signal = alunoHeroPrimarySignal(aluno);
       expect(
         alunoHeroCaption(aluno, signal),
-        'Parado há 29 dias — contato hoje',
+        'Parado há 29 dias · chame hoje',
       );
     });
 

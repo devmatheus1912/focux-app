@@ -113,7 +113,7 @@ extension _CheckinCorpo on _CheckinScreenState {
                     rpeAlvo: current?.rpeAlvo,
                     rpeEscolhido: _rpeEscolhido,
                     onRpe: _ultimaEnvio == null ? null : _anotarRpe,
-                    onTrocar: onTrocar,
+                    serieAvaliada: _ultimaSerie?.numero,
                   )
                   : _cardOuVazio(s, exercicios, current, currentIndex),
         ),

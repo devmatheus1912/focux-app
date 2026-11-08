@@ -25,9 +25,9 @@ void main() {
 
     expect(linha, isNotNull);
     expect(linha!.sobrancelha, 'Seu ritmo');
-    expect(linha.titulo, '2 de 3');
-    expect(linha.frase, contains('4 semanas'));
-    expect(linha.frase, contains('kg'));
+    // Cada número com o que ele mede.
+    expect(linha.titulo, '2 de 3 treinos');
+    expect(linha.frase, '4 semanas seguidas · 1.200 kg na semana');
   });
 
   test('semana sem sessão não vira linha', () {

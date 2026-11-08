@@ -78,6 +78,8 @@ abstract final class FxIcons {
   static const IconData chevronDireita = IconData(0xe13a, fontFamily: _light); // caretRight
   static const IconData chevronEsquerda = IconData(0xe138, fontFamily: _light); // caretLeft
   static const IconData circulo = IconData(0xe18a, fontFamily: _light); // circle
+  static const IconData parcial = IconData(0xe18c, fontFamily: _light); // circleHalf
+  static const IconData naoFeito = IconData(0xe602, fontFamily: _light); // circleDashed
   static const IconData citacao = IconData(0xe660, fontFamily: _light); // quotes
   static const IconData colar = IconData(0xe196, fontFamily: _light); // clipboard
   static const IconData compartilhar = IconData(0xeaf0, fontFamily: _light); // export

@@ -333,7 +333,6 @@ class SaudeConexaoCard extends StatelessWidget {
   const SaudeConexaoCard({
     super.key,
     required this.rotuloFonte,
-    required this.sincronizado,
     required this.compartilhando,
     required this.onCompartilhar,
     required this.onGerenciar,
@@ -343,7 +342,6 @@ class SaudeConexaoCard extends StatelessWidget {
   final String rotuloFonte;
 
   /// "Sincronizado às 13:50 · Apple Watch".
-  final String sincronizado;
   final bool? compartilhando;
   final ValueChanged<bool> onCompartilhar;
   final VoidCallback onGerenciar;
@@ -383,14 +381,8 @@ class SaudeConexaoCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     // Selo abaixo do nome: não quebra a linha do título.
+                    // A hora da sincronização fica no subtítulo da barra do topo.
                     const FxStatusPill(label: 'Conectada', tone: FxPillTone.success),
-                    const SizedBox(height: 4),
-                    Text(
-                      sincronizado,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: chrome.mute, fontSize: 13),
-                    ),
                   ],
                 ),
               ),

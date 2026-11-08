@@ -631,8 +631,8 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
                           : SaudeMetricTile(
                             icone: FxIcons.sono,
                             rotulo: 'Sono',
-                            valor: 'Registrar sono',
-                            apoio: 'Use o relógio para dormir',
+                            valor: 'Sem registro',
+                            apoio: 'Toque para ver como registrar',
                             acao: true,
                             onTap: _comoLiberar,
                           ),
@@ -660,7 +660,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
                         (fcRepouso > 0 || s.avgHeartRate > 0) ? 'bpm' : null,
                     apoio:
                         fcRepouso > 0
-                            ? 'Entra na sua nota'
+                            ? 'Usada na nota de prontidão'
                             : (s.avgHeartRate > 0
                                 ? 'Inclui treino e caminhada'
                                 : saudeSemBatimento),
@@ -700,7 +700,6 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
             4,
             SaudeConexaoCard(
               rotuloFonte: rotuloPlataformaSaude(),
-              sincronizado: _subtitulo(),
               compartilhando: _compartilhando,
               onCompartilhar: _alterarCompartilhamento,
               onGerenciar: _gerenciarConexao,

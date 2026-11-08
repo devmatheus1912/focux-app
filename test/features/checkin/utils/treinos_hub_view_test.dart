@@ -173,14 +173,14 @@ void main() {
   });
 
   group('treinoDuracaoReal', () {
-    test('entre 5 min e 8 h aparece', () {
+    test('entre 5 min e 3 h aparece', () {
       expect(
         treinoDuracaoReal('2026-09-27T07:00:00', '2026-09-27T07:05:00'),
         const Duration(minutes: 5),
       );
       expect(
-        treinoDuracaoReal('2026-09-27T07:00:00', '2026-09-27T15:00:00'),
-        const Duration(hours: 8),
+        treinoDuracaoReal('2026-09-27T07:00:00', '2026-09-27T10:00:00'),
+        const Duration(hours: 3),
       );
     });
 

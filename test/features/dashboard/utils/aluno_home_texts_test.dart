@@ -137,7 +137,7 @@ void main() {
       expect(alunoPrazoTexto(_pt, _hoje, hoje: _hoje), 'Vence hoje');
       expect(
         alunoPrazoTexto(_pt, DateTime(2026, 10, 1), hoje: _hoje),
-        startsWith('Até '),
+        startsWith('Ficha até '),
       );
       expect(
         alunoPrazoTexto(_en, DateTime(2026, 10, 1), hoje: _hoje),

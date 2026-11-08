@@ -66,13 +66,12 @@ class AlunoPersonalCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  // Rótulo pequeno e apagado: o nome é o que se lê.
                   Text(
                     s.alunoPersonalCardEyebrow,
-                    style: FocuxHubTypography.eyebrow(
-                      context,
-                      color: chrome.mute,
-                    ),
+                    style: FocuxHubTypography.chip(chrome.mute),
                   ),
+                  const SizedBox(height: 2),
                   Text(
                     nomeLimpo,
                     maxLines: 1,
@@ -82,7 +81,7 @@ class AlunoPersonalCard extends StatelessWidget {
                   if (frase.isNotEmpty)
                     Text(
                       frase,
-                      maxLines: 2,
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: FocuxHubTypography.bodyMuted(color: chrome.mute),
                     ),

@@ -61,8 +61,12 @@ class SuaSemanaRow extends StatelessWidget {
             .toList();
     final segue = nomes.isEmpty && dia.segueSequencia;
     final descanso = nomes.isEmpty && !segue && feitoExtra == null;
+    // Dia que já passou sem treino: diz isso, em vez de "segue a sequência".
+    final naoFeito = status == false;
     final texto = feitoExtra != null
         ? feitoExtra!
+        : segue && naoFeito
+        ? s.treinosSemanaNaoFeito
         : segue
         ? (previsto?.isNotEmpty == true ? s.treinosSemanaProxima(previsto!) : s.rotinaSegueSequencia)
         : descanso
@@ -70,7 +74,7 @@ class SuaSemanaRow extends StatelessWidget {
         : nomes.join(' · ');
     final peso = hoje ? FontWeight.w700 : FontWeight.w500;
     final cor =
-        descanso
+        descanso || naoFeito
             ? theme.colorScheme.onSurfaceVariant
             : theme.colorScheme.onSurface;
 
@@ -149,19 +153,26 @@ class SuaSemanaRow extends StatelessWidget {
                     ),
                     const SizedBox(width: TokensStrip.s1),
                   ],
+                  // Ficha prevista e não feita: a palavra, não um traço.
+                  if (naoFeito && !segue) ...[
+                    Text(
+                      s.treinosSemanaNaoFeito,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(width: TokensStrip.s1),
+                  ],
                   // Colunas fixas: status e seta alinham em todas as linhas.
                   SizedBox(
                     width: 22,
-                    child: status == null
-                        ? null
-                        : Icon(
-                            status! ? FxIcons.concluidoAtivo : FxIcons.remover,
+                    child: status == true
+                        ? const Icon(
+                            FxIcons.concluidoAtivo,
                             size: 18,
-                            color:
-                                status!
-                                    ? EagleTokens.good
-                                    : theme.colorScheme.onSurfaceVariant,
-                          ),
+                            color: EagleTokens.good,
+                          )
+                        : null,
                   ),
                   SizedBox(
                     width: 20,

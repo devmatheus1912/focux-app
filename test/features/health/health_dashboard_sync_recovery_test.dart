@@ -200,7 +200,7 @@ void main() {
       },
     );
     expect(find.text('Prontidão indisponível'), findsOneWidget);
-    expect(find.text('Sem sono registrado'), findsNothing);
+    expect(find.text('Sua nota sai com o sono da noite'), findsNothing);
     expect(find.textContaining('/100'), findsNothing);
     expect(find.text('12.000'), findsOneWidget);
     expect(find.text('8h'), findsOneWidget);
@@ -230,7 +230,7 @@ void main() {
     // O caso do print: 63 "Recuperação parcial" sem nenhum sono.
     expect(find.text('63'), findsNothing);
     expect(find.text('Recuperação parcial'), findsNothing);
-    expect(find.text('Sem sono registrado'), findsOneWidget);
+    expect(find.text('Sua nota sai com o sono da noite'), findsOneWidget);
     expect(find.text('Como registrar'), findsOneWidget);
     expect(find.text('Registrar sono'), findsNothing);
     expect(find.text('Sem registro'), findsWidgets); // cartão de sono vazio, texto pequeno

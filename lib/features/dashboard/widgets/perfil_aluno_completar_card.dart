@@ -60,5 +60,5 @@ class PerfilAlunoCompletarCard extends StatelessWidget {
 }
 
 /// Estilo do e-mail sob o nome.
-TextStyle perfilAlunoEmailStyle(ShellPalette chrome) =>
+TextStyle perfilAlunoSubtituloStyle(ShellPalette chrome) =>
     FocuxHubTypography.bodyMuted(color: chrome.mute);

@@ -21,6 +21,7 @@ import '../utils/aluno_perfil_completion.dart';
 import 'perfil_aluno_completar_card.dart';
 import 'perfil_progresso_bloco.dart';
 import '../../../core/theme/fx_icons.dart';
+import '../providers/dashboard_provider.dart';
 
 /// Identidade e conta. As ferramentas moram em `/aluno/ferramentas`, abertas
 /// pela Hoje.
@@ -33,6 +34,13 @@ class PerfilAlunoHubBody extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final s = S.of(context);
     final aluno = home.aluno;
+    final personal =
+        ref
+            .watch(alunoDashboardHomeProvider)
+            .value
+            ?.personalBrand
+            .nomePersonal
+            .trim();
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
     final accent = BrandPalette.softened(primary);
@@ -105,14 +113,15 @@ class PerfilAlunoHubBody extends ConsumerWidget {
                   overflow: TextOverflow.ellipsis,
                   style: FxSettingsLayout.profileName(context, color: chrome.ink),
                 ),
-                if (aluno.email.trim().isNotEmpty) ...[
+                // Com quem treina; o e-mail fica em Editar cadastro.
+                if (personal != null && personal.isNotEmpty) ...[
                   const SizedBox(height: TokensStrip.s1),
                   Text(
-                    aluno.email,
+                    s.alunoPerfilTreinaCom(personal),
                     textAlign: TextAlign.center,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: perfilAlunoEmailStyle(chrome),
+                    style: perfilAlunoSubtituloStyle(chrome),
                   ),
                 ],
                 const SizedBox(height: TokensStrip.s4),

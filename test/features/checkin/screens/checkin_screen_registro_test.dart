@@ -242,7 +242,7 @@ void main() {
       expect(repo.rpes, [null]);
       expect(find.text('Esforço sentido (RPE)'), findsNothing);
       // o esforço é perguntado dentro do descanso, sem travar o registro
-      expect(find.text('Como foi a série?'), findsOneWidget);
+      expect(find.text('Como foi a série 1?'), findsOneWidget);
       expect(find.textContaining('perto de 8'), findsOneWidget);
     });
 

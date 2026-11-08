@@ -89,7 +89,8 @@ const treinosHubUltimosMax = 3;
 
 String treinoPreviaPath(int treinoId) => '/checkin/treino/$treinoId';
 const _duracaoMin = Duration(minutes: 5);
-const _duracaoMax = Duration(hours: 8);
+// Acima de 3 h a sessão ficou aberta esquecida: não é duração de treino.
+const _duracaoMax = Duration(hours: 3);
 
 TreinosHubView buildTreinosHubView({
   required List<ExecucaoTreino> treinos,

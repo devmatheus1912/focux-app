@@ -25,9 +25,9 @@ void main() {
             value: '74',
             suffix: '%',
           ),
-          'Aderência baixa em 30 dias — reforce o hábito',
+          'Aderência baixa em 30 dias · reforce o hábito',
         ),
-        'Aderência baixa em 30 dias — reforce o hábito',
+        'Aderência baixa em 30 dias · reforce o hábito',
       );
     });
 
@@ -35,9 +35,9 @@ void main() {
       expect(
         alunoHeroContextLine(
           const AlunoHeroPrimarySignal(label: 'Sem treino', value: '5'),
-          '5 dias parado — vale check-in',
+          '5 dias parado · vale um check-in',
         ),
-        '5 dias parado — vale check-in',
+        '5 dias parado · vale um check-in',
       );
     });
   });

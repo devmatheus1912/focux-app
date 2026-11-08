@@ -45,6 +45,13 @@ AlunoRitmoLinha? alunoSemanaLinha(S s, AlunoWeekSummary semana) {
   );
 }
 
+/// Exercício em que a carga é ajuda (elástico, máquina assistida): o número
+/// não é peso levantado e não serve de "maior carga".
+bool exercicioDeAjuda(String nome) => RegExp(
+  r'el[aá]stico|superband|assistid|graviton',
+  caseSensitive: false,
+).hasMatch(nome);
+
 /// Ganho do exercício no histórico. Sem curva, o recorde do mês ainda entra.
 AlunoRitmoLinha? alunoEvolucaoLinha(
   S s, {
@@ -57,7 +64,7 @@ AlunoRitmoLinha? alunoEvolucaoLinha(
     recordesMes: recordesMes,
     ultimaData: ultimaData,
   );
-  final d = destaque;
+  final d = destaque == null || exercicioDeAjuda(destaque.nome) ? null : destaque;
   if (d == null) {
     if (rodape == null) return null;
     return AlunoRitmoLinha(sobrancelha: s.alunoEvolucaoTitulo, titulo: rodape);

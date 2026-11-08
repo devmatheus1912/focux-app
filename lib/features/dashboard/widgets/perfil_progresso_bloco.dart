@@ -17,13 +17,15 @@ import '../../evolucao/utils/evolucao_series.dart';
 import '../../evolucao/widgets/evolucao_hero.dart';
 import '../../../core/theme/fx_icons.dart';
 
-/// "105,0 kg · +15,0 kg"; sem medida, o texto de vazio.
+/// "105,0 kg · +15,0 kg desde 12/03"; sem medida, o texto de vazio.
+/// A data diz de onde vem a diferença (sem ela, "+26 kg" parece alarme).
 String perfilPesoLinha(S s, List<MedidaCorporal> medidas) {
   final pesos = serieDaMetrica(medidas, EvolucaoMetrica.peso);
   if (pesos.isEmpty) return s.progressoSemPeso;
   final atual = '${formatBrDecimal(pesos.last.valor)} kg';
   if (pesos.length < 2) return atual;
-  return '$atual · ${diferencaTexto(pesos.last.valor - pesos.first.valor, 'kg')}';
+  final dif = diferencaTexto(pesos.last.valor - pesos.first.valor, 'kg');
+  return '$atual · ${s.perfilPesoDesde(dif, dataCurta(pesos.first.data))}';
 }
 
 /// Resumo com os anéis, igual ao do personal. Abre Meu progresso em todo estado.
@@ -51,6 +53,7 @@ class PerfilProgressoBloco extends ConsumerWidget {
             children: [
               if (evolucao.value case final dados?)
                 EvolucaoMiniAneis(
+                  semMoldura: true,
                   aneis: dados.aneis,
                   metaNome: nomeDaMetaPrincipal(dados.metas),
                   doPersonal: false,

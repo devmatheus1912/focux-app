@@ -2,12 +2,22 @@ import '../../../core/utils/pt_br_display.dart';
 import '../../../l10n/app_localizations.dart';
 import 'historico_detalhe_view.dart';
 
-/// "Concluído · qua, 24 de set." ou "Em andamento".
+/// "Concluído · qua, 24 de set.", "Parcial · …" (igual ao selo da lista) ou
+/// "Em andamento".
 String? historicoDetalheSubtitulo(S s, HistoricoDetalheView v) {
   if (!v.concluida) return s.historicoDetalheEmAndamento;
   final quando = v.concluidoEm;
-  return quando == null ? null : s.historicoDetalheConcluidoEm(quando);
+  if (quando == null) return v.parcial ? s.historicoParcial : null;
+  return v.parcial
+      ? s.historicoDetalheParcialEm(quando)
+      : s.historicoDetalheConcluidoEm(quando);
 }
+
+/// Comparação com a vez anterior e destaque: rodapé do cartão de números.
+List<String> historicoDetalheRodape(S s, HistoricoDetalheView v) => [
+  historicoComparacaoTexto(s, v.comparacao),
+  historicoDestaqueTexto(s, v),
+].nonNulls.toList();
 
 /// Só quando há o que dizer: "Concluído" já está no subtítulo.
 String? historicoDetalheStatus(S s, HistoricoDetalheView v) {

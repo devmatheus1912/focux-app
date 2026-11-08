@@ -157,7 +157,7 @@ void main() {
         contains('checkinRestRingSize'),
         contains('TokensStrip.fontH1'),
         contains('FxTonalButton'),
-        contains('this.onTrocar'),
+        contains('this.serieAvaliada'),
         contains('this.contextLine'),
       ),
     );
@@ -165,7 +165,7 @@ void main() {
     expect(timers, contains('BrandPalette.accent'));
     expect(timers, contains('ExcludeSemantics'));
     expect(timers, contains('_CheckinRestRingPainter'));
-    expect(timers, contains('s.checkinTrocar'));
+    expect(timers, isNot(contains('s.checkinTrocar')));
     expect(timers, contains('s.checkinPularDescanso'));
     expect(timers, isNot(contains('CircularProgressIndicator')));
     expect(timers, isNot(contains('class CheckinRestBanner')));
@@ -260,7 +260,6 @@ void main() {
   testWidgets('Pular e Trocar ficam tocáveis no lockup de descanso', (
     tester,
   ) async {
-    var trocarTaps = 0;
     var skipTaps = 0;
     await tester.pumpWidget(
       MaterialApp(
@@ -271,23 +270,21 @@ void main() {
           body: CheckinRestFocusView(
             seconds: 69,
             totalSeconds: 75,
-            contextLine: 'Série 2 de 4 · Supino reto',
+            contextLine: 'Próxima: série 2 de 4 · Supino reto',
             onSkip: () => skipTaps++,
-            onTrocar: () => trocarTaps++,
           ),
         ),
       ),
     );
 
     expect(find.text('1:09'), findsOneWidget);
-    expect(find.text('Série 2 de 4 · Supino reto'), findsOneWidget);
-    await tester.tap(find.text('Trocar'));
+    expect(find.text('Próxima: série 2 de 4 · Supino reto'), findsOneWidget);
+    // Trocar mora no menu "···"; o descanso tem uma ação só, larga.
+    expect(find.text('Trocar'), findsNothing);
     await tester.tap(find.text('Pular descanso'));
-    expect(trocarTaps, 1);
     expect(skipTaps, 1);
-    // Ação nunca é só texto: os dois são botões tonais.
     expect(find.byType(TextButton), findsNothing);
-    expect(find.byType(FxTonalButton), findsNWidgets(2));
+    expect(find.byType(FxTonalButton), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

@@ -40,7 +40,8 @@ void main() {
   test('sete dias: treino, descanso e hoje marcado', () {
     final dias = faixaDaSemana(ficha, const [], _quarta);
     expect(dias, hasLength(7));
-    expect(dias[0].estado, FxWeekDayState.treino);
+    // Segunda já passou sem treino: não feito, não "treino marcado".
+    expect(dias[0].estado, FxWeekDayState.naoFeito);
     expect(dias[1].estado, FxWeekDayState.descanso);
     expect(dias[2].hoje, isTrue);
     expect(dias.where((d) => d.hoje), hasLength(1));
@@ -63,7 +64,7 @@ void main() {
       [_feito(DateTime(2026, 10, 19, 18).toIso8601String())],
       _quarta,
     );
-    expect(dias[0].estado, FxWeekDayState.treino);
+    expect(dias[0].estado, FxWeekDayState.naoFeito);
   });
 
   test('hoje de descanso aponta o próximo dia de treino', () {

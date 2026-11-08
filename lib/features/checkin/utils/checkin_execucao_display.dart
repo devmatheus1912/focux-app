@@ -175,10 +175,11 @@ String checkinRestContextLine(
   int? series,
 }) {
   final next = seriesFeitas + 1;
+  // "Próxima:" deixa claro que a pergunta do esforço é da série que acabou.
   final seriesPart =
       series == null || series <= 0
           ? s.checkinProximaSerie
-          : s.checkinSerieNDeM(next, series);
+          : s.checkinProximaSerieNDeM(next, series);
   final name = exerciseName.trim();
   if (name.isEmpty) return seriesPart;
   return '$seriesPart · $name';

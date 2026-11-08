@@ -110,6 +110,10 @@ class HistoricoDetalheView {
 
   int get exerciciosTotal => exercicios.length;
   bool get semSeries => concluida && seriesFeitas == 0;
+
+  /// Mesma regra do servidor: menos da metade das séries planejadas.
+  bool get parcial =>
+      concluida && seriesPlanejadas > 0 && seriesFeitas * 2 < seriesPlanejadas;
 }
 
 /// Detalhe da sessão; [evolucao] (quando chega) traz volume e comparação do

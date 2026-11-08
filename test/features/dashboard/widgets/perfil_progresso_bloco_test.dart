@@ -61,7 +61,7 @@ void main() {
       _medida(2, '2026-11-02', 105),
     ]);
     expect(find.text('Meu progresso'), findsOneWidget);
-    expect(find.text('Peso: 105,0 kg · +15,0 kg'), findsOneWidget);
+    expect(find.text('Peso: 105,0 kg · +15,0 kg desde 30/10'), findsOneWidget);
     expect(find.text('Peso atual'), findsNothing);
   });
 

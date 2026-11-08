@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:health/health.dart';
 import 'package:focux_app/core/health/health_service.dart';
 import 'package:focux_app/features/health/data/health_repository.dart';
 import 'package:focux_app/features/health/screens/health_dashboard_screen.dart';
@@ -101,6 +102,25 @@ void main() {
         120,
       );
       expect(HealthService.minutosUnidos([]), 0);
+    });
+
+    test('sono do relógio por fase conta; acordado e na cama não', () {
+      final inicio = DateTime(2026, 11, 6, 18);
+      DateTime h(int dia, int hora, [int min = 0]) =>
+          DateTime(2026, 11, dia, hora, min);
+      final total = HealthService.minutosDormidos([
+        // 22h–23h40 de ontem: trecho que acaba antes da meia-noite conta.
+        (tipo: HealthDataType.SLEEP_LIGHT, de: h(6, 22), ate: h(6, 23, 40)),
+        (tipo: HealthDataType.SLEEP_DEEP, de: h(7, 0), ate: h(7, 1)),
+        (tipo: HealthDataType.SLEEP_REM, de: h(7, 1), ate: h(7, 2)),
+        // iPhone grava "dormindo" sobre o mesmo intervalo: não duplica.
+        (tipo: HealthDataType.SLEEP_ASLEEP, de: h(7, 0), ate: h(7, 2)),
+        (tipo: HealthDataType.SLEEP_AWAKE, de: h(7, 2), ate: h(7, 3)),
+        (tipo: HealthDataType.SLEEP_IN_BED, de: h(6, 21), ate: h(7, 7)),
+        // Cochilo da tarde de ontem fica fora da noite.
+        (tipo: HealthDataType.SLEEP_LIGHT, de: h(6, 14), ate: h(6, 15)),
+      ], inicio: inicio);
+      expect(total, 100 + 120);
     });
   });
 

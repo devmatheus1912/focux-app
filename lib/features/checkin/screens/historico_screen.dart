@@ -101,10 +101,13 @@ class _HistoricoCheckinScreenState
                 child: HistoricoGanhoCard(linha: ganho),
               ),
             if (fichas.isNotEmpty)
-              HistoricoFiltroFichas(
-                fichas: fichas,
-                selecionado: _treinoId,
-                onSelect: (id) => setState(() => _treinoId = id),
+              Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: HistoricoFiltroFichas(
+                  fichas: fichas,
+                  selecionado: _treinoId,
+                  onSelect: (id) => setState(() => _treinoId = id),
+                ),
               ),
             Expanded(
               child: FxAsyncBody<HistoricoLista>(

@@ -267,6 +267,10 @@ class ExecucaoTreino {
   /// O servidor marcou como parcial (menos da metade das séries planejadas).
   final bool parcial;
 
+  /// Só na lista do histórico: séries feitas e planejadas na sessão.
+  final int? seriesFeitas;
+  final int? seriesPlanejadas;
+
   ExecucaoTreino({
     this.id,
     required this.treinoId,
@@ -282,6 +286,8 @@ class ExecucaoTreino {
     this.exerciciosCount,
     this.exerciciosConcluidos,
     this.parcial = false,
+    this.seriesFeitas,
+    this.seriesPlanejadas,
   });
 
   int get totalExercicios => exerciciosCount ?? exercicios.length;
@@ -308,7 +314,10 @@ class ExecucaoTreino {
           j['evolucoesPerformance'],
         ).map(EvolucaoPerformance.fromJson).toList(),
     exerciciosCount: checkinJsonInt(j['exerciciosCount']),
+    exerciciosConcluidos: checkinJsonInt(j['exerciciosConcluidos']),
     parcial: j['parcial'] == true,
+    seriesFeitas: checkinJsonInt(j['seriesFeitas']),
+    seriesPlanejadas: checkinJsonInt(j['seriesPlanejadas']),
   );
 
   /// Item slim do BFF `historicoResumo` (sem séries/mídia/evoluções).
@@ -323,6 +332,9 @@ class ExecucaoTreino {
       exercicios: const [],
       exerciciosCount: checkinJsonInt(j['exerciciosCount']),
       exerciciosConcluidos: checkinJsonInt(j['exerciciosConcluidos']),
+      parcial: j['parcial'] == true,
+      seriesFeitas: checkinJsonInt(j['seriesFeitas']),
+      seriesPlanejadas: checkinJsonInt(j['seriesPlanejadas']),
     );
   }
 
@@ -341,6 +353,8 @@ class ExecucaoTreino {
     'exerciciosCount': exerciciosCount,
     'exerciciosConcluidos': exerciciosConcluidos,
     'parcial': parcial,
+    'seriesFeitas': seriesFeitas,
+    'seriesPlanejadas': seriesPlanejadas,
   };
 }
 

@@ -12,6 +12,7 @@ import '../data/health_repository.dart';
 import '../utils/health_plausibilidade.dart';
 import '../utils/prontidao_display.dart';
 import '../../../core/theme/fx_icons.dart';
+import '../../../core/widgets/fx_action_link.dart';
 
 /// Card da nota de prontidão, na cor da marca (mesmo princípio do card
 /// principal da Home). Três estados com a mesma altura: com nota, sem sono e
@@ -65,6 +66,55 @@ class ProntidaoCard extends StatelessWidget {
         texto =
             'Sem o sono não calculamos sua prontidão. Use o relógio para '
             'dormir ou registre o sono no app Saúde.';
+    }
+
+    // Sem sono, nada a calcular ainda: linha discreta no fundo da tela, não o
+    // cartão da marca (o bloco "Sono" do resumo leva ao mesmo "Como registrar").
+    if (estado == ProntidaoEstado.semSono) {
+      return Semantics(
+        container: true,
+        label: 'Prontidão de hoje: sua nota sai com o sono da noite',
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(
+            TokensStrip.s4,
+            TokensStrip.s2,
+            TokensStrip.s2,
+            TokensStrip.s2,
+          ),
+          decoration: BoxDecoration(
+            color: chrome.cardFill,
+            borderRadius: BorderRadius.circular(TokensStrip.rCard),
+            border: Border.all(color: chrome.line),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: TokensStrip.s2),
+                child: Icon(FxIcons.sono, color: chrome.mute, size: 20),
+              ),
+              const SizedBox(width: TokensStrip.s3),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: TokensStrip.s2),
+                    Text(
+                      'Sua nota sai com o sono da noite',
+                      style: FocuxHubTypography.bodyMuted(color: chrome.ink),
+                    ),
+                    FxActionLink(
+                      label: 'Como registrar',
+                      onTap: onComoRegistrar,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
     }
 
     // Sem nota, uma faixa de uma linha: o anel vazio parecia "carregando" ou

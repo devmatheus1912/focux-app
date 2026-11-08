@@ -119,7 +119,7 @@ void main() {
         seriesFeitas: 1,
         series: 4,
       ),
-      'Série 2 de 4 · Supino reto',
+      'Próxima: série 2 de 4 · Supino reto',
     );
     expect(
       checkinRestSemanticsLabel(

@@ -65,12 +65,12 @@ class HistoricoResumoCard extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final status = historicoDetalheStatus(s, view);
     final duracao = view.duracao;
-    final titulo = status ?? (duracao == null ? null : treinosDuracaoTexto(s, duracao));
+    final titulo =
+        status ?? (duracao == null ? null : treinosDuracaoTexto(s, duracao));
+    // Comparação e destaque moram no rodapé de [HistoricoMetricas].
     final linhas = [
       if (status != null && duracao != null) treinosDuracaoTexto(s, duracao),
-      historicoComparacaoTexto(s, view.comparacao),
-      historicoDestaqueTexto(s, view),
-    ].nonNulls.toList();
+    ];
     if (titulo == null && linhas.isEmpty) return const SizedBox.shrink();
     return FxStripCard(
       accent: primary,
@@ -80,7 +80,10 @@ class HistoricoResumoCard extends StatelessWidget {
           if (titulo != null)
             Text(
               titulo,
-              style: FocuxHubTypography.sectionTitle(context, color: chrome.ink),
+              style: FocuxHubTypography.sectionTitle(
+                context,
+                color: chrome.ink,
+              ),
             ),
           for (final (i, linha) in linhas.indexed) ...[
             if (i > 0 || titulo != null) const SizedBox(height: TokensStrip.s1),
@@ -117,42 +120,57 @@ class HistoricoMetricas extends StatelessWidget {
         historicoNDeMTexto(s, view.exerciciosFeitos, view.exerciciosTotal),
       ),
     ];
+    final rodape = historicoDetalheRodape(s, view);
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: TokensStrip.s3,
         vertical: TokensStrip.s3,
       ),
       decoration: fxListCardDecoration(context),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          for (final (label, valor) in itens)
-            Expanded(
-              child: MergeSemantics(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      label,
-                      style: FocuxHubTypography.bodyMuted(color: chrome.mute),
-                    ),
-                    const SizedBox(height: 2),
-                    FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        valor,
-                        maxLines: 1,
-                        style: FocuxHubTypography.metric(
-                          color: chrome.ink,
-                          fontSize: 20,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (final (label, valor) in itens)
+                Expanded(
+                  child: MergeSemantics(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          label,
+                          style: FocuxHubTypography.bodyMuted(
+                            color: chrome.mute,
+                          ),
                         ),
-                      ),
+                        const SizedBox(height: 2),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            valor,
+                            maxLines: 1,
+                            style: FocuxHubTypography.metric(
+                              color: chrome.ink,
+                              fontSize: 20,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
+            ],
+          ),
+          for (final linha in rodape) ...[
+            const SizedBox(height: TokensStrip.s2),
+            Text(
+              linha,
+              style: FocuxHubTypography.bodyMuted(color: chrome.mute),
             ),
+          ],
         ],
       ),
     );
@@ -228,11 +246,12 @@ class _HistoricoExercicioTileState extends State<HistoricoExercicioTile> {
           button: temDetalhe,
           expanded: temDetalhe ? _aberto : null,
           label: '${linha.nome}. ${historicoExercicioDetalhe(s, linha)}',
-          hint: !temDetalhe
-              ? null
-              : _aberto
-              ? s.historicoFecharExercicio
-              : s.historicoAbrirExercicio,
+          hint:
+              !temDetalhe
+                  ? null
+                  : _aberto
+                  ? s.historicoFecharExercicio
+                  : s.historicoAbrirExercicio,
           excludeSemantics: true,
           child: InkWell(
             onTap: temDetalhe ? () => setState(() => _aberto = !_aberto) : null,
@@ -242,7 +261,15 @@ class _HistoricoExercicioTileState extends State<HistoricoExercicioTile> {
                 padding: const EdgeInsets.all(TokensStrip.s3),
                 child: Row(
                   children: [
-                    Icon(linha.feito ? FxIcons.concluido : FxIcons.alvo, size: 18, color: linha.feito ? EagleTokens.good : chrome.mute),
+                    Icon(
+                      linha.feito
+                          ? FxIcons.concluido
+                          : linha.seriesFeitas > 0
+                          ? FxIcons.parcial
+                          : FxIcons.circulo,
+                      size: 18,
+                      color: linha.feito ? EagleTokens.good : chrome.mute,
+                    ),
                     const SizedBox(width: TokensStrip.s3),
                     Expanded(
                       child: Column(
@@ -250,21 +277,23 @@ class _HistoricoExercicioTileState extends State<HistoricoExercicioTile> {
                         children: [
                           Text(
                             linha.nome,
-                            style: FocuxHubTypography.cardTitle(color: chrome.ink),
+                            style: FocuxHubTypography.cardTitle(
+                              color: chrome.ink,
+                            ),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             historicoExercicioDetalhe(s, linha),
-                            style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                            style: FocuxHubTypography.bodyMuted(
+                              color: chrome.mute,
+                            ),
                           ),
                         ],
                       ),
                     ),
                     if (temDetalhe)
                       Icon(
-                        _aberto
-                            ? FxIcons.chevronCima
-                            : FxIcons.chevronBaixo,
+                        _aberto ? FxIcons.chevronCima : FxIcons.chevronBaixo,
                         size: 20,
                         color: chrome.mute,
                       ),

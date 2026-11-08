@@ -258,7 +258,11 @@ class EvolucaoMiniAneis extends StatelessWidget {
     this.pesoLinha,
     this.pesoRotulo,
     this.metaNome,
+    this.semMoldura = false,
   });
+
+  /// Dentro de um grupo que já é cartão (Perfil): sem a moldura própria.
+  final bool semMoldura;
 
   final EvolucaoAneis aneis;
   final bool doPersonal;
@@ -287,8 +291,8 @@ class EvolucaoMiniAneis extends StatelessWidget {
         borderRadius: BorderRadius.circular(TokensStrip.rCard),
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.all(TokensStrip.s3),
-          decoration: chrome,
+          padding: EdgeInsets.all(semMoldura ? 0 : TokensStrip.s3),
+          decoration: semMoldura ? null : chrome,
           child: Row(
             children: [
               FxAneisConcentricos(

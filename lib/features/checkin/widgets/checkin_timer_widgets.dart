@@ -26,7 +26,9 @@ class CheckinRestFocusView extends StatelessWidget {
   final int? totalSeconds;
   final String? contextLine;
   final VoidCallback onSkip;
-  final VoidCallback? onTrocar;
+
+  /// Número da série que acabou: a pergunta do esforço diz qual é.
+  final int? serieAvaliada;
 
   /// Soma ou tira segundos do descanso (±15 s).
   final ValueChanged<int>? onAjustar;
@@ -42,7 +44,7 @@ class CheckinRestFocusView extends StatelessWidget {
     required this.onSkip,
     this.totalSeconds,
     this.contextLine,
-    this.onTrocar,
+    this.serieAvaliada,
     this.onAjustar,
     this.onRpe,
     this.rpeEscolhido,
@@ -58,9 +60,7 @@ class CheckinRestFocusView extends StatelessWidget {
     final countdown = checkinRestCountdownLabel(seconds);
     final total = totalSeconds;
     final progress =
-        total != null && total > 0
-            ? (seconds / total).clamp(0.0, 1.0)
-            : 1.0;
+        total != null && total > 0 ? (seconds / total).clamp(0.0, 1.0) : 1.0;
     final contextText = contextLine?.trim();
     final hasContext = contextText != null && contextText.isNotEmpty;
 
@@ -81,34 +81,63 @@ class CheckinRestFocusView extends StatelessWidget {
                 style: FocuxHubTypography.chip(chrome.mute),
               ),
               const SizedBox(height: TokensStrip.s4),
-              SizedBox(
-                width: checkinRestRingSize,
-                height: checkinRestRingSize,
-                child: Stack(
-                  alignment: Alignment.center,
+              // Fonte grande: a linha encolhe junto, sem estourar a largura.
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    ExcludeSemantics(
-                      child: CustomPaint(
-                        size: const Size.square(checkinRestRingSize),
-                        painter: _CheckinRestRingPainter(
-                          progress: progress,
-                          color: brand,
-                          trackColor: chrome.mute.withValues(alpha: 0.14),
-                          strokeWidth: TokensStrip.s2,
-                        ),
+                    if (onAjustar != null) ...[
+                      _AjusteDescanso(
+                        icone: FxIcons.remover,
+                        rotulo: s.checkinDescansoMenos15,
+                      leitura: s.checkinDescansoMenos15Leitura,
+                        onTap: () => onAjustar!(-15),
+                      ),
+                      const SizedBox(width: TokensStrip.s3),
+                    ],
+                    SizedBox(
+                      width: checkinRestRingSize,
+                      height: checkinRestRingSize,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          ExcludeSemantics(
+                            child: CustomPaint(
+                              size: const Size.square(checkinRestRingSize),
+                              painter: _CheckinRestRingPainter(
+                                progress: progress,
+                                color: brand,
+                                trackColor: chrome.mute.withValues(alpha: 0.14),
+                                strokeWidth: TokensStrip.s2,
+                              ),
+                            ),
+                          ),
+                          Text(
+                            countdown,
+                            style: FocuxHubTypography.metric(
+                              color: chrome.ink,
+                              fontSize: TokensStrip.fontH1,
+                              fontWeight: FontWeight.w700,
+                            ).copyWith(
+                              letterSpacing: TokensStrip.trackingH1,
+                              fontFeatures: const [
+                                FontFeature.tabularFigures(),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    Text(
-                      countdown,
-                      style: FocuxHubTypography.metric(
-                        color: chrome.ink,
-                        fontSize: TokensStrip.fontH1,
-                        fontWeight: FontWeight.w700,
-                      ).copyWith(
-                        letterSpacing: TokensStrip.trackingH1,
-                        fontFeatures: const [FontFeature.tabularFigures()],
+                    if (onAjustar != null) ...[
+                      const SizedBox(width: TokensStrip.s3),
+                      _AjusteDescanso(
+                        icone: FxIcons.adicionar,
+                        rotulo: s.checkinDescansoMais15,
+                      leitura: s.checkinDescansoMais15Leitura,
+                        onTap: () => onAjustar!(15),
                       ),
-                    ),
+                    ],
                   ],
                 ),
               ),
@@ -125,7 +154,9 @@ class CheckinRestFocusView extends StatelessWidget {
               if (onRpe != null) ...[
                 const SizedBox(height: TokensStrip.s4),
                 Text(
-                  s.checkinRpeComoFoi,
+                  serieAvaliada == null
+                      ? s.checkinRpeComoFoi
+                      : s.checkinRpeComoFoiN(serieAvaliada!),
                   style: FocuxHubTypography.bodyMuted(color: chrome.mute),
                 ),
                 const SizedBox(height: TokensStrip.s2),
@@ -157,46 +188,60 @@ class CheckinRestFocusView extends StatelessWidget {
                 ],
               ],
               const SizedBox(height: TokensStrip.s5),
-              if (onAjustar != null) ...[
-                Wrap(
-                  alignment: WrapAlignment.center,
-                  spacing: TokensStrip.s2,
-                  children: [
-                    FxTonalButton(
-                      label: s.checkinDescansoMenos15,
-                      icon: FxIcons.remover,
-                      compact: true,
-                      onPressed: () => onAjustar!(-15),
-                    ),
-                    FxTonalButton(
-                      label: s.checkinDescansoMais15,
-                      icon: FxIcons.adicionar,
-                      compact: true,
-                      onPressed: () => onAjustar!(15),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: TokensStrip.s2),
-              ],
-              Wrap(
-                alignment: WrapAlignment.center,
-                children: [
-                  FxTonalButton(
-                    label: s.checkinPularDescanso,
-                    icon: FxIcons.proximo,
-                    onPressed: onSkip,
-                  ),
-                  if (onTrocar != null)
-                    FxTonalButton(
-                      label: s.checkinTrocar,
-                      icon: FxIcons.trocar,
-                      onPressed: onTrocar,
-                    ),
-                ],
+              // Trocar o exercício fica no menu "···" ("Trocar exercício").
+              FxTonalButton(
+                label: s.checkinPularDescanso,
+                icon: FxIcons.proximo,
+                expanded: true,
+                onPressed: onSkip,
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// −15 s / +15 s ao lado do anel: alvo de 48, rótulo curto embaixo.
+class _AjusteDescanso extends StatelessWidget {
+  const _AjusteDescanso({
+    required this.icone,
+    required this.rotulo,
+    required this.leitura,
+    required this.onTap,
+  });
+
+  final IconData icone;
+  final String rotulo;
+
+  /// O que o leitor de tela diz: o ícone (− / +) não é lido.
+  final String leitura;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    return Semantics(
+      button: true,
+      label: leitura,
+      excludeSemantics: true,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton.outlined(
+            onPressed: onTap,
+            icon: Icon(icone, size: 20),
+            constraints: const BoxConstraints.tightFor(
+              width: checkinExecutionControlMin,
+              height: checkinExecutionControlMin,
+            ),
+          ),
+          const SizedBox(height: TokensStrip.s1),
+          ExcludeSemantics(
+            child: Text(rotulo, style: FocuxHubTypography.chip(chrome.mute)),
+          ),
+        ],
       ),
     );
   }

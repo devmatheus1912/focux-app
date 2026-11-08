@@ -148,16 +148,16 @@ String alunoHeroCaption(Aluno aluno, AlunoHeroPrimarySignal signal) {
     if (dias == 0) return 'Treinou hoje';
     if (dias == 1) return 'Treinou ontem';
     if (dias >= AlunoFollowUpStore.diasSemTreinoLimite) {
-      return 'Parado há $dias dias — contato hoje';
+      return 'Parado há $dias dias · chame hoje';
     }
     if (dias >= 3) {
-      return '$dias dias parado — vale check-in';
+      return '$dias dias parado · vale um check-in';
     }
     return 'Último treino há $dias dias';
   }
   if (signal.label == alunoHeroAderenciaLabel) {
     final ader = aluno.aderenciaPercent ?? 0;
-    if (ader < 50) return 'Aderência baixa em 30 dias — reforce o hábito';
+    if (ader < 50) return 'Aderência baixa em 30 dias · reforce o hábito';
     if (ader < 70) return 'Aderência moderada em 30 dias';
     return 'Aderência saudável em 30 dias';
   }

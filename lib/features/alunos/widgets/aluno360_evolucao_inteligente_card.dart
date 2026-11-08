@@ -83,10 +83,22 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
     );
   }
 
-  static String _recordeChip(EvolucaoInteligente ev) {
-    final nome = ev.ultimoPrExercicio?.trim();
-    final valor = _ultimoPrValue(ev)!;
-    return nome == null || nome.isEmpty ? 'PR $valor' : '$nome $valor';
+  /// "Estável · +3%"; % absurdo (base pequena) fica só com o sinal.
+  static String tendenciaTexto(EvolucaoInteligente ev) {
+    final sinal = sinalLabel(ev.sinal);
+    final pct = ev.tendenciaVolumePct;
+    if (pct == null ||
+        pct.abs() > Aluno360EvolucaoInteligenteLogic.tendenciaPctSoftCap) {
+      return sinal;
+    }
+    return '$sinal · ${pct > 0 ? '+' : ''}$pct%';
+  }
+
+  /// "Sugestão: manter plano ou microajustar volume."
+  static String sugestaoTexto(String acao) {
+    final a = acao.trim();
+    if (a.isEmpty) return a;
+    return 'Sugestão: ${a[0].toLowerCase()}${a.substring(1)}';
   }
 
   static String? _ultimoPrValue(EvolucaoInteligente ev) {
@@ -140,13 +152,19 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                     e,
                     fallback: 'Evolução inteligente indisponível.',
                   ),
-                  style: Aluno360Layout.metaStyle(context).copyWith(color: mute),
+                  style: Aluno360Layout.metaStyle(
+                    context,
+                  ).copyWith(color: mute),
                 ),
               ],
             ),
           ),
       data: (ev) {
-        final sigColor = sinalColor(ev.sinal, isDark: isDark, ink: fxScreenInk(context));
+        final sigColor = sinalColor(
+          ev.sinal,
+          isDark: isDark,
+          ink: fxScreenInk(context),
+        );
         final isEmptySignal = ev.sinal == 'SEM_DADOS';
         final sparklineData =
             Aluno360EvolucaoInteligenteLogic.resolveVolumeSparklineData(
@@ -171,7 +189,9 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                           'Peça um check-in para liberar volume e tendência.'
                       : 'Peça um check-in a $firstName para começar '
                           'a montar volume, tendência e próximos passos.',
-                  style: Aluno360Layout.metaStyle(context).copyWith(color: mute),
+                  style: Aluno360Layout.metaStyle(
+                    context,
+                  ).copyWith(color: mute),
                 ),
               ],
               const SizedBox(height: TokensStrip.s3),
@@ -233,46 +253,41 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              Wrap(
-                                spacing: TokensStrip.s2,
-                                runSpacing: TokensStrip.s2,
-                                children: [
+                              _EvolucaoNumeros(
+                                itens: [
                                   if (ev.sinal != 'SEM_BASE')
-                                    _EvolucaoMetricChip(
-                                      label: sinalLabel(ev.sinal),
-                                      color: sigColor,
+                                    (
+                                      rotulo: 'Tendência',
+                                      valor: tendenciaTexto(ev),
+                                      detalhe: null,
+                                      cor: sigColor,
                                     ),
-                                  _EvolucaoMetricChip(
-                                    label: 'Volume 7 dias: ${formatAlunoVolumeKg(ev.volumeSemanal)}',
-                                    color: primary,
+                                  (
+                                    rotulo: 'Volume 7 dias',
+                                    valor: formatAlunoVolumeKg(
+                                      ev.volumeSemanal,
+                                    ),
+                                    detalhe: null,
+                                    cor: null,
                                   ),
-                                  if (_ultimoPrValue(ev) != null)
-                                    _EvolucaoMetricChip(
-                                      label: _recordeChip(ev),
-                                      color: primary,
+                                  if (_ultimoPrValue(ev) case final pr?)
+                                    (
+                                      rotulo: 'Recorde',
+                                      valor: pr,
+                                      detalhe: ev.ultimoPrExercicio?.trim(),
+                                      cor: null,
                                     ),
                                 ],
                               ),
-                              if (Aluno360EvolucaoInteligenteLogic.composeSinalHint(
-                                    resumo: ev.resumo,
-                                    tendenciaPct: ev.tendenciaVolumePct,
-                                  )
-                                  case final hint?) ...[
-                                const SizedBox(height: TokensStrip.s2),
+                              // Uma frase de leitura; a tendência já está no número.
+                              if (ev.resumo.trim().isNotEmpty) ...[
+                                const SizedBox(height: TokensStrip.s3),
                                 Text(
-                                  hint,
-                                  style: Aluno360Layout.metaStyle(context)
-                                      .copyWith(color: mute),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ] else if (ev.resumo.trim().isNotEmpty) ...[
-                                const SizedBox(height: TokensStrip.s2),
-                                Text(
-                                  ev.resumo,
-                                  style: Aluno360Layout.metaStyle(context)
-                                      .copyWith(color: mute),
-                                  maxLines: 2,
+                                  ev.resumo.trim(),
+                                  style: FocuxHubTypography.body(
+                                    color: fxScreenInk(context),
+                                  ),
+                                  maxLines: 3,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ],
@@ -291,16 +306,21 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                               if (ev.proximaAcao.trim().isNotEmpty) ...[
                                 const SizedBox(height: TokensStrip.s3),
                                 Text(
-                                  ev.proximaAcao,
-                                  style: Aluno360Layout.metaStyle(context)
-                                      .copyWith(color: mute),
+                                  sugestaoTexto(ev.proximaAcao),
+                                  style: FocuxHubTypography.bodyMuted(
+                                    color: mute,
+                                  ),
                                 ),
                               ],
                               if (ev.sugerirCopiloto &&
                                   onOpenCopilot != null) ...[
                                 Align(
                                   alignment: Alignment.centerLeft,
-                                  child: FxTonalButton(label: 'Abrir Copiloto', onPressed: onOpenCopilot, compact: true),
+                                  child: FxTonalButton(
+                                    label: 'Abrir Copiloto',
+                                    onPressed: onOpenCopilot,
+                                    compact: true,
+                                  ),
                                 ),
                               ],
                             ],
@@ -315,24 +335,49 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
   }
 }
 
-class _EvolucaoMetricChip extends StatelessWidget {
-  const _EvolucaoMetricChip({required this.label, required this.color});
+typedef _Numero = ({String rotulo, String valor, String? detalhe, Color? cor});
 
-  final String label;
-  final Color color;
+/// Até três números lado a lado: rótulo em cima, valor embaixo.
+class _EvolucaoNumeros extends StatelessWidget {
+  const _EvolucaoNumeros({required this.itens});
+
+  final List<_Numero> itens;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: TokensStrip.s3,
-        vertical: TokensStrip.s2,
-      ),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(TokensStrip.rPill),
-      ),
-      child: Text(label, style: FocuxHubTypography.chip(color)),
+    final mute = fxScreenMute(context);
+    final ink = fxScreenInk(context);
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (final (i, n) in itens.indexed) ...[
+          if (i > 0) const SizedBox(width: TokensStrip.s3),
+          Expanded(
+            child: MergeSemantics(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(n.rotulo, style: FocuxHubTypography.chip(mute)),
+                  const SizedBox(height: 2),
+                  Text(
+                    n.valor,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: FocuxHubTypography.cardTitle(color: n.cor ?? ink),
+                  ),
+                  if (n.detalhe case final d? when d.isNotEmpty)
+                    Text(
+                      d,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: FocuxHubTypography.bodyMuted(color: mute),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ],
     );
   }
 }
@@ -362,30 +407,41 @@ class _VolumeSparklineRow extends StatelessWidget {
               ? 'Primeira semana com volume registrado'
               : 'Tendência de volume nas últimas semanas, '
                   'de ${minVol.toStringAsFixed(0)} a ${maxVol.toStringAsFixed(0)}',
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(
-            child: Text(
-              singleWeek
-                  ? '${volumeLabel ?? 'Volume'} · 1ª semana'
-                  : 'Volume · semanas',
-              style: Aluno360Layout.metaStyle(context).copyWith(
-                color: mute,
-                letterSpacing: 0.2,
-                fontSize: 11.5,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
+          Text(
+            singleWeek
+                ? '${volumeLabel ?? 'Volume'} · 1ª semana'
+                : 'Volume por semana',
+            style: FocuxHubTypography.chip(mute),
           ),
-          // Um ponto só vira barra órfã — caption basta na 1ª semana.
-          if (!singleWeek && data.length >= 2)
-            FxSparkline(
-              data: data,
-              color: color,
-              width: 72,
-              height: 24,
+          // Um ponto só vira barra órfã — o rótulo basta na 1ª semana.
+          if (!singleWeek && data.length >= 2) ...[
+            const SizedBox(height: TokensStrip.s1),
+            LayoutBuilder(
+              builder:
+                  (context, c) => FxSparkline(
+                    data: data,
+                    color: color,
+                    width: c.maxWidth,
+                    height: 36,
+                  ),
             ),
+            Row(
+              children: [
+                Text(
+                  formatAlunoVolumeKg(data.first),
+                  style: FocuxHubTypography.bodyMuted(color: mute),
+                ),
+                const Spacer(),
+                Text(
+                  formatAlunoVolumeKg(data.last),
+                  style: FocuxHubTypography.bodyMuted(color: mute),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );

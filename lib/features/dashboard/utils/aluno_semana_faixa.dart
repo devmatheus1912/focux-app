@@ -39,6 +39,8 @@ List<FxWeekDay> faixaDaSemana(
         dia: i + 1,
         estado: feitos.contains(DateTime(segunda.year, segunda.month, segunda.day + i))
             ? FxWeekDayState.concluido
+            : temTreino(d) && i + 1 < hoje.weekday
+            ? FxWeekDayState.naoFeito
             : temTreino(d)
             ? FxWeekDayState.treino
             : FxWeekDayState.descanso,

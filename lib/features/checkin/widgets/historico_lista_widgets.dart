@@ -226,6 +226,8 @@ class HistoricoFiltroFichas extends StatelessWidget {
         ),
       ),
     );
+    // Largura toda: sem isso a Column centraliza a faixa e as chips saem da
+    // margem da página.
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.fromLTRB(

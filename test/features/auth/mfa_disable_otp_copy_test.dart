@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/auth/utils/mfa_disable_otp_copy.dart';
-import 'package:focux_app/features/alunos/utils/aluno360_evolucao_inteligente_logic.dart';
 
 void main() {
   group('mfaDisableOtpSentMessage', () {
@@ -30,19 +29,6 @@ void main() {
     test('conta com senha pede senha ou e-mail', () {
       expect(mfaDisablePedeSenhaOuEmail(semSenhaConhecida: false), isTrue);
       expect(mfaDisableIntro(semSenhaConhecida: false), contains('senha'));
-    });
-  });
-
-  group('formatTendenciaVolumeHint', () {
-    test('clampa % absurdo em texto legível', () {
-      expect(
-        Aluno360EvolucaoInteligenteLogic.formatTendenciaVolumeHint(596),
-        'Volume bem acima da semana anterior',
-      );
-      expect(
-        Aluno360EvolucaoInteligenteLogic.formatTendenciaVolumeHint(18),
-        '+18% vs semana anterior',
-      );
     });
   });
 }

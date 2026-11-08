@@ -7,7 +7,8 @@ import '../theme/shell_chrome.dart';
 import '../theme/tokens_strip.dart';
 import '../theme/fx_icons.dart';
 
-enum FxWeekDayState { treino, descanso, concluido }
+/// [naoFeito]: dia de treino que já passou sem sessão concluída.
+enum FxWeekDayState { treino, descanso, concluido, naoFeito }
 
 /// Um dia da faixa. `dia`: 1 = segunda … 7 = domingo.
 class FxWeekDay {
@@ -58,6 +59,7 @@ class FxWeekStrip extends StatelessWidget {
       FxWeekDayState.concluido => s.alunoSemanaFaixaConcluido,
       FxWeekDayState.treino => s.alunoSemanaFaixaTreino,
       FxWeekDayState.descanso => s.alunoSemanaFaixaDescanso,
+      FxWeekDayState.naoFeito => s.treinosSemanaNaoFeito,
     };
     return [
       for (final (i, d) in dias.indexed)
@@ -105,16 +107,21 @@ class _Dia extends StatelessWidget {
     final brand = chrome.brand;
     final concluido = dia.estado == FxWeekDayState.concluido;
     final treino = dia.estado == FxWeekDayState.treino;
-    final fundo = concluido
-        ? EagleTokens.good
-        : treino
-        ? (sobre == null ? brand : sobre.withValues(alpha: 0.22))
-        : Colors.transparent;
-    final borda = dia.proximo
-        ? (sobre ?? brand)
-        : (concluido || treino)
-        ? (sobre != null && treino ? sobre.withValues(alpha: 0.5) : fundo)
-        : (sobre?.withValues(alpha: 0.35) ?? chrome.lineStrong);
+    final naoFeito = dia.estado == FxWeekDayState.naoFeito;
+    final fundo =
+        concluido
+            ? EagleTokens.good
+            : treino
+            ? (sobre == null ? brand : sobre.withValues(alpha: 0.22))
+            : Colors.transparent;
+    final borda =
+        dia.proximo
+            ? (sobre ?? brand)
+            : (concluido || treino)
+            ? (sobre != null && treino ? sobre.withValues(alpha: 0.5) : fundo)
+            : naoFeito
+            ? Colors.transparent
+            : (sobre?.withValues(alpha: 0.35) ?? chrome.lineStrong);
     final tinta = sobre ?? chrome.ink;
     final suave = sobre?.withValues(alpha: 0.72) ?? chrome.mute;
 
@@ -135,18 +142,27 @@ class _Dia extends StatelessWidget {
             color: fundo,
             border: Border.all(color: borda, width: dia.proximo ? 2 : 1),
           ),
-          foregroundDecoration: dia.hoje
-              ? BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: tinta, width: 2),
-                )
-              : null,
-          child: concluido
-              ? const Icon(FxIcons.check, size: 18, color: Colors.white)
-              : treino
-              ? (dia.letra == null
-                    ? Icon(FxIcons.treinoPequeno, size: 14, color: sobre ?? Colors.white)
-                    : Center(
+          foregroundDecoration:
+              dia.hoje
+                  ? BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: tinta, width: 2),
+                  )
+                  : null,
+          // Não feito: círculo tracejado, nunca o halter de "treino marcado".
+          child:
+              naoFeito
+                  ? Icon(FxIcons.naoFeito, size: 32, color: suave)
+                  : concluido
+                  ? const Icon(FxIcons.check, size: 18, color: Colors.white)
+                  : treino
+                  ? (dia.letra == null
+                      ? Icon(
+                        FxIcons.treinoPequeno,
+                        size: 14,
+                        color: sobre ?? Colors.white,
+                      )
+                      : Center(
                         child: Text(
                           dia.letra!,
                           style: FocuxHubTypography.cardSubtitle(
@@ -154,7 +170,7 @@ class _Dia extends StatelessWidget {
                           ).copyWith(fontWeight: FontWeight.w800),
                         ),
                       ))
-              : null,
+                  : null,
         ),
       ],
     );

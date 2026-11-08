@@ -51,9 +51,11 @@ import '../../treinos/models/rotina_fila.dart';
 import '../../treinos/utils/ficha_vigencia.dart';
 import '../../treinos/widgets/ficha_vigencia_linha.dart';
 import '../widgets/aluno_personal_card.dart';
-import '../../../core/widgets/fx_action_link.dart';
 import '../widgets/aluno_capa_banner.dart';
 import '../../../core/theme/brand_style.dart';
+import '../../../core/theme/fx_icons.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 
 part 'aluno_dashboard_screen_header.part.dart';
 
@@ -462,15 +464,20 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
         ),
       if (view.ofertas.isNotEmpty)
         (TokensStrip.s4, AlunoUpsellCarousel(ofertas: view.ofertas)),
-      // Ferramentas: linha discreta no fim, fora do fold.
+      // Ferramentas: linha de lista que diz o que tem dentro, no fim da tela.
       (
         TokensStrip.s3,
-        Align(
-          alignment: Alignment.centerLeft,
-          child: FxActionLink(
-            label: s.alunoFerramentasLinhaTitulo,
-            onTap: () => openAlunoRoute(context, alunoFerramentasRoute),
-          ),
+        FxSettingsGroup(
+          children: [
+            FxSettingsTile(
+              icon: FxIcons.apps,
+              label: s.alunoFerramentasLinhaTitulo,
+              subtitle: s.alunoFerramentasLinhaSub,
+              value: '',
+              showDivider: false,
+              onTap: () => openAlunoRoute(context, alunoFerramentasRoute),
+            ),
+          ],
         ),
       ),
     ];
