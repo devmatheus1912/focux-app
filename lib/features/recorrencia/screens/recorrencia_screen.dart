@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/router/safe_navigation.dart';
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
@@ -395,7 +394,7 @@ class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
                     );
                   }
                   final item = _items[i - 1];
-                  final danger = recorrenciaDanger(item.status);
+                  final encerrada = recorrenciaEncerrada(item.status);
                   return FxSatelliteListTile(
                     title: recorrenciaAlunoLabel(item.alunoNome),
                     subtitle: Text(
@@ -407,16 +406,13 @@ class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
                     trailing: Text(
                       recorrenciaValorLabel(item.valor),
                       style: FocuxHubTypography.bodyMuted(
-                        color: danger ? EagleTokens.bad : fxScreenMute(context),
+                        color: fxScreenMute(context),
                         fontWeight: FontWeight.w700,
+                      ).copyWith(
+                        decoration: encerrada ? TextDecoration.lineThrough : null,
                       ),
                     ),
-                    accent:
-                        danger
-                            ? EagleTokens.bad
-                            : recorrenciaPendente(item.status)
-                            ? primary
-                            : null,
+                    accent: recorrenciaPendente(item.status) ? primary : null,
                     onTap:
                         recorrenciaTemLinkCheckout(item.status, item.initPoint)
                             ? () => _abrirCheckout(item.initPoint!)

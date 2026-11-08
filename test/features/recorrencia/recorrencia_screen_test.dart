@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/api/api_client.dart';
 import 'package:focux_app/core/theme/design_tokens.dart';
+import 'package:focux_app/core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/features/auth/providers/auth_provider.dart';
 import 'package:focux_app/features/perfil/data/perfil_repository.dart';
 import 'package:focux_app/features/perfil/providers/perfil_provider.dart';
@@ -245,6 +246,27 @@ void main() {
       expect(find.text('Pendentes'), findsOneWidget);
       expect(find.text('Recorrências'), findsOneWidget);
       expect(find.text('Beto'), findsOneWidget);
+    });
+
+    testWidgets('cancelada fica apagada: sem realce e valor sem vermelho', (
+      tester,
+    ) async {
+      telaAlta(tester);
+      await tester.pumpWidget(
+        _app(
+          _Adapter(itens: [{..._item}..['status'] = 'CANCELADA']),
+          const RecorrenciaScreen(embedded: true),
+          chave: '12345678901',
+        ),
+      );
+      await _settle(tester);
+      final linha = tester.widget<FxSatelliteListTile>(
+        find.widgetWithText(FxSatelliteListTile, 'Beto'),
+      );
+      expect(linha.accent, isNull);
+      final valor = tester.widget<Text>(find.textContaining('150'));
+      expect(valor.style?.color, isNot(EagleTokens.bad));
+      expect(valor.style?.decoration, TextDecoration.lineThrough);
     });
 
     for (final tela in kDynamicTypeTelas) {

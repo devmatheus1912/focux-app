@@ -118,7 +118,8 @@ String recorrenciaAcaoFeito(RecorrenciaAcao acao) => switch (acao) {
 
 String recorrenciaValorLabel(FxMoney valor) => valor.format();
 
-bool recorrenciaDanger(String status) =>
+/// Cancelada é decisão do personal, não problema: fica apagada, sem realce.
+bool recorrenciaEncerrada(String status) =>
     status.trim().toUpperCase() == 'CANCELADA';
 
 bool recorrenciaPendente(String status) =>
