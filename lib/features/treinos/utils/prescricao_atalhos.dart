@@ -24,9 +24,6 @@ const opcoesDescansoSeg = [
 bool repeticoesEhAtalho(String bloco, String atual) =>
     atalhosRepeticoes(bloco).contains(atual.trim());
 
-bool descansoEhAtalho(String bloco, int atual) =>
-    atalhosDescansoSeg(bloco).contains(atual);
-
 /// "Mais detalhes" abre sozinho quando algum já tem valor: nada some do
 /// personal que já usa carga, RPE, observações, superset ou dropset.
 bool maisDetalhesPreenchidos({

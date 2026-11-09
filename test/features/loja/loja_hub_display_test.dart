@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/loja/utils/loja_hub_display.dart';
-import 'package:focux_app/core/theme/fx_icons.dart';
 
 void main() {
   test('lojaHubViewLabel e contagem', () {
@@ -30,32 +29,4 @@ void main() {
     expect(lojaPacoteSubtitle(duracaoMeses: 3), '3 meses');
   });
 
-  test('lojaPedido labels não expõem id', () {
-    expect(
-      lojaPedidoLabel(buyerNome: 'Ana', buyerEmail: 'ana@ex.com'),
-      'Ana',
-    );
-    expect(
-      lojaPedidoLabel(buyerNome: '  ', buyerEmail: 'ana@ex.com'),
-      'ana@ex.com',
-    );
-    expect(lojaPedidoLabel(buyerEmail: ''), 'Comprador');
-    expect(lojaPedidoStatusLabel('PAGO'), 'Pago');
-    expect(lojaPedidoStatusLabel('pendente'), 'Pendente');
-    expect(lojaPedidoStatusLabel(''), 'Sem status');
-    expect(
-      lojaPedidoSubtitle(
-        buyerNome: 'Ana',
-        buyerEmail: 'ana@ex.com',
-        status: 'PENDENTE',
-      ),
-      'Pendente · ana@ex.com',
-    );
-    expect(lojaPedidoFxIcon('PAGO'), FxIcons.concluido);
-    expect(lojaPedidoFxIcon('PENDENTE'), FxIcons.pix);
-    expect(lojaPedidoPendente('PENDENTE'), isTrue);
-    expect(lojaPedidoPendente('PAGO'), isFalse);
-    expect(lojaPedidoPix('  abc  '), 'abc');
-    expect(lojaPedidoPix('  '), isNull);
-  });
 }

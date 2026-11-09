@@ -61,23 +61,6 @@ void main() {
   });
 
 
-  test('meta line is honest: counts or em montagem, never fake duration', () {
-    expect(treinoDetailMetaLine(const []), 'Em montagem');
-    expect(
-      treinoDetailMetaLine([
-        _item(id: 1, nome: 'Supino', grupo: GrupoMuscular.peito),
-      ]),
-      '1 exercício · 3 séries · 1 grupo',
-    );
-    expect(
-      treinoDetailMetaLine([
-        _item(id: 1, nome: 'Supino', grupo: GrupoMuscular.peito),
-        _item(id: 2, nome: 'Crucifixo', grupo: GrupoMuscular.peito),
-        _item(id: 3, nome: 'Remada', grupo: GrupoMuscular.costasLatissimo),
-      ]),
-      '3 exercícios · 9 séries · 2 grupos',
-    );
-  });
 
   test('exercise line keeps prescription scannable without empty load', () {
     expect(

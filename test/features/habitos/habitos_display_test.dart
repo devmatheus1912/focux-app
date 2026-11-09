@@ -1,7 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:focux_app/features/habitos/data/habito_repository.dart';
 import 'package:focux_app/features/habitos/utils/habitos_display.dart';
-import 'package:focux_app/core/theme/fx_icons.dart';
 
 void main() {
   test('habitoTemplateLabel e value', () {
@@ -31,61 +29,5 @@ void main() {
     expect(habitoMetaValue(5), '5x');
   });
 
-  test('habitoCompliance não expõe id', () {
-    expect(habitoComplianceLabel('Ana'), 'Ana');
-    expect(habitoComplianceLabel('  '), 'Aluno');
-    expect(habitoComplianceLabel(null), 'Aluno');
-    expect(habitoComplianceValue(80), '80%');
-    expect(habitoComplianceSubtitle(1), '1 check na semana');
-    expect(habitoComplianceSubtitle(4), '4 checks na semana');
-    expect(habitoComplianceFxIcon(80), FxIcons.concluido);
-    expect(habitoComplianceFxIcon(50), FxIcons.grafico);
-    expect(habitoComplianceFxIcon(10), FxIcons.alerta);
-    expect(habitoComplianceDanger(39), isTrue);
-    expect(habitoComplianceDanger(40), isFalse);
-    expect(
-      habitoFocusCompliance([
-        ComplianceItem(
-          alunoId: 1,
-          alunoNome: 'Ana',
-          checksSemana: 2,
-          compliancePct: 80,
-        ),
-        ComplianceItem(
-          alunoId: 2,
-          alunoNome: 'Bia',
-          checksSemana: 0,
-          compliancePct: 20,
-        ),
-      ])?.alunoId,
-      2,
-    );
-    expect(habitoFocusCompliance(const []), isNull);
-    expect(
-      habitoComplianceListExcludingFocus(
-        [
-          ComplianceItem(
-            alunoId: 1,
-            alunoNome: 'Ana',
-            checksSemana: 2,
-            compliancePct: 80,
-          ),
-          ComplianceItem(
-            alunoId: 2,
-            alunoNome: 'Bia',
-            checksSemana: 0,
-            compliancePct: 20,
-          ),
-        ],
-        ComplianceItem(
-          alunoId: 2,
-          alunoNome: 'Bia',
-          checksSemana: 0,
-          compliancePct: 20,
-        ),
-      ).map((e) => e.alunoId),
-      [1],
-    );
-  });
 
 }

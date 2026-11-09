@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import '../../exercicios/data/enums.dart';
 import '../../exercicios/data/template_splits.dart';
 import '../../../l10n/pt.dart';
@@ -88,7 +89,8 @@ List<Divisao> outrasDivisoes(int dias) => [
       if (t.dias.length <= dias) _split(t.id, t.nome),
 ];
 
-/// Uma letra por dia: o comportamento de antes da divisão.
+/// Uma letra por dia: o comportamento de antes da divisão (fixtures de teste).
+@visibleForTesting
 Divisao umaPorDia(int dias) => _generica(dias.clamp(0, 7));
 
 /// O dia do modelo de exercícios que corresponde a uma sessão pelo nome

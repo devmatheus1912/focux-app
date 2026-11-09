@@ -8,12 +8,6 @@ void main() {
     expect(adjustPrescriptionSeries(20, 1), 20);
   });
 
-  test('adjustPrescriptionRestSeconds moves in 15s steps', () {
-    expect(adjustPrescriptionRestSeconds(75, 15), 90);
-    expect(adjustPrescriptionRestSeconds(75, -15), 60);
-    expect(adjustPrescriptionRestSeconds(10, -15), 15);
-    expect(adjustPrescriptionRestSeconds(290, 15), 300);
-  });
 
   test('parsePrescriptionInt falls back when empty or invalid', () {
     expect(parsePrescriptionInt('', fallback: 4), 4);

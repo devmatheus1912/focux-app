@@ -1,6 +1,4 @@
-import 'package:flutter/widgets.dart';
 import '../data/habito_repository.dart';
-import '../../../core/theme/fx_icons.dart';
 
 String habitoTemplateLabel({
   required String titulo,
@@ -46,12 +44,6 @@ String habitoComplianceValue(int pct) => '$pct%';
 String habitoComplianceSubtitle(int checksSemana) {
   if (checksSemana == 1) return '1 check na semana';
   return '$checksSemana checks na semana';
-}
-
-IconData habitoComplianceFxIcon(int pct) {
-  if (pct >= 70) return FxIcons.concluido;
-  if (pct >= 40) return FxIcons.grafico;
-  return FxIcons.alerta;
 }
 
 bool habitoComplianceDanger(int pct) => pct < 40;

@@ -12,12 +12,6 @@ const coachEmptyTitle = 'Nenhum aluno precisa de atenção';
 const coachEmptySubtitle =
     'Aparece aqui quem ficou 5 dias sem treinar, dormiu pouco ou quebrou a sequência. Depende do check-in dos treinos.';
 
-String? coachPendingChipLabel(int pending) {
-  if (pending <= 0) return null;
-  if (pending == 1) return '1 aluno pede atenção';
-  return '$pending alunos pedem atenção';
-}
-
 String coachPendingTitulo(int pending) {
   if (pending <= 0) return 'Ninguém precisa de atenção';
   if (pending == 1) return '1 aluno precisa de atenção';

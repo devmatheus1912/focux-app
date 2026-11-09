@@ -47,12 +47,6 @@ String alertaUltimoTreinoLabel(String? raw) {
   return fxDateFull(date);
 }
 
-String alertaCheckinsLabel(int count) {
-  if (count <= 0) return 'Nenhum em 30 dias';
-  if (count == 1) return '1 em 30 dias';
-  return '$count em 30 dias';
-}
-
 String alertaCheckinsMetricValue(int count) => '$count';
 
 String alertaCheckinsMetricHint() => 'Em 30 dias';

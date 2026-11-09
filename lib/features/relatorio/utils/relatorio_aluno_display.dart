@@ -141,17 +141,6 @@ String relatorioAlunoPeriodoOpcaoLabel(String key, {DateTime? agora}) {
   return relatorioAlunoPeriodoOpcaoByKey(key, agora: agora)?.label ?? key;
 }
 
-int? relatorioAlunoDiasFromKey(String key) {
-  if (key.startsWith('m:')) return null;
-  return int.tryParse(key);
-}
-
-String relatorioAlunoAderenciaStatus(double taxa) {
-  if (taxa >= 75) return 'Excelente';
-  if (taxa >= 50) return 'Regular';
-  return 'Baixa';
-}
-
 bool relatorioAlunoAderenciaBaixa(double taxa) => taxa < 50;
 
 String relatorioAlunoDeltaLabel(double delta) {
@@ -179,18 +168,3 @@ String relatorioAlunoHubSubtitle({
   return 'Recorte de $diasAnalisados dias';
 }
 
-String relatorioAlunoPeriodoMetricValue(int diasAnalisados) {
-  if (diasAnalisados <= 0) return '—';
-  if (diasAnalisados == 1) return '1 dia';
-  return '$diasAnalisados dias';
-}
-
-String relatorioAlunoCheckinsMetricValue(int? checkIns) {
-  if (checkIns == null) return '—';
-  return '$checkIns';
-}
-
-String relatorioAlunoCheckinsMetricHint(int? checkIns) {
-  if (checkIns == null) return 'Sem recorte anterior ainda';
-  return relatorioAlunoCheckinsLabel(checkIns);
-}

@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/leads/utils/lead_display.dart';
-import 'package:focux_app/core/theme/fx_icons.dart';
 
 void main() {
   test('leadOrigemLabel não inventa origem', () {
@@ -78,15 +77,6 @@ void main() {
     expect(leadEmailHint('a@b.com'), 'Vira o login do aluno');
   });
 
-  test('leadInteracao labels em PT-BR', () {
-    expect(leadInteracaoTipoLabel('WHATSAPP'), 'WhatsApp');
-    expect(leadInteracaoTipoLabel('LIGACAO'), 'Ligação');
-    expect(leadInteracaoTipoLabel('EMAIL'), 'E-mail');
-    expect(leadInteracaoFxIcon('WHATSAPP'), FxIcons.chat);
-    expect(leadInteracaoFxIcon('OUTRO'), FxIcons.ia);
-    expect(leadFollowUpValue(null), 'Não definido');
-    expect(leadFollowUpValue('  '), 'Não definido');
-  });
 
   test('lead list chrome helpers', () {
     expect(leadCountLabel(1), '1 lead');

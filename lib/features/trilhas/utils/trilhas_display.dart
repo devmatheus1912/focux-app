@@ -98,12 +98,6 @@ String trilhaPrazoMetricValue(List<TrilhaModel> trilhas) {
   return trilhaDataLabel(data);
 }
 
-String trilhaPrazoMetricHint(List<TrilhaModel> trilhas) {
-  if (trilhaAtivasCount(trilhas) == 0) return 'Nenhuma trilha ativa';
-  if (trilhaProximoPrazo(trilhas) == null) return 'Sem prazo nas ativas';
-  return 'Próximo prazo das ativas';
-}
-
 int trilhaListaAtivas(TrilhaLista lista) =>
     lista.ativas ?? trilhaAtivasCount(lista.items);
 

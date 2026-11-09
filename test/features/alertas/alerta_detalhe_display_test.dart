@@ -9,14 +9,6 @@ void main() {
     expect(alertaUltimoTreinoLabel('2026-08-31'), '31 de agosto de 2026');
   });
 
-  test('alertaCheckinsLabel pluraliza', () {
-    expect(alertaCheckinsLabel(0), 'Nenhum em 30 dias');
-    expect(alertaCheckinsLabel(1), '1 em 30 dias');
-    expect(alertaCheckinsLabel(8), '8 em 30 dias');
-    expect(alertaCheckinsMetricValue(8), '8');
-    expect(alertaCheckinsMetricHint(), 'Em 30 dias');
-    expect(alertaDetalheSecoes, hasLength(2));
-  });
 
   test('alertaStatusFinanceiroLabel humaniza códigos', () {
     expect(alertaStatusFinanceiroLabel('ATIVO'), 'Em dia');

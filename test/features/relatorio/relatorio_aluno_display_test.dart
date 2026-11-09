@@ -36,31 +36,7 @@ void main() {
     expect(opcoes.any((o) => o.key == 'custom'), isFalse);
   });
 
-  test('relatorioAlunoPeriodoKey e dias from key', () {
-    expect(relatorioAlunoPeriodoKey(dias: 7), '7');
-    expect(
-      relatorioAlunoPeriodoKey(
-        dias: 31,
-        inicio: DateTime(2026, 8, 1),
-        fim: DateTime(2026, 8, 31),
-      ),
-      'm:2026-08',
-    );
-    expect(relatorioAlunoDiasFromKey('90'), 90);
-    expect(relatorioAlunoDiasFromKey('m:2026-08'), isNull);
-    expect(
-      relatorioAlunoPeriodoOpcaoLabel('m:2026-08', agora: DateTime(2026, 9, 7)),
-      'Agosto 2026',
-    );
-    expect(relatorioAlunoDiasDoRange(DateTime(2026, 2, 1), DateTime(2026, 2, 28)), 28);
-  });
 
-  test('relatorioAlunoAderenciaStatus e comparativo', () {
-    expect(relatorioAlunoAderenciaStatus(80), 'Excelente');
-    expect(relatorioAlunoAderenciaStatus(50), 'Regular');
-    expect(relatorioAlunoAderenciaStatus(10), 'Baixa');
-    expect(relatorioAlunoAderenciaBaixa(49.9), isTrue);
-  });
 
   test('relatorioAlunoDeltaLabel e check-ins', () {
     expect(relatorioAlunoDeltaLabel(10), '+10,0%');

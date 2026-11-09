@@ -1,42 +1,5 @@
-import 'package:flutter/widgets.dart';
 import '../data/evolucao_repository.dart';
 import '../../../l10n/pt.dart';
-import '../../../core/theme/fx_icons.dart';
-
-String engajamentoTipoLabel(String? tipo) {
-  switch ((tipo ?? '').trim().toUpperCase()) {
-    case 'TREINO':
-    case 'TREINO_INICIADO':
-      return ptS.aluno360FerramentasGrupoTreino;
-    case 'CHECKIN_CONCLUIDO':
-      return ptS.engajamentoCheckIn;
-    case 'MEDIDA':
-      return ptS.engajamentoMedida;
-    case 'MENSAGEM':
-      return ptS.copilotoMensagemCampo;
-    case 'EM_ANDAMENTO':
-      return ptS.historicoDetalheEmAndamento;
-    case '':
-      return ptS.engajamentoEvento;
-    default:
-      return tipo!.trim();
-  }
-}
-
-IconData engajamentoFxIcon(String? tipo) {
-  switch ((tipo ?? '').trim().toUpperCase()) {
-    case 'TREINO':
-    case 'TREINO_INICIADO':
-    case 'CHECKIN_CONCLUIDO':
-      return FxIcons.treino;
-    case 'MEDIDA':
-      return FxIcons.grafico;
-    case 'MENSAGEM':
-      return FxIcons.chat;
-    default:
-      return FxIcons.calendario;
-  }
-}
 
 enum EngajamentoTreinoEstado { feito, parcial, cancelado, aberto }
 
@@ -329,17 +292,3 @@ bool _doAluno(EventoEngajamento e) =>
         ? e.descricao.toLowerCase().startsWith('aluno')
         : e.remetente!.toUpperCase() == 'ALUNO';
 
-String? engajamentoEventoRota(String? tipo, int alunoId) {
-  switch ((tipo ?? '').trim().toUpperCase()) {
-    case 'MENSAGEM':
-      return '/alunos/$alunoId/chat';
-    case 'MEDIDA':
-      return '/alunos/$alunoId/evolucao';
-    case 'TREINO':
-    case 'TREINO_INICIADO':
-    case 'CHECKIN_CONCLUIDO':
-      return '/alunos/$alunoId/rotina';
-    default:
-      return null;
-  }
-}

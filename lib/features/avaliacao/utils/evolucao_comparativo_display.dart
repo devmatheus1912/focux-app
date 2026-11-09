@@ -21,8 +21,6 @@ class EvolucaoComparativoDelta {
   bool get improved => tone == EvolucaoComparativoDeltaTone.better;
 }
 
-String evolucaoComparativoHubSubtitle() => 'Primeira vs atual avaliação';
-
 String evolucaoComparativoStickyShare() => 'Compartilhar no chat';
 
 String evolucaoComparativoStickyRegistrar() => 'Registrar avaliação';

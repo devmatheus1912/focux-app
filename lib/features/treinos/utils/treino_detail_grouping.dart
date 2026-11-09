@@ -33,30 +33,6 @@ int treinoDetailSeriesCount(List<TreinoExercicioItem> items) =>
 int treinoDetailGroupCount(List<TreinoExercicioItem> items) =>
     items.map(treinoDetailGroupLabel).toSet().length;
 
-double? treinoDetailCargaTotalKg(List<TreinoExercicioItem> items) {
-  var sum = 0.0;
-  var any = false;
-  for (final item in items) {
-    final kg = item.cargaKg;
-    if (kg == null || kg <= 0) continue;
-    sum += kg;
-    any = true;
-  }
-  return any ? sum : null;
-}
-
-/// Contagens reais da prescrição — sem duração inventada.
-String treinoDetailMetaLine(List<TreinoExercicioItem> items) {
-  if (items.isEmpty) return 'Em montagem';
-  final exercises = items.length;
-  final series = treinoDetailSeriesCount(items);
-  final groups = treinoDetailGroupCount(items);
-  final ex = exercises == 1 ? '1 exercício' : '$exercises exercícios';
-  final ser = series == 1 ? '1 série' : '$series séries';
-  final grp = groups == 1 ? '1 grupo' : '$groups grupos';
-  return '$ex · $ser · $grp';
-}
-
 /// Prescrição numa linha — o que o personal precisa escanear.
 String treinoDetailExerciseLine(TreinoExercicioItem te) {
   if (te.seriesLinhas.isNotEmpty) {

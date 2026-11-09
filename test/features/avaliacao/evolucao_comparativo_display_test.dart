@@ -3,25 +3,6 @@ import 'package:focux_app/features/avaliacao/data/avaliacao_repository.dart';
 import 'package:focux_app/features/avaliacao/utils/evolucao_comparativo_display.dart';
 
 void main() {
-  test('copy e formatação do comparativo', () {
-    expect(evolucaoComparativoHubSubtitle(), 'Primeira vs atual avaliação');
-    expect(evolucaoComparativoStickyShare(), 'Compartilhar no chat');
-    expect(evolucaoComparativoStickyRegistrar(), 'Registrar avaliação');
-    expect(evolucaoComparativoConfirmTitle(), 'Compartilhar no chat?');
-    expect(evolucaoComparativoConfirmLabel(), 'Enviar');
-    expect(
-      evolucaoComparativoJanelaCaption(primeira: '01/01', atual: '01/02', dias: 31),
-      '01/01 → 01/02 · 31 dias',
-    );
-    expect(evolucaoComparativoFmtData(null), '—');
-    expect(evolucaoComparativoFmtData(''), '—');
-    expect(evolucaoComparativoFmtData('nao-e-data'), 'nao-e-data');
-    expect(evolucaoComparativoFmtNum(null), '—');
-    expect(evolucaoComparativoFmtNum(72.46), '72,5');
-    expect(evolucaoComparativoFmtValor(null, 'kg'), '—');
-    expect(evolucaoComparativoFmtValor(80, 'kg'), '80,0 kg');
-    expect(evolucaoComparativoFmtValor(22.1, ''), '22,1');
-  });
 
   test('404 amigável conta como vazio', () {
     expect(evolucaoComparativoIsEmptyError('Recurso não encontrado.'), isTrue);

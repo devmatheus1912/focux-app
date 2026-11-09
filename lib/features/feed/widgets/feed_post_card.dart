@@ -497,21 +497,6 @@ class _FeedVideoPreview extends StatelessWidget {
   }
 }
 
-IconData feedTipoIcon(String? tipo) {
-  switch (tipo?.toUpperCase()) {
-    case 'IMAGEM':
-      return FxIcons.imagem;
-    case 'VIDEO':
-      return FxIcons.playCirculo;
-    case 'ENQUETE':
-      return FxIcons.enquete;
-    case 'DICA':
-      return FxIcons.ideia;
-    default:
-      return FxIcons.artigo;
-  }
-}
-
 Color feedBadgeColor(String? tipo, Color primary) {
   switch (tipo?.toUpperCase()) {
     case 'DICA':

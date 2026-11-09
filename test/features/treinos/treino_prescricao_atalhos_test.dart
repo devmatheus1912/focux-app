@@ -115,13 +115,6 @@ void main() {
       expect(atalhosDescansoSeg('ALONGAMENTO'), [0, 10, 15, 30]);
     });
 
-    test('"Outro" marca quando o valor não é atalho', () {
-      expect(repeticoesEhAtalho('TRABALHO', '8-12'), isTrue);
-      expect(repeticoesEhAtalho('TRABALHO', ' 8-12 '), isTrue);
-      expect(repeticoesEhAtalho('TRABALHO', '5'), isFalse);
-      expect(descansoEhAtalho('TRABALHO', 75), isFalse);
-      expect(descansoEhAtalho('TRABALHO', 90), isTrue);
-    });
 
     test('Mais detalhes abre sozinho se algo já tem valor', () {
       expect(

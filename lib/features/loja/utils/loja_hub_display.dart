@@ -1,5 +1,3 @@
-import 'package:flutter/widgets.dart';
-import '../../../core/theme/fx_icons.dart';
 enum LojaHubView { vitrine, pedidos }
 
 String lojaHubViewLabel(LojaHubView view) => switch (view) {
@@ -84,18 +82,3 @@ String? lojaPedidoPix(String? raw) {
   return value;
 }
 
-IconData lojaPedidoFxIcon(String status) {
-  switch (status.trim().toUpperCase()) {
-    case 'PAGO':
-    case 'CONFIRMADO':
-    case 'PAID':
-      return FxIcons.concluido;
-    case 'CANCELADO':
-    case 'CANCELLED':
-    case 'EXPIRADO':
-    case 'EXPIRED':
-      return FxIcons.alerta;
-    default:
-      return FxIcons.pix;
-  }
-}

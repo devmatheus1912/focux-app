@@ -34,27 +34,6 @@ String setupActionRouteFromAtivacao(String route) {
   return uri.replace(queryParameters: params).toString();
 }
 
-String setupStepFxIconName(String name) {
-  switch (name) {
-    case 'person':
-      return 'target';
-    case 'person_add':
-      return 'users';
-    case 'fitness_center':
-      return 'dumbbell';
-    case 'inventory_2':
-      return 'article';
-    case 'repeat':
-      return 'route';
-    case 'attach_money':
-      return 'pix';
-    case 'link':
-      return 'spark';
-    default:
-      return 'circle-check';
-  }
-}
-
 class SetupWizardSkeleton extends StatelessWidget {
   const SetupWizardSkeleton({super.key});
 

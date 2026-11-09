@@ -1,28 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/evolucao/data/evolucao_repository.dart';
 import 'package:focux_app/features/evolucao/utils/engajamento_display.dart';
-import 'package:focux_app/core/theme/fx_icons.dart';
 
 void main() {
 
-  test('engajamentoTipoLabel em PT-BR', () {
-    expect(engajamentoTipoLabel('TREINO'), 'Treino');
-    expect(engajamentoTipoLabel('treino_iniciado'), 'Treino');
-    expect(engajamentoTipoLabel('CHECKIN_CONCLUIDO'), 'Check-in');
-    expect(engajamentoTipoLabel('MEDIDA'), 'Medida');
-    expect(engajamentoTipoLabel('MENSAGEM'), 'Mensagem');
-    expect(engajamentoTipoLabel(''), 'Evento');
-    expect(engajamentoTipoLabel(null), 'Evento');
-    expect(engajamentoTipoLabel('CUSTOM'), 'CUSTOM');
-  });
 
-  test('engajamentoFxIcon por tipo', () {
-    expect(engajamentoFxIcon('TREINO'), FxIcons.treino);
-    expect(engajamentoFxIcon('CHECKIN_CONCLUIDO'), FxIcons.treino);
-    expect(engajamentoFxIcon('MEDIDA'), FxIcons.grafico);
-    expect(engajamentoFxIcon('MENSAGEM'), FxIcons.chat);
-    expect(engajamentoFxIcon(null), FxIcons.calendario);
-  });
 
 
 
@@ -92,10 +74,4 @@ void main() {
   });
 
 
-  test('rota de próxima ação', () {
-    expect(engajamentoEventoRota('MENSAGEM', 9), '/alunos/9/chat');
-    expect(engajamentoEventoRota('MEDIDA', 9), '/alunos/9/evolucao');
-    expect(engajamentoEventoRota('TREINO', 9), '/alunos/9/rotina');
-    expect(engajamentoEventoRota('OUTRO', 9), isNull);
-  });
 }
