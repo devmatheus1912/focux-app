@@ -215,6 +215,22 @@ RouteBase buildChromeShellRoute() {
                   abaInicial: evolucaoHubViewFromSecao(
                     state.uri.queryParameters['aba'] ?? '',
                   ),
+                  // Linha do tempo: abre o Histórico com o registro marcado.
+                  dataDestaque: state.uri.queryParameters['data'],
+                ),
+          ),
+          GoRoute(
+            path: '/alunos/:id/sessoes/:execucaoId',
+            redirect:
+                (context, state) =>
+                    intPathParam(state, 'id') == null ||
+                            intPathParam(state, 'execucaoId') == null
+                        ? '/alunos'
+                        : null,
+            builder:
+                (context, state) => HistoricoDetalheScreen(
+                  execucaoId: intPathParam(state, 'execucaoId')!,
+                  alunoIdDoPersonal: intPathParam(state, 'id'),
                 ),
           ),
           GoRoute(

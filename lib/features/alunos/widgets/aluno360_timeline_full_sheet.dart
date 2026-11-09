@@ -47,10 +47,8 @@ class _Aluno360TimelineFullSheetState
     final mapped =
         events
             .map(
-              (e) => Aluno360TimelineCard.itemFromApi(
-                e,
-                primary: widget.primary,
-              ),
+              (e) =>
+                  Aluno360TimelineCard.itemFromApi(e, primary: widget.primary),
             )
             .toList();
     final filtered = mapped
@@ -62,14 +60,18 @@ class _Aluno360TimelineFullSheetState
         )
         .toList(growable: false);
     return sortTimeline360Items(
-      dedupeAutonomiaTimelineByTask(
-        dedupeChatTimelineByFingerprint(
-          filtered,
+      juntarMetaEMedida(
+        dedupeAutonomiaTimelineByTask(
+          dedupeChatTimelineByFingerprint(
+            filtered,
+            kindOf: (item) => item.kind,
+            bodyOf: (item) => item.body,
+          ),
           kindOf: (item) => item.kind,
-          bodyOf: (item) => item.body,
+          titleOf: (item) => item.title,
         ),
         kindOf: (item) => item.kind,
-        titleOf: (item) => item.title,
+        atOf: (item) => item.at,
       ),
       atOf: (item) => item.at,
       priorityOf: (item) => item.priority,
@@ -97,9 +99,10 @@ class _Aluno360TimelineFullSheetState
       // Se algo foi escondido (ex.: visualizações do aluno), o total do servidor
       // não vale mais: conta só o que o personal vê.
       final nadaEscondido = state.events.length == items.length;
-      headerSubtitle = state.totalCount > 0 && nadaEscondido
-          ? '${state.totalCount} sinais'
-          : '${items.length} sinais';
+      headerSubtitle =
+          state.totalCount > 0 && nadaEscondido
+              ? '${state.totalCount} registros'
+              : '${items.length} registros';
     }
 
     return FxHomeSheetSurface(
@@ -207,7 +210,10 @@ class _Aluno360TimelineFullSheetState
                             child: Center(
                               child:
                                   state.loadingMore
-                                      ? const FxLoading(size: 22, strokeWidth: 2)
+                                      ? const FxLoading(
+                                        size: 22,
+                                        strokeWidth: 2,
+                                      )
                                       : FxActionLink(
                                         label: ptS.retencaoCarregarMais,
                                         onTap:

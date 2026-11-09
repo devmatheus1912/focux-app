@@ -10,7 +10,6 @@ import '../../../l10n/app_localizations.dart';
 import '../models/treino_previa.dart';
 import '../utils/treino_previa_view.dart';
 import '../../../core/widgets/fx_video_em_breve.dart';
-import '../../../core/theme/fx_icons.dart';
 
 class TreinoPreviaCabecalho extends StatelessWidget {
   const TreinoPreviaCabecalho({super.key, required this.texto});
@@ -56,8 +55,7 @@ class TreinoPreviaExercicioTile extends StatelessWidget {
       label: [
         '$numero. ${exercicio.exercicioNome}',
         if (prescricao.isNotEmpty) prescricao,
-        if (exercicio.temVideo) s.treinoPreviaComVideo,
-        if (exercicio.videoEmBreve) s.videoEmBreve,
+        if (exercicio.videoEmBreve || !exercicio.temVideo) s.videoEmBreve,
         if (obs != null) obs,
       ].join(', '),
       excludeSemantics: true,
@@ -95,29 +93,10 @@ class TreinoPreviaExercicioTile extends StatelessWidget {
                       style: FocuxHubTypography.bodyMuted(color: chrome.mute),
                     ),
                   ],
-                  if (exercicio.videoEmBreve) ...[
+                  // Quase todo exercício tem vídeo: só a falta dele vira texto.
+                  if (exercicio.videoEmBreve || !exercicio.temVideo) ...[
                     const SizedBox(height: TokensStrip.s1),
                     const FxVideoEmBreve.linha(),
-                  ],
-                  if (exercicio.temVideo) ...[
-                    const SizedBox(height: TokensStrip.s1),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          FxIcons.playCirculoPequeno,
-                          size: 16,
-                          color: primary,
-                        ),
-                        const SizedBox(width: TokensStrip.s1),
-                        Text(
-                          s.treinoPreviaComVideo,
-                          style: FocuxHubTypography.bodyMuted(
-                            color: chrome.mute,
-                          ),
-                        ),
-                      ],
-                    ),
                   ],
                   if (obs != null) ...[
                     const SizedBox(height: TokensStrip.s2),

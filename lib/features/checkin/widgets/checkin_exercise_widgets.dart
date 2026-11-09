@@ -1,3 +1,4 @@
+import '../../treinos/utils/grupos_de_serie.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -180,7 +181,7 @@ class CheckinSerieCard extends StatelessWidget {
               if (proximoNome != null && c.maxHeight >= alturaMinimaDepois) ...[
                 const SizedBox(height: TokensStrip.s2),
                 Text(
-                  s.checkinDepois(proximoNome!),
+                  checkinTextoDepois(s, ee, proximoNome!),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: FocuxHubTypography.bodyMuted(color: chrome.mute),
@@ -304,16 +305,30 @@ class CheckinSerieCard extends StatelessWidget {
     final s = S.of(context);
     final chrome = ShellChrome.of(context);
     final dots = _dots(ee);
+    final numero = ee.seriesFeitas + 1;
+    final grupo = checkinPosicaoNoGrupo(ee.seriesPrescritas, numero);
+    final daSerie = ee.seriesPrescritas
+        .where((l) => l.numero == numero)
+        .firstOrNull;
     final linha = [
-      // Papel da série quando não é válida: "Aquecimento", "Ajuste", "Back-off".
-      if (checkinPapelDaSerie(s, ee.proximaSeriePapel) case final papel?) papel,
-      checkinLinhaDaSerie(
-        s,
-        atual: ee.seriesFeitas + 1,
-        total: ee.series,
-        repeticoes: ee.repeticoes,
-        descansoSegundos: ee.descansoSegundos,
-      ),
+      // Com grupos: "Aquecimento 1 de 2 · 12 reps · 45 s"; o total da sessão
+      // fica na barra de progresso.
+      if (grupo != null)
+        [
+          checkinRotuloDoGrupo(grupo),
+          '${daSerie?.repeticoes ?? ee.repeticoes ?? ''} reps',
+          if ((daSerie?.descansoSegundos ?? ee.descansoSegundos) case final d?
+              when d > 0)
+            '$d s',
+        ].where((t) => !t.startsWith(' ')).join(' · ')
+      else
+        checkinLinhaDaSerie(
+          s,
+          atual: numero,
+          total: ee.series,
+          repeticoes: ee.proximaRepeticoes ?? ee.repeticoes,
+          descansoSegundos: ee.descansoSegundos,
+        ),
       // O método prescrito: "Bi-set", "Drop-set", "Pirâmide"…
       if (ee.metodo.combinado) rotuloDoCombinado(ee.metodo.grupoRotulo, 2),
       if (ee.metodo.tecnica != Tecnica.normal) rotuloDaTecnica(ee.metodo.tecnica),
@@ -405,12 +420,17 @@ class CheckinSerieCard extends StatelessWidget {
       return null;
     }
 
+    // Aquecimento e ajuste: bolinha menor e vazada (não contam).
+    bool leve(int n) => ee.seriesPrescritas.any(
+      (l) => l.numero == n && !PapelDaSerie.conta(l.papel),
+    );
     return [
       for (var n = 1; n <= total; n++)
         FxSetDot(
           numero: n,
           feita: n <= ee.seriesFeitas,
           detalhe: n <= ee.seriesFeitas ? _detalhe(feita(n)) : null,
+          aquecimento: leve(n),
         ),
     ];
   }

@@ -159,7 +159,8 @@ void main() {
       expect(find.text('Ver o painel'), findsNothing);
       expect(find.text('Ferramentas'), findsOneWidget);
 
-      final help = find.byTooltip(DashboardMicrocopy.helpHomeOpen);
+      final help = find.text('Como usar a Hoje');
+      await tester.scrollUntilVisible(help, 200);
       expect(help, findsOneWidget);
       await tester.ensureVisible(help);
       await tester.tap(help);

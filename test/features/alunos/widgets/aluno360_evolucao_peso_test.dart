@@ -182,7 +182,7 @@ void main() {
           _evento('AUTONOMIA', 'Completar perfil base', 'VIEWED'),
         ]),
       );
-      expect(find.text('Ver todos os 4 sinais'), findsOneWidget);
+      expect(find.text('Ver todos os 4 registros'), findsOneWidget);
     });
   });
 

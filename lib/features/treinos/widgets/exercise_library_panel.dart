@@ -617,7 +617,7 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
               ),
               // Bolha da letra sobre o trilho à direita, fora da coluna das fotos.
               Positioned(
-                right: 2,
+                right: 0,
                 top: 4,
                 child: IgnorePointer(
                   child: ValueListenableBuilder<String?>(
@@ -801,7 +801,7 @@ class _LetraFixa extends StatelessWidget {
       label: 'Seção $letra',
       excludeSemantics: true,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
         decoration: BoxDecoration(
           color: isDark ? EagleTokens.darkCardHi : Colors.white,
           borderRadius: BorderRadius.circular(99),
@@ -917,7 +917,10 @@ class _GroupedExerciseList extends StatelessWidget {
                 for (final e in section.items) e.nomeDisplay,
               ])) ...[
                 if (grupo.prefixo != null)
-                  _CabecalhoDoPrefixo(texto: grupo.prefixo!),
+                  _CabecalhoDoPrefixo(
+                    texto: grupo.prefixo!,
+                    quantos: grupo.itens.length,
+                  ),
                 for (final (i, texto) in grupo.itens)
                   ExerciseLibraryRow(
                     exercicio: section.items[i],
@@ -963,9 +966,10 @@ class _GroupedExerciseList extends StatelessWidget {
 
 /// "Levantamento terra romeno (RDL)": começo comum das linhas de baixo.
 class _CabecalhoDoPrefixo extends StatelessWidget {
-  const _CabecalhoDoPrefixo({required this.texto});
+  const _CabecalhoDoPrefixo({required this.texto, required this.quantos});
 
   final String texto;
+  final int quantos;
 
   @override
   Widget build(BuildContext context) {
@@ -976,11 +980,12 @@ class _CabecalhoDoPrefixo extends StatelessWidget {
           top: TokensStrip.s3,
           bottom: TokensStrip.s1,
         ),
+        // Título de linha com a contagem: o dono das linhas de baixo.
         child: Text(
-          texto,
+          '$texto · $quantos',
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
-          style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+          style: FocuxHubTypography.cardTitle(color: chrome.ink),
         ),
       ),
     );

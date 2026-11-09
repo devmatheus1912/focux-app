@@ -110,6 +110,7 @@ class PrescriptionEditorSheet extends StatefulWidget {
     this.outrosNoBloco = 0,
     this.nomesNoBloco = const [],
     this.gruposDeSerie,
+    this.validasKey,
     this.aplicarAoBloco = false,
     this.onAplicarAoBlocoChanged,
     this.parametrosIniciais = const ParametrosDoMetodo(),
@@ -159,6 +160,9 @@ class PrescriptionEditorSheet extends StatefulWidget {
   /// Aquecimento, ajuste e back-off do exercício (grupos de séries), abaixo
   /// da prescrição das válidas.
   final Widget? gruposDeSerie;
+
+  /// Marca os controles das válidas (a linha "Válidas" dos grupos rola até eles).
+  final GlobalKey? validasKey;
 
   /// Outros exercícios do mesmo bloco (0 = sem "Aplicar a todo o bloco").
   final int outrosNoBloco;

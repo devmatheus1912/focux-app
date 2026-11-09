@@ -67,7 +67,12 @@ void main() {
     expect(screen, contains('FxMetricStrip'));
     expect(screen, contains('/alunos?filtro=risco'));
     expect(screen, contains('RISK_STUDENTS'));
-    expect(screen, contains('FxHelpIconButton'));
+    // Ajuda saiu do topo: link "Como usar a Hoje" no fim (SPEC-topo-home).
+    expect(
+      File('lib/features/dashboard/widgets/dashboard_home_primary_slivers.dart')
+          .readAsStringSync(),
+      contains('Como usar a Hoje'),
+    );
     expect(screen, contains('FxHelpChrome.iconSize'));
     expect(screen, contains('alunoFromAlertaResumo'));
     expect(screen, contains('onboardingFromHome'));

@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show ProviderListenable;
 import 'package:go_router/go_router.dart';
 
 import '../../../core/router/safe_navigation.dart';
@@ -29,9 +30,19 @@ import '../../../core/theme/fx_icons.dart';
 /// Uma sessão do histórico. Concluída: "Treinar de novo" abre a prévia.
 /// Aberta (link antigo ou push): "Continuar treino".
 class HistoricoDetalheScreen extends ConsumerStatefulWidget {
-  const HistoricoDetalheScreen({super.key, required this.execucaoId});
+  const HistoricoDetalheScreen({
+    super.key,
+    required this.execucaoId,
+    this.alunoIdDoPersonal,
+  });
 
   final int execucaoId;
+
+  /// Aberto pelo personal (linha do tempo do 360): só leitura, sem
+  /// "Treinar de novo", e volta para o aluno.
+  final int? alunoIdDoPersonal;
+
+  bool get doPersonal => alunoIdDoPersonal != null;
 
   @override
   ConsumerState<HistoricoDetalheScreen> createState() =>
@@ -42,7 +53,14 @@ class _HistoricoDetalheScreenState
     extends ConsumerState<HistoricoDetalheScreen> {
   var _abrindo = false;
 
-  void _voltar() => safePopOrGo(context, '/checkin/historico');
+  void _voltar() => widget.doPersonal
+      ? safePopOrGo(context, '/alunos/${widget.alunoIdDoPersonal}')
+      : safePopOrGo(context, '/checkin/historico');
+
+  ProviderListenable<AsyncValue<ExecucaoTreino>> get _detalhe =>
+      widget.doPersonal
+          ? historicoDetalhePersonalProvider(widget.execucaoId)
+          : historicoDetalheProvider(widget.execucaoId);
 
   /// Treinar ou "Já fiz" na prévia mudam a Home e a lista.
   void _recarregarDependentes() {
@@ -53,10 +71,8 @@ class _HistoricoDetalheScreenState
   Future<void> _treinarDeNovo(int treinoId) async {
     if (_abrindo) return;
     _abrindo = true;
-    final iniciar = await context.push<bool>(treinoPreviaPath(treinoId));
-    if (mounted && iniciar == true) {
-      await context.push('/checkin/executar', extra: treinoId);
-    }
+    // A prévia abre a execução no lugar dela (ver meus_treinos_screen).
+    await context.push<bool>(treinoPreviaPath(treinoId));
     _abrindo = false;
     if (mounted) _recarregarDependentes();
   }
@@ -89,21 +105,29 @@ class _HistoricoDetalheScreenState
   @override
   Widget build(BuildContext context) {
     final s = S.of(context);
-    final detalheAsync = ref.watch(historicoDetalheProvider(widget.execucaoId));
+    final detalheAsync = ref.watch(_detalhe);
     final evolucao =
-        ref.watch(historicoEvolucaoProvider(widget.execucaoId)).value;
+        ref
+            .watch(
+              widget.doPersonal
+                  ? historicoEvolucaoPersonalProvider(widget.execucaoId)
+                  : historicoEvolucaoProvider(widget.execucaoId),
+            )
+            .value;
     final execucao = detalheAsync.value;
     final view =
         execucao == null
             ? null
             : buildHistoricoDetalheView(execucao, evolucao: evolucao);
+    // O personal não tem a Home do aluno: nada de "Treinar de novo".
     final noPlano =
-        ref
-            .watch(alunoDashboardHomeProvider)
-            .value
-            ?.treinos
-            .any((t) => t.treinoId == execucao?.treinoId) ??
-        false;
+        !widget.doPersonal &&
+        (ref
+                .watch(alunoDashboardHomeProvider)
+                .value
+                ?.treinos
+                .any((t) => t.treinoId == execucao?.treinoId) ??
+            false);
     final titulo = execucao?.treinoNome ?? s.historicoTitulo;
     final naoEncontrada =
         !detalheAsync.hasValue &&
@@ -165,7 +189,7 @@ class _HistoricoDetalheScreenState
         s.historicoTreinarDeNovo,
         () => _treinarDeNovo(execucao.treinoId),
       ),
-      (false, _) => (
+      (false, _) when !widget.doPersonal => (
         s.treinosContinuarCta,
         () => _continuar(execucao.treinoId),
       ),

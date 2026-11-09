@@ -102,6 +102,12 @@ class _EvolucaoMedidasAbaState extends State<EvolucaoMedidasAba> {
   @override
   Widget build(BuildContext context) {
     final medidas = widget.medidas.where(evolucaoMedidaTemConteudo).toList();
+    // Registros com "Está certo": o salto até eles não pede "Confira".
+    final conferidas = datasConferidas(
+      widget.medidas,
+      gordura: widget.gordura,
+      massa: widget.massa,
+    );
     final disponiveis = [
       for (final m in EvolucaoMetrica.values)
         if (_serie(medidas, m).isNotEmpty) m,
@@ -150,6 +156,7 @@ class _EvolucaoMedidasAbaState extends State<EvolucaoMedidasAba> {
           ...widget.topo,
           if (todos.length >= evolucaoPontosParaGrafico) ...[
             _BlocoDaSerie(
+              conferidas: conferidas,
               metrica: metrica,
               pontos: pontos,
               periodo: _periodo,
@@ -159,6 +166,7 @@ class _EvolucaoMedidasAbaState extends State<EvolucaoMedidasAba> {
             const SizedBox(height: TokensStrip.s3),
           ],
           _ListaDeMedidas(
+            conferidas: conferidas,
             metricas: disponiveis,
             selecionada: metrica,
             serieDe: (m) => _serie(medidas, m),
@@ -192,6 +200,7 @@ class _EvolucaoMedidasAbaState extends State<EvolucaoMedidasAba> {
 
 class _BlocoDaSerie extends StatelessWidget {
   const _BlocoDaSerie({
+    this.conferidas = const {},
     required this.metrica,
     required this.pontos,
     required this.periodo,
@@ -199,6 +208,7 @@ class _BlocoDaSerie extends StatelessWidget {
     this.alvo,
   });
 
+  final Set<String> conferidas;
   final EvolucaoMetrica metrica;
   final List<PontoGrafico> pontos;
   final EvolucaoPeriodo periodo;
@@ -237,7 +247,11 @@ class _BlocoDaSerie extends StatelessWidget {
                 unidade: metrica.unidade,
                 tendencia: tendencia,
                 alvo: alvo,
-                suspeitos: pontosSuspeitos(pontos, metrica.unidade),
+                suspeitos: pontosSuspeitos(
+                  pontos,
+                  metrica.unidade,
+                  conferidas: conferidas,
+                ),
                 resumo: resumoDaSerie(metrica, pontos),
               ),
             )
@@ -262,6 +276,7 @@ class _BlocoDaSerie extends StatelessWidget {
 /// Uma linha por medida, com divisor. Toque troca o gráfico.
 class _ListaDeMedidas extends StatelessWidget {
   const _ListaDeMedidas({
+    this.conferidas = const {},
     required this.metricas,
     required this.selecionada,
     required this.serieDe,
@@ -270,6 +285,7 @@ class _ListaDeMedidas extends StatelessWidget {
     required this.onConfira,
   });
 
+  final Set<String> conferidas;
   final List<EvolucaoMetrica> metricas;
   final EvolucaoMetrica selecionada;
   final List<PontoGrafico> Function(EvolucaoMetrica) serieDe;
@@ -299,7 +315,11 @@ class _ListaDeMedidas extends StatelessWidget {
               basePropria: series[m]!.first.data.isAfter(inicio),
               suspeita:
                   series[m]!.length >= 2 &&
-                  pontosSuspeitos(series[m]!, m.unidade).contains(series[m]!.length - 1),
+                  pontosSuspeitos(
+                    series[m]!,
+                    m.unidade,
+                    conferidas: conferidas,
+                  ).contains(series[m]!.length - 1),
               onTap: () => onSelecionar(m),
               onConfira: () => onConfira(series[m]!),
             ),

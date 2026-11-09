@@ -27,10 +27,10 @@ void main() {
         MedidaCorporal(id: 2, data: '2026-11-04', peso: 110),
         MedidaCorporal(id: 1, data: '2026-10-30', peso: 90),
       ],
-      gordura: [(data: '2026-10-30', valor: 20, avaliacaoId: 5)],
+      gordura: [(data: '2026-10-30', valor: 20, avaliacaoId: 5, conferido: false)],
       massa: [
-        (data: '2026-10-30', valor: 10, avaliacaoId: 5),
-        (data: '2026-11-06', valor: 80, avaliacaoId: 6),
+        (data: '2026-10-30', valor: 10, avaliacaoId: 5, conferido: false),
+        (data: '2026-11-06', valor: 80, avaliacaoId: 6, conferido: false),
       ],
     );
     expect(registros.map((r) => r.data), ['2026-11-06', '2026-11-04', '2026-10-30']);

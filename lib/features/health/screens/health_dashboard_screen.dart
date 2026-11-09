@@ -143,6 +143,29 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
       widget.clearHomeWidgetRecoveryScore?.call(steps: steps) ??
       HomeWidgetService.clearRecoveryScore(steps: steps);
 
+  static const _chaveImportacao = 'saude_historico_importado_em';
+
+  /// Lê os 14 dias anteriores no aparelho e manda os que faltam. Uma vez por
+  /// dia (a chave sai no logout); falha não atrapalha a tela.
+  Future<int> _importarHistoricoUmaVezPorDia() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final hoje = DateTime.now();
+      final marca = '${hoje.year}-${hoje.month}-${hoje.day}';
+      if (prefs.getString(_chaveImportacao) == marca) return 0;
+      final dias = <({DateTime dia, HealthSummary resumo})>[];
+      for (var i = 1; i <= 14; i++) {
+        final dia = DateTime(hoje.year, hoje.month, hoje.day - i);
+        dias.add((dia: dia, resumo: await HealthService.getResumoDoDia(dia)));
+      }
+      final criados = await _repo.importarDias(dias);
+      await prefs.setString(_chaveImportacao, marca);
+      return criados;
+    } catch (_) {
+      return 0;
+    }
+  }
+
   Future<void> _checkAuth() async {
     try {
       final auth = await _resolveCheckAuthorization();
@@ -207,6 +230,11 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
       String? soft;
       try {
         synced = await _resolveSyncToday(summary);
+        // Calibrando: manda os últimos 14 dias do aparelho e recalcula a nota.
+        if (synced.calibrando && widget.syncToday == null) {
+          final entrou = await _importarHistoricoUmaVezPorDia();
+          if (entrou > 0) synced = await _resolveSyncToday(summary);
+        }
         final score = synced.recoveryScore;
         if (score != null) {
           await _resolveUpdateHomeWidgetRecovery(

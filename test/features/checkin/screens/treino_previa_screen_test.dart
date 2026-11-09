@@ -79,19 +79,20 @@ void main() {
     expect(find.text('Treino A'), findsWidgets);
     expect(find.text('2 exercícios'), findsOneWidget);
     expect(find.text('Agachamento livre'), findsOneWidget);
-    expect(find.text('3 × 10–12 · 20 kg · descanso 60 s'), findsOneWidget);
+    expect(find.text('3 × 10–12 · 20 kg'), findsOneWidget);
     expect(
       find.text('Desça devagar, joelho alinhado com o pé.'),
       findsOneWidget,
     );
-    expect(find.text('Com vídeo'), findsOneWidget);
+    // Vídeo é o normal: a linha só fala quando falta ("Vídeo em breve").
+    expect(find.text('Com vídeo'), findsNothing);
     expect(find.text('Prancha'), findsOneWidget);
     expect(find.text('Iniciar treino'), findsOneWidget);
     expect(find.text('Já fiz este treino'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Iniciar fecha a prévia com true; nada é gravado aqui', (
+  testWidgets('Iniciar abre a execução no lugar da prévia; nada é gravado aqui', (
     tester,
   ) async {
     final repo = _FakeCheckinRepository();
@@ -100,7 +101,8 @@ void main() {
     await tester.tap(find.text('Iniciar treino'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 600));
-    expect(find.text('resultado true'), findsOneWidget);
+    expect(find.text('executar 1'), findsOneWidget);
+    expect(find.text('Iniciar treino'), findsNothing);
     expect(repo.confirmados, isEmpty);
   });
 
@@ -253,6 +255,10 @@ Future<void> _pump(
       GoRoute(
         path: '/checkin/treino/:id',
         builder: (context, state) => const TreinoPreviaScreen(treinoId: 1),
+      ),
+      GoRoute(
+        path: '/checkin/executar',
+        builder: (context, state) => Text('executar ${state.extra}'),
       ),
     ],
   );

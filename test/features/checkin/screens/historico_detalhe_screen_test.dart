@@ -85,13 +85,13 @@ class _FakeCheckinRepository implements CheckinRepository {
   final SessaoEvolucaoDto? evolucao;
 
   @override
-  Future<ExecucaoTreino> detalhe(int execucaoId) async {
+  Future<ExecucaoTreino> detalhe(int execucaoId, {bool doPersonal = false}) async {
     if (erro case final e?) throw e;
     return execucao ?? Completer<ExecucaoTreino>().future;
   }
 
   @override
-  Future<SessaoEvolucaoDto> evolucaoSessao(int execucaoId) async {
+  Future<SessaoEvolucaoDto> evolucaoSessao(int execucaoId, {bool doPersonal = false}) async {
     if (evolucao case final e?) return e;
     throw Exception('sem evolução');
   }

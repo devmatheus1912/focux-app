@@ -60,7 +60,11 @@ class EvolucaoScreen extends ConsumerStatefulWidget {
     required this.alunoId,
     required this.alunoNome,
     this.abaInicial = EvolucaoHubView.medidas,
+    this.dataDestaque,
   });
+
+  /// "aaaa-mm-dd" vindo da linha do tempo: abre o Histórico com ele marcado.
+  final String? dataDestaque;
 
   /// Aberta direto em uma aba, como Comparar a partir do 360.
   final EvolucaoHubView abaInicial;
@@ -71,6 +75,20 @@ class EvolucaoScreen extends ConsumerStatefulWidget {
 
 class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
   var _recolhido = false;
+
+  /// O Histórico com o registro da linha do tempo abre uma vez só.
+  var _destaqueAberto = false;
+
+  void _abrirDestaqueSePreciso(EvolucaoHomeBundle? home) {
+    final data = widget.dataDestaque;
+    if (_destaqueAberto || home == null || data == null || data.length < 10) {
+      return;
+    }
+    _destaqueAberto = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _conferir(home, {data.substring(0, 10)});
+    });
+  }
 
   /// Redesenha a folha do recorde quando a validação muda.
   VoidCallback? _avisarFormulario;
@@ -108,8 +126,36 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
       ),
       destaque: datas,
       podeAbrir: _podeAbrirRegistro,
+      onEstaCerto: () => _estaCerto(home, datas),
     );
     if (r != null && mounted) await _abrirRegistro(r);
+  }
+
+  /// "Está certo": confere o registro mais novo do par (medida e avaliação).
+  Future<void> _estaCerto(EvolucaoHomeBundle home, Set<String> datas) async {
+    if (datas.isEmpty) return;
+    final nova = (datas.toList()..sort()).last;
+    final api = ref.read(apiClientProvider);
+    final repo = EvolucaoRepository(api);
+    try {
+      for (final m in home.medidas) {
+        if (m.data.startsWith(nova) && m.conferidoEm == null) {
+          await repo.conferirMedida(widget.alunoId, m.id);
+        }
+      }
+      final avaliacoes = {
+        for (final p in [...home.gordura, ...home.massa])
+          if (p.data.startsWith(nova) && !p.conferido && p.avaliacaoId != null)
+            p.avaliacaoId!,
+      };
+      for (final id in avaliacoes) {
+        await repo.conferirAvaliacao(widget.alunoId, id);
+      }
+      await _atualizar();
+      if (mounted) FeedbackHelper.showSuccess(context, 'Conferido. O aviso saiu.');
+    } catch (e) {
+      if (mounted) FeedbackHelper.showError(context, friendlyError(e));
+    }
   }
 
   Future<void> _atualizar() async {
@@ -247,6 +293,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
     final homeAsync = ref.watch(evolucaoHomeProvider(widget.alunoId));
     if (homeAsync.hasValue) reportarTelaPronta();
     final home = homeAsync.value;
+    _abrirDestaqueSePreciso(home);
     final medidas = home?.medidas ?? const <MedidaCorporal>[];
     final recordes = home?.recordes ?? const <RecordePessoal>[];
     final metas = home?.metas ?? const <MetaCorporal>[];
@@ -394,6 +441,13 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                                         alunoId: widget.alunoId,
                                         alunoNome: nome,
                                         onConfira: (datas) => _conferir(home, datas),
+                                        conferidas: home == null
+                                            ? const {}
+                                            : datasConferidas(
+                                              home.medidas,
+                                              gordura: home.gordura,
+                                              massa: home.massa,
+                                            ),
                                       )
                                       : const SizedBox.shrink(),
                                 ],
@@ -436,6 +490,8 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
   Future<void> _registrarMedida() async {
     final bundle = ref.read(evolucaoHomeProvider(widget.alunoId)).value;
     NovaMedida? nova;
+    // "Salvar assim" numa medida improvável já grava como conferida.
+    var conferirAoSalvar = false;
     // "Corrigir" reabre a folha.
     while (true) {
       nova = await novaMedidaSheet(
@@ -474,7 +530,10 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
         cancelLabel: S.of(context).aluno360ConfirmeValoresCorrigir,
         icon: FxIcons.alerta,
       );
-      if (manter || !mounted) break;
+      if (manter || !mounted) {
+        conferirAoSalvar = manter;
+        break;
+      }
     }
     final m = nova;
     if (!mounted) return;
@@ -489,7 +548,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
     }
     final api = ref.read(apiClientProvider);
     try {
-      await EvolucaoRepository(api).adicionarMedida(
+      final salva = await EvolucaoRepository(api).adicionarMedida(
         widget.alunoId,
         data: m.data,
         peso: m.peso,
@@ -497,11 +556,14 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
         quadril: m.quadril,
         braco: m.braco,
       );
+      if (conferirAoSalvar) {
+        await EvolucaoRepository(api).conferirMedida(widget.alunoId, salva.id);
+      }
       // Medida já persistiu: a tela atualiza mesmo se a avaliação falhar.
       await invalidateAluno360Providers(ref, widget.alunoId);
       if (m.gordura != null || m.massa != null) {
         try {
-          await AvaliacaoRepository(api).registrar(widget.alunoId, {
+          final avaliacao = await AvaliacaoRepository(api).registrar(widget.alunoId, {
             if (m.peso != null) 'pesoKg': m.peso,
             if (m.cintura != null) 'cinturaCm': m.cintura,
             if (m.quadril != null) 'quadrilCm': m.quadril,
@@ -509,6 +571,12 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
             if (m.massa != null) 'percMassa': m.massa,
             'observacoes': 'Registrado via evolução (nova medida)',
           });
+          if (conferirAoSalvar) {
+            await EvolucaoRepository(api).conferirAvaliacao(
+              widget.alunoId,
+              avaliacao.id,
+            );
+          }
           await invalidateAluno360Providers(ref, widget.alunoId);
         } catch (avaliacaoErr) {
           if (mounted) {

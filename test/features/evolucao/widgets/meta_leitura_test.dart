@@ -30,7 +30,7 @@ void main() {
         const EvolucaoHomeBundle(
           medidas: [],
           recordes: [],
-          massa: [(data: '02/11', valor: 40, avaliacaoId: null)],
+          massa: [(data: '02/11', valor: 40, avaliacaoId: null, conferido: false)],
         ),
       )?.valor,
       40,

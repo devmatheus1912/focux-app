@@ -11,6 +11,9 @@ class MedidaCorporal {
 
   /// ALUNO ou PERSONAL. Nulo em medida antiga.
   final String? registradoPor;
+
+  /// O personal disse "Está certo" no Confira: o aviso some.
+  final String? conferidoEm;
   MedidaCorporal({
     required this.id,
     required this.data,
@@ -20,6 +23,7 @@ class MedidaCorporal {
     this.braco,
     this.fotoUrl,
     this.registradoPor,
+    this.conferidoEm,
   });
   factory MedidaCorporal.fromJson(Map<String, dynamic> j) => MedidaCorporal(
     id: (j['id'] as num?)?.toInt() ?? 0,
@@ -30,6 +34,7 @@ class MedidaCorporal {
     braco: (j['braco'] as num?)?.toDouble(),
     fotoUrl: j['fotoUrl'] as String?,
     registradoPor: j['registradoPor'] as String?,
+    conferidoEm: j['conferidoEm']?.toString(),
   );
 }
 
@@ -177,7 +182,7 @@ class EvolucaoAneis {
 /// Gordura por avaliação: medida não tem esse campo.
 /// Ponto de gordura ou massa magra. [avaliacaoId] diz de que avaliação veio,
 /// para corrigir pelo histórico; nulo com backend antigo.
-typedef PontoGordura = ({String data, double valor, int? avaliacaoId});
+typedef PontoGordura = ({String data, double valor, int? avaliacaoId, bool conferido});
 
 /// BFF `GET /api/alunos/{id}/evolucao/home`: tudo que a tela precisa.
 class EvolucaoHomeBundle {
@@ -225,6 +230,7 @@ class EvolucaoHomeBundle {
             data: _medidaDataString((item as Map)['data']),
             valor: (item['valor'] as num).toDouble(),
             avaliacaoId: (item['avaliacaoId'] as num?)?.toInt(),
+            conferido: item['conferido'] == true,
           ),
       ],
       massa: [
@@ -233,6 +239,7 @@ class EvolucaoHomeBundle {
             data: _medidaDataString((item as Map)['data']),
             valor: (item['valor'] as num).toDouble(),
             avaliacaoId: (item['avaliacaoId'] as num?)?.toInt(),
+            conferido: item['conferido'] == true,
           ),
       ],
       aneis:
@@ -407,6 +414,14 @@ class EvolucaoRepository {
     );
     return MedidaCorporal.fromJson(r.data);
   }
+
+  /// "Está certo" no Confira: a medida improvável é real.
+  Future<void> conferirMedida(int alunoId, int medidaId) =>
+      _dio.post('/api/alunos/$alunoId/medidas/$medidaId/conferir');
+
+  /// "Está certo" da gordura/massa (avaliação física).
+  Future<void> conferirAvaliacao(int alunoId, int avaliacaoId) =>
+      _dio.post('/api/alunos/$alunoId/avaliacoes/$avaliacaoId/conferir');
 
   Future<MedidaCorporal> adicionarMedida(
     int alunoId, {

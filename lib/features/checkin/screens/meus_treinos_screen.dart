@@ -78,19 +78,14 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
     if (mounted) invalidateAlunoDashboardHome(ref);
   }
 
-  /// A prévia fecha com `true` para iniciar: a execução abre daqui, e ao
-  /// concluir o aluno volta ao hub, não à prévia do treino que acabou de fazer.
+  /// A prévia abre a execução no lugar dela; ao concluir, o aluno volta ao
+  /// hub, não à prévia do treino que acabou de fazer.
   Future<void> _abrirPrevia(ExecucaoTreino treino) async {
     if (_abrindo) return;
     _abrindo = true;
-    final iniciar = await context.push<bool>(treinoPreviaPath(treino.treinoId));
+    await context.push<bool>(treinoPreviaPath(treino.treinoId));
     _abrindo = false;
-    if (!mounted) return;
-    if (iniciar == true) {
-      await _executar(treino);
-    } else {
-      invalidateAlunoDashboardHome(ref);
-    }
+    if (mounted) invalidateAlunoDashboardHome(ref);
   }
 
   void _abrirFicha(ExecucaoTreino treino) {

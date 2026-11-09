@@ -139,15 +139,25 @@ class CheckinRepository {
     );
   }
 
-  Future<ExecucaoTreino> detalhe(int execucaoId) async {
-    final r = await _dio.get('/api/checkin/$execucaoId');
+  /// [doPersonal]: leitura da sessão de um aluno da carteira (linha do tempo).
+  Future<ExecucaoTreino> detalhe(int execucaoId, {bool doPersonal = false}) async {
+    final r = await _dio.get(
+      doPersonal ? '/api/checkin/personal/$execucaoId' : '/api/checkin/$execucaoId',
+    );
     return ExecucaoTreino.fromJson(
       _requireJsonMap(r.data, 'GET /api/checkin/{id}'),
     );
   }
 
-  Future<SessaoEvolucaoDto> evolucaoSessao(int execucaoId) async {
-    final r = await _dio.get('/api/checkin/$execucaoId/evolucao-sessao');
+  Future<SessaoEvolucaoDto> evolucaoSessao(
+    int execucaoId, {
+    bool doPersonal = false,
+  }) async {
+    final r = await _dio.get(
+      doPersonal
+          ? '/api/checkin/personal/$execucaoId/evolucao-sessao'
+          : '/api/checkin/$execucaoId/evolucao-sessao',
+    );
     return SessaoEvolucaoDto.fromJson(
       _requireJsonMap(r.data, 'GET /api/checkin/{id}/evolucao-sessao'),
     );

@@ -31,7 +31,12 @@ List<String> medidasSuspeitas({
     'Gordura ${formatBrDecimal(gordura)}%',
   if (massaMagra != null && !medidaPlausivel(MedidaTipo.massaMagraPct, massaMagra))
     'Massa magra ${formatBrDecimal(massaMagra)}%',
+  // Gordura e massa magra não passam de 100% juntas (a massa magra aqui pode
+  // ser só a muscular, então somar menos de 100% é normal).
+  if (gordura != null && massaMagra != null && gordura + massaMagra > 105)
+    'Gordura e massa magra somam ${formatBrDecimal(gordura + massaMagra)}%',
 ];
+
 
 /// Quanto uma medida pode mudar de verdade entre dois registros, pela
 /// unidade: peso até 1,5 kg por dia, circunferência até 1 cm por dia e

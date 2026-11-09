@@ -11,7 +11,7 @@ class _RepoComServidor extends FakeCheckinRepo {
   int detalhes = 0;
 
   @override
-  Future<ExecucaoTreino> detalhe(int execucaoId) async {
+  Future<ExecucaoTreino> detalhe(int execucaoId, {bool doPersonal = false}) async {
     detalhes++;
     return ExecucaoTreino.fromJson({
       'id': execucaoId,

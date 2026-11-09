@@ -1,3 +1,4 @@
+import '../../treinos/utils/prescricao_serie.dart';
 import '../utils/checkin_json.dart';
 
 /// `GET /api/checkin/treinos/{treinoId}/previa`: prescrição sem abrir sessão.
@@ -39,6 +40,7 @@ class TreinoPreviaExercicio {
     this.gifUrl,
     this.temVideo = false,
     this.videoEmBreve = false,
+    this.seriesPrescritas = const [],
   });
 
   final int treinoExercicioId;
@@ -52,6 +54,9 @@ class TreinoPreviaExercicio {
   final String? gifUrl;
   final bool temVideo;
   final bool videoEmBreve;
+
+  /// Grupos de série prescritos (aquecimento, ajuste, válida, back-off).
+  final List<SeriePrescrita> seriesPrescritas;
 
   /// Miniatura estática antes do GIF (lista leve).
   String? get imagemUrl => thumbnailUrl ?? gifUrl;
@@ -69,5 +74,9 @@ class TreinoPreviaExercicio {
         gifUrl: checkinJsonString(j['gifUrl']),
         temVideo: checkinJsonBool(j['temVideo']),
         videoEmBreve: checkinJsonBool(j['videoEmBreve']),
+        seriesPrescritas: [
+          for (final l in (j['seriesPrescritas'] as List?) ?? const [])
+            if (checkinJsonMap(l) case final m?) SeriePrescrita.fromJson(m),
+        ],
       );
 }

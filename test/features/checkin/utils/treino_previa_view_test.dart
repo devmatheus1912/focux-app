@@ -109,7 +109,7 @@ void main() {
             descansoSegundos: 90,
           ),
         ),
-        '4 × 8 · 32,5 kg · descanso 90 s',
+        '4 × 8 · 32,5 kg',
       );
       expect(
         treinoPreviaPrescricao(

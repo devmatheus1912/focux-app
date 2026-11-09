@@ -30,6 +30,10 @@ class RecoverySnapshot {
   /// Sono presente e base ainda curta: sem nota, "calibrando".
   final bool calibrando;
 
+  /// Noites com sono na base e quantas a nota precisa ("2 de 5 noites").
+  final int noitesNaBase;
+  final int noitesParaCalibrar;
+
   /// Dados que entraram na nota: `sono`, `fcRepouso`, `hrv`.
   final List<String> insumos;
 
@@ -49,6 +53,8 @@ class RecoverySnapshot {
     this.restingHeartRate = 0,
     this.hrv = 0,
     this.calibrando = false,
+    this.noitesNaBase = 0,
+    this.noitesParaCalibrar = 5,
     this.insumos = const [],
     this.naoCompartilhado = false,
   });
@@ -69,6 +75,8 @@ class RecoverySnapshot {
     restingHeartRate: (json['restingHeartRate'] as num?)?.toDouble() ?? 0,
     hrv: (json['hrv'] as num?)?.toDouble() ?? 0,
     calibrando: json['calibrando'] as bool? ?? false,
+    noitesNaBase: (json['noitesNaBase'] as num?)?.toInt() ?? 0,
+    noitesParaCalibrar: (json['noitesParaCalibrar'] as num?)?.toInt() ?? 5,
     insumos: [
       for (final i in (json['insumos'] as List<dynamic>? ?? const []))
         i.toString(),
@@ -110,6 +118,31 @@ class HealthRepository {
       },
     );
     return RecoverySnapshot.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// Dias passados do aparelho (até 14): só entram os que faltam no servidor.
+  /// Devolve quantos entraram.
+  Future<int> importarDias(List<({DateTime dia, HealthSummary resumo})> dias) async {
+    String iso(DateTime d) =>
+        '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+    final response = await _dio.post(
+      '/api/aluno/saude/dias',
+      data: {
+        'dias': [
+          for (final d in dias)
+            {
+              'data': iso(d.dia),
+              'steps': d.resumo.steps,
+              'caloriesBurned': d.resumo.caloriesBurned,
+              'avgHeartRate': d.resumo.avgHeartRate,
+              'sleepHours': d.resumo.sleepHours,
+              'restingHeartRate': d.resumo.restingHeartRate,
+              'hrv': d.resumo.hrv,
+            },
+        ],
+      },
+    );
+    return ((response.data as Map<String, dynamic>?)?['criados'] as num?)?.toInt() ?? 0;
   }
 
   /// Últimos [dias] dias de prontidão (máximo 30), do mais antigo ao mais novo.

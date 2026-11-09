@@ -1,3 +1,5 @@
+import '../../treinos/utils/grupos_de_serie.dart';
+import '../../treinos/utils/prescricao_serie.dart';
 import '../models/checkin_execucao_models.dart';
 import 'package:flutter/painting.dart';
 
@@ -208,10 +210,41 @@ String checkinRestSemanticsLabel(
 }
 
 
-/// Rótulo do papel da próxima série; nulo para a série válida (a comum).
-String? checkinPapelDaSerie(S s, String? papel) => switch (papel?.toUpperCase()) {
-  'AQUECIMENTO' => s.checkinAquecimento,
-  'AJUSTE' => s.checkinAjusteSerie,
-  'BACKOFF' => s.checkinBackoffSerie,
-  _ => null,
-};
+/// Onde a série [numero] está no grupo dela: (papel, posição, total do papel).
+/// Nulo quando o exercício não tem grupos (só válidas): vale "Série n de m".
+({String papel, int posicao, int total})? checkinPosicaoNoGrupo(
+  List<SeriePrescrita> linhas,
+  int numero,
+) {
+  if (linhas.isEmpty) return null;
+  if (linhas.every((l) => l.papel == PapelDaSerie.valida)) return null;
+  final ordenadas = [...linhas]..sort((a, b) => a.numero.compareTo(b.numero));
+  final atual = ordenadas.where((l) => l.numero == numero).firstOrNull;
+  if (atual == null) return null;
+  final doPapel = ordenadas.where((l) => l.papel == atual.papel).toList();
+  return (
+    papel: atual.papel,
+    posicao: doPapel.indexOf(atual) + 1,
+    total: doPapel.length,
+  );
+}
+
+/// "Aquecimento 1 de 2", "Válida 2 de 3", "Back-off 1 de 2".
+String checkinRotuloDoGrupo(({String papel, int posicao, int total}) g) =>
+    '${PapelDaSerie.rotulo(g.papel)} ${g.posicao} de ${g.total}';
+
+
+/// "Depois": a próxima série do mesmo exercício quando ainda há grupo pela
+/// frente ("Depois: Válida 1 de 3 · 12-15"); senão o próximo exercício, com
+/// "(2ª vez)" quando ele tem o mesmo nome do atual.
+String checkinTextoDepois(S s, ExecucaoExercicio ee, String proximoNome) {
+  final proxima = ee.seriesFeitas + 2;
+  final grupo = checkinPosicaoNoGrupo(ee.seriesPrescritas, proxima);
+  final linha = ee.seriesPrescritas.where((l) => l.numero == proxima).firstOrNull;
+  if (grupo != null && linha != null) {
+    return s.checkinDepois('${checkinRotuloDoGrupo(grupo)} · ${linha.repeticoes}');
+  }
+  final mesmoNome =
+      proximoNome.trim().toLowerCase() == ee.exercicioNome.trim().toLowerCase();
+  return s.checkinDepois(mesmoNome ? '$proximoNome (2ª vez)' : proximoNome);
+}

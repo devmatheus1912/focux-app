@@ -46,8 +46,11 @@ void main() {
   }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
   testWidgets('Android usa o voltar preditivo', (tester) async {
+    // Embrulhado pelo fundo opaco da página (SPEC-transicao-cromo).
+    final b = fxPremiumPageTransitions.builders[TargetPlatform.android];
+    expect(b, isA<FxFundoOpacoTransitionsBuilder>());
     expect(
-      fxPremiumPageTransitions.builders[TargetPlatform.android],
+      (b! as FxFundoOpacoTransitionsBuilder).sistema,
       isA<PredictiveBackPageTransitionsBuilder>(),
     );
   });

@@ -180,7 +180,7 @@ class _Aluno360RecoveryInsightCardState
                           ] else ...[
                             Text(
                               snapshot.calibrando
-                                  ? 'Calibrando: a nota aparece em alguns dias'
+                                  ? 'Calibrando · ${snapshot.noitesNaBase} de ${snapshot.noitesParaCalibrar} noites'
                                   : 'Sem sono registrado hoje',
                               style: Aluno360Layout.metaStyle(
                                 context,

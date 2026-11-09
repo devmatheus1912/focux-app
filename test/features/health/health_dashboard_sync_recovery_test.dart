@@ -243,7 +243,7 @@ void main() {
     expect(passos, 5124);
   });
 
-  testWidgets('calibrando: sem número e com explicação', (tester) async {
+  testWidgets('calibrando: sem número, com quantas noites faltam', (tester) async {
     await abrir(
       tester,
       sync:
@@ -252,9 +252,12 @@ void main() {
             'sleepHours': 8,
             'calibrando': true,
             'insumos': ['sono'],
+            'noitesNaBase': 2,
+            'noitesParaCalibrar': 5,
           }),
     );
-    expect(find.text('Calibrando sua nota'), findsOneWidget);
+    expect(find.text('Calibrando sua nota · 2 de 5 noites'), findsOneWidget);
+    expect(find.byType(LinearProgressIndicator), findsWidgets);
     expect(find.text('Ver treino de hoje'), findsNothing);
     expect(find.text('Por quê?'), findsOneWidget);
   });

@@ -25,7 +25,11 @@ class GruposDeSerieEditor extends StatefulWidget {
     required this.sugerir,
     required this.onChanged,
     this.enabled = true,
+    this.onVerValidas,
   });
+
+  /// Toque em "Válidas": leva aos controles das válidas, no topo da folha.
+  final VoidCallback? onVerValidas;
 
   final List<GrupoDeSeries> antes;
   final List<GrupoDeSeries> depois;
@@ -70,6 +74,27 @@ class _GruposDeSerieEditorState extends State<GruposDeSerieEditor> {
     widget.onChanged(antes, depois);
   }
 
+  /// Troca o grupo com o vizinho do mesmo papel (dois ajustes, por exemplo).
+  /// A ordem entre papéis é fixa: aquecimento, ajuste, válidas, back-off.
+  void _mover(bool doLadoAntes, int i, int passo) {
+    final antes = [...widget.antes];
+    final depois = [...widget.depois];
+    final lista = doLadoAntes ? antes : depois;
+    final j = i + passo;
+    if (j < 0 || j >= lista.length || lista[j].papel != lista[i].papel) return;
+    HapticFeedback.selectionClick();
+    final g = lista.removeAt(i);
+    lista.insert(j, g);
+    setState(() => _aberto = (doLadoAntes, j));
+    widget.onChanged(antes, depois);
+  }
+
+  bool _temVizinho(bool lado, int i, int passo) {
+    final lista = lado ? widget.antes : widget.depois;
+    final j = i + passo;
+    return j >= 0 && j < lista.length && lista[j].papel == lista[i].papel;
+  }
+
   void _remover(bool doLadoAntes, int i) {
     HapticFeedback.selectionClick();
     final antes = [...widget.antes];
@@ -91,6 +116,8 @@ class _GruposDeSerieEditorState extends State<GruposDeSerieEditor> {
       ),
       onMudar: (novo) => _mudar(lado, i, novo),
       onRemover: () => _remover(lado, i),
+      onSubir: _temVizinho(lado, i, -1) ? () => _mover(lado, i, -1) : null,
+      onDescer: _temVizinho(lado, i, 1) ? () => _mover(lado, i, 1) : null,
     );
     final temGrupos = widget.antes.isNotEmpty || widget.depois.isNotEmpty;
     return FxSettingsGroup(
@@ -103,12 +130,35 @@ class _GruposDeSerieEditorState extends State<GruposDeSerieEditor> {
             children: [
               if (temGrupos) ...[
                 for (final (i, g) in widget.antes.indexed) linha(true, i, g),
-                // As válidas são os controles de cima; aqui só a posição delas.
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: TokensStrip.s2),
-                  child: Text(
-                    'Válidas · ${widget.resumoValidas}',
-                    style: FocuxHubTypography.cardTitle(color: chrome.ink),
+                // As válidas são os controles de cima: tocar leva até eles.
+                Semantics(
+                  button: widget.onVerValidas != null,
+                  label: 'Válidas, ${widget.resumoValidas}. Editar no topo',
+                  excludeSemantics: true,
+                  child: InkWell(
+                    onTap: widget.onVerValidas,
+                    borderRadius: BorderRadius.circular(TokensStrip.rSm),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(minHeight: 48),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'Válidas · ${widget.resumoValidas}',
+                              style: FocuxHubTypography.cardTitle(
+                                color: chrome.ink,
+                              ),
+                            ),
+                          ),
+                          if (widget.onVerValidas != null)
+                            Icon(
+                              FxIcons.chevronCima,
+                              size: 20,
+                              color: chrome.mute,
+                            ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
                 for (final (i, g) in widget.depois.indexed) linha(false, i, g),
@@ -153,7 +203,13 @@ class _LinhaDoGrupo extends StatelessWidget {
     required this.onAbrir,
     required this.onMudar,
     required this.onRemover,
+    this.onSubir,
+    this.onDescer,
   });
+
+  /// Setas só quando há outro grupo do mesmo papel ao lado.
+  final VoidCallback? onSubir;
+  final VoidCallback? onDescer;
 
   final GrupoDeSeries grupo;
   final bool aberto;
@@ -288,6 +344,27 @@ class _LinhaDoGrupo extends StatelessWidget {
                   },
                 ),
                 const SizedBox(height: TokensStrip.s1),
+                if (onSubir != null || onDescer != null)
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Ordem',
+                          style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: 'Subir',
+                        onPressed: enabled ? onSubir : null,
+                        icon: const Icon(FxIcons.chevronCima),
+                      ),
+                      IconButton(
+                        tooltip: 'Descer',
+                        onPressed: enabled ? onDescer : null,
+                        icon: const Icon(FxIcons.chevronBaixo),
+                      ),
+                    ],
+                  ),
                 Align(
                   alignment: AlignmentDirectional.centerStart,
                   child: FxActionLink(

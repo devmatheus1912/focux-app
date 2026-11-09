@@ -48,6 +48,7 @@ class SessionInvalidator {
     'saude_aviso_compartilhamento_visto',
     'saude_escolha_compartilhamento_feita',
     'saude_meta_passos',
+    'saude_historico_importado_em',
     'last_exercise_prescription_v1',
     'recent_exercise_order_v1',
     'recent_exercise_usage_v1',

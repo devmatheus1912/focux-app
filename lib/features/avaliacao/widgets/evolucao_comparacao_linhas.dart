@@ -17,7 +17,11 @@ class EvolucaoComparacaoLinhas extends StatelessWidget {
     required this.primeira,
     required this.atual,
     this.onConfira,
+    this.conferidas = const {},
   });
+
+  /// Datas com registro conferido: o salto até elas não pede "Confira".
+  final Set<String> conferidas;
 
   final SnapshotAvaliacao primeira;
   final SnapshotAvaliacao atual;
@@ -50,7 +54,14 @@ class EvolucaoComparacaoLinhas extends StatelessWidget {
                 if (i > 0) Divider(height: 1, color: ShellChrome.of(context).line),
                 _Linha(
                   metrica: m,
-                  suspeita: evolucaoComparativoSuspeita(m, dias),
+                  suspeita:
+                      evolucaoComparativoSuspeita(m, dias) &&
+                      !conferidas.contains(
+                        (atual.avaliadoEm ?? '').length >= 10
+                            ? atual.avaliadoEm!.substring(0, 10)
+                            : '',
+                      ),
+                  dias: dias,
                   onConfira:
                       onConfira == null
                           ? null
@@ -136,7 +147,15 @@ class _Composicao extends StatelessWidget {
 /// Nome, "90,0 → 105,0 kg" e a diferença à direita. Sem cor: subir ou descer
 /// depende do objetivo.
 class _Linha extends StatelessWidget {
-  const _Linha({required this.metrica, this.suspeita = false, this.onConfira});
+  const _Linha({
+    required this.metrica,
+    this.suspeita = false,
+    this.onConfira,
+    this.dias,
+  });
+
+  /// Dias entre os dois registros: o motivo do "Confira" ("em 9 dias").
+  final int? dias;
 
   final EvolucaoComparativoMetrica metrica;
   final VoidCallback? onConfira;
@@ -179,8 +198,10 @@ class _Linha extends StatelessWidget {
               ),
             ),
             if (temDois)
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
+              // Diferença e "Confira" na mesma linha: a linha fica da altura
+              // das outras; o motivo ("em 9 dias") vem no "Confira".
+              Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     evolucaoComparativoDiferenca(metrica),
@@ -189,22 +210,31 @@ class _Linha extends StatelessWidget {
                       fontSize: TokensStrip.fontBody,
                     ).copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
                   ),
-                  if (suspeita)
+                  if (suspeita) ...[
+                    const SizedBox(width: TokensStrip.s2),
                     InkWell(
                       onTap: onConfira,
                       borderRadius: BorderRadius.circular(TokensStrip.s2),
                       child: ConstrainedBox(
-                        constraints: BoxConstraints(minHeight: onConfira == null ? 0 : 44),
+                        constraints: BoxConstraints(
+                          minHeight: onConfira == null ? 0 : 44,
+                        ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(FxIcons.alertaPequeno, size: 14, color: alerta),
                             const SizedBox(width: 2),
-                            Text(ptS.comparacaoConfira, style: FocuxHubTypography.chip(alerta)),
+                            Text(
+                              dias == null
+                                  ? ptS.comparacaoConfira
+                                  : '${ptS.comparacaoConfira} · ${dias! <= 0 ? 'mesmo dia' : '$dias d'}',
+                              style: FocuxHubTypography.chip(alerta),
+                            ),
                           ],
                         ),
                       ),
                     ),
+                  ],
                 ],
               ),
           ],

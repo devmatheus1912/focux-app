@@ -35,10 +35,14 @@ class EvolucaoComparativoScreen extends ConsumerStatefulWidget {
     required this.alunoId,
     this.alunoNome = 'Aluno',
     this.onConfira,
+    this.conferidas = const {},
   });
 
   /// "Confira" numa linha: as datas comparadas, para abrir o registro.
   final ValueChanged<Set<String>>? onConfira;
+
+  /// Datas com registro conferido ("Está certo"): sem "Confira".
+  final Set<String> conferidas;
   @override
   ConsumerState<EvolucaoComparativoScreen> createState() =>
       _EvolucaoComparativoScreenState();
@@ -336,6 +340,7 @@ class _EvolucaoComparativoScreenState
             primeira: c.primeira,
             atual: c.atual,
             onConfira: widget.onConfira,
+            conferidas: widget.conferidas,
           ),
         ],
       ),

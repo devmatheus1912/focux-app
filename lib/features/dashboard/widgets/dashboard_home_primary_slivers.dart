@@ -1,3 +1,7 @@
+import '../../../core/widgets/fx_action_link.dart';
+import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/theme/tokens_strip.dart';
+import '../../../core/theme/fx_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -48,7 +52,6 @@ List<Widget> buildDashboardHomePrimarySlivers({
     onProfileTap: () => context.push('/perfil'),
     notificacoesCountOverride: notificacoesNaoLidasOverride,
     onQuickSearch: onQuickSearch,
-    onHelp: onHelp,
     freshnessLabel: hojeLinhaUtil(
       atendimentos: commandCenter.agendaHojeCount,
       freshness: freshnessLabel,
@@ -111,5 +114,25 @@ List<Widget> buildDashboardHomePrimarySlivers({
       ),
     ),
     const SliverToBoxAdapter(child: HojeFerramentasLinha()),
+    // A ajuda saiu do topo (três botões cabem com o nome em 22).
+    if (onHelp != null)
+      SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            FxSettingsLayout.pageInset,
+            TokensStrip.s2,
+            FxSettingsLayout.pageInset,
+            TokensStrip.s4,
+          ),
+          child: Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: FxActionLink(
+              label: 'Como usar a Hoje',
+              icon: FxIcons.ajuda,
+              onTap: onHelp,
+            ),
+          ),
+        ),
+      ),
   ];
 }

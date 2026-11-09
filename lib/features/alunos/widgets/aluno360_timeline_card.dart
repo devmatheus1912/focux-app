@@ -52,28 +52,28 @@ class Aluno360TimelineCard extends StatelessWidget {
         break;
       case 'CHECKIN':
         icon = FxIcons.treino;
-        color = EagleTokens.good;
+        color = TokensStrip.textSecondary;
         kind = 'Check-in';
         break;
       case 'MEDIDA':
         icon = FxIcons.fitaMetrica;
-        color = EagleTokens.purple;
+        color = TokensStrip.textSecondary;
         kind = 'Medida';
         break;
       case 'AUTONOMIA':
         icon = FxIcons.toque;
-        color = EagleTokens.warn;
+        color = TokensStrip.textSecondary;
         kind = 'Autonomia';
         break;
       case 'FINANCEIRO':
         icon = FxIcons.pagamento;
-        color = EagleTokens.bad;
+        color = TokensStrip.textSecondary;
         kind = 'Financeiro';
         break;
       default:
         if (tipo.startsWith('CHAT_')) {
           icon = FxIcons.chat;
-          color = primary;
+          color = TokensStrip.textSecondary;
           kind = 'Chat';
         } else {
           icon = FxIcons.raio;
@@ -187,7 +187,7 @@ class Aluno360TimelineCard extends StatelessWidget {
 
     return Semantics(
       container: true,
-      label: 'Linha do tempo, últimos sinais do aluno',
+      label: 'Linha do tempo, últimos registros do aluno',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -271,7 +271,7 @@ class Aluno360TimelineCard extends StatelessWidget {
             Align(
               alignment: Alignment.centerLeft,
               child: FxActionLink(
-                label: 'Ver todos os ${allItems.length} sinais',
+                label: 'Ver todos os ${allItems.length} registros',
                 onTap: () => _showFullTimeline(context, primary),
               ),
             ),

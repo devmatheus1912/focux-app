@@ -304,12 +304,30 @@ List<String> variacoesSuspeitas({
 
 /// Índices dos pontos que mudaram demais desde o anterior, pela mesma regra
 /// do "Confira" ([variacaoSuspeita]). [pontos] em ordem de data.
-Set<int> pontosSuspeitos(List<PontoGrafico> pontos, String unidade) => {
+Set<int> pontosSuspeitos(
+  List<PontoGrafico> pontos,
+  String unidade, {
+  Set<String> conferidas = const {},
+}) => {
   for (var i = 1; i < pontos.length; i++)
-    if (variacaoSuspeita(
+    if (!conferidas.contains(pontos[i].data.toIso8601String().substring(0, 10)) &&
+        variacaoSuspeita(
       unidade,
       pontos[i].valor - pontos[i - 1].valor,
       pontos[i].data.difference(pontos[i - 1].data).inDays.abs(),
     ))
       i,
+};
+
+/// Datas (aaaa-mm-dd) com registro conferido pelo personal ("Está certo"):
+/// o salto até elas não pede mais "Confira".
+Set<String> datasConferidas(
+  List<MedidaCorporal> medidas, {
+  List<PontoGordura> gordura = const [],
+  List<PontoGordura> massa = const [],
+}) => {
+  for (final m in medidas)
+    if (m.conferidoEm != null && m.data.length >= 10) m.data.substring(0, 10),
+  for (final p in [...gordura, ...massa])
+    if (p.conferido && p.data.length >= 10) p.data.substring(0, 10),
 };

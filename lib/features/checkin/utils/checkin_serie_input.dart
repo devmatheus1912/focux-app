@@ -4,6 +4,7 @@
 /// The student logs the actual reps performed (integer count).
 library;
 
+import '../../treinos/utils/grupos_de_serie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../l10n/app_localizations.dart';
@@ -68,7 +69,20 @@ CheckinCurrentSetSeed checkinCurrentSetSeed({
     return null;
   }
 
-  final previous = byNumero(ee.seriesAnteriores, numero);
+  // A última sessão só vale quando o desenho das séries é o mesmo (a série de
+  // mesmo número tem o mesmo papel). Aquecimento e ajuste nunca herdam carga
+  // de válida: com grupos novos, a prescrição da série vale.
+  final linhas = ee.seriesPrescritas;
+  final papel = linhas.where((l) => l.numero == numero).firstOrNull?.papel;
+  final mesmoDesenho =
+      linhas.isEmpty || ee.seriesAnteriores.length == linhas.length;
+  final previous = mesmoDesenho ? byNumero(ee.seriesAnteriores, numero) : null;
+  if (papel != null && !PapelDaSerie.conta(papel) && !mesmoDesenho) {
+    final reps = int.tryParse(
+      checkinFirstRepsToken(ee.proximaRepeticoes ?? ee.repeticoes) ?? '',
+    );
+    return CheckinCurrentSetSeed(cargaKg: ee.proximaCargaKg, reps: reps);
+  }
   if (previous != null &&
       (previous.cargaKg != null ||
           (previous.repeticoes != null &&

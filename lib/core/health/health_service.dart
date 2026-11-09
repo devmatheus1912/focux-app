@@ -122,14 +122,46 @@ class HealthService {
   static Future<HealthSummary> getTodaySummary() async {
     final now = DateTime.now();
     final midnight = DateTime(now.year, now.month, now.day);
+    return _resumo(
+      inicio: midnight,
+      fim: now,
+      fimDoSono: now,
+      steps: await getTodaySteps(),
+    );
+  }
 
-    final dia = await getHealthData(start: midnight, end: now);
+  /// Resumo de um dia passado ([dia] à meia-noite): o dia inteiro e a noite que
+  /// terminou nele (18h da véspera até o meio-dia). Usado para a linha de base
+  /// da nota começar calibrada (SPEC-saude-calibrando).
+  static Future<HealthSummary> getResumoDoDia(DateTime dia) async {
+    final inicio = DateTime(dia.year, dia.month, dia.day);
+    final fim = inicio.add(const Duration(days: 1));
+    int steps = 0;
+    try {
+      await _ensureConfigured();
+      steps = await _health.getTotalStepsInInterval(inicio, fim) ?? 0;
+    } catch (_) {}
+    return _resumo(
+      inicio: inicio,
+      fim: fim,
+      fimDoSono: inicio.add(const Duration(hours: 12)),
+      steps: steps,
+    );
+  }
+
+  static Future<HealthSummary> _resumo({
+    required DateTime inicio,
+    required DateTime fim,
+    required DateTime fimDoSono,
+    required int steps,
+  }) async {
+    final now = inicio;
+    final dia = await getHealthData(start: inicio, end: fim);
     final noite = await getHealthData(
       start: inicioDaJanelaDeSono(now),
-      end: now,
+      end: fimDoSono,
       types: tiposDeSonoDormido,
     );
-    final steps = await getTodaySteps();
 
     double calories = 0;
     double avgHeartRate = 0;

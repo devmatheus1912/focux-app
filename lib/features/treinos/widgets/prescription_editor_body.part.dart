@@ -121,6 +121,7 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
       ],
       // O objetivo é da sessão (cabeçalho do editor); aqui, só os números.
       FxSettingsGroup(
+        key: widget.validasKey,
         accent: widget.primary,
         children: [
           _PrescriptionStepperRow(
@@ -276,7 +277,8 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
               line: line,
               showDivider: true,
               chips: FxQuickChips<int>(
-                itens: const [6, 7, 8, 9],
+                // 10 = falha (back-off, método de intensidade).
+                itens: const [6, 7, 8, 9, 10],
                 selecionado: int.tryParse(widget.rpeAlvoCtrl!.text.trim()),
                 outroRotulo: prescriptionSemRpe,
                 outroSelecionado: widget.rpeAlvoCtrl!.text.trim().isEmpty,

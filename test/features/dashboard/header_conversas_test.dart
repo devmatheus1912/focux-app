@@ -34,7 +34,6 @@ Future<void> _abrir(
             isDark: false,
             primary: EagleTokens.brandAccent,
             onProfileTap: () {},
-            onHelp: () {},
             onQuickSearch: () {},
             onConversas: onConversas,
             conversasCount: conversas,

@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 
 import '../utils/motion_preferences.dart';
+import '../widgets/fx_fundo_da_pagina.dart';
 
 Page<T> fxTransitionPage<T>({
   required GoRouterState state,
@@ -15,13 +16,14 @@ Page<T> fxTransitionPage<T>({
     return CupertinoPage<T>(
       key: state.pageKey,
       name: state.name ?? state.path,
-      child: child,
+      // A página Cupertino não passa pelo tema: o fundo opaco entra aqui.
+      child: FxFundoDaPagina(child: child),
     );
   }
   return CustomTransitionPage<T>(
     key: state.pageKey,
     name: state.name ?? state.path,
-    child: child,
+    child: FxFundoDaPagina(child: child),
     transitionDuration: const Duration(milliseconds: 320),
     reverseTransitionDuration: const Duration(milliseconds: 260),
     transitionsBuilder: (context, animation, secondaryAnimation, child) {

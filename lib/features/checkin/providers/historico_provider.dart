@@ -48,6 +48,23 @@ final historicoEvolucaoProvider = FutureProvider.autoDispose
       }
     });
 
+/// A mesma sessão lida pelo personal (linha do tempo do 360).
+final historicoDetalhePersonalProvider = FutureProvider.autoDispose
+    .family<ExecucaoTreino, int>(
+      (ref, id) => ref.read(checkinRepositoryProvider).detalhe(id, doPersonal: true),
+    );
+
+final historicoEvolucaoPersonalProvider = FutureProvider.autoDispose
+    .family<SessaoEvolucaoDto?, int>((ref, id) async {
+      try {
+        return await ref
+            .read(checkinRepositoryProvider)
+            .evolucaoSessao(id, doPersonal: true);
+      } catch (_) {
+        return null;
+      }
+    });
+
 /// Sessões concluídas; `null` = todas as fichas.
 final historicoListaProvider = AsyncNotifierProvider.autoDispose
     .family<HistoricoListaNotifier, HistoricoLista, int?>(

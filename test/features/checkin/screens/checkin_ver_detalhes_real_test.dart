@@ -14,7 +14,7 @@ class _RepoComDetalhe extends FakeCheckinRepo {
   _RepoComDetalhe() : super(feitas: [3, 3]);
 
   @override
-  Future<ExecucaoTreino> detalhe(int execucaoId) async {
+  Future<ExecucaoTreino> detalhe(int execucaoId, {bool doPersonal = false}) async {
     // Antes de concluir, a execução pede o detalhe como o harness padrão.
     if (concluidos == 0) return super.detalhe(execucaoId);
     return _concluida(execucaoId);
@@ -43,7 +43,7 @@ class _RepoComDetalhe extends FakeCheckinRepo {
   });
 
   @override
-  Future<SessaoEvolucaoDto> evolucaoSessao(int execucaoId) async =>
+  Future<SessaoEvolucaoDto> evolucaoSessao(int execucaoId, {bool doPersonal = false}) async =>
       SessaoEvolucaoDto.fromJson({'execucaoId': execucaoId});
 }
 

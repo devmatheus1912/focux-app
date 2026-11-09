@@ -38,6 +38,9 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
   bool _saving = false;
   bool _aplicarAoBloco = false;
 
+  /// Controles das válidas: a linha "Válidas" dos grupos rola até eles.
+  final _validasKey = GlobalKey();
+
   /// Aquecimento e ajuste (antes das válidas) e back-off (depois).
   late List<GrupoDeSeries> _antes;
   late List<GrupoDeSeries> _depois;
@@ -299,7 +302,17 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
       nomesNoBloco: [
         for (final o in widget.outrosNoBloco) o.exercicio.nomeDisplay,
       ],
+      validasKey: _validasKey,
       gruposDeSerie: GruposDeSerieEditor(
+        onVerValidas: () {
+          final alvo = _validasKey.currentContext;
+          if (alvo == null) return;
+          Scrollable.ensureVisible(
+            alvo,
+            duration: const Duration(milliseconds: 260),
+            curve: Curves.easeOutCubic,
+          );
+        },
         antes: _antes,
         depois: _depois,
         enabled: !busy,

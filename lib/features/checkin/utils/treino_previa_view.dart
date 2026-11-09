@@ -1,3 +1,4 @@
+import '../../treinos/utils/grupos_de_serie.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../dashboard/utils/aluno_home_texts.dart';
 import '../../treinos/utils/treino_atribuicao_prazo.dart';
@@ -61,14 +62,19 @@ String treinoPreviaCabecalho(S s, TreinoPrevia p, {required DateTime hoje}) {
   ].join(' · ');
 }
 
-/// "3 × 10–12 · 20 kg · descanso 60 s"; só o que o personal prescreveu.
+/// "3 × 10–12 · 20 kg"; com grupos, o mesmo resumo do editor ("2 aquec. ·
+/// 3 × 12-15 · 2 back-off"). O descanso fica para a execução.
 String treinoPreviaPrescricao(S s, TreinoPreviaExercicio e) {
+  final grupos = e.seriesPrescritas.isEmpty
+      ? null
+      : resumoDosGrupos(e.seriesPrescritas);
+  if (grupos != null) {
+    return grupos.replaceAll(RegExp(r' · \d+ s(?= ·|$)'), '');
+  }
   final carga = e.cargaKg;
-  final descanso = e.descansoSegundos;
   return [
     if (e.series != null || (e.repeticoes?.trim().isNotEmpty ?? false))
       checkinSeriesRepsLabel(e.series, e.repeticoes),
     if (carga != null && carga > 0) checkinCargaLabel(carga)!,
-    if (descanso != null && descanso > 0) s.treinoPreviaDescanso(descanso),
   ].join(' · ');
 }

@@ -1,3 +1,4 @@
+import '../../../core/theme/tokens_strip.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/shell_chrome.dart';
@@ -30,7 +31,6 @@ class DashboardHomeHeader extends StatelessWidget {
     required this.onProfileTap,
     this.notificacoesCountOverride,
     this.onQuickSearch,
-    this.onHelp,
     this.freshnessLabel,
     this.onConversas,
     this.conversasCount = 0,
@@ -43,7 +43,6 @@ class DashboardHomeHeader extends StatelessWidget {
   final VoidCallback onProfileTap;
   final int? notificacoesCountOverride;
   final VoidCallback? onQuickSearch;
-  final VoidCallback? onHelp;
   final String? freshnessLabel;
 
   /// Abre a caixa de entrada; o selo mostra as conversas sem resposta.
@@ -65,6 +64,16 @@ class DashboardHomeHeader extends StatelessWidget {
             : fxTitleCaseName(fullName);
     final width = MediaQuery.sizeOf(context).width;
     final compactChrome = DashboardLayout.isCompact(width);
+    // Ajuda fica no fim da Hoje ("Como usar a Hoje"): três botões no topo.
+    final botoes = _HeaderChromeCluster(
+      // <360: busca cai (catálogo/tools cobrem).
+      onQuickSearch: compactChrome ? null : onQuickSearch,
+      notificacoesCountOverride: notificacoesCountOverride,
+      onConversas: onConversas,
+      conversasCount: conversasCount,
+    );
+    // Letra do sistema acima de 1,3: os botões descem para a linha de baixo.
+    final letraGrande = MediaQuery.textScalerOf(context).scale(10) > 13;
     final freshness =
         (freshnessLabel != null && freshnessLabel!.isNotEmpty)
             ? freshnessLabel!
@@ -82,79 +91,73 @@ class DashboardHomeHeader extends StatelessWidget {
           data: fxTemaSobreMarca(context, accent: primary),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(12, 11, 10, 11),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Semantics(
-                  button: true,
-                  label: '$a11yName. Abrir perfil',
-                  child: Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      DashboardHeaderProfileAvatar(
-                        primary: primary,
-                        isDark: isDark,
-                        photoUrl: logoUrl,
-                        initials: fxInitials(nomePersonal ?? 'F'),
-                        size: 44,
-                        onTap: onProfileTap,
-                      ),
-                      Positioned(
-                        right: 0,
-                        bottom: 0,
-                        child: Container(
-                          width: 10,
-                          height: 10,
-                          decoration: BoxDecoration(
-                            color: sobre.ink,
-                            shape: BoxShape.circle,
+            child: _ComBotoesEmbaixo(
+              mostrar: letraGrande,
+              botoes: botoes,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Semantics(
+                    button: true,
+                    label: '$a11yName. Abrir perfil',
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        DashboardHeaderProfileAvatar(
+                          primary: primary,
+                          isDark: isDark,
+                          photoUrl: logoUrl,
+                          initials: fxInitials(nomePersonal ?? 'F'),
+                          size: 44,
+                          onTap: onProfileTap,
+                        ),
+                        Positioned(
+                          right: 0,
+                          bottom: 0,
+                          child: Container(
+                            width: 10,
+                            height: 10,
+                            decoration: BoxDecoration(
+                              color: sobre.ink,
+                              shape: BoxShape.circle,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'Olá, $firstName',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: dashboardPageTitleStyle(
-                          context,
-                          color: sobre.ink,
-                        ).copyWith(fontWeight: FontWeight.w700, height: 1.12),
-                      ),
-                      const SizedBox(height: 2),
-                      Semantics(
-                        liveRegion: true,
-                        child: Text(
-                          freshness,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: dashboardCardSubtitleStyle(
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _Saudacao(
+                          texto: 'Olá, $firstName',
+                          estilo: dashboardPageTitleStyle(
                             context,
-                            isDark: isDark,
-                          ).copyWith(color: mute, height: 1.2),
+                            color: sobre.ink,
+                          ).copyWith(fontWeight: FontWeight.w700, height: 1.12),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 2),
+                        Semantics(
+                          liveRegion: true,
+                          child: Text(
+                            freshness,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: dashboardCardSubtitleStyle(
+                              context,
+                              isDark: isDark,
+                            ).copyWith(color: mute, height: 1.2),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(width: 4),
-                _HeaderChromeCluster(
-                  // <360: busca cai (catálogo/tools cobrem).
-                  onQuickSearch: compactChrome ? null : onQuickSearch,
-                  onHelp: onHelp,
-                  notificacoesCountOverride: notificacoesCountOverride,
-                  onConversas: onConversas,
-                  conversasCount: conversasCount,
-                ),
-              ],
+                  if (!letraGrande) ...[const SizedBox(width: 4), botoes],
+                ],
+              ),
             ),
           ),
         ),
@@ -166,7 +169,6 @@ class DashboardHomeHeader extends StatelessWidget {
 class _HeaderChromeCluster extends StatelessWidget {
   const _HeaderChromeCluster({
     this.onQuickSearch,
-    this.onHelp,
     this.notificacoesCountOverride,
     this.onConversas,
     this.conversasCount = 0,
@@ -175,7 +177,6 @@ class _HeaderChromeCluster extends StatelessWidget {
   final VoidCallback? onConversas;
   final int conversasCount;
   final VoidCallback? onQuickSearch;
-  final VoidCallback? onHelp;
   final int? notificacoesCountOverride;
 
   @override
@@ -194,14 +195,6 @@ class _HeaderChromeCluster extends StatelessWidget {
           ),
           const SizedBox(width: gap),
         ],
-        if (onHelp != null) ...[
-          FxHelpIconButton(
-            size: size,
-            tooltip: DashboardMicrocopy.helpHomeOpen,
-            onTap: onHelp!,
-          ),
-          const SizedBox(width: gap),
-        ],
         if (onConversas != null) ...[
           ShellHeaderIconButton(
             icon: FxIcons.chat,
@@ -216,6 +209,70 @@ class _HeaderChromeCluster extends StatelessWidget {
           size: size,
           countOverride: notificacoesCountOverride,
         ),
+      ],
+    );
+  }
+}
+
+/// "Olá, Nome" em 22; se não couber, diminui até 17 antes de cortar.
+class _Saudacao extends StatelessWidget {
+  const _Saudacao({required this.texto, required this.estilo});
+
+  final String texto;
+  final TextStyle estilo;
+
+  static const _minimo = TokensStrip.fontSecao;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, c) {
+        final base = estilo.fontSize ?? TokensStrip.fontTitulo;
+        final pintor = TextPainter(
+          text: TextSpan(text: texto, style: estilo),
+          maxLines: 1,
+          textDirection: Directionality.of(context),
+          textScaler: MediaQuery.textScalerOf(context),
+        )..layout();
+        final largura = pintor.width;
+        pintor.dispose();
+        final tamanho =
+            largura <= c.maxWidth || largura == 0
+                ? base
+                : (base * c.maxWidth / largura).clamp(_minimo, base);
+        return Text(
+          texto,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: estilo.copyWith(fontSize: tamanho.toDouble()),
+        );
+      },
+    );
+  }
+}
+
+/// Com letra grande do sistema, os botões do topo ficam numa linha embaixo.
+class _ComBotoesEmbaixo extends StatelessWidget {
+  const _ComBotoesEmbaixo({
+    required this.mostrar,
+    required this.botoes,
+    required this.child,
+  });
+
+  final bool mostrar;
+  final Widget botoes;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!mostrar) return child;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        child,
+        const SizedBox(height: TokensStrip.s2),
+        Align(alignment: AlignmentDirectional.centerEnd, child: botoes),
       ],
     );
   }

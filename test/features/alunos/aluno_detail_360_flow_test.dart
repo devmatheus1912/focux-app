@@ -86,7 +86,7 @@ void main() {
     await tester.pump();
 
     expect(find.text('Histórico'), findsOneWidget);
-    expect(find.text('12 sinais'), findsOneWidget);
+    expect(find.text('12 registros'), findsOneWidget);
     // Label de lista para CHECKIN é canônico — não o título cru do fixture.
     expect(find.text('Check-in concluído'), findsWidgets);
     expect(find.text('Treino concluído'), findsWidgets);

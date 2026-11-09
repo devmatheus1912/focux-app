@@ -52,10 +52,12 @@ class ProntidaoCard extends StatelessWidget {
         titulo = recovery!.recoveryLabel;
         texto = '${recovery!.recoveryHint}\n${dicaDoTreino(score!)}';
       case ProntidaoEstado.calibrando:
-        titulo = 'Calibrando sua nota';
+        final feitas = recovery?.noitesNaBase ?? 0;
+        final total = recovery?.noitesParaCalibrar ?? 5;
+        titulo = 'Calibrando sua nota · $feitas de $total noites';
         texto =
-            'Com alguns dias de sono registrado, a nota aparece e passa a '
-            'comparar você com a sua própria média.';
+            'A nota compara a sua noite com as suas últimas noites. Com '
+            '$total noites registradas ela aparece.';
       case ProntidaoEstado.indisponivel:
         titulo = 'Prontidão indisponível';
         texto =
@@ -154,6 +156,21 @@ class ProntidaoCard extends StatelessWidget {
                   ),
                 ],
               ),
+              if (estado == ProntidaoEstado.calibrando) ...[
+                const SizedBox(height: TokensStrip.s2),
+                // Quantas noites a base já tem.
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(TokensStrip.rPill),
+                  child: LinearProgressIndicator(
+                    value: ((recovery?.noitesNaBase ?? 0) /
+                            (recovery?.noitesParaCalibrar ?? 5))
+                        .clamp(0.0, 1.0),
+                    minHeight: 6,
+                    color: marca.sobre,
+                    backgroundColor: marca.sobre.withValues(alpha: 0.24),
+                  ),
+                ),
+              ],
               const SizedBox(height: TokensStrip.s2),
               _BotaoDoCard(rotulo: rotulo, icone: icone, cheio: true, marca: marca, onTap: acao),
             ],

@@ -1,4 +1,5 @@
 
+import '../../../core/router/app_router_redirect.dart';
 import '../../chat/data/chat_text_formatter.dart';
 import 'aluno360_copilot_logic.dart';
 import 'aluno360_medida_plausivel.dart';
@@ -581,5 +582,26 @@ String resolveTimeline360DeepLinkForPersonal({
   if (raw == '/checkin/treinos' || raw.startsWith('/checkin/')) {
     return '/alunos/$alunoId/rotina';
   }
+  // Nunca uma tela do app do aluno (abriria outra coisa para o personal).
+  final caminho = Uri.tryParse(raw)?.path ?? raw;
+  if (isAlunoOnlyLocation(caminho)) return '';
   return raw;
+}
+
+/// "Meta concluída" e a medida que a concluiu viram uma linha só (a da meta).
+List<T> juntarMetaEMedida<T>(
+  List<T> itens, {
+  required String Function(T) kindOf,
+  required DateTime? Function(T) atOf,
+}) {
+  String? minuto(DateTime? d) =>
+      d == null ? null : '${d.year}-${d.month}-${d.day} ${d.hour}:${d.minute}';
+  final metas = {
+    for (final i in itens)
+      if (kindOf(i) == 'META') minuto(atOf(i)),
+  }..remove(null);
+  return [
+    for (final i in itens)
+      if (!(kindOf(i) == 'Medida' && metas.contains(minuto(atOf(i))))) i,
+  ];
 }

@@ -6,7 +6,6 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
-import '../../alunos/utils/equipamento_aluno_display.dart';
 import '../../exercicios/data/exercicio_repository.dart';
 import '../../exercicios/screens/widgets/exercise_media_thumb.dart';
 import '../../exercicios/utils/biblioteca_aba.dart';
@@ -93,7 +92,10 @@ class ExerciseLibraryRow extends StatelessWidget {
     final mute = chrome.mute;
     final line = chrome.line;
     final brand = BrandPalette.softened(Theme.of(context).colorScheme.primary);
-    final meta = exerciseLibraryMeta(exercicio);
+    final meta = [
+      exerciseLibraryMeta(exercicio),
+      if (!_hasThumbMedia) 'Vídeo em breve',
+    ].where((p) => p.isNotEmpty).join(' · ');
     final hasPreview =
         onPreviewThumb != null && canPreviewExerciseMedia(exercicio);
     // Toda linha reserva o quadrado da foto: a coluna dos nomes não zigue-zagueia.
@@ -153,7 +155,8 @@ class ExerciseLibraryRow extends StatelessWidget {
                           exercicio,
                           size: 36,
                           radius: 10,
-                          showPlayBadge: hasPreview,
+                          // Quase todo exercício tem vídeo: o selo só fazia ruído.
+                          showPlayBadge: false,
                         ),
                       ),
                     ),
@@ -358,7 +361,7 @@ class _QuadradoSemFoto extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final equipamentos = exercicio.equipamentos;
+    // Um ícone só para quem não tem mídia: o halter, sem fingir informação.
     return ExcludeSemantics(
       child: Container(
         width: 36,
@@ -368,9 +371,7 @@ class _QuadradoSemFoto extends StatelessWidget {
           border: Border.all(color: line),
         ),
         child: Icon(
-          equipamentos.isEmpty
-              ? FxIcons.treino
-              : equipamentoFxIcon(equipamentos.first),
+          FxIcons.treino,
           size: 18,
           color: mute,
         ),

@@ -1,4 +1,5 @@
 import '../../treinos/models/metodo_exercicio.dart';
+import '../../treinos/utils/prescricao_serie.dart';
 import '../../../core/api/pagina.dart';
 import '../utils/checkin_json.dart';
 
@@ -38,6 +39,9 @@ class ExecucaoExercicio {
 
   /// Descanso depois da última série feita (o do grupo dela); nulo = o do exercício.
   final int? descansoAposSerie;
+
+  /// Todas as séries prescritas, com papel (grupos de série).
+  final List<SeriePrescrita> seriesPrescritas;
   final double? proximaCargaKg;
   final String? proximaRepeticoes;
 
@@ -73,6 +77,7 @@ class ExecucaoExercicio {
     this.seriesAnteriores = const [],
     this.proximaSeriePapel,
     this.descansoAposSerie,
+    this.seriesPrescritas = const [],
     this.proximaCargaKg,
     this.proximaRepeticoes,
     this.metodo = MetodoExercicio.normal,
@@ -121,6 +126,10 @@ class ExecucaoExercicio {
             ).map(ExecucaoSerie.fromJson).toList(),
         proximaSeriePapel: checkinJsonString(j['proximaSeriePapel']),
         descansoAposSerie: checkinJsonInt(j['descansoAposSerie']),
+        seriesPrescritas: [
+          for (final l in (j['seriesPrescritas'] as List?) ?? const [])
+            if (checkinJsonMap(l) case final m?) SeriePrescrita.fromJson(m),
+        ],
         proximaCargaKg: checkinJsonDouble(j['proximaCargaKg']),
         proximaRepeticoes: checkinJsonString(j['proximaRepeticoes']),
         metodo: MetodoExercicio.fromJson(
@@ -199,6 +208,7 @@ class ExecucaoExercicio {
     seriesAnteriores: seriesAnteriores,
     proximaSeriePapel: proximaSeriePapel,
     descansoAposSerie: descansoAposSerie,
+    seriesPrescritas: seriesPrescritas,
     proximaCargaKg: proximaCargaKg,
     proximaRepeticoes: proximaRepeticoes,
     metodo: metodo,

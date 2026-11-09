@@ -4,6 +4,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_action_link.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../l10n/pt.dart';
@@ -18,6 +19,7 @@ Future<RegistroDoHistorico?> abrirHistoricoDaEvolucao(
   required List<RegistroDoHistorico> registros,
   Set<String> destaque = const {},
   bool Function(RegistroDoHistorico)? podeAbrir,
+  VoidCallback? onEstaCerto,
 }) => showFxHomeSheet<RegistroDoHistorico>(
   context,
   builder:
@@ -25,6 +27,7 @@ Future<RegistroDoHistorico?> abrirHistoricoDaEvolucao(
         registros: registros,
         destaque: destaque,
         podeAbrir: podeAbrir ?? (_) => false,
+        onEstaCerto: onEstaCerto,
       ),
 );
 
@@ -33,7 +36,11 @@ class _FolhaHistorico extends StatelessWidget {
     required this.registros,
     required this.destaque,
     required this.podeAbrir,
+    this.onEstaCerto,
   });
+
+  /// "Está certo": o valor marcado é real; o "Confira" some para todos.
+  final VoidCallback? onEstaCerto;
 
   final List<RegistroDoHistorico> registros;
   final Set<String> destaque;
@@ -65,6 +72,21 @@ class _FolhaHistorico extends StatelessWidget {
             isDark: chrome.isDark,
             title: ptS.evolucaoHistoricoTitulo,
           ),
+          if (onEstaCerto != null && destaque.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: TokensStrip.s2),
+              child: Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: FxActionLink(
+                  label: 'Está certo',
+                  icon: FxIcons.check,
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    onEstaCerto!();
+                  },
+                ),
+              ),
+            ),
           const SizedBox(height: TokensStrip.s2),
           Flexible(
             child: ListView(
