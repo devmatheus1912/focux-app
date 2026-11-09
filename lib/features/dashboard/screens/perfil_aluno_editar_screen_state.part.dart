@@ -606,8 +606,8 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
                                                   ? aluno.nome[0].toUpperCase()
                                                   : 'A',
                                               style: const TextStyle(
-                                                fontSize: 24,
-                                                fontWeight: FontWeight.w800,
+                                                fontSize: TokensStrip.fontTitulo,
+                                                fontWeight: FontWeight.w700,
                                               ),
                                             )
                                             : null,
@@ -651,7 +651,7 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
                                       'Quanto mais completo seu perfil, melhor o ajuste do treino.',
                                       style: TextStyle(
                                         color: mute,
-                                        fontSize: 13,
+                                        fontSize: TokensStrip.fontBodySm,
                                         height: 1.4,
                                       ),
                                     ),
@@ -793,7 +793,7 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
                     Text(
                       'Esses dados ajudam o personal a ajustar treino, contato, segurança e aderência sem depender de conversa toda hora.',
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: mute, fontSize: 12, height: 1.45),
+                      style: TextStyle(color: mute, fontSize: TokensStrip.fontRotulo, height: 1.45),
                     ),
                   ],
                 ),

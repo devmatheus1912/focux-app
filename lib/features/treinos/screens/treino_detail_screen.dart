@@ -55,9 +55,12 @@ import '../widgets/prescription_editor_sheet.dart';
 import '../data/workout_builder_preset.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/theme/fx_icons.dart';
+import '../utils/grupos_de_serie.dart';
+import '../widgets/grupos_de_serie_editor.dart';
 
 part 'treino_detail_screen_body.part.dart';
 part 'treino_detail_screen_exercises.part.dart';
+part 'treino_detail_screen_objetivo.part.dart';
 part 'treino_detail_screen_rows.part.dart';
 part 'treino_detail_screen_sheets.part.dart';
 part 'treino_detail_screen_states.part.dart';

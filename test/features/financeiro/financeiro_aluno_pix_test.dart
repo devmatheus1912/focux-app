@@ -303,7 +303,12 @@ void main() {
         find.byType(Scrollable).first,
         const Offset(0, -200),
       );
-      await tester.tap(find.text('Setembro 2026'));
+      // Com letra 1,6 a linha encosta no botão fixo: abre pela própria linha.
+      final linha = find.ancestor(
+        of: find.text('Setembro 2026'),
+        matching: find.byWidgetPredicate((w) => w is InkWell && w.onTap != null),
+      );
+      tester.widget<InkWell>(linha.first).onTap!();
       await _settle(tester);
       expect(tester.takeException(), isNull);
       await tester.ensureVisible(find.text('Pagar com PIX'));

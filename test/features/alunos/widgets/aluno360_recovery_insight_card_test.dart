@@ -24,7 +24,7 @@ Widget _card(RecoverySnapshot snapshot) {
 void main() {
   setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
 
-  testWidgets('sem nota: anel "--" sem nível nem dica', (tester) async {
+  testWidgets('sem nota: uma linha, sem anel vazio, nível nem dica', (tester) async {
     await tester.pumpWidget(
       _card(
         const RecoverySnapshot(
@@ -40,7 +40,11 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('--'), findsOneWidget);
+    expect(find.text('--'), findsNothing);
+    expect(
+      find.text('Prontidão sai quando o aluno registrar o sono'),
+      findsOneWidget,
+    );
     expect(find.text('Pronto para treinar'), findsNothing);
     expect(find.text('Boa noite de sono.'), findsNothing);
     expect(

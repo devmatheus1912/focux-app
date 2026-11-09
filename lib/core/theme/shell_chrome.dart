@@ -209,8 +209,8 @@ class ShellHeaderIconButton extends StatelessWidget {
                               '9+',
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: compact ? 7 : 8,
-                                fontWeight: FontWeight.w800,
+                                fontSize: compact ? TokensStrip.fontMinimo : TokensStrip.fontMinimo,
+                                fontWeight: FontWeight.w700,
                                 height: 1,
                               ),
                             )

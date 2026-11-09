@@ -290,7 +290,7 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
                 habitoComplianceLabel(focus.alunoNome),
                 style: FocuxHubTypography.metric(
                   color: ShellChrome.of(context).ink,
-                  fontSize: FocuxHubTypography.metricLg,
+                  fontSize: TokensStrip.fontTitulo,
                 ),
               ),
               const SizedBox(height: 6),
@@ -330,7 +330,7 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
                 _habitos.first.titulo,
                 style: FocuxHubTypography.metric(
                   color: ShellChrome.of(context).ink,
-                  fontSize: FocuxHubTypography.metricLg,
+                  fontSize: TokensStrip.fontTitulo,
                 ),
               ),
               const SizedBox(height: TokensStrip.s3),

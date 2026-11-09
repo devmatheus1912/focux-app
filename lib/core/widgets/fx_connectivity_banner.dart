@@ -15,6 +15,7 @@ import '../utils/connectivity_banner_state.dart';
 import 'feedback_helper.dart';
 import 'fx_tonal_button.dart';
 import '../theme/fx_icons.dart';
+import '../theme/tokens_strip.dart';
 
 /// Mostra conexão e fila offline, e drena a fila: ao voltar a rede, ao voltar
 /// ao primeiro plano e em intervalo enquanto houver pendência.
@@ -189,7 +190,7 @@ class _FxConnectivityBannerState extends ConsumerState<FxConnectivityBanner>
                                   _bannerMessage(S.of(context), kind),
                                   style: const TextStyle(
                                     color: Colors.white,
-                                    fontSize: 12.5,
+                                    fontSize: TokensStrip.fontRotulo,
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),

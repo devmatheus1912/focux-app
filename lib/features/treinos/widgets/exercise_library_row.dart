@@ -6,6 +6,7 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
+import '../../alunos/utils/equipamento_aluno_display.dart';
 import '../../exercicios/data/exercicio_repository.dart';
 import '../../exercicios/screens/widgets/exercise_media_thumb.dart';
 import '../../exercicios/utils/biblioteca_aba.dart';
@@ -30,7 +31,20 @@ class ExerciseLibraryRow extends StatelessWidget {
     this.picker = true,
     this.searchQuery = '',
     this.insetGroup = false,
+    this.titulo,
+    this.marcado = false,
+    this.onMarcar,
   });
+
+  /// Texto da linha quando o começo do nome virou cabeçalho do grupo
+  /// ("com halteres"). O leitor de tela lê o nome inteiro.
+  final String? titulo;
+
+  /// Marcado para adicionar junto (o "+" vira check).
+  final bool marcado;
+
+  /// "+" à direita: marca para adicionar vários de uma vez.
+  final VoidCallback? onMarcar;
 
   final Exercicio exercicio;
   final VoidCallback onTap;
@@ -55,11 +69,11 @@ class ExerciseLibraryRow extends StatelessWidget {
 
   bool get _hasThumbMedia => exercisePreviewMediaUrlFor(exercicio) != null;
 
-  double get _rowMinHeight => _hasThumbMedia ? 52 : 48;
+  double get _rowMinHeight => 52;
 
   String _semanticLabel(String meta) {
     final base =
-        selected
+        selected || marcado
             ? '${exercicio.nomeDisplay}, selecionado. $meta'
             : alreadyInTreino
             ? '${exercicio.nomeDisplay}. $meta. Já no treino${resumoNoTreino == null ? '' : ', $resumoNoTreino'}.'
@@ -67,7 +81,7 @@ class ExerciseLibraryRow extends StatelessWidget {
     final fav = exercicio.favoritado ? ' Favorito.' : '';
     final action =
         onFavoriteToggle != null
-            ? ' Toque na estrela ou segure para ${exercicio.favoritado ? 'remover dos favoritos' : 'favoritar'}.'
+            ? ' Segure para ${exercicio.favoritado ? 'remover dos favoritos' : 'favoritar'}.'
             : '';
     return '$base$fav$action';
   }
@@ -82,11 +96,9 @@ class ExerciseLibraryRow extends StatelessWidget {
     final meta = exerciseLibraryMeta(exercicio);
     final hasPreview =
         onPreviewThumb != null && canPreviewExerciseMedia(exercicio);
+    // Toda linha reserva o quadrado da foto: a coluna dos nomes não zigue-zagueia.
     final dividerInset =
-        insetGroup
-            ? 0.0
-            : (_hasThumbMedia ? 36.0 : 0.0) +
-                (_hasThumbMedia ? FxSettingsLayout.iconGap : 0.0);
+        insetGroup ? 0.0 : 36.0 + FxSettingsLayout.iconGap;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -119,7 +131,10 @@ class ExerciseLibraryRow extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  if (_hasThumbMedia) ...[
+                  if (!_hasThumbMedia) ...[
+                    _QuadradoSemFoto(exercicio: exercicio, mute: mute, line: line),
+                    const SizedBox(width: FxSettingsLayout.iconGap),
+                  ] else ...[
                     Semantics(
                       button: hasPreview,
                       label:
@@ -150,7 +165,7 @@ class ExerciseLibraryRow extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _ExerciseTitle(
-                          title: exercicio.nomeDisplay,
+                          title: titulo ?? exercicio.nomeDisplay,
                           query: searchQuery,
                           ink: selected ? brand : ink,
                           highlight: brand,
@@ -173,7 +188,12 @@ class ExerciseLibraryRow extends StatelessWidget {
                             ],
                             if (alreadyInTreino) ...[
                               const SizedBox(width: 6),
-                              _InTreinoPill(mute: mute, resumo: resumoNoTreino),
+                              Flexible(
+                                child: _InTreinoPill(
+                                  mute: mute,
+                                  resumo: resumoNoTreino,
+                                ),
+                              ),
                             ],
                           ],
                         ),
@@ -204,31 +224,39 @@ class ExerciseLibraryRow extends StatelessWidget {
                       ],
                     ),
                   ),
-                  if (onFavoriteToggle != null)
+                  // Estrela só nos favoritos (favoritar é segurar a linha).
+                  if (exercicio.favoritado)
+                    const Padding(
+                      padding: EdgeInsets.only(left: 4),
+                      child: Icon(
+                        FxIcons.estrelaAtiva,
+                        color: EagleTokens.gold,
+                        size: 18,
+                        semanticLabel: 'Favorito',
+                      ),
+                    ),
+                  if (onMarcar != null)
                     IconButton(
                       visualDensity: VisualDensity.compact,
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(
-                        minWidth: 44,
-                        minHeight: 44,
+                        minWidth: 48,
+                        minHeight: 48,
                       ),
-                      tooltip:
-                          exercicio.favoritado
-                              ? 'Remover dos favoritos'
-                              : 'Adicionar aos favoritos',
+                      tooltip: marcado
+                          ? 'Desmarcar ${exercicio.nomeDisplay}'
+                          : 'Marcar ${exercicio.nomeDisplay}',
                       onPressed: () {
-                        HapticFeedback.mediumImpact();
-                        onFavoriteToggle!();
+                        HapticFeedback.selectionClick();
+                        onMarcar!();
                       },
                       icon: Icon(
-                        exercicio.favoritado
-                            ? FxIcons.estrelaAtiva
-                            : FxIcons.estrela,
-                        color: exercicio.favoritado ? EagleTokens.gold : mute,
-                        size: 22,
+                        marcado ? FxIcons.concluidoAtivo : FxIcons.adicionarCirculo,
+                        color: marcado ? brand : mute,
+                        size: 24,
                       ),
                     ),
-                  if (selected)
+                  if (selected && onMarcar == null)
                     Icon(FxIcons.check, color: brand, size: 20)
                   else if (!picker)
                     Icon(
@@ -274,7 +302,7 @@ class _ExerciseTitle extends StatelessWidget {
     if (normalized.length < 2) {
       return Text(
         title,
-        maxLines: 1,
+        maxLines: 2,
         overflow: TextOverflow.ellipsis,
         style: FxSettingsLayout.rowLabel(color: ink),
       );
@@ -286,7 +314,7 @@ class _ExerciseTitle extends StatelessWidget {
     if (index < 0) {
       return Text(
         title,
-        maxLines: 1,
+        maxLines: 2,
         overflow: TextOverflow.ellipsis,
         style: FxSettingsLayout.rowLabel(color: ink),
       );
@@ -305,13 +333,48 @@ class _ExerciseTitle extends StatelessWidget {
             text: match,
             style: FxSettingsLayout.rowLabel(
               color: highlight,
-            ).copyWith(fontWeight: FontWeight.w900),
+            ).copyWith(fontWeight: FontWeight.w700),
           ),
           if (after.isNotEmpty) TextSpan(text: after),
         ],
       ),
-      maxLines: 1,
+      maxLines: 2,
       overflow: TextOverflow.ellipsis,
+    );
+  }
+}
+
+/// Quadrado da foto quando o exercício não tem mídia: ícone do equipamento.
+class _QuadradoSemFoto extends StatelessWidget {
+  const _QuadradoSemFoto({
+    required this.exercicio,
+    required this.mute,
+    required this.line,
+  });
+
+  final Exercicio exercicio;
+  final Color mute;
+  final Color line;
+
+  @override
+  Widget build(BuildContext context) {
+    final equipamentos = exercicio.equipamentos;
+    return ExcludeSemantics(
+      child: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: line),
+        ),
+        child: Icon(
+          equipamentos.isEmpty
+              ? FxIcons.treino
+              : equipamentoFxIcon(equipamentos.first),
+          size: 18,
+          color: mute,
+        ),
+      ),
     );
   }
 }
@@ -334,7 +397,7 @@ class _MeuPill extends StatelessWidget {
         'Meu',
         style: FxSettingsLayout.footer(
           color: brand,
-        ).copyWith(fontWeight: FontWeight.w800),
+        ).copyWith(fontWeight: FontWeight.w700),
       ),
     );
   }
@@ -356,9 +419,11 @@ class _InTreinoPill extends StatelessWidget {
       ),
       child: Text(
         resumo == null || resumo!.isEmpty ? 'No treino' : 'No treino · $resumo',
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         style: FxSettingsLayout.footer(
           color: mute,
-        ).copyWith(fontWeight: FontWeight.w800),
+        ).copyWith(fontWeight: FontWeight.w700),
       ),
     );
   }

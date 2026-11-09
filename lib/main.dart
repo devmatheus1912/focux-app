@@ -51,6 +51,7 @@ import 'features/perfil/providers/perfil_provider.dart';
 import 'l10n/app_localizations.dart';
 import 'core/widgets/fx_tonal_button.dart';
 import 'core/theme/fx_icons.dart';
+import 'core/theme/tokens_strip.dart';
 
 /// Relógio do cold start — parado no primeiro frame de [FocuxApp].
 final Stopwatch _bootStopwatch = Stopwatch();
@@ -164,7 +165,7 @@ void main() {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Colors.white70,
-                        fontSize: 14,
+                        fontSize: TokensStrip.fontBody,
                         height: 1.5,
                         decoration: TextDecoration.none,
                       ),

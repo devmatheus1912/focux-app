@@ -114,7 +114,7 @@ class FxConversionDivider extends StatelessWidget {
             label,
             style: FocuxHubTypography.bodyMuted(
               color: heroTealSurface(0.82),
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ),

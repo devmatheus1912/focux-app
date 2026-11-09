@@ -44,6 +44,7 @@ import '../widgets/checkin_serie_detail_widgets.dart';
 import '../widgets/checkin_sessao_aberta_state.dart';
 import '../widgets/checkin_timer_widgets.dart';
 import '../../../core/theme/fx_icons.dart';
+import '../../dashboard/providers/dashboard_provider.dart';
 
 part 'checkin_screen_carga.part.dart';
 part 'checkin_screen_corpo.part.dart';
@@ -327,7 +328,10 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
       // Combinado: a volta passa pelos exercícios do grupo e só descansa no último.
       final passo = passoDoCombinado(_execucao?.exercicios ?? [depois], depois);
       if (passo.focoId != null) setState(() => _focoTreinoExercicioId = passo.focoId);
-      if (passo.descansar) _iniciarDescanso(depois.descansoSegundos ?? 60);
+      // Descanso do grupo da série que acabou (aquecimento curto, válida longa).
+      if (passo.descansar) {
+        _iniciarDescanso(depois.descansoAposSerie ?? depois.descansoSegundos ?? 60);
+      }
     }
   }
 
@@ -378,6 +382,9 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
     setState(() => _concluindo = true);
     try {
       final id = _execucao!.id!;
+      // A Home de antes de concluir: dá a ficha e a meta para "Sua semana".
+      final homeAntes = ref.read(alunoDashboardHomeProvider).value;
+      final treinoId = _execucao!.treinoId;
       final conclusao = await _sessao.concluir(id);
       final concluida = conclusao.concluida;
       final evolucao = conclusao.evolucao;
@@ -390,12 +397,28 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
         treinoNomeLocal: _execucao!.treinoNome,
         seriesSemCarga: semCarga,
       );
-      final acao = await showCheckinResumo(context, resumo: resumo);
+      final semana = homeAntes == null
+          ? null
+          : checkinResumoSemana(
+              rotina: homeAntes.rotina,
+              historico: homeAntes.historico,
+              treinoId: treinoId,
+              hoje: _agora(),
+              meta: homeAntes.frequenciaDias,
+            );
+      final acao = await showCheckinResumo(
+        context,
+        resumo: resumo,
+        semana: semana,
+      );
       if (!mounted) return;
+      // Mesmo caminho do Concluir (fecha a execução) e o detalhe abre por cima:
+      // o pushReplacement direto da execução travou o app no iPhone (FLUTTER-4).
+      final router = GoRouter.of(context);
+      safePopOrGo(context, '/checkin/treinos');
       if (acao == CheckinResumoAcao.detalhes) {
-        context.pushReplacement(historicoDetalhePath(id));
-      } else {
-        safePopOrGo(context, '/checkin/treinos');
+        await Future<void>.delayed(Duration.zero);
+        router.push(historicoDetalhePath(id));
       }
     } catch (e) {
       if (mounted) _erro(friendlyError(e));

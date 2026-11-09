@@ -72,8 +72,8 @@ void main() {
     expect(find.bySemanticsLabel('Detalhe do treino'), findsOneWidget);
     expect(find.text('Treino Força'), findsWidgets);
     expect(find.text('Template base'), findsOneWidget);
-    expect(find.textContaining('4×8-12'), findsOneWidget);
-    expect(find.textContaining('75s'), findsOneWidget);
+    expect(find.textContaining('4 × 8-12'), findsOneWidget);
+    expect(find.textContaining('75 s'), findsOneWidget);
     expect(find.text('Tudo salvo'), findsOneWidget);
     expect(find.byTooltip('Como montar este treino'), findsOneWidget);
     expect(find.text('Adicionar exercício'), findsWidgets);
@@ -118,12 +118,13 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
 
     expect(find.text('Editar prescrição'), findsOneWidget);
-    expect(find.text('Prescrição'), findsOneWidget);
+    expect(find.text('Prescrição'), findsNothing);
     expect(find.text('Mais detalhes'), findsOneWidget);
-    expect(find.text('Objetivo'), findsOneWidget);
+    // Objetivo é da sessão, não da folha do exercício.
+    expect(find.text('Objetivo'), findsNothing);
     expect(find.text('Tipo de série'), findsNothing);
     expect(find.text('Vídeo'), findsNothing); // saiu da prescrição
     expect(find.text('Salvar prescrição'), findsOneWidget);
-    expect(find.text('Hipertrofia'), findsOneWidget);
+    expect(find.text('Hipertrofia'), findsNothing);
   });
 }

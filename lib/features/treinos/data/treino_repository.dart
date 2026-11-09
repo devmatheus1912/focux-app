@@ -469,6 +469,15 @@ class TreinoRepository {
     return Treino.fromJson(response.data as Map<String, dynamic>);
   }
 
+  /// Objetivo da sessão (HIPERTROFIA, FORCA, RESISTENCIA; vazio limpa).
+  Future<Treino> atualizarObjetivo(int id, String objetivo) async {
+    final response = await _dio.patch(
+      '/api/treinos/$id',
+      data: {'objetivo': objetivo},
+    );
+    return Treino.fromJson(response.data as Map<String, dynamic>);
+  }
+
   Future<Treino> duplicar(int id) async {
     final response = await _dio.post('/api/treinos/$id/duplicar');
     throwIfQueuedOffline(response);

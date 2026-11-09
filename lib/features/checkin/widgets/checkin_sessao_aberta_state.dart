@@ -63,7 +63,7 @@ class CheckinSessaoAbertaState extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: FocuxHubTypography.body(
                     color: scheme.onSurface,
-                  ).copyWith(fontSize: 18, fontWeight: FontWeight.w700),
+                  ).copyWith(fontSize: TokensStrip.fontSecao, fontWeight: FontWeight.w700),
                 ),
               ),
               const SizedBox(height: TokensStrip.s2),

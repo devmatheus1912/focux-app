@@ -257,6 +257,26 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
+      # Símbolos no Sentry: sem eles, travamento e crash chegam com quadros do
+      # Dart sem nome (FLUTTER-4). O dSYM do App.framework traz o código Dart.
+      - name: Upload dSYM to Sentry (optional)
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${SENTRY_AUTH_TOKEN:-}" ]]; then
+            echo "::warning::Secret SENTRY_AUTH_TOKEN ausente: símbolos não enviados ao Sentry."
+            exit 0
+          fi
+          if [[ ! -d build/ios/archive/Runner.xcarchive/dSYMs ]]; then
+            echo "::warning::dSYMs não encontrados no archive."
+            exit 0
+          fi
+          curl -sL https://sentry.io/get-cli/ | SENTRY_CLI_VERSION=2.39.1 bash
+          sentry-cli debug-files upload \
+            --org focux-personal --project flutter \
+            build/ios/archive/Runner.xcarchive/dSYMs
+
       - name: Upload to TestFlight (optional)
         if: >-
           github.event_name == 'push' ||

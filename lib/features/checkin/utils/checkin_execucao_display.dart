@@ -207,3 +207,11 @@ String checkinRestSemanticsLabel(
   return (cargaKg: carga, reps: reps);
 }
 
+
+/// Rótulo do papel da próxima série; nulo para a série válida (a comum).
+String? checkinPapelDaSerie(S s, String? papel) => switch (papel?.toUpperCase()) {
+  'AQUECIMENTO' => s.checkinAquecimento,
+  'AJUSTE' => s.checkinAjusteSerie,
+  'BACKOFF' => s.checkinBackoffSerie,
+  _ => null,
+};

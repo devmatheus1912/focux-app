@@ -48,7 +48,7 @@ class _TrilhaCard extends StatelessWidget {
                     trilha.titulo,
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
-                      fontSize: 15,
+                      fontSize: TokensStrip.fontBody,
                       color: chrome.ink,
                     ),
                   ),
@@ -99,7 +99,7 @@ class _TrilhaCard extends StatelessWidget {
                   style: TextStyle(
                     fontWeight: FontWeight.w700,
                     color: progressColor,
-                    fontSize: 12,
+                    fontSize: TokensStrip.fontRotulo,
                   ),
                 ),
               ],
@@ -121,7 +121,7 @@ class _TrilhaCard extends StatelessWidget {
               Text(
                 'Marcos',
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: TokensStrip.fontRotulo,
                   fontWeight: FontWeight.w700,
                   color: chrome.ink,
                 ),
@@ -200,7 +200,7 @@ class _MarcoTile extends StatelessWidget {
         title: Text(
           marco.titulo,
           style: TextStyle(
-            fontSize: 13,
+            fontSize: TokensStrip.fontBodySm,
             decoration: marco.concluido ? TextDecoration.lineThrough : null,
             color: marco.concluido ? TokensStrip.textSecondary : null,
           ),

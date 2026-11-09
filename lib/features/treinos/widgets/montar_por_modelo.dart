@@ -14,6 +14,7 @@ import '../services/recent_exercise_usage_store.dart';
 import '../utils/divisao_catalogo.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/theme/fx_icons.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 /// Sugere exercícios para **esta** sessão. Se o nome casa com um dia de um modelo
 /// ("B · Costas e bíceps"), abre direto os blocos desse dia; senão, o personal
@@ -60,7 +61,7 @@ Future<void> openSugerirExercicios({
                 Text(S.of(routeContext).treinoSugerirExercicios),
                 Text(
                   S.of(routeContext).treinoSugerirUmDia,
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                  style: const TextStyle(fontSize: TokensStrip.fontRotulo, fontWeight: FontWeight.w600),
                 ),
               ],
             ),

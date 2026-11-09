@@ -127,7 +127,7 @@ class DashboardHomeHeader extends StatelessWidget {
                         style: dashboardPageTitleStyle(
                           context,
                           color: sobre.ink,
-                        ).copyWith(fontWeight: FontWeight.w800, height: 1.12),
+                        ).copyWith(fontWeight: FontWeight.w700, height: 1.12),
                       ),
                       const SizedBox(height: 2),
                       Semantics(

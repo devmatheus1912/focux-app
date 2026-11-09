@@ -374,9 +374,9 @@ void showTimeline360BodySheet(
                       item.body,
                       style: Aluno360Layout.captionStyle(context).copyWith(
                         color: ink,
-                        fontSize: 14,
+                        fontSize: TokensStrip.fontBody,
                         height: 1.45,
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                     if (link.isNotEmpty) ...[
@@ -550,7 +550,7 @@ class Timeline360Tile extends StatelessWidget {
                         style: Aluno360Layout.captionStyle(context).copyWith(
                           color: ink,
                           fontWeight: FontWeight.w700,
-                          fontSize: 14,
+                          fontSize: TokensStrip.fontBody,
                           height: 1.25,
                         ),
                       ),

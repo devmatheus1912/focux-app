@@ -93,7 +93,7 @@ class SaudeMetricTile extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: chrome.mute,
-                          fontSize: 13,
+                          fontSize: TokensStrip.fontBodySm,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -115,8 +115,8 @@ class SaudeMetricTile extends StatelessWidget {
                       text: texto,
                       style: TextStyle(
                         color: _vazio ? chrome.mute : chrome.ink,
-                        fontSize: _vazio ? 16 : 28,
-                        fontWeight: _vazio ? FontWeight.w600 : FontWeight.w800,
+                        fontSize: _vazio ? TokensStrip.fontBody : TokensStrip.fontTitulo,
+                        fontWeight: _vazio ? FontWeight.w600 : FontWeight.w700,
                         fontFeatures: const [FontFeature.tabularFigures()],
                       ),
                       children: [
@@ -125,7 +125,7 @@ class SaudeMetricTile extends StatelessWidget {
                             text: ' $unidade',
                             style: TextStyle(
                               color: chrome.mute,
-                              fontSize: 14,
+                              fontSize: TokensStrip.fontBody,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -154,7 +154,7 @@ class SaudeMetricTile extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: chrome.mute,
-                      fontSize: 12.5,
+                      fontSize: TokensStrip.fontRotulo,
                       height: 1.25,
                     ),
                   ),
@@ -202,7 +202,7 @@ class _ProntidaoTendenciaState extends State<ProntidaoTendencia> {
     if (comNota < ProntidaoTendencia.minimoDeDias) {
       return Text(
         'Sua tendência aparece com 3 dias de nota.',
-        style: TextStyle(color: chrome.mute, fontSize: 14),
+        style: TextStyle(color: chrome.mute, fontSize: TokensStrip.fontBody),
       );
     }
     Widget corpo;
@@ -255,7 +255,7 @@ class _ProntidaoTendenciaState extends State<ProntidaoTendencia> {
                                     i == dias.length - 1
                                         ? chrome.ink
                                         : chrome.mute,
-                                fontSize: 12,
+                                fontSize: TokensStrip.fontRotulo,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
@@ -273,7 +273,7 @@ class _ProntidaoTendenciaState extends State<ProntidaoTendencia> {
               _descricao(dias[sel]),
               style: TextStyle(
                 color: chrome.ink,
-                fontSize: 13.5,
+                fontSize: TokensStrip.fontBodySm,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -318,7 +318,7 @@ class _CartaoDeSecao extends StatelessWidget {
             titulo,
             style: FocuxHubTypography.body(
               color: chrome.ink,
-            ).copyWith(fontWeight: FontWeight.w800, fontSize: 16),
+            ).copyWith(fontWeight: FontWeight.w700, fontSize: TokensStrip.fontBody),
           ),
           const SizedBox(height: 12),
           filho,
@@ -375,8 +375,8 @@ class SaudeConexaoCard extends StatelessWidget {
                       rotuloFonte,
                       style: TextStyle(
                         color: chrome.ink,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w800,
+                        fontSize: TokensStrip.fontBody,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -406,7 +406,7 @@ class SaudeConexaoCard extends StatelessWidget {
                       'Compartilhar com meu personal',
                       style: TextStyle(
                         color: chrome.ink,
-                        fontSize: 14.5,
+                        fontSize: TokensStrip.fontBody,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -416,7 +416,7 @@ class SaudeConexaoCard extends StatelessWidget {
                           : 'Só você vê seus dados de saúde.',
                       style: TextStyle(
                         color: chrome.mute,
-                        fontSize: 12.5,
+                        fontSize: TokensStrip.fontRotulo,
                         height: 1.3,
                       ),
                     ),

@@ -2,6 +2,8 @@ import '../../treinos/models/metodo_exercicio.dart';
 import '../../../core/api/pagina.dart';
 import '../utils/checkin_json.dart';
 
+export 'sessao_evolucao_dto.dart';
+
 class ExecucaoExercicio {
   final int id;
   final int treinoExercicioId;
@@ -33,6 +35,9 @@ class ExecucaoExercicio {
   final List<ExecucaoSerie> seriesDetalhes;
   final List<ExecucaoSerie> seriesAnteriores;
   final String? proximaSeriePapel;
+
+  /// Descanso depois da última série feita (o do grupo dela); nulo = o do exercício.
+  final int? descansoAposSerie;
   final double? proximaCargaKg;
   final String? proximaRepeticoes;
 
@@ -67,6 +72,7 @@ class ExecucaoExercicio {
     this.seriesDetalhes = const [],
     this.seriesAnteriores = const [],
     this.proximaSeriePapel,
+    this.descansoAposSerie,
     this.proximaCargaKg,
     this.proximaRepeticoes,
     this.metodo = MetodoExercicio.normal,
@@ -114,6 +120,7 @@ class ExecucaoExercicio {
               j['seriesAnteriores'],
             ).map(ExecucaoSerie.fromJson).toList(),
         proximaSeriePapel: checkinJsonString(j['proximaSeriePapel']),
+        descansoAposSerie: checkinJsonInt(j['descansoAposSerie']),
         proximaCargaKg: checkinJsonDouble(j['proximaCargaKg']),
         proximaRepeticoes: checkinJsonString(j['proximaRepeticoes']),
         metodo: MetodoExercicio.fromJson(
@@ -191,6 +198,7 @@ class ExecucaoExercicio {
     seriesDetalhes: seriesDetalhes ?? this.seriesDetalhes,
     seriesAnteriores: seriesAnteriores,
     proximaSeriePapel: proximaSeriePapel,
+    descansoAposSerie: descansoAposSerie,
     proximaCargaKg: proximaCargaKg,
     proximaRepeticoes: proximaRepeticoes,
     metodo: metodo,
@@ -422,50 +430,6 @@ class EvolucaoPerformance {
         percentual: checkinJsonInt(json['percentual']),
         unidade: checkinJsonStringOr(json['unidade']),
         mensagem: checkinJsonStringOr(json['mensagem']),
-      );
-}
-
-/// Resumo BFF da sessão (`GET /checkin/{id}/evolucao-sessao`).
-class SessaoEvolucaoDto {
-  final int? execucaoId;
-  final double? volumeKg;
-  final double? volumeAnteriorKg;
-  final int seriesFeitas;
-  final int seriesPlanejadas;
-  final int recordes;
-  final String sinal;
-  final String sinalLabel;
-  final String? destaqueExercicio;
-  final double? destaqueDeltaKg;
-
-  const SessaoEvolucaoDto({
-    this.execucaoId,
-    this.volumeKg,
-    this.volumeAnteriorKg,
-    required this.seriesFeitas,
-    required this.seriesPlanejadas,
-    required this.recordes,
-    required this.sinal,
-    required this.sinalLabel,
-    this.destaqueExercicio,
-    this.destaqueDeltaKg,
-  });
-
-  factory SessaoEvolucaoDto.fromJson(Map<String, dynamic> j) =>
-      SessaoEvolucaoDto(
-        execucaoId: checkinJsonInt(j['execucaoId']),
-        volumeKg: checkinJsonDouble(j['volumeKg']),
-        volumeAnteriorKg: checkinJsonDouble(j['volumeAnteriorKg']),
-        seriesFeitas: checkinJsonIntOr(j['seriesFeitas']),
-        seriesPlanejadas: checkinJsonIntOr(j['seriesPlanejadas']),
-        recordes: checkinJsonIntOr(j['recordes']),
-        sinal: checkinJsonStringOr(j['sinal'], 'SEM_DADOS'),
-        sinalLabel: checkinJsonStringOr(
-          j['sinalLabel'],
-          'Sem séries registradas',
-        ),
-        destaqueExercicio: checkinJsonString(j['destaqueExercicio']),
-        destaqueDeltaKg: checkinJsonDouble(j['destaqueDeltaKg']),
       );
 }
 

@@ -431,7 +431,7 @@ class _InviteCodeField extends StatelessWidget {
           onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
           style: FocuxHubTypography.metric(
             color: Colors.white,
-            fontSize: FocuxHubTypography.metricEm,
+            fontSize: TokensStrip.fontSecao,
             letterSpacing: 4,
           ),
           cursorColor: primary,
@@ -467,7 +467,7 @@ class _InviteCodeField extends StatelessWidget {
             ),
             errorStyle: TextStyle(
               color: EagleTokens.authErrorSoft,
-              fontSize: 11.5,
+              fontSize: TokensStrip.fontMinimo,
             ),
           ),
         ),

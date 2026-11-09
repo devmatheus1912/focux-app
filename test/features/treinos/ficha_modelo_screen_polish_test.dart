@@ -273,9 +273,10 @@ void main() {
     expect(repo.aplicados, [(31, 3, false), (31, 4, false)]);
   });
 
-  testWidgets('o modelo fecha com Pronto e mostra que está salvo', (tester) async {
+  testWidgets('o modelo salva sozinho; a ação é aplicar em aluno', (tester) async {
     await _abrir(tester);
-    expect(find.text('Pronto'), findsOneWidget);
+    expect(find.text('Pronto'), findsNothing);
+    expect(find.text('Aplicar em aluno'), findsOneWidget);
     expect(find.text('Tudo salvo'), findsOneWidget);
   });
 

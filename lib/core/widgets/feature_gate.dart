@@ -205,7 +205,7 @@ class _PlanSyncBannerShell extends StatelessWidget {
                       warning ?? 'Plano salvo em cache. Atualizando...',
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 12.2,
+                        fontSize: TokensStrip.fontRotulo,
                         height: 1.25,
                         fontWeight: FontWeight.w600,
                       ),

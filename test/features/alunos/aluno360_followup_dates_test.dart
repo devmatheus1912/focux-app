@@ -6,7 +6,8 @@ void main() {
     final ops = alunoFollowUpDateOptions(DateTime(2026, 9, 4, 18, 30));
     expect(ops.map((o) => o.days).toList(), alunoFollowUpDateHorizons);
     expect(ops.first.label, 'Hoje');
-    expect(ops.first.subtitle, '04/09/2026');
+    // Mesmo ano da referência: sem o ano.
+    expect(ops.first.subtitle, '04/09');
     expect(ops.first.date, DateTime(2026, 9, 4));
     expect(ops[1].label, 'Amanhã');
     expect(ops[1].date, DateTime(2026, 9, 5));

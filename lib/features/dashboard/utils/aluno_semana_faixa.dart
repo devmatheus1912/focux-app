@@ -5,11 +5,14 @@ import '../../treinos/models/rotina_fila.dart';
 import '../../treinos/utils/semana_da_fila.dart';
 
 /// Sete dias da semana de [hoje]. Vazia quando a ficha não tem dia de treino.
+/// Feito = dia com sessão concluída no [historico] ou em [diasComTreino] (o 360
+/// não tem o histórico do aluno, só a aderência dos últimos 7 dias).
 List<FxWeekDay> faixaDaSemana(
   RotinaFila rotina,
   List<ExecucaoTreino> historico,
-  DateTime hoje,
-) {
+  DateTime hoje, {
+  Iterable<DateTime> diasComTreino = const [],
+}) {
   final dias = semanaDaFila(rotina);
   bool temTreino(DiaDaSemana d) =>
       !d.descanso && d.sessoes.any((s) => s.nome.trim().isNotEmpty);
@@ -20,6 +23,7 @@ List<FxWeekDay> faixaDaSemana(
     for (final h in historico)
       if (normalizeTreinoStatus(h.status) == treinoStatusConcluido)
         if (_dia(h.concluidoEm) case final d?) d,
+    for (final d in diasComTreino) DateTime(d.year, d.month, d.day),
   };
 
   final hojeTreina = temTreino(dias[hoje.weekday - 1]);
@@ -48,6 +52,16 @@ List<FxWeekDay> faixaDaSemana(
         proximo: proximo == i + 1,
       ),
   ];
+}
+
+/// Dias com treino da aderência do 360 (`TREINOU` ou check-in no dia).
+Iterable<DateTime> diasComTreinoDaAderencia(Iterable<({String data, int checkins, String? status})> dias) sync* {
+  for (final d in dias) {
+    final treinou = d.checkins > 0 || (d.status ?? '').toUpperCase() == 'TREINOU';
+    if (!treinou) continue;
+    final dia = _dia(d.data);
+    if (dia != null) yield dia;
+  }
 }
 
 DateTime? _dia(String? iso) {

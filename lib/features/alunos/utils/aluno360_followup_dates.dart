@@ -14,10 +14,12 @@ class AlunoFollowUpDateOption {
 
 const alunoFollowUpDateHorizons = [0, 1, 3, 7, 14, 30];
 
-String alunoFollowUpDateLabel(DateTime date) {
+/// "01/11"; o ano só aparece quando não é o ano corrente.
+String alunoFollowUpDateLabel(DateTime date, {DateTime? agora}) {
   final d = date.day.toString().padLeft(2, '0');
   final m = date.month.toString().padLeft(2, '0');
-  return '$d/$m/${date.year}';
+  final ano = (agora ?? DateTime.now()).year;
+  return date.year == ano ? '$d/$m' : '$d/$m/${date.year}';
 }
 
 String alunoFollowUpHorizonLabel(int days) {
@@ -39,7 +41,10 @@ List<AlunoFollowUpDateOption> alunoFollowUpDateOptions(DateTime now) {
         days: days,
         date: today.add(Duration(days: days)),
         label: alunoFollowUpHorizonLabel(days),
-        subtitle: alunoFollowUpDateLabel(today.add(Duration(days: days))),
+        subtitle: alunoFollowUpDateLabel(
+          today.add(Duration(days: days)),
+          agora: now,
+        ),
       ),
   ];
 }

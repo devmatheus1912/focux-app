@@ -48,6 +48,7 @@ class FichaSemana extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = S.of(context);
     final nomes = nomesDosDias(s);
+    final previstos = nomesDaSequencia(dias);
     return Column(
       children: [
         for (final (i, dia) in dias.indexed)
@@ -60,7 +61,12 @@ class FichaSemana extends StatelessWidget {
               descansoLabel: s.rotinaDescanso,
               adicionarLabel: s.rotinaAdicionarTreino,
               segundoTreinoLabel: s.rotinaSegundoTreino,
-              segueLabel: dia.segueSequencia ? s.rotinaSegueSequencia : null,
+              segueLabel: !dia.segueSequencia
+                  ? null
+                  : previstos[dia.dia] ?? s.rotinaSegueSequencia,
+              segueSubtitulo: dia.segueSequencia && previstos[dia.dia] != null
+                  ? s.rotinaSegueSequencia
+                  : null,
               onAdicionar: ocupado || onAdicionar == null
                   ? null
                   : () => onAdicionar!(dia.dia),

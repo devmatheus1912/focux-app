@@ -736,7 +736,7 @@ class _ConversationBlockedBar extends StatelessWidget {
           Expanded(
             child: Text(
               message,
-              style: TextStyle(color: mute, fontSize: 13, height: 1.35),
+              style: TextStyle(color: mute, fontSize: TokensStrip.fontBodySm, height: 1.35),
             ),
           ),
         ],

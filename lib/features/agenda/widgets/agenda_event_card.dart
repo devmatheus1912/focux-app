@@ -95,7 +95,7 @@ class AgendaEventCard extends StatelessWidget {
                     time,
                     style: FocuxHubTypography.body(
                       color: sobre.ink,
-                    ).copyWith(fontWeight: FontWeight.w800),
+                    ).copyWith(fontWeight: FontWeight.w700),
                   ),
                 ],
               ),
@@ -120,7 +120,7 @@ class AgendaEventCard extends StatelessWidget {
           time,
           style: FocuxHubTypography.body(
             color: chrome.ink,
-          ).copyWith(fontWeight: FontWeight.w800),
+          ).copyWith(fontWeight: FontWeight.w700),
         ),
         onTap: onTap,
       ),

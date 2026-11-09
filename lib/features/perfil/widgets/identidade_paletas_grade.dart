@@ -77,7 +77,7 @@ class IdentidadePaletasGrade extends StatelessWidget {
                   textAlign: TextAlign.center,
                   overflow: TextOverflow.ellipsis,
                   style: FocuxHubTypography.chip(chrome.ink).copyWith(
-                    fontWeight: escolhida ? FontWeight.w800 : FontWeight.w600,
+                    fontWeight: escolhida ? FontWeight.w700 : FontWeight.w600,
                     height: 1.15,
                   ),
                 ),

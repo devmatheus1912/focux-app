@@ -26,7 +26,7 @@ void main() {
     final screen = readScreenSourceBundle(
       'lib/features/notificacoes/screens/notificacoes_screen.dart',
     );
-    expect(screen, contains('unread ? FontWeight.w700 : FontWeight.w500'));
+    expect(screen, contains('unread ? FontWeight.w700 : FontWeight.w600'));
     expect(screen, contains("ValueKey('notificacao-nao-lida')"));
     expect(screen, contains('notificacaoNaoLidasLabel(unreadCount)'));
     expect(screen, isNot(contains('inbox.total),')));

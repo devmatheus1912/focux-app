@@ -14,6 +14,15 @@ Future<void> _dispatchTreinoDetailAction({
   final repo = ref.read(treinoRepositoryProvider);
 
   switch (action) {
+    case 'objetivo':
+      await _escolherObjetivoDaSessao(
+        context: context,
+        ref: ref,
+        treino: treino,
+        treinoId: treinoId,
+        alunoId: alunoId,
+        modeloId: modeloId,
+      );
     case 'add':
       AnalyticsService.instance.track(
         ProductEvents.treinoDetailAddTapped,

@@ -72,7 +72,7 @@ class SuaSemanaRow extends StatelessWidget {
         : descanso
         ? s.rotinaDescanso
         : nomes.join(' · ');
-    final peso = hoje ? FontWeight.w700 : FontWeight.w500;
+    final peso = hoje ? FontWeight.w700 : FontWeight.w600;
     final cor =
         descanso || naoFeito
             ? theme.colorScheme.onSurfaceVariant

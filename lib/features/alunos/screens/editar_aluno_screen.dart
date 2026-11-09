@@ -278,7 +278,7 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
                                           style: FocuxHubTypography.cardTitle(
                                             color: primary,
                                           ).copyWith(
-                                            fontWeight: FontWeight.w800,
+                                            fontWeight: FontWeight.w700,
                                           ),
                                         ),
                                       ),

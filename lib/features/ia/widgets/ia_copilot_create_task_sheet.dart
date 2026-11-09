@@ -85,8 +85,8 @@ class _IaCopilotCreateTaskSheet extends StatelessWidget {
                 'Ação',
                 style: TextStyle(
                   color: ink,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w900,
+                  fontSize: TokensStrip.fontRotulo,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
               const SizedBox(height: TokensStrip.s2),
@@ -113,7 +113,7 @@ class _IaCopilotCreateTaskSheet extends StatelessWidget {
                 ),
                 style: TextStyle(
                   color: ink,
-                  fontSize: 13,
+                  fontSize: TokensStrip.fontBodySm,
                   fontWeight: FontWeight.w700,
                   height: 1.35,
                 ),
@@ -154,7 +154,7 @@ class _IaCopilotCreateTaskSheet extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: mute,
-                    fontSize: 11.5,
+                    fontSize: TokensStrip.fontMinimo,
                     fontWeight: FontWeight.w600,
                     height: 1.35,
                   ),

@@ -365,7 +365,7 @@ class _RecorrenciaAlunoScreenState
                                         recorrenciaValorLabel(assinatura.valor),
                                         style: FocuxHubTypography.metric(
                                           color: ShellChrome.forBrightness(context, isDark).ink,
-                                          fontSize: FocuxHubTypography.metricLg,
+                                          fontSize: TokensStrip.fontTitulo,
                                         ),
                                       ),
                                       const SizedBox(height: TokensStrip.s3),

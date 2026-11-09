@@ -209,7 +209,11 @@ class FxShellAppBar extends StatelessWidget implements PreferredSizeWidget {
     final titleStyle = TokensStrip.h2(
       color: ink,
       fontFamily: Theme.of(context).textTheme.bodyLarge?.fontFamily,
-    ).copyWith(fontSize: 17);
+    ).copyWith(
+      fontSize: TokensStrip.fontSecao,
+      fontWeight: FontWeight.w600,
+      height: 1.25,
+    );
     final titleWidget =
         subtitle == null
             ? Text(
@@ -239,7 +243,7 @@ class FxShellAppBar extends StatelessWidget implements PreferredSizeWidget {
                     color: mute,
                     fontFamily:
                         Theme.of(context).textTheme.bodyLarge?.fontFamily,
-                  ).copyWith(fontSize: 11.5, height: 1.1),
+                  ).copyWith(height: 1.2),
                 ),
               ],
             );
@@ -449,7 +453,7 @@ class FxSatelliteListTile extends StatelessWidget {
           style: FocuxHubTypography.body(
             color: muted ? mute : ink,
           ).copyWith(
-            fontWeight: muted ? FontWeight.w500 : FontWeight.w700,
+            fontWeight: muted ? FontWeight.w600 : FontWeight.w700,
             letterSpacing: -0.15,
           ),
         ),
@@ -459,7 +463,7 @@ class FxSatelliteListTile extends StatelessWidget {
                 : DefaultTextStyle(
                   style: FocuxHubTypography.bodyMuted(
                     color: mute,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                     height: 1.35,
                   ),
                   child: subtitle!,

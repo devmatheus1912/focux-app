@@ -48,8 +48,8 @@ class CheckinFeedbackChip extends StatelessWidget {
                 label,
                 style: TextStyle(
                   color: selected ? Colors.white : color,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w800,
+                  fontSize: TokensStrip.fontBodySm,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ],

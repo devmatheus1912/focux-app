@@ -219,7 +219,7 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
                             'Funil de Vendas: arraste cards entre colunas conforme cada contato avanca.',
                             style: TextStyle(
                               color: ink,
-                              fontSize: 13,
+                              fontSize: TokensStrip.fontBodySm,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -304,13 +304,13 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
                                         style: FocuxHubTypography.metric(
                                           color: ink,
                                           fontSize:
-                                              FocuxHubTypography.metricMd,
+                                              TokensStrip.fontSecao,
                                         ),
                                       ),
                                       Text(
                                         leadStatusLabel(col),
                                         style: TextStyle(
-                                          fontSize: 10.5,
+                                          fontSize: TokensStrip.fontMinimo,
                                           fontWeight: FontWeight.w600,
                                           color: mute,
                                         ),
@@ -378,7 +378,7 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
                                               child: Text(
                                                 leadStatusLabel(col),
                                                 style: TextStyle(
-                                                  fontSize: 13,
+                                                  fontSize: TokensStrip.fontBodySm,
                                                   fontWeight: FontWeight.w700,
                                                   color: ink,
                                                 ),
@@ -397,7 +397,7 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
                                             Text(
                                               '(${leads.length})',
                                               style: TextStyle(
-                                                fontSize: 11,
+                                                fontSize: TokensStrip.fontMinimo,
                                                 color: mute,
                                                 fontFamily: 'monospace',
                                               ),
@@ -443,9 +443,9 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
                                                     Text(
                                                       'Adicionar',
                                                       style: TextStyle(
-                                                        fontSize: 12,
+                                                        fontSize: TokensStrip.fontRotulo,
                                                         fontWeight:
-                                                            FontWeight.w500,
+                                                            FontWeight.w600,
                                                         color: mute,
                                                       ),
                                                     ),
@@ -554,7 +554,7 @@ class _LeadCard extends StatelessWidget {
                   title.isNotEmpty ? title[0].toUpperCase() : '?',
                   style: TextStyle(
                     color: FocuxContrast.readableOn(isDark ? brandDeep : brand),
-                    fontSize: 13,
+                    fontSize: TokensStrip.fontBodySm,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -564,7 +564,7 @@ class _LeadCard extends StatelessWidget {
                 child: Text(
                   title,
                   style: TextStyle(
-                    fontSize: 13,
+                    fontSize: TokensStrip.fontBodySm,
                     fontWeight: FontWeight.w600,
                     color: ink,
                   ),
@@ -628,7 +628,7 @@ class _LeadCard extends StatelessWidget {
                       Text(
                         'WhatsApp',
                         style: TextStyle(
-                          fontSize: 11,
+                          fontSize: TokensStrip.fontMinimo,
                           fontWeight: FontWeight.w600,
                           color: brand,
                         ),

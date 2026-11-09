@@ -357,8 +357,8 @@ class _MotivoTile extends StatelessWidget {
                   child: Text(
                     motivo.label,
                     style: TokensStrip.body(color: ink).copyWith(
-                      fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                      fontSize: 15,
+                      fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+                      fontSize: TokensStrip.fontBody,
                     ),
                   ),
                 ),
@@ -438,8 +438,8 @@ class _OfertaCard extends StatelessWidget {
                     Text(
                       oferta.titulo,
                       style: TokensStrip.body(color: ink).copyWith(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                        fontSize: TokensStrip.fontSecao,
                         height: 1.25,
                       ),
                     ),
@@ -449,7 +449,7 @@ class _OfertaCard extends StatelessWidget {
                         'Finalize ${subscriptionChannelWith(ChannelPreposition.em)}',
                         style: TokensStrip.bodyMuted(
                           color: secondary,
-                        ).copyWith(fontSize: 12, fontWeight: FontWeight.w600),
+                        ).copyWith(fontSize: TokensStrip.fontRotulo, fontWeight: FontWeight.w600),
                       ),
                     ],
                   ],
@@ -462,7 +462,7 @@ class _OfertaCard extends StatelessWidget {
             oferta.descricao,
             style: TokensStrip.bodyMuted(
               color: secondary,
-            ).copyWith(fontSize: 14, height: 1.45),
+            ).copyWith(fontSize: TokensStrip.fontBody, height: 1.45),
           ),
           const SizedBox(height: 16),
           TextField(
@@ -476,7 +476,7 @@ class _OfertaCard extends StatelessWidget {
             ).copyWith(
               counterStyle: TokensStrip.bodyMuted(
                 color: secondary,
-              ).copyWith(fontSize: 11),
+              ).copyWith(fontSize: TokensStrip.fontMinimo),
             ),
             onChanged: onFeedback,
           ),

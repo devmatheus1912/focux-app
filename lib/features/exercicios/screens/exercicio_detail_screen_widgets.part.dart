@@ -55,8 +55,8 @@ class _CompactPill extends StatelessWidget {
             label,
             style: TextStyle(
               color: chrome.ink,
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
+              fontSize: TokensStrip.fontRotulo,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ],
@@ -117,8 +117,8 @@ class _SimpleInfoCard extends StatelessWidget {
                   title,
                   style: TextStyle(
                     color: ink,
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w900,
+                    fontSize: TokensStrip.fontBodySm,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
                 const SizedBox(height: 5),
@@ -235,8 +235,8 @@ class _CleanExpansion extends StatelessWidget {
             title,
             style: TextStyle(
               color: ink,
-              fontSize: 14,
-              fontWeight: FontWeight.w900,
+              fontSize: TokensStrip.fontBody,
+              fontWeight: FontWeight.w700,
             ),
           ),
           childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
@@ -284,8 +284,8 @@ class _PrescriptionReadinessPanel extends StatelessWidget {
                       'Prontidao para prescricao',
                       style: TextStyle(
                         color: ink,
-                        fontSize: 13.5,
-                        fontWeight: FontWeight.w900,
+                        fontSize: TokensStrip.fontBodySm,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -293,7 +293,7 @@ class _PrescriptionReadinessPanel extends StatelessWidget {
                       exercicio.mediaTrustLabel,
                       style: TextStyle(
                         color: mute,
-                        fontSize: 12.5,
+                        fontSize: TokensStrip.fontRotulo,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -307,7 +307,7 @@ class _PrescriptionReadinessPanel extends StatelessWidget {
             exercicio.mediaTrustDescription,
             style: TextStyle(
               color: ink.withValues(alpha: 0.82),
-              fontSize: 12.8,
+              fontSize: TokensStrip.fontRotulo,
               height: 1.35,
               fontWeight: FontWeight.w600,
             ),
@@ -373,8 +373,8 @@ class _ReadinessCheck extends StatelessWidget {
             label,
             style: TextStyle(
               color: ok ? color : fallback,
-              fontSize: 11.5,
-              fontWeight: FontWeight.w800,
+              fontSize: TokensStrip.fontMinimo,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ],
@@ -530,8 +530,8 @@ class _EditorialReviewPanel extends StatelessWidget {
                       'Curadoria editorial',
                       style: TextStyle(
                         color: ink,
-                        fontSize: 13.5,
-                        fontWeight: FontWeight.w900,
+                        fontSize: TokensStrip.fontBodySm,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -542,7 +542,7 @@ class _EditorialReviewPanel extends StatelessWidget {
                       ].join(' - '),
                       style: TextStyle(
                         color: mute,
-                        fontSize: 12.5,
+                        fontSize: TokensStrip.fontRotulo,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -557,7 +557,7 @@ class _EditorialReviewPanel extends StatelessWidget {
               notes!.trim(),
               style: TextStyle(
                 color: ink.withValues(alpha: 0.84),
-                fontSize: 12.5,
+                fontSize: TokensStrip.fontRotulo,
                 height: 1.35,
               ),
             ),
@@ -654,8 +654,8 @@ class _GuidanceCard extends StatelessWidget {
                   title,
                   style: TextStyle(
                     color: ink,
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w800,
+                    fontSize: TokensStrip.fontBodySm,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -663,7 +663,7 @@ class _GuidanceCard extends StatelessWidget {
                   text,
                   style: TextStyle(
                     color: ink.withValues(alpha: 0.82),
-                    fontSize: 12.8,
+                    fontSize: TokensStrip.fontRotulo,
                     height: 1.36,
                   ),
                 ),
@@ -713,8 +713,8 @@ class _MediaMetadataPanel extends StatelessWidget {
                   licensed ? 'Video licenciado' : 'Origem do video',
                   style: TextStyle(
                     color: ink,
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w900,
+                    fontSize: TokensStrip.fontBodySm,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -726,7 +726,7 @@ class _MediaMetadataPanel extends StatelessWidget {
                   ].join(' | '),
                   style: TextStyle(
                     color: mute,
-                    fontSize: 12.5,
+                    fontSize: TokensStrip.fontRotulo,
                     fontWeight: FontWeight.w700,
                   ),
                 ),

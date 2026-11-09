@@ -405,7 +405,7 @@ class _AgendaSlotPickerSheetState extends State<AgendaSlotPickerSheet> {
                                 ),
                       ).copyWith(
                         fontWeight:
-                            selected ? FontWeight.w800 : FontWeight.w600,
+                            selected ? FontWeight.w700 : FontWeight.w600,
                       ),
                     ),
                     if (ocupante != null)
@@ -418,7 +418,7 @@ class _AgendaSlotPickerSheetState extends State<AgendaSlotPickerSheet> {
                           style: FocuxHubTypography.bodyMuted(
                             color: chrome.mute,
                             fontWeight: FontWeight.w600,
-                          ).copyWith(fontSize: 10),
+                          ).copyWith(fontSize: TokensStrip.fontMinimo),
                         ),
                       ),
                   ],

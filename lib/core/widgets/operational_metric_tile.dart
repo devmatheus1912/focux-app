@@ -87,7 +87,7 @@ class OperationalMetricTile extends StatelessWidget {
                   label.toUpperCase(),
                   style: FocuxHubTypography.chip(
                     labelColor,
-                  ).copyWith(letterSpacing: 0.4, fontSize: dense ? 10 : null),
+                  ).copyWith(letterSpacing: 0.4, fontSize: dense ? TokensStrip.fontMinimo : null),
                 ),
               ),
               if (onInfo != null) ...[
@@ -116,8 +116,8 @@ class OperationalMetricTile extends StatelessWidget {
                     color: ink,
                     fontSize:
                         dense
-                            ? FocuxHubTypography.metricEm
-                            : FocuxHubTypography.metricMd,
+                            ? TokensStrip.fontSecao
+                            : TokensStrip.fontSecao,
                   ).copyWith(letterSpacing: 0.2),
                 ),
               ),
@@ -132,7 +132,7 @@ class OperationalMetricTile extends StatelessWidget {
                 color: hintColor,
                 fontWeight: FontWeight.w600,
                 height: 1.2,
-              ).copyWith(fontSize: dense ? 11.5 : null),
+              ).copyWith(fontSize: dense ? TokensStrip.fontMinimo : null),
             ),
         ],
       ),

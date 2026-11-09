@@ -47,7 +47,14 @@ class _SeloNivel extends StatelessWidget {
       children: [
         Icon(icone, size: 14, color: cor),
         const SizedBox(width: 4),
-        Text(rotulo, style: FocuxHubTypography.chip(cor)),
+        Flexible(
+          child: Text(
+            rotulo,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: FocuxHubTypography.chip(cor),
+          ),
+        ),
       ],
     );
   }

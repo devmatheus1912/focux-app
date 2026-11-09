@@ -237,7 +237,7 @@ class _CompareHero extends StatelessWidget {
             Text(
               preco,
               textAlign: TextAlign.center,
-              style: FocuxHubTypography.metric(color: ink, fontSize: 32),
+              style: FocuxHubTypography.metric(color: ink, fontSize: TokensStrip.fontDestaque),
             ),
             if (precoApoio case final apoio?)
               Text(
@@ -490,10 +490,12 @@ class _CompareCard extends StatelessWidget {
     ];
 
     final body = expand
-        ? ListView(
-            padding: EdgeInsets.zero,
+        ? SingleChildScrollView(
             physics: const ClampingScrollPhysics(),
-            children: [table, ...footer],
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [table, ...footer],
+            ),
           )
         : Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,

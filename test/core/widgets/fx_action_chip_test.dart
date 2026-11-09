@@ -119,7 +119,7 @@ void main() {
               child: Wrap(
                 children: [
                   FxActionChip(
-                    label: 'Falar com o personal',
+                    label: 'Falar com o personal sobre o treino de hoje',
                     accent: primary,
                     isDark: false,
                     maxLines: 2,
@@ -133,7 +133,7 @@ void main() {
       ),
     );
     final texto = tester.renderObject<RenderParagraph>(
-      find.text('Falar com o personal'),
+      find.text('Falar com o personal sobre o treino de hoje'),
     );
     expect(texto.text.style?.fontSize, 13);
     expect(texto.didExceedMaxLines, isFalse);

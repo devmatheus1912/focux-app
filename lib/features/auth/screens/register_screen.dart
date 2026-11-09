@@ -441,7 +441,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               Center(
                                 child: AuthTextLink(
                                   label: registerAjudaLabel(),
-                                  fontSize: 13.5,
+                                  fontSize: TokensStrip.fontBodySm,
                                   onTap: _abrirAjuda,
                                 ),
                               ),

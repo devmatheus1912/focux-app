@@ -37,7 +37,7 @@ class _StatusDoCadastro extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: FxSettingsLayout.subhead(
                 color: pronto ? ink : mute,
-              ).copyWith(fontWeight: FontWeight.w800),
+              ).copyWith(fontWeight: FontWeight.w700),
             ),
           ),
         ],

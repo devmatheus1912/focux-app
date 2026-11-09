@@ -365,7 +365,7 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
                   : relatorioAderenciaMediaLabel(taxa),
               style: FocuxHubTypography.metric(
                 color: sobre.ink,
-                fontSize: FocuxHubTypography.metricEm,
+                fontSize: TokensStrip.fontSecao,
               ),
             ),
           ),

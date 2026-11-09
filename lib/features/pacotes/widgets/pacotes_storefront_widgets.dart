@@ -228,8 +228,8 @@ class PacoteStorefrontCard extends StatelessWidget {
                   pacote.valor.format(),
                   style: FocuxHubTypography.metric(
                     color: ink,
-                    fontSize: FocuxHubTypography.metricLg,
-                    fontWeight: FontWeight.w800,
+                    fontSize: TokensStrip.fontTitulo,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ],

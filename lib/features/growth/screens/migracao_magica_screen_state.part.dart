@@ -285,7 +285,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                       Text(
                         migracaoAjudaDaFonte(_fonte),
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: TokensStrip.fontRotulo,
                           color: mute,
                           height: 1.35,
                         ),
@@ -300,7 +300,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                               child: Text(
                                 'Foto/print: Pro (${MigracaoFotoLimits.pro}/mês) ou Enterprise (${MigracaoFotoLimits.enterprise}/mês).',
                                 style: TextStyle(
-                                  fontSize: 11.5,
+                                  fontSize: TokensStrip.fontMinimo,
                                   color: mute,
                                   height: 1.35,
                                 ),
@@ -314,7 +314,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                               'Fotos este mês: ${plano.migracaoFotosUsadasMes}/$limite · '
                               '${ptCountLabel(plano.migracaoFotosRestantes, 'restante', 'restantes')}',
                               style: TextStyle(
-                                fontSize: 11.5,
+                                fontSize: TokensStrip.fontMinimo,
                                 fontWeight: FontWeight.w600,
                                 color: mute,
                                 height: 1.35,
@@ -349,7 +349,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                                 child: Text(
                                   _importedFileLabel!,
                                   style: TextStyle(
-                                    fontSize: 11.5,
+                                    fontSize: TokensStrip.fontMinimo,
                                     fontWeight: FontWeight.w600,
                                     color: brand,
                                   ),
@@ -405,7 +405,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                             maxLines: 8,
                             minLines: 4,
                             style: TextStyle(
-                              fontSize: 13,
+                              fontSize: TokensStrip.fontBodySm,
                               color: ink,
                               height: 1.6,
                             ),
@@ -553,7 +553,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                       return Text(
                         hint,
                         style: TextStyle(
-                          fontSize: 12.5,
+                          fontSize: TokensStrip.fontRotulo,
                           height: 1.35,
                           fontWeight: FontWeight.w600,
                           color:
@@ -623,7 +623,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                                 nome.isNotEmpty ? nome[0].toUpperCase() : '?',
                                 style: TextStyle(
                                   color: FocuxContrast.readableOn(isDark ? brandDeep : brand),
-                                  fontSize: 16,
+                                  fontSize: TokensStrip.fontBody,
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
@@ -636,7 +636,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                                   Text(
                                     nome,
                                     style: TextStyle(
-                                      fontSize: 14,
+                                      fontSize: TokensStrip.fontBody,
                                       fontWeight: FontWeight.w700,
                                       color: ink,
                                     ),
@@ -648,7 +648,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                                     Text(
                                       meta,
                                       style: TextStyle(
-                                        fontSize: 11.5,
+                                        fontSize: TokensStrip.fontMinimo,
                                         color: mute,
                                         height: 1.35,
                                       ),
@@ -700,14 +700,14 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                       migracaoIgnoradasReais(_ignorados, _amostrasIgnoradas),
                     ),
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: TokensStrip.fontBodySm,
                       fontWeight: FontWeight.w600,
                       color: mute,
                     ),
                   ),
                   subtitle: Text(
                     'Não pareciam alunos',
-                    style: TextStyle(fontSize: 11.5, color: mute),
+                    style: TextStyle(fontSize: TokensStrip.fontMinimo, color: mute),
                   ),
                   children: [
                     for (final linha in migracaoAmostrasReais(_amostrasIgnoradas))
@@ -719,7 +719,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                             linha,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(fontSize: 11.5, color: mute),
+                            style: TextStyle(fontSize: TokensStrip.fontMinimo, color: mute),
                           ),
                         ),
                       ),
@@ -743,7 +743,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
       child: Text(
         texto,
         style: TextStyle(
-          fontSize: 10.5,
+          fontSize: TokensStrip.fontMinimo,
           fontWeight: FontWeight.w700,
           color: EagleTokens.warn,
         ),
@@ -779,7 +779,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
           Text(
             'Colunas reconhecidas',
             style: TextStyle(
-              fontSize: 13,
+              fontSize: TokensStrip.fontBodySm,
               fontWeight: FontWeight.w700,
               color: ink,
             ),
@@ -787,7 +787,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
           const SizedBox(height: 2),
           Text(
             'Toque para trocar se algo veio na coluna errada.',
-            style: TextStyle(fontSize: 11.5, color: mute),
+            style: TextStyle(fontSize: TokensStrip.fontMinimo, color: mute),
           ),
           for (final (campo, idx) in campos)
             InkWell(
@@ -800,7 +800,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                       width: 76,
                       child: Text(
                         migracaoCampoLabel(campo),
-                        style: TextStyle(fontSize: 12.5, color: mute),
+                        style: TextStyle(fontSize: TokensStrip.fontRotulo, color: mute),
                       ),
                     ),
                     Expanded(
@@ -809,7 +809,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 13,
+                          fontSize: TokensStrip.fontBodySm,
                           fontWeight: FontWeight.w600,
                           color: idx == null ? mute : ink,
                         ),

@@ -1,3 +1,7 @@
+import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/tokens_strip.dart';
+import '../utils/agrupar_por_prefixo.dart';
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -70,7 +74,15 @@ class ExerciseLibraryPanel extends ConsumerStatefulWidget {
     this.onPreview,
     this.bottomPadding = 0,
     this.gruposIniciais = const {},
+    this.marcados = const {},
+    this.onMarcar,
   });
+
+  /// Marcados para adicionar juntos ("+" virou check).
+  final Set<int> marcados;
+
+  /// "+" de cada linha; nulo esconde o "+".
+  final ValueChanged<Exercicio>? onMarcar;
 
   /// Grupos da sessão ("A · Peito e tríceps"): já vêm marcados ao abrir.
   final Set<GrupoMuscular> gruposIniciais;
@@ -308,7 +320,7 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
       });
       FeedbackHelper.showSuccess(
         context,
-        makeFavorite ? 'Adicionado aos favoritos' : 'Removido dos favoritos',
+        makeFavorite ? 'Favoritado' : 'Removido dos favoritos',
       );
     } catch (e) {
       if (!mounted) return;
@@ -444,7 +456,8 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
     var offset = 0.0;
     for (final s in secoes) {
       if (s.letter == letra) break;
-      offset += _alturaCabecalho +
+      offset +=
+          _alturaCabecalho +
           s.items.length * _alturaLinha +
           FxSettingsLayout.groupGap;
     }
@@ -454,7 +467,10 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final ctx = _chavesDasLetras[letra]?.currentContext;
       if (ctx != null && ctx.mounted) {
-        Scrollable.ensureVisible(ctx, duration: const Duration(milliseconds: 120));
+        Scrollable.ensureVisible(
+          ctx,
+          duration: const Duration(milliseconds: 120),
+        );
       }
     });
   }
@@ -558,11 +574,12 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
                     selected: _filter.isActive,
                     primary: primary,
                     isDark: isDark,
-                    onTap: () => showExercisePickerFilterSheet(
-                      context,
-                      filter: _filter,
-                      onChanged: _onFilterChanged,
-                    ),
+                    onTap:
+                        () => showExercisePickerFilterSheet(
+                          context,
+                          filter: _filter,
+                          onChanged: _onFilterChanged,
+                        ),
                   ),
                 ],
               ),
@@ -570,7 +587,9 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
                 Padding(
                   padding: const EdgeInsets.only(top: 6),
                   child: Text(
-                    caption.secondary == null ? caption.primary : '${caption.primary} · ${caption.secondary}',
+                    caption.secondary == null
+                        ? caption.primary
+                        : '${caption.primary} · ${caption.secondary}',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ),
@@ -596,8 +615,9 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
                   ),
                 ),
               ),
+              // Bolha da letra sobre o trilho à direita, fora da coluna das fotos.
               Positioned(
-                left: FxSettingsLayout.pageInset,
+                right: 2,
                 top: 4,
                 child: IgnorePointer(
                   child: ValueListenableBuilder<String?>(
@@ -747,15 +767,18 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
       onPreview: widget.onPreview,
       onUpload: _handleUpload,
       onFavoriteToggle: _toggleFavorite,
+      marcados: widget.marcados,
+      onMarcar: widget.onMarcar,
       loadingMore: _loadingMore,
       bottomPadding: widget.bottomPadding,
-      rodape: widget.onCadastrar == null || _hasNext
-          ? null
-          : FxLinkRow(
-              label: 'Criar meu exercício',
-              icon: FxIcons.adicionar,
-              onTap: () => widget.onCadastrar!(null),
-            ),
+      rodape:
+          widget.onCadastrar == null || _hasNext
+              ? null
+              : FxLinkRow(
+                label: 'Criar meu exercício',
+                icon: FxIcons.adicionar,
+                onTap: () => widget.onCadastrar!(null),
+              ),
     );
   }
 }
@@ -788,8 +811,8 @@ class _LetraFixa extends StatelessWidget {
           letra,
           style: TextStyle(
             color: primary,
-            fontSize: 13,
-            fontWeight: FontWeight.w800,
+            fontSize: TokensStrip.fontBodySm,
+            fontWeight: FontWeight.w700,
           ),
         ),
       ),
@@ -816,7 +839,12 @@ class _GroupedExerciseList extends StatelessWidget {
     this.loadingMore = false,
     this.bottomPadding = 0,
     this.rodape,
+    this.marcados = const {},
+    this.onMarcar,
   });
+
+  final Set<int> marcados;
+  final ValueChanged<Exercicio>? onMarcar;
 
   /// Fim da lista ("Criar meu exercício"), só depois da última página.
   final Widget? rodape;
@@ -859,7 +887,10 @@ class _GroupedExerciseList extends StatelessWidget {
       itemBuilder: (context, sectionIndex) {
         if (sectionIndex >= sections.length) {
           if (!loadingMore && rodape != null) {
-            return Padding(padding: const EdgeInsets.only(top: 16), child: rodape);
+            return Padding(
+              padding: const EdgeInsets.only(top: 16),
+              child: rodape,
+            );
           }
           return const Padding(
             padding: EdgeInsets.symmetric(vertical: 16),
@@ -881,38 +912,77 @@ class _GroupedExerciseList extends StatelessWidget {
             header: section.letter,
             accent: primary,
             children: [
-              for (var i = 0; i < section.items.length; i++)
-                ExerciseLibraryRow(
-                  exercicio: section.items[i],
-                  searchQuery: searchQuery,
-                  alreadyInTreino: alreadyInTreinoIds.contains(
-                    section.items[i].id,
+              // 3+ seguidos com o mesmo começo: o começo vira cabeçalho fino.
+              for (final grupo in agruparPorPrefixo([
+                for (final e in section.items) e.nomeDisplay,
+              ])) ...[
+                if (grupo.prefixo != null)
+                  _CabecalhoDoPrefixo(texto: grupo.prefixo!),
+                for (final (i, texto) in grupo.itens)
+                  ExerciseLibraryRow(
+                    exercicio: section.items[i],
+                    titulo: grupo.prefixo == null ? null : texto,
+                    marcado: marcados.contains(section.items[i].id),
+                    onMarcar:
+                        onMarcar == null
+                            ? null
+                            : () => onMarcar!(section.items[i]),
+                    searchQuery: searchQuery,
+                    alreadyInTreino: alreadyInTreinoIds.contains(
+                      section.items[i].id,
+                    ),
+                    resumoNoTreino: resumoNoTreino[section.items[i].id],
+                    alerta: _alerta(section.items[i]),
+                    showDivider: i < section.items.length - 1,
+                    insetGroup: true,
+                    uploadEnabled: onUploadVideo != null && !uploading,
+                    onTap: () => onSelect(section.items[i]),
+                    onFavoriteToggle: () => onFavoriteToggle(section.items[i]),
+                    onPreviewThumb:
+                        !canPreviewExerciseMedia(section.items[i])
+                            ? null
+                            : onPreview != null
+                            ? () => onPreview!(section.items[i])
+                            : () => showExerciseMediaPreview(
+                              context,
+                              exercicio: section.items[i],
+                            ),
+                    onUploadVideo:
+                        onUploadVideo == null
+                            ? null
+                            : () => onUpload(section.items[i]),
                   ),
-                  resumoNoTreino: resumoNoTreino[section.items[i].id],
-                  alerta: _alerta(section.items[i]),
-                  showDivider: i < section.items.length - 1,
-                  insetGroup: true,
-                  uploadEnabled: onUploadVideo != null && !uploading,
-                  onTap: () => onSelect(section.items[i]),
-                  onFavoriteToggle: () => onFavoriteToggle(section.items[i]),
-                  onPreviewThumb:
-                      !canPreviewExerciseMedia(section.items[i])
-                          ? null
-                          : onPreview != null
-                          ? () => onPreview!(section.items[i])
-                          : () => showExerciseMediaPreview(
-                            context,
-                            exercicio: section.items[i],
-                          ),
-                  onUploadVideo:
-                      onUploadVideo == null
-                          ? null
-                          : () => onUpload(section.items[i]),
-                ),
+              ],
             ],
           ),
         );
       },
+    );
+  }
+}
+
+/// "Levantamento terra romeno (RDL)": começo comum das linhas de baixo.
+class _CabecalhoDoPrefixo extends StatelessWidget {
+  const _CabecalhoDoPrefixo({required this.texto});
+
+  final String texto;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    return ExcludeSemantics(
+      child: Padding(
+        padding: const EdgeInsets.only(
+          top: TokensStrip.s3,
+          bottom: TokensStrip.s1,
+        ),
+        child: Text(
+          texto,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+        ),
+      ),
     );
   }
 }

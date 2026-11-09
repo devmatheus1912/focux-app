@@ -24,9 +24,8 @@ void main() {
     expect(screen, contains('fx_horizontal_scroll_peek.dart'));
     expect(screen, contains('AlunoListCard'));
     expect(screen, contains('aluno_list_card.dart'));
-    expect(screen, contains("label: 'Ativo'"));
-    expect(screen, contains("label: 'Inativo'"));
-    expect(screen, contains("label: 'Bloqueado'"));
+    expect(screen, contains('alunoStatusAcoesDisponiveis'));
+    expect(screen, contains('alunoStatusAcaoLabel'));
     expect(screen, contains('alunosExclusaoFalhaMessage'));
     expect(screen, isNot(contains('catch (_) {}')));
     expect(screen, contains('alunosStatusAlteradosMessage'));

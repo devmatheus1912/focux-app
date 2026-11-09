@@ -224,7 +224,7 @@ class _HeroRiskNotice extends StatelessWidget {
                 style: Aluno360Layout.metaStyle(context).copyWith(
                   color: ink,
                   fontWeight: FontWeight.w700,
-                  fontSize: compact ? 11.5 : 12,
+                  fontSize: compact ? TokensStrip.fontMinimo : TokensStrip.fontRotulo,
                 ),
               ),
             ),
@@ -242,7 +242,7 @@ class _HeroRiskNotice extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: Aluno360Layout.metaStyle(
                     context,
-                  ).copyWith(color: mute, fontSize: compact ? 11 : 12),
+                  ).copyWith(color: mute, fontSize: compact ? TokensStrip.fontMinimo : TokensStrip.fontRotulo),
                 ),
               ),
             ],

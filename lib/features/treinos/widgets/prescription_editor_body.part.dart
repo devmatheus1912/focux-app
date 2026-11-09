@@ -4,8 +4,6 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
   late final Listenable _fieldsListenable;
   late String _presetId;
   late String _tipoSerie;
-  bool _showCarga = false;
-  bool _showRpeAlvo = false;
   bool _showNotes = false;
   bool _maisAberto = false;
   late bool _aplicarAoBloco;
@@ -30,13 +28,11 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
     _aplicarAoBloco = widget.aplicarAoBloco;
     _parametros = widget.parametrosIniciais;
     _maisAberto = maisDetalhesPreenchidos(
-      carga: widget.cargaCtrl.text,
+      carga: '',
       rpe: widget.rpeAlvoCtrl?.text ?? '',
       observacoes: widget.observacoesCtrl.text,
       tipoSerie: widget.tipoSerie,
     );
-    _showCarga = widget.cargaCtrl.text.trim().isNotEmpty;
-    _showRpeAlvo = widget.rpeAlvoCtrl?.text.trim().isNotEmpty == true;
     _showNotes = widget.observacoesCtrl.text.trim().isNotEmpty;
     _fieldsListenable = Listenable.merge([
       widget.seriesCtrl,
@@ -52,10 +48,6 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
   void _onFieldsChanged() {
     if (!mounted) return;
     setState(() {
-      if (widget.cargaCtrl.text.trim().isNotEmpty) _showCarga = true;
-      if (widget.rpeAlvoCtrl?.text.trim().isNotEmpty == true) {
-        _showRpeAlvo = true;
-      }
       if (widget.observacoesCtrl.text.trim().isNotEmpty) _showNotes = true;
     });
   }
@@ -127,21 +119,10 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
         ),
         const SizedBox(height: TokensStrip.s3),
       ],
+      // O objetivo é da sessão (cabeçalho do editor); aqui, só os números.
       FxSettingsGroup(
-        header: prescriptionGroupHeader,
         accent: widget.primary,
         children: [
-          if (widget.showPresets)
-            FxSettingsTile(
-              icon: FxIcons.meta,
-              label: prescriptionObjetivo,
-              value: selectedPreset.label,
-              mute: mute,
-              line: line,
-              accent: brand,
-              picker: true,
-              onTap: enabled ? _openObjetivoPicker : null,
-            ),
           _PrescriptionStepperRow(
             label: prescriptionSeries,
             icon: FxIcons.listaNumerada,
@@ -163,7 +144,7 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
           ),
           _PrescriptionChipsRow(
             label: prescriptionRepsLabel,
-            icon: FxIcons.treino,
+            icon: FxIcons.repetir,
             iconColor: brand,
             ink: ink,
             line: line,
@@ -183,43 +164,32 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
               onOutro: enabled ? () => _openRepsSheet() : null,
             ),
           ),
-          _PrescriptionStepperRow(
-            label: prescriptionDescanso,
-            icon: FxIcons.cronometro,
+          // Carga é o centro da progressão: fica junto da prescrição.
+          _PrescriptionValueRow(
+            label: prescriptionCarga,
+            icon: FxIcons.balanca,
             iconColor: brand,
-            value: '${restValue}s',
+            controller: widget.cargaCtrl,
+            hint: prescriptionSemCarga,
             line: line,
             ink: ink,
             mute: mute,
-            onDecrement:
-                enabled
-                    ? () => _setRest(
-                      adjustPrescriptionRestSeconds(restValue, -15),
-                    )
-                    : null,
-            onIncrement:
-                enabled
-                    ? () => _setRest(
-                      adjustPrescriptionRestSeconds(restValue, 15),
-                    )
-                    : null,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
             showDivider: true,
           ),
+          // Descanso só em chips, em ordem; valor fora do atalho entra no lugar.
           _PrescriptionChipsRow(
-            label: '',
-            icon: null,
+            label: prescriptionDescanso,
+            icon: FxIcons.cronometro,
             iconColor: brand,
             ink: ink,
             line: line,
             showDivider: false,
             chips: FxQuickChips<int>(
-              itens: atalhosDescansoSeg(widget.bloco),
+              itens: descansoComValorNoLugar(widget.bloco, restValue),
               selecionado: restValue,
-              rotuloDe: (v) => '${v}s',
-              outroSelecionado: !descansoEhAtalho(widget.bloco, restValue),
-              outroRotulo: descansoEhAtalho(widget.bloco, restValue)
-                  ? 'Outro'
-                  : '${restValue}s',
+              rotuloDe: (v) => '$v s',
+              outroRotulo: 'Outro',
               onSelecionar: (v) {
                 if (enabled) _setRest(v);
               },
@@ -228,6 +198,10 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
           ),
         ],
       ),
+      if (widget.gruposDeSerie != null) ...[
+        const SizedBox(height: FxSettingsLayout.groupGap),
+        widget.gruposDeSerie!,
+      ],
       const SizedBox(height: FxSettingsLayout.groupGap),
       _metodo(),
       if (widget.outrosNoBloco > 0 &&
@@ -238,9 +212,7 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
             FxSettingsTile(
               icon: FxIcons.checklist,
               label: 'Aplicar a todo o bloco',
-              subtitle: widget.outrosNoBloco == 1
-                  ? 'Séries, repetições e descanso do outro exercício do bloco'
-                  : 'Séries, repetições e descanso dos outros ${widget.outrosNoBloco} do bloco',
+              subtitle: prescricaoAplicarAoBlocoTexto(widget.nomesNoBloco, widget.outrosNoBloco),
               value: '',
               mute: mute,
               line: line,
@@ -256,6 +228,7 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
                       }
                     : null,
               ),
+              // A linha toda liga e desliga (sem seta: o interruptor já diz).
               onTap: enabled
                   ? () {
                       final v = !_aplicarAoBloco;
@@ -294,64 +267,34 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
         header: prescriptionMaisDetalhes,
         accent: widget.primary,
         children: [
-          if (_showCarga)
-            _PrescriptionValueRow(
-              label: prescriptionCarga,
-              icon: FxIcons.balanca,
+          if (widget.rpeAlvoCtrl != null)
+            _PrescriptionChipsRow(
+              label: prescriptionRpe,
+              icon: FxIcons.velocidade,
               iconColor: brand,
-              controller: widget.cargaCtrl,
-              hint: prescriptionOpcional,
-              line: line,
               ink: ink,
-              mute: mute,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              showDivider: true,
-            )
-          else
-            _PrescriptionExpandRow(
-              label: prescriptionAddCarga,
-              icon: FxIcons.balanca,
-              iconColor: brand,
               line: line,
-              mute: mute,
-              onTap: () {
-                if (!enabled) return;
-                HapticFeedback.selectionClick();
-                setState(() => _showCarga = true);
-              },
               showDivider: true,
-            ),
-          if (widget.rpeAlvoCtrl != null) ...[
-            if (_showRpeAlvo)
-              _PrescriptionValueRow(
-                label: prescriptionRpe,
-                icon: FxIcons.velocidade,
-                iconColor: brand,
-                controller: widget.rpeAlvoCtrl!,
-                hint: prescriptionOpcional,
-                line: line,
-                ink: ink,
-                mute: mute,
-                keyboardType: TextInputType.number,
-                showDivider: _showNotes,
-              )
-            else
-              _PrescriptionExpandRow(
-                label: prescriptionAddRpe,
-                icon: FxIcons.velocidade,
-                iconColor: brand,
-                line: line,
-                mute: mute,
-                onTap: () {
+              chips: FxQuickChips<int>(
+                itens: const [6, 7, 8, 9],
+                selecionado: int.tryParse(widget.rpeAlvoCtrl!.text.trim()),
+                outroRotulo: prescriptionSemRpe,
+                outroSelecionado: widget.rpeAlvoCtrl!.text.trim().isEmpty,
+                onSelecionar: (v) {
                   if (!enabled) return;
+                  widget.rpeAlvoCtrl!.text = '$v';
                   HapticFeedback.selectionClick();
-                  setState(() => _showRpeAlvo = true);
+                  setState(() {});
                 },
-                showDivider: true,
+                onOutro: enabled
+                    ? () {
+                        widget.rpeAlvoCtrl!.clear();
+                        HapticFeedback.selectionClick();
+                        setState(() {});
+                      }
+                    : null,
               ),
-          ],
+            ),
           if (_showNotes)
             _PrescriptionNotesField(
               controller: widget.observacoesCtrl,

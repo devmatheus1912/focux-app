@@ -127,7 +127,7 @@ class _DenunciarSheetState extends State<_DenunciarSheet> {
                       denunciaMotivoLabel(l10n, m),
                       style: TextStyle(
                         color: ink,
-                        fontSize: 13.5,
+                        fontSize: TokensStrip.fontBodySm,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -158,7 +158,7 @@ class _DenunciarSheetState extends State<_DenunciarSheet> {
                 borderSide: BorderSide(color: brand, width: 1.2),
               ),
             ),
-            style: TextStyle(color: ink, fontSize: 13, height: 1.35),
+            style: TextStyle(color: ink, fontSize: TokensStrip.fontBodySm, height: 1.35),
           ),
           const SizedBox(height: TokensStrip.s4),
           FxLiquidPrimaryButton(

@@ -4,6 +4,7 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../utils/treino_atribuicao_prazo.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 /// Badge soft de prazo — paridade Hub (`_TinyBadge` / chips densos).
 class TreinoPrazoBadge extends StatelessWidget {
@@ -36,7 +37,7 @@ class TreinoPrazoBadge extends StatelessWidget {
           label,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: FocuxHubTypography.chip(color).copyWith(fontSize: 10),
+          style: FocuxHubTypography.chip(color).copyWith(fontSize: TokensStrip.fontMinimo),
         ),
       ),
     );

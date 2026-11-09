@@ -99,8 +99,8 @@ class _Tile extends StatelessWidget {
                       metrica.texto ?? '${metrica.valor}',
                       maxLines: 1,
                       style: FocuxHubTypography.cardTitle(color: corNumero).copyWith(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w800,
+                        fontSize: TokensStrip.fontTitulo,
+                        fontWeight: FontWeight.w700,
                         fontFeatures: const [FontFeature.tabularFigures()],
                       ),
                     ),

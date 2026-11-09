@@ -48,7 +48,7 @@ class _AnalyticsBody extends StatelessWidget {
                         '${formatBrDecimal(taxaInadimplencia)}%',
                         style: FocuxHubTypography.metric(
                           color: ink,
-                          fontSize: FocuxHubTypography.metricLg,
+                          fontSize: TokensStrip.fontTitulo,
                         ),
                       ),
                       const SizedBox(height: 6),
@@ -229,7 +229,7 @@ class _FunilCard extends StatelessWidget {
                 'Ativação: ${formatBrDecimal(funil.taxaAtivacao * 100)}%',
                 style: TextStyle(
                   color: ink,
-                  fontSize: 14,
+                  fontSize: TokensStrip.fontBody,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -281,12 +281,12 @@ class _FunilBar extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(step.label, style: TextStyle(color: mute, fontSize: 12)),
+              Text(step.label, style: TextStyle(color: mute, fontSize: TokensStrip.fontRotulo)),
               Text(
                 '${step.value} · ${(step.ratio * 100).toStringAsFixed(0)}%',
                 style: TextStyle(
                   color: ink,
-                  fontSize: 12,
+                  fontSize: TokensStrip.fontRotulo,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -326,7 +326,7 @@ class _PillTag extends StatelessWidget {
         label,
         style: TextStyle(
           color: primary,
-          fontSize: 11,
+          fontSize: TokensStrip.fontMinimo,
           fontWeight: FontWeight.w700,
         ),
       ),
@@ -367,7 +367,7 @@ class _WauChart extends StatelessWidget {
                 'Usuários ativos / semana',
                 style: TextStyle(
                   color: ink,
-                  fontSize: 15,
+                  fontSize: TokensStrip.fontBody,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -375,7 +375,7 @@ class _WauChart extends StatelessWidget {
                 'pico: ${wau.map((e) => e.usuarios).reduce(max)}',
                 style: TextStyle(
                   color: primary,
-                  fontSize: 11,
+                  fontSize: TokensStrip.fontMinimo,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -405,7 +405,7 @@ class _WauChart extends StatelessWidget {
                                 '${entry.value.usuarios}',
                                 style: TextStyle(
                                   color: ink,
-                                  fontSize: 9.5,
+                                  fontSize: TokensStrip.fontMinimo,
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
@@ -444,7 +444,7 @@ class _WauChart extends StatelessWidget {
                               semana,
                               style: TextStyle(
                                 color: isLast ? ink : mute,
-                                fontSize: 9,
+                                fontSize: TokensStrip.fontMinimo,
                                 fontWeight:
                                     isLast ? FontWeight.w700 : FontWeight.w400,
                               ),
@@ -495,7 +495,7 @@ class _CohortTable extends StatelessWidget {
                   'Mês',
                   style: TextStyle(
                     color: mute,
-                    fontSize: 11,
+                    fontSize: TokensStrip.fontMinimo,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -506,7 +506,7 @@ class _CohortTable extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: mute,
-                    fontSize: 11,
+                    fontSize: TokensStrip.fontMinimo,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -517,7 +517,7 @@ class _CohortTable extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: primary,
-                    fontSize: 11,
+                    fontSize: TokensStrip.fontMinimo,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -528,7 +528,7 @@ class _CohortTable extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: EagleTokens.good,
-                    fontSize: 11,
+                    fontSize: TokensStrip.fontMinimo,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -547,7 +547,7 @@ class _CohortTable extends StatelessWidget {
                       c.mesEntrada,
                       style: TextStyle(
                         color: ink,
-                        fontSize: 12,
+                        fontSize: TokensStrip.fontRotulo,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -556,7 +556,7 @@ class _CohortTable extends StatelessWidget {
                     child: Text(
                       '${c.cadastrados}',
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: mute, fontSize: 12),
+                      style: TextStyle(color: mute, fontSize: TokensStrip.fontRotulo),
                     ),
                   ),
                   Expanded(
@@ -597,7 +597,7 @@ class _RetencaoBadge extends StatelessWidget {
           '${value.toStringAsFixed(0)}%',
           style: TextStyle(
             color: color,
-            fontSize: 11,
+            fontSize: TokensStrip.fontMinimo,
             fontWeight: FontWeight.w700,
           ),
         ),

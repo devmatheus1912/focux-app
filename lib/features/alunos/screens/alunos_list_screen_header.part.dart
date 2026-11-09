@@ -92,7 +92,7 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                               textInputAction: TextInputAction.search,
                               cursorColor: primary,
                               style: FocuxHubTypography.body(color: ink).copyWith(
-                                fontWeight: FontWeight.w500,
+                                fontWeight: FontWeight.w600,
                               ),
                               decoration: InputDecoration(
                                 filled: false,
@@ -103,7 +103,7 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                                 hintText: context.alunosL10n.alunosSearchHint,
                                 hintStyle: FocuxHubTypography.body(
                                   color: mute,
-                                ).copyWith(fontWeight: FontWeight.w500),
+                                ).copyWith(fontWeight: FontWeight.w600),
                                 border: InputBorder.none,
                                 enabledBorder: InputBorder.none,
                                 focusedBorder: InputBorder.none,
@@ -248,6 +248,6 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
     AlunoFiltro.inadimplentes => context.alunosL10n.alunosFilterOverdue,
     AlunoFiltro.risco => context.alunosL10n.alunosFilterHighRisk,
     AlunoFiltro.novos => context.alunosL10n.alunosFilterInvites,
-    AlunoFiltro.inativos => 'Inativos',
+    AlunoFiltro.inativos => 'Pausados',
   };
 }

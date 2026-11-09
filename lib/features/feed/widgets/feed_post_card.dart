@@ -310,7 +310,7 @@ class FeedTypeBadge extends StatelessWidget {
       child: Text(
         feedTipoLabel(tipo),
         style: TextStyle(
-          fontSize: 10,
+          fontSize: TokensStrip.fontMinimo,
           color: color,
           fontWeight: FontWeight.w700,
         ),
@@ -353,8 +353,8 @@ class FeedPostAuthorHeader extends StatelessWidget {
                   fxInitials(name),
                   style: TextStyle(
                     color: primary,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
+                    fontSize: TokensStrip.fontRotulo,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
         ),
@@ -369,7 +369,7 @@ class FeedPostAuthorHeader extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: FocuxHubTypography.bodyMuted(
                   color: Theme.of(context).colorScheme.onSurface,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
               Text(

@@ -202,7 +202,7 @@ class AuthWordmark extends ConsumerWidget {
                     color: Colors.white.withValues(alpha: 0.88),
                   ).copyWith(
                     fontSize: taglineSize,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                     height: 1.45,
                   ),
                 ),
@@ -230,7 +230,7 @@ class AuthWordmark extends ConsumerWidget {
             color: Colors.white.withValues(alpha: 0.88),
           ).copyWith(
             fontSize: taglineSize,
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w600,
             height: 1.45,
           ),
         ),
@@ -301,8 +301,8 @@ class AuthRoleToggle extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: selected ? 1.0 : 0.82),
-                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                  fontSize: 13,
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+                  fontSize: TokensStrip.fontBodySm,
                 ),
               ),
             ),

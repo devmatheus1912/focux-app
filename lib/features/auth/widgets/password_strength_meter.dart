@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/fx_icons.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 class PasswordStrengthMeter extends StatelessWidget {
   const PasswordStrengthMeter({
@@ -94,7 +95,7 @@ class PasswordStrengthMeter extends StatelessWidget {
               strength.label,
               style: TextStyle(
                 color: password.isEmpty ? textColor : strength.color,
-                fontSize: 11.5,
+                fontSize: TokensStrip.fontMinimo,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -104,8 +105,8 @@ class PasswordStrengthMeter extends StatelessWidget {
                 'min. $minLength caracteres',
                 style: TextStyle(
                   color: textColor,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
+                  fontSize: TokensStrip.fontMinimo,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],

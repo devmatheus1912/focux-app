@@ -131,7 +131,7 @@ class _Dia extends StatelessWidget {
           nome,
           style: FocuxHubTypography.cardSubtitle(
             color: dia.hoje ? tinta : suave,
-          ).copyWith(fontWeight: dia.hoje ? FontWeight.w700 : FontWeight.w500),
+          ).copyWith(fontWeight: dia.hoje ? FontWeight.w700 : FontWeight.w600),
         ),
         const SizedBox(height: TokensStrip.s1),
         Container(
@@ -167,7 +167,7 @@ class _Dia extends StatelessWidget {
                           dia.letra!,
                           style: FocuxHubTypography.cardSubtitle(
                             color: sobre ?? Colors.white,
-                          ).copyWith(fontWeight: FontWeight.w800),
+                          ).copyWith(fontWeight: FontWeight.w700),
                         ),
                       ))
                   : null,

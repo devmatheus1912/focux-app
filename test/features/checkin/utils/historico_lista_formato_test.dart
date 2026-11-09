@@ -83,4 +83,11 @@ void main() {
     expect(exercicioDeAjuda('Barra fixa assistida'), isTrue);
     expect(exercicioDeAjuda('Agachamento livre'), isFalse);
   });
+
+  test('parcial sem nenhuma série: registrado sem séries, nunca "0 de 16"', () {
+    expect(
+      detalhe(sessao(feitas: 0, planejadas: 16, parcial: true)),
+      s.treinosSemSeries,
+    );
+  });
 }

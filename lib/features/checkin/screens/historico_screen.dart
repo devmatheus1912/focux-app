@@ -23,6 +23,9 @@ import '../utils/historico_semanas.dart';
 import '../widgets/historico_lista_widgets.dart';
 import '../widgets/treinos_hub_rows.dart';
 import '../../../core/theme/fx_icons.dart';
+import '../../dashboard/utils/aluno_home_texts.dart';
+import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/theme/shell_chrome.dart';
 
 /// Sessões concluídas, semana a semana. Cada linha abre a própria sessão.
 class HistoricoCheckinScreen extends ConsumerStatefulWidget {
@@ -61,13 +64,26 @@ class _HistoricoCheckinScreenState
     final s = S.of(context);
     final listaAsync = ref.watch(historicoListaProvider(_treinoId));
     final home = ref.watch(alunoDashboardHomeProvider).value;
-    final ganho = home == null
+    // O cartão é de carga (número curto à direita). Sem carga que valha
+    // (nenhuma, ou exercício de ajuda), os recordes viram uma linha simples.
+    final destaque = home?.destaqueExercicio;
+    final temCarga = destaque != null && !exercicioDeAjuda(destaque.nome);
+    final ultimaData =
+        home == null || home.recordes.isEmpty ? null : home.recordes.first.data;
+    final ganho = home == null || !temCarga
         ? null
         : alunoEvolucaoLinha(
             s,
-            destaque: home.destaqueExercicio,
+            destaque: destaque,
             recordesMes: home.recordesMes,
-            ultimaData: home.recordes.isEmpty ? null : home.recordes.first.data,
+            ultimaData: ultimaData,
+          );
+    final recordes = home == null || temCarga
+        ? null
+        : alunoRecordesRodape(
+            s,
+            recordesMes: home.recordesMes,
+            ultimaData: ultimaData,
           );
     final fichas = historicoFichasFiltro(home?.treinos ?? const []);
 
@@ -99,6 +115,24 @@ class _HistoricoCheckinScreenState
                   0,
                 ),
                 child: HistoricoGanhoCard(linha: ganho),
+              ),
+            if (recordes != null)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  TokensStrip.s4,
+                  TokensStrip.s3,
+                  TokensStrip.s4,
+                  0,
+                ),
+                child: Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Text(
+                    recordes,
+                    style: FocuxHubTypography.bodyMuted(
+                      color: ShellChrome.of(context).mute,
+                    ),
+                  ),
+                ),
               ),
             if (fichas.isNotEmpty)
               Align(

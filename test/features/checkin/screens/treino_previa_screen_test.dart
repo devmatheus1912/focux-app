@@ -212,7 +212,7 @@ void main() {
     expect(find.text('Treino registrado'), findsOneWidget);
 
     expect(find.text('Ver detalhes'), findsNothing);
-    await tester.tap(find.text('Concluir'));
+    await tester.tap(find.text('Voltar aos treinos'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 600));
     expect(find.text('abrir'), findsOneWidget);

@@ -108,6 +108,8 @@ class PrescriptionEditorSheet extends StatefulWidget {
     this.enabled = true,
     this.bloco = 'TRABALHO',
     this.outrosNoBloco = 0,
+    this.nomesNoBloco = const [],
+    this.gruposDeSerie,
     this.aplicarAoBloco = false,
     this.onAplicarAoBlocoChanged,
     this.parametrosIniciais = const ParametrosDoMetodo(),
@@ -150,6 +152,13 @@ class PrescriptionEditorSheet extends StatefulWidget {
 
   /// Bloco do exercício: define os atalhos de repetições e descanso.
   final String bloco;
+
+  /// Nomes dos outros exercícios do bloco (subtítulo do "Aplicar a todo o bloco").
+  final List<String> nomesNoBloco;
+
+  /// Aquecimento, ajuste e back-off do exercício (grupos de séries), abaixo
+  /// da prescrição das válidas.
+  final Widget? gruposDeSerie;
 
   /// Outros exercícios do mesmo bloco (0 = sem "Aplicar a todo o bloco").
   final int outrosNoBloco;

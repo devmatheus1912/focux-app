@@ -335,7 +335,7 @@ class _NpsFocusCard extends StatelessWidget {
             formatBrDecimal(resumo.npsScore),
             style: FocuxHubTypography.metric(
               color: chrome.ink,
-              fontSize: FocuxHubTypography.metricLg,
+              fontSize: TokensStrip.fontTitulo,
             ),
           ),
           const SizedBox(height: 6),

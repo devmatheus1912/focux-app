@@ -124,7 +124,7 @@ void main() {
         ),
         false,
       );
-      expect(badge.label, 'Inativo');
+      expect(badge.label, 'Pausado');
     });
 
     test('Inadimplente ainda vence Inativo', () {

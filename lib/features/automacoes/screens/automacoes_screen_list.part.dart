@@ -82,7 +82,7 @@ extension on _AutomacoesScreenState {
                       t.nome,
                       style: FocuxHubTypography.metric(
                         color: Theme.of(context).colorScheme.onSurface,
-                        fontSize: FocuxHubTypography.metricLg,
+                        fontSize: TokensStrip.fontTitulo,
                       ),
                     ),
                     const SizedBox(height: 6),

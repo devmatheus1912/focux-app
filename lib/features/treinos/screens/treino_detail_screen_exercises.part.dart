@@ -13,7 +13,11 @@ class _TreinoListaUnica extends StatefulWidget {
   final TreinoRepository repo;
   final WidgetRef ref;
   final Map<String, String> nomesDosBlocos;
-  final Future<void> Function(TreinoExercicioItem item) onEditPrescription;
+  final Future<void> Function(
+    TreinoExercicioItem item, [
+    String? adicionarPapel,
+  ])
+  onEditPrescription;
   final void Function(String bloco) onAdd;
 
   const _TreinoListaUnica({
@@ -322,10 +326,23 @@ class _TreinoListaUnicaState extends State<_TreinoListaUnica> {
             rotulo: 'Editar prescrição',
             icone: FxIcons.anotar,
           ),
+          // Atalhos dos grupos de série: abrem a folha com o grupo já posto.
+          if (!te.seriesLinhas.any((l) => l.papel == PapelDaSerie.aquecimento))
+            FxActionItem(
+              valor: 'add-aquecimento',
+              rotulo: 'Adicionar aquecimento',
+              icone: FxIcons.adicionar,
+            ),
+          if (!te.seriesLinhas.any((l) => l.papel == PapelDaSerie.backoff))
+            FxActionItem(
+              valor: 'add-backoff',
+              rotulo: 'Adicionar back-off',
+              icone: FxIcons.adicionar,
+            ),
           FxActionItem(
             valor: 'move',
-            rotulo: 'Mover para…',
-            icone: FxIcons.mover,
+            rotulo: 'Mover de bloco',
+            icone: FxIcons.trocarVertical,
           ),
           FxActionItem(
             valor: 'duplicate',
@@ -375,6 +392,10 @@ class _TreinoListaUnicaState extends State<_TreinoListaUnica> {
     switch (acao) {
       case 'edit':
         await widget.onEditPrescription(te);
+      case 'add-aquecimento':
+        await widget.onEditPrescription(te, PapelDaSerie.aquecimento);
+      case 'add-backoff':
+        await widget.onEditPrescription(te, PapelDaSerie.backoff);
       case 'move':
         await _escolherBloco(te);
       case 'duplicate':
@@ -424,6 +445,8 @@ class _TreinoListaUnicaState extends State<_TreinoListaUnica> {
             key: ValueKey('secao-${linha.bloco}'),
             nome: widget.nomesDosBlocos[linha.bloco] ?? linha.bloco,
             vazia: vazia,
+            // Só o Principal com exercícios: o título não contrasta com nada.
+            semTitulo: linha.bloco == 'TRABALHO' && _soPrincipal,
             quantidade: _quantidadeNaSecao(index),
             isDark: widget.isDark,
             primary: widget.primary,
@@ -432,6 +455,7 @@ class _TreinoListaUnicaState extends State<_TreinoListaUnica> {
           );
         }
         final te = (linha as LinhaItem).item;
+        final nomeDoBloco = widget.nomesDosBlocos[te.bloco] ?? te.bloco;
         final primeiro = _linhas[index - 1] is LinhaSecao;
         final ultimo =
             index + 1 >= _linhas.length || _linhas[index + 1] is LinhaSecao;
@@ -450,46 +474,69 @@ class _TreinoListaUnicaState extends State<_TreinoListaUnica> {
         return Padding(
           key: ValueKey('item-${te.id}'),
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Container(
-            margin: EdgeInsets.only(
-              bottom: ultimo ? TreinosLayout.exerciseGroupGap : 0,
-            ),
-            decoration: fxListCardDecoration(
-              context,
-              accent: widget.primary,
-            ).copyWith(
-              borderRadius: BorderRadius.vertical(
-                top: Radius.circular(primeiro ? TokensStrip.rCard : 0),
-                bottom: Radius.circular(ultimo ? TokensStrip.rCard : 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(
+                decoration: fxListCardDecoration(
+                  context,
+                  accent: widget.primary,
+                ).copyWith(
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(primeiro ? TokensStrip.rCard : 0),
+                    bottom: Radius.circular(ultimo ? TokensStrip.rCard : 0),
+                  ),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: _ComColcheteDoCombinado(
+                  grupo: grupo != null,
+                  cabecalho:
+                      abreGrupo
+                          ? cabecalhoDoCombinado(
+                            rotulo: te.metodo.grupoRotulo,
+                            tamanho: doGrupo.length,
+                            voltas: te.series,
+                            descansoSegundos: doGrupo.last.descansoSegundos,
+                          )
+                          : null,
+                  primary: widget.primary,
+                  child: _ExercicioRow(
+                    te: te,
+                    reorderIndex: index,
+                    isDark: widget.isDark,
+                    isLast: ultimo,
+                    mostrarGrupo: _variosGrupos,
+                    onEditPrescription: () => widget.onEditPrescription(te),
+                    onMenu: () => _menu(te),
+                  ),
+                ),
               ),
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: _ComColcheteDoCombinado(
-              grupo: grupo != null,
-              cabecalho:
-                  abreGrupo
-                      ? cabecalhoDoCombinado(
-                        rotulo: te.metodo.grupoRotulo,
-                        tamanho: doGrupo.length,
-                        voltas: te.series,
-                        descansoSegundos: doGrupo.last.descansoSegundos,
-                      )
-                      : null,
-              primary: widget.primary,
-              child: _ExercicioRow(
-                te: te,
-                reorderIndex: index,
-                isDark: widget.isDark,
-                isLast: ultimo,
-                onEditPrescription: () => widget.onEditPrescription(te),
-                onMenu: () => _menu(te),
-              ),
-            ),
+              // Fim do bloco: adicionar fica embaixo, perto do polegar.
+              if (ultimo)
+                Padding(
+                  padding: const EdgeInsets.only(
+                    bottom: TreinosLayout.exerciseGroupGap,
+                  ),
+                  child: _LinhaDeAdicionar(
+                    rotulo: 'Adicionar ao ${nomeDoBloco.toLowerCase()}',
+                    primary: widget.primary,
+                    onTap: () => widget.onAdd(te.bloco),
+                  ),
+                ),
+            ],
           ),
         );
       },
     );
   }
+
+  /// Só o Principal tem exercícios.
+  bool get _soPrincipal =>
+      _itensEmOrdem.isNotEmpty &&
+      _itensEmOrdem.every((e) => e.bloco == 'TRABALHO');
+
+  /// O músculo só aparece na linha quando a sessão mistura grupos.
+  bool get _variosGrupos => treinoDetailGroupCount(_itensEmOrdem) > 1;
 
   int _quantidadeNaSecao(int indiceDaSecao) {
     var n = 0;
@@ -501,13 +548,14 @@ class _TreinoListaUnicaState extends State<_TreinoListaUnica> {
   }
 }
 
-/// Cabeçalho de seção: nome, quantos exercícios e "+ Adicionar". Seção vazia
-/// ganha uma linha convidativa.
+/// Cabeçalho de seção. Com exercícios: o título ("Principal · 4"). Vazia:
+/// só a linha fina "+ Aquecimento", que abre a biblioteca no bloco.
 class _SecaoDoTreino extends StatelessWidget {
   const _SecaoDoTreino({
     super.key,
     required this.nome,
     required this.vazia,
+    required this.semTitulo,
     required this.quantidade,
     required this.isDark,
     required this.primary,
@@ -517,6 +565,7 @@ class _SecaoDoTreino extends StatelessWidget {
 
   final String nome;
   final bool vazia;
+  final bool semTitulo;
   final int quantidade;
   final bool isDark;
   final Color primary;
@@ -525,61 +574,71 @@ class _SecaoDoTreino extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.forBrightness(context, isDark);
+    if (vazia) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: _LinhaDeAdicionar(rotulo: nome, primary: primary, onTap: onAdd),
+      );
+    }
+    if (semTitulo) return const SizedBox(height: TokensStrip.s2);
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         FxSettingsLayout.pageInset,
-        TokensStrip.s2,
+        TokensStrip.s3,
         FxSettingsLayout.pageInset,
-        0,
+        TokensStrip.s2,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
+      child: Semantics(
+        header: true,
+        child: Text(
+          quantidade > 0 ? '$nome · $quantidade' : nome,
+          style: FocuxHubTypography.cardTitle(color: ink),
+        ),
+      ),
+    );
+  }
+}
+
+/// "+ Aquecimento" / "+ Adicionar ao principal": linha fina, alvo de 48.
+class _LinhaDeAdicionar extends StatelessWidget {
+  const _LinhaDeAdicionar({
+    required this.rotulo,
+    required this.primary,
+    required this.onTap,
+  });
+
+  final String rotulo;
+  final Color primary;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: rotulo,
+      excludeSemantics: true,
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.selectionClick();
+          onTap();
+        },
+        borderRadius: BorderRadius.circular(TokensStrip.rSm),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 48),
+          child: Row(
             children: [
+              const SizedBox(width: TokensStrip.s1),
+              Icon(FxIcons.adicionar, size: 18, color: primary),
+              const SizedBox(width: TokensStrip.s2),
               Expanded(
-                child: Semantics(
-                  header: true,
-                  child: Text(
-                    quantidade > 0 ? '$nome · $quantidade' : nome,
-                    style: FocuxHubTypography.cardTitle(color: ink),
-                  ),
+                child: Text(
+                  rotulo,
+                  style: FocuxHubTypography.cardTitle(color: primary),
                 ),
-              ),
-              FxTonalButton(
-                label: 'Adicionar',
-                semanticLabel: 'Adicionar em $nome',
-                icon: FxIcons.adicionar,
-                compact: true,
-                onPressed: onAdd,
               ),
             ],
           ),
-          if (vazia)
-            Padding(
-              padding: const EdgeInsets.only(bottom: TokensStrip.s3),
-              child: Material(
-                color: fxTransparent,
-                child: InkWell(
-                  onTap: onAdd,
-                  borderRadius: BorderRadius.circular(TokensStrip.rCard),
-                  child: Container(
-                    height: 52,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(TokensStrip.rCard),
-                      border: Border.all(color: chrome.lineStrong),
-                    ),
-                    child: Text(
-                      'Nenhum exercício. Toque para adicionar.',
-                      style: FocuxHubTypography.bodyMuted(color: chrome.mute),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-        ],
+        ),
       ),
     );
   }

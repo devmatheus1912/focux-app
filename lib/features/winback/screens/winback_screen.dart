@@ -420,7 +420,7 @@ class _WinbackFocusCard extends StatelessWidget {
               winbackAlunoLabel(first.alunoNome),
               style: FocuxHubTypography.metric(
                 color: chrome.ink,
-                fontSize: FocuxHubTypography.metricLg,
+                fontSize: TokensStrip.fontTitulo,
               ),
             ),
           ),

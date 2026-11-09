@@ -44,7 +44,7 @@ class AlunoChoiceSection extends StatelessWidget {
           label,
           style: FxSettingsLayout.subhead(
             color: mute,
-          ).copyWith(fontWeight: FontWeight.w800, fontSize: 11),
+          ).copyWith(fontWeight: FontWeight.w700, fontSize: TokensStrip.fontMinimo),
         ),
         const SizedBox(height: TokensStrip.s2),
         child,
@@ -126,10 +126,10 @@ class AlunoSegmentedChoice extends StatelessWidget {
                         style: FocuxHubTypography.chip(
                           selected == options[i].value ? action : ink,
                         ).copyWith(
-                          fontSize: 12,
+                          fontSize: TokensStrip.fontRotulo,
                           fontWeight:
                               selected == options[i].value
-                                  ? FontWeight.w800
+                                  ? FontWeight.w700
                                   : FontWeight.w600,
                         ),
                       ),

@@ -46,7 +46,7 @@ class FocuxBrandTagline extends StatelessWidget {
               color: mute,
             ).copyWith(
               fontSize: fontSize,
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w600,
               height: 1.5,
               letterSpacing: 0.06,
             ),

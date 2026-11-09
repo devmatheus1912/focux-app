@@ -123,7 +123,7 @@ class ConversationUploadingBanner extends StatelessWidget {
             S.of(context).chatEnviandoAnexo,
             style: TextStyle(
               color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
-              fontSize: 13,
+              fontSize: TokensStrip.fontBodySm,
             ),
           ),
         ],

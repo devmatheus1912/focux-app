@@ -152,14 +152,14 @@ class _MigracaoImportacaoResumoBody extends StatelessWidget {
                           style: TextStyle(
                             fontWeight: FontWeight.w700,
                             color: ink,
-                            fontSize: 13,
+                            fontSize: TokensStrip.fontBodySm,
                           ),
                         ),
                         if (item.motivo.isNotEmpty)
                           Text(
                             item.motivo,
                             style: TextStyle(
-                              fontSize: 11.5,
+                              fontSize: TokensStrip.fontMinimo,
                               color: mute,
                               height: 1.35,
                             ),
@@ -254,7 +254,7 @@ class _MigracaoConviteTile extends StatelessWidget {
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
                       color: ink,
-                      fontSize: 14,
+                      fontSize: TokensStrip.fontBody,
                     ),
                   ),
                 ),
@@ -273,7 +273,7 @@ class _MigracaoConviteTile extends StatelessWidget {
                             ? s.migracaoAcessoEnviado
                             : s.migracaoAcessoCopiado,
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: TokensStrip.fontRotulo,
                           fontWeight: FontWeight.w700,
                           color: EagleTokens.good,
                         ),
@@ -285,7 +285,7 @@ class _MigracaoConviteTile extends StatelessWidget {
             if (email != null)
               Text(
                 email,
-                style: TextStyle(fontSize: 12, color: mute, height: 1.35),
+                style: TextStyle(fontSize: TokensStrip.fontRotulo, color: mute, height: 1.35),
               ),
             const SizedBox(height: TokensStrip.s2),
             if (whatsAppUri != null) ...[
@@ -365,7 +365,7 @@ class _MigracaoGrupoHeader extends StatelessWidget {
                         style: TextStyle(
                           fontWeight: FontWeight.w700,
                           color: ink,
-                          fontSize: 13,
+                          fontSize: TokensStrip.fontBodySm,
                         ),
                       ),
                     ),
@@ -379,7 +379,7 @@ class _MigracaoGrupoHeader extends StatelessWidget {
                       child: Text(
                         '$count',
                         style: TextStyle(
-                          fontSize: 11,
+                          fontSize: TokensStrip.fontMinimo,
                           fontWeight: FontWeight.w700,
                           color: color,
                         ),
@@ -390,7 +390,7 @@ class _MigracaoGrupoHeader extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   subtitulo,
-                  style: TextStyle(fontSize: 12, color: mute, height: 1.35),
+                  style: TextStyle(fontSize: TokensStrip.fontRotulo, color: mute, height: 1.35),
                 ),
               ],
             ),
@@ -435,14 +435,14 @@ class _MigracaoEmailEnviadoTile extends StatelessWidget {
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       color: ink,
-                      fontSize: 13,
+                      fontSize: TokensStrip.fontBodySm,
                     ),
                   ),
                   if (item.email != null && item.email!.isNotEmpty)
                     Text(
                       item.email!,
                       style:
-                          TextStyle(fontSize: 11.5, color: mute, height: 1.3),
+                          TextStyle(fontSize: TokensStrip.fontMinimo, color: mute, height: 1.3),
                     ),
                 ],
               ),
@@ -450,7 +450,7 @@ class _MigracaoEmailEnviadoTile extends StatelessWidget {
             Text(
               'E-mail enviado',
               style: TextStyle(
-                  fontSize: 11,
+                  fontSize: TokensStrip.fontMinimo,
                   color: EagleTokens.good,
                   fontWeight: FontWeight.w600),
             ),

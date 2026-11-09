@@ -305,7 +305,8 @@ class CheckinSerieCard extends StatelessWidget {
     final chrome = ShellChrome.of(context);
     final dots = _dots(ee);
     final linha = [
-      if (ee.proximaSeriePapel == 'AQUECIMENTO') s.checkinAquecimento,
+      // Papel da série quando não é válida: "Aquecimento", "Ajuste", "Back-off".
+      if (checkinPapelDaSerie(s, ee.proximaSeriePapel) case final papel?) papel,
       checkinLinhaDaSerie(
         s,
         atual: ee.seriesFeitas + 1,
@@ -326,7 +327,7 @@ class CheckinSerieCard extends StatelessWidget {
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           style: FocuxHubTypography.cardTitle(color: chrome.ink)
-              .copyWith(fontSize: 22, height: 1.2),
+              .copyWith(fontSize: TokensStrip.fontTitulo, height: 1.2),
         ),
         const SizedBox(height: TokensStrip.s1),
         Text(linha, style: FocuxHubTypography.bodyMuted(color: chrome.mute)),

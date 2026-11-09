@@ -122,6 +122,8 @@ String treinosRecenteDetalhe(S s, TreinoRecente r) {
   final feitas = e.seriesFeitas;
   final planejadas = e.seriesPlanejadas;
   final semSerie = feitas != null ? feitas == 0 : r.exerciciosConcluidos == 0;
+  // Nenhuma série: "Registrado sem séries", mesmo parcial (nunca "0 de 16").
+  if (feitas == 0) return s.treinosSemSeries;
   final partes = [
     if (e.parcial && feitas != null && planejadas != null && planejadas > 0)
       s.historicoSeriesNDeM(feitas, planejadas)

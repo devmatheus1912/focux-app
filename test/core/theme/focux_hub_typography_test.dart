@@ -25,9 +25,12 @@ void main() {
     expect(page.fontSize, TokensStrip.fontH1);
     expect(section.fontSize, TokensStrip.fontH2);
     expect(caption.fontSize, TokensStrip.fontBodySm);
-    expect(FocuxHubTypography.metricEm, TokensStrip.fontBody + 3);
-    expect(FocuxHubTypography.metricMd, TokensStrip.fontBody + 5);
-    expect(FocuxHubTypography.metricLg, TokensStrip.fontH2);
+    // Oito papéis da escala, com os pesos 400/600/700 (500 só no mínimo).
+    expect(FocuxHubTypography.rotulo(color: ink).fontSize, TokensStrip.fontRotulo);
+    expect(FocuxHubTypography.minimo(color: ink).fontSize, TokensStrip.fontMinimo);
+    expect(FocuxHubTypography.numeroTela(color: ink).fontSize, TokensStrip.fontNumeroTela);
+    expect(card.fontSize, TokensStrip.fontBody);
+    expect(card.fontWeight, FontWeight.w600);
   });
 
   test('elevation layers are monotonically ordered', () {

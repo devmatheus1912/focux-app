@@ -101,7 +101,7 @@ class IaCopilotGenerationStatus extends StatelessWidget {
               'Pronto para revisão',
               style: TextStyle(
                 color: ink,
-                fontSize: 12.5,
+                fontSize: TokensStrip.fontRotulo,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -111,7 +111,7 @@ class IaCopilotGenerationStatus extends StatelessWidget {
               elapsed,
               style: TextStyle(
                 color: mute,
-                fontSize: 11,
+                fontSize: TokensStrip.fontMinimo,
                 fontFamily: 'monospace',
               ),
             ),
@@ -143,8 +143,8 @@ class IaCopilotGenerationStatus extends StatelessWidget {
                   'Gerando recomendações...',
                   style: TextStyle(
                     color: ink,
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w800,
+                    fontSize: TokensStrip.fontRotulo,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
@@ -201,8 +201,8 @@ class IaCopilotMetaChip extends StatelessWidget {
             label,
             style: TextStyle(
               color: ink,
-              fontSize: 11.2,
-              fontWeight: FontWeight.w800,
+              fontSize: TokensStrip.fontMinimo,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ],

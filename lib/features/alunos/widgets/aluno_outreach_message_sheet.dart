@@ -226,9 +226,9 @@ class _OutreachMessageQuote extends StatelessWidget {
             Text(
               message,
               style: FocuxHubTypography.body(color: chrome.ink).copyWith(
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
                 height: 1.5,
-                fontSize: 15,
+                fontSize: TokensStrip.fontBody,
               ),
             ),
           ],

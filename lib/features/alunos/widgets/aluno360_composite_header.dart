@@ -136,7 +136,7 @@ class _Aluno360TabChip extends StatelessWidget {
                 style: Aluno360Layout.tabSelectedLabelStyle().copyWith(
                   color: selected ? Colors.white : mute,
                   fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
-                  fontSize: 13,
+                  fontSize: TokensStrip.fontBodySm,
                 ),
               ),
             ),

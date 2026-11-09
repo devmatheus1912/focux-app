@@ -205,12 +205,12 @@ void main() {
       await abrir(tester, alunoId: 3);
       expect(find.textContaining('Pular'), findsNothing);
       expect(find.textContaining('Aquecimento'), findsWidgets);
-      expect(find.textContaining('Trabalho'), findsWidgets);
+      expect(find.textContaining('Adicionar ao'), findsWidgets);
       expect(find.text('Exercício 1'), findsOneWidget);
       expect(find.text('Exercício 2'), findsOneWidget);
       expect(find.textContaining('Alongamento'), findsWidgets);
-      // cada seção tem o seu "+ Adicionar", mesmo com exercícios
-      expect(find.text('Adicionar'), findsNWidgets(3));
+      // bloco vazio: uma linha fina com o nome; sem caixa nem botão no canto
+      expect(find.text('Adicionar'), findsNothing);
     });
   });
 
@@ -266,7 +266,7 @@ void main() {
 
     testWidgets('diz de qual modelo é a sessão', (tester) async {
       await abrirContexto(tester);
-      expect(find.text('Modelo: Hipertrofia 4 dias'), findsOneWidget);
+      expect(find.text('Hipertrofia 4 dias · 2 sessões'), findsOneWidget);
       expect(find.text('Treino A'), findsOneWidget);
       expect(find.text('Treino B'), findsOneWidget);
     });
@@ -298,7 +298,7 @@ void main() {
       );
       await _settle(tester);
 
-      expect(find.text('Modelo: Hipertrofia 4 dias'), findsOneWidget);
+      expect(find.text('Hipertrofia 4 dias · 2 sessões'), findsOneWidget);
       expect(find.text('Atribuir'), findsNothing);
       expect(find.textContaining('Ficha de'), findsNothing);
     });

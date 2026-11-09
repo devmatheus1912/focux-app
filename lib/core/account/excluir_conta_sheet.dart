@@ -228,9 +228,9 @@ class _ExcluirContaSheetState extends State<_ExcluirContaSheet> {
                 texto,
                 style: TextStyle(
                   color: corTexto ?? chrome.ink,
-                  fontSize: 14,
+                  fontSize: TokensStrip.fontBody,
                   height: 1.35,
-                  fontWeight: corTexto == null ? FontWeight.w500 : FontWeight.w700,
+                  fontWeight: corTexto == null ? FontWeight.w600 : FontWeight.w700,
                 ),
               ),
             ),

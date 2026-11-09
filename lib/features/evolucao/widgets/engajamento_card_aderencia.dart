@@ -106,7 +106,7 @@ class EngajamentoCardAderencia extends StatelessWidget {
                       centro,
                       style: FocuxHubTypography.metric(
                         color: sobre.ink,
-                        fontSize: FocuxHubTypography.metricMd,
+                        fontSize: TokensStrip.fontSecao,
                       ),
                     ),
                   ),

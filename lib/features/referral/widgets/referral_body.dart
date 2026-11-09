@@ -239,7 +239,7 @@ class _ReferralCodeCard extends StatelessWidget {
             codigo,
             style: FocuxHubTypography.metric(
               color: chrome.ink,
-              fontSize: FocuxHubTypography.metricLg,
+              fontSize: TokensStrip.fontTitulo,
             ),
           ),
           const SizedBox(height: TokensStrip.s3),

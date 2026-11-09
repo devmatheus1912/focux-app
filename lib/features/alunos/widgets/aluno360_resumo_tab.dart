@@ -128,7 +128,9 @@ class Aluno360ResumoTab extends ConsumerWidget {
     );
 
     final blocos = <Widget>[
-      if (snapshot != null) _agora(context, s, chrome, snapshot, agora),
+      // "Agora" só existe com algo a fazer; sem urgência, a seção some.
+      if (snapshot != null && agora != null)
+        _agora(context, s, chrome, snapshot, agora),
       // Sem treino nenhum, o cartão da ficha ("Sem ficha ainda") já diz tudo.
       if (!semTreinos)
         FxMetricStrip(metricas: _metricas(context, s, checkins, abrirEngajamento)),
@@ -136,6 +138,7 @@ class Aluno360ResumoTab extends ConsumerWidget {
         alunoId: alunoId,
         alunoNome: aluno.nome,
         hoje: hoje,
+        aderencia: aderenciaBundle?.dias ?? const [],
       ),
       if (financeiroEmAtraso &&
           snapshot?.stickyAction.destination !=
@@ -194,7 +197,7 @@ class Aluno360ResumoTab extends ConsumerWidget {
     S s,
     ShellPalette chrome,
     Aluno360OperacaoSnapshot snapshot,
-    ResumoAgora? agora,
+    ResumoAgora agora,
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -204,13 +207,7 @@ class Aluno360ResumoTab extends ConsumerWidget {
           style: FocuxHubTypography.eyebrow(context, color: chrome.mute),
         ),
         const SizedBox(height: TokensStrip.s2),
-        if (agora == null)
-          Text(
-            s.alunoResumoNadaUrgente,
-            style: FocuxHubTypography.bodyMuted(color: chrome.mute),
-          )
-        else
-          FxActionRow(
+        FxActionRow(
             key: const ValueKey('aluno360_resumo_agora'),
             leading: snapshot.stickyAction.icon,
             titulo: agora.titulo,

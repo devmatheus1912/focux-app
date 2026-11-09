@@ -99,3 +99,24 @@ List<String> workoutBuilderRepShortcuts(String presetId) {
     _ => const ['8-12', '10-15', '12-15'],
   };
 }
+
+/// Objetivo da sessão (`treinos.objetivo`) → preset. Texto antigo fora da
+/// lista conta como sem objetivo (nulo).
+String? presetIdDoObjetivo(String? objetivo) =>
+    switch (objetivo?.trim().toUpperCase()) {
+      'HIPERTROFIA' => 'hypertrophy',
+      'FORCA' => 'strength',
+      'RESISTENCIA' => 'endurance',
+      _ => null,
+    };
+
+/// Preset → valor gravado na sessão.
+String objetivoDoPreset(String presetId) => switch (presetId) {
+  'strength' => 'FORCA',
+  'endurance' => 'RESISTENCIA',
+  _ => 'HIPERTROFIA',
+};
+
+/// Efeito do objetivo escrito: "4 × 8-12 · 75 s".
+String efeitoDoPreset(WorkoutBuilderPreset p) =>
+    '${p.series} × ${p.repeticoes} · ${p.descansoSegundos} s';

@@ -34,15 +34,21 @@ Future<void> _openTreinoDetailMenu({
               icon: FxIcons.adicionar,
               label: 'Adicionar exercício',
               grupo: 'Montar',
-              showChevron: true,
               onTap: () => Navigator.pop(sheetContext, 'add'),
+            ),
+            // O objetivo é da sessão: define a prescrição de quem entra.
+            TreinoInsetActionSpec(
+              icon: FxIcons.meta,
+              label: _rotuloDoObjetivo(treino.objetivo) == null
+                  ? 'Objetivo da sessão'
+                  : 'Objetivo da sessão · ${_rotuloDoObjetivo(treino.objetivo)}',
+              grupo: 'Montar',
+              onTap: () => Navigator.pop(sheetContext, 'objetivo'),
             ),
             if (naSemana || temSugestao)
               TreinoInsetActionSpec(
                 icon: FxIcons.ia,
-                label: temSugestao
-                    ? s.treinoSugerirDe(treino.nome.trim())
-                    : s.treinoSugerirExercicios,
+                label: s.treinoSugerirExercicios,
                 grupo: 'Montar',
                 onTap: () => Navigator.pop(sheetContext, 'sugerir'),
               ),
@@ -147,9 +153,12 @@ class _TreinoDetailBody extends StatelessWidget {
       'AJUSTE': s.treinoBlocoAjuste,
     };
 
-    Future<void> openEditPrescription(TreinoExercicioItem item) async {
+    Future<void> openEditPrescription(
+      TreinoExercicioItem item, [
+      String? adicionarPapel,
+    ]) async {
       HapticFeedback.selectionClick();
-      final saved = await _showTreinoSheet<bool>(
+      final saved = await _showTreinoSheet<Object>(
         context: context,
         builder:
             (_) => _EditPrescriptionSheet(
@@ -157,15 +166,29 @@ class _TreinoDetailBody extends StatelessWidget {
               item: item,
               isDark: isDark,
               repo: repo,
+              adicionarPapel: adicionarPapel,
               outrosNoBloco: [
                 for (final e in orderedExercises)
                   if (e.id != item.id && e.bloco == item.bloco) e,
               ],
             ),
       );
-      if (saved != true) return;
+      if (saved == null || saved == false) return;
       sessaoMudou(ref, treinoId, alunoId: alunoId, modeloId: modeloId);
-      if (context.mounted) {
+      if (!context.mounted) return;
+      if (saved case PrescricaoAplicadaAoBloco(:final quantos, :final desfazer)) {
+        FeedbackHelper.showSuccessAction(
+          context,
+          quantos == 1
+              ? 'Prescrição aplicada a mais 1 exercício.'
+              : 'Prescrição aplicada a mais $quantos exercícios.',
+          actionLabel: 'Desfazer',
+          onAction: () async {
+            await desfazer();
+            sessaoMudou(ref, treinoId, alunoId: alunoId, modeloId: modeloId);
+          },
+        );
+      } else {
         FeedbackHelper.showSuccess(context, 'Prescrição atualizada.');
       }
     }
@@ -209,18 +232,22 @@ class _TreinoDetailBody extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    EstadoDoSalvo(salvando: salvando),
+                    // Uma linha: estado do salvo à esquerda, contexto à direita.
                     if (alunoId != null)
                       FichaContextoDoTreino(
                         alunoId: alunoId!,
                         alunoNome: alunoNome,
                         treinoId: treinoId,
+                        inicio: EstadoDoSalvo(salvando: salvando),
                       )
                     else if (modeloId != null)
                       ModeloContextoDoTreino(
                         modeloId: modeloId!,
                         treinoId: treinoId,
+                        inicio: EstadoDoSalvo(salvando: salvando),
                       )
+                    else
+                      EstadoDoSalvo(salvando: salvando),
 
                   ],
                 ),

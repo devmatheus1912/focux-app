@@ -29,7 +29,7 @@ class RecoveryScoreRing extends StatelessWidget {
             score?.toString() ?? '--',
             style: TextStyle(
               color: color,
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w700,
               fontSize: size * 0.26,
             ),
           ),

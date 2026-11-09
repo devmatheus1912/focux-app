@@ -15,6 +15,7 @@ import '../../treinos/providers/treinos_provider.dart';
 import '../../treinos/utils/semana_da_fila.dart';
 import '../../treinos/widgets/ficha_vigencia_linha.dart';
 import '../../../core/theme/fx_icons.dart';
+import '../data/aluno_core_models.dart';
 
 /// A ficha de treino do aluno no Resumo: a semana em sete dias, a validade e
 /// um verbo que abre a ficha de verdade (`/alunos/:id/rotina`).
@@ -24,6 +25,7 @@ class Aluno360FichaCard extends ConsumerWidget {
     required this.alunoId,
     required this.alunoNome,
     this.hoje,
+    this.aderencia = const [],
   });
 
   final int alunoId;
@@ -32,6 +34,9 @@ class Aluno360FichaCard extends ConsumerWidget {
   /// Para teste; por padrão, agora.
   final DateTime? hoje;
 
+  /// Aderência dos últimos 7 dias (do Resumo): marca os dias treinados.
+  final List<AderenciaDia> aderencia;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final rotina = ref.watch(alunoRotinaProvider(alunoId)).asData?.value;
@@ -39,11 +44,22 @@ class Aluno360FichaCard extends ConsumerWidget {
     final s = S.of(context);
     final chrome = ShellChrome.of(context);
     final agora = hoje ?? DateTime.now();
-    final dias = faixaDaSemana(rotina, const [], agora);
+    // Feitos vêm da aderência do Resumo (o 360 não tem o histórico do aluno);
+    // sem eles, todo dia passado aparecia como "não feito".
+    final dias = faixaDaSemana(
+      rotina,
+      const [],
+      agora,
+      diasComTreino: diasComTreinoDaAderencia([
+        for (final d in aderencia)
+          (data: d.data, checkins: d.checkins, status: d.status),
+      ]),
+    );
     final vazia = !rotina.temTreino || dias.isEmpty;
-    final rotulo = !vazia && rotina.vigencia.temPrazo
-        ? rotuloDaVigencia(s, rotina.vigencia, agora)
-        : null;
+    final rotulo =
+        !vazia && rotina.vigencia.temPrazo
+            ? rotuloDaVigencia(s, rotina.vigencia, agora)
+            : null;
     final verbo = vazia ? s.alunoResumoFichaMontar : s.alunoResumoFichaAbrir;
     final semana = semanaDaFila(rotina);
     final diasComLetra = [
@@ -53,17 +69,16 @@ class Aluno360FichaCard extends ConsumerWidget {
           estado: d.estado,
           hoje: d.hoje,
           proximo: d.proximo,
-          letra: [
-            for (final x in semana)
-              if (x.dia == d.dia && x.sessoes.isNotEmpty)
-                letraDaSessao(x.sessoes.first.nome),
-          ].firstOrNull,
+          letra:
+              [
+                for (final x in semana)
+                  if (x.dia == d.dia && x.sessoes.isNotEmpty)
+                    letraDaSessao(x.sessoes.first.nome),
+              ].firstOrNull,
         ),
     ];
-    void abrir() => context.push(
-      '/alunos/$alunoId/rotina',
-      extra: alunoNome.trim(),
-    );
+    void abrir() =>
+        context.push('/alunos/$alunoId/rotina', extra: alunoNome.trim());
 
     return Semantics(
       button: true,
@@ -121,7 +136,10 @@ class Aluno360FichaCard extends ConsumerWidget {
                     const SizedBox(height: TokensStrip.s3),
                     Align(
                       alignment: Alignment.centerLeft,
-                      child: FxStatusPill(label: rotulo.texto, tone: rotulo.tom),
+                      child: FxStatusPill(
+                        label: rotulo.texto,
+                        tone: rotulo.tom,
+                      ),
                     ),
                   ],
                 ],

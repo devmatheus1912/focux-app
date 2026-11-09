@@ -480,7 +480,7 @@ class _DetailBody extends StatelessWidget {
                           s.financeiroCobrancasFeitas,
                           style: TextStyle(
                             color: chrome.mute,
-                            fontSize: 13,
+                            fontSize: TokensStrip.fontBodySm,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -600,7 +600,7 @@ class _CartaoMensalidade extends StatelessWidget {
             mensalidade.valor.formatCobranca(),
             style: FocuxHubTypography.metric(
               color: chrome.ink,
-              fontSize: FocuxHubTypography.metricLg,
+              fontSize: TokensStrip.fontTitulo,
             ).copyWith(
               letterSpacing: 0,
               fontFeatures: const [FontFeature.tabularFigures()],

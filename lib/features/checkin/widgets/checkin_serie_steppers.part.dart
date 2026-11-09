@@ -153,9 +153,9 @@ class _CheckinStepper extends StatelessWidget {
                     maxLines: 1,
                     textAlign: TextAlign.center,
                     style: FocuxHubTypography.cardTitle(color: ink).copyWith(
-                      fontSize: 44,
+                      fontSize: TokensStrip.fontNumeroTela,
                       height: 1.1,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                       fontFeatures: const [FontFeature.tabularFigures()],
                     ),
                   ),

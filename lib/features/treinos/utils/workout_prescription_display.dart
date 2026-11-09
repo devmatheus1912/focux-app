@@ -27,7 +27,7 @@ TextStyle activePrescriptionCaptionStyle({required Color mute}) =>
 TextStyle activePrescriptionLineStyle({required Color brand}) =>
     FocuxHubTypography.bodyMuted(
       color: brand,
-      fontWeight: FontWeight.w800,
+      fontWeight: FontWeight.w700,
     );
 
 /// Strip inset da prescrição — sem glow (paridade dock + Perfil inset).

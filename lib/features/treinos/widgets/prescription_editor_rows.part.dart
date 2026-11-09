@@ -47,7 +47,7 @@ class _RepShortcutChip extends StatelessWidget {
               child: Text(
                 label,
                 style: FxSettingsLayout.rowValue(color: mute).copyWith(
-                  fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
                   color: selected ? brand : mute,
                 ),
               ),
@@ -70,7 +70,6 @@ class _PrescriptionStepperRow extends StatelessWidget {
     required this.mute,
     required this.onDecrement,
     required this.onIncrement,
-    this.showDivider = true,
   });
 
   final String label;
@@ -82,13 +81,12 @@ class _PrescriptionStepperRow extends StatelessWidget {
   final Color mute;
   final VoidCallback? onDecrement;
   final VoidCallback? onIncrement;
-  final bool showDivider;
 
   @override
   Widget build(BuildContext context) {
     return _PrescriptionRowDivider(
       line: line,
-      showDivider: showDivider,
+      showDivider: true,
       child: SizedBox(
         height: FxSettingsLayout.rowMinHeight,
         child: Row(
@@ -114,7 +112,7 @@ class _PrescriptionStepperRow extends StatelessWidget {
                       value,
                       textAlign: TextAlign.center,
                       style: FxSettingsLayout.rowLabel(color: ink).copyWith(
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),
@@ -328,7 +326,7 @@ class _PrescriptionNotesField extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(top: 4, bottom: 8),
       child: Semantics(
-        label: 'Observações de execução',
+        label: prescriptionOrientacoes,
         child: TextFormField(
           controller: controller,
           minLines: 2,
@@ -341,9 +339,9 @@ class _PrescriptionNotesField extends StatelessWidget {
           decoration: FxInputDeco.insetGrouped(
             context,
             icon: FxIcons.notas,
-            hint: 'Orientações curtas para o aluno',
+            hint: 'Ex.: desça em 3 segundos',
             iconColor: iconColor,
-          ),
+          ).copyWith(labelText: prescriptionOrientacoes),
         ),
       ),
     );

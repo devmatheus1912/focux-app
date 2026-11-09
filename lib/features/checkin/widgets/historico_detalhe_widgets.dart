@@ -154,7 +154,7 @@ class HistoricoMetricas extends StatelessWidget {
                             maxLines: 1,
                             style: FocuxHubTypography.metric(
                               color: chrome.ink,
-                              fontSize: 20,
+                              fontSize: TokensStrip.fontSecao,
                             ),
                           ),
                         ),

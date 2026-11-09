@@ -19,6 +19,7 @@ import '../../../l10n/app_localizations.dart';
 import '../data/perfil_repository.dart';
 import '../providers/perfil_provider.dart';
 import '../utils/brand_public_identity.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 /// Nome + link público quando Apple/Google deixou placeholder ou relay.
 class BrandPublicIdentityScreen extends ConsumerStatefulWidget {
@@ -215,7 +216,7 @@ class _BrandPublicIdentityScreenState
                   preview,
                   style: TextStyle(
                     color: EagleTokens.textSecondary,
-                    fontSize: 13,
+                    fontSize: TokensStrip.fontBodySm,
                   ),
                 ),
                 const SizedBox(height: 28),

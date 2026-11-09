@@ -330,7 +330,7 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
                 textInputAction: TextInputAction.search,
                 onChanged: _onQueryChanged,
                 onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
-                style: TextStyle(color: ink, fontSize: 16),
+                style: TextStyle(color: ink, fontSize: TokensStrip.fontBody),
                 decoration: InputDecoration(
                   hintText: 'Buscar conversas',
                   hintStyle: TextStyle(color: mute),

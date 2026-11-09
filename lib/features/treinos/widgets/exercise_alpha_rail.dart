@@ -54,8 +54,8 @@ class ExerciseAlphaRail extends StatelessWidget {
                       l,
                       style: TextStyle(
                         color: mute,
-                        fontSize: 10.5,
-                        fontWeight: FontWeight.w800,
+                        fontSize: TokensStrip.fontMinimo,
+                        fontWeight: FontWeight.w700,
                         height: 1,
                       ),
                     ),

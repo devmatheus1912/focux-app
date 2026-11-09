@@ -144,6 +144,17 @@ class _LinhaDoGrupo extends StatelessWidget {
                 '${linha.series}',
                 style: FocuxHubTypography.metric(color: chrome.ink),
               ),
+              // Fora da faixa de referência: a palavra diz, sem cor de alerta.
+              if (linha.series > faixaReferenciaMax ||
+                  linha.series < faixaReferenciaMin) ...[
+                const SizedBox(width: TokensStrip.s1),
+                Text(
+                  linha.series > faixaReferenciaMax
+                      ? s.volumeAcimaDaFaixa
+                      : s.volumeAbaixoDaFaixa,
+                  style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                ),
+              ],
             ],
           ),
           const SizedBox(height: TokensStrip.s1),

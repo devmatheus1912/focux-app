@@ -188,7 +188,7 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
                   [if (resumo != null) resumo, if (dica != null) dica].join(' · '),
                   style: TextStyle(
                     color: mute,
-                    fontSize: 13,
+                    fontSize: TokensStrip.fontBodySm,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -198,8 +198,8 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
                 s.checkinComoFoi,
                 style: TextStyle(
                   color: ink,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w800,
+                  fontSize: TokensStrip.fontBody,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
               const SizedBox(height: TokensStrip.s2),
@@ -283,7 +283,7 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
                             s.checkinRpeTitulo,
                             style: TextStyle(
                               color: ink,
-                              fontWeight: FontWeight.w900,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         ),
@@ -299,7 +299,7 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
                       checkinRpeValueLine(s, _rpe),
                       style: TextStyle(
                         color: brand,
-                        fontSize: 13,
+                        fontSize: TokensStrip.fontBodySm,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -311,8 +311,8 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
                   s.checkinRpeAlvo(widget.rpeAlvo!),
                   style: TextStyle(
                     color: brand,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
+                    fontSize: TokensStrip.fontRotulo,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               IconButton(
@@ -327,7 +327,7 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
               padding: const EdgeInsets.only(right: 8),
               child: Text(
                 _rpeHintBody(s),
-                style: TextStyle(color: mute, fontSize: 12, height: 1.35),
+                style: TextStyle(color: mute, fontSize: TokensStrip.fontRotulo, height: 1.35),
               ),
             ),
           Padding(
@@ -349,11 +349,11 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
               children: [
                 Text(
                   s.checkinRpeEscalaMin,
-                  style: TextStyle(color: mute, fontSize: 11),
+                  style: TextStyle(color: mute, fontSize: TokensStrip.fontMinimo),
                 ),
                 Text(
                   s.checkinRpeEscalaMax,
-                  style: TextStyle(color: mute, fontSize: 11),
+                  style: TextStyle(color: mute, fontSize: TokensStrip.fontMinimo),
                 ),
               ],
             ),

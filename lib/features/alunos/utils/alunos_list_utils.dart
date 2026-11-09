@@ -117,7 +117,7 @@ bool shouldShowAlunoListBadge(
     if (activeFiltro == AlunoFiltro.inadimplentes) return false;
     if (activeFiltro == AlunoFiltro.contatoHoje) return false;
   }
-  if (statusText == 'Inativo' && activeFiltro == AlunoFiltro.ativos) {
+  if (statusText == 'Pausado' && activeFiltro == AlunoFiltro.ativos) {
     return false;
   }
   return true;
@@ -228,7 +228,7 @@ int? alunosInativosCount({
   }
   if (status == AlunoStatus.inativo) {
     return (
-      label: 'Inativo',
+      label: 'Pausado',
       fill: EagleTokens.warnSoft,
       foreground: EagleTokens.warn,
     );

@@ -161,8 +161,8 @@ class _FxNumberPadSheetState extends State<_FxNumberPadSheet> {
               onSubmitted: (_) => _confirmar(),
               style: FocuxHubTypography.metric(
                 color: chrome.ink,
-                fontSize: 40,
-                fontWeight: FontWeight.w800,
+                fontSize: TokensStrip.fontNumeroTela,
+                fontWeight: FontWeight.w700,
               ),
               decoration: FxInputDeco.build(
                 context,

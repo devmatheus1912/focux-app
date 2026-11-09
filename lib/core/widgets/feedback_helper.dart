@@ -10,6 +10,7 @@ import '../api/plan_upgrade_error_hub.dart';
 import '../theme/design_tokens.dart';
 import '../utils/friendly_error.dart';
 import '../theme/fx_icons.dart';
+import '../theme/tokens_strip.dart';
 
 /// Where transient feedback should anchor on screen.
 enum FeedbackPlacement {
@@ -276,7 +277,7 @@ class FeedbackHelper {
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w700,
-                  fontSize: 13.5,
+                  fontSize: TokensStrip.fontBodySm,
                 ),
               ),
             ),

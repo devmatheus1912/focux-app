@@ -19,6 +19,8 @@ import '../utils/historico_detalhe_texts.dart';
 import '../utils/treinos_hub_texts.dart';
 import 'checkin_execucao_sheets.dart';
 import '../../../core/theme/fx_icons.dart';
+import '../../../core/widgets/fx_week_strip.dart';
+import '../../../core/widgets/fx_action_link.dart';
 
 enum CheckinResumoAcao { concluir, detalhes }
 
@@ -33,6 +35,7 @@ Future<CheckinResumoAcao> showCheckinResumo(
   required CheckinResumo resumo,
   String? titulo,
   String? mensagem,
+  CheckinResumoSemana? semana,
 }) async {
   HapticFeedback.mediumImpact();
   checkinResumoAberto.value = true;
@@ -47,6 +50,7 @@ Future<CheckinResumoAcao> showCheckinResumo(
       pageBuilder:
           (_, __, ___) => CheckinResumoView(
             resumo: resumo,
+            semana: semana,
             titulo: titulo,
             mensagem: mensagem,
           ),
@@ -67,9 +71,13 @@ class CheckinResumoView extends StatelessWidget {
     required this.resumo,
     this.titulo,
     this.mensagem,
+    this.semana,
   });
 
   final CheckinResumo resumo;
+
+  /// Semana com hoje feito, meta e próximo da fila (só no fim do treino).
+  final CheckinResumoSemana? semana;
 
   /// Texto no lugar de "Treino concluído" e frase abaixo ("Já fiz").
   final String? titulo;
@@ -137,7 +145,7 @@ class CheckinResumoView extends StatelessWidget {
                               textAlign: TextAlign.center,
                               style: FocuxTypography.headline(
                                 color: chrome.ink,
-                              ).copyWith(fontWeight: FontWeight.w900),
+                              ).copyWith(fontWeight: FontWeight.w700),
                             ),
                           ),
                           const SizedBox(height: TokensStrip.s1),
@@ -181,8 +189,8 @@ class CheckinResumoView extends StatelessWidget {
                               comparacao,
                               textAlign: TextAlign.center,
                               style: FocuxHubTypography.body(
-                                color: chrome.ink,
-                              ).copyWith(fontWeight: FontWeight.w700),
+                                color: chrome.mute,
+                              ),
                             ),
                           ],
                           if (resumo.seriesSemCarga > 0) ...[
@@ -194,6 +202,21 @@ class CheckinResumoView extends StatelessWidget {
                                   '${s.checkinResumoSemCarga(resumo.seriesSemCarga)}. '
                                   '${s.checkinResumoSemCargaDica}',
                             ),
+                            if (mensagem == null)
+                              Align(
+                                alignment: AlignmentDirectional.centerStart,
+                                child: FxActionLink(
+                                  label: s.checkinResumoAnotarCargas,
+                                  onTap:
+                                      () => Navigator.of(
+                                        context,
+                                      ).pop(CheckinResumoAcao.detalhes),
+                                ),
+                              ),
+                          ],
+                          if (semana case final sem?) ...[
+                            const SizedBox(height: TokensStrip.s6),
+                            _SuaSemana(semana: sem),
                           ],
                           if (resumo.recordes.isNotEmpty) ...[
                             const SizedBox(height: TokensStrip.s6),
@@ -294,7 +317,19 @@ class _Numeros extends StatelessWidget {
           s.checkinResumoSeries,
           historicoNDeMTexto(s, resumo.seriesFeitas, resumo.seriesPlanejadas),
         ),
-      if (volume != null) (s.checkinResumoVolume, historicoKgTexto(s, volume)),
+      // Com a maioria sem carga, o volume engana: mostra quantas tiveram carga.
+      if (resumo.seriesSemCarga * 2 > resumo.seriesFeitas &&
+          resumo.seriesFeitas > 0)
+        (
+          s.checkinResumoComCarga,
+          historicoNDeMTexto(
+            s,
+            (resumo.seriesFeitas - resumo.seriesSemCarga).clamp(0, 999).toInt(),
+            resumo.seriesFeitas,
+          ),
+        )
+      else if (volume != null)
+        (s.checkinResumoVolume, historicoKgTexto(s, volume)),
     ];
     return Row(
       children: [
@@ -322,7 +357,7 @@ class _Numero extends StatelessWidget {
             child: Text(
               valor,
               maxLines: 1,
-              style: FocuxHubTypography.metric(color: chrome.ink, fontSize: 22),
+              style: FocuxHubTypography.metric(color: chrome.ink, fontSize: TokensStrip.fontTitulo),
             ),
           ),
           const SizedBox(height: 2),
@@ -363,6 +398,44 @@ class _Linha extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Faixa da semana com hoje feito, "3 de 5 treinos" e o próximo da fila.
+class _SuaSemana extends StatelessWidget {
+  const _SuaSemana({required this.semana});
+
+  final CheckinResumoSemana semana;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = S.of(context);
+    final chrome = ShellChrome.of(context);
+    final meta = semana.meta;
+    final contagem =
+        meta != null && meta > 0
+            ? s.checkinResumoSemanaDeMeta(semana.feitos, meta)
+            : s.checkinResumoSemanaFeitos(semana.feitos);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          s.checkinResumoSuaSemana,
+          style: FocuxHubTypography.sectionTitle(context, color: chrome.ink),
+        ),
+        const SizedBox(height: TokensStrip.s3),
+        FxWeekStrip(dias: semana.dias),
+        const SizedBox(height: TokensStrip.s3),
+        Text(
+          [
+            contagem,
+            if (semana.proximo case final p?) s.checkinResumoProximo(p),
+          ].join(' · '),
+          textAlign: TextAlign.center,
+          style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+        ),
+      ],
     );
   }
 }

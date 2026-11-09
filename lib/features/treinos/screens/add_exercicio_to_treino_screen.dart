@@ -40,6 +40,7 @@ import '../data/exercise_prescription_memory.dart';
 import '../data/exercise_prescription_memory_store.dart';
 import '../data/treino_repository.dart';
 import '../data/workout_builder_preset.dart';
+import '../utils/grupos_de_serie.dart';
 import '../providers/treinos_provider.dart';
 import '../services/recent_exercise_usage_store.dart';
 import '../../../l10n/app_localizations.dart';
@@ -58,6 +59,7 @@ import '../widgets/aluno_restricao_strip.dart';
 import '../../anamnese/data/anamnese_repository.dart';
 import '../../anamnese/providers/anamnese_provider.dart';
 import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../widgets/exercise_library_panel.dart';
 import '../widgets/prescription_editor_sheet.dart';
 import '../widgets/treino_no_lugar.dart';
@@ -108,15 +110,43 @@ class _AddExercicioToTreinoScreenState
   bool _restricaoDispensada = false;
   ExercisePrescriptionMemory? _lastPrescription;
 
+  /// Marcados no "+", na ordem em que foram marcados.
+  final List<Exercicio> _marcados = [];
+
   Future<void> _cancel() async {
     FxKeyboardDismissScope.dismiss();
+    if (_marcados.isNotEmpty) {
+      final n = _marcados.length;
+      final descartar = await showFxConfirmSheet(
+        context,
+        title: n == 1 ? 'Descartar 1 selecionado?' : 'Descartar $n selecionados?',
+        message: 'Eles não entram na sessão.',
+        confirmLabel: 'Descartar',
+        discard: true,
+      );
+      if (!descartar || !mounted) return;
+    }
     safePopOrGo(context, '/treinos/${widget.treinoId}');
+  }
+
+  void _marcar(Exercicio e) {
+    setState(() {
+      final i = _marcados.indexWhere((m) => m.id == e.id);
+      if (i >= 0) {
+        _marcados.removeAt(i);
+      } else {
+        _marcados.add(e);
+      }
+    });
   }
 
   @override
   void initState() {
     super.initState();
-    _applyPreset('hypertrophy', notify: false);
+    // Exercício novo entra com o objetivo da sessão (memória do exercício
+    // continua ganhando, em _loadPickerMemory).
+    final objetivo = ref.read(treinoProvider(widget.treinoId)).value?.objetivo;
+    _applyPreset(presetIdDoObjetivo(objetivo) ?? 'hypertrophy', notify: false);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _ensureBiblioteca();
       _applyAlunoEquipmentFilter();
@@ -163,7 +193,8 @@ class _AddExercicioToTreinoScreenState
     final temRestricao = anamneseTemRestricao(anamnese);
     final regioesAluno = regioesDaAnamnese(anamnese);
     final alturaBarra =
-        (_adicionados > 0 ? 72.0 : 0.0) + (_ultimo != null ? 64.0 : 0.0);
+        (_adicionados > 0 || _marcados.isNotEmpty ? 72.0 : 0.0) +
+        (_ultimo != null ? 64.0 : 0.0);
     final chrome = ShellChrome.of(context);
     final isDark = chrome.isDark;
     final primary = Theme.of(context).colorScheme.primary;
@@ -171,7 +202,7 @@ class _AddExercicioToTreinoScreenState
     return fxScreenA11yScope(
       label: 'Adicionar exercício',
       child: FxFormPopGuard(
-        dirty: false,
+        dirty: _marcados.isNotEmpty,
         onCancel: _cancel,
         child: FxShellScaffold(
           useMesh: true,
@@ -320,6 +351,8 @@ class _AddExercicioToTreinoScreenState
                             onLoadPage: _loadPickerPage,
                             onSelect: _adicionarRapido,
                             onPreview: _abrirPrevia,
+                            marcados: {for (final m in _marcados) m.id},
+                            onMarcar: _marcar,
                             libraryTotalCount: home.libraryCount,
                             searchPlaceholder: S.of(context).adicionarBuscaDica,
                             gruposIniciais: treinoAsync.maybeWhen(
@@ -378,7 +411,15 @@ class _AddExercicioToTreinoScreenState
                           ),
                           const SizedBox(height: TokensStrip.s2),
                         ],
-                        if (_adicionados > 0)
+                        // "3 selecionados · Adicionar" no lugar do Pronto.
+                        if (_marcados.isNotEmpty)
+                          FxLiquidPrimaryButton(
+                            label: _marcados.length == 1
+                                ? '1 selecionado · Adicionar'
+                                : '${_marcados.length} selecionados · Adicionar',
+                            onPressed: _loading ? null : _adicionarMarcados,
+                          )
+                        else if (_adicionados > 0)
                           FxLiquidPrimaryButton(
                             label:
                                 _adicionados == 1

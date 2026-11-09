@@ -152,7 +152,7 @@ class _CopilotFolha extends ConsumerWidget {
               texto,
               style: FocuxHubTypography.cardTitle(
                 color: chrome.ink,
-              ).copyWith(fontSize: 18, height: 1.3),
+              ).copyWith(fontSize: TokensStrip.fontSecao, height: 1.3),
             ),
             if (fatos.isNotEmpty) ...[
               const SizedBox(height: TokensStrip.s4),

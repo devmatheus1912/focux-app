@@ -234,6 +234,8 @@ void main() {
       final adapter = await abrir(tester, 1);
       await tester.tap(find.text('20').first);
       await tester.pump();
+      await tester.ensureVisible(find.text('Aplicar a todo o bloco'));
+      await tester.pump();
       await tester.tap(find.text('Aplicar a todo o bloco'));
       await tester.pump();
       await tester.tap(find.text('Salvar prescrição'));

@@ -98,7 +98,7 @@ class _PaletteThemePreview extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: FocuxHubTypography.bodyMuted(
                   color: mute,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w600,
                   height: 1.3,
                 ),
               ),
@@ -198,7 +198,7 @@ class _LogoUploadRing extends StatelessWidget {
                             secondary,
                             dark: ShellChrome.of(context).isDark,
                           ),
-                        ).copyWith(fontSize: 36),
+                        ).copyWith(fontSize: TokensStrip.fontDestaque),
                       ),
                     ),
           ),
@@ -310,7 +310,7 @@ class _BrandField extends StatelessWidget {
               hintText: hint,
               hintStyle: TextStyle(
                 color: chrome.mute.withValues(alpha: 0.55),
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
               ),
               prefixIcon:
                   icon != null
@@ -341,7 +341,7 @@ class _BrandField extends StatelessWidget {
                   return Text(
                     '${controller.text.length}/$maxLength',
                     style: TextStyle(
-                      fontSize: 10,
+                      fontSize: TokensStrip.fontMinimo,
                       fontWeight: FontWeight.w600,
                       color: chrome.mute.withValues(alpha: 0.75),
                     ),
@@ -404,7 +404,7 @@ class _PaywallCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             'Logo, slogan e paletas curadas para deixar seu app com cara de marca premium.',
-            style: TextStyle(color: chrome.mute, fontSize: 12.5, height: 1.35),
+            style: TextStyle(color: chrome.mute, fontSize: TokensStrip.fontRotulo, height: 1.35),
           ),
           const SizedBox(height: 14),
           FxLiquidPrimaryButton(label: 'Assinar Enterprise', onPressed: onTap),

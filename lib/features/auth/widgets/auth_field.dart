@@ -57,7 +57,7 @@ class AuthField extends StatelessWidget {
         Text(
           label,
           style: FocuxHubTypography.chip(heroTealSurface(0.86)).copyWith(
-            fontSize: 12.5,
+            fontSize: TokensStrip.fontRotulo,
             fontWeight: FontWeight.w600,
             letterSpacing: 0.5,
           ),
@@ -82,7 +82,7 @@ class AuthField extends StatelessWidget {
             helperMaxLines: 2,
             helperStyle: FocuxHubTypography.bodyMuted(
               color: heroTealSurface(0.78),
-            ).copyWith(fontSize: 12),
+            ).copyWith(fontSize: TokensStrip.fontRotulo),
             hintStyle: FocuxHubTypography.body(color: heroTealSurface(0.72)),
             prefixIcon:
                 icon == null
@@ -113,7 +113,7 @@ class AuthField extends StatelessWidget {
             ),
             errorStyle: const TextStyle(
               color: EagleTokens.authErrorSoft,
-              fontSize: 11.5,
+              fontSize: TokensStrip.fontMinimo,
             ),
           ),
         ),

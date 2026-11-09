@@ -145,7 +145,7 @@ void main() {
     await pumpSheet(tester);
     expect(repo.concluidos, 1);
 
-    await tester.tap(find.text('Concluir'));
+    await tester.tap(find.text('Voltar aos treinos'));
     await pumpSheet(tester);
     expect(find.text('treinos'), findsOneWidget);
   });
@@ -177,7 +177,7 @@ void main() {
     expect(find.text('Treino concluído'), findsOneWidget);
     expect(find.text('Recordes de hoje'), findsOneWidget);
     expect(find.textContaining('Supino'), findsWidgets);
-    await tester.tap(find.text('Concluir'));
+    await tester.tap(find.text('Voltar aos treinos'));
     await pumpSheet(tester);
     expect(find.text('treinos'), findsOneWidget);
   });

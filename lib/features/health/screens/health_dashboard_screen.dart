@@ -750,14 +750,14 @@ class _AvisoCompartilhando extends StatelessWidget {
             'Seu personal já vê sua prontidão',
             style: TextStyle(
               color: chrome.ink,
-              fontSize: 15,
-              fontWeight: FontWeight.w800,
+              fontSize: TokensStrip.fontBody,
+              fontWeight: FontWeight.w700,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             'Agora você decide: o interruptor fica na seção Conexão.',
-            style: TextStyle(color: chrome.mute, fontSize: 13.5, height: 1.3),
+            style: TextStyle(color: chrome.mute, fontSize: TokensStrip.fontBodySm, height: 1.3),
           ),
           const SizedBox(height: TokensStrip.s3),
           Wrap(
@@ -809,7 +809,7 @@ class _SaudeSoftSyncBanner extends StatelessWidget {
               'Sync parcial',
               style: FocuxHubTypography.body(
                 color: chrome.ink,
-              ).copyWith(fontWeight: FontWeight.w800),
+              ).copyWith(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 4),
             Text(

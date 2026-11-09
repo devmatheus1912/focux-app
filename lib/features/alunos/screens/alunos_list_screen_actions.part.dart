@@ -27,11 +27,17 @@ class _AlunosBulkActionsSheet extends StatefulWidget {
 class _AlunosBulkActionsSheetState extends State<_AlunosBulkActionsSheet> {
   String? _statusSelecionado;
 
-  static const _statusOptions = <({String value, String label})>[
-    (value: 'ATIVO', label: 'Ativo'),
-    (value: 'INATIVO', label: 'Inativo'),
-    (value: 'BLOQUEADO', label: 'Bloqueado'),
-  ];
+  /// As mesmas ações do 360 (Reativar, Pausar, Bloquear acesso), a partir do
+  /// status comum da seleção; seleção misturada mostra as três.
+  List<({String value, String label})> get _statusOptions {
+    final atual = widget.statusAtual;
+    final valores = atual == null
+        ? const [AlunoStatus.ativo, AlunoStatus.inativo, AlunoStatus.bloqueado]
+        : alunoStatusAcoesDisponiveis(atual);
+    return [
+      for (final v in valores) (value: v, label: alunoStatusAcaoLabel(v)),
+    ];
+  }
 
   String? _statusSubtitle(String status) {
     if (status == widget.statusAtual) return 'Status atual';
@@ -61,7 +67,7 @@ class _AlunosBulkActionsSheetState extends State<_AlunosBulkActionsSheet> {
             ],
             FxSettingsGroup(
               header: 'Status',
-              caption: 'Escolha um status e confirme.',
+              caption: 'Escolha a ação e confirme.',
               edgeToEdgeRows: true,
               accent: Theme.of(context).colorScheme.primary,
               children: FxInsetPickerOption.list(
@@ -85,7 +91,9 @@ class _AlunosBulkActionsSheetState extends State<_AlunosBulkActionsSheet> {
             ),
             const SizedBox(height: FxSettingsLayout.groupGap),
             FxLiquidPrimaryButton(
-              label: 'Aplicar status',
+              label: _statusSelecionado == null
+                  ? 'Aplicar'
+                  : alunoStatusAcaoLabel(_statusSelecionado!),
               onPressed:
                   _statusSelecionado == null ||
                           _statusSelecionado == widget.statusAtual
@@ -132,7 +140,7 @@ class _DestructiveSheetButton extends StatelessWidget {
               style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w700,
-                fontSize: 15,
+                fontSize: TokensStrip.fontBody,
               ),
             ),
           ),

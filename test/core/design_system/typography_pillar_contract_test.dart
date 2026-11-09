@@ -50,7 +50,7 @@ void main() {
     expect(theme, contains('AppTypography.inter'));
     expect(theme, isNot(contains('AppTypography.mono')));
     expect(theme, contains('textTheme:'));
-    expect(theme, contains('TokensStrip.fontH1'));
+    expect(theme, contains('TokensStrip.fontDestaque'));
   });
 
   test('hub screens use centralized typography', () {

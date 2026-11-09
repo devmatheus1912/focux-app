@@ -125,7 +125,7 @@ class _PerfilPhotoEditor extends StatelessWidget {
                             initial,
                             style: FxSettingsLayout.avatarInitials(
                               color: primary,
-                            ).copyWith(fontSize: 28),
+                            ).copyWith(fontSize: TokensStrip.fontTitulo),
                           )
                           : null,
                 ),

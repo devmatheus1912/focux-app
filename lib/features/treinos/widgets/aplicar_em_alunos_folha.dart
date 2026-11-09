@@ -142,7 +142,7 @@ class _LinhaDoAluno extends ConsumerWidget {
                 backgroundColor: primary.withValues(alpha: 0.14),
                 child: Text(
                   iniciais(aluno.nome),
-                  style: FocuxHubTypography.cardTitle(color: chrome.ink).copyWith(fontSize: 13),
+                  style: FocuxHubTypography.cardTitle(color: chrome.ink).copyWith(fontSize: TokensStrip.fontBodySm),
                 ),
               ),
               const SizedBox(width: TokensStrip.s3),

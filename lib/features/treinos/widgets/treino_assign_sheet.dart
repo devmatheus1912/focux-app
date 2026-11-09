@@ -15,6 +15,7 @@ import 'treino_home_sheet.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../core/theme/fx_icons.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 /// Resultado do sheet de escolher aluno e o prazo opcional.
 class TreinoAtribuicaoResult {
@@ -312,7 +313,7 @@ class _PrazoChip extends StatelessWidget {
           child: Text(
             label,
             style: TextStyle(
-              fontSize: 12.5,
+              fontSize: TokensStrip.fontRotulo,
               fontWeight: FontWeight.w700,
               color:
                   selected

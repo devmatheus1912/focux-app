@@ -90,7 +90,7 @@ class _PaywallLegalConsentLineState extends State<_PaywallLegalConsentLine> {
     );
     final body = TokensStrip.bodyMuted(
       color: secondary,
-    ).copyWith(fontSize: 12, height: 1.45);
+    ).copyWith(fontSize: TokensStrip.fontRotulo, height: 1.45);
     final link = body.copyWith(
       fontWeight: FontWeight.w600,
       color: widget.primary,

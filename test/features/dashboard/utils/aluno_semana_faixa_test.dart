@@ -98,4 +98,26 @@ void main() {
     );
     expect(dias[1].estado, FxWeekDayState.descanso);
   });
+
+  test('360 e aluno: os mesmos treinos dão a mesma faixa', () {
+    final doAluno = faixaDaSemana(
+      ficha,
+      [_feito(DateTime(2026, 10, 26, 18).toIso8601String())],
+      _quarta,
+    );
+    final do360 = faixaDaSemana(
+      ficha,
+      const [],
+      _quarta,
+      diasComTreino: diasComTreinoDaAderencia([
+        (data: '2026-10-26', checkins: 1, status: null),
+        (data: '2026-10-27', checkins: 0, status: 'SEM_PLANO'),
+      ]),
+    );
+    expect(
+      do360.map((d) => d.estado).toList(),
+      doAluno.map((d) => d.estado).toList(),
+    );
+    expect(do360[0].estado, FxWeekDayState.concluido);
+  });
 }

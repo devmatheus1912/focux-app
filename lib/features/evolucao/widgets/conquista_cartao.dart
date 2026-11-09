@@ -99,7 +99,7 @@ class ConquistaCartao extends StatelessWidget {
               Text(
                 c.tipoRotulo,
                 textAlign: TextAlign.center,
-                style: FocuxHubTypography.cardTitle(color: tinta).copyWith(fontSize: 22),
+                style: FocuxHubTypography.cardTitle(color: tinta).copyWith(fontSize: TokensStrip.fontTitulo),
               ),
               if (mostrarValor) ...[
                 const SizedBox(height: TokensStrip.s2),
@@ -136,7 +136,7 @@ class _Numero extends StatelessWidget {
       texto,
       maxLines: 1,
       textScaler: TextScaler.noScaling,
-      style: FocuxHubTypography.metric(color: cor, fontSize: 34),
+      style: FocuxHubTypography.metric(color: cor, fontSize: TokensStrip.fontDestaque),
     ),
   );
 }

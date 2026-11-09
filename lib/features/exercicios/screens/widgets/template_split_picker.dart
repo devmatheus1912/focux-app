@@ -167,7 +167,7 @@ class _TemplateIntro extends StatelessWidget {
                   'Quantos dias o aluno treina?',
                   style: FocuxHubTypography.body(
                     color: scheme.onSurface,
-                  ).copyWith(fontWeight: FontWeight.w900),
+                  ).copyWith(fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(height: 2),
                 Text(
@@ -377,7 +377,7 @@ class _TemplateCompleteCard extends StatelessWidget {
                   'Modelo concluído',
                   style: FocuxHubTypography.cardTitle(
                     color: scheme.onSurface,
-                  ).copyWith(fontWeight: FontWeight.w900),
+                  ).copyWith(fontWeight: FontWeight.w700),
                 ),
               ),
             ],
@@ -434,14 +434,14 @@ class _TemplateProgressCard extends StatelessWidget {
                   'Complete o modelo',
                   style: FocuxHubTypography.body(
                     color: scheme.onSurface,
-                  ).copyWith(fontWeight: FontWeight.w900),
+                  ).copyWith(fontWeight: FontWeight.w700),
                 ),
               ),
               Text(
                 '$done/$total',
                 style: FocuxHubTypography.metric(
                   color: scheme.primary,
-                  fontWeight: FontWeight.w900,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ],

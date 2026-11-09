@@ -150,15 +150,18 @@ void main() {
       }
       expect(find.text('Aquecimento · 3'), findsOneWidget);
       expect(find.text('Alongamento e volta à calma · 2'), findsOneWidget);
-      expect(find.text('Adicionar'), findsNWidgets(3));
+      // "+ Adicionar ao {bloco}" no fim de cada bloco com exercícios
+      expect(find.text('Adicionar ao aquecimento'), findsOneWidget);
+      expect(find.text('Adicionar ao principal'), findsOneWidget);
+      expect(find.text('Adicionar ao alongamento e volta à calma'), findsOneWidget);
       expect(find.text('Segure para reordenar'), findsNothing);
       // um cabeçalho de grupo muscular dentro do bloco não existe mais
       expect(find.text('PEITO'), findsNothing);
-      expect(find.text('6 exercícios · ~30 min · 1 grupo'), findsOneWidget);
+      expect(find.text('6 exercícios · ~30 min · 1 grupo muscular'), findsOneWidget);
     },
   );
 
-  testWidgets('seção vazia mostra o convite', (tester) async {
+  testWidgets('seção vazia vira uma linha fina; só Principal fica sem título', (tester) async {
     tela(tester);
     final soTrabalho = Treino(
       id: 9,
@@ -167,10 +170,11 @@ void main() {
     );
     await tester.pumpWidget(_app(soTrabalho, _Adapter()));
     await _settle(tester);
-    expect(
-      find.text('Nenhum exercício. Toque para adicionar.'),
-      findsNWidgets(2),
-    );
+    expect(find.text('Aquecimento'), findsOneWidget);
+    expect(find.text('Alongamento e volta à calma'), findsOneWidget);
+    expect(find.text('Nenhum exercício. Toque para adicionar.'), findsNothing);
+    expect(find.textContaining('Principal'), findsNothing);
+    expect(find.text('Adicionar ao principal'), findsOneWidget);
   });
 
   testWidgets('arrastar pela alça de Trabalho para o Aquecimento muda o bloco', (
@@ -207,7 +211,7 @@ void main() {
     expect(ids.indexOf(4), lessThan(3));
   });
 
-  testWidgets('"Mover para…" leva o exercício para outro bloco', (
+  testWidgets('"Mover de bloco" leva o exercício para outro bloco', (
     tester,
   ) async {
     tela(tester);
@@ -217,7 +221,7 @@ void main() {
 
     await tester.tap(find.byTooltip('Ações de Exercício 4'));
     await _settle(tester);
-    await tester.tap(find.text('Mover para…'));
+    await tester.tap(find.text('Mover de bloco'));
     await _settle(tester);
     // o bloco atual (Trabalho) não é oferecido
     expect(find.text('Trabalho'), findsNothing);

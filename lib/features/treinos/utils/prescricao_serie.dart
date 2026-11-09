@@ -1,15 +1,20 @@
+import 'grupos_de_serie.dart';
 class SeriePrescrita {
   const SeriePrescrita({
     required this.numero,
     required this.repeticoes,
     this.cargaKg,
     this.papel = 'VALIDA',
+    this.descansoSegundos,
   });
 
   final int numero;
   final String repeticoes;
   final double? cargaKg;
   final String papel;
+
+  /// Descanso depois desta série; nulo = o do exercício.
+  final int? descansoSegundos;
 
   bool get aquecimento => papel == 'AQUECIMENTO';
 
@@ -23,6 +28,7 @@ class SeriePrescrita {
     repeticoes: repeticoes ?? this.repeticoes,
     cargaKg: limparCarga ? null : (cargaKg ?? this.cargaKg),
     papel: papel ?? this.papel,
+    descansoSegundos: descansoSegundos,
   );
 
   factory SeriePrescrita.fromJson(Map<String, dynamic> json) => SeriePrescrita(
@@ -30,6 +36,7 @@ class SeriePrescrita {
     repeticoes: json['repeticoes'] as String? ?? '8-12',
     cargaKg: (json['cargaKg'] as num?)?.toDouble(),
     papel: (json['papel'] as String? ?? 'VALIDA').toUpperCase(),
+    descansoSegundos: (json['descansoSegundos'] as num?)?.toInt(),
   );
 
   Map<String, dynamic> toJson() => {
@@ -37,6 +44,7 @@ class SeriePrescrita {
     'repeticoes': repeticoes,
     if (cargaKg != null) 'cargaKg': cargaKg,
     'papel': papel,
+    if (descansoSegundos != null) 'descansoSegundos': descansoSegundos,
   };
 }
 
@@ -74,17 +82,14 @@ extension SeriePrescritaNumero on SeriePrescrita {
     repeticoes: repeticoes,
     cargaKg: cargaKg,
     papel: papel,
+    descansoSegundos: descansoSegundos,
   );
 }
 
 String resumoSeries(List<SeriePrescrita> series, {int descansoSegundos = 75}) {
-  if (series.isEmpty) return '0 × $prescricaoHipertrofiaReps · ${descansoSegundos}s';
-  final aquecimento = series.where((s) => s.aquecimento).length;
-  final validas = series.where((s) => !s.aquecimento).toList();
-  final reps = validas.isEmpty ? series.first.repeticoes : validas.first.repeticoes;
-  final miolo = validas.isEmpty
-      ? '${series.length} × $reps'
-      : '${validas.length} × $reps';
-  final prefixo = aquecimento > 0 ? '$aquecimento aquecimento · ' : '';
-  return '$prefixo$miolo · ${descansoSegundos}s';
+  if (series.isEmpty) return '0 × $prescricaoHipertrofiaReps · $descansoSegundos s';
+  // Com aquecimento, ajuste ou back-off, o resumo diz cada grupo.
+  final grupos = resumoDosGrupos(series, descansoExercicio: descansoSegundos);
+  if (grupos != null) return grupos;
+  return '${series.length} × ${series.first.repeticoes} · $descansoSegundos s';
 }

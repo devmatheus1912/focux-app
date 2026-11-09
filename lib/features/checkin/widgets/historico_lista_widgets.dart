@@ -90,9 +90,17 @@ class HistoricoGanhoCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: TokensStrip.s3),
-            Text(
-              linha.titulo,
-              style: FocuxHubTypography.metric(color: chrome.ink, fontSize: 22),
+            // Número curto; se vier longo, encolhe em vez de espremer o rótulo.
+            Flexible(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: AlignmentDirectional.centerEnd,
+                child: Text(
+                  linha.titulo,
+                  maxLines: 1,
+                  style: FocuxHubTypography.metric(color: chrome.ink, fontSize: TokensStrip.fontTitulo),
+                ),
+              ),
             ),
           ],
         ),
@@ -148,7 +156,7 @@ class HistoricoSessaoRow extends StatelessWidget {
                         '${quando.day}',
                         style: FocuxHubTypography.metric(
                           color: chrome.ink,
-                          fontSize: 20,
+                          fontSize: TokensStrip.fontSecao,
                         ),
                       ),
                       Text(

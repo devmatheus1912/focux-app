@@ -19,12 +19,16 @@ class FxChoiceStrip<T> extends StatelessWidget {
     required this.selecionado,
     required this.onSelecionar,
     this.quebrar = false,
+    this.cheio = false,
   });
 
   final List<FxChoiceItem<T>> itens;
   final T? selecionado;
   final ValueChanged<T> onSelecionar;
   final bool quebrar;
+
+  /// Selecionado preenchido com a cor da marca (lugar atual, não só escolha).
+  final bool cheio;
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +37,7 @@ class FxChoiceStrip<T> extends StatelessWidget {
         FxChoiceChip(
           label: item.label,
           selected: item.value == selecionado,
+          cheio: cheio,
           onTap: () => onSelecionar(item.value),
         ),
     ];

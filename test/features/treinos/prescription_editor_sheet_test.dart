@@ -102,12 +102,13 @@ void main() {
     expect(find.byType(PrescriptionEditorSheet), findsOneWidget);
     expect(find.text('Editar prescrição'), findsOneWidget);
     expect(find.text('Supino declinado máquina'), findsOneWidget);
-    expect(find.text('Prescrição'), findsOneWidget);
+    expect(find.text('Prescrição'), findsNothing);
     // detalhes ficam recolhidos até o personal abrir (ou já terem valor)
     expect(find.text('Mais detalhes'), findsOneWidget);
     expect(find.text('Tipo de série'), findsNothing);
-    expect(find.text('Objetivo'), findsOneWidget);
-    expect(find.text('Hipertrofia'), findsOneWidget);
+    // Objetivo é da sessão, não da folha do exercício.
+    expect(find.text('Objetivo'), findsNothing);
+    expect(find.text('Hipertrofia'), findsNothing);
     expect(find.text('Salvar prescrição'), findsOneWidget);
     // A técnica virou a seção "Método", sempre à vista; "Mais detalhes" é carga, RPE e dica.
     expect(find.text('Drop-set'), findsOneWidget);

@@ -200,7 +200,7 @@ String aluno360AderenciaValor(Aluno aluno) => aderenciaDoCard(aluno).texto;
   return switch (aluno.aderenciaEstado) {
     'COMECANDO' => (
       texto: '${aluno.treinosJanela ?? 0}',
-      rotulo: ptS.aderenciaCardComecando,
+      rotulo: ptS.aderenciaCardComecandoTreinos,
     ),
     'SEM_FICHA' => (texto: '—', rotulo: ptS.aderenciaCardSemFicha),
     _ => (

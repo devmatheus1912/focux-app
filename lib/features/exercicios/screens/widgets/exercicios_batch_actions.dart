@@ -40,7 +40,7 @@ class ExerciciosBatchActions extends StatelessWidget {
               Expanded(
                 child: Text(
                   '$count selecionado${count == 1 ? '' : 's'}',
-                  style: const TextStyle(fontWeight: FontWeight.w800),
+                  style: const TextStyle(fontWeight: FontWeight.w700),
                 ),
               ),
               IconButton(

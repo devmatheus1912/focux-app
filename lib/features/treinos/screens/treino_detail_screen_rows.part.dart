@@ -16,6 +16,9 @@ class _ExercicioRow extends StatelessWidget {
   final int reorderIndex;
   final bool isDark;
   final bool isLast;
+
+  /// Mostra o músculo só quando a sessão tem mais de um grupo.
+  final bool mostrarGrupo;
   final VoidCallback onEditPrescription;
   final VoidCallback onMenu;
 
@@ -24,6 +27,7 @@ class _ExercicioRow extends StatelessWidget {
     required this.reorderIndex,
     required this.isDark,
     required this.isLast,
+    this.mostrarGrupo = true,
     required this.onEditPrescription,
     required this.onMenu,
   });
@@ -37,7 +41,7 @@ class _ExercicioRow extends StatelessWidget {
     final note = te.observacoes?.trim();
     final hasNote = note != null && note.isNotEmpty;
     final prescription = treinoDetailExerciseLine(te);
-    final grupo = _grupoEmTexto(te);
+    final grupo = mostrarGrupo ? _grupoEmTexto(te) : '';
     final nome =
         te.exercicio.isPersonalUpload
             ? '${te.exercicio.nomeDisplay} · Meu'
@@ -110,7 +114,7 @@ class _ExercicioRow extends StatelessWidget {
                                 overflow: TextOverflow.ellipsis,
                                 style: FocuxHubTypography.metric(
                                   color: ink.withValues(alpha: 0.8),
-                                  fontSize: 12,
+                                  fontSize: TokensStrip.fontRotulo,
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
@@ -122,7 +126,7 @@ class _ExercicioRow extends StatelessWidget {
                                   style: FocuxHubTypography.bodyMuted(
                                     color: mute,
                                     fontWeight: FontWeight.w600,
-                                  ).copyWith(fontSize: 11),
+                                  ).copyWith(fontSize: TokensStrip.fontMinimo),
                                 ),
                             ],
                           ),

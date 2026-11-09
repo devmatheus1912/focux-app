@@ -202,7 +202,7 @@ class _MonthTitle extends StatelessWidget {
                 style: FocuxHubTypography.pageTitle(
                   context,
                   color: chrome.ink,
-                ).copyWith(fontSize: 28, fontWeight: FontWeight.w800),
+                ).copyWith(fontSize: TokensStrip.fontTitulo, fontWeight: FontWeight.w700),
               ),
             ),
           ),
@@ -294,11 +294,11 @@ class _MonthDayCell extends StatelessWidget {
                   child: Text(
                     '${day.day}',
                     style: FocuxHubTypography.body(color: numero).copyWith(
-                      fontSize: 14,
+                      fontSize: TokensStrip.fontBody,
                       fontWeight:
                           isToday || selected
-                              ? FontWeight.w800
-                              : FontWeight.w500,
+                              ? FontWeight.w700
+                              : FontWeight.w600,
                     ),
                   ),
                 ),
@@ -360,7 +360,7 @@ class _PontosDoDia extends StatelessWidget {
           if (extra > 0)
             Text(
               '+$extra',
-              style: FocuxHubTypography.chip(chrome.mute).copyWith(fontSize: 9, height: 1),
+              style: FocuxHubTypography.chip(chrome.mute).copyWith(fontSize: TokensStrip.fontMinimo, height: 1),
             ),
         ],
       ),

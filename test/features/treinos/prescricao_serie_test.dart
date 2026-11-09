@@ -7,7 +7,7 @@ void main() {
     expect(series, hasLength(4));
     expect(series.every((s) => s.papel == 'VALIDA'), isTrue);
     expect(series.first.repeticoes, '8-12');
-    expect(resumoSeries(series), '4 × 8-12 · 75s');
+    expect(resumoSeries(series), '4 × 8-12 · 75 s');
   });
 
   test('memória do exercício ganha da global', () {
@@ -22,7 +22,7 @@ void main() {
     );
     expect(series, hasLength(2));
     expect(series.first.cargaKg, 20);
-    expect(resumoSeries(series, descansoSegundos: 150), '1 aquecimento · 1 × 5 · 150s');
+    expect(resumoSeries(series, descansoSegundos: 150), '1 aquec. · 1 × 5 · 150 s');
   });
 
   test('duas de aquecimento e quatro válidas', () {
@@ -32,6 +32,6 @@ void main() {
       for (var n = 3; n <= 6; n++)
         SeriePrescrita(numero: n, repeticoes: '8-12', cargaKg: 60),
     ];
-    expect(resumoSeries(series), '2 aquecimento · 4 × 8-12 · 75s');
+    expect(resumoSeries(series), '2 aquec. · 4 × 8-12 · 75 s');
   });
 }

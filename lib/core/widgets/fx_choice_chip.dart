@@ -14,11 +14,15 @@ class FxChoiceChip extends StatelessWidget {
     required this.label,
     required this.selected,
     required this.onTap,
+    this.cheio = false,
   });
 
   final String label;
   final bool selected;
   final VoidCallback? onTap;
+
+  /// Selecionado preenchido com a marca, texto claro.
+  final bool cheio;
 
   static const double alvoMin = 48;
 
@@ -28,6 +32,8 @@ class FxChoiceChip extends StatelessWidget {
     final enabled = onTap != null;
     final foreground = !enabled
         ? chrome.mute.withValues(alpha: 0.5)
+        : selected && cheio
+        ? Theme.of(context).colorScheme.onPrimary
         : selected
         ? chrome.brand
         : chrome.ink;
@@ -64,7 +70,9 @@ class FxChoiceChip extends StatelessWidget {
                   vertical: TokensStrip.s2,
                 ),
                 decoration: BoxDecoration(
-                  color: selected
+                  color: selected && cheio
+                      ? chrome.brand
+                      : selected
                       ? chrome.brand.withValues(alpha: chrome.isDark ? 0.22 : 0.10)
                       : chrome.cardFill,
                   borderRadius: BorderRadius.circular(TokensStrip.rPill),

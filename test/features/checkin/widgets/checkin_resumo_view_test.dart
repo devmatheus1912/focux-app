@@ -106,7 +106,7 @@ void main() {
       ),
     );
     expect(
-      find.text('Primeira vez nesse treino. Agora tem com o que comparar.'),
+      find.text('Primeira vez com este treino. Na próxima, você vê a evolução.'),
       findsOneWidget,
     );
     expect(find.text('Recordes de hoje'), findsNothing);
@@ -146,7 +146,7 @@ void main() {
 
     await tester.tap(find.text('abrir'));
     await _settle(tester);
-    await tester.tap(find.text('Concluir'));
+    await tester.tap(find.text('Voltar aos treinos'));
     await _settle(tester);
     expect(acao, CheckinResumoAcao.concluir);
   });

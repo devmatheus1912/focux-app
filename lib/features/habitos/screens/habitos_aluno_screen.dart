@@ -332,7 +332,7 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
                     '${h.streakAtual}d',
                     style: TextStyle(
                       color: EagleTokens.warn,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                   leading: Semantics(

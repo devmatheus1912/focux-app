@@ -315,7 +315,7 @@ class _DesafioDetailBody extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                             style: FocuxHubTypography.metric(
                               color: sobre.ink,
-                              fontSize: FocuxHubTypography.metricLg,
+                              fontSize: TokensStrip.fontTitulo,
                             ),
                           ),
                           const SizedBox(height: 6),

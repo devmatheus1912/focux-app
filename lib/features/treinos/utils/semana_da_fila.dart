@@ -242,3 +242,36 @@ DivisaoTrocada trocarDivisao(List<DiaDaSemana> atual, List<DiaDaSemana> nova) {
     saem: usadas < hoje.length ? hoje.sublist(usadas) : const [],
   );
 }
+
+/// Nome previsto para cada dia que "segue a sequência": a fila é a ordem das
+/// sessões da semana (A, B, C…) e cada dia da sequência pega a próxima depois
+/// da última sessão que apareceu antes dele. Chave = dia (1 = segunda).
+Map<int, String> nomesDaSequencia(List<DiaDaSemana> dias) {
+  final fila = <int>[];
+  final nomes = <int, String>{};
+  for (final d in dias) {
+    for (final s in d.sessoes) {
+      final id = s.treinoId;
+      if (id == null || fila.contains(id)) continue;
+      fila.add(id);
+      nomes[id] = s.nome.trim();
+    }
+  }
+  if (fila.isEmpty) return const {};
+  final previstos = <int, String>{};
+  var cursor = 0;
+  for (final d in dias) {
+    final ultima = d.sessoes.lastWhere(
+      (s) => s.treinoId != null,
+      orElse: () => const SessaoDaSemana(nome: ''),
+    );
+    if (ultima.treinoId != null) {
+      cursor = fila.indexOf(ultima.treinoId!) + 1;
+    } else if (d.segueSequencia) {
+      final nome = nomes[fila[cursor % fila.length]] ?? '';
+      if (nome.isNotEmpty) previstos[d.dia] = nome;
+      cursor++;
+    }
+  }
+  return previstos;
+}

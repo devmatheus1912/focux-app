@@ -1,6 +1,9 @@
 import '../data/checkin_repository.dart';
 import 'checkin_execucao_estado.dart';
 import 'historico_detalhe_view.dart';
+import '../../../core/widgets/fx_week_strip.dart';
+import '../../dashboard/utils/aluno_semana_faixa.dart';
+import '../../treinos/models/rotina_fila.dart';
 
 enum CheckinResumoComparacaoTipo { mais, menos, igual, primeira }
 
@@ -135,3 +138,43 @@ CheckinResumoComparacao? _comparacao(SessaoEvolucaoDto? evo, double? volume) {
 }
 
 double? _positivo(double? v) => v != null && v > 0 ? v : null;
+
+/// "Sua semana" no fim do treino: a faixa com hoje já feito, quantos treinos
+/// na semana contra a meta da rotina e o próximo da fila.
+typedef CheckinResumoSemana = ({
+  List<FxWeekDay> dias,
+  int feitos,
+  int? meta,
+  String? proximo,
+});
+
+/// Próximo treino da fila depois de [treinoId] (rodízio volta ao começo).
+String? checkinProximoDaFila(RotinaFila rotina, int treinoId) {
+  final fila = [
+    for (final i in rotina.itens)
+      if (!i.descanso && i.treinoId != null) i,
+  ];
+  if (fila.length < 2) return null;
+  final idx = fila.indexWhere((i) => i.treinoId == treinoId);
+  if (idx < 0) return null;
+  final nome = fila[(idx + 1) % fila.length].nome?.trim() ?? '';
+  return nome.isEmpty ? null : nome;
+}
+
+/// Monta a semana para o resumo; nula sem ficha com dia de treino.
+CheckinResumoSemana? checkinResumoSemana({
+  required RotinaFila rotina,
+  required List<ExecucaoTreino> historico,
+  required int treinoId,
+  required DateTime hoje,
+  int? meta,
+}) {
+  final dias = faixaDaSemana(rotina, historico, hoje, diasComTreino: [hoje]);
+  if (dias.isEmpty) return null;
+  return (
+    dias: dias,
+    feitos: dias.where((d) => d.estado == FxWeekDayState.concluido).length,
+    meta: meta,
+    proximo: checkinProximoDaFila(rotina, treinoId),
+  );
+}

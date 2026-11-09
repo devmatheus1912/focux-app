@@ -57,7 +57,7 @@ class AssinaturaSuccessScreen extends StatelessWidget {
                           textAlign: TextAlign.center,
                           style: TokensStrip.h1(
                             color: ink,
-                          ).copyWith(fontSize: 26),
+                          ).copyWith(fontSize: TokensStrip.fontTitulo),
                         ),
                       ),
                       const SizedBox(height: TokensStrip.s2),
@@ -87,7 +87,7 @@ class AssinaturaSuccessScreen extends StatelessWidget {
                                   style: TextStyle(
                                     color: ink,
                                     fontFamily: 'monospace',
-                                    fontSize: 12,
+                                    fontSize: TokensStrip.fontRotulo,
                                   ),
                                 ),
                               ],
@@ -110,7 +110,7 @@ class AssinaturaSuccessScreen extends StatelessWidget {
                             'Próximos passos',
                             style: TokensStrip.h2(
                               color: ink,
-                            ).copyWith(fontSize: 17),
+                            ).copyWith(fontSize: TokensStrip.fontSecao),
                           ),
                         ),
                       ),

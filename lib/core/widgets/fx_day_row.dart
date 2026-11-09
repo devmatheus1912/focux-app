@@ -36,6 +36,7 @@ class FxDayRow extends StatelessWidget {
     this.hojeLabel,
     this.onAdicionar,
     this.segueLabel,
+    this.segueSubtitulo,
     this.fimVazio,
   });
 
@@ -50,6 +51,9 @@ class FxDayRow extends StatelessWidget {
 
   /// Dia sem sessão que segue a sequência (rodízio); nulo = descanso.
   final String? segueLabel;
+
+  /// Com o nome previsto no título, a palavra "sequência" vai embaixo.
+  final String? segueSubtitulo;
 
   /// No fim da linha de dia sem sessão (o "…" do dia, por exemplo). Substitui o "+".
   final Widget? fimVazio;
@@ -99,6 +103,7 @@ class FxDayRow extends StatelessWidget {
               if (sessoes.isEmpty && segueLabel != null)
                 FxTapRow(
                   title: segueLabel!,
+                  subtitle: segueSubtitulo,
                   leading: Icon(FxIcons.repetir, size: 20, color: chrome.mute),
                   vazio: true,
                   trailing: fimVazio ?? const SizedBox.shrink(),
@@ -106,8 +111,9 @@ class FxDayRow extends StatelessWidget {
                 )
               else if (sessoes.isEmpty)
                 FxTapRow(
-                  title: onAdicionar == null ? descansoLabel : adicionarLabel,
-                  subtitle: onAdicionar == null ? null : descansoLabel,
+                  // O estado do dia é o título; adicionar é a ação embaixo.
+                  title: descansoLabel,
+                  subtitle: onAdicionar == null ? null : adicionarLabel,
                   vazio: true,
                   trailing: fimVazio,
                   onTap: onAdicionar,

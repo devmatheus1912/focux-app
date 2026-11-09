@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'brand_palette.dart';
 import 'curated_brand_palettes.dart';
 import 'design_tokens.dart';
-import 'focux_hub_typography.dart';
 import 'fx_page_transitions_builder.dart';
 import 'tokens_strip.dart';
 
@@ -116,97 +115,38 @@ class AppTheme {
     );
 
     // ── Text Theme (Inter throughout, tight tracking on display) ──────
+    // Slots do Material apontam para os papéis da escala (SPEC tipografia).
+    TextStyle papel(double size, FontWeight w, double h, {double ls = 0, Color? c}) =>
+        _inter(fontSize: size, fontWeight: w, color: c ?? onSurface, letterSpacing: ls, height: h);
+    final destaque = papel(TokensStrip.fontDestaque, FontWeight.w700, 1.1, ls: -0.2);
+    final secao = papel(TokensStrip.fontSecao, FontWeight.w600, 1.25, ls: -0.2);
+    final linha = papel(TokensStrip.fontBody, FontWeight.w600, 1.3);
+    final secundario = papel(TokensStrip.fontBodySm, FontWeight.w400, 1.4);
     final textTheme = TextTheme(
-      displayLarge: _inter(
-        fontSize: 42,
-        fontWeight: FontWeight.w700,
-        color: onSurface,
-        letterSpacing: -0.5,
-      ),
-      displayMedium: _inter(
-        fontSize: TokensStrip.fontH1,
-        fontWeight: TokensStrip.weightH1,
-        color: onSurface,
-        letterSpacing: TokensStrip.trackingH1,
-      ),
-      displaySmall: _inter(
-        fontSize: 25,
-        fontWeight: FontWeight.w700,
-        color: onSurface,
-        letterSpacing: -0.2,
-      ),
-      headlineLarge: _inter(
-        fontSize: TokensStrip.fontH2,
-        fontWeight: TokensStrip.weightH2,
-        color: onSurface,
-        letterSpacing: TokensStrip.trackingH2,
-      ),
-      headlineMedium: _inter(
-        fontSize: FocuxHubTypography.metricEm,
-        fontWeight: FontWeight.w600,
-        color: onSurface,
-        letterSpacing: -0.1,
-      ),
-      headlineSmall: _inter(
-        fontSize: 16,
-        fontWeight: FontWeight.w600,
-        color: onSurface,
-        letterSpacing: 0,
-      ),
-      titleLarge: _inter(
-        fontSize: 15,
-        fontWeight: FontWeight.w600,
-        color: onSurface,
-        letterSpacing: 0,
-      ),
-      titleMedium: _inter(
-        fontSize: 13.5,
-        fontWeight: FontWeight.w600,
-        color: onSurface,
-        letterSpacing: 0,
-      ),
-      titleSmall: _inter(
-        fontSize: 12,
-        fontWeight: FontWeight.w600,
-        color: onSurface,
-        letterSpacing: 0.1,
-      ),
-      bodyLarge: _inter(
-        fontSize: TokensStrip.fontBody,
-        fontWeight: TokensStrip.weightBody,
-        color: onSurface,
-        letterSpacing: 0,
-        height: TokensStrip.leadingBody,
-      ),
-      bodyMedium: _inter(
-        fontSize: TokensStrip.fontBodySm,
-        fontWeight: TokensStrip.weightBody,
-        color: onSurface,
-        letterSpacing: 0,
-        height: TokensStrip.leadingBody,
-      ),
-      bodySmall: _inter(
-        fontSize: 11.5,
-        fontWeight: FontWeight.w400,
-        color: onSurfMute,
-      ),
-      labelLarge: _inter(
-        fontSize: 12.5,
-        fontWeight: FontWeight.w600,
-        color: onSurface,
-        letterSpacing: 0.05,
-      ),
+      displayLarge: destaque,
+      displayMedium: destaque,
+      displaySmall: destaque,
+      headlineLarge: papel(TokensStrip.fontTitulo, FontWeight.w700, 1.2, ls: -0.2),
+      headlineMedium: secao,
+      headlineSmall: secao,
+      titleLarge: secao,
+      titleMedium: linha,
+      titleSmall: papel(TokensStrip.fontRotulo, FontWeight.w600, 1.2),
+      bodyLarge: papel(TokensStrip.fontBody, FontWeight.w400, TokensStrip.leadingBody),
+      bodyMedium: secundario,
+      bodySmall: secundario.copyWith(color: onSurfMute),
+      labelLarge: linha,
       labelMedium: _rotuloNumerico(
-        fontSize: 10.5,
-        fontWeight: FontWeight.w500,
+        fontSize: TokensStrip.fontRotulo,
+        fontWeight: FontWeight.w600,
         color: onSurfMute,
-        letterSpacing: 0.8,
+        letterSpacing: 0,
       ),
       labelSmall: _rotuloNumerico(
-        fontSize: 9.5,
+        fontSize: TokensStrip.fontMinimo,
         fontWeight: FontWeight.w500,
         color: onSurfMute,
-        letterSpacing: 1.0,
+        letterSpacing: 0,
       ),
     );
 
@@ -227,7 +167,7 @@ class AppTheme {
         scrolledUnderElevation: 0.5,
         centerTitle: false,
         titleTextStyle: _inter(
-          fontSize: 16.5,
+          fontSize: TokensStrip.fontBody,
           fontWeight: FontWeight.w600,
           color: onSurface,
           letterSpacing: -0.1,
@@ -269,8 +209,8 @@ class AppTheme {
           horizontal: TokensStrip.s4,
           vertical: TokensStrip.s3,
         ),
-        hintStyle: _inter(color: onSurfMute, fontSize: 14),
-        labelStyle: _inter(color: onSurfMute, fontSize: 14),
+        hintStyle: _inter(color: onSurfMute, fontSize: TokensStrip.fontBody),
+        labelStyle: _inter(color: onSurfMute, fontSize: TokensStrip.fontBody),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(TokensStrip.rInput),
           borderSide: BorderSide(
@@ -316,7 +256,7 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(TokensStrip.rButton),
           ),
-          textStyle: _inter(fontSize: 15, fontWeight: FontWeight.w700),
+          textStyle: _inter(fontSize: TokensStrip.fontBody, fontWeight: FontWeight.w700),
           elevation: 0,
           shadowColor: primary.withValues(alpha: 0.35),
         ),
@@ -337,14 +277,14 @@ class AppTheme {
                     : primary,
             width: 1.2,
           ),
-          textStyle: _inter(fontSize: 15, fontWeight: FontWeight.w600),
+          textStyle: _inter(fontSize: TokensStrip.fontBody, fontWeight: FontWeight.w600),
         ),
       ),
 
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: primary,
-          textStyle: _inter(fontSize: 14, fontWeight: FontWeight.w600),
+          textStyle: _inter(fontSize: TokensStrip.fontBody, fontWeight: FontWeight.w600),
         ),
       ),
 
@@ -353,7 +293,7 @@ class AppTheme {
         backgroundColor: dark ? EagleTokens.darkCardHi : EagleTokens.lineSoft,
         selectedColor: dark ? EagleTokens.darkCardHi : primarySoft,
         labelStyle: _inter(
-          fontSize: 12,
+          fontSize: TokensStrip.fontRotulo,
           color: onSurface,
           fontWeight: FontWeight.w500,
         ),
@@ -368,7 +308,7 @@ class AppTheme {
       listTileTheme: ListTileThemeData(
         // Trailing/leading texto em Inter; mono só via FocuxHubTypography.metric.
         leadingAndTrailingTextStyle: _inter(
-          fontSize: 12,
+          fontSize: TokensStrip.fontRotulo,
           fontWeight: FontWeight.w600,
           color: onSurfMute,
         ),
@@ -388,7 +328,7 @@ class AppTheme {
         ),
         backgroundColor: dark ? EagleTokens.darkCard : surface,
         titleTextStyle: _inter(
-          fontSize: FocuxHubTypography.metricEm,
+          fontSize: TokensStrip.fontSecao,
           fontWeight: FontWeight.w600,
           color: onSurface,
         ),
@@ -417,13 +357,13 @@ class AppTheme {
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
             return _inter(
-              fontSize: 10.5,
+              fontSize: TokensStrip.fontMinimo,
               fontWeight: FontWeight.w700,
               color: primary,
             );
           }
           return _inter(
-            fontSize: 10.5,
+            fontSize: TokensStrip.fontMinimo,
             fontWeight: FontWeight.w500,
             color: onSurfMute,
           );
@@ -447,7 +387,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(EagleTokens.radiusSm),
         ),
         backgroundColor: dark ? EagleTokens.darkCardHi : EagleTokens.ink,
-        contentTextStyle: _inter(color: Colors.white, fontSize: 14),
+        contentTextStyle: _inter(color: Colors.white, fontSize: TokensStrip.fontBody),
       ),
 
       switchTheme: SwitchThemeData(
@@ -491,8 +431,8 @@ class AppTheme {
         labelColor: primary,
         unselectedLabelColor: onSurfMute,
         indicatorColor: primary,
-        labelStyle: _inter(fontSize: 13, fontWeight: FontWeight.w600),
-        unselectedLabelStyle: _inter(fontSize: 13, fontWeight: FontWeight.w500),
+        labelStyle: _inter(fontSize: TokensStrip.fontBodySm, fontWeight: FontWeight.w600),
+        unselectedLabelStyle: _inter(fontSize: TokensStrip.fontBodySm, fontWeight: FontWeight.w500),
       ),
 
       // ── Badge ───────────────────────────────────────────────────────
@@ -507,7 +447,7 @@ class AppTheme {
           color: dark ? EagleTokens.darkCardHi : EagleTokens.ink,
           borderRadius: BorderRadius.circular(EagleTokens.radiusXs),
         ),
-        textStyle: _inter(color: Colors.white, fontSize: 12),
+        textStyle: _inter(color: Colors.white, fontSize: TokensStrip.fontRotulo),
       ),
     );
   }

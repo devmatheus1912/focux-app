@@ -66,8 +66,8 @@ class PlanUsageBanner extends ConsumerWidget {
                             ? 'Cota de IA esgotada'
                             : 'Você está perto do limite do plano',
                         style: TextStyle(
-                          fontWeight: FontWeight.w800,
-                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          fontSize: TokensStrip.fontBodySm,
                           color:
                               isDark
                                   ? EagleTokens.darkInk
@@ -78,7 +78,7 @@ class PlanUsageBanner extends ConsumerWidget {
                       Text(
                         message,
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: TokensStrip.fontRotulo,
                           height: 1.4,
                           color:
                               isDark

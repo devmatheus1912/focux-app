@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/design_tokens.dart';
 import '../theme/fx_icons.dart';
+import '../theme/tokens_strip.dart';
 
 /// Disclaimer de segurança exibido em TODAS as telas que geram
 /// conteúdo via IA (treino, progressão, chat).
@@ -44,7 +45,7 @@ class IaSafetyDisclaimer extends StatelessWidget {
               child: Text(
                 text,
                 style: TextStyle(
-                  fontSize: 11,
+                  fontSize: TokensStrip.fontMinimo,
                   color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
                   height: 1.3,
                 ),
@@ -80,7 +81,7 @@ class IaSafetyDisclaimer extends StatelessWidget {
             child: Text(
               text,
               style: TextStyle(
-                fontSize: 12,
+                fontSize: TokensStrip.fontRotulo,
                 color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
                 height: 1.4,
               ),

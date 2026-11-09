@@ -131,7 +131,7 @@ extension ConversationScreenSheetsSearch on _ConversationScreenState {
                                             _replySenderLabel(msg.remetente),
                                             style: TextStyle(
                                               color: primary,
-                                              fontSize: 11,
+                                              fontSize: TokensStrip.fontMinimo,
                                               fontWeight: FontWeight.w700,
                                             ),
                                           ),
@@ -149,7 +149,7 @@ extension ConversationScreenSheetsSearch on _ConversationScreenState {
                                                   isDark
                                                       ? EagleTokens.darkInkMute
                                                       : EagleTokens.inkMute,
-                                              fontSize: 11,
+                                              fontSize: TokensStrip.fontMinimo,
                                             ),
                                           ),
                                         ],

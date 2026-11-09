@@ -17,15 +17,19 @@ class ModeloContextoDoTreino extends ConsumerWidget {
     super.key,
     required this.modeloId,
     required this.treinoId,
+    this.inicio,
   });
 
   final int modeloId;
   final int treinoId;
 
+  /// Vai à esquerda da linha do contexto (o estado do salvo).
+  final Widget? inicio;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final modelo = ref.watch(fichaModeloProvider(modeloId)).asData?.value;
-    if (modelo == null) return const SizedBox.shrink();
+    if (modelo == null) return inicio ?? const SizedBox.shrink();
 
     final s = S.of(context);
     final chrome = ShellChrome.of(context);
@@ -36,9 +40,24 @@ class ModeloContextoDoTreino extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            s.treinoContextoModelo(modelo.nome),
-            style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              if (inicio != null) ...[
+                inicio!,
+                const SizedBox(width: TokensStrip.s3),
+              ],
+              Expanded(
+                // Nome do modelo + quantas sessões ele tem de verdade.
+                child: Text(
+                  s.treinoContextoModeloSessoes(modelo.nome, sessoes.length),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: inicio == null ? TextAlign.start : TextAlign.end,
+                  style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                ),
+              ),
+            ],
           ),
           if (sessoes.length > 1)
             FxChoiceStrip<int>(
@@ -54,6 +73,7 @@ class ModeloContextoDoTreino extends ConsumerWidget {
                   extra: TreinoRouteExtra(modeloId: modeloId).toExtra(),
                 );
               },
+              cheio: true,
             ),
         ],
       ),

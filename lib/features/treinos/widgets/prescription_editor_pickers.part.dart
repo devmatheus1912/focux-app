@@ -107,29 +107,6 @@ extension on _PrescriptionEditorSheetState {
     draft.dispose();
   }
 
-  Future<void> _openObjetivoPicker() async {
-    if (!widget.enabled) return;
-    final picked = await showFxInsetPickerSheet<String>(
-      context,
-      title: prescriptionObjetivo,
-      subtitle: prescriptionObjetivoSubtitle,
-      headerIcon: FxIcons.meta,
-      selected: _presetId,
-      items: [
-        for (final preset in workoutBuilderPresets)
-          FxInsetPickerSheetItem(
-            value: preset.id,
-            label: preset.label,
-            subtitle: preset.summary,
-            icon: FxIcons.meta,
-          ),
-      ],
-    );
-    if (picked == null || !mounted) return;
-    setState(() => _presetId = picked);
-    widget.onPresetSelected(picked);
-  }
-
   String _previewLine() {
     final preset = _selectedPreset;
     final series =

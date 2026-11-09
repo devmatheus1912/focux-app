@@ -224,7 +224,7 @@ class _EsqueciSenhaScreenState extends ConsumerState<EsqueciSenhaScreen> {
                                                   '${i + 1}',
                                                   style: const TextStyle(
                                                     color: Colors.white,
-                                                    fontSize: 12,
+                                                    fontSize: TokensStrip.fontRotulo,
                                                     fontWeight: FontWeight.w700,
                                                   ),
                                                 ),

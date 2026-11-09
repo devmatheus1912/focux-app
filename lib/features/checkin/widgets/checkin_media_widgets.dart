@@ -431,8 +431,8 @@ class _CheckinMediaBadge extends StatelessWidget {
             label,
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 10.5,
-              fontWeight: FontWeight.w800,
+              fontSize: TokensStrip.fontMinimo,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ],
@@ -471,8 +471,8 @@ class CheckinVideoFallback extends StatelessWidget {
             S.of(context).checkinMidiaVideoPersonal,
             style: TextStyle(
               color: brand,
-              fontSize: 12.5,
-              fontWeight: FontWeight.w900,
+              fontSize: TokensStrip.fontRotulo,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ],

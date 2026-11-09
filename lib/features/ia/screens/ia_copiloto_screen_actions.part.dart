@@ -108,7 +108,7 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
                                 'Nenhum aluno encontrado para essa busca.',
                                 style: TextStyle(
                                   color: mute,
-                                  fontSize: 13,
+                                  fontSize: TokensStrip.fontBodySm,
                                   height: 1.35,
                                 ),
                               ),

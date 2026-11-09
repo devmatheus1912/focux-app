@@ -152,7 +152,7 @@ class FxInsetPickerOption extends StatelessWidget {
                                       color: ink,
                                     ).copyWith(
                                       fontWeight:
-                                          selected ? FontWeight.w800 : null,
+                                          selected ? FontWeight.w700 : null,
                                     ),
                                   ),
                                   const SizedBox(
@@ -176,7 +176,7 @@ class FxInsetPickerOption extends StatelessWidget {
                                   color: ink,
                                 ).copyWith(
                                   fontWeight:
-                                      selected ? FontWeight.w800 : null,
+                                      selected ? FontWeight.w700 : null,
                                 ),
                               ),
                     ),

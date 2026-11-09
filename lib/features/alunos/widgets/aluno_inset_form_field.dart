@@ -137,7 +137,7 @@ class AlunoInsetFormField extends StatelessWidget {
                 label,
                 style: FxSettingsLayout.subhead(
                   color: chrome.ink,
-                ).copyWith(fontWeight: FontWeight.w800),
+                ).copyWith(fontWeight: FontWeight.w700),
               ),
               if (obrigatorio || mostrarOpcional)
                 Text(

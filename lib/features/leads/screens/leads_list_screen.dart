@@ -226,7 +226,7 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
                           'Pro →',
                           style: FocuxHubTypography.body(
                             color: primary,
-                          ).copyWith(fontWeight: FontWeight.w800),
+                          ).copyWith(fontWeight: FontWeight.w700),
                         ),
                       ],
                     ),

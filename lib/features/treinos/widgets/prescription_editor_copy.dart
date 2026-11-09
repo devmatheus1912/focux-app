@@ -1,3 +1,5 @@
+import '../utils/prescricao_atalhos.dart';
+
 /// Copy da sheet de prescrição — PT-BR.
 const prescriptionObjetivo = 'Objetivo';
 const prescriptionObjetivoSubtitle = 'Ajusta séries, reps e descanso.';
@@ -27,3 +29,25 @@ const prescriptionMetodoCrescente = 'Crescente';
 const prescriptionMetodoDecrescente = 'Decrescente';
 const prescriptionMaisDetalhesSubtitulo = 'Carga, RPE e dica para o aluno';
 const prescriptionDicaAluno = 'Adicionar dica para o aluno';
+const prescriptionSemCarga = 'Sem carga';
+const prescriptionSemRpe = 'Sem';
+const prescriptionOrientacoes = 'Orientações para o aluno';
+
+/// Atalhos de descanso com o valor atual no lugar certo (nunca no fim da fila).
+List<int> descansoComValorNoLugar(String bloco, int atual) {
+  final itens = {...atalhosDescansoSeg(bloco), atual}.toList()..sort();
+  return itens;
+}
+
+/// "Séries, repetições e descanso de: Agachamento, Leg press e mais 2".
+String prescricaoAplicarAoBlocoTexto(List<String> nomes, int total) {
+  if (nomes.isEmpty) {
+    return total == 1
+        ? 'Séries, repetições e descanso do outro exercício do bloco'
+        : 'Séries, repetições e descanso dos outros $total do bloco';
+  }
+  final mostrados = nomes.take(2).join(', ');
+  final resto = nomes.length - 2;
+  return 'Séries, repetições e descanso de: $mostrados'
+      '${resto > 0 ? ' e mais $resto' : ''}';
+}

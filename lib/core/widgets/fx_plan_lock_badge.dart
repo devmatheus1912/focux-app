@@ -56,8 +56,8 @@ class FxPlanLockBadge extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 color: color,
-                fontSize: compact ? 10 : 11,
-                fontWeight: FontWeight.w800,
+                fontSize: compact ? TokensStrip.fontMinimo : TokensStrip.fontMinimo,
+                fontWeight: FontWeight.w700,
                 letterSpacing: 0.35,
                 height: 1.0,
               ),

@@ -213,7 +213,6 @@ extension _AddExercicioToTreinoScreenActions
 
   Future<void> _adicionarRapido(Exercicio exercicio) async {
     if (_loading) return;
-    final bloco = widget.bloco;
     final treinoAtual = ref
         .read(treinoPickerHomeProvider(widget.treinoId))
         .whenData((h) => h.treino)
@@ -225,19 +224,20 @@ extension _AddExercicioToTreinoScreenActions
       final escolha = await showFxGroupedActionSheet<String>(
         context,
         titulo: exercicio.nomeDisplay,
-        subtitulo: 'Já está neste treino',
+        subtitulo: 'Já está na sessão. Como entra?',
         icone: FxIcons.treino,
         grupos: [
           FxActionGroup<String>(null, [
             FxActionItem(
               valor: 'ajustar',
-              rotulo: 'Ajustar prescrição',
+              rotulo: 'Adicionar grupos ao que já existe',
+              descricao: 'Aquecimento, ajuste ou back-off no mesmo exercício',
               icone: FxIcons.anotar,
             ),
             FxActionItem(
               valor: 'repetir',
-              rotulo: 'Adicionar de novo',
-              descricao: 'Entra como outra linha do treino',
+              rotulo: 'Outra variação',
+              descricao: 'Entra como outro exercício da sessão',
               icone: FxIcons.duplicar,
             ),
           ]),
@@ -268,6 +268,37 @@ extension _AddExercicioToTreinoScreenActions
         return;
       }
     }
+    await _inserir(exercicio);
+  }
+
+  /// Adiciona os marcados na ordem em que foram marcados, no bloco da busca,
+  /// cada um com a prescrição do objetivo da sessão (ou a memória dele).
+  Future<void> _adicionarMarcados() async {
+    if (_loading || _marcados.isEmpty) return;
+    final fila = [..._marcados];
+    var feitos = 0;
+    for (final e in fila) {
+      final ok = await _inserir(e);
+      if (!mounted) return;
+      if (!ok) break;
+      feitos++;
+      setState(() => _marcados.removeWhere((m) => m.id == e.id));
+    }
+    if (mounted && feitos > 0) {
+      FeedbackHelper.showSuccess(
+        context,
+        feitos == 1 ? '1 exercício adicionado.' : '$feitos exercícios adicionados.',
+      );
+    }
+  }
+
+  /// Grava um exercício na sessão; false quando a API recusou.
+  Future<bool> _inserir(Exercicio exercicio) async {
+    final bloco = widget.bloco;
+    final treinoAtual = ref
+        .read(treinoPickerHomeProvider(widget.treinoId))
+        .whenData((h) => h.treino)
+        .value;
     final deste = await ExercisePrescriptionMemoryStore.loadFor(
       exercicio.id,
       bloco: bloco,
@@ -276,13 +307,29 @@ extension _AddExercicioToTreinoScreenActions
         ? await ExercisePrescriptionMemoryStore.loadGlobalSeries()
         : null;
     final padrao = padraoDoBloco(bloco);
+    // No principal, o objetivo da sessão vale para quem entra; só a memória
+    // do próprio exercício ganha dele.
+    final presetId = usaMemoriaGlobal(bloco)
+        ? presetIdDoObjetivo(treinoAtual?.objetivo)
+        : null;
+    final preset = presetId == null ? null : workoutBuilderPresetById(presetId);
     // Memória do exercício vence o padrão do bloco; a global só vale no trabalho.
-    final linhas = deste == null && global == null
+    final linhas = deste == null && preset != null
+        ? GrupoDeSeries(
+            papel: PapelDaSerie.valida,
+            series: preset.series,
+            repeticoes: preset.repeticoes,
+          ).linhas()
+        : deste == null && global == null
         ? padrao.linhas
         : seriesIniciais(desteExercicio: deste, ultimaGlobal: global);
-    final validas = linhas.where((linha) => !linha.aquecimento).toList();
+    final validas = linhas
+        .where((linha) => linha.papel == PapelDaSerie.valida)
+        .toList();
     final base = validas.isEmpty ? linhas.first : validas.first;
-    final descanso = usaMemoriaGlobal(bloco)
+    final descanso = preset != null
+        ? preset.descansoSegundos
+        : usaMemoriaGlobal(bloco)
         ? prescricaoHipertrofiaDescanso
         : padrao.descansoSegundos;
     setState(() {
@@ -308,7 +355,7 @@ extension _AddExercicioToTreinoScreenActions
       // precisa da segunda chamada quando há aquecimento ou séries diferentes.
       final uniformes = linhas.every(
         (l) =>
-            !l.aquecimento &&
+            l.papel == PapelDaSerie.valida &&
             l.repeticoes == base.repeticoes &&
             l.cargaKg == base.cargaKg,
       );
@@ -349,10 +396,12 @@ extension _AddExercicioToTreinoScreenActions
           );
         unawaited(_recarregarUso());
       }
+      return true;
     } catch (error) {
       if (mounted) {
         setState(() => _error = friendlyError(error, fallback: 'Não adicionou o exercício.'));
       }
+      return false;
     } finally {
       if (mounted) setState(() => _loading = false);
     }

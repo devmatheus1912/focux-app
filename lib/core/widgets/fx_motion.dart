@@ -190,7 +190,7 @@ class FxLiquidPrimaryButton extends StatelessWidget {
                               style: TextStyle(
                                 color: labelColor,
                                 fontWeight: FontWeight.w700,
-                                fontSize: 15,
+                                fontSize: TokensStrip.fontBody,
                               ),
                             ),
                           ],
@@ -213,7 +213,7 @@ class FxLiquidPrimaryButton extends StatelessWidget {
                                 style: TextStyle(
                                   color: labelColor,
                                   fontWeight: FontWeight.w700,
-                                  fontSize: 15,
+                                  fontSize: TokensStrip.fontBody,
                                 ),
                               ),
                             ),
@@ -303,7 +303,7 @@ class FxLiquidSecondaryButton extends StatelessWidget {
                         color:
                             enabled ? primary : primary.withValues(alpha: 0.45),
                         fontWeight: FontWeight.w700,
-                        fontSize: 15,
+                        fontSize: TokensStrip.fontBody,
                       ),
                     ),
                   ),

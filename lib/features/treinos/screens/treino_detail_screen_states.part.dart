@@ -7,6 +7,7 @@ class _EditPrescriptionSheet extends StatefulWidget {
     required this.isDark,
     required this.repo,
     this.outrosNoBloco = const [],
+    this.adicionarPapel,
   });
 
   final int treinoId;
@@ -16,6 +17,9 @@ class _EditPrescriptionSheet extends StatefulWidget {
 
   /// Outros exercícios do mesmo bloco (para "Aplicar a todo o bloco").
   final List<TreinoExercicioItem> outrosNoBloco;
+
+  /// Atalho do menu ("Adicionar aquecimento"/"back-off"): abre com o grupo já posto.
+  final String? adicionarPapel;
 
   @override
   State<_EditPrescriptionSheet> createState() => _EditPrescriptionSheetState();
@@ -34,20 +38,34 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
   bool _saving = false;
   bool _aplicarAoBloco = false;
 
+  /// Aquecimento e ajuste (antes das válidas) e back-off (depois).
+  late List<GrupoDeSeries> _antes;
+  late List<GrupoDeSeries> _depois;
+
   @override
   void initState() {
     super.initState();
     final item = widget.item;
-    _seriesCtrl = TextEditingController(text: '${item.series}');
-    _repCtrl = TextEditingController(text: item.repeticoes);
+    final extras = gruposExtras(item.seriesLinhas);
+    _antes = extras.antes;
+    _depois = extras.depois;
+    // Os controles da folha são as válidas; os outros grupos ficam na lista.
+    final validas = item.seriesLinhas
+        .where((l) => l.papel == PapelDaSerie.valida)
+        .toList();
+    final temLinhas = item.seriesLinhas.isNotEmpty;
+    _seriesCtrl = TextEditingController(
+      text: '${temLinhas ? validas.length.clamp(1, 20) : item.series}',
+    );
+    _repCtrl = TextEditingController(
+      text: validas.isNotEmpty ? validas.first.repeticoes : item.repeticoes,
+    );
     _descansoCtrl = TextEditingController(
       text: '${item.descansoSegundos ?? 60}',
     );
+    final carga = validas.isNotEmpty ? validas.first.cargaKg : item.cargaKg;
     _cargaCtrl = TextEditingController(
-      text:
-          item.cargaKg != null && item.cargaKg! > 0
-              ? item.cargaKg!.toString()
-              : '',
+      text: carga != null && carga > 0 ? formatBrDecimal(carga) : '',
     );
     _rpeAlvoCtrl = TextEditingController(
       text: item.rpeAlvo != null ? '${item.rpeAlvo}' : '',
@@ -60,6 +78,21 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
       repeticoes: item.repeticoes,
       descansoSegundos: item.descansoSegundos ?? 60,
     );
+    final papel = widget.adicionarPapel;
+    if (papel != null) {
+      final novo = grupoSugerido(
+        papel,
+        seriesValidas: int.tryParse(_seriesCtrl.text) ?? item.series,
+        repsValidas: _repCtrl.text.trim().isEmpty ? '8-12' : _repCtrl.text.trim(),
+        cargaValidas: double.tryParse(_cargaCtrl.text.replaceAll(',', '.')),
+        descansoValidas: item.descansoSegundos,
+      );
+      if (papel == PapelDaSerie.backoff) {
+        _depois = [..._depois, novo];
+      } else {
+        _antes = [novo, ..._antes];
+      }
+    }
   }
 
   @override
@@ -114,9 +147,10 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
       );
       final carga = double.tryParse(_cargaCtrl.text.replaceAll(',', '.'));
       final reps = _repCtrl.text.trim();
-      final aquecimento = widget.item.seriesLinhas.where((linha) => linha.aquecimento).toList();
-      final validasAtuais = widget.item.seriesLinhas.where((linha) => !linha.aquecimento).toList();
-      final quantidadeValidas = (series - aquecimento.length).clamp(1, 20).toInt();
+      final validasAtuais = widget.item.seriesLinhas
+          .where((linha) => linha.papel == PapelDaSerie.valida)
+          .toList();
+      final quantidadeValidas = series.clamp(1, 20).toInt();
       // Pirâmide: cada série com a sua meta (reps e carga mudam a cada série).
       final piramide = _tipoSerie == 'PIRAMIDE'
           ? linhasDaPiramide(
@@ -135,7 +169,12 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
             cargaKg: piramide?[i].carga ?? carga ?? (i < validasAtuais.length ? validasAtuais[i].cargaKg : null),
           ),
       ];
-      final linhas = [...aquecimento, ...validas];
+      // Ordem da execução: aquecimento/ajuste, válidas, back-off.
+      final linhas = [
+        ...desagruparSeries(_antes),
+        ...validas,
+        ...desagruparSeries(_depois),
+      ];
       await widget.repo.salvarSeries(
         widget.treinoId,
         widget.item.id,
@@ -145,8 +184,10 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
         bloco: widget.item.bloco,
         descansoSegundos: descansoSegundos,
       );
-      if (_aplicarAoBloco) {
-        for (final outro in widget.outrosNoBloco) {
+      Future<void> Function()? desfazer;
+      if (_aplicarAoBloco && widget.outrosNoBloco.isNotEmpty) {
+        final anteriores = [...widget.outrosNoBloco];
+        for (final outro in anteriores) {
           await _aplicarEm(
             outro,
             series: series,
@@ -154,6 +195,10 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
             descansoSegundos: descansoSegundos,
           );
         }
+        // Desfazer devolve a prescrição e as séries de cada um como estavam.
+        final repo = widget.repo;
+        final treinoId = widget.treinoId;
+        desfazer = () => _restaurarPrescricoes(repo, treinoId, anteriores);
       }
       AnalyticsService.instance.track(
         ProductEvents.treinoPrescriptionSaved,
@@ -163,7 +208,14 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
           'tipoSerie': _tipoSerie,
         },
       );
-      if (mounted) Navigator.pop(context, true);
+      if (mounted) {
+        Navigator.pop<Object>(
+          context,
+          desfazer == null
+              ? true
+              : PrescricaoAplicadaAoBloco(widget.outrosNoBloco.length, desfazer),
+        );
+      }
     } catch (e) {
       if (mounted) {
         FeedbackHelper.showError(context, friendlyError(e));
@@ -192,17 +244,20 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
       observacoes: outro.observacoes ?? '',
       tipoSerie: tecnicaParaApi(outro.metodo.tecnica),
     );
+    GrupoDeSeries semCarga(GrupoDeSeries g) => g.copyWith(limparCarga: true);
     await widget.repo.salvarSeries(
       widget.treinoId,
       outro.id,
-      linhas: [
-        for (var i = 1; i <= series; i++)
-          SeriePrescrita(
-            numero: i,
-            repeticoes: repeticoes,
-            cargaKg: outro.cargaKg,
-          ),
-      ],
+      linhas: desagruparSeries([
+        ..._antes.map(semCarga),
+        GrupoDeSeries(
+          papel: PapelDaSerie.valida,
+          series: series,
+          repeticoes: repeticoes,
+          cargaKg: outro.cargaKg,
+        ),
+        ..._depois.map(semCarga),
+      ]),
       bloco: outro.bloco,
       descansoSegundos: descansoSegundos,
     );
@@ -241,6 +296,27 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
       enabled: !busy,
       bloco: widget.item.bloco,
       outrosNoBloco: widget.outrosNoBloco.length,
+      nomesNoBloco: [
+        for (final o in widget.outrosNoBloco) o.exercicio.nomeDisplay,
+      ],
+      gruposDeSerie: GruposDeSerieEditor(
+        antes: _antes,
+        depois: _depois,
+        enabled: !busy,
+        resumoValidas:
+            '${_seriesCtrl.text} × ${_repCtrl.text.trim().isEmpty ? '8-12' : _repCtrl.text.trim()}',
+        sugerir: (papel) => grupoSugerido(
+          papel,
+          seriesValidas: int.tryParse(_seriesCtrl.text) ?? 3,
+          repsValidas: _repCtrl.text.trim().isEmpty ? '8-12' : _repCtrl.text.trim(),
+          cargaValidas: double.tryParse(_cargaCtrl.text.replaceAll(',', '.')),
+          descansoValidas: int.tryParse(_descansoCtrl.text),
+        ),
+        onChanged: (antes, depois) => setState(() {
+          _antes = antes;
+          _depois = depois;
+        }),
+      ),
       aplicarAoBloco: _aplicarAoBloco,
       onAplicarAoBlocoChanged: (v) => _aplicarAoBloco = v,
 
@@ -252,4 +328,13 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
       ),
     );
   }
+}
+
+/// Resultado da folha quando a prescrição foi aplicada a outros exercícios:
+/// quantos mudaram e como desfazer.
+class PrescricaoAplicadaAoBloco {
+  const PrescricaoAplicadaAoBloco(this.quantos, this.desfazer);
+
+  final int quantos;
+  final Future<void> Function() desfazer;
 }

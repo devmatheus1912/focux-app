@@ -81,7 +81,7 @@ class _NotificacaoTile extends StatelessWidget {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: FocuxHubTypography.body(color: chrome.ink).copyWith(
-                          fontWeight: unread ? FontWeight.w700 : FontWeight.w500,
+                          fontWeight: unread ? FontWeight.w700 : FontWeight.w600,
                         ),
                       ),
                       if (apoio.isNotEmpty)

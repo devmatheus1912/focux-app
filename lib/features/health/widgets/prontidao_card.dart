@@ -149,7 +149,7 @@ class ProntidaoCard extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: FocuxHubTypography.body(color: marca.sobre)
-                          .copyWith(fontSize: 16, fontWeight: FontWeight.w800, height: 1.2),
+                          .copyWith(fontSize: TokensStrip.fontBody, fontWeight: FontWeight.w700, height: 1.2),
                     ),
                   ),
                 ],
@@ -179,7 +179,7 @@ class ProntidaoCard extends StatelessWidget {
               'Prontidão de hoje',
               style: TextStyle(
                 color: marca.sobre.withValues(alpha: 0.82),
-                fontSize: 13,
+                fontSize: TokensStrip.fontBodySm,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.3,
               ),
@@ -204,8 +204,8 @@ class ProntidaoCard extends StatelessWidget {
                     titulo,
                     style: FocuxHubTypography.body(color: marca.sobre)
                         .copyWith(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w800,
+                          fontSize: TokensStrip.fontSecao,
+                          fontWeight: FontWeight.w700,
                           height: 1.2,
                         ),
                   ),
@@ -217,7 +217,7 @@ class ProntidaoCard extends StatelessWidget {
               texto,
               style: TextStyle(
                 color: marca.sobre.withValues(alpha: 0.92),
-                fontSize: 14,
+                fontSize: TokensStrip.fontBody,
                 height: 1.35,
               ),
             ),
@@ -311,8 +311,8 @@ class ProntidaoAnel extends StatelessWidget {
                           valor.round().toString(),
                           style: TextStyle(
                             color: cor,
-                            fontSize: 40,
-                            fontWeight: FontWeight.w800,
+                            fontSize: TokensStrip.fontNumeroTela,
+                            fontWeight: FontWeight.w700,
                             fontFeatures: const [FontFeature.tabularFigures()],
                           ),
                         ),

@@ -306,7 +306,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 alignment: Alignment.centerRight,
                                 child: AuthTextLink(
                                   label: loginEsqueciLabel(),
-                                  fontSize: 13.5,
+                                  fontSize: TokensStrip.fontBodySm,
                                   onTap:
                                       () => authUnfocusAndGo(
                                         context,
@@ -426,7 +426,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(color: heroTealSurface(0.82), fontSize: 14),
+                style: TextStyle(color: heroTealSurface(0.82), fontSize: TokensStrip.fontBody),
               ),
             ),
           ),
@@ -474,7 +474,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       Center(
         child: AuthTextLink(
           label: loginAjudaLabel(),
-          fontSize: 13.5,
+          fontSize: TokensStrip.fontBodySm,
           onTap: _abrirAjuda,
         ),
       ),

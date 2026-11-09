@@ -121,7 +121,7 @@ class FxActionChip extends StatelessWidget {
                             style: FocuxHubTypography.chip(fg).copyWith(
                               fontSize: TokensStrip.fontBodySm,
                               fontWeight:
-                                  solid ? FontWeight.w800 : FontWeight.w700,
+                                  solid ? FontWeight.w700 : FontWeight.w700,
                               height: maxLines > 1 ? 1.15 : 1.0,
                             ),
                           ),

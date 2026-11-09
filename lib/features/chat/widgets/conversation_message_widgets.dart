@@ -54,7 +54,7 @@ class ConversationDateDivider extends StatelessWidget {
             child: Text(
               label,
               style: FocuxHubTypography.chip(chrome.mute).copyWith(
-                fontSize: 11,
+                fontSize: TokensStrip.fontMinimo,
                 fontWeight: FontWeight.w600,
                 letterSpacing: 0.2,
               ),
@@ -577,7 +577,7 @@ class ConversationBubble extends StatelessWidget {
                         'editada',
                         style: FocuxHubTypography.chip(
                           metaColor.withValues(alpha: 0.72),
-                        ).copyWith(fontSize: 10),
+                        ).copyWith(fontSize: TokensStrip.fontMinimo),
                       ),
                       const SizedBox(width: TokensStrip.s1),
                     ],
@@ -585,7 +585,7 @@ class ConversationBubble extends StatelessWidget {
                       _conversationTimeLabel(msg.enviadoEm),
                       style: FocuxHubTypography.chip(
                         metaColor.withValues(alpha: 0.72),
-                      ).copyWith(fontSize: 10, letterSpacing: 0.15),
+                      ).copyWith(fontSize: TokensStrip.fontMinimo, letterSpacing: 0.15),
                     ),
                     if (mine) ...[
                       const SizedBox(width: 5),

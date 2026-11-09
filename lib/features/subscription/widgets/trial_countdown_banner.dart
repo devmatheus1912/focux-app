@@ -65,7 +65,7 @@ class TrialCountdownBanner extends ConsumerWidget {
                             : 'Teste $plano · $dias dias restantes',
                         style: FocuxHubTypography.bodyMuted(
                           color: Theme.of(context).colorScheme.onSurface,
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                       const SizedBox(height: 2),

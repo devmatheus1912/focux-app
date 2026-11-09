@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/checkin/data/checkin_repository.dart';
 import 'package:focux_app/features/checkin/providers/checkin_provider.dart';
@@ -188,6 +189,8 @@ Future<CheckinHarness> pumpCheckin(
   WidgetTester tester,
   FakeCheckinRepo repo, {
   Size tela = const Size(430, 1400),
+  Widget Function(int id)? historico,
+  List<Override> extras = const [],
 }) async {
   final h = CheckinHarness(repo);
   addTearDown(h.conexao.close);
@@ -207,7 +210,9 @@ Future<CheckinHarness> pumpCheckin(
       GoRoute(
         path: '/checkin/historico/:id',
         builder:
-            (context, state) => Text('historico ${state.pathParameters['id']}'),
+            (context, state) =>
+                historico?.call(int.parse(state.pathParameters['id']!)) ??
+                Text('historico ${state.pathParameters['id']}'),
       ),
     ],
   );
@@ -219,6 +224,7 @@ Future<CheckinHarness> pumpCheckin(
         checkinDescansoAlertaProvider.overrideWithValue(h.alerta),
         checkinRelogioProvider.overrideWithValue(() => h.agora),
         checkinSessaoAtivaProvider.overrideWithValue(() async => h.sessaoAtiva),
+        ...extras,
       ],
       child: MaterialApp.router(
         locale: const Locale('pt'),

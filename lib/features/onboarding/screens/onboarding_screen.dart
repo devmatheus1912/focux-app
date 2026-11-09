@@ -230,7 +230,7 @@ class _Conteudo extends StatelessWidget {
             style: FocuxHubTypography.pageTitle(
               context,
               color: heroTealInk(),
-            ).copyWith(fontSize: 26, height: 1.2, fontWeight: FontWeight.w800),
+            ).copyWith(fontSize: TokensStrip.fontTitulo, height: 1.2, fontWeight: FontWeight.w700),
           ),
         ),
         const SizedBox(height: TokensStrip.s5),

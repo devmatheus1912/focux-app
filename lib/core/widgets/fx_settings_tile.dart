@@ -87,8 +87,13 @@ class FxSettingsTile extends StatelessWidget {
             ? '$spoken trancado. Plano ${upgradeTierLabel ?? 'upgrade'}'
             : (value.isEmpty ? spoken : '$spoken. $value');
     final interactive = onTap != null;
-    final showChevron =
-        interactive && !danger && !locked && !disclosure && !picker;
+    // Linha com interruptor (accessory) não leva seta: ela não abre tela.
+    final showChevron = interactive &&
+        !danger &&
+        !locked &&
+        !disclosure &&
+        !picker &&
+        accessory == null;
 
     // Ícone solto na linha: fundo colorido só onde o ícone é o assunto.
     final Widget icone = Icon(

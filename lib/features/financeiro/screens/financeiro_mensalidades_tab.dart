@@ -361,7 +361,7 @@ class _FinanceiroMensalidadesTabState
                       hintText: 'Buscar por nome do aluno',
                       hintStyle: TextStyle(
                         color: mute,
-                        fontSize: 13.5,
+                        fontSize: TokensStrip.fontBodySm,
                         fontWeight: FontWeight.w600,
                       ),
                       prefixIcon: Padding(
@@ -699,7 +699,7 @@ class _FinanceiroMensalidadesTabState
                                                       cabecalho,
                                                       style: TextStyle(
                                                         color: mute,
-                                                        fontSize: 13,
+                                                        fontSize: TokensStrip.fontBodySm,
                                                         fontWeight:
                                                             FontWeight.w700,
                                                       ),

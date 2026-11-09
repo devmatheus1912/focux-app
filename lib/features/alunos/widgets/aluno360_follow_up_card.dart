@@ -41,8 +41,13 @@ class Aluno360FollowUpCard extends StatelessWidget {
     final semData =
         aluno.followUpDate == null &&
         !(aluno.snoozedUntilDate?.isAfter(DateTime.now()) ?? false);
+    final hoje = DateUtils.dateOnly(DateTime.now());
+    final atrasado = aluno.followUpDate != null &&
+        DateUtils.dateOnly(aluno.followUpDate!).isBefore(hoje);
     return FxActionRow(
       key: const ValueKey('aluno360_follow_up'),
+      // Sem urgência o verbo é tonal; cheio só com o contato atrasado.
+      forte: atrasado,
       leading: FxIcons.calendario,
       titulo: s.alunoResumoContatoTitulo,
       motivo: legenda(s, aluno),

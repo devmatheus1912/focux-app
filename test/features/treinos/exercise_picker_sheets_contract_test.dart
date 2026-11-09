@@ -30,7 +30,7 @@ void main() {
     expect(prescription, contains('showFxInsetPickerSheet'));
     expect(prescription, contains('FxSettingsTile'));
     expect(prescription, contains('FxSettingsGroup'));
-    expect(prescription, contains('prescriptionGroupHeader'));
+    expect(prescription, isNot(contains('prescriptionGroupHeader')));
     expect(prescription, contains('prescriptionMaisDetalhes'));
     expect(prescription, contains('_openRepsSheet'));
     expect(prescription, isNot(contains('AlunoSegmentedChoice')));

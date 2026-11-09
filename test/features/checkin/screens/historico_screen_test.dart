@@ -86,6 +86,40 @@ class _FakeCheckinRepository implements CheckinRepository {
 }
 
 void main() {
+  testWidgets('destaque de elástico: sem cartão de carga, recordes numa linha', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(320, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final home = AlunoDashboardHomeBundle.fromJson({
+      'aluno': {'id': 7, 'nome': 'Ana', 'email': 'a@t.com', 'status': 'ATIVO'},
+      'treinos': [],
+      'historicoResumo': [],
+      'medidas': [],
+      'chat': {'possuiMensagemDoAluno': false, 'naoLidasDoPersonal': 0},
+      'recordesMes': 2,
+      'recordes': [
+        {'exercicioNome': 'Agachamento', 'cargaKg': 60, 'data': '2026-11-06'},
+      ],
+      'destaqueExercicio': {
+        'nome': 'Barra fixa com elástico (superband)',
+        'serieSemanal': [15, 19],
+        'inicialKg': 15,
+        'atualKg': 19,
+      },
+    });
+    await _pump(
+      tester,
+      _FakeCheckinRepository({
+        (null, null): [_pagina([_sessao(1, 'Treino A')])],
+      }),
+      home: home,
+    );
+    expect(find.text('Maior carga recente'), findsNothing);
+    expect(find.textContaining('2 recordes'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('agrupa por semana com contagem e linha igual ao hub', (
     tester,
   ) async {

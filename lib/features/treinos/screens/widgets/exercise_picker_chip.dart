@@ -72,7 +72,7 @@ class ExercisePickerChip extends StatelessWidget {
                     style: FocuxHubTypography.bodyMuted(
                       color: selected ? primary : ink,
                       fontWeight: FontWeight.w700,
-                    ).copyWith(fontSize: 13),
+                    ).copyWith(fontSize: TokensStrip.fontBodySm),
                   ),
                 ),
               ],

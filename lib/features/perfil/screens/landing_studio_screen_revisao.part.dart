@@ -188,7 +188,7 @@ class _LandingStudioImageSlot extends StatelessWidget {
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 13,
+                                  fontSize: TokensStrip.fontBodySm,
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),

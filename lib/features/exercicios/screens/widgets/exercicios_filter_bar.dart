@@ -102,7 +102,7 @@ class _ExerciciosFilterBarState extends State<ExerciciosFilterBar> {
               hintText: exerciciosSearchHint(),
               hintStyle: TextStyle(
                 color: mute,
-                fontSize: 13.5,
+                fontSize: TokensStrip.fontBodySm,
                 fontWeight: FontWeight.w600,
               ),
               prefixIcon: Padding(

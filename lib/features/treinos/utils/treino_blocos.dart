@@ -139,6 +139,21 @@ String treinoResumoLinha(List<TreinoExercicioItem> exercicios) {
   return [
     n == 1 ? '1 exercício' : '$n exercícios',
     if (min > 0) '~$min min',
-    if (grupos > 0) grupos == 1 ? '1 grupo' : '$grupos grupos',
+    if (grupos > 0) treinoGruposMuscularesTexto(exercicios),
   ].join(' · ');
+}
+
+/// "1 grupo muscular", "Quadríceps e glúteos" (até 2) ou "3 grupos musculares".
+String treinoGruposMuscularesTexto(List<TreinoExercicioItem> exercicios) {
+  final nomes = <String>{
+    for (final e in exercicios)
+      if (treinoDetailGroupLabel(e) case final g when g != 'OUTROS') g,
+  }.toList();
+  final total = treinoDetailGroupCount(exercicios);
+  if (total <= 1) return '1 grupo muscular';
+  if (total == 2 && nomes.length == 2) {
+    final primeiro = nomes[0][0] + nomes[0].substring(1).toLowerCase();
+    return '$primeiro e ${nomes[1].toLowerCase()}';
+  }
+  return '$total grupos musculares';
 }

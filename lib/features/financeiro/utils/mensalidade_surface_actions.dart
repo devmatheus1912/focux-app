@@ -83,7 +83,7 @@ Widget _pixQrVisual({
     textAlign: TextAlign.center,
     style: TextStyle(
       color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
-      fontSize: 13,
+      fontSize: TokensStrip.fontBodySm,
       height: 1.35,
     ),
   );
@@ -268,7 +268,7 @@ Future<bool> mostrarPixMensalidade({
                             textAlign: TextAlign.center,
                             style: FocuxHubTypography.metric(
                               color: Theme.of(ctx).colorScheme.onSurface,
-                              fontSize: 28,
+                              fontSize: TokensStrip.fontTitulo,
                             ),
                           ),
                           const SizedBox(height: TokensStrip.s1),
@@ -281,7 +281,7 @@ Future<bool> mostrarPixMensalidade({
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: mute,
-                              fontSize: 13,
+                              fontSize: TokensStrip.fontBodySm,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -301,7 +301,7 @@ Future<bool> mostrarPixMensalidade({
                                           isDark
                                               ? EagleTokens.darkInkMute
                                               : TokensStrip.textSecondary,
-                                      fontSize: 13,
+                                      fontSize: TokensStrip.fontBodySm,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -318,7 +318,7 @@ Future<bool> mostrarPixMensalidade({
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                       color: EagleTokens.bad,
-                                      fontSize: 13,
+                                      fontSize: TokensStrip.fontBodySm,
                                       height: 1.35,
                                       fontWeight: FontWeight.w600,
                                     ),
@@ -372,7 +372,7 @@ Future<bool> mostrarPixMensalidade({
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 color: mute,
-                                fontSize: 12.5,
+                                fontSize: TokensStrip.fontRotulo,
                                 height: 1.35,
                               ),
                             ),

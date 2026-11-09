@@ -425,6 +425,8 @@
   "rotinaMontar": "Montar",
   "rotinaSessaoVazia": "Vazio",
   "rotinaAdicionarTreino": "Adicionar treino",
+  "volumeAcimaDaFaixa": "· acima",
+  "volumeAbaixoDaFaixa": "· abaixo",
   "rotinaMoverDia": "Mover para outro dia",
   "rotinaCopiarDia": "Copiar para outro dia",
   "rotinaEscolhaODia": "Para qual dia?",
@@ -451,9 +453,9 @@
     }
   },
   "treinoBlocoAquecimento": "Aquecimento",
-  "treinoBlocoTrabalho": "Trabalho",
+  "treinoBlocoTrabalho": "Principal",
   "treinoBlocoAlongamento": "Alongamento e volta à calma",
-  "treinoBlocoAjuste": "Ajuste",
+  "treinoBlocoAjuste": "Complementar",
   "rotinaSessaoAdiada": "A troca de {sessoes} vale quando {nome} terminar o treino.",
   "@rotinaSessaoAdiada": {
     "placeholders": {
@@ -529,12 +531,8 @@
   },
   "modeloNaoAbriu": "Não abriu o modelo. Tente de novo.",
   "modeloTitulo": "Modelo",
-  "treinoContextoModelo": "Modelo: {nome}",
-  "@treinoContextoModelo": {
-    "placeholders": {
-      "nome": {"type": "String"}
-    }
-  },
+  "treinoContextoModeloSessoes": "{nome} · {n, plural, =1{1 sessão} other{{n} sessões}}",
+  "@treinoContextoModeloSessoes": { "placeholders": { "nome": { "type": "String" }, "n": { "type": "int" } } },
   "sessoesSemUso": "{n, plural, =1{1 sessão vazia sem aluno} other{{n} sessões vazias sem aluno}}",
   "@sessoesSemUso": {
     "placeholders": {
@@ -553,7 +551,7 @@
   "vigenciaTitulo": "Vigência",
   "vigenciaMenuTitulo": "Vigência da ficha",
   "vigenciaSemPrazo": "Sem prazo",
-  "vigenciaAte": "Até {data}",
+  "vigenciaAte": "Ficha até {data}",
   "@vigenciaAte": {
     "placeholders": {
       "data": {"type": "String"}
@@ -614,7 +612,7 @@
       "n": {"type": "int"}
     }
   },
-  "volumeNaPrimeiraSemana": "{series} na 1ª semana",
+  "volumeNaPrimeiraSemana": "{series} na 1ª semana do rodízio",
   "@volumeNaPrimeiraSemana": {
     "placeholders": {
       "series": {"type": "String"}
@@ -866,9 +864,18 @@
   "checkinResumoMenos": "Volume {pct}% abaixo da última vez. Faz parte.",
   "@checkinResumoMenos": { "placeholders": { "pct": { "type": "int" } } },
   "checkinResumoIgual": "Mesmo volume da última vez. Consistência conta.",
-  "checkinResumoPrimeira": "Primeira vez nesse treino. Agora tem com o que comparar.",
+  "checkinResumoPrimeira": "Primeira vez com este treino. Na próxima, você vê a evolução.",
   "checkinResumoRecordes": "Recordes de hoje",
-  "checkinResumoConcluir": "Concluir",
+  "checkinResumoConcluir": "Voltar aos treinos",
+  "checkinResumoAnotarCargas": "Anotar cargas",
+  "checkinResumoComCarga": "Com carga",
+  "checkinResumoSuaSemana": "Sua semana",
+  "checkinResumoSemanaDeMeta": "{feitos} de {meta} treinos",
+  "@checkinResumoSemanaDeMeta": { "placeholders": { "feitos": { "type": "int" }, "meta": { "type": "int" } } },
+  "checkinResumoSemanaFeitos": "{feitos, plural, =1{1 treino na semana} other{{feitos} treinos na semana}}",
+  "@checkinResumoSemanaFeitos": { "placeholders": { "feitos": { "type": "int" } } },
+  "checkinResumoProximo": "Próximo: {nome}",
+  "@checkinResumoProximo": { "placeholders": { "nome": { "type": "String" } } },
   "checkinResumoDetalhes": "Ver detalhes",
   "checkinTreinoFallback": "Treino",
   "checkinSerieTitulo": "Série {n}",
@@ -947,6 +954,8 @@
   "checkinNReps": "{n} reps",
   "@checkinNReps": { "placeholders": { "n": { "type": "int" } } },
   "checkinAquecimento": "Aquecimento",
+  "checkinAjusteSerie": "Ajuste",
+  "checkinBackoffSerie": "Back-off",
   "checkinSerieDe": "Série {atual} de {total}",
   "@checkinSerieDe": { "placeholders": { "atual": { "type": "int" }, "total": { "type": "int" } } },
   "@checkinUltimaVez": { "placeholders": { "resumo": { "type": "String" } } },
@@ -1477,7 +1486,8 @@
   "alunoResumoMotivoFinanceiro": "A mensalidade está em atraso",
   "alunoResumoMotivoCadastro": "Faltam dados no cadastro",
   "alunoResumoMotivoTarefa": "Há uma tarefa aberta",
-  "alunoResumoNadaUrgente": "Nada urgente com este aluno.",
+  "aluno360ProntidaoSemSono": "Prontidão sai quando o aluno registrar o sono",
+  "aderenciaCardComecandoTreinos": "Treinos desde o início",
   "alunoResumoMetricaAderencia": "Aderência",
   "alunoResumoMetricaDiasSemTreino": "Dias sem treino",
   "alunoResumoMetricaCheckins": "Treinos em 7 dias",
@@ -2461,7 +2471,6 @@
   "@aderenciaDiasPrevistos": {"placeholders": {"feitos": {"type": "int"}, "previstos": {"type": "int"}}},
   "aderenciaPorcentagemNoDia15": "A porcentagem aparece no dia 15.",
   "aderenciaMontarFicha": "Montar ficha",
-  "aderenciaCardComecando": "Começando",
   "aderenciaCardSemFicha": "Sem ficha",
   "engajamentoFaltou": "Faltou",
   "engajamentoDescanso": "Descanso",

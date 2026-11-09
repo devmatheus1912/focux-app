@@ -78,7 +78,7 @@ void main() {
 
   for (final escuro in [false, true]) {
     testWidgets('Hoje do aluno, blocos novos (escuro: $escuro)', (tester) async {
-      await tester.binding.setSurfaceSize(const Size(390, 760));
+      await tester.binding.setSurfaceSize(const Size(390, 820));
       addTearDown(() => tester.binding.setSurfaceSize(null));
       await tester.pumpWidget(
         _app(

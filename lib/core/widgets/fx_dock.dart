@@ -340,9 +340,9 @@ class _FxDockNavItemState extends State<_FxDockNavItem> {
                     Text(
                       item.label,
                       style: FocuxHubTypography.chip(color).copyWith(
-                        fontSize: widget.compact ? 11.0 : 11.5,
+                        fontSize: widget.compact ? TokensStrip.fontMinimo : TokensStrip.fontMinimo,
                         fontWeight:
-                            widget.active ? FontWeight.w700 : FontWeight.w500,
+                            widget.active ? FontWeight.w700 : FontWeight.w600,
                         height: 1.1,
                       ),
                       maxLines: 1,
@@ -393,8 +393,8 @@ class _DockBadge extends StatelessWidget {
         textAlign: TextAlign.center,
         style: const TextStyle(
           color: Colors.white,
-          fontSize: 10,
-          fontWeight: FontWeight.w800,
+          fontSize: TokensStrip.fontMinimo,
+          fontWeight: FontWeight.w700,
           height: 1.1,
         ),
       ),

@@ -293,7 +293,7 @@ class _FeedCommentsSheetState extends State<FeedCommentsSheet> {
                                           style: TextStyle(
                                             color: ink,
                                             fontWeight: FontWeight.w700,
-                                            fontSize: 13,
+                                            fontSize: TokensStrip.fontBodySm,
                                           ),
                                         ),
                                         const SizedBox(height: 4),

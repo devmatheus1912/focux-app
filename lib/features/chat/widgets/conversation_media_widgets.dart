@@ -88,7 +88,7 @@ class ConversationMediaPreview extends StatelessWidget {
                         'Abrir',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 11,
+                          fontSize: TokensStrip.fontMinimo,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -158,7 +158,7 @@ class ConversationMediaPreview extends StatelessWidget {
                       'Toque para abrir',
                       style: TextStyle(
                         color: textColor.withValues(alpha: 0.72),
-                        fontSize: 11.5,
+                        fontSize: TokensStrip.fontMinimo,
                       ),
                     ),
                   ],
@@ -222,8 +222,8 @@ class ConversationMediaFilterChip extends StatelessWidget {
             label,
             style: TextStyle(
               color: ink,
-              fontSize: 13,
-              fontWeight: FontWeight.w800,
+              fontSize: TokensStrip.fontBodySm,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ),
@@ -297,8 +297,8 @@ class ConversationMediaGalleryTile extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: ink,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
+                      fontSize: TokensStrip.fontBody,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -306,7 +306,7 @@ class ConversationMediaGalleryTile extends StatelessWidget {
                     '${_sender(msg.remetente)} - ${_dateLabel(msg.enviadoEm)}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: muted, fontSize: 12),
+                    style: TextStyle(color: muted, fontSize: TokensStrip.fontRotulo),
                   ),
                 ],
               ),
@@ -495,8 +495,8 @@ class _ConversationAudioInlinePlayerState
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               color: ink,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w800,
+                              fontSize: TokensStrip.fontBodySm,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                           const SizedBox(height: 7),
@@ -514,7 +514,7 @@ class _ConversationAudioInlinePlayerState
                           const SizedBox(height: 5),
                           Text(
                             '${_audioTime(position)} / ${_audioTime(duration)}',
-                            style: TextStyle(color: muted, fontSize: 11),
+                            style: TextStyle(color: muted, fontSize: TokensStrip.fontMinimo),
                           ),
                         ],
                       );

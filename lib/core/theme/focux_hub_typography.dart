@@ -3,61 +3,61 @@ import 'package:flutter/material.dart';
 import 'focux_typography.dart';
 import 'tokens_strip.dart';
 
-/// Escala tipográfica canônica do hub personal (fonte: Perfil).
+/// Escala tipográfica do app: oito papéis nomeados pelo uso, tamanho e peso
+/// fixos; a cor é de quem chama. Três pesos (400, 600, 700); o w500 só no
+/// papel mínimo. Nenhuma tela usa `fontSize` literal (contrato de tipografia).
 ///
-/// Todas as telas do shell (Hoje, Perfil, Alunos, …) devem usar estes roles
-/// em vez de `fontSize` literais (18/20/22) ou `AppTypography.inter` ad-hoc.
+/// | Papel | Tamanho / peso / entrelinha |
+/// |---|---|
+/// | destaque | 32 / 700 / 1.1 |
+/// | título da página ([pageTitle]) | 22 / 700 / 1.2 |
+/// | título de seção ([sectionTitle]) | 17 / 600 / 1.25 |
+/// | título de linha ([cardTitle]) | 15 / 600 / 1.3 |
+/// | corpo ([body]) | 15 / 400 / 1.45 |
+/// | secundário ([bodyMuted]) | 13 / 400 / 1.4 |
+/// | rótulo ([rotulo], [chip], [eyebrow]) | 12 / 600 / 1.2 |
+/// | mínimo ([minimo]) | 11 / 500 / 1.2 |
+/// | número de tela única ([numeroTela]) | 40 / 700 |
 abstract final class FocuxHubTypography {
   FocuxHubTypography._();
 
-  /// Métricas intermediárias — evita literais 18/20/22 na UI.
-  static const double metricEm = TokensStrip.fontBody + 3; // 18
-  static const double metricMd = TokensStrip.fontBody + 5; // 20
-  static const double metricLg = TokensStrip.fontH2; // 22
+  /// Número herói (anel, total do mês).
+  static TextStyle destaque({required Color color}) => FocuxTypography.display(
+    color: color,
+  );
 
-  /// Saudação / nome hero / headline principal do card.
+  /// Topo da tela, saudação.
   static TextStyle pageTitle(BuildContext context, {required Color color}) {
-    return Theme.of(context).textTheme.titleLarge!.copyWith(
-      color: color,
-      fontWeight: FontWeight.w900,
-      height: 1.05,
-      letterSpacing: 0,
-    );
+    return FocuxTypography.headline(color: color);
   }
 
-  /// Título de seção / card (FxSettingsGroup e hubs).
+  /// Bloco, folha, título da barra do topo.
   static TextStyle sectionTitle(BuildContext context, {required Color color}) {
-    return Theme.of(context).textTheme.titleMedium!.copyWith(
-      fontWeight: FontWeight.w800,
-      color: color,
-      letterSpacing: -0.2,
-    );
+    return FocuxTypography.secao(color: color);
   }
 
-  /// Eyebrow / app-bar label (“Foco do dia”, “Perfil”).
+  /// Eyebrow ("Foco do dia"): papel rótulo.
   static TextStyle eyebrow(
     BuildContext context, {
     required Color color,
-    FontWeight fontWeight = FontWeight.w800,
-    double letterSpacing = 0.1,
+    FontWeight fontWeight = FontWeight.w600,
+    double letterSpacing = 0,
   }) {
-    return Theme.of(context).textTheme.titleMedium!.copyWith(
+    return rotulo(color: color).copyWith(
       fontWeight: fontWeight,
       letterSpacing: letterSpacing,
-      height: 1.15,
-      color: color,
     );
   }
 
-  /// Corpo padrão (15 / w400).
+  /// Texto corrido (15 / 400).
   static TextStyle body({required Color color}) =>
       TokensStrip.body(color: color);
 
-  /// Corpo secundário (13 / muted) com leading de leitura.
+  /// Subtítulo, explicação (13 / 400).
   static TextStyle bodyMuted({
     required Color color,
     FontWeight fontWeight = FontWeight.w400,
-    double height = 1.35,
+    double height = 1.4,
   }) {
     return TokensStrip.bodyMuted(color: color).copyWith(
       fontWeight: fontWeight,
@@ -65,21 +65,24 @@ abstract final class FocuxHubTypography {
     );
   }
 
-  /// Chip / trailing de ação (Perfil).
-  static TextStyle chip(Color foreground) {
-    return TokensStrip.bodyMuted(color: foreground).copyWith(
-      fontSize: TokensStrip.fontBodySm - 2,
-      fontWeight: FontWeight.w800,
-      height: 1.1,
-    );
-  }
+  /// Chip / trailing de ação: papel rótulo.
+  static TextStyle chip(Color foreground) => rotulo(color: foreground);
 
-  /// Título de linha em lista/card sem [BuildContext] (equiv. sectionTitle).
+  /// Chip, eyebrow, selo (12 / 600).
+  static TextStyle rotulo({required Color color}) => FocuxTypography.rotulo(
+    color: color,
+  );
+
+  /// Metadado, eixo de gráfico, contador (11 / 500).
+  static TextStyle minimo({required Color color}) => FocuxTypography.minimo(
+    color: color,
+  );
+
+  /// Linha de lista, card, botão (15 / 600).
   static TextStyle cardTitle({required Color color}) {
-    return FocuxTypography.bodySmall(color: color).copyWith(
-      fontWeight: FontWeight.w800,
-      letterSpacing: -0.2,
-      height: 1.2,
+    return FocuxTypography.body(color: color).copyWith(
+      fontWeight: FontWeight.w600,
+      height: 1.3,
     );
   }
 
@@ -91,11 +94,12 @@ abstract final class FocuxHubTypography {
     return bodyMuted(color: color, fontWeight: fontWeight);
   }
 
-  /// Todo número da interface: Inter forte com dígitos de largura igual.
+  /// Todo número da interface: dígitos de largura igual, tamanhos da escala
+  /// (32, 22, 17, 15, 13 ou 11).
   static TextStyle metric({
     required Color color,
     double? fontSize,
-    FontWeight fontWeight = FontWeight.w800,
+    FontWeight fontWeight = FontWeight.w700,
     double? height,
     double? letterSpacing,
   }) => FocuxTypography.numero(
@@ -105,4 +109,14 @@ abstract final class FocuxHubTypography {
     height: height,
     letterSpacing: letterSpacing,
   );
+
+  /// Número grande de tela única (teclado numérico, contador da série, anel
+  /// de prontidão): 40 / 700. Só nesses lugares.
+  static TextStyle numeroTela({required Color color, double? height}) =>
+      metric(
+        color: color,
+        fontSize: TokensStrip.fontNumeroTela,
+        height: height ?? 1.0,
+        letterSpacing: -0.2,
+      );
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/hero_teal.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 /// Ação em texto do login, sem pílula: o login é a única tela em que o
 /// produto aceita link de texto (acabamento fino). Área de toque de 48 dp,
@@ -81,7 +82,7 @@ class AuthFraseComLink extends StatelessWidget {
         Text(
           frase.trim(),
           textAlign: TextAlign.center,
-          style: TextStyle(color: heroTealSurface(0.82), fontSize: 14),
+          style: TextStyle(color: heroTealSurface(0.82), fontSize: TokensStrip.fontBody),
         ),
         AuthTextLink(label: acao, onTap: onTap),
       ],

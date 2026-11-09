@@ -60,8 +60,8 @@ class AuthBackButton extends StatelessWidget {
           'Voltar',
           style: TextStyle(
             color: Colors.white.withValues(alpha: 0.78),
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
+            fontSize: TokensStrip.fontBody,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ],

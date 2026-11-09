@@ -21,16 +21,32 @@ abstract class TokensStrip {
   static const Color borderDefault = Color(0xFFE5E7EB);
 
   // ── Typography hierarchy (TOKENS STRIP spec) ─────────────────────────
-  static const double fontH1 = 32;
-  static const double fontH2 = 22;
+  // Oito papéis (ver FocuxHubTypography). Só estes tamanhos existem no app.
+  static const double fontDestaque = 32;
+  static const double fontTitulo = 22;
+  static const double fontSecao = 17;
   static const double fontBody = 15;
   static const double fontBodySm = 13;
-  static const FontWeight weightH1 = FontWeight.w800;
+  static const double fontRotulo = 12;
+  static const double fontMinimo = 11;
+
+  /// Número grande de tela única (teclado numérico, contador, anel).
+  static const double fontNumeroTela = 40;
+
+  /// Todos os tamanhos da escala (contrato de tipografia).
+  static const escala = <double>[
+    fontDestaque, fontTitulo, fontSecao, fontBody, fontBodySm, fontRotulo,
+    fontMinimo, fontNumeroTela,
+  ];
+
+  static const double fontH1 = fontDestaque;
+  static const double fontH2 = fontTitulo;
+  static const FontWeight weightH1 = FontWeight.w700;
   static const FontWeight weightH2 = FontWeight.w700;
   static const FontWeight weightBody = FontWeight.w400;
-  static const double trackingH1 = -0.3;
+  static const double trackingH1 = -0.2;
   static const double trackingH2 = -0.2;
-  static const double leadingBody = 1.5;
+  static const double leadingBody = 1.45;
 
   static TextStyle h1({required Color color, String? fontFamily}) => TextStyle(
         fontFamily: fontFamily,

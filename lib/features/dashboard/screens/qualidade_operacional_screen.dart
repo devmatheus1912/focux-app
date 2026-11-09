@@ -263,7 +263,7 @@ class _QualidadeBody extends StatelessWidget {
                   '${data.score}',
                   style: FocuxHubTypography.metric(
                     color: sobre.ink,
-                    fontSize: FocuxHubTypography.metricLg,
+                    fontSize: TokensStrip.fontTitulo,
                   ),
                 ),
               ),
@@ -380,7 +380,7 @@ class _LinhaReferencia extends StatelessWidget {
                 valor,
                 style: FocuxHubTypography.metric(
                   color: chrome.ink,
-                  fontSize: FocuxHubTypography.metricEm,
+                  fontSize: TokensStrip.fontSecao,
                 ),
               ),
             ],

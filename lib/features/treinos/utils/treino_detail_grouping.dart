@@ -65,10 +65,10 @@ String treinoDetailExerciseLine(TreinoExercicioItem te) {
       descansoSegundos: te.descansoSegundos ?? 75,
     );
   }
-  final parts = <String>['${te.series}×${te.repeticoes}'];
+  final parts = <String>['${te.series} × ${te.repeticoes}'];
   final load = formatTreinoLoadKg(te.cargaKg);
   if (load != '—') parts.add(load);
-  parts.add('${te.descansoSegundos ?? 60}s');
+  parts.add('${te.descansoSegundos ?? 60} s');
   if (te.tipoSerie == 'SUPERSET') {
     final grupo = te.grupoSuperset;
     parts.add(grupo == null ? 'SS' : 'SS$grupo');

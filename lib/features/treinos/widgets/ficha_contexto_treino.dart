@@ -20,16 +20,20 @@ class FichaContextoDoTreino extends ConsumerWidget {
     required this.alunoId,
     required this.alunoNome,
     required this.treinoId,
+    this.inicio,
   });
 
   final int alunoId;
   final String? alunoNome;
   final int treinoId;
 
+  /// Vai à esquerda da linha do contexto (o estado do salvo).
+  final Widget? inicio;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final rotina = ref.watch(alunoRotinaProvider(alunoId)).asData?.value;
-    if (rotina == null) return const SizedBox.shrink();
+    if (rotina == null) return inicio ?? const SizedBox.shrink();
 
     final s = S.of(context);
     final chrome = ShellChrome.of(context);
@@ -40,7 +44,7 @@ class FichaContextoDoTreino extends ConsumerWidget {
           if (sessao.treinoId != null) (dia.dia, sessao),
     ];
     final atual = sessoes.where((e) => e.$2.treinoId == treinoId).firstOrNull;
-    if (atual == null) return const SizedBox.shrink();
+    if (atual == null) return inicio ?? const SizedBox.shrink();
 
     final nome = alunoNome?.trim() ?? '';
     final diaNome = nomes[atual.$1 - 1];
@@ -53,7 +57,7 @@ class FichaContextoDoTreino extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(linha, style: FocuxHubTypography.bodyMuted(color: chrome.mute)),
+          _LinhaDoContexto(inicio: inicio, texto: linha, cor: chrome.mute),
           if (sessoes.length > 1)
             FxChoiceStrip<int>(
               itens: [
@@ -71,9 +75,43 @@ class FichaContextoDoTreino extends ConsumerWidget {
                   ).toExtra(),
                 );
               },
+              cheio: true,
             ),
         ],
       ),
+    );
+  }
+}
+
+/// "Tudo salvo" à esquerda e o contexto à direita, numa linha só.
+class _LinhaDoContexto extends StatelessWidget {
+  const _LinhaDoContexto({
+    required this.inicio,
+    required this.texto,
+    required this.cor,
+  });
+
+  final Widget? inicio;
+  final String texto;
+  final Color cor;
+
+  @override
+  Widget build(BuildContext context) {
+    final rotulo = Text(
+      texto,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      textAlign: inicio == null ? TextAlign.start : TextAlign.end,
+      style: FocuxHubTypography.bodyMuted(color: cor),
+    );
+    if (inicio == null) return rotulo;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        inicio!,
+        const SizedBox(width: TokensStrip.s3),
+        Expanded(child: rotulo),
+      ],
     );
   }
 }

@@ -86,8 +86,8 @@ class SaudeDesconectadoView extends StatelessWidget {
                   'Conecte para ver sua prontidão',
                   textAlign: TextAlign.center,
                   style: FocuxHubTypography.body(color: chrome.ink).copyWith(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w800,
+                    fontSize: TokensStrip.fontTitulo,
+                    fontWeight: FontWeight.w700,
                     height: 1.2,
                   ),
                 ),
@@ -191,8 +191,8 @@ class _MetaPassosSheetState extends State<_MetaPassosSheet> {
             milhar(_valor),
             style: TextStyle(
               color: chrome.ink,
-              fontSize: 40,
-              fontWeight: FontWeight.w800,
+              fontSize: TokensStrip.fontNumeroTela,
+              fontWeight: FontWeight.w700,
               fontFeatures: const [FontFeature.tabularFigures()],
             ),
           ),

@@ -15,6 +15,7 @@ class FxActionRow extends StatelessWidget {
     required this.verbo,
     required this.onTap,
     this.leading,
+    this.forte = true,
   });
 
   final String titulo;
@@ -25,13 +26,20 @@ class FxActionRow extends StatelessWidget {
   final VoidCallback onTap;
   final IconData? leading;
 
+  /// Verbo cheio só quando a ação é a da vez; senão tonal (marca a 12%).
+  final bool forte;
+
   static const double alturaMin = 56;
 
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
-    final bg = FxActionChip.solidBackground(chrome.brand, isDark: chrome.isDark);
-    final fg = FxActionChip.solidForeground(isDark: chrome.isDark);
+    final bg = forte
+        ? FxActionChip.solidBackground(chrome.brand, isDark: chrome.isDark)
+        : chrome.brand.withValues(alpha: 0.12);
+    final fg = forte
+        ? FxActionChip.solidForeground(isDark: chrome.isDark)
+        : chrome.brand;
     // Letra grande: o verbo desce para baixo do texto em vez de espremê-lo.
     final empilhar = MediaQuery.textScalerOf(context).scale(1) >= 1.5;
 

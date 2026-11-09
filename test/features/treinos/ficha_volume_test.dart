@@ -240,7 +240,7 @@ void main() {
 
     testWidgets('com rodízio, o total diz que é a 1ª semana', (tester) async {
       await abrir(tester, const FichaVolume(totalSeries: 19, rodizio: true));
-      expect(find.text('19 séries de trabalho na 1ª semana'), findsOneWidget);
+      expect(find.text('19 séries de trabalho na 1ª semana do rodízio'), findsOneWidget);
     });
 
     test('lê o rodízio do servidor', () {
@@ -416,7 +416,7 @@ void main() {
       final antes = treinos.consultasDeVolume;
       expect(antes, greaterThanOrEqualTo(1));
 
-      await tester.tap(find.text('Peito'));
+      await tester.tap(find.text('Peito').first);
       await _settle(tester);
       router.pop();
       await _settle(tester);
@@ -434,7 +434,7 @@ void main() {
       final (router, _, modelos) = await telas(tester, '/modelos/31', _fichaComSessao);
       final antes = modelos.consultasDeVolume;
 
-      await tester.tap(find.text('Treino A'));
+      await tester.tap(find.text('Treino A').first);
       await _settle(tester);
       router.pop();
       await _settle(tester);

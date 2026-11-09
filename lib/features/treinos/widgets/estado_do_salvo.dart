@@ -22,6 +22,7 @@ class EstadoDoSalvo extends StatelessWidget {
       child: Semantics(
         liveRegion: true,
         child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               salvando ? FxIcons.renovar : FxIcons.nuvemOk,

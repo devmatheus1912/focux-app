@@ -104,7 +104,7 @@ void main() {
     test('Inativo não mostra Em risco', () {
       expect(
         alunoHeroStatusVisual(aluno('INATIVO', risco: true)).label,
-        'Inativo',
+        'Pausado',
       );
     });
 

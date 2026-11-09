@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 /// Botão fino de contorno (pílula preta), igual para Apple e Google e para as
 /// ações secundárias das telas de entrada: nenhum pesa mais que o botão
@@ -66,7 +67,7 @@ class AuthSocialButton extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 15,
+                        fontSize: TokensStrip.fontBody,
                         fontWeight: FontWeight.w600,
                         letterSpacing: 0.1,
                       ),

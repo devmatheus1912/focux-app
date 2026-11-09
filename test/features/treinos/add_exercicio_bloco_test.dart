@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/api/api_client.dart';
 import 'package:focux_app/core/theme/design_tokens.dart';
+import 'package:focux_app/core/theme/fx_icons.dart';
 import 'package:focux_app/features/auth/providers/auth_provider.dart';
 import 'package:focux_app/features/exercicios/data/exercicio_page.dart';
 import 'package:focux_app/features/exercicios/data/exercicio_repository.dart';
@@ -182,7 +183,10 @@ void main() {
       WidgetTester tester,
       String bloco, {
       List<TreinoExercicioItem> noTreino = const [],
+      List<Exercicio>? biblioteca,
+      String? objetivo,
     }) async {
+      final lista = biblioteca ?? [Exercicio(id: 1, nome: 'Supino reto')];
       tester.view.physicalSize = const Size(1290, 2800);
       tester.view.devicePixelRatio = 3;
       addTearDown(tester.view.reset);
@@ -190,7 +194,12 @@ void main() {
       final dio = Dio(BaseOptions(baseUrl: 'https://api.example.test'))
         ..httpClientAdapter = adapter;
       final home = TreinoPickerHomeBundle(
-        treino: Treino(id: 12, nome: 'Treino A', exercicios: noTreino),
+        treino: Treino(
+          id: 12,
+          nome: 'Treino A',
+          objetivo: objetivo,
+          exercicios: noTreino,
+        ),
         libraryCount: 2,
         shortcuts: const [],
         uiHints: TreinoPickerUiHints.fallback(librarySize: 2),
@@ -213,11 +222,11 @@ void main() {
             treinoPickerHomeProvider(12).overrideWith((ref) async => home),
             exercicioPickerPageProvider.overrideWith(
               (ref, query) async => ExercicioPickerPage(
-                content: [Exercicio(id: 1, nome: 'Supino reto')],
-                meta: const ExercicioPageMeta(
+                content: lista,
+                meta: ExercicioPageMeta(
                   page: 0,
                   size: 30,
-                  totalElements: 1,
+                  totalElements: lista.length,
                   totalPages: 1,
                   hasNext: false,
                 ),
@@ -319,18 +328,78 @@ void main() {
         for (var i = 0; i < 8; i++) {
           await tester.pump(const Duration(milliseconds: 100));
         }
-        expect(find.text('Já está neste treino'), findsOneWidget);
-        expect(find.text('Ajustar prescrição'), findsOneWidget);
-        expect(find.text('Adicionar de novo'), findsOneWidget);
+        expect(find.text('Já está na sessão. Como entra?'), findsOneWidget);
+        expect(find.text('Adicionar grupos ao que já existe'), findsOneWidget);
+        expect(find.text('Outra variação'), findsOneWidget);
         // nada foi adicionado só por tocar
         expect(adapter.chamadas.where((c) => c.metodo == 'POST'), isEmpty);
 
-        await tester.tap(find.text('Adicionar de novo'));
+        await tester.tap(find.text('Outra variação'));
         for (var i = 0; i < 8; i++) {
           await tester.pump(const Duration(milliseconds: 100));
         }
         expect(adapter.chamadas.where((c) => c.metodo == 'POST'), hasLength(1));
       },
     );
+
+    Future<void> esperar(WidgetTester tester) async {
+      for (var i = 0; i < 8; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+    }
+
+    final tres = [
+      Exercicio(id: 1, nome: 'Agachamento livre'),
+      Exercicio(id: 2, nome: 'Leg press'),
+      Exercicio(id: 3, nome: 'Stiff com barra', favoritado: true),
+    ];
+
+    testWidgets('marcar 3 no "+" e adicionar: na ordem marcada, no bloco', (
+      tester,
+    ) async {
+      final adapter = await abrir(tester, 'AQUECIMENTO', biblioteca: tres);
+      // estrela só no favorito
+      expect(find.byIcon(FxIcons.estrelaAtiva), findsOneWidget);
+      expect(find.byIcon(FxIcons.estrela), findsNothing);
+
+      for (final nome in ['Stiff com barra', 'Agachamento livre', 'Leg press']) {
+        await tester.tap(find.byTooltip('Marcar $nome'));
+        await tester.pump();
+      }
+      expect(find.text('3 selecionados · Adicionar'), findsOneWidget);
+      expect(adapter.chamadas.where((c) => c.metodo == 'POST'), isEmpty);
+
+      await tester.tap(find.text('3 selecionados · Adicionar'));
+      await esperar(tester);
+      final posts = adapter.chamadas
+          .where((c) => c.metodo == 'POST' && c.path == '/api/treinos/12/exercicios')
+          .map((c) => c.corpo as Map)
+          .toList();
+      expect(posts.map((c) => c['exercicioId']), [3, 1, 2]);
+      expect(posts.every((c) => c['bloco'] == 'AQUECIMENTO'), isTrue);
+      expect(find.textContaining('selecionados'), findsNothing);
+    });
+
+    testWidgets('fechar com marcados pergunta antes de descartar', (tester) async {
+      await abrir(tester, 'TRABALHO', biblioteca: tres);
+      await tester.tap(find.byTooltip('Marcar Leg press'));
+      await tester.pump();
+      await tester.tap(find.byTooltip('Fechar'));
+      await esperar(tester);
+      expect(find.text('Descartar 1 selecionado?'), findsOneWidget);
+    });
+
+    testWidgets('sessão de força: exercício novo entra com 5 × 3-6 · 150 s', (
+      tester,
+    ) async {
+      final adapter = await abrir(tester, 'TRABALHO', objetivo: 'FORCA');
+      await tester.tap(find.text('Supino reto'));
+      await esperar(tester);
+      final post = adapter.chamadas.firstWhere(
+        (c) => c.metodo == 'POST' && c.path == '/api/treinos/12/exercicios',
+      );
+      final corpo = post.corpo as Map;
+      expect((corpo['series'], corpo['repeticoes'], corpo['descansoSegundos']), (5, '3-6', 150));
+    });
   });
 }

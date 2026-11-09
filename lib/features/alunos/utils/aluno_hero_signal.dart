@@ -73,7 +73,7 @@ AlunoHeroStatusVisual alunoHeroStatusVisual(Aluno aluno, {bool isDark = true}) {
   }
   if (status == AlunoStatus.inativo) {
     return AlunoHeroStatusVisual(
-      label: 'Inativo',
+      label: 'Pausado',
       background:
           isDark ? Colors.white.withValues(alpha: 0.14) : EagleTokens.warnSoft,
       foreground: isDark ? EagleTokens.warmPeach : EagleTokens.warn,

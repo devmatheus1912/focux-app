@@ -10,6 +10,7 @@ import '../constants/aluno_360_layout.dart';
 import '../../health/data/health_repository.dart';
 import '../../health/widgets/recovery_score_ring.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../core/theme/fx_icons.dart';
 
 class Aluno360RecoveryInsightCard extends StatefulWidget {
   const Aluno360RecoveryInsightCard({
@@ -115,6 +116,25 @@ class _Aluno360RecoveryInsightCardState
         final score = snapshot.recoveryScore;
         // Sem nota do servidor, nível e dica não valem como conselho.
         final temNota = score != null;
+        if (!temNota && !snapshot.calibrando) {
+          return Semantics(
+            label: s.saudeProntidaoIndisponivelSemantics,
+            child: Row(
+              children: [
+                Icon(FxIcons.sono, size: 20, color: mute),
+                const SizedBox(width: TokensStrip.s3),
+                Expanded(
+                  child: Text(
+                    s.aluno360ProntidaoSemSono,
+                    style: Aluno360Layout.metaStyle(
+                      context,
+                    ).copyWith(color: mute),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
         return Semantics(
           label:
               temNota

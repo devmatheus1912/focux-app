@@ -106,7 +106,7 @@ class _EvolucaoChart extends StatelessWidget {
                                       fontWeight:
                                           selecionado
                                               ? FontWeight.w700
-                                              : FontWeight.w500,
+                                              : FontWeight.w600,
                                     ),
                                   ),
                                 ],
@@ -379,7 +379,7 @@ class _BlocoQuantoEntrou extends StatelessWidget {
                 valor,
                 style: FocuxHubTypography.metric(
                   color: sobre.ink,
-                  fontSize: FocuxHubTypography.metricLg,
+                  fontSize: TokensStrip.fontTitulo,
                 ).copyWith(
                   letterSpacing: 0,
                   fontFeatures: const [FontFeature.tabularFigures()],

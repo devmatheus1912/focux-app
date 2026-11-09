@@ -11,8 +11,10 @@ extension _MetodoDaPrescricao on _PrescriptionEditorSheetState {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(rotulo, style: FocuxHubTypography.bodyMuted(color: chrome.mute)),
-          const SizedBox(height: TokensStrip.s1),
+          if (rotulo.isNotEmpty) ...[
+            Text(rotulo, style: FocuxHubTypography.bodyMuted(color: chrome.mute)),
+            const SizedBox(height: TokensStrip.s1),
+          ],
           FxChoiceStrip<T>(
             quebrar: true,
             itens: [for (final e in opcoes.entries) FxChoiceItem(value: e.key, label: e.value)],
@@ -32,7 +34,7 @@ extension _MetodoDaPrescricao on _PrescriptionEditorSheetState {
       accent: widget.primary,
       children: [
         _parametro<String>(
-          prescriptionMetodo,
+          '',
           {
             for (final t in Tecnica.values) tecnicaParaApi(t): rotuloDaTecnica(t),
           },

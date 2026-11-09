@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 class AuthOperationalNotice extends StatelessWidget {
   final IconData icon;
@@ -49,8 +50,8 @@ class AuthOperationalNotice extends StatelessWidget {
                   title,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 12.6,
-                    fontWeight: FontWeight.w800,
+                    fontSize: TokensStrip.fontRotulo,
+                    fontWeight: FontWeight.w700,
                     height: 1.2,
                   ),
                 ),
@@ -59,7 +60,7 @@ class AuthOperationalNotice extends StatelessWidget {
                   text,
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.72),
-                    fontSize: 12.2,
+                    fontSize: TokensStrip.fontRotulo,
                     height: 1.35,
                   ),
                 ),
@@ -69,7 +70,7 @@ class AuthOperationalNotice extends StatelessWidget {
                     action!,
                     style: TextStyle(
                       color: EagleTokens.planUsageWarn,
-                      fontSize: 12.1,
+                      fontSize: TokensStrip.fontRotulo,
                       fontWeight: FontWeight.w700,
                       height: 1.3,
                     ),

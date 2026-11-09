@@ -84,7 +84,7 @@ void main() {
       treinoDetailExerciseLine(
         _item(id: 1, nome: 'Supino', grupo: GrupoMuscular.peito),
       ),
-      '3×10 · 60s',
+      '3 × 10 · 60 s',
     );
     expect(
       treinoDetailExerciseLine(
@@ -100,7 +100,7 @@ void main() {
           grupoSuperset: 1,
         ),
       ),
-      '4×8-10 · 40kg · 90s · SS1',
+      '4 × 8-10 · 40kg · 90 s · SS1',
     );
     expect(
       treinoDetailExerciseLine(
@@ -114,7 +114,7 @@ void main() {
           tipoSerie: 'DROPSET',
         ),
       ),
-      '3×12 · 45s · drop',
+      '3 × 12 · 45 s · drop',
     );
   });
 }

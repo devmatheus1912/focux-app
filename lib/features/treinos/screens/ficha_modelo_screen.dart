@@ -190,17 +190,16 @@ class _FichaModeloScreenState extends ConsumerState<FichaModeloScreen>
           ),
         ),
         FxStickyActions(
-          primaryLabel: vazia ? s.modeloCriarSemana : s.rotinaPronto,
+          // O modelo salva sozinho: a ação da tela é aplicar em um aluno.
+          primaryLabel: vazia ? s.modeloCriarSemana : s.modeloAplicarEmAluno,
           loading: _ocupado,
           onPrimary: !vazia
-              ? () => context.pop()
+              ? () => aplicarModeloEmAluno(context, ref, modelo)
               : _plano == null
               ? null
               : () async {
                   if (await gravarSemanaInteira(_plano!.semana)) _plano = null;
                 },
-          secondaryLabel: vazia ? null : s.modeloAplicarEmAluno,
-          onSecondary: vazia ? null : () => aplicarModeloEmAluno(context, ref, modelo),
         ),
       ],
     );

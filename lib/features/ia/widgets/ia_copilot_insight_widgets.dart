@@ -147,8 +147,8 @@ class IaCopilotInsightsLoading extends StatelessWidget {
                       'Preparando recomendações',
                       style: TextStyle(
                         color: ink,
-                        fontSize: 13.5,
-                        fontWeight: FontWeight.w800,
+                        fontSize: TokensStrip.fontBodySm,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: 3),
@@ -156,7 +156,7 @@ class IaCopilotInsightsLoading extends StatelessWidget {
                       'Organizando as recomendações...',
                       style: TextStyle(
                         color: mute,
-                        fontSize: 11.5,
+                        fontSize: TokensStrip.fontMinimo,
                         height: 1.25,
                       ),
                     ),

@@ -30,7 +30,7 @@ void main() {
     );
     await tester.pump(const Duration(milliseconds: 600));
     expect(find.textContaining('2 séries ficaram sem peso'), findsOneWidget);
-    expect(find.text('Concluir'), findsOneWidget);
+    expect(find.text('Voltar aos treinos'), findsOneWidget);
   });
 
   testWidgets('sem série sem peso, não mostra o aviso', (tester) async {

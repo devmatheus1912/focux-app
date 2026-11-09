@@ -15,7 +15,7 @@ void main() {
     expect(screen, contains('showStartPeek'));
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('FxLiquidSecondaryButton'));
-    expect(screen, contains('Aplicar status'));
+    expect(screen, contains('alunoStatusAcaoLabel(_statusSelecionado!)'));
     expect(screen, contains('keyboardDismissBehavior'));
     expect(screen, contains('viewInsetsOf'));
     expect(screen, contains('FxShellAppBar'));
