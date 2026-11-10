@@ -6,7 +6,6 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_action_chip.dart';
 import '../../../core/widgets/fx_empty_state.dart';
-import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
@@ -15,14 +14,13 @@ import '../utils/ia_copiloto_display.dart';
 import '../../../core/theme/fx_icons.dart';
 
 /// Abertura do Copiloto: quem precisa de atenção, depois qualquer outro aluno.
+/// Um só botão principal na tela; escolher o aluno já analisa.
 class CopilotoCardView extends StatelessWidget {
   const CopilotoCardView({
     super.key,
     required this.prioridades,
     required this.tarefasAbertas,
-    required this.alunoNome,
     required this.onAnalisar,
-    required this.onAnalisarSelecionado,
     required this.onEscolherAluno,
     required this.onVerTarefas,
     this.podeAnalisar = true,
@@ -32,11 +30,7 @@ class CopilotoCardView extends StatelessWidget {
   final bool podeAnalisar;
   final List<CopilotoPrioridade> prioridades;
   final int tarefasAbertas;
-
-  /// Aluno já escolhido nesta tela; nulo antes da primeira escolha.
-  final String? alunoNome;
   final void Function(int alunoId, String nome) onAnalisar;
-  final VoidCallback onAnalisarSelecionado;
   final VoidCallback onEscolherAluno;
   final VoidCallback onVerTarefas;
 
@@ -44,7 +38,6 @@ class CopilotoCardView extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = S.of(context);
     final chrome = ShellChrome.of(context);
-    final nome = alunoNome?.trim() ?? '';
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: FxSettingsLayout.pageInset,
@@ -52,18 +45,14 @@ class CopilotoCardView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (nome.isNotEmpty && podeAnalisar) ...[
-            FxLiquidPrimaryButton(
-              label: s.copilotoAnalisar(nome),
-              onPressed: onAnalisarSelecionado,
-            ),
-            const SizedBox(height: TokensStrip.s4),
-          ],
           if (prioridades.isEmpty)
             FxEmptyState(
               icon: FxIcons.ia,
               title: s.copilotoSemPrioridadesTitulo,
-              subtitle: s.copilotoRevisaoFrase,
+              subtitle:
+                  podeAnalisar
+                      ? '${s.copilotoRevisaoFrase} ${iaCopilotoCustoAnalise()}'
+                      : s.copilotoRevisaoFrase,
               action:
                   podeAnalisar
                       ? FxEmptyAction(
@@ -82,7 +71,9 @@ class CopilotoCardView extends StatelessWidget {
             ),
             const SizedBox(height: TokensStrip.s1),
             Text(
-              s.copilotoRevisaoFrase,
+              podeAnalisar
+                  ? '${s.copilotoRevisaoFrase} ${iaCopilotoCustoAnalise()}'
+                  : s.copilotoRevisaoFrase,
               style: FocuxHubTypography.bodyMuted(color: chrome.mute),
             ),
             const SizedBox(height: TokensStrip.s3),
@@ -131,7 +122,8 @@ class CopilotoCardView extends StatelessWidget {
               ),
             ],
           ],
-          if (tarefasAbertas > 0) ...[
+          // Só quando há tarefas além das que a abertura já mostra.
+          if (tarefasAbertas > prioridades.length) ...[
             const SizedBox(height: TokensStrip.s2),
             FxTonalButton(
               label: s.copilotoVerTarefasN(tarefasAbertas),
@@ -185,12 +177,23 @@ class _PrioridadeRow extends StatelessWidget {
           ),
           if (onAnalisar case final analisar?) ...[
             const SizedBox(width: TokensStrip.s2),
-            FxActionChip(
-              label: s.copilotoAnalisarCurto,
-              accent: Theme.of(context).colorScheme.primary,
-              isDark: chrome.isDark,
-              onPressed: analisar,
-            ),
+            // Sobre o bloco da marca: cor da paleta da marca (o chip do tema
+            // sai quase preto sobre o teal).
+            if (sobreMarca)
+              FxTonalButton(
+                label: s.copilotoAnalisarCurto,
+                compact: true,
+                fundo: chrome.ink.withValues(alpha: 0.16),
+                texto: chrome.ink,
+                onPressed: analisar,
+              )
+            else
+              FxActionChip(
+                label: s.copilotoAnalisarCurto,
+                accent: Theme.of(context).colorScheme.primary,
+                isDark: chrome.isDark,
+                onPressed: analisar,
+              ),
           ],
         ],
       ),

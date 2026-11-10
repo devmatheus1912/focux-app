@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// URLs oficiais — mesmas páginas usadas no cadastro e no perfil.
@@ -11,7 +12,8 @@ abstract class FocuxLegal {
       'https://focuxpersonal.com/excluir-conta';
 
   /// Versão dos docs enviada em `POST /api/lgpd/me/consent`.
-  static const String consentDocumentVersion = '2026-09';
+  /// 2026-11: política com bases legais, processadores (inclui IA) e prazos.
+  static const String consentDocumentVersion = '2026-11';
 
   static Future<bool> openTerms() => _open(termsUrl);
 
@@ -20,6 +22,11 @@ abstract class FocuxLegal {
   static Future<bool> openSupport() => _open(supportUrl);
 
   static Future<bool> openDeleteAccount() => _open(deleteAccountUrl);
+
+  /// Licenças das bibliotecas de código aberto usadas no app (tela do Flutter).
+  static void abrirLicencas(BuildContext context) {
+    showLicensePage(context: context, applicationName: 'Focux Personal');
+  }
 
   static Future<bool> _open(String url) async {
     final uri = Uri.parse(url);

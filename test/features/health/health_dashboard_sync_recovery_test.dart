@@ -302,7 +302,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(chamadas, [true]);
     expect(
-      find.text('Seu personal vê sua nota de prontidão e os dados do dia.'),
+      find.text(
+        'Seu personal vê sua prontidão e os dados do dia. '
+        'O assistente de IA dele só usa se você permitir.',
+      ),
       findsOneWidget,
     );
   });

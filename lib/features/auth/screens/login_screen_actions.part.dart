@@ -210,7 +210,7 @@ extension on _LoginScreenState {
       setState(() => _error = 'Não foi possível iniciar a verificação MFA.');
       return true;
     }
-    final from = GoRouterState.of(context).uri.queryParameters['from'];
+    final from = uriDaRota(context).queryParameters['from'];
     ref.read(mfaChallengeProvider.notifier).value = MfaChallenge(
       mfaToken: token,
       returnTo: from,
@@ -307,7 +307,7 @@ extension on _LoginScreenState {
 
   String _postLoginRedirect(BuildContext context, {required bool isAluno}) {
     final fallback = isAluno ? '/dashboard/aluno' : '/dashboard/personal';
-    final from = GoRouterState.of(context).uri.queryParameters['from'];
+    final from = uriDaRota(context).queryParameters['from'];
     if (from == null) return fallback;
     return safePostLoginPath(from, isAluno: isAluno) ?? fallback;
   }

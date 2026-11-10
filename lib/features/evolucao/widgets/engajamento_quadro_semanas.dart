@@ -13,16 +13,24 @@ import '../../../core/theme/fx_icons.dart';
 
 const _tamanhoDoDia = 32.0;
 
-/// Cinco semanas de segunda a domingo. Ícone e cor juntos dizem o estado.
+/// Semanas de segunda a domingo. Ícone e cor juntos dizem o estado.
 class EngajamentoQuadroSemanas extends StatelessWidget {
   const EngajamentoQuadroSemanas({
     super.key,
     required this.semanas,
     required this.resumo,
+    this.titulo,
+    this.periodo,
   });
 
   final List<EngajamentoSemana> semanas;
   final String resumo;
+
+  /// Padrão: "Últimas 5 semanas".
+  final String? titulo;
+
+  /// Escolha de período ao lado do título.
+  final Widget? periodo;
 
   static (IconData?, String) _simbolo(EngajamentoDiaEstado estado) =>
       switch (estado) {
@@ -64,9 +72,16 @@ class EngajamentoQuadroSemanas extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            ptS.engajamentoUltimas5Semanas,
-            style: FocuxHubTypography.cardTitle(color: chrome.ink),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  titulo ?? ptS.engajamentoUltimas5Semanas,
+                  style: FocuxHubTypography.cardTitle(color: chrome.ink),
+                ),
+              ),
+              if (periodo case final p?) p,
+            ],
           ),
           Text(resumo, style: FocuxHubTypography.bodyMuted(color: chrome.mute)),
           const SizedBox(height: TokensStrip.s3),
@@ -173,7 +188,9 @@ class _Dia extends StatelessWidget {
       EngajamentoDiaEstado.parcial => (primary.withValues(alpha: 0.28), primary),
       EngajamentoDiaEstado.cancelou => (aviso.withValues(alpha: 0.18), aviso),
       EngajamentoDiaEstado.faltou => (chrome.line, chrome.mute),
-      EngajamentoDiaEstado.descanso => (Colors.transparent, chrome.mute),
+      // Descanso tem fundo leve; sem registro, só a borda: dá para saber se
+      // o aluno faltou ou descansou.
+      EngajamentoDiaEstado.descanso => (chrome.line.withValues(alpha: 0.6), chrome.mute),
       EngajamentoDiaEstado.semRegistro => (Colors.transparent, chrome.mute),
       EngajamentoDiaEstado.futuro => (Colors.transparent, chrome.mute),
     };
@@ -186,8 +203,7 @@ class _Dia extends StatelessWidget {
         border:
             dia?.hoje == true
                 ? Border.all(color: chrome.ink, width: 2)
-                : atual == EngajamentoDiaEstado.descanso ||
-                    atual == EngajamentoDiaEstado.semRegistro
+                : atual == EngajamentoDiaEstado.semRegistro
                 ? Border.all(color: chrome.line)
                 : null,
       ),

@@ -17,7 +17,7 @@ void main() {
     expect(login, contains("import '../utils/post_login_redirect.dart';"));
     expect(login, contains("_postLoginRedirect(context, isAluno: true)"));
     expect(login, contains("_postLoginRedirect(context, isAluno: false)"));
-    expect(login, contains("GoRouterState.of(context).uri.queryParameters['from']"));
+    expect(login, contains("uriDaRota(context).queryParameters['from']"));
     expect(login, contains('safePostLoginPath(from, isAluno: isAluno)'));
 
     expect(util, contains('String? safePostLoginPath'));

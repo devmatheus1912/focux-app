@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
-import 'package:go_router/go_router.dart';
+
+import '../router/estado_da_rota.dart';
 
 part 'focux_surfaces_catalog.dart';
 
@@ -99,7 +100,7 @@ abstract final class FocuxSurfaces {
 
   static FocuxSurfaceMatch? matchOf(BuildContext context) {
     try {
-      return resolve(GoRouterState.of(context).uri.path);
+      return resolve(uriDaRota(context).path);
     } catch (_) {
       return null;
     }

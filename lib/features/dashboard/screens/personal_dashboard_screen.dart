@@ -35,6 +35,7 @@ import '../widgets/dashboard_home_help_sheet.dart';
 import '../utils/dashboard_screen_helpers.dart';
 import '../utils/dashboard_home_client_cache.dart';
 
+import '../../../core/router/estado_da_rota.dart';
 part 'personal_dashboard_screen_state.part.dart';
 part 'personal_dashboard_screen_build.part.dart';
 

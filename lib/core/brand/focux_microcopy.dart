@@ -30,7 +30,8 @@ abstract final class FocuxMicrocopy {
   static const naoFoiPossivelCarregar = 'Não foi possível carregar';
   static const iaErroGenerico = 'Não foi possível gerar agora. Tente novamente.';
 
-  static const commandCenter = 'Centro de Comando';
+  /// Nome que o personal vê para a fila de tarefas (a tela se chama Tarefas).
+  static const commandCenter = 'Tarefas';
   static const alunosEmRisco = 'Alunos em risco';
   static const painelPersonal = 'Painel do personal';
 

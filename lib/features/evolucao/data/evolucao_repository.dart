@@ -150,6 +150,42 @@ class AderenciaResumo {
   );
 }
 
+/// Aderência do período escolhido na tela, com a mesma conta da Aderência, e
+/// a comparação com o período anterior de mesmo tamanho.
+class AderenciaPeriodo {
+  const AderenciaPeriodo({
+    this.inicio,
+    this.fim,
+    this.feitos = 0,
+    this.previstos = 0,
+    this.percent,
+    this.percentAnterior,
+    this.diferenca,
+  });
+
+  final DateTime? inicio;
+  final DateTime? fim;
+  final int feitos;
+  final int previstos;
+
+  /// Nulo sem ficha ou com aluno começando.
+  final int? percent;
+  final int? percentAnterior;
+
+  /// Pontos de [percent] sobre [percentAnterior]; nulo sem os dois.
+  final int? diferenca;
+
+  factory AderenciaPeriodo.fromJson(Map<String, dynamic> j) => AderenciaPeriodo(
+    inicio: DateTime.tryParse(j['inicio'] as String? ?? ''),
+    fim: DateTime.tryParse(j['fim'] as String? ?? ''),
+    feitos: (j['feitos'] as num?)?.toInt() ?? 0,
+    previstos: (j['previstos'] as num?)?.toInt() ?? 0,
+    percent: (j['percent'] as num?)?.toInt(),
+    percentAnterior: (j['percentAnterior'] as num?)?.toInt(),
+    diferenca: (j['diferenca'] as num?)?.toInt(),
+  );
+}
+
 /// Os três anéis da Evolução. Campo nulo: anel vazio.
 class EvolucaoAneis {
   const EvolucaoAneis({
@@ -534,15 +570,40 @@ class EvolucaoRepository {
     );
   }
 
-  Future<({List<EventoEngajamento> eventos, AderenciaResumo? aderencia})>
-  engajamento(int alunoId, {int dias = 30}) async {
+  static String _isoDate(DateTime d) =>
+      '${d.year.toString().padLeft(4, '0')}-'
+      '${d.month.toString().padLeft(2, '0')}-'
+      '${d.day.toString().padLeft(2, '0')}';
+
+  /// [inicio]/[fim] (inclusive) trocam a janela de [dias], ex. "mês passado".
+  Future<
+    ({
+      List<EventoEngajamento> eventos,
+      AderenciaResumo? aderencia,
+      AderenciaPeriodo? periodo,
+    })
+  >
+  engajamento(
+    int alunoId, {
+    int dias = 30,
+    DateTime? inicio,
+    DateTime? fim,
+  }) async {
     final r = await _dio.get(
       '/api/alunos/$alunoId/engajamento',
-      queryParameters: {'dias': dias, 'limit': 200},
+      queryParameters: {
+        'dias': dias,
+        'limit': 200,
+        if (inicio != null && fim != null) ...{
+          'inicio': _isoDate(inicio),
+          'fim': _isoDate(fim),
+        },
+      },
     );
     final data = r.data;
     final eventos = data is Map ? (data['eventos'] as List?) ?? [] : data as List;
     final aderencia = data is Map ? data['aderencia'] : null;
+    final periodo = data is Map ? data['periodo'] : null;
     return (
       eventos:
           eventos
@@ -551,6 +612,10 @@ class EvolucaoRepository {
       aderencia:
           aderencia is Map
               ? AderenciaResumo.fromJson(Map<String, dynamic>.from(aderencia))
+              : null,
+      periodo:
+          periodo is Map
+              ? AderenciaPeriodo.fromJson(Map<String, dynamic>.from(periodo))
               : null,
     );
   }

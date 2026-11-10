@@ -54,6 +54,7 @@ import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../core/theme/fx_icons.dart';
 
+import '../../../core/router/estado_da_rota.dart';
 export '../constants/alunos_list_filters.dart';
 
 part 'alunos_list_screen_state.part.dart';

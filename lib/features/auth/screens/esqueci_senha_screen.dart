@@ -23,6 +23,7 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../core/theme/fx_icons.dart';
 
+import '../../../core/router/estado_da_rota.dart';
 part 'esqueci_senha_screen_actions.part.dart';
 
 class EsqueciSenhaScreen extends ConsumerStatefulWidget {
@@ -54,7 +55,7 @@ class _EsqueciSenhaScreenState extends ConsumerState<EsqueciSenhaScreen> {
     super.didChangeDependencies();
     if (_roleFromQueryApplied) return;
     _roleFromQueryApplied = true;
-    final params = GoRouterState.of(context).uri.queryParameters;
+    final params = uriDaRota(context).queryParameters;
     final role = params['role']?.trim().toLowerCase();
     if (role == 'aluno') {
       _isAluno = true;

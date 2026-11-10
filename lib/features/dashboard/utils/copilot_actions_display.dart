@@ -81,13 +81,38 @@ List<FilaAcaoResumo> copilotActionsOrdenadas(List<FilaAcaoResumo> itens) {
   ];
 }
 
+/// Prazo de uma prioridade: grupo em Tarefas, pílula e se a pílula é aviso.
+/// Uma tabela só para Tarefas, a folha de criar tarefa e o Copiloto.
+typedef CopilotPrazo = ({String grupo, String? selo, bool aviso});
+
+CopilotPrazo copilotActionsPrazo(String prioridade) =>
+    switch (prioridade.trim().toUpperCase()) {
+      'P0' => (grupo: ptS.tarefasGrupoUrgente, selo: 'Hoje', aviso: true),
+      'P1' => (grupo: 'Esta semana', selo: 'Esta semana', aviso: false),
+      _ => (grupo: ptS.tarefasGrupoDepois, selo: null, aviso: false),
+    };
+
 /// "Hoje" ou "Esta semana": nunca a sigla interna de prioridade.
 String copilotActionsSelo(FilaAcaoResumo action) =>
-    action.prioridade.trim().toUpperCase() == 'P0' ? 'Hoje' : 'Esta semana';
+    copilotActionsPrazo(action.prioridade).selo ?? '';
 
 /// Título da linha: o nome do aluno, sem o prefixo interno.
-String copilotActionsNome(FilaAcaoResumo action) =>
-    dashboardRadarStudentName(action.titulo) ?? action.titulo.trim();
+String copilotActionsNome(FilaAcaoResumo action) {
+  final titulo = action.titulo.trim();
+  final copiloto = RegExp(r'^Revisar treino de (.+)$').firstMatch(titulo);
+  if (copiloto != null) return copiloto.group(1)!.trim();
+  return dashboardRadarStudentName(titulo) ?? titulo;
+}
+
+/// Por que o aluno precisa de atenção: o motivo salvo na tarefa do Copiloto
+/// ("…\n\nMotivo: …"), senão a primeira linha da descrição.
+String copilotActionsPorque(FilaAcaoResumo action) {
+  final partes = action.descricao.split('\n\nMotivo: ');
+  if (partes.length > 1 && partes.last.trim().isNotEmpty) {
+    return partes.last.trim();
+  }
+  return copilotActionsMotivo(action);
+}
 
 /// Motivo em frase: tira o nome repetido ("Hugo · mapa corporal").
 String copilotActionsMotivo(FilaAcaoResumo action) {
@@ -113,31 +138,22 @@ String copilotActionsDestino(FilaAcaoResumo action) {
   return action.acaoUrl;
 }
 
-/// Resumo em uma linha: "3 abertas · 1 urgente".
-String copilotActionsResumo(List<FilaAcaoResumo> acoes, {int? abertas}) {
-  final urgentes = acoes.where(_urgente).length;
-  final n = abertas ?? acoes.length;
-  final total = n == 1 ? ptS.tarefasUmaAberta : ptS.tarefasNAbertas(n);
-  if (urgentes == 0) return total;
-  final texto = urgentes == 1 ? ptS.tarefasUmaUrgente : ptS.tarefasNUrgentes(urgentes);
-  return '$total · $texto';
-}
-
-bool _urgente(FilaAcaoResumo a) => a.prioridade.toUpperCase() == 'P0';
-
-/// Urgente, Hoje e Depois, na ordem da lista. Grupo vazio não aparece.
+/// Urgente, Esta semana e Depois, na ordem da lista ([copilotActionsPrazo]).
+/// Grupo vazio não aparece.
 List<(String, List<FilaAcaoResumo>)> copilotActionsPorGrupo(
   List<FilaAcaoResumo> acoes,
 ) {
-  final ordem = copilotActionsOrdenadas(acoes);
-  final hoje = ordem.where((a) => a.prioridade.toUpperCase() == 'P1').toList();
-  final urgentes = ordem.where(_urgente).toList();
-  final depois =
-      ordem.where((a) => !_urgente(a) && a.prioridade.toUpperCase() != 'P1').toList();
+  final grupos = <String, List<FilaAcaoResumo>>{};
+  for (final a in copilotActionsOrdenadas(acoes)) {
+    grupos.putIfAbsent(copilotActionsPrazo(a.prioridade).grupo, () => []).add(a);
+  }
   return [
-    if (urgentes.isNotEmpty) (ptS.tarefasGrupoUrgente, urgentes),
-    if (hoje.isNotEmpty) (ptS.tarefasGrupoHoje, hoje),
-    if (depois.isNotEmpty) (ptS.tarefasGrupoDepois, depois),
+    for (final g in [
+      ptS.tarefasGrupoUrgente,
+      copilotActionsPrazo('P1').grupo,
+      ptS.tarefasGrupoDepois,
+    ])
+      if (grupos[g] case final itens?) (g, itens),
   ];
 }
 

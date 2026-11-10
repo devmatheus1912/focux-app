@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../navigation/focux_navigation.dart';
 
+import 'estado_da_rota.dart';
 void safePopOrGo(
   BuildContext context,
   String fallbackLocation, {
@@ -13,7 +14,7 @@ void safePopOrGo(
     context.pop(result);
     return;
   }
-  final currentLocation = GoRouterState.of(context).uri.toString();
+  final currentLocation = uriDaRota(context).toString();
   if (_sameLocation(currentLocation, fallbackLocation)) {
     return;
   }

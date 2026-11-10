@@ -66,31 +66,21 @@ void main() {
     expect(referralDiscountLine(pt, _info()), 'Seu colega ganha 20% no primeiro mês pago');
     expect(
       referralRewardHeadline(pt, _info()),
-      'Você ganha 30 dias quando seu colega completar 30 dias de assinatura paga',
+      'Ganhe 30 dias por colega que assinar',
     );
     expect(pt.referralHelpRulesBody, contains('30 dias pagos'));
   });
 
-  test('subtitulo do hub segue a campanha e junta freshness', () {
-    expect(referralHubSubtitle(pt, null, null), 'Indique e ganhe');
-    expect(
-      referralHubSubtitle(pt, _info(), 'Atualizado agora'),
-      '30 dias extras por indicação · Atualizado agora',
-    );
-    expect(
-      referralHubSubtitle(pt, _info(campanhaAtiva: false), null),
-      'Campanha pausada',
-    );
-    expect(referralHubSubtitle(en, _info(), null), '30 extra days per referral');
+  test('código soletrado para o leitor de tela', () {
+    expect(referralCodigoSoletrado('AB12'), 'A B 1 2');
   });
 
-  test('progresso X de N recompensas e Y de M dias', () {
+  test('progresso em recompensas e dias; some sem indicação', () {
     final info = _info(concedidas: 2, diasGanhos: 60);
-    expect(referralRewardsProgress(pt, info), '2 de 3');
-    expect(referralDaysProgress(pt, info), '60 de 90 dias');
+    expect(referralProgressoTexto(pt, info), '2 de 3 recompensas · +60 dias no seu plano');
     final pausada = _info(campanhaAtiva: false, diasGanhos: 30);
-    expect(referralRewardsProgress(pt, pausada), isNull);
-    expect(referralDaysProgress(pt, pausada), '30');
+    expect(referralProgressoTexto(pt, pausada), '+30 dias no seu plano');
+    expect(referralMostraProgresso(_info()), isFalse);
     expect(referralRewardHeadline(pt, pausada), isNull);
     expect(referralDiscountLine(pt, pausada), isNull);
     expect(referralDiscountLine(pt, _info()), contains('20%'));

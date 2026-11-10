@@ -76,13 +76,6 @@ class WalletPixValidation {
         .text;
   }
 
-  static List<TextInputFormatter> formattersForConta() {
-    return [
-      FilteringTextInputFormatter.allow(RegExp(r'[\d-]')),
-      LengthLimitingTextInputFormatter(14),
-    ];
-  }
-
   static String? validateTipo(String? tipo) {
     if (tipo == null || tipo.isEmpty) {
       return 'Selecione o tipo de chave PIX';
@@ -146,37 +139,54 @@ class WalletPixValidation {
 }
 
 const walletChavePixMax = 120;
-const walletBancoMax = 80;
-const walletAgenciaMax = 6;
 
-String walletSalvarTileLabel() => 'Salvar dados';
+String walletSalvarTileLabel() => 'Salvar chave';
 
-String walletSalvarConfirmTitle() => 'Salvar dados da carteira?';
+String walletTrocarConfirmTitle() => 'Trocar a chave PIX?';
 
-String walletSalvarConfirmMessage() =>
-    'PIX e banco passam a valer nos recebimentos dos alunos.';
+/// O valor novo, mascarado: quem confirma vê para onde o dinheiro vai.
+String walletTrocarConfirmMessage(String rotuloMascarado) =>
+    'Os próximos pagamentos dos alunos vão para: $rotuloMascarado. '
+    'Cobranças já enviadas continuam com a chave antiga.';
+
+String walletTrocarConfirmLabel() => 'Trocar chave';
+
+String walletTrocarMotivoAparelho() => 'Confirme para trocar a chave PIX';
 
 String walletDiscardTitle() => 'Descartar alterações?';
 
 String walletDiscardMessage() =>
-    'Você alterou dados da carteira. Se sair agora, as mudanças não serão salvas.';
+    'Você alterou a chave PIX. Se sair agora, a mudança não será salva.';
 
-String walletCopiarTileLabel() => 'Copiar chave PIX';
+String walletCopiarTileLabel() => 'Copiar chave';
 
-String walletHubSubtitle({String? freshness}) {
-  const base = 'PIX e banco dos recebimentos';
-  final stamp = freshness?.trim();
-  if (stamp == null || stamp.isEmpty) return base;
-  return '$base · $stamp';
+String walletChaveCopiada() =>
+    'Chave copiada. Cole para o aluno que vai pagar por fora.';
+
+String walletParaQueServe() =>
+    'É a chave que aparece nas cobranças de mensalidade, loja e recorrência.';
+
+/// "CPF · ***.615.761-**".
+String walletRotuloMascarado(String? tipo, String chave) =>
+    '${WalletPixValidation.labelForTipo(tipo ?? '')} · '
+    '${maskPixKeyForDisplay(tipo, chave)}';
+
+/// Leitura da chave mascarada sem soletrar asteriscos.
+String walletChaveSemantica(String? tipo, String chave) {
+  final raw = chave.trim();
+  final digits = raw.replaceAll(RegExp(r'\D'), '');
+  final t = (tipo ?? '').trim().toUpperCase();
+  return switch (t) {
+    'CPF' when digits.length >= 9 =>
+      'CPF terminado em ${digits.substring(6, 9)}',
+    'CNPJ' when digits.length >= 8 =>
+      'CNPJ com ${digits.substring(2, 5)} ${digits.substring(5, 8)} no meio',
+    'TELEFONE' when digits.length >= 4 =>
+      'Celular terminado em ${digits.substring(digits.length - 4)}',
+    'EMAIL' when raw.isNotEmpty => 'E-mail começando com ${raw[0]}',
+    _ => 'Chave aleatória cadastrada',
+  };
 }
-
-const walletDetalheSecaoPix = 'pix';
-const walletDetalheSecaoBanco = 'banco';
-
-const walletDetalheSecoes = [
-  (value: walletDetalheSecaoPix, label: 'PIX'),
-  (value: walletDetalheSecaoBanco, label: 'Banco'),
-];
 
 /// Tipos de chave, na ordem do seletor.
 const walletTiposChave = ['CPF', 'CNPJ', 'EMAIL', 'TELEFONE', 'ALEATORIA'];
@@ -191,26 +201,7 @@ String walletTipoCurto(String tipo) => switch (tipo) {
   _ => tipo,
 };
 
-String walletPixSectionTitle() => 'Dados PIX';
-
-String walletBancoSectionTitle() => 'Dados bancários';
-
-/// Estado da chave **salva** (não do que está sendo digitado).
-String walletPixStatusValue(String? tipo, String chave) {
-  final temTipo = tipo != null && tipo.trim().isNotEmpty;
-  final temChave = chave.trim().isNotEmpty;
-  if (temTipo && temChave) return 'Chave cadastrada';
-  return 'Cadastre sua chave';
-}
-
-String walletPixStatusHint(String? tipo, String chave) {
-  final temTipo = tipo != null && tipo.trim().isNotEmpty;
-  final temChave = chave.trim().isNotEmpty;
-  if (temTipo && temChave) {
-    return WalletPixValidation.labelForTipo(tipo);
-  }
-  return 'Escolha o tipo e informe a chave';
-}
+String walletPixSectionTitle() => 'Chave PIX';
 
 /// Máscara para exibir chave PIX (CPF/CNPJ/telefone) sem PII completa.
 String maskPixKeyForDisplay(String? tipo, String chave) {

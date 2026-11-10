@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -8,6 +10,8 @@ import '../../../core/api/api_client.dart';
 import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/health/health_service.dart';
 import '../../../core/health/home_widget_service.dart';
+import '../../../core/legal/ia_consentimentos.dart';
+import '../../perfil/data/lgpd_consent_repository.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -265,6 +269,20 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
           _fetchedAt = DateTime.now();
           _historico = extras.historico;
           _compartilhando = extras.compartilhando;
+          if (extras.compartilhando == true &&
+              widget.loadCompartilhamento == null) {
+            // Quem já compartilhava: pergunta uma vez sobre a IA.
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!mounted) return;
+              unawaited(
+                pedirAceitesIaDoAluno(
+                  context,
+                  LgpdConsentRepository(ApiClient()),
+                  compartilhaSaude: true,
+                ),
+              );
+            });
+          }
           _metaPassos = extras.meta;
           _mostrarAvisoCompartilhando = extras.avisar;
         });
@@ -365,6 +383,14 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
       if (mounted) setState(() => _compartilhando = salvo);
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(_escolhaFeitaKey, true);
+      // Ligou: pergunta se o assistente de IA do personal também pode usar.
+      if (salvo && mounted && widget.setCompartilhamento == null) {
+        await pedirAceitesIaDoAluno(
+          context,
+          LgpdConsentRepository(ApiClient()),
+          compartilhaSaude: true,
+        );
+      }
     } catch (e) {
       if (!mounted) return;
       setState(() => _compartilhando = anterior);

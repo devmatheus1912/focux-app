@@ -37,16 +37,8 @@ String referralInviteText(S l10n, ReferralInfo info) {
   return l10n.referralInviteText(codigo, link);
 }
 
-String referralHubSubtitle(S l10n, ReferralInfo? info, String? freshness) {
-  final base = info == null
-      ? l10n.referralTitle
-      : _temRecompensa(info)
-      ? l10n.referralHubSubtitle(info.diasPorIndicacao!)
-      : l10n.referralCampaignInactiveShort;
-  final stamp = freshness?.trim();
-  if (stamp == null || stamp.isEmpty) return base;
-  return '$base · $stamp';
-}
+/// Código soletrado para o leitor de tela ("S C B W…").
+String referralCodigoSoletrado(String codigo) => codigo.split('').join(' ');
 
 String? referralRewardHeadline(S l10n, ReferralInfo info) {
   if (!_temRecompensa(info)) return null;
@@ -58,18 +50,16 @@ String? referralDiscountLine(S l10n, ReferralInfo info) {
   return l10n.referralDiscountLine(info.descontoIndicadoPct!);
 }
 
-/// "X de N" recompensas; nulo sem campanha (o servidor não mandou o limite).
-String? referralRewardsProgress(S l10n, ReferralInfo info) {
-  final max = info.maxRecompensas;
-  if (!info.campanhaAtiva || max == null) return null;
-  return l10n.referralRewardsProgress(info.recompensasConcedidas, max);
-}
+/// Sem nenhuma indicação o progresso não diz nada: a lista vazia já convida.
+bool referralMostraProgresso(ReferralInfo info) => info.indicacoes.isNotEmpty;
 
-/// "Y de M dias"; sem campanha mostra só o acumulado.
-String referralDaysProgress(S l10n, ReferralInfo info) {
-  final teto = info.tetoDias;
-  if (!info.campanhaAtiva || teto == null) return '${info.diasGanhos}';
-  return l10n.referralDaysProgress(info.diasGanhos, teto);
+/// "X de N recompensas · +Y dias no seu plano"; sem campanha, só os dias.
+String referralProgressoTexto(S l10n, ReferralInfo info) {
+  final max = info.maxRecompensas;
+  final dias = l10n.referralDiasNoPlano(info.diasGanhos);
+  if (!info.campanhaAtiva || max == null) return dias;
+  return '${l10n.referralRewardsProgress(info.recompensasConcedidas, max)} · '
+      '$dias';
 }
 
 /// Quanto do teto de dias já foi ganho, de 0 a 1.

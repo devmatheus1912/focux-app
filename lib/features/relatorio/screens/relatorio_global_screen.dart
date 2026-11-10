@@ -107,7 +107,7 @@ class _RelatorioGlobalScreenState extends ConsumerState<RelatorioGlobalScreen> {
 
   void _abrirRelatorioAluno(ResumoAluno aluno) {
     context.push(
-      '/alunos/${aluno.alunoId}/relatorio',
+      '/alunos/${aluno.alunoId}/engajamento',
       extra: aluno.alunoNome,
     );
   }

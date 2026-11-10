@@ -6,9 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/shell_chrome.dart';
-import '../../../core/utils/clipboard_sensitive.dart';
 import '../../../core/utils/friendly_error.dart';
-import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
@@ -40,7 +38,6 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
   ReferralInfo? _info;
   bool _loading = true;
   String? _erro;
-  DateTime? _fetchedAt;
 
   @override
   void initState() {
@@ -59,7 +56,6 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
       setState(() {
         _info = info;
         _loading = false;
-        _fetchedAt = DateTime.now();
       });
       if (primeiraCarga) {
         AnalyticsService.instance.track(
@@ -94,10 +90,16 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
       await SharePlus.instance.share(ShareParams(text: texto));
     } catch (_) {
       // Sem folha de compartilhar no aparelho: copiar ainda resolve.
-      await copySensitiveToClipboard(texto);
-      if (!mounted) return;
-      FeedbackHelper.showSuccess(context, l10n.referralInviteCopied);
+      await _copiar(texto, l10n.referralInviteCopied);
     }
+  }
+
+  /// Convite não é dado sensível: fica na área de transferência até o
+  /// personal colar no WhatsApp.
+  Future<void> _copiar(String texto, String aviso) async {
+    await Clipboard.setData(ClipboardData(text: texto));
+    if (!mounted) return;
+    FeedbackHelper.showSuccess(context, aviso);
   }
 
   Future<void> _copiarLink() async {
@@ -106,9 +108,14 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
     final l10n = S.of(context);
     HapticFeedback.selectionClick();
     await AnalyticsService.instance.track(ProductEvents.referralLinkCopied);
-    await copySensitiveToClipboard(link.trim());
-    if (!mounted) return;
-    FeedbackHelper.showSuccess(context, l10n.referralLinkCopied);
+    await _copiar(link.trim(), l10n.referralLinkCopied);
+  }
+
+  Future<void> _copiarCodigo() async {
+    final codigo = referralCodigoLabel(_info?.codigo);
+    if (codigo == '—') return;
+    HapticFeedback.selectionClick();
+    await _copiar(codigo, S.of(context).referralCodigoCopiado);
   }
 
   void _abrirAjuda() {
@@ -128,11 +135,6 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
         constrainWidth: false,
         appBar: FxShellAppBar(
           title: l10n.referralTitle,
-          subtitle: referralHubSubtitle(
-            l10n,
-            _info,
-            FxHubFreshness.fromFetchedAt(_fetchedAt),
-          ),
           onBack: () => safePopOrGo(context, '/perfil'),
           actions: [
             FxHelpIconButton(
@@ -176,6 +178,7 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
                           isDark: chrome.isDark,
                           onShare: _share,
                           onCopyLink: _copiarLink,
+                          onCopyCode: _copiarCodigo,
                         ),
                       ),
               ),

@@ -1,12 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/screen_source_bundle.dart';
 
 void main() {
-  test('relatorio usa polish: cards, erro amigavel e a11y', () {
-    final screen = readScreenSourceBundle(
-      'lib/features/relatorio/screens/relatorio_screen.dart',
-    );
+  test('relatorio global e PDF usam polish; o do aluno mora na Aderência', () {
     final global = readScreenSourceBundle(
       'lib/features/relatorio/screens/relatorio_global_screen.dart',
     );
@@ -14,19 +13,18 @@ void main() {
       'lib/features/relatorio/utils/relatorio_pdf_export.dart',
     );
 
-    expect(screen, contains('fxScreenA11yScope'));
-    expect(screen, isNot(contains('FxSettingsGroup')));
-    expect(screen, contains('FxHelpIconButton'));
-    expect(screen, contains('friendlyError'));
-    expect(screen, contains('Exportar relatório em PDF'));
-    expect(screen, contains('FxHubFreshness.fromFetchedAt'));
-    expect(screen, contains("value: 'checkin'"));
-    expect(screen, isNot(contains('dashboardHeroCaptionOnTeal')));
-    expect(screen, isNot(contains('_PeriodPill')));
+    // O Relatório do aluno saiu: período, comparação e PDF ficam na Aderência.
+    expect(
+      File('lib/features/relatorio/screens/relatorio_screen.dart').existsSync(),
+      isFalse,
+    );
+    expect(global, contains("'/alunos/\${aluno.alunoId}/engajamento'"));
 
     expect(pdf, contains('focuxPdfPage'));
     expect(pdf, contains('brand: brand'));
     expect(pdf, isNot(contains('PdfColor.fromInt')));
+    // "Check-ins" é o mesmo número de "Dias com treino": não repete no PDF.
+    expect(pdf, isNot(contains("'Check-ins'")));
 
     expect(global, contains('fxScreenA11yScope'));
     expect(global, isNot(contains('FxSettingsGroup')));

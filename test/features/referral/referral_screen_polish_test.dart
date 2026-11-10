@@ -22,13 +22,18 @@ void main() {
     expect(screen, contains('FxEmptyState'));
     expect(screen, contains('SkeletonList'));
     expect(screen, contains('RefreshIndicator'));
-    expect(screen, contains('FxHubFreshness.fromFetchedAt'));
+    // Topo sem frescor nem regra repetida; a regra mora no bloco e nos passos.
+    expect(screen, isNot(contains('FxHubFreshness')));
     expect(body, contains('FxStripCard'));
     expect(body, contains('l10n.referralCopyInvite'));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains("safePopOrGo(context, '/perfil')"));
     expect(hub, isNot(contains('FxSettingsGroup')));
-    expect(screen, contains('copySensitiveToClipboard'));
+    // Convite não é sensível: não some da área de transferência em 1 min.
+    expect(hub, isNot(contains('copySensitiveToClipboard')));
+    expect(screen, contains('Clipboard.setData'));
+    // "Copiar só o link" na cor da marca, não o tonal do tema.
+    expect(body, contains('fundo: sobre.ink'));
     expect(screen, contains('referralLinkShared'));
     expect(screen, contains('referralViewed'));
     expect(body, contains('keyboardDismissBehavior'));

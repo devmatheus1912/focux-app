@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:go_router/go_router.dart';
 
 import '../theme/focux_system_chrome.dart';
 import 'cinematic_mesh_background.dart';
 import 'mesh_scope.dart';
 
+import '../router/estado_da_rota.dart';
 /// Routes that keep their own immersive / marketing background (no mesh wrap).
 const _immersiveRoutePrefixes = [
   '/checkin/executar',
@@ -29,7 +29,7 @@ class FxRouteChrome extends StatelessWidget {
   Widget build(BuildContext context) {
     if (MeshScope.of(context)) return child;
 
-    final path = GoRouterState.of(context).uri.path;
+    final path = uriDaRota(context).path;
     if (_fxRouteUsesImmersiveChrome(path)) return child;
 
     final isDark = Theme.of(context).brightness == Brightness.dark;

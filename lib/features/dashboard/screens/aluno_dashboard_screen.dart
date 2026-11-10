@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/legal/ia_consentimentos.dart';
+import '../../perfil/widgets/perfil_lgpd_consent_sheet.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -168,6 +170,27 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
         _viewFor(home, DateTime.now()).action.mode ==
             AlunoTodayMode.workoutDone;
     _agendarNps();
+    _agendarAceiteIa();
+  }
+
+  var _aceiteIaPerguntado = false;
+
+  /// Uma vez: autorizar o assistente de IA do personal. Nunca junto do NPS
+  /// nem por cima do resumo do treino.
+  void _agendarAceiteIa() {
+    if (_aceiteIaPerguntado || _npsPendente) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _aceiteIaPerguntado || !_homeNaFrente) return;
+      if (checkinResumoAberto.value) return;
+      _aceiteIaPerguntado = true;
+      unawaited(
+        pedirAceitesIaDoAluno(
+          context,
+          ref.read(lgpdConsentRepositoryProvider),
+          compartilhaSaude: false,
+        ),
+      );
+    });
   }
 
   void _agendarNps() {

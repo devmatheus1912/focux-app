@@ -24,7 +24,11 @@ void main() {
     expect(screen, contains("safePopOrGo(context, '/alunos/\${widget.alunoId}')"));
     expect(screen, isNot(contains("safePopOrGo(context, '/evolucao')")));
     expect(screen, contains("'/alunos/\${widget.alunoId}/chat'"));
-    expect(screen, contains('label: ptS.engajamentoEscrever'));
+    // "Mandar mensagem", ou "Responder" quando o aluno falou por último.
+    expect(screen, contains(': ptS.engajamentoEscrever'));
+    expect(screen, contains('engajamentoPeriodoConsulta'));
+    expect(screen, contains('_exportarPdf'));
+    expect(screen, isNot(contains("'/alunos/\${widget.alunoId}/relatorio'")));
     expect(screen, contains('onPressed: _abrirChat'));
     expect(screen, isNot(contains("label: 'Chat'")));
     expect(screen, contains('safeArea: false'));

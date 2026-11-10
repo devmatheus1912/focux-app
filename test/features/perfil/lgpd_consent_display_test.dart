@@ -22,7 +22,15 @@ void main() {
   });
 
   test('tipos por perfil', () {
-    expect(lgpdConsentTiposPersonal, ['TERMOS', 'PRIVACIDADE']);
-    expect(lgpdConsentTiposAluno, ['TERMOS', 'PRIVACIDADE', 'SAUDE']);
+    expect(lgpdConsentTiposPersonal, ['TERMOS', 'PRIVACIDADE', 'IA_TERCEIROS']);
+    expect(lgpdConsentTiposAluno, [
+      'TERMOS',
+      'PRIVACIDADE',
+      'SAUDE',
+      'IA_COPILOTO',
+      'SAUDE_IA',
+    ]);
+    expect(lgpdConsentEhIa('SAUDE_IA'), isTrue);
+    expect(lgpdConsentEhIa('SAUDE'), isFalse);
   });
 }

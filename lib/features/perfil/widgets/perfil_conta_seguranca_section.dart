@@ -92,6 +92,14 @@ class PerfilContaSegurancaSection extends StatelessWidget {
               ),
             ],
             FxSettingsTile(
+              icon: FxIcons.juridico,
+              label: 'Licenças de código aberto',
+              value: '',
+              mute: mute,
+              line: line,
+              onTap: () => FocuxLegal.abrirLicencas(context),
+            ),
+            FxSettingsTile(
               icon: FxIcons.sair,
               label: 'Sair da conta',
               value: '',

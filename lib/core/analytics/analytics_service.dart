@@ -297,10 +297,6 @@ class ProductEvents {
   static const relatoriosHubTtv = 'relatorios_hub_ttv';
   static const relatoriosHubHelpOpened = 'relatorios_hub_help_opened';
   static const relatoriosHubRefreshed = 'relatorios_hub_refreshed';
-  static const relatorioAlunoViewed = 'relatorio_aluno_viewed';
-  static const relatorioAlunoTtv = 'relatorio_aluno_ttv';
-  static const relatorioAlunoHelpOpened = 'relatorio_aluno_help_opened';
-  static const relatorioAlunoRefreshed = 'relatorio_aluno_refreshed';
   static const relatorioAlunoPdfExported = 'relatorio_aluno_pdf_exported';
   static const businessReportsViewed = 'business_reports_viewed';
   static const businessReportsTtv = 'business_reports_ttv';

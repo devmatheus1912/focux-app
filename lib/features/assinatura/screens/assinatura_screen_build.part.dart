@@ -142,11 +142,10 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
         footnote =
             trialOffer
                 ? ''
-                : subscriptionUsesNativeStore
-                ? (_billingPeriod == SubscriptionBillingPeriod.yearly
-                    ? 'Anual · renova automaticamente. Cancele ${subscriptionCancelWhere()}.'
-                    : 'Mensal · renova automaticamente. Cancele ${subscriptionCancelWhere()}.')
-                : 'Checkout seguro via Mercado Pago.';
+                // O app só existe em iOS e Android: assinatura sempre pela loja.
+                : _billingPeriod == SubscriptionBillingPeriod.yearly
+                ? 'Anual · renova automaticamente. Cancele ${subscriptionCancelWhere()}.'
+                : 'Mensal · renova automaticamente. Cancele ${subscriptionCancelWhere()}.';
       }
     }
 

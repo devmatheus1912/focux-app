@@ -248,14 +248,7 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
                           120,
                         ),
                         children: [
-                          if (abertas)
-                            Text(
-                              copilotActionsResumo(
-                                actions,
-                                abertas: contagem?.abertas,
-                              ),
-                              style: FocuxHubTypography.bodyMuted(color: mute),
-                            ),
+                          // A contagem já está na aba ("Abertas 1").
                           for (final (grupo, doGrupo)
                               in abertas
                                   ? copilotActionsPorGrupo(actions)

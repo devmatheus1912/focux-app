@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/analytics/analytics_service.dart';
+import '../../../core/pdf/focux_pdf_brand_loader.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
@@ -11,10 +13,13 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/utils/motion_preferences.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
+import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_grouped_action_sheet.dart';
+import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -24,9 +29,12 @@ import '../../../core/widgets/fx_tonal_button.dart';
 import '../../alunos/providers/aluno_detail_providers.dart';
 import '../../planos/data/plano_recurso.dart';
 import '../../planos/utils/plan_gate.dart';
+import '../../relatorio/data/relatorio_repository.dart';
+import '../../relatorio/utils/relatorio_pdf_export.dart';
 import '../../subscription/widgets/upgrade_prompt_sheet.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/evolucao_repository.dart';
+import '../providers/metas_provider.dart';
 import '../utils/engajamento_display.dart';
 import '../widgets/engajamento_card_aderencia.dart';
 import '../widgets/engajamento_help_sheet.dart';
@@ -35,9 +43,6 @@ import '../../../l10n/pt.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../alunos/widgets/aluno360_timeline_full_sheet.dart';
 import '../../../core/theme/fx_icons.dart';
-
-/// O quadro mostra 5 semanas.
-const _diasDoQuadro = 35;
 
 class EngajamentoScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -57,7 +62,10 @@ class EngajamentoScreen extends ConsumerStatefulWidget {
 class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
   List<EventoEngajamento> _eventos = [];
   AderenciaResumo? _aderencia;
+  AderenciaPeriodo? _periodoDados;
+  var _periodo = EngajamentoPeriodo.cincoSemanas;
   bool _loading = true;
+  bool _exportando = false;
   String? _erro;
   DateTime? _fetchedAt;
   final _checkinsSectionKey = GlobalKey();
@@ -70,16 +78,23 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
 
   Future<void> _load() async {
     setState(() {
-      _loading = true;
+      _loading = _aderencia == null;
       _erro = null;
     });
     try {
       final repo = EvolucaoRepository(ref.read(apiClientProvider));
-      final eventos = await repo.engajamento(widget.alunoId, dias: _diasDoQuadro);
+      final consulta = engajamentoPeriodoConsulta(_periodo);
+      final dados = await repo.engajamento(
+        widget.alunoId,
+        dias: consulta.dias,
+        inicio: consulta.inicio,
+        fim: consulta.fim,
+      );
       if (mounted) {
         setState(() {
-          _eventos = eventos.eventos;
-          _aderencia = eventos.aderencia;
+          _eventos = dados.eventos;
+          _aderencia = dados.aderencia;
+          _periodoDados = dados.periodo;
           _loading = false;
           _fetchedAt = DateTime.now();
         });
@@ -118,7 +133,84 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
     });
   }
 
-  /// O Relatório tem outra conta e o PDF: mora aqui, com a trava do plano.
+  Future<void> _escolherPeriodo() async {
+    final escolhido = await showFxInsetPickerSheet<EngajamentoPeriodo>(
+      context,
+      title: ptS.engajamentoPeriodoTitulo,
+      headerIcon: FxIcons.calendario,
+      selected: _periodo,
+      items: [
+        for (final p in EngajamentoPeriodo.values)
+          FxInsetPickerSheetItem(value: p, label: engajamentoPeriodoRotulo(p)),
+      ],
+    );
+    if (!mounted || escolhido == null || escolhido == _periodo) return;
+    setState(() => _periodo = escolhido);
+    await _load();
+  }
+
+  /// PDF da aderência do período, com a marca do personal e a trava do plano.
+  Future<void> _exportarPdf() async {
+    final plano = PlanGate.read(ref, PlanoRecursoKeys.relatorios);
+    if (!plano.liberado) {
+      await UpgradePromptSheet.show(
+        context: context,
+        featureName: ptS.engajamentoRelatorioPdf,
+        capability: PlanoRecursoKeys.relatorios,
+        requiredPlan: plano.planoMinimo,
+        upgradePlano: plano.planoMinimo,
+        source: 'engajamento_pdf',
+      );
+      return;
+    }
+    final p = _periodoDados;
+    if (p == null || _exportando) return;
+    setState(() => _exportando = true);
+    try {
+      final inicio = p.inicio;
+      final fim = p.fim;
+      await exportRelatorioPdf(
+        alunoNome: fxTitleCaseName(widget.alunoNome),
+        periodoLabel:
+            inicio != null && fim != null
+                ? relatorioPeriodoLabelPdf(
+                  dias: 0,
+                  rangeCustom: DateTimeRangePdf(start: inicio, end: fim),
+                )
+                : engajamentoPeriodoRotulo(_periodo),
+        dados: AderenciaData(
+          diasAnalisados:
+              inicio != null && fim != null
+                  ? fim.difference(inicio).inDays + 1
+                  : engajamentoPeriodoConsulta(_periodo).dias,
+          treinosConcluidos: p.feitos,
+          treinosTotal: p.previstos,
+          taxaAderenciaPercent: (p.percent ?? 0).toDouble(),
+        ),
+        comparativo:
+            p.percent != null && p.percentAnterior != null
+                ? ComparativoPeriodo(
+                  aderenciaAtual: p.percent!.toDouble(),
+                  aderenciaAnterior: p.percentAnterior!.toDouble(),
+                  deltaPercent: (p.diferenca ?? 0).toDouble(),
+                  checkInsAtual: p.feitos,
+                  checkInsAnterior: 0,
+                )
+                : null,
+        brand: await carregarMarcaDoPdf(ref),
+        metas: await ref.read(metasDoAlunoProvider(widget.alunoId).future),
+      );
+      AnalyticsService.instance.track(
+        ProductEvents.relatorioAlunoPdfExported,
+        props: {'aluno_id': widget.alunoId, 'origem': 'aderencia'},
+      );
+    } catch (e) {
+      if (mounted) FeedbackHelper.showError(context, friendlyError(e));
+    } finally {
+      if (mounted) setState(() => _exportando = false);
+    }
+  }
+
   Future<void> _maisOpcoes() async {
     final escolha = await showFxGroupedActionSheet<String>(
       context,
@@ -126,16 +218,16 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
       grupos: [
         FxActionGroup<String>(null, [
           FxActionItem(
+            valor: 'pdf',
+            rotulo: ptS.engajamentoRelatorioPdf,
+            descricao: ptS.engajamentoRelatorioApoio,
+            icone: FxIcons.pdf,
+          ),
+          FxActionItem(
             valor: 'evolucao',
             rotulo: ptS.engajamentoVerEvolucao,
             descricao: ptS.engajamentoVerEvolucaoApoio,
             icone: FxIcons.graficoLinha,
-          ),
-          FxActionItem(
-            valor: 'relatorio',
-            rotulo: ptS.engajamentoRelatorioPdf,
-            descricao: ptS.engajamentoRelatorioApoio,
-            icone: FxIcons.pdf,
           ),
         ]),
       ],
@@ -145,33 +237,19 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
       _abrirEvolucao();
       return;
     }
-    final plano = PlanGate.read(ref, PlanoRecursoKeys.relatorios);
-    if (!plano.liberado) {
-      await UpgradePromptSheet.show(
-        context: context,
-        featureName: ptS.engajamentoRelatorioPdf,
-        capability: PlanoRecursoKeys.relatorios,
-        requiredPlan: plano.planoMinimo,
-        upgradePlano: plano.planoMinimo,
-        source: 'engajamento_relatorio',
-      );
-      return;
-    }
-    context.push(
-      '/alunos/${widget.alunoId}/relatorio',
-      extra: widget.alunoNome,
-    );
+    await _exportarPdf();
   }
 
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
+    final showSticky = !_loading && _erro == null;
+    final conversa = engajamentoConversa(_eventos);
     final freshness = [
       fxTitleCaseName(widget.alunoNome),
       FxHubFreshness.fromFetchedAt(_fetchedAt),
     ].nonNulls.join(' · ');
-    final showSticky = !_loading && _erro == null;
     return fxScreenA11yScope(
       label: ptS.engajamentoAderencia(widget.alunoNome),
       child: PopScope(
@@ -229,9 +307,29 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
                       FxSettingsLayout.pageInset,
                       TokensStrip.s2 + MediaQuery.viewInsetsOf(context).bottom,
                     ),
-                    child: FxLiquidPrimaryButton(
-                      label: ptS.engajamentoEscrever,
-                      onPressed: _abrirChat,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // A última mensagem é o contexto do botão.
+                        if (conversa != null) ...[
+                          Text(
+                            conversa.texto,
+                            textAlign: TextAlign.center,
+                            style: FocuxHubTypography.bodyMuted(
+                              color: chrome.mute,
+                            ),
+                          ),
+                          const SizedBox(height: TokensStrip.s2),
+                        ],
+                        FxLiquidPrimaryButton(
+                          label:
+                              conversa?.semResposta == true
+                                  ? ptS.engajamentoResponder
+                                  : ptS.engajamentoEscrever,
+                          onPressed: _abrirChat,
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -249,15 +347,29 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
     final aluno =
         ref.watch(aluno360OperacaoBundleProvider(widget.alunoId)).value?.aluno;
     final aderencia = aluno?.aderenciaPercent ?? 0;
-    final conversa = engajamentoConversa(_eventos);
     final descansos = _aderencia?.diasDescanso ?? const <int>[];
+    final diaDaFicha = _aderencia?.diaDaFicha ?? 0;
+    final quadroDoPeriodo = engajamentoQuadroDoPeriodo(
+      _periodo,
+      diaDaFicha: diaDaFicha,
+    );
     final semanas = engajamentoSemanas(
       _eventos,
       diasDescanso: descansos,
-      diaDaFicha: _aderencia?.diaDaFicha ?? 0,
+      diaDaFicha: diaDaFicha,
+      semanas: quadroDoPeriodo.semanas,
+      ate: quadroDoPeriodo.ate,
     );
     final quadro = engajamentoContagemQuadro(semanas);
-    final naSemana = engajamentoDiasNaSemana(semanas.last);
+    final semanaAtual = engajamentoSemanas(
+      _eventos,
+      diasDescanso: descansos,
+      diaDaFicha: diaDaFicha,
+      semanas: 1,
+    ).last;
+    final naSemana = engajamentoDiasNaSemana(semanaAtual);
+    final porSemana = descansos.isEmpty ? null : 7 - descansos.length;
+    final periodoRotulo = engajamentoPeriodoRotulo(_periodo);
 
     final topo = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -266,7 +378,7 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
           resumo: _aderencia,
           aderenciaCadastro: aderencia,
           frase: engajamentoFrase(_eventos),
-          tendencia: engajamentoTendencia(_eventos),
+          tendencia: engajamentoTendenciaPeriodo(_periodoDados?.diferenca),
           onMontarFicha:
               () => context.push(
                 '/alunos/${widget.alunoId}/rotina',
@@ -276,8 +388,17 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
         const SizedBox(height: TokensStrip.s3),
         EngajamentoQuadroSemanas(
           semanas: semanas,
+          titulo: periodoRotulo,
+          periodo: FxActionChip(
+            label: ptS.engajamentoPeriodoTitulo,
+            accent: primary,
+            isDark: isDark,
+            onPressed: _escolherPeriodo,
+          ),
           resumo:
-              quadro.previstos > 0
+              porSemana != null
+                  ? ptS.engajamentoFichaPorSemana(porSemana)
+                  : quadro.previstos > 0
                   ? ptS.engajamentoResumoQuadro(quadro.feitos, quadro.previstos)
                   : ptS.engajamentoResumoQuadroSemPrevisto(quadro.feitos),
         ),
@@ -287,15 +408,17 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
           child: FxMetricStrip(
             metricas: [
               FxMetric(
-                valor: _aderencia?.feitos ?? engajamentoTreinosSemana(_eventos),
-                rotulo: ptS.engajamentoDiasComTreino,
+                valor: _periodoDados?.feitos ?? _aderencia?.feitos ?? 0,
+                rotulo: ptS.engajamentoDiasComTreinoEm(periodoRotulo),
               ),
               FxMetric(
                 valor: naSemana,
                 texto:
-                    descansos.isEmpty
+                    engajamentoSemanaComecou(semanaAtual)
+                        ? ptS.engajamentoSemanaComecou
+                        : porSemana == null
                         ? '$naSemana'
-                        : ptS.engajamentoDeN(naSemana, 7 - descansos.length),
+                        : ptS.engajamentoDeN(naSemana, porSemana),
                 rotulo: ptS.engajamentoEstaSemana,
               ),
               FxMetric(
@@ -306,25 +429,6 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
             ],
           ),
         ),
-        if (conversa != null) ...[
-          const SizedBox(height: TokensStrip.s3),
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  conversa.texto,
-                  style: FocuxHubTypography.bodyMuted(color: chrome.mute),
-                ),
-              ),
-              if (conversa.semResposta)
-                FxTonalButton(
-                  label: ptS.engajamentoResponder,
-                  compact: true,
-                  onPressed: _abrirChat,
-                ),
-            ],
-          ),
-        ],
         if (aluno != null) ...[
           const SizedBox(height: TokensStrip.s4),
           FxTonalButton(
@@ -345,7 +449,7 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
       ],
     );
 
-    const listBottom = 88.0;
+    const listBottom = 120.0;
     const padding = EdgeInsets.fromLTRB(
       FxSettingsLayout.pageInset,
       TokensStrip.s4,

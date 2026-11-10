@@ -29,6 +29,7 @@ import '../widgets/nps_catalog_sheet.dart';
 import '../../../core/utils/pt_br_display.dart';
 import '../../../core/theme/fx_icons.dart';
 
+import '../../../core/router/estado_da_rota.dart';
 class NpsDashboardScreen extends ConsumerStatefulWidget {
   const NpsDashboardScreen({super.key});
 
@@ -81,7 +82,7 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
   String _filtroOf(BuildContext context) =>
       _filtroOverride ??
       npsNormalizeFiltro(
-        GoRouterState.of(context).uri.queryParameters['filtro'],
+        uriDaRota(context).queryParameters['filtro'],
       );
 
   void _setFiltro(String next) {

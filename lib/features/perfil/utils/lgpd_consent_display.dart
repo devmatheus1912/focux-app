@@ -4,8 +4,15 @@ String lgpdConsentTipoLabel(String tipo) => switch (tipo.toUpperCase()) {
   'TERMOS' => 'Termos de uso',
   'PRIVACIDADE' => 'Política de privacidade',
   'SAUDE' => 'Dados de saúde',
+  'IA_TERCEIROS' => 'Copiloto de IA',
+  'IA_COPILOTO' => 'Meus treinos no assistente de IA',
+  'SAUDE_IA' => 'Saúde no assistente de IA',
   _ => tipo,
 };
+
+/// Aceites de IA: permitir e revogar a qualquer momento (registro novo).
+bool lgpdConsentEhIa(String tipo) =>
+    const ['IA_TERCEIROS', 'IA_COPILOTO', 'SAUDE_IA'].contains(tipo.toUpperCase());
 
 enum LgpdConsentEstado { aceito, versaoAntiga, pendente }
 
@@ -29,7 +36,14 @@ String lgpdConsentAceitoLabel(LgpdConsent consent) {
   return 'Aceito em ${dd(data.day)}/${dd(data.month)}/${data.year}';
 }
 
-const lgpdConsentTiposPersonal = ['TERMOS', 'PRIVACIDADE'];
+const lgpdConsentTiposPersonal = ['TERMOS', 'PRIVACIDADE', 'IA_TERCEIROS'];
 
-/// Aluno também aceita tratamento de dados de saúde (anamnese/hábitos).
-const lgpdConsentTiposAluno = ['TERMOS', 'PRIVACIDADE', 'SAUDE'];
+/// Aluno também aceita tratamento de dados de saúde (anamnese/hábitos) e
+/// decide o que o assistente de IA do personal pode usar.
+const lgpdConsentTiposAluno = [
+  'TERMOS',
+  'PRIVACIDADE',
+  'SAUDE',
+  'IA_COPILOTO',
+  'SAUDE_IA',
+];

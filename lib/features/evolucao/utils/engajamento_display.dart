@@ -60,55 +60,6 @@ String engajamentoFrase(List<EventoEngajamento> eventos, {DateTime? now}) {
   return ptS.engajamentoUltimoTreino(vezes, _haDias(feitos.last, ref));
 }
 
-/// Treinos feitos nos últimos 7 dias, com hoje.
-int engajamentoTreinosSemana(
-  Iterable<EventoEngajamento> eventos, {
-  DateTime? now,
-}) {
-  final corte = _dia(now ?? DateTime.now()).subtract(const Duration(days: 6));
-  return eventos
-      .where(_treinoFeito)
-      .map(_quando)
-      .nonNulls
-      .where((d) => !d.isBefore(corte))
-      .map(_dia)
-      .toSet()
-      .length;
-}
-
-/// Últimos 7 dias contra os 7 anteriores. Nulo quando não há o que comparar.
-({int diferenca, String texto})? engajamentoTendencia(
-  Iterable<EventoEngajamento> eventos, {
-  DateTime? now,
-}) {
-  final hoje = _dia(now ?? DateTime.now());
-  final corte = hoje.subtract(const Duration(days: 6));
-  final anterior = hoje.subtract(const Duration(days: 13));
-  final atuaisDias = <DateTime>{};
-  final antesDias = <DateTime>{};
-  for (final quando in eventos.where(_treinoFeito).map(_quando).nonNulls) {
-    if (!quando.isBefore(corte)) {
-      atuaisDias.add(_dia(quando));
-    } else if (!quando.isBefore(anterior)) {
-      antesDias.add(_dia(quando));
-    }
-  }
-  final atuais = atuaisDias.length;
-  final antes = antesDias.length;
-  if (atuais == 0 && antes == 0) return null;
-  final d = atuais - antes;
-  if (d == 0) return (diferenca: 0, texto: ptS.engajamentoTendenciaIgual);
-  final n = d.abs();
-  final treinos = n == 1 ? ptS.engajamentoUmTreino : ptS.engajamentoNTreinos(n);
-  return (
-    diferenca: d,
-    texto:
-        d > 0
-            ? ptS.engajamentoTendenciaMais(treinos)
-            : ptS.engajamentoTendenciaMenos(treinos),
-  );
-}
-
 /// Dias do período mais recente, do mais antigo para hoje.
 List<({DateTime dia, EngajamentoTreinoEstado? estado})> engajamentoCalendario(
   Iterable<EventoEngajamento> eventos, {
@@ -165,21 +116,106 @@ class EngajamentoSemana {
   final List<EngajamentoDia> dias;
 }
 
-/// Semanas de segunda a domingo, a de hoje por último. Sem [diasDescanso] o app
-/// não sabe o que era previsto: dia sem treino fica "sem registro", nunca falta.
+/// Período do resumo e do quadro.
+enum EngajamentoPeriodo { cincoSemanas, trintaDias, mesPassado }
+
+String engajamentoPeriodoRotulo(EngajamentoPeriodo p) => switch (p) {
+  EngajamentoPeriodo.cincoSemanas => ptS.engajamentoUltimas5Semanas,
+  EngajamentoPeriodo.trintaDias => ptS.engajamentoPeriodo30Dias,
+  EngajamentoPeriodo.mesPassado => ptS.engajamentoPeriodoMesPassado,
+};
+
+/// O que pedir ao servidor: últimos N dias ou o mês passado inteiro.
+({int dias, DateTime? inicio, DateTime? fim}) engajamentoPeriodoConsulta(
+  EngajamentoPeriodo p, {
+  DateTime? now,
+}) {
+  final hoje = _dia(now ?? DateTime.now());
+  return switch (p) {
+    EngajamentoPeriodo.cincoSemanas => (dias: 35, inicio: null, fim: null),
+    EngajamentoPeriodo.trintaDias => (dias: 30, inicio: null, fim: null),
+    EngajamentoPeriodo.mesPassado => (
+      dias: 31,
+      inicio: DateTime(hoje.year, hoje.month - 1, 1),
+      fim: DateTime(hoje.year, hoje.month, 0),
+    ),
+  };
+}
+
+/// Semanas do quadro: no padrão, desde a semana do início do acompanhamento
+/// (sem semanas vazias de antes dele), até 5; no mês passado, as do mês.
+({int semanas, DateTime? ate}) engajamentoQuadroDoPeriodo(
+  EngajamentoPeriodo p, {
+  required int diaDaFicha,
+  DateTime? now,
+}) {
+  final hoje = _dia(now ?? DateTime.now());
+  DateTime segundaDe(DateTime d) => DateTime(d.year, d.month, d.day - d.weekday + 1);
+  int semanasEntre(DateTime de, DateTime ate) =>
+      segundaDe(ate).difference(segundaDe(de)).inDays ~/ 7 + 1;
+  switch (p) {
+    case EngajamentoPeriodo.mesPassado:
+      final consulta = engajamentoPeriodoConsulta(p, now: hoje);
+      return (
+        semanas: semanasEntre(consulta.inicio!, consulta.fim!),
+        ate: consulta.fim,
+      );
+    case EngajamentoPeriodo.cincoSemanas:
+    case EngajamentoPeriodo.trintaDias:
+      if (diaDaFicha <= 0) return (semanas: 5, ate: null);
+      final inicio = DateTime(hoje.year, hoje.month, hoje.day - diaDaFicha + 1);
+      return (semanas: semanasEntre(inicio, hoje).clamp(1, 5), ate: null);
+  }
+}
+
+/// "12 pontos acima do período anterior"; nulo sem os dois períodos medidos.
+({int diferenca, String texto})? engajamentoTendenciaPeriodo(int? diferenca) {
+  if (diferenca == null) return null;
+  final texto =
+      diferenca > 0
+          ? ptS.engajamentoTendenciaSubiu(diferenca)
+          : diferenca < 0
+          ? ptS.engajamentoTendenciaCaiu(-diferenca)
+          : ptS.engajamentoTendenciaIgual;
+  // O cartão desenha a seta pela diferença.
+  return (diferenca: diferenca, texto: texto);
+}
+
+/// Nenhum treino ainda e nenhum dia previsto já perdido: a semana só começou.
+bool engajamentoSemanaComecou(EngajamentoSemana semana) =>
+    semana.dias.every(
+      (d) =>
+          d.estado != EngajamentoDiaEstado.treinou &&
+          d.estado != EngajamentoDiaEstado.faltou &&
+          d.estado != EngajamentoDiaEstado.parcial,
+    );
+
+/// Semanas de segunda a domingo, a de [ate] (padrão: hoje) por último. Sem
+/// [diasDescanso] o app não sabe o que era previsto: dia sem treino fica
+/// "sem registro", nunca falta.
 List<EngajamentoSemana> engajamentoSemanas(
   Iterable<EventoEngajamento> eventos, {
   required List<int> diasDescanso,
   required int diaDaFicha,
   DateTime? now,
   int semanas = 5,
+  DateTime? ate,
 }) {
   final hoje = _dia(now ?? DateTime.now());
-  // Antes da ficha não havia treino previsto: nada conta como falta.
+  final ultimo = _dia(ate ?? hoje);
+  // Antes do início do acompanhamento não havia treino previsto: nada é falta.
   final inicio = DateTime(hoje.year, hoje.month, hoje.day - diaDaFicha + 1);
-  final segunda = DateTime(hoje.year, hoje.month, hoje.day - hoje.weekday + 1);
+  final segunda = DateTime(
+    ultimo.year,
+    ultimo.month,
+    ultimo.day - ultimo.weekday + 1,
+  );
   final porDia = {
-    for (final d in engajamentoCalendario(eventos, now: hoje, dias: semanas * 7))
+    for (final d in engajamentoCalendario(
+      eventos,
+      now: ultimo,
+      dias: semanas * 7 + 7,
+    ))
       d.dia: d.estado,
   };
   EngajamentoDiaEstado estado(DateTime dia) {

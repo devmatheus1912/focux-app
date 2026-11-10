@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/legal/focux_legal.dart';
+import '../../../core/legal/ia_consentimentos.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
@@ -77,10 +79,57 @@ class _PerfilLgpdConsentBodyState extends ConsumerState<PerfilLgpdConsentBody> {
     _carregar();
   }
 
-  LgpdConsentEstado _estado(String tipo) => lgpdConsentEstado(
-    _aceites[tipo.toUpperCase()],
-    FocuxLegal.consentDocumentVersion,
-  );
+  LgpdConsentEstado _estado(String tipo) {
+    // IA: vale o mais recente entre aceite e revogação, não a versão.
+    if (lgpdConsentEhIa(tipo)) {
+      return iaAceiteVigente(_aceites, tipo.toUpperCase())
+          ? LgpdConsentEstado.aceito
+          : LgpdConsentEstado.pendente;
+    }
+    return lgpdConsentEstado(
+      _aceites[tipo.toUpperCase()],
+      FocuxLegal.consentDocumentVersion,
+    );
+  }
+
+  /// IA: permitir ou revogar, sem tela de documento.
+  Future<void> _alternarIa(String tipo) async {
+    if (_busyTipo != null) return;
+    final permitir = _estado(tipo) != LgpdConsentEstado.aceito;
+    final label = lgpdConsentTipoLabel(tipo);
+    if (!permitir) {
+      final ok = await showFxConfirmSheet(
+        context,
+        title: 'Revogar $label?',
+        message: 'O assistente de IA deixa de receber esses dados a partir de agora.',
+        confirmLabel: 'Revogar',
+        cancelLabel: 'Manter',
+        destructive: true,
+      );
+      if (ok != true || !mounted) return;
+    }
+    setState(() => _busyTipo = tipo);
+    try {
+      final saved = await ref
+          .read(lgpdConsentRepositoryProvider)
+          .registrar(
+            tipo: permitir ? tipo : '$tipo${IaConsentimentos.sufixoRevogado}',
+          );
+      if (!mounted) return;
+      setState(() {
+        _aceites = {..._aceites, saved.tipo: saved};
+        _busyTipo = null;
+      });
+      FeedbackHelper.showSuccess(
+        context,
+        permitir ? '$label permitido.' : '$label revogado.',
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _busyTipo = null);
+      FeedbackHelper.showError(context, friendlyError(e));
+    }
+  }
 
   Future<void> _carregar() async {
     setState(() {
@@ -153,34 +202,46 @@ class _PerfilLgpdConsentBodyState extends ConsumerState<PerfilLgpdConsentBody> {
       return Text(_erro!, style: FocuxHubTypography.bodyMuted(color: mute));
     }
 
+    final documentos = widget.tipos.where((t) => !lgpdConsentEhIa(t)).toList();
     final aceitos =
-        widget.tipos.where((t) => _estado(t) == LgpdConsentEstado.aceito).length;
+        documentos.where((t) => _estado(t) == LgpdConsentEstado.aceito).length;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          lgpdConsentResumo(aceitos, widget.tipos.length),
+          lgpdConsentResumo(aceitos, documentos.length),
           style: FocuxHubTypography.bodyMuted(color: mute),
         ),
         const SizedBox(height: TokensStrip.s2),
         for (final tipo in widget.tipos)
           _ConsentRow(
             titulo: lgpdConsentTipoLabel(tipo),
-            subtitulo: switch (_estado(tipo)) {
-              LgpdConsentEstado.aceito => lgpdConsentAceitoLabel(
-                _aceites[tipo.toUpperCase()]!,
-              ),
-              LgpdConsentEstado.versaoAntiga => 'Nova versão disponível',
-              LgpdConsentEstado.pendente => 'Ainda não aceito',
-            },
+            subtitulo:
+                lgpdConsentEhIa(tipo)
+                    ? (_estado(tipo) == LgpdConsentEstado.aceito
+                        ? 'Permitido'
+                        : 'Não permitido')
+                    : switch (_estado(tipo)) {
+                      LgpdConsentEstado.aceito => lgpdConsentAceitoLabel(
+                        _aceites[tipo.toUpperCase()]!,
+                      ),
+                      LgpdConsentEstado.versaoAntiga => 'Nova versão disponível',
+                      LgpdConsentEstado.pendente => 'Ainda não aceito',
+                    },
             aceito: _estado(tipo) == LgpdConsentEstado.aceito,
             busy: _busyTipo == tipo,
             ink: ink,
             mute: mute,
             onAbrir: () => widget.onAbrirDoc(tipo),
-            onAceitar: _busyTipo != null ? null : () => _lerEAceitar(tipo),
+            ia: lgpdConsentEhIa(tipo),
+            onAceitar:
+                _busyTipo != null
+                    ? null
+                    : lgpdConsentEhIa(tipo)
+                    ? () => _alternarIa(tipo)
+                    : () => _lerEAceitar(tipo),
           ),
       ],
     );
@@ -197,8 +258,11 @@ class _ConsentRow extends StatelessWidget {
     required this.mute,
     required this.onAbrir,
     required this.onAceitar,
+    this.ia = false,
   });
 
+  /// Aceite de IA: "Permitir" ou "Revogar" no lugar de "Ler e aceitar".
+  final bool ia;
   final String titulo;
   final String subtitulo;
   final bool aceito;
@@ -255,7 +319,18 @@ class _ConsentRow extends StatelessWidget {
               ),
             ),
           ),
-          if (!aceito && !busy)
+          if (ia && !busy)
+            aceito
+                ? FxTonalButton(
+                  label: 'Revogar',
+                  expanded: true,
+                  onPressed: onAceitar,
+                )
+                : FxLiquidPrimaryButton(
+                  label: 'Permitir',
+                  onPressed: onAceitar,
+                )
+          else if (!aceito && !busy)
             FxLiquidPrimaryButton(
               label: 'Ler e aceitar',
               onPressed: onAceitar,

@@ -161,11 +161,9 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                                     },
                                   ),
                                   tarefasAbertas: tarefas?.totalItens ?? 0,
-                                  alunoNome: _selectedAlunoNome,
                                   podeAnalisar: !cotaEsgotada,
                                   onAnalisar: _analisar,
-                                  onAnalisarSelecionado: _gerar,
-                                  onEscolherAluno: _selecionarAluno,
+                                  onEscolherAluno: _escolherEAnalisar,
                                   onVerTarefas:
                                       () => context.push(
                                         '/dashboard/command-center/copiloto',
@@ -221,46 +219,22 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                               ),
                             ),
                           ] else if (_gerado) ...[
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(
-                                FxSettingsLayout.pageInset,
-                                0,
-                                FxSettingsLayout.pageInset,
-                                TokensStrip.s3,
+                            // O nome já está no topo; aqui só o motivo.
+                            if (_proximaAcao?.motivo
+                                case final motivo?
+                                when motivo.trim().isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                  FxSettingsLayout.pageInset,
+                                  0,
+                                  FxSettingsLayout.pageInset,
+                                  TokensStrip.s3,
+                                ),
+                                child: Text(
+                                  motivo.trim(),
+                                  style: FocuxHubTypography.body(color: ink),
+                                ),
                               ),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          _selectedAlunoNome ?? '',
-                                          style: FocuxHubTypography.pageTitle(
-                                            context,
-                                            color: ink,
-                                          ),
-                                        ),
-                                        if (_proximaAcao?.motivo
-                                            case final motivo?
-                                            when motivo.trim().isNotEmpty) ...[
-                                          const SizedBox(
-                                            height: TokensStrip.s1,
-                                          ),
-                                          Text(
-                                            motivo.trim(),
-                                            style: FocuxHubTypography.bodyMuted(
-                                              color: mute,
-                                            ),
-                                          ),
-                                        ],
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
                             Consumer(
                               builder: (context, ref, _) {
                                 final query = InsightsQuery(
@@ -358,6 +332,19 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                                               insight: e.value,
                                               brand: brand,
                                               mute: mute,
+                                              acaoLabel:
+                                                  _acaoDoInsight(
+                                                    e.value,
+                                                  )?.label,
+                                              onAcao: switch (_acaoDoInsight(
+                                                e.value,
+                                              )) {
+                                                final acao? =>
+                                                  () => _aplicarAcao(acao),
+                                                null => null,
+                                              },
+                                              onMais:
+                                                  () => _menuDoInsight(e.value),
                                             ),
                                           const SizedBox(
                                             height: TokensStrip.s2,

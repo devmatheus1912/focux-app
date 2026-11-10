@@ -41,6 +41,7 @@ import '../widgets/auth_social_stack.dart';
 import '../widgets/auth_text_link.dart';
 import '../../../core/theme/fx_icons.dart';
 
+import '../../../core/router/estado_da_rota.dart';
 part 'login_screen_actions.part.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -100,7 +101,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     super.didChangeDependencies();
     if (_roleFromQueryApplied) return;
     _roleFromQueryApplied = true;
-    final params = GoRouterState.of(context).uri.queryParameters;
+    final params = uriDaRota(context).queryParameters;
     final role = params['role']?.trim().toLowerCase();
     if (role == 'aluno') {
       _isAluno = true;

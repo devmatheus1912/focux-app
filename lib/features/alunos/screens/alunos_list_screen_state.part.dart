@@ -77,9 +77,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
 
   bool _hasDeepLinkFiltro(BuildContext context) {
     if (_ignoredDeepLinkFiltro) return false;
-    return GoRouterState.of(
-          context,
-        ).uri.queryParameters.containsKey('filtro') ||
+    return uriDaRota(context).queryParameters.containsKey('filtro') ||
         widget.initialFiltro != AlunoFiltro.todos;
   }
 
@@ -235,7 +233,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
 
   void _maybeOpenHelpFromDeepLink() {
     if (_helpDeepLinkApplied) return;
-    final sheet = GoRouterState.of(context).uri.queryParameters['sheet'];
+    final sheet = uriDaRota(context).queryParameters['sheet'];
     if (sheet != 'help') return;
     _helpDeepLinkApplied = true;
     showAlunosListHelpSheet(context);

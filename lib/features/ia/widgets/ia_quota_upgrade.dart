@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../../core/legal/ia_consentimentos.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -130,6 +132,9 @@ class IaQuotaUpgrade {
     BuildContext context,
     WidgetRef ref,
   ) async {
+    // Antes de qualquer dado sair para a IA: o aceite do personal.
+    if (!await garantirAceiteCopiloto(context, ref)) return false;
+    if (!context.mounted) return false;
     final features = ref.read(planoFeaturesProvider).value;
     if (features == null || !isBlockedLocally(features)) return true;
     await showUpgradeDialog(context, ref, features: features);

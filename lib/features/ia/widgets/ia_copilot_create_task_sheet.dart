@@ -3,13 +3,14 @@ import 'package:flutter/material.dart';
 import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_motion.dart';
+import '../../dashboard/utils/copilot_actions_display.dart';
 import '../providers/ia_copilot_providers.dart';
 import '../utils/ia_copiloto_display.dart';
-import 'ia_copilot_shell_widgets.dart';
 import '../../../core/theme/fx_icons.dart';
 
 Future<IaCopilotTaskDraft?> showIaCopilotCreateTaskSheet(
@@ -53,27 +54,22 @@ class _IaCopilotCreateTaskSheet extends StatelessWidget {
     final mute = dark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final line = dark ? EagleTokens.darkLine : TokensStrip.borderDefault;
     final cardBg = dark ? EagleTokens.darkCard : TokensStrip.cardBg;
+    // Tarefa do Copiloto nasce P1: o mesmo prazo de Tarefas.
+    final prazo = copilotActionsPrazo('P1').selo;
 
     return FxHomeSheetScaffold(
       isDark: dark,
-      leading: Icon(
-        FxIcons.pranchetaFeita,
-        color: brand,
-        size: 18,
-      ),
-      title: 'Criar tarefa para ${alunoNome ?? 'aluno'}?',
+      leading: Icon(FxIcons.pranchetaFeita, color: brand, size: 18),
+      title: 'Criar tarefa para ${alunoNome ?? 'o aluno'}?',
       subtitle:
-          'Vai para o ${FocuxMicrocopy.commandCenter}. Nada é aplicado automaticamente.',
+          'Vai para ${FocuxMicrocopy.commandCenter}. Nada é enviado ao aluno.',
       child: StatefulBuilder(
         builder: (ctx, setSheetState) {
           void submit() {
             final text = controller.text.trim();
             if (text.isEmpty) return;
             Navigator.of(ctx).pop(
-              IaCopilotTaskDraft(
-                acao: text,
-                motivo: motivoInicial.trim(),
-              ),
+              IaCopilotTaskDraft(acao: text, motivo: motivoInicial.trim()),
             );
           }
 
@@ -81,14 +77,17 @@ class _IaCopilotCreateTaskSheet extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                'Ação',
-                style: TextStyle(
-                  color: ink,
-                  fontSize: TokensStrip.fontRotulo,
-                  fontWeight: FontWeight.w700,
+              // O motivo é o contexto: vem antes do campo.
+              if (motivoInicial.trim().isNotEmpty) ...[
+                Text(
+                  motivoInicial.trim(),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: FocuxHubTypography.bodyMuted(color: mute),
                 ),
-              ),
+                const SizedBox(height: TokensStrip.s3),
+              ],
+              Text('Tarefa', style: FocuxHubTypography.chip(ink)),
               const SizedBox(height: TokensStrip.s2),
               TextField(
                 controller: controller,
@@ -99,8 +98,8 @@ class _IaCopilotCreateTaskSheet extends StatelessWidget {
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: cardBg,
-                  hintText: 'Descreva a tarefa para revisar depois',
-                  hintStyle: TextStyle(color: mute),
+                  hintText: 'O que fazer com este aluno',
+                  hintStyle: FocuxHubTypography.body(color: mute),
                   contentPadding: const EdgeInsets.all(14),
                   enabledBorder: FxInputDeco.outlineBorder(
                     borderRadius: BorderRadius.circular(16),
@@ -111,53 +110,13 @@ class _IaCopilotCreateTaskSheet extends StatelessWidget {
                     borderSide: BorderSide(color: brand, width: 1.2),
                   ),
                 ),
-                style: TextStyle(
-                  color: ink,
-                  fontSize: TokensStrip.fontBodySm,
-                  fontWeight: FontWeight.w700,
-                  height: 1.35,
-                ),
+                style: FocuxHubTypography.body(color: ink),
               ),
-              const SizedBox(height: TokensStrip.s3),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  IaCopilotMetaChip(
-                    label: 'Destino: ${FocuxMicrocopy.commandCenter}',
-                    icon: FxIcons.painel,
-                    brand: brand,
-                    ink: ink,
-                    line: line,
-                  ),
-                  IaCopilotMetaChip(
-                    label: 'Prioridade P1',
-                    icon: FxIcons.meta,
-                    brand: brand,
-                    ink: ink,
-                    line: line,
-                  ),
-                  IaCopilotMetaChip(
-                    label: 'SLA 24h',
-                    icon: FxIcons.cronometro,
-                    brand: brand,
-                    ink: ink,
-                    line: line,
-                  ),
-                ],
-              ),
-              if (motivoInicial.trim().isNotEmpty) ...[
-                const SizedBox(height: TokensStrip.s3),
+              if (prazo != null) ...[
+                const SizedBox(height: TokensStrip.s2),
                 Text(
-                  motivoInicial,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: mute,
-                    fontSize: TokensStrip.fontMinimo,
-                    fontWeight: FontWeight.w600,
-                    height: 1.35,
-                  ),
+                  'Prazo: ${prazo.toLowerCase()}',
+                  style: FocuxHubTypography.bodyMuted(color: mute),
                 ),
               ],
               const SizedBox(height: TokensStrip.s4),

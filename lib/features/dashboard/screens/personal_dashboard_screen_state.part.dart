@@ -57,7 +57,7 @@ class _PersonalDashboardScreenState
     _deepLinkApplied = true;
     final Map<String, String> params;
     try {
-      params = GoRouterState.of(context).uri.queryParameters;
+      params = uriDaRota(context).queryParameters;
     } catch (_) {
       return;
     }

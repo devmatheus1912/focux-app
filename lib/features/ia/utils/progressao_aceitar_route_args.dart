@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/router/estado_da_rota.dart';
 class ProgressaoAceitarRouteArgs {
   const ProgressaoAceitarRouteArgs({
     this.returnTo,
@@ -16,7 +17,7 @@ class ProgressaoAceitarRouteArgs {
 
   /// Resolves navigation context from [GoRouter] extra (hot-reload safe).
   static ProgressaoAceitarRouteArgs resolve(BuildContext context) =>
-      fromExtra(GoRouterState.of(context).extra);
+      fromExtra(estadoDaRota(context)?.extra);
 
   static ProgressaoAceitarRouteArgs fromExtra(Object? extra) {
     if (extra is! Map) return const ProgressaoAceitarRouteArgs();

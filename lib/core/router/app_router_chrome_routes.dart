@@ -36,7 +36,6 @@ import '../../features/treinos/screens/add_exercicio_to_treino_screen.dart';
 import '../../features/treinos/utils/treino_criacao_fluxo.dart';
 import '../../features/financeiro/screens/financeiro_screen.dart';
 import '../../features/financeiro/utils/financeiro_hub_display.dart';
-import '../../features/relatorio/screens/relatorio_screen.dart';
 import '../../features/feed/screens/feed_screen.dart';
 import '../../features/feed/screens/feed_aluno_screen.dart';
 import '../../features/chat/screens/chat_inbox_screen.dart';
@@ -190,17 +189,6 @@ RouteBase buildChromeShellRoute() {
             builder:
                 (context, state) => AlunoEquipamentosScreen(
                   alunoId: intPathParam(state, 'id')!,
-                ),
-          ),
-          GoRoute(
-            path: '/alunos/:id/relatorio',
-            redirect:
-                (context, state) =>
-                    intPathParam(state, 'id') == null ? '/alunos' : null,
-            builder:
-                (context, state) => RelatorioScreen(
-                  alunoId: intPathParam(state, 'id')!,
-                  alunoNome: stringRouteExtra(state) ?? 'Aluno',
                 ),
           ),
           GoRoute(

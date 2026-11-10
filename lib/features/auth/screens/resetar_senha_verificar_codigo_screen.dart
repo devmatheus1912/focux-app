@@ -21,6 +21,7 @@ import '../widgets/auth_otp_field.dart';
 import '../widgets/auth_shell.dart';
 import '../../../core/theme/fx_icons.dart';
 
+import '../../../core/router/estado_da_rota.dart';
 part 'resetar_senha_verificar_codigo_screen_actions.part.dart';
 
 class ResetarSenhaVerificarCodigoScreen extends ConsumerStatefulWidget {
@@ -49,7 +50,7 @@ class _ResetarSenhaVerificarCodigoScreenState
     super.didChangeDependencies();
     if (_queryApplied) return;
     _queryApplied = true;
-    final params = GoRouterState.of(context).uri.queryParameters;
+    final params = uriDaRota(context).queryParameters;
     _email = params['email']?.trim() ?? '';
     final role = params['role']?.trim().toLowerCase();
     _isAluno = role == 'aluno';

@@ -37,7 +37,7 @@ List<CopilotoPrioridade> copilotoPrioridades(
       CopilotoPrioridade(
         alunoId: id,
         nome: nome.trim(),
-        motivo: copilotActionsMotivo(a),
+        motivo: copilotActionsPorque(a),
       ),
     );
     if (out.length == limite) break;
@@ -45,53 +45,75 @@ List<CopilotoPrioridade> copilotoPrioridades(
   return out;
 }
 
+/// O que o botão de uma recomendação faz: abrir uma tela do app ou executar
+/// uma ação no backend (com confirmação).
 class IaCopilotoApplySpec {
   const IaCopilotoApplySpec({
-    required this.backendTipo,
     required this.label,
+    this.backendTipo,
+    this.rota,
     this.parametros,
   });
 
-  final String backendTipo;
   final String label;
+
+  /// Ação executada no backend (`ENVIAR_PUSH`, `MARCAR_RISCO`, `REDUZIR_CARGA`).
+  final String? backendTipo;
+
+  /// Tela que o botão abre (carga, medida). Não executa nada sozinho.
+  final String? rota;
   final String? parametros;
+
+  bool get abreTela => rota != null;
 }
 
+/// Ação de uma recomendação ou da próxima ação.
+///
+/// `CARGA` abre Ajustar cargas, onde o personal revisa exercício por
+/// exercício: "aumentar intensidade" nunca vira o corte de −15%. O corte só
+/// existe para `REDUZIR_CARGA` explícito.
 IaCopilotoApplySpec? iaCopilotoApplySpec({
   required String? tipoAcao,
   String? mensagemSugerida,
+  int? alunoId,
 }) {
   final tipo = tipoAcao?.trim().toUpperCase();
   if (tipo == null || tipo.isEmpty) return null;
 
-  // Paridade com Aluno360: TREINO = check-in/push; carga só em CARGA explícita.
-  if (tipo == 'CARGA' || tipo == 'REDUZIR_CARGA') {
-    return const IaCopilotoApplySpec(
-      backendTipo: 'REDUZIR_CARGA',
-      label: 'Aplicar ajuste de carga (−15%)',
-    );
+  switch (tipo) {
+    case 'CARGA':
+      if (alunoId == null) return null;
+      return IaCopilotoApplySpec(
+        label: 'Ajustar cargas',
+        rota: '/alunos/$alunoId/ia/progressao',
+      );
+    case 'MEDIDA':
+      if (alunoId == null) return null;
+      return IaCopilotoApplySpec(
+        label: 'Conferir medida',
+        rota: '/alunos/$alunoId/evolucao',
+      );
+    case 'REDUZIR_CARGA':
+      return const IaCopilotoApplySpec(
+        backendTipo: 'REDUZIR_CARGA',
+        label: 'Aplicar ajuste de carga (−15%)',
+      );
+    case 'MARCAR_RISCO':
+      return const IaCopilotoApplySpec(
+        backendTipo: 'MARCAR_RISCO',
+        label: 'Registrar contato prioritário',
+      );
   }
 
-  if (tipo == 'TREINO' ||
-      tipo == 'CONTATO' ||
-      tipo == 'WEARABLE' ||
-      tipo == 'ENVIAR_PUSH') {
-    final msg = mensagemSugerida?.trim();
-    if (msg == null || msg.isEmpty) return null;
-    return IaCopilotoApplySpec(
-      backendTipo: 'ENVIAR_PUSH',
-      label:
-          tipo == 'TREINO' ? 'Pedir check-in ao aluno' : 'Enviar mensagem ao aluno',
-      parametros: msg,
-    );
-  }
-
-  if (tipo == 'MARCAR_RISCO') {
-    return const IaCopilotoApplySpec(
-      backendTipo: 'MARCAR_RISCO',
-      label: 'Registrar contato prioritário',
-    );
-  }
-
-  return null;
+  // Mensagem pronta ao aluno: treino vira pedido de check-in.
+  final msg = mensagemSugerida?.trim();
+  if (msg == null || msg.isEmpty) return null;
+  return IaCopilotoApplySpec(
+    backendTipo: 'ENVIAR_PUSH',
+    label: tipo == 'TREINO' ? 'Pedir check-in' : 'Enviar mensagem',
+    parametros: msg,
+  );
 }
+
+/// Texto de custo junto de "Analisar" e "Refazer".
+String iaCopilotoCustoAnalise() => 'Usa 1 da sua cota de IA.';

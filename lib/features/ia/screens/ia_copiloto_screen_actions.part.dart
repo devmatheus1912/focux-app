@@ -60,8 +60,9 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
                     SizedBox(height: TokensStrip.s4),
                     FxHomeSheetHeader(
                       isDark: dark,
-                      title: 'Selecionar aluno',
-                      subtitle: 'Escolha o aluno para analisar.',
+                      title: 'Analisar um aluno',
+                      subtitle:
+                          'Escolha o aluno. ${iaCopilotoCustoAnalise()}',
                       leading: Icon(
                         FxIcons.buscarPessoa,
                         color: primary,
@@ -204,6 +205,13 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
     });
   }
 
+  /// Escolher o aluno já analisa (o custo aparece na folha).
+  Future<void> _escolherEAnalisar() async {
+    await _selecionarAluno();
+    if (!mounted || _selectedAlunoId == null) return;
+    await _gerar();
+  }
+
   Future<void> _analisar(int alunoId, String nome) {
     setState(() {
       _selectedAlunoId = alunoId;
@@ -231,6 +239,7 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
       });
       return;
     }
+    // Aceite do personal e cota, antes de qualquer dado sair para a IA.
     if (!await IaQuotaUpgrade.guardBeforeRequest(context, ref)) return;
     if (!mounted) return;
 
@@ -316,24 +325,26 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
       }
       return '${erro.message}$refText';
     }
+    if (ApiError.from(erro)?.codigo == IaConsentimentos.codigoAceiteAluno) {
+      final nome = _selectedAlunoNome?.split(' ').first ?? 'O aluno';
+      return '$nome ainda não autorizou o assistente de IA. '
+          'O pedido aparece no app dele na próxima abertura.';
+    }
     return friendlyError(erro, fallback: FocuxMicrocopy.iaErroGenerico);
   }
 
-  Future<void> _atribuir() async {
+  /// Tarefa a partir de uma recomendação: o texto é o "O que fazer" dela.
+  Future<void> _atribuir({String? texto, String? motivo}) async {
     if (_selectedAlunoId == null) {
       await _selecionarAluno();
       if (_selectedAlunoId == null) return;
     }
     try {
       final repo = IaRepository(ref.read(apiClientProvider));
-      final acaoAtual =
-          _proximaAcao ?? await repo.proximaAcao(_selectedAlunoId!);
-      final textoAcao =
-          acaoAtual.displayText == 'Sem detalhe' ? '' : acaoAtual.displayText;
-      final motivo = acaoAtual.motivo;
+      final textoAcao = texto?.trim() ?? '';
       final draft = await _confirmarCriarTarefa(
         textoAcao.isEmpty ? 'Revisar aluno no Copiloto' : textoAcao,
-        motivo,
+        (motivo ?? _proximaAcao?.motivo ?? '').trim(),
       );
       if (draft == null) return;
       final acao = await repo.salvarAcaoCopiloto(
@@ -358,7 +369,6 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
         }
       }
       if (!mounted) return;
-      setState(() => _proximaAcao = acao);
       invalidatePersonalDashboardHome(ref);
       ref.invalidate(commandCenterProvider);
       ref.invalidate(copilotoTarefasAbertasProvider);

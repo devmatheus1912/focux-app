@@ -37,7 +37,8 @@ class TarefaRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final nome = copilotActionsNome(action);
     final motivo = copilotActionsMotivo(action);
-    final selo = copilotActionsSelo(action);
+    final prazo = copilotActionsPrazo(action.prioridade);
+    final selo = prazo.selo ?? '';
     final primary = Theme.of(context).colorScheme.primary;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -93,12 +94,12 @@ class TarefaRow extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: FocuxHubTypography.bodyMuted(color: mute),
                         ),
-                        if (!concluida) ...[
+                        if (!concluida && selo.isNotEmpty) ...[
                           const SizedBox(height: TokensStrip.s1),
                           FxStatusPill(
                             label: selo,
                             tone:
-                                selo == ptS.tarefasGrupoHoje
+                                prazo.aviso
                                     ? FxPillTone.warning
                                     : FxPillTone.neutral,
                           ),

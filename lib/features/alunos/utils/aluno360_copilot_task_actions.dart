@@ -29,7 +29,7 @@ Future<bool> criarTarefaCopilotoFromAluno360({
       if (context.mounted) {
         FeedbackHelper.showInfo(
           context,
-          'Tarefa já aberta no ${FocuxMicrocopy.commandCenter}.',
+          'Tarefa já aberta em ${FocuxMicrocopy.commandCenter}.',
           placement: FeedbackPlacement.operacaoTop,
         );
       }
@@ -64,7 +64,7 @@ Future<bool> criarTarefaCopilotoFromAluno360({
       FeedbackHelper.showOperacaoSuccess(
         context,
         persisted
-            ? 'Tarefa criada no ${FocuxMicrocopy.commandCenter}.'
+            ? 'Tarefa criada em ${FocuxMicrocopy.commandCenter}.'
             : 'Servidor aceitou, mas a tarefa ainda não apareceu.',
       );
     }

@@ -23,6 +23,7 @@ import 'fx_shell_scaffold.dart';
 import 'skeleton_loader.dart';
 import '../theme/fx_icons.dart';
 
+import '../router/estado_da_rota.dart';
 class FeatureGate extends ConsumerWidget {
   final SubscriptionPlan requiredPlan;
   final Widget child;
@@ -258,7 +259,7 @@ class _LockedScreenState extends ConsumerState<_LockedScreen> {
     }
 
     final fromAtivacao =
-        GoRouterState.of(context).uri.queryParameters['from'] == 'ativacao';
+        uriDaRota(context).queryParameters['from'] == 'ativacao';
     final offer = PlanEntitlements.lockedOffer(
       featureName: widget.featureName,
       capability: widget.capability,

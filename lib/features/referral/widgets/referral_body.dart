@@ -35,12 +35,14 @@ class ReferralBody extends StatelessWidget {
     required this.isDark,
     required this.onShare,
     required this.onCopyLink,
+    required this.onCopyCode,
   });
 
   final ReferralInfo info;
   final bool isDark;
   final VoidCallback onShare;
   final VoidCallback onCopyLink;
+  final VoidCallback onCopyCode;
 
   @override
   Widget build(BuildContext context) {
@@ -64,12 +66,14 @@ class ReferralBody extends StatelessWidget {
         ],
         _ReferralCodeCard(
           info: info,
-          isDark: isDark,
           onShare: onShare,
           onCopyLink: onCopyLink,
+          onCopyCode: onCopyCode,
         ),
-        const SizedBox(height: TokensStrip.s4),
-        _ReferralProgresso(info: info, isDark: isDark),
+        if (referralMostraProgresso(info)) ...[
+          const SizedBox(height: TokensStrip.s4),
+          _ReferralProgresso(info: info, isDark: isDark),
+        ],
         const SizedBox(height: TokensStrip.s4),
         DashboardSectionHeader(title: l10n.referralListTitle),
         const SizedBox(height: TokensStrip.s2),
@@ -100,29 +104,84 @@ class ReferralBody extends StatelessWidget {
               ),
             ),
         const SizedBox(height: TokensStrip.s4),
-        Theme(
-          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-          child: ExpansionTile(
-            tilePadding: EdgeInsets.zero,
-            childrenPadding: EdgeInsets.zero,
-            title: Text(
-              l10n.referralHowItWorks,
-              style: FocuxHubTypography.sectionTitle(
-                context,
-                color: chrome.ink,
-              ),
-            ),
-            children: [
-              for (final passo in referralComoFuncionaPassos(l10n, info))
-                FxSatelliteListTile(
-                  title: passo.titulo,
-                  titleCase: false,
-                  subtitle: Text(passo.detalhe),
-                ),
-            ],
-          ),
+        _ComoFunciona(
+          info: info,
+          // Quem já indicou conhece as regras: começa fechado.
+          abertoNoInicio: info.indicacoes.isEmpty,
         ),
       ],
+    );
+  }
+}
+
+/// Regras completas num lugar só, recolhível, no desenho dos outros cartões.
+class _ComoFunciona extends StatefulWidget {
+  const _ComoFunciona({required this.info, required this.abertoNoInicio});
+
+  final ReferralInfo info;
+  final bool abertoNoInicio;
+
+  @override
+  State<_ComoFunciona> createState() => _ComoFuncionaState();
+}
+
+class _ComoFuncionaState extends State<_ComoFunciona> {
+  late bool _aberto = widget.abertoNoInicio;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = S.of(context);
+    final chrome = ShellChrome.of(context);
+    return FxStripCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Semantics(
+            button: true,
+            expanded: _aberto,
+            child: InkWell(
+              onTap: () => setState(() => _aberto = !_aberto),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: 44),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        l10n.referralHowItWorks,
+                        style: FocuxHubTypography.cardTitle(color: chrome.ink),
+                      ),
+                    ),
+                    Icon(
+                      _aberto ? FxIcons.chevronCima : FxIcons.chevronBaixo,
+                      size: 20,
+                      color: chrome.mute,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          if (_aberto)
+            for (final passo in referralComoFuncionaPassos(l10n, widget.info))
+              Padding(
+                padding: const EdgeInsets.only(top: TokensStrip.s3),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      passo.titulo,
+                      style: FocuxHubTypography.cardTitle(color: chrome.ink),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      passo.detalhe,
+                      style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                    ),
+                  ],
+                ),
+              ),
+        ],
+      ),
     );
   }
 }
@@ -138,20 +197,12 @@ class _ReferralProgresso extends StatelessWidget {
     final l10n = S.of(context);
     final chrome = ShellChrome.forBrightness(context, isDark);
     final primary = Theme.of(context).colorScheme.primary;
-    final texto = [
-      if (referralRewardsProgress(l10n, info) case final premios?) premios,
-      referralDaysProgress(l10n, info),
-    ].join(' · ');
+    final texto = referralProgressoTexto(l10n, info);
     return FxStripCard(
       semanticsLabel: texto,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            l10n.referralRewardsMetric,
-            style: FocuxHubTypography.chip(chrome.mute),
-          ),
-          const SizedBox(height: TokensStrip.s1),
           Text(texto, style: FocuxHubTypography.cardTitle(color: chrome.ink)),
           const SizedBox(height: TokensStrip.s2),
           ClipRRect(
@@ -193,66 +244,90 @@ class _ReferralBannerCard extends StatelessWidget {
 class _ReferralCodeCard extends StatelessWidget {
   const _ReferralCodeCard({
     required this.info,
-    required this.isDark,
     required this.onShare,
     required this.onCopyLink,
+    required this.onCopyCode,
   });
 
   final ReferralInfo info;
-  final bool isDark;
   final VoidCallback onShare;
   final VoidCallback onCopyLink;
+  final VoidCallback onCopyCode;
 
   @override
   Widget build(BuildContext context) {
     final l10n = S.of(context);
-    final chrome = fxPaletaSobreMarca(context);
+    final sobre = fxPaletaSobreMarca(context);
     final codigo = referralCodigoLabel(info.codigo);
     final headline = referralRewardHeadline(l10n, info);
     final desconto = referralDiscountLine(l10n, info);
+    final temLink = referralTemLink(info.linkCompartilhamento);
     return FxStripCard(
       marca: true,
-      semanticsLabel: l10n.referralCodeSemantics(codigo),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (headline != null) ...[
+          if (headline != null)
             Text(
               headline,
-              style: FocuxHubTypography.cardTitle(color: chrome.ink),
+              style: FocuxHubTypography.cardTitle(color: sobre.ink),
             ),
-            const SizedBox(height: TokensStrip.s1),
-          ],
           if (desconto != null) ...[
+            const SizedBox(height: TokensStrip.s1),
             Text(
               desconto,
-              style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+              style: FocuxHubTypography.bodyMuted(color: sobre.mute),
             ),
-            const SizedBox(height: TokensStrip.s3),
           ],
+          const SizedBox(height: TokensStrip.s3),
           Text(
             l10n.referralYourCode,
-            style: FocuxHubTypography.chip(chrome.mute),
+            style: FocuxHubTypography.chip(sobre.mute),
           ),
-          const SizedBox(height: 2),
-          SelectableText(
-            codigo,
-            style: FocuxHubTypography.metric(
-              color: chrome.ink,
-              fontSize: TokensStrip.fontTitulo,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Semantics(
+                  label: l10n.referralCodeSemantics(
+                    referralCodigoSoletrado(codigo),
+                  ),
+                  excludeSemantics: true,
+                  child: SelectableText(
+                    codigo,
+                    style: FocuxHubTypography.metric(
+                      color: sobre.ink,
+                      fontSize: TokensStrip.fontTitulo,
+                    ),
+                  ),
+                ),
+              ),
+              IconButton(
+                tooltip: l10n.referralCopiarCodigo,
+                onPressed: onCopyCode,
+                icon: Icon(FxIcons.copiar, color: sobre.ink),
+              ),
+            ],
           ),
           const SizedBox(height: TokensStrip.s3),
           FxLiquidPrimaryButton(
             label: l10n.referralCopyInvite,
             onPressed: onShare,
           ),
-          if (referralTemLink(info.linkCompartilhamento)) ...[
+          if (temLink) ...[
             const SizedBox(height: TokensStrip.s2),
+            // Sobre o bloco: cor da paleta da marca, não o tonal do tema
+            // (que sai quase preto sobre o teal).
             FxTonalButton(
               label: l10n.referralCopyLinkOnly,
               expanded: true,
+              fundo: sobre.ink.withValues(alpha: 0.14),
+              texto: sobre.ink,
               onPressed: onCopyLink,
+            ),
+            const SizedBox(height: TokensStrip.s2),
+            Text(
+              l10n.referralLinkLevaCodigo,
+              style: FocuxHubTypography.bodyMuted(color: sobre.mute),
             ),
           ],
         ],

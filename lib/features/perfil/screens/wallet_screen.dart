@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/auth/confirmar_no_aparelho.dart';
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/utils/clipboard_sensitive.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
@@ -15,17 +16,14 @@ import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_form_chrome.dart';
 import '../../../core/widgets/fx_help.dart';
-import '../../../core/widgets/fx_hub_header.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_choice_strip.dart';
-import '../../../core/widgets/operational_metric_tile.dart';
+import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/skeleton_loader.dart';
-import '../../alunos/widgets/aluno_form_choices.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
-import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../../core/widgets/feature_gate.dart';
 import '../../planos/providers/plano_features_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
@@ -37,7 +35,7 @@ import '../../../core/theme/fx_icons.dart';
 
 part 'wallet_screen_widgets.part.dart';
 
-/// Configuração de PIX e dados bancários para recebimentos.
+/// Chave PIX que recebe os pagamentos dos alunos.
 class WalletScreen extends ConsumerStatefulWidget {
   const WalletScreen({super.key});
 
@@ -47,31 +45,20 @@ class WalletScreen extends ConsumerStatefulWidget {
 
 class _WalletScreenState extends ConsumerState<WalletScreen> {
   final _formKey = GlobalKey<FormState>();
-
   final _chavePixCtrl = TextEditingController();
-  final _bancoCtrl = TextEditingController();
-  final _agenciaCtrl = TextEditingController();
-  final _contaCtrl = TextEditingController();
 
   String? _tipoChavePix;
   bool _carregando = false;
   bool _inicializado = false;
   var _editandoChave = false;
-  var _secao = walletDetalheSecaoPix;
-  DateTime? _fetchedAt;
 
   String? _snapshotTipo;
   String _snapshotChave = '';
-  String _snapshotBanco = '';
-  String _snapshotAgencia = '';
-  String _snapshotConta = '';
 
   @override
   void initState() {
     super.initState();
-    for (final ctrl in [_chavePixCtrl, _bancoCtrl, _agenciaCtrl, _contaCtrl]) {
-      ctrl.addListener(_onFormChanged);
-    }
+    _chavePixCtrl.addListener(_onFormChanged);
   }
 
   void _onFormChanged() {
@@ -80,29 +67,25 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
 
   @override
   void dispose() {
-    for (final ctrl in [_chavePixCtrl, _bancoCtrl, _agenciaCtrl, _contaCtrl]) {
-      ctrl
-        ..removeListener(_onFormChanged)
-        ..dispose();
-    }
+    _chavePixCtrl
+      ..removeListener(_onFormChanged)
+      ..dispose();
     super.dispose();
   }
+
+  bool get _temChaveSalva =>
+      _snapshotChave.trim().isNotEmpty &&
+      (_snapshotTipo ?? '').trim().isNotEmpty;
 
   bool get _hasUnsavedChanges {
     if (!_inicializado) return false;
     return _tipoChavePix != _snapshotTipo ||
-        _chavePixCtrl.text != _snapshotChave ||
-        _bancoCtrl.text != _snapshotBanco ||
-        _agenciaCtrl.text != _snapshotAgencia ||
-        _contaCtrl.text != _snapshotConta;
+        _chavePixCtrl.text != _snapshotChave;
   }
 
   void _captureSnapshot() {
     _snapshotTipo = _tipoChavePix;
     _snapshotChave = _chavePixCtrl.text;
-    _snapshotBanco = _bancoCtrl.text;
-    _snapshotAgencia = _agenciaCtrl.text;
-    _snapshotConta = _contaCtrl.text;
   }
 
   void _preencherDadosAtuais(PerfilPersonal perfil) {
@@ -113,11 +96,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
       _tipoChavePix,
       perfil.chavePix ?? '',
     );
-    _bancoCtrl.text = perfil.banco ?? '';
-    _agenciaCtrl.text = perfil.agencia ?? '';
-    _contaCtrl.text = perfil.conta ?? '';
     _captureSnapshot();
-    _fetchedAt = DateTime.now();
   }
 
   Future<bool> _confirmDiscard() {
@@ -145,20 +124,37 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
     showFxHelpSheet(
       context,
       title: 'Carteira e PIX',
-      subtitle: walletHubSubtitle(),
+      subtitle: walletParaQueServe(),
       tips: const [
         FxHelpTip(
           'Receber',
-          'A chave PIX é o que o aluno usa para te pagar. Banco e agência são opcionais.',
+          'A chave PIX é o que o aluno usa para te pagar nas cobranças do app.',
           icon: FxIcons.pix,
         ),
         FxHelpTip(
-          'Salvar',
-          'Confirme em "Salvar dados". Só então aparece "Chave cadastrada" e ela vale nos recebimentos.',
+          'Trocar',
+          'Trocar a chave pede o Face ID ou o código do aparelho, e você recebe um e-mail avisando.',
           icon: FxIcons.concluido,
         ),
       ],
     );
+  }
+
+  /// Troca de chave existente: mostra o valor novo e pede o aparelho.
+  Future<bool> _confirmarTroca(String novoTipo, String novaChave) async {
+    final ok = await showFxConfirmSheet(
+      context,
+      title: walletTrocarConfirmTitle(),
+      message: walletTrocarConfirmMessage(
+        walletRotuloMascarado(novoTipo, novaChave),
+      ),
+      confirmLabel: walletTrocarConfirmLabel(),
+      cancelLabel: 'Voltar',
+    );
+    if (!ok || !mounted) return false;
+    return ref
+        .read(confirmarNoAparelhoProvider)
+        .confirmar(walletTrocarMotivoAparelho());
   }
 
   Future<void> _salvar() async {
@@ -173,40 +169,31 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
     );
     if (chaveErro != null) {
       FeedbackHelper.showError(context, chaveErro);
-      setState(() => _secao = walletDetalheSecaoPix);
       return;
     }
     if (!_formKey.currentState!.validate()) return;
 
-    final ok = await showFxConfirmSheet(
-      context,
-      title: walletSalvarConfirmTitle(),
-      message: walletSalvarConfirmMessage(),
-      confirmLabel: walletSalvarTileLabel(),
-    );
-    if (!ok || !mounted) return;
+    final tipo = _tipoChavePix!;
+    final chave = WalletPixValidation.normalizeForApi(tipo, _chavePixCtrl.text);
+    final trocando =
+        _temChaveSalva &&
+        chave !=
+            WalletPixValidation.normalizeForApi(_snapshotTipo, _snapshotChave);
+    if (trocando && !await _confirmarTroca(tipo, chave)) return;
+    if (!mounted) return;
 
     setState(() => _carregando = true);
     try {
-      final repo = ref.read(perfilRepositoryProvider);
-      await repo.atualizarWallet({
-        if (_chavePixCtrl.text.isNotEmpty)
-          'chavePix': WalletPixValidation.normalizeForApi(
-            _tipoChavePix,
-            _chavePixCtrl.text,
-          ),
-        if (_tipoChavePix != null) 'tipoChavePix': _tipoChavePix,
-        if (_bancoCtrl.text.isNotEmpty) 'banco': _bancoCtrl.text.trim(),
-        if (_agenciaCtrl.text.isNotEmpty) 'agencia': _agenciaCtrl.text.trim(),
-        if (_contaCtrl.text.isNotEmpty) 'conta': _contaCtrl.text.trim(),
+      await ref.read(perfilRepositoryProvider).atualizarWallet({
+        'chavePix': chave,
+        'tipoChavePix': tipo,
       });
       ref.invalidate(perfilProvider);
       ref.invalidate(perfilWalletProvider);
       if (mounted) {
         _editandoChave = false;
         _captureSnapshot();
-        _fetchedAt = DateTime.now();
-        FeedbackHelper.showSuccess(context, 'Carteira atualizada com sucesso.');
+        FeedbackHelper.showSuccess(context, 'Chave PIX salva.');
       }
     } catch (e) {
       if (mounted) {
@@ -222,7 +209,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
     if (chave.isEmpty) return;
     await copySensitiveToClipboard(chave);
     if (!mounted) return;
-    FeedbackHelper.showSuccess(context, 'Chave PIX copiada.');
+    FeedbackHelper.showSuccess(context, walletChaveCopiada());
   }
 
   void _definirTipo(String selected) {
@@ -239,6 +226,14 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
           normalized,
         );
       }
+    });
+  }
+
+  void _cancelarEdicao() {
+    setState(() {
+      _editandoChave = false;
+      _tipoChavePix = _snapshotTipo;
+      _chavePixCtrl.text = _snapshotChave;
     });
   }
 
@@ -259,7 +254,8 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
       );
     }
 
-    final showSticky = !perfilAsync.isLoading && !perfilAsync.hasError;
+    final showSticky =
+        !perfilAsync.isLoading && !perfilAsync.hasError && _hasUnsavedChanges;
 
     return fxScreenA11yScope(
       label: 'Carteira e PIX',
@@ -270,7 +266,6 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
           useMesh: true,
           appBar: FxShellAppBar(
             title: 'Carteira e PIX',
-            subtitle: FxHubFreshness.fromFetchedAt(_fetchedAt),
             onBack: _handleBack,
             actions: [
               FxHelpIconButton(
@@ -291,7 +286,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                   )
                   : null,
           body: perfilAsync.when(
-            loading: () => const SkeletonList(count: 5),
+            loading: () => const SkeletonList(count: 3),
             error:
                 (e, _) => FxErrorState(
                   chromeOnDark: chrome.isDark,
@@ -322,20 +317,17 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                     ),
                     children: [
                       FxContentWidthLimiter(
-                        child: _WalletFormFields(
+                        child: _WalletChave(
                           tipoChavePix: _tipoChavePix,
                           chavePixCtrl: _chavePixCtrl,
-                          bancoCtrl: _bancoCtrl,
-                          agenciaCtrl: _agenciaCtrl,
-                          contaCtrl: _contaCtrl,
                           carregando: _carregando,
-                          secao: _secao,
                           tipoSalvo: _snapshotTipo,
                           chaveSalva: _snapshotChave,
-                          editandoChave: _editandoChave,
-                          onEditarChave: () =>
-                              setState(() => _editandoChave = true),
-                          onSecao: (value) => setState(() => _secao = value),
+                          editando: _editandoChave || !_temChaveSalva,
+                          podeCancelar: _editandoChave && _temChaveSalva,
+                          onEditarChave:
+                              () => setState(() => _editandoChave = true),
+                          onCancelar: _cancelarEdicao,
                           onSelecionarTipo: _definirTipo,
                           onCopiarChave: _copiarChavePix,
                         ),

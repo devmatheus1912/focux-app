@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/api/api_error.dart';
 import '../../../core/brand/focux_microcopy.dart';
+import '../../../core/legal/ia_consentimentos.dart';
+import '../models/ia_copilot_insight.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';

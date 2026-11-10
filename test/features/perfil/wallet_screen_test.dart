@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/core/auth/confirmar_no_aparelho.dart';
 import 'package:focux_app/core/theme/design_tokens.dart';
 import 'package:focux_app/features/perfil/data/perfil_repository.dart';
 import 'package:focux_app/features/perfil/providers/perfil_provider.dart';
@@ -22,7 +23,19 @@ PerfilPersonal _perfil({String? chave, String? tipo}) => PerfilPersonal(
   tipoChavePix: tipo,
 );
 
-Widget _app(PerfilPersonal perfil) {
+class _AparelhoFalso implements ConfirmarNoAparelho {
+  _AparelhoFalso({this.confirma = true});
+  final bool confirma;
+  final motivos = <String>[];
+
+  @override
+  Future<bool> confirmar(String motivo) async {
+    motivos.add(motivo);
+    return confirma;
+  }
+}
+
+Widget _app(PerfilPersonal perfil, {ConfirmarNoAparelho? aparelho}) {
   final router = GoRouter(
     initialLocation: '/',
     routes: [GoRoute(path: '/', builder: (_, _) => const WalletScreen())],
@@ -31,6 +44,9 @@ Widget _app(PerfilPersonal perfil) {
     overrides: [
       seededPlanoFeatures(PlanoFeatures.optimisticEnterprise),
       perfilWalletProvider.overrideWith((ref) async => perfil),
+      confirmarNoAparelhoProvider.overrideWithValue(
+        aparelho ?? _AparelhoFalso(),
+      ),
     ],
     child: MaterialApp.router(
       theme: ThemeData(
@@ -64,51 +80,66 @@ void main() {
     addTearDown(tester.view.reset);
   }
 
-  testWidgets('sem chave: "Cadastre sua chave" e o seletor com cinco tipos', (
+  testWidgets('sem chave: formulário com cinco tipos, sem banco e sem Salvar', (
     tester,
   ) async {
     telaAlta(tester);
     await tester.pumpWidget(_app(_perfil()));
     await _settle(tester);
-    expect(find.text('Cadastre sua chave'), findsOneWidget);
-    expect(find.text('Chave cadastrada'), findsNothing);
-    expect(find.text('Pronta'), findsNothing);
     for (final tipo in ['CPF', 'CNPJ', 'E-mail', 'Celular', 'Aleatória']) {
       expect(find.text(tipo), findsWidgets, reason: tipo);
     }
     expect(find.text('Alterar chave'), findsNothing);
+    expect(find.text('Banco'), findsNothing);
+    expect(find.text('Recebimentos'), findsNothing);
+    // Nada alterado: sem botão de salvar.
+    expect(find.text('Salvar chave'), findsNothing);
   });
 
-  testWidgets('com chave: estado cadastrado, chave mascarada e Alterar chave', (
+  testWidgets('com chave: mascarada, Alterar e Copiar; campo fechado', (
     tester,
   ) async {
     telaAlta(tester);
     await tester.pumpWidget(_app(_perfil(chave: '12345678901', tipo: 'CPF')));
     await _settle(tester);
-    expect(find.text('Chave cadastrada'), findsOneWidget);
-    // CPF mascarado, nunca inteiro
-    expect(find.textContaining('***.456.789-**'), findsWidgets);
+    expect(find.text('CPF · ***.456.789-**'), findsOneWidget);
     expect(find.textContaining('123.456.789-01'), findsNothing);
     expect(find.text('Alterar chave'), findsOneWidget);
-    expect(find.text('Copiar chave PIX'), findsOneWidget);
-    // campo só abre depois de "Alterar chave"
+    expect(find.text('Copiar chave'), findsOneWidget);
     expect(find.byType(TextFormField), findsNothing);
+    expect(find.text('Salvar chave'), findsNothing);
 
     await tester.tap(find.text('Alterar chave'));
     await _settle(tester);
     expect(find.byType(TextFormField), findsOneWidget);
-    expect(find.text('Alterar chave'), findsNothing);
+    expect(find.text('Manter a chave atual'), findsOneWidget);
   });
 
-  testWidgets('trocar o tipo não muda o estado salvo do cartão', (
+  testWidgets('trocar a chave mostra o valor novo e pede o aparelho', (
     tester,
   ) async {
     telaAlta(tester);
-    await tester.pumpWidget(_app(_perfil()));
+    final aparelho = _AparelhoFalso(confirma: false);
+    await tester.pumpWidget(
+      _app(_perfil(chave: '12345678901', tipo: 'CPF'), aparelho: aparelho),
+    );
+    await _settle(tester);
+    await tester.tap(find.text('Alterar chave'));
     await _settle(tester);
     await tester.tap(find.text('E-mail'));
     await _settle(tester);
-    expect(find.text('Cadastre sua chave'), findsOneWidget);
+    await tester.enterText(find.byType(TextFormField), 'joana@gmail.com');
+    await _settle(tester);
+    expect(find.text('Salvar chave'), findsOneWidget);
+
+    await tester.tap(find.text('Salvar chave'));
+    await _settle(tester);
+    expect(find.text('Trocar a chave PIX?'), findsOneWidget);
+    expect(find.textContaining('E-mail · j***@gmail.com'), findsOneWidget);
+
+    await tester.tap(find.text('Trocar chave'));
+    await _settle(tester);
+    expect(aparelho.motivos, hasLength(1));
   });
 
   for (final tela in kDynamicTypeTelas) {

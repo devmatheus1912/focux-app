@@ -1,83 +1,97 @@
 part of 'wallet_screen.dart';
 
-class _WalletFormFields extends StatelessWidget {
-  const _WalletFormFields({
+/// Um bloco só: a chave salva com Alterar/Copiar, ou o formulário.
+class _WalletChave extends StatelessWidget {
+  const _WalletChave({
     required this.tipoChavePix,
     required this.chavePixCtrl,
-    required this.bancoCtrl,
-    required this.agenciaCtrl,
-    required this.contaCtrl,
     required this.carregando,
-    required this.secao,
-    required this.onSecao,
-    required this.onSelecionarTipo,
-    required this.onCopiarChave,
     required this.tipoSalvo,
     required this.chaveSalva,
-    required this.editandoChave,
+    required this.editando,
+    required this.podeCancelar,
     required this.onEditarChave,
+    required this.onCancelar,
+    required this.onSelecionarTipo,
+    required this.onCopiarChave,
   });
 
   final String? tipoChavePix;
   final TextEditingController chavePixCtrl;
-  final TextEditingController bancoCtrl;
-  final TextEditingController agenciaCtrl;
-  final TextEditingController contaCtrl;
   final bool carregando;
-  final String secao;
-  final ValueChanged<String> onSecao;
-  final ValueChanged<String> onSelecionarTipo;
-  final VoidCallback onCopiarChave;
 
-  /// O que já está salvo no servidor (o estado do cartão não segue o que se digita).
+  /// O que já está salvo no servidor (o bloco não segue o que se digita).
   final String? tipoSalvo;
   final String chaveSalva;
 
-  /// Com chave salva, o campo só abre depois de "Alterar chave".
-  final bool editandoChave;
+  /// Formulário aberto: sem chave salva, ou depois de "Alterar chave".
+  final bool editando;
+  final bool podeCancelar;
   final VoidCallback onEditarChave;
+  final VoidCallback onCancelar;
+  final ValueChanged<String> onSelecionarTipo;
+  final VoidCallback onCopiarChave;
 
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final cadastrada = chaveSalva.trim().isNotEmpty &&
-        (tipoSalvo ?? '').trim().isNotEmpty;
-    final masked = maskPixKeyForDisplay(tipoSalvo, chaveSalva);
-    final mostrarCampo = !cadastrada || editandoChave;
+    final ink = fxScreenInk(context);
+    final mute = fxScreenMute(context);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        FxHubHeader(
-          title: 'Recebimentos',
-          subtitle: walletHubSubtitle(),
-        ),
-        const SizedBox(height: TokensStrip.s3),
-        OperationalMetricTile(
-          label: 'PIX',
-          value: walletPixStatusValue(tipoSalvo, chaveSalva),
-          hint: masked.isEmpty
-              ? walletPixStatusHint(tipoSalvo, chaveSalva)
-              : '${WalletPixValidation.labelForTipo(tipoSalvo ?? '')} · $masked',
-          color: primary,
-          isDark: isDark,
-        ),
-        const SizedBox(height: TokensStrip.s4),
-        AlunoSegmentedChoice(
-          options: walletDetalheSecoes,
-          selected: secao,
-          isDark: isDark,
-          onSelect: onSecao,
-        ),
-        const SizedBox(height: TokensStrip.s4),
-        if (secao == walletDetalheSecaoPix) ...[
-          DashboardSectionHeader(title: walletPixSectionTitle()),
-          const SizedBox(height: TokensStrip.s2),
-          if (mostrarCampo) ...[
+    return FxStripCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            walletPixSectionTitle(),
+            style: FocuxHubTypography.chip(mute),
+          ),
+          const SizedBox(height: TokensStrip.s1),
+          if (!editando) ...[
+            Semantics(
+              label: walletChaveSemantica(tipoSalvo, chaveSalva),
+              excludeSemantics: true,
+              child: Text(
+                walletRotuloMascarado(tipoSalvo, chaveSalva),
+                style: FocuxHubTypography.cardTitle(color: ink),
+              ),
+            ),
+            const SizedBox(height: TokensStrip.s1),
+            Text(
+              walletParaQueServe(),
+              style: FocuxHubTypography.bodyMuted(color: mute),
+            ),
+            const SizedBox(height: TokensStrip.s3),
+            Wrap(
+              spacing: TokensStrip.s2,
+              runSpacing: TokensStrip.s2,
+              children: [
+                FxActionChip(
+                  label: 'Alterar chave',
+                  accent: primary,
+                  isDark: isDark,
+                  enabled: !carregando,
+                  onPressed: onEditarChave,
+                ),
+                FxActionChip(
+                  label: walletCopiarTileLabel(),
+                  accent: primary,
+                  isDark: isDark,
+                  enabled: !carregando,
+                  onPressed: onCopiarChave,
+                ),
+              ],
+            ),
+          ] else ...[
+            Text(
+              walletParaQueServe(),
+              style: FocuxHubTypography.bodyMuted(color: mute),
+            ),
+            const SizedBox(height: TokensStrip.s3),
             Text(
               'Tipo de chave',
-              style: FxSettingsLayout.subhead(color: fxScreenMute(context)),
+              style: FxSettingsLayout.subhead(color: mute),
             ),
             const SizedBox(height: TokensStrip.s2),
             FxChoiceStrip<String>(
@@ -99,70 +113,26 @@ class _WalletFormFields extends StatelessWidget {
                 ...WalletPixValidation.formattersForTipo(tipoChavePix),
                 LengthLimitingTextInputFormatter(walletChavePixMax),
               ],
-              validator: (v) =>
-                  WalletPixValidation.validateChave(tipoChavePix, v ?? ''),
+              validator:
+                  (v) => WalletPixValidation.validateChave(tipoChavePix, v ?? ''),
               showDivider: false,
             ),
-          ] else ...[
-            Text(
-              '${WalletPixValidation.labelForTipo(tipoSalvo ?? '')} · $masked',
-              style: FxSettingsLayout.rowLabel(color: fxScreenInk(context)),
-            ),
-            const SizedBox(height: TokensStrip.s2),
-            Wrap(
-              spacing: TokensStrip.s2,
-              runSpacing: TokensStrip.s2,
-              children: [
-                FxActionChip(
-                  label: 'Alterar chave',
+            if (podeCancelar) ...[
+              const SizedBox(height: TokensStrip.s2),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: FxActionChip(
+                  label: 'Manter a chave atual',
                   accent: primary,
                   isDark: isDark,
                   enabled: !carregando,
-                  onPressed: onEditarChave,
+                  onPressed: onCancelar,
                 ),
-                FxActionChip(
-                  label: walletCopiarTileLabel(),
-                  accent: primary,
-                  isDark: isDark,
-                  enabled: !carregando,
-                  onPressed: onCopiarChave,
-                ),
-              ],
-            ),
+              ),
+            ],
           ],
-        ] else ...[
-          DashboardSectionHeader(title: walletBancoSectionTitle()),
-          const SizedBox(height: TokensStrip.s2),
-          AlunoInsetFormField(
-            controller: bancoCtrl,
-            label: 'Banco',
-            icon: FxIcons.banco,
-            hint: 'Ex.: Nubank, Itaú, Bradesco',
-            textCapitalization: TextCapitalization.words,
-            inputFormatters: [
-              LengthLimitingTextInputFormatter(walletBancoMax),
-            ],
-          ),
-          AlunoInsetFormField(
-            controller: agenciaCtrl,
-            label: 'Agência',
-            icon: FxIcons.etiqueta,
-            keyboardType: TextInputType.number,
-            inputFormatters: [
-              FilteringTextInputFormatter.digitsOnly,
-              LengthLimitingTextInputFormatter(walletAgenciaMax),
-            ],
-          ),
-          AlunoInsetFormField(
-            controller: contaCtrl,
-            label: 'Conta',
-            icon: FxIcons.numero,
-            keyboardType: TextInputType.text,
-            inputFormatters: WalletPixValidation.formattersForConta(),
-            showDivider: false,
-          ),
         ],
-      ],
+      ),
     );
   }
 }

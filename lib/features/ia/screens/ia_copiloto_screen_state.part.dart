@@ -18,10 +18,36 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
   bool _viewTracked = false;
   bool _ttvTracked = false;
 
-  IaCopilotoApplySpec? get _applySpec => iaCopilotoApplySpec(
-    tipoAcao: _proximaAcao?.tipoAcao,
-    mensagemSugerida: _proximaAcao?.mensagemSugerida,
-  );
+  List<IaCopilotInsight> get _insights =>
+      ref
+          .read(
+            insightsProvider(
+              InsightsQuery(alunoId: _selectedAlunoId, mode: _mode),
+            ),
+          )
+          .value ??
+      const [];
+
+  IaCopilotoApplySpec? _acaoDoInsight(IaCopilotInsight insight) =>
+      iaCopilotoApplySpec(
+        tipoAcao: insight.tipoAcao,
+        mensagemSugerida: insight.mensagemSugerida,
+        alunoId: _selectedAlunoId,
+      );
+
+  /// A barra usa a ação da primeira recomendação que tem ação; sem nenhuma,
+  /// a da próxima ação.
+  IaCopilotoApplySpec? get _applySpec {
+    for (final i in _insights) {
+      final acao = _acaoDoInsight(i);
+      if (acao != null) return acao;
+    }
+    return iaCopilotoApplySpec(
+      tipoAcao: _proximaAcao?.tipoAcao,
+      mensagemSugerida: _proximaAcao?.mensagemSugerida,
+      alunoId: _selectedAlunoId,
+    );
+  }
 
   String get _resultPrimaryLabel =>
       _mensagemEnviada
@@ -30,7 +56,17 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
 
   VoidCallback get _resultPrimaryAction {
     if (_mensagemEnviada) return _voltarAoInicio;
-    return _applySpec != null ? _aplicarAcao : _atribuir;
+    final acao = _applySpec;
+    if (acao == null) {
+      return () {
+        final primeiro = _insights.firstOrNull;
+        _atribuir(
+          texto: primeiro?.recomendacao,
+          motivo: primeiro?.detalhe,
+        );
+      };
+    }
+    return () => _aplicarAcao(acao);
   }
 
   void _voltarAoInicio() {

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/analytics/analytics_service.dart';
+import '../../../core/legal/ia_consentimentos.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_loading.dart';
@@ -42,6 +43,9 @@ class Aluno360CopilotIaRefreshButtonState
   var _requestSeq = 0;
 
   Future<void> _refreshIa() async {
+    // Antes de qualquer dado sair para a IA: o aceite do personal.
+    if (!await garantirAceiteCopiloto(context, ref)) return;
+    if (!mounted) return;
     final requestSeq = ++_requestSeq;
     setState(() => _refreshing = true);
     // Keep current card visible; status badge/spinner only.

@@ -2,16 +2,17 @@ part of 'ia_copiloto_screen.dart';
 
 extension IaCopilotScreenApply on _IaCopilotoScreenState {
   CopilotExecutarAcaoSpec _toExecutarSpec(IaCopilotoApplySpec spec) {
-    return switch (spec.backendTipo) {
+    final backendTipo = spec.backendTipo!;
+    return switch (backendTipo) {
       'REDUZIR_CARGA' => CopilotExecutarAcaoSpec(
-        backendTipo: spec.backendTipo,
+        backendTipo: backendTipo,
         label: spec.label,
         icon: FxIcons.treino,
         executingLabel: 'Aplicando…',
         executingSemantics: 'Aplicando ajuste de carga',
       ),
       'ENVIAR_PUSH' => CopilotExecutarAcaoSpec(
-        backendTipo: spec.backendTipo,
+        backendTipo: backendTipo,
         label: spec.label,
         icon: FxIcons.notificacaoTocando,
         executingLabel: 'Enviando…',
@@ -19,7 +20,7 @@ extension IaCopilotScreenApply on _IaCopilotoScreenState {
         parametros: spec.parametros,
       ),
       _ => CopilotExecutarAcaoSpec(
-        backendTipo: spec.backendTipo,
+        backendTipo: backendTipo,
         label: spec.label,
         icon: FxIcons.alerta,
         executingLabel: 'Registrando…',
@@ -28,10 +29,14 @@ extension IaCopilotScreenApply on _IaCopilotoScreenState {
     };
   }
 
-  Future<void> _aplicarAcao() async {
+  Future<void> _aplicarAcao(IaCopilotoApplySpec apply) async {
     final alunoId = _selectedAlunoId;
-    final apply = _applySpec;
-    if (alunoId == null || apply == null || _aplicando) return;
+    if (alunoId == null || _aplicando) return;
+    // Carga e medida abrem a tela de revisão; nada é aplicado daqui.
+    if (apply.rota case final rota?) {
+      context.push(rota, extra: _selectedAlunoNome);
+      return;
+    }
 
     final spec = _toExecutarSpec(apply);
     var parametros = spec.parametros;
@@ -101,6 +106,27 @@ extension IaCopilotScreenApply on _IaCopilotoScreenState {
     context.push('/alunos/$alunoId/ia/progressao');
   }
 
+  /// "⋯" de uma recomendação: criar tarefa com o "O que fazer" dela.
+  Future<void> _menuDoInsight(IaCopilotInsight insight) async {
+    final action = await showFxGroupedActionSheet<String>(
+      context,
+      titulo: insight.titulo,
+      subtitulo: _selectedAlunoNome,
+      icone: FxIcons.ia,
+      grupos: [
+        FxActionGroup<String>(null, [
+          FxActionItem(
+            valor: 'criar',
+            rotulo: iaCopilotoCriarTarefaLabel(),
+            icone: FxIcons.pranchetaFeita,
+          ),
+        ]),
+      ],
+    );
+    if (!mounted || action != 'criar') return;
+    await _atribuir(texto: insight.recomendacao, motivo: insight.detalhe);
+  }
+
   Future<void> _denunciar() async {
     final insights =
         ref
@@ -129,12 +155,6 @@ extension IaCopilotScreenApply on _IaCopilotoScreenState {
       icone: FxIcons.filtros,
       grupos: [
         FxActionGroup<String>(null, [
-          if (_applySpec != null)
-            FxActionItem(
-              valor: 'criar',
-              rotulo: iaCopilotoCriarTarefaLabel(),
-              icone: FxIcons.pranchetaFeita,
-            ),
           FxActionItem(
             valor: 'progressao',
             rotulo: s.copilotoProgressaoCarga,
@@ -143,6 +163,7 @@ extension IaCopilotScreenApply on _IaCopilotoScreenState {
           FxActionItem(
             valor: 'refazer',
             rotulo: s.copilotoRefazer,
+            descricao: iaCopilotoCustoAnalise(),
             icone: FxIcons.atualizar,
           ),
           FxActionItem(
@@ -155,8 +176,6 @@ extension IaCopilotScreenApply on _IaCopilotoScreenState {
     );
     if (!mounted || action == null) return;
     switch (action) {
-      case 'criar':
-        await _atribuir();
       case 'progressao':
         _abrirProgressao();
       case 'refazer':

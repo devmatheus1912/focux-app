@@ -22,6 +22,7 @@ Future<void> _pump(
           isDark: false,
           onShare: onShare ?? () {},
           onCopyLink: () {},
+          onCopyCode: () {},
         ),
       ),
     ),
@@ -62,14 +63,17 @@ void main() {
     await _pump(tester, _ativa, onShare: () => compartilhou = true);
 
     expect(find.text('ABCD234567'), findsOneWidget);
-    expect(find.text('1 de 3 · 30 de 90 dias'), findsOneWidget);
+    expect(find.text('Ganhe 30 dias por colega que assinar'), findsOneWidget);
+    expect(find.text('1 de 3 recompensas · +30 dias no seu plano'), findsOneWidget);
+    expect(find.text('O link já leva seu código.'), findsOneWidget);
+    expect(find.text('Copiar só o link'), findsOneWidget);
     expect(find.text('Maria L.'), findsOneWidget);
     expect(find.text('+30 dias no seu plano'), findsOneWidget);
     expect(find.text('Assinou · libera após 30 dias pagos'), findsOneWidget);
     expect(find.textContaining('1 recompensa aguardando 30 dias'), findsOneWidget);
     expect(find.text('Seu colega ganha 20% no primeiro mês pago'), findsOneWidget);
 
-    await tester.tap(find.text('Copiar convite'));
+    await tester.tap(find.text('Enviar convite'));
     expect(compartilhou, isTrue);
     expect(tester.takeException(), isNull);
   });
@@ -88,7 +92,10 @@ void main() {
       ),
     );
     expect(find.text('Nenhuma indicação ainda'), findsOneWidget);
-    expect(find.text('Só o link'), findsNothing);
+    expect(find.text('Copiar só o link'), findsNothing);
+    // Sem indicação, sem cartão de progresso; as regras abrem sozinhas.
+    expect(find.textContaining('recompensas ·'), findsNothing);
+    expect(find.text('1. Compartilhe o convite'), findsOneWidget);
   });
 
   testWidgets('limite atingido e campanha pausada avisam no topo', (tester) async {
@@ -119,13 +126,12 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.textContaining('Campanha pausada'), findsOneWidget);
+    // Sem indicação, "Como funciona" já vem aberto.
     await tester.scrollUntilVisible(
-      find.text('Como funciona'),
+      find.text('3. Você ganha dias extras'),
       200,
       scrollable: find.byType(Scrollable).first,
     );
-    await tester.tap(find.text('Como funciona'));
-    await tester.pumpAndSettle();
     expect(find.text('3. Você ganha dias extras'), findsOneWidget);
   });
 }

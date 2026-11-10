@@ -41,7 +41,6 @@ Future<Uint8List> buildRelatorioPdf({
   // seções na cor da marca do personal
   List<pw.Widget> secao(String titulo, List<pw.Widget> filhos) =>
       focuxPdfSection(titulo, filhos, cor: marca.cor);
-  final checkIns = comparativo?.checkInsAtual;
   final abertas = metas.where((m) => m.aberta && !m.manutencao).toList();
   final doc = pw.Document(
     title: 'Relatório de aderência · $alunoNome',
@@ -66,11 +65,6 @@ Future<Uint8List> buildRelatorioPdf({
           (
             titulo: 'Dias com treino',
             valor: '${dados.treinosConcluidos} de ${dados.treinosTotal}',
-            legenda: null,
-          ),
-          (
-            titulo: 'Check-ins',
-            valor: checkIns == null ? '—' : '$checkIns',
             legenda: null,
           ),
         ]),
@@ -113,15 +107,7 @@ Future<Uint8List> buildRelatorioPdf({
                   'Aderência',
                   '${formatBrDecimal(comparativo.aderenciaAtual)}%',
                   '${formatBrDecimal(comparativo.aderenciaAnterior)}%',
-                  _variacao(comparativo.aderenciaAtual - comparativo.aderenciaAnterior, '%'),
-                ],
-                [
-                  'Check-ins',
-                  '${comparativo.checkInsAtual}',
-                  '${comparativo.checkInsAnterior}',
-                  _variacaoInteira(
-                    comparativo.checkInsAtual - comparativo.checkInsAnterior,
-                  ),
+                  _variacao(comparativo.aderenciaAtual - comparativo.aderenciaAnterior, ' pontos'),
                 ],
               ],
               cellAlignments: const {
@@ -142,8 +128,6 @@ String _variacao(double delta, String sufixo) {
   final sinal = delta > 0 ? '+' : '';
   return '$sinal${formatBrDecimal(delta)}$sufixo';
 }
-
-String _variacaoInteira(int delta) => delta > 0 ? '+$delta' : '$delta';
 
 Future<void> exportRelatorioPdf({
   required String alunoNome,

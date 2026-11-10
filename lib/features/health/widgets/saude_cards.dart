@@ -412,7 +412,8 @@ class SaudeConexaoCard extends StatelessWidget {
                     ),
                     Text(
                       compartilhando == true
-                          ? 'Seu personal vê sua nota de prontidão e os dados do dia.'
+                          ? 'Seu personal vê sua prontidão e os dados do dia. '
+                              'O assistente de IA dele só usa se você permitir.'
                           : 'Só você vê seus dados de saúde.',
                       style: TextStyle(
                         color: chrome.mute,

@@ -8,7 +8,20 @@ class IaCopilotInsight {
     required this.detalhe,
     this.recomendacao = '',
     this.status = 'READY',
+    this.tipoAcao,
+    this.acaoLabel,
+    this.mensagemSugerida,
   });
+
+  /// Ação que esta recomendação oferece (`CARGA`, `MEDIDA`, `TREINO`…);
+  /// nulo = sem botão.
+  final String? tipoAcao;
+
+  /// Verbo do botão ("Ajustar cargas").
+  final String? acaoLabel;
+
+  /// Texto pronto quando a ação é mandar mensagem ao aluno.
+  final String? mensagemSugerida;
 
   final String titulo;
   final String tipo;
@@ -31,6 +44,9 @@ class IaCopilotInsight {
       detalhe: copilotInsightDetalhe(json),
       recomendacao: copilotInsightRecomendacao(json),
       status: (json['status'] ?? 'READY').toString(),
+      tipoAcao: json['tipoAcao'] as String?,
+      acaoLabel: json['acaoLabel'] as String?,
+      mensagemSugerida: json['mensagemSugerida'] as String?,
     );
   }
 }

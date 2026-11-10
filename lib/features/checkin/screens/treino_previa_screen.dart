@@ -44,9 +44,9 @@ class _TreinoPreviaScreenState extends ConsumerState<TreinoPreviaScreen> {
 
   void _voltar() => safePopOrGo(context, '/checkin/treinos');
 
-  /// A execução entra no lugar da prévia: sem fechar a prévia e abrir outra
-  /// tela no mesmo toque (FLUTTER-4, SPEC-iniciar-treino-trava). Ao concluir,
-  /// o aluno volta para onde abriu a prévia.
+  /// A execução entra no lugar da prévia; ao concluir, o aluno volta para onde
+  /// abriu a prévia. A trava do FLUTTER-4/5 era o `GoRouterState.of` da tela
+  /// que sai (ver `estadoDaRota`), não este caminho.
   void _iniciar() {
     context.pushReplacement('/checkin/executar', extra: widget.treinoId);
   }

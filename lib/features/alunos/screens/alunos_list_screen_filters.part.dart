@@ -34,7 +34,7 @@ extension AlunosListScreenFilters on _AlunosListScreenState {
   }
 
   void _tirarBuscaDaLocation() {
-    final location = GoRouterState.of(context).uri;
+    final location = uriDaRota(context);
     final atual = GoRouter.of(context).routerDelegate.currentConfiguration.uri;
     // Debounce pode disparar depois de trocar de aba: não puxar de volta.
     if (atual.path != location.path) return;

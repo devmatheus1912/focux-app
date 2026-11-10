@@ -57,23 +57,29 @@ void main() {
     });
   });
 
-  test('copy de salvar e descartar fica fora da UI', () {
-    expect(walletSalvarTileLabel(), 'Salvar dados');
-    expect(walletSalvarConfirmTitle(), 'Salvar dados da carteira?');
+  test('copy de salvar, trocar e descartar fica fora da UI', () {
+    expect(walletSalvarTileLabel(), 'Salvar chave');
+    expect(walletTrocarConfirmTitle(), 'Trocar a chave PIX?');
+    expect(
+      walletTrocarConfirmMessage('E-mail · j***@gmail.com'),
+      contains('vão para: E-mail · j***@gmail.com'),
+    );
     expect(walletDiscardTitle(), 'Descartar alterações?');
     expect(walletChavePixMax, 120);
-    expect(walletHubSubtitle(), 'PIX e banco dos recebimentos');
+  });
+
+  test('chave mascarada e leitura para o leitor de tela', () {
+    expect(walletRotuloMascarado('CPF', '12345678901'), 'CPF · ***.456.789-**');
+    expect(walletChaveSemantica('CPF', '12345678901'), 'CPF terminado em 789');
     expect(
-      walletHubSubtitle(freshness: 'há 1 min'),
-      'PIX e banco dos recebimentos · há 1 min',
+      walletChaveSemantica('TELEFONE', '62999994321'),
+      'Celular terminado em 4321',
     );
-    expect(walletDetalheSecoes, hasLength(2));
-    expect(walletPixStatusValue('CPF', '123'), 'Chave cadastrada');
-    expect(walletPixStatusValue(null, ''), 'Cadastre sua chave');
-    expect(walletPixStatusValue('CPF', ''), 'Cadastre sua chave');
-    expect(walletPixStatusValue(null, '123'), 'Cadastre sua chave');
-    expect(walletPixStatusHint('EMAIL', 'a@b.com'), 'E-mail');
-    expect(walletPixStatusHint(null, ''), 'Escolha o tipo e informe a chave');
+    expect(
+      walletChaveSemantica('EMAIL', 'joana@gmail.com'),
+      'E-mail começando com j',
+    );
+    expect(walletChaveSemantica('ALEATORIA', 'x' * 32), 'Chave aleatória cadastrada');
   });
 
   test('seletor de tipo: cinco opções, rótulos curtos, sem "Pronta"', () {
