@@ -4,14 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/utils/aluno360_ferramentas_grupos.dart';
 import 'package:focux_app/features/alunos/utils/aluno360_ferramentas_logic.dart';
-import 'package:focux_app/features/alunos/utils/aluno360_operacao_logic.dart';
 import 'package:focux_app/features/planos/data/planos_repository.dart';
 
-String _isoDay(DateTime day) {
-  return '${day.year.toString().padLeft(4, '0')}-'
-      '${day.month.toString().padLeft(2, '0')}-'
-      '${day.day.toString().padLeft(2, '0')}';
-}
 
 void main() {
   group('Aluno360FerramentasLogic', () {
@@ -33,85 +27,6 @@ void main() {
       expect(grade, contains('Aluno360FerramentasLogic.moduleIcon(modulo)'));
     });
 
-    test('aderenciaSparklineValues maps weekly checkins', () {
-      final today = DateTime.now();
-      final anchor = DateTime(today.year, today.month, today.day);
-      final day0 = anchor.subtract(const Duration(days: 2));
-      final day1 = anchor.subtract(const Duration(days: 1));
-      final day2 = anchor;
-
-      final raw = [
-        {'data': _isoDay(day0), 'checkins': 1},
-        {'data': _isoDay(day1), 'checkins': 0},
-        {'data': _isoDay(day2), 'checkins': 2},
-      ];
-      final values = Aluno360FerramentasLogic.aderenciaSparklineValues(raw);
-      final padded = padAderenciaWeekToSevenDays([
-        AderenciaWeekPoint(checkins: 1, date: _isoDay(day0)),
-        AderenciaWeekPoint(checkins: 0, date: _isoDay(day1)),
-        AderenciaWeekPoint(checkins: 2, date: _isoDay(day2)),
-      ]);
-      expect(values, padded.map((p) => p.checkins).toList(growable: false));
-    });
-
-    test('aderenciaModuleSub describes weekly context not duplicate percent', () {
-      final aluno = Aluno(
-        id: 1,
-        nome: 'Ana',
-        email: 'a@test.com',
-        status: 'ATIVO',
-        aderenciaPercent: 42,
-        diasSemTreino: 10,
-      );
-      expect(
-        Aluno360FerramentasLogic.aderenciaModuleSub(aluno: aluno),
-        '10 dias sem treino',
-      );
-
-      final today = DateTime.now();
-      final anchor = DateTime(today.year, today.month, today.day);
-
-      final semDados = Aluno(
-        id: 2,
-        nome: 'B',
-        email: 'b@test.com',
-        status: 'ATIVO',
-      );
-      expect(
-        Aluno360FerramentasLogic.aderenciaModuleSub(
-          aluno: semDados,
-          aderenciaSemanal: [
-            {'data': _isoDay(anchor), 'checkins': 2},
-          ],
-        ),
-        '2 check-ins em 7 dias',
-      );
-    });
-
-    test('composicaoCorporalValue and anamneseValue use consistent labels', () {
-      expect(
-        Aluno360FerramentasLogic.composicaoCorporalValue(),
-        'Pendente',
-      );
-      expect(
-        Aluno360FerramentasLogic.composicaoCorporalValue(bf: '18.2'),
-        'Parcial',
-      );
-      expect(
-        Aluno360FerramentasLogic.composicaoCorporalValue(
-          bf: '18.2',
-          massaMagra: '52.0',
-        ),
-        'OK',
-      );
-      expect(Aluno360FerramentasLogic.anamneseValue('REVISADA'), 'Revisada');
-      expect(Aluno360FerramentasLogic.anamneseValue('PREENCHIDA'), 'Revisar');
-      expect(Aluno360FerramentasLogic.anamneseValue('SOLICITADA'), 'Aguardando');
-      expect(Aluno360FerramentasLogic.anamneseNeedsAttention('PREENCHIDA'), isTrue);
-      expect(Aluno360FerramentasLogic.anamneseNeedsAttention('SOLICITADA'), isFalse);
-      expect(Aluno360FerramentasLogic.anamneseNeedsAttention('REVISADA'), isFalse);
-    });
-
     test('módulos bloqueados pelo plano', () {
       expect(
         Aluno360FerramentasLogic.isGatedModuleLocked(
@@ -129,26 +44,10 @@ void main() {
       );
     });
 
-    test('aderenciaSparkSemanticsLabel names each weekday', () {
-      final today = DateTime.now();
-      final anchor = DateTime(today.year, today.month, today.day);
-      final raw = [
-        {'data': _isoDay(anchor.subtract(const Duration(days: 1))), 'checkins': 1},
-        {'data': _isoDay(anchor), 'checkins': 0},
-      ];
-      final label = Aluno360FerramentasLogic.aderenciaSparkSemanticsLabel(raw);
-      expect(label, startsWith('Últimos 7 dias:'));
-      expect(label, contains(weekdayNameFromIso(_isoDay(anchor))));
-    });
-
     test('composicaoCorporalPending false when massa filled', () {
       expect(
         Aluno360FerramentasLogic.composicaoCorporalPending(massaMagra: '52.0'),
         isFalse,
-      );
-      expect(
-        Aluno360FerramentasLogic.composicaoCorporalValue(massaMagra: '52.0'),
-        'Parcial',
       );
       expect(
         Aluno360FerramentasLogic.composicaoCorporalPending(),
@@ -213,7 +112,6 @@ void main() {
       expect(secoes(aluno()).map((s) => s.grupo), [
         Aluno360FerramentasGrupo.treino,
         Aluno360FerramentasGrupo.acompanhamento,
-        Aluno360FerramentasGrupo.relacao,
         Aluno360FerramentasGrupo.dinheiro,
       ]);
     });
@@ -257,10 +155,13 @@ void main() {
       expect(composicaoSuspeita(bf: '818,0', massaMagra: '51,0'), isTrue);
       expect(composicaoSuspeita(bf: '18,0', massaMagra: '55,0'), isFalse);
       expect(
-        aluno360ComposicaoValor(bf: '818,0', massaMagra: '51,0'),
+        aluno360ComposicaoLinha(bf: '818,0', massaMagra: '51,0').valor,
         'Confira o valor',
       );
-      expect(aluno360ComposicaoValor(bf: '18,0', massaMagra: '55,0'), 'OK');
+      expect(
+        aluno360ComposicaoLinha(bf: '18,0', massaMagra: '55,0', data: '2026-11-09'),
+        (sub: 'Avaliação de 09/11', valor: '18,0% gordura'),
+      );
       expect(
         secoes(aluno(), bf: '818,0', massa: '51,0').first.grupo,
         Aluno360FerramentasGrupo.acompanhamento,

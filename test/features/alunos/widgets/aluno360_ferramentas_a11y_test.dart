@@ -114,17 +114,18 @@ const _modulos = [
   'Composição corporal',
   'Trilhas',
   'Anamnese',
-  'Chat',
   'Mensalidades',
 ];
 
 void main() {
-  testWidgets('todos os módulos aparecem, em quatro grupos, sem "Mais ferramentas"', (tester) async {
+  testWidgets('todos os módulos aparecem, em três grupos, sem "Mais ferramentas" nem Chat', (tester) async {
     await _abrir(tester, _aluno());
     for (final m in _modulos) {
       expect(find.text(m), findsOneWidget, reason: m);
     }
-    for (final g in ['Treino', 'Acompanhamento', 'Relação', 'Dinheiro']) {
+    expect(find.text('Chat'), findsNothing);
+    expect(find.text('Relação'), findsNothing);
+    for (final g in ['Treino', 'Acompanhamento', 'Dinheiro']) {
       expect(find.text(g), findsOneWidget, reason: g);
     }
     expect(find.text('Mais ferramentas'), findsNothing);
@@ -134,11 +135,11 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('dados do aluno: incompleto abre a aba, com o que falta e Editar cadastro', (tester) async {
+  testWidgets('dados do aluno: incompleto abre a aba, com o que falta, sem Editar cadastro', (tester) async {
     await _abrir(tester, _aluno(nascimento: null, altura: null));
     expect(find.text('Dados do aluno'), findsOneWidget);
     expect(find.text('Informar'), findsWidgets);
-    expect(find.text('Editar cadastro'), findsOneWidget);
+    expect(find.text('Editar cadastro'), findsNothing);
     final dados = tester.getTopLeft(find.text('Dados do aluno')).dy;
     final treino = tester.getTopLeft(find.text('Treinos')).dy;
     expect(dados, lessThan(treino));
@@ -184,7 +185,7 @@ void main() {
     expect(find.textContaining('818,0'), findsWidgets);
   });
 
-  testWidgets('composição normal mostra OK', (tester) async {
+  testWidgets('composição normal mostra a gordura e a data', (tester) async {
     await _abrir(
       tester,
       _aluno(objetivo: 'Hipertrofia'),
@@ -192,11 +193,13 @@ void main() {
         composicaoResumo: Aluno360ComposicaoResumo(
           percGordura: 18.4,
           massaMuscular: 52.1,
+          data: '2026-11-09',
         ),
       ),
     );
     expect(find.text('Confira o valor'), findsNothing);
-    expect(find.text('Última avaliação registrada'), findsOneWidget);
+    expect(find.text('Avaliação de 09/11'), findsOneWidget);
+    expect(find.text('OK'), findsNothing);
   });
 
   testWidgets('aderência sem histórico mostra "—" no lugar de 0%', (tester) async {

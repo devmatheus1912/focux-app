@@ -72,7 +72,6 @@ void main() {
     final composer = readScreenSourceBundle(
       'lib/features/chat/widgets/conversation_composer_widgets.dart',
     );
-    expect(composer, contains('TokensStrip.rCard'));
     expect(composer, contains("hintText: 'Mensagem'"));
     expect(composer, isNot(contains('Icons.add_circle')));
     expect(composer, isNot(contains('FxIcons.ia')));

@@ -581,6 +581,7 @@ class EvolucaoRepository {
       List<EventoEngajamento> eventos,
       AderenciaResumo? aderencia,
       AderenciaPeriodo? periodo,
+      DateTime? fichaDesde,
     })
   >
   engajamento(
@@ -617,6 +618,8 @@ class EvolucaoRepository {
           periodo is Map
               ? AderenciaPeriodo.fromJson(Map<String, dynamic>.from(periodo))
               : null,
+      fichaDesde:
+          data is Map ? DateTime.tryParse('${data['fichaDesde'] ?? ''}') : null,
     );
   }
 

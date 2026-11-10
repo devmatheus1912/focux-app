@@ -117,10 +117,7 @@ class _GrupoAulasAlunoScreenState extends ConsumerState<GrupoAulasAlunoScreen> {
       if (!mounted) return;
       final seen = _aulas.map((a) => a.id).toSet();
       setState(() {
-        _aulas = [
-          ..._aulas,
-          ...pagina.content.where((a) => seen.add(a.id)),
-        ];
+        _aulas = [..._aulas, ...pagina.content.where((a) => seen.add(a.id))];
         _page = pagina.page ?? (_page + 1);
         _hasMore = pagina.hasNext;
         _total = pagina.totalElements ?? _aulas.length;
@@ -131,6 +128,24 @@ class _GrupoAulasAlunoScreenState extends ConsumerState<GrupoAulasAlunoScreen> {
       setState(() => _loadingMore = false);
       FeedbackHelper.showError(context, friendlyError(e));
     }
+  }
+
+  /// Detalhe da aula antes de decidir: quando, onde, vagas e descrição.
+  String _detalhe(GrupoAula aula) {
+    final descricao = (aula.descricao ?? '').trim();
+    return [
+      grupoAulaLinha(
+        inicio: aula.inicio,
+        fim: aula.fim,
+        localAula: aula.localAula,
+      ),
+      if (!aula.inscrito)
+        grupoAulaVagasLabel(
+          inscritos: aula.inscritos,
+          capacidadeMax: aula.capacidadeMax,
+        ),
+      if (descricao.isNotEmpty) descricao,
+    ].join('\n');
   }
 
   Future<void> _inscrever(GrupoAula aula) async {
@@ -148,8 +163,8 @@ class _GrupoAulasAlunoScreenState extends ConsumerState<GrupoAulasAlunoScreen> {
     }
     final ok = await showFxConfirmSheet(
       context,
-      title: 'Inscrever nesta aula?',
-      message: aula.titulo,
+      title: aula.titulo,
+      message: _detalhe(aula),
       confirmLabel: 'Inscrever',
       icon: FxIcons.grupo,
     );
@@ -168,9 +183,10 @@ class _GrupoAulasAlunoScreenState extends ConsumerState<GrupoAulasAlunoScreen> {
   Future<void> _cancelar(GrupoAula aula) async {
     final ok = await showFxConfirmSheet(
       context,
-      title: 'Sair desta aula?',
-      message: aula.titulo,
-      confirmLabel: 'Sair',
+      title: aula.titulo,
+      message: 'Você está inscrito.\n${_detalhe(aula)}',
+      confirmLabel: 'Sair da aula',
+      cancelLabel: 'Fechar',
       destructive: true,
       icon: FxIcons.sair,
     );
@@ -224,71 +240,74 @@ class _GrupoAulasAlunoScreenState extends ConsumerState<GrupoAulasAlunoScreen> {
             actions: [
               FxHelpIconButton(
                 tooltip: 'Como usar aulas em grupo',
-                onTap: () => showFxHelpSheet(
-                  context,
-                  title: 'Aulas em grupo',
-                  subtitle: 'Turmas abertas pelo seu personal.',
-                  tips: const [
-                    FxHelpTip(
-                      'Inscrever',
-                      'Toque na aula para entrar. Se estiver lotada, espere a próxima.',
+                onTap:
+                    () => showFxHelpSheet(
+                      context,
+                      title: 'Aulas em grupo',
+                      subtitle: 'Turmas abertas pelo seu personal.',
+                      tips: const [
+                        FxHelpTip(
+                          'Inscrever',
+                          'Toque na aula para entrar. Se estiver lotada, espere a próxima.',
+                        ),
+                        FxHelpTip(
+                          'Sair',
+                          'Toque numa aula em que você está inscrito para ver o detalhe ou sair.',
+                        ),
+                      ],
                     ),
-                    FxHelpTip(
-                      'Sair',
-                      'Toque de novo numa aula inscrita para cancelar.',
-                    ),
-                  ],
-                ),
               ),
             ],
           ),
-          body: _loading
-              ? const Padding(
-                  padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-                  child: SkeletonList(count: 4),
-                )
-              : _erro != null
-              ? FxErrorState(
-                  chromeOnDark: chrome.isDark,
-                  primary: scheme.primary,
-                  title: FocuxMicrocopy.naoFoiPossivelCarregar,
-                  message: _erro!,
-                  onRetry: _load,
-                )
-              : Column(
-                  children: [
-                    if (_aulas.isNotEmpty ||
-                        searching ||
-                        _searchCtrl.text.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        TokensStrip.s4,
-                        TokensStrip.s2,
-                        TokensStrip.s4,
-                        TokensStrip.s2,
-                      ),
-                      child: TextField(
-                        controller: _searchCtrl,
-                        focusNode: _searchFocus,
-                        textInputAction: TextInputAction.search,
-                        onChanged: _onQueryChanged,
-                        onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
-                        decoration: InputDecoration(
-                          hintText: 'Buscar aula',
-                          prefixIcon: const Icon(FxIcons.buscar),
-                          border: FxInputDeco.outlineBorder(
-                            borderRadius: BorderRadius.circular(16),
+          body:
+              _loading
+                  ? const Padding(
+                    padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                    child: SkeletonList(count: 4),
+                  )
+                  : _erro != null
+                  ? FxErrorState(
+                    chromeOnDark: chrome.isDark,
+                    primary: scheme.primary,
+                    title: FocuxMicrocopy.naoFoiPossivelCarregar,
+                    message: _erro!,
+                    onRetry: _load,
+                  )
+                  : Column(
+                    children: [
+                      if (_aulas.isNotEmpty ||
+                          searching ||
+                          _searchCtrl.text.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            TokensStrip.s4,
+                            TokensStrip.s2,
+                            TokensStrip.s4,
+                            TokensStrip.s2,
+                          ),
+                          child: TextField(
+                            controller: _searchCtrl,
+                            focusNode: _searchFocus,
+                            textInputAction: TextInputAction.search,
+                            onChanged: _onQueryChanged,
+                            onTapOutside:
+                                (_) => FxKeyboardDismissScope.dismiss(),
+                            decoration: InputDecoration(
+                              hintText: 'Buscar aula',
+                              prefixIcon: const Icon(FxIcons.buscar),
+                              border: FxInputDeco.outlineBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                            ),
                           ),
                         ),
+                      Expanded(
+                        child: FxContentWidthLimiter(
+                          child: _buildList(searching),
+                        ),
                       ),
-                    ),
-                    Expanded(
-                      child: FxContentWidthLimiter(
-                        child: _buildList(searching),
-                      ),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
         ),
       ),
     );
@@ -297,77 +316,96 @@ class _GrupoAulasAlunoScreenState extends ConsumerState<GrupoAulasAlunoScreen> {
   Widget _buildList(bool searching) {
     return RefreshIndicator(
       onRefresh: _load,
-      child: _aulas.isEmpty
-          ? ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              children: [
-                const SizedBox(height: 48),
-                FxEmptyState(
-                  icon: searching ? FxIcons.buscar : FxIcons.calendario,
-                  title: searching
-                      ? 'Nenhuma aula encontrada'
-                      : 'Nenhuma aula disponível',
-                  subtitle: searching
-                      ? 'Tente outro nome ou local.'
-                      : 'Quando seu personal abrir uma aula em grupo, ela aparece aqui. Dúvida? Fale no chat.',
-                  action: searching
-                      ? FxEmptyAction(label: 'Limpar busca', secondary: true, onTap: _clearQuery)
-                      : FxEmptyAction(
-                          label: 'Abrir chat',
-                          onTap: () => openAlunoRoute(context, '/chat/aluno'),
-                        ),
-                ),
-              ],
-            )
-          : ListView.builder(
-              physics: const AlwaysScrollableScrollPhysics(),
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              padding: const EdgeInsets.fromLTRB(
-                FxSettingsLayout.pageInset,
-                8,
-                FxSettingsLayout.pageInset,
-                32,
-              ),
-              itemCount: _aulas.length + (_hasMore ? 1 : 0),
-              itemBuilder: (_, i) {
-                if (i >= _aulas.length) {
-                  return FxSatelliteListTile(
-                    title: _loadingMore ? 'Carregando…' : 'Carregar mais',
-                    onTap: _loadingMore ? null : _carregarMais,
-                  );
-                }
-                final a = _aulas[i];
-                final lotada = grupoAulaLotada(
-                  inscritos: a.inscritos,
-                  capacidadeMax: a.capacidadeMax,
-                );
-                final status = grupoAulaStatusLabel(
-                  inscrito: a.inscrito,
-                  lotada: lotada,
-                );
-                final statusColor = a.inscrito
-                    ? Theme.of(context).colorScheme.primary
-                    : EagleTokens.warn;
-                return FxSatelliteListTile(
-                  title: a.titulo,
-                  titleCase: false,
-                  subtitle: Text(
-                    '${grupoAulaSubtitle(inicio: a.inicio, localAula: a.localAula)} · ${grupoAulaVagasLabel(inscritos: a.inscritos, capacidadeMax: a.capacidadeMax)}',
+      child:
+          _aulas.isEmpty
+              ? ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                children: [
+                  const SizedBox(height: 48),
+                  FxEmptyState(
+                    icon: searching ? FxIcons.buscar : FxIcons.calendario,
+                    title:
+                        searching
+                            ? 'Nenhuma aula encontrada'
+                            : 'Nenhuma aula disponível',
+                    subtitle:
+                        searching
+                            ? 'Tente outro nome ou local.'
+                            : 'Quando seu personal abrir uma aula em grupo, ela aparece aqui. Dúvida? Fale no chat.',
+                    action:
+                        searching
+                            ? FxEmptyAction(
+                              label: 'Limpar busca',
+                              secondary: true,
+                              onTap: _clearQuery,
+                            )
+                            : FxEmptyAction(
+                              label: 'Abrir chat',
+                              onTap:
+                                  () => openAlunoRoute(context, '/chat/aluno'),
+                            ),
                   ),
-                  trailing: status == null
-                      ? null
-                      : Text(
-                          status,
-                          style: FocuxHubTypography.bodyMuted(
-                            color: statusColor,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                  onTap: () => _inscrever(a),
-                );
-              },
-            ),
+                ],
+              )
+              : ListView.builder(
+                physics: const AlwaysScrollableScrollPhysics(),
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                padding: const EdgeInsets.fromLTRB(
+                  FxSettingsLayout.pageInset,
+                  8,
+                  FxSettingsLayout.pageInset,
+                  32,
+                ),
+                itemCount: _aulas.length + (_hasMore ? 1 : 0),
+                itemBuilder: (_, i) {
+                  if (i >= _aulas.length) {
+                    return FxSatelliteListTile(
+                      title: _loadingMore ? 'Carregando…' : 'Carregar mais',
+                      onTap: _loadingMore ? null : _carregarMais,
+                    );
+                  }
+                  final a = _aulas[i];
+                  final lotada = grupoAulaLotada(
+                    inscritos: a.inscritos,
+                    capacidadeMax: a.capacidadeMax,
+                  );
+                  final status = grupoAulaStatusLabel(
+                    inscrito: a.inscrito,
+                    lotada: lotada,
+                  );
+                  final statusColor =
+                      a.inscrito
+                          ? Theme.of(context).colorScheme.primary
+                          : EagleTokens.warn;
+                  return FxSatelliteListTile(
+                    title: a.titulo,
+                    titleCase: false,
+                    subtitle: Text(
+                      a.inscrito
+                          ? grupoAulaLinha(
+                            inicio: a.inicio,
+                            fim: a.fim,
+                            localAula: a.localAula,
+                          )
+                          : '${grupoAulaLinha(inicio: a.inicio, fim: a.fim, localAula: a.localAula)} · ${grupoAulaVagasLabel(inscritos: a.inscritos, capacidadeMax: a.capacidadeMax)}',
+                    ),
+                    trailing:
+                        status == null
+                            ? null
+                            : Text(
+                              status,
+                              style: FocuxHubTypography.bodyMuted(
+                                color: statusColor,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                    onTap: () => _inscrever(a),
+                  );
+                },
+              ),
     );
   }
 }

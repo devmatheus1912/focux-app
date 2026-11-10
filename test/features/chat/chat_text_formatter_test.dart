@@ -30,4 +30,11 @@ void main() {
       'Oi, Beatriz. Contate Beatriz imediatamente. ok',
     );
   });
+
+  test('lista do resumo continua lista na bolha', () {
+    expect(
+      formatChatTextForDisplay('Última medida:\n- Peso: 80 kg\n- Cintura: 90 cm'),
+      'Última medida:\n• Peso: 80 kg\n• Cintura: 90 cm',
+    );
+  });
 }

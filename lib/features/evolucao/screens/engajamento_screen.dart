@@ -62,6 +62,7 @@ class EngajamentoScreen extends ConsumerStatefulWidget {
 class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
   List<EventoEngajamento> _eventos = [];
   AderenciaResumo? _aderencia;
+  DateTime? _fichaDesde;
   AderenciaPeriodo? _periodoDados;
   var _periodo = EngajamentoPeriodo.cincoSemanas;
   bool _loading = true;
@@ -95,6 +96,7 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
           _eventos = dados.eventos;
           _aderencia = dados.aderencia;
           _periodoDados = dados.periodo;
+          _fichaDesde = dados.fichaDesde;
           _loading = false;
           _fetchedAt = DateTime.now();
         });
@@ -385,6 +387,18 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
                 extra: widget.alunoNome,
               ),
         ),
+        if (engajamentoFichaNova(
+              _fichaDesde,
+              hoje: DateTime.now(),
+              diaDaFicha: diaDaFicha,
+            )
+            case final aviso?) ...[
+          const SizedBox(height: TokensStrip.s2),
+          Text(
+            aviso,
+            style: FocuxHubTypography.bodyMuted(color: fxScreenMute(context)),
+          ),
+        ],
         const SizedBox(height: TokensStrip.s3),
         EngajamentoQuadroSemanas(
           semanas: semanas,

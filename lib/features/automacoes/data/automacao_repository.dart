@@ -39,17 +39,43 @@ class AutomacaoFluxo {
   );
 }
 
+/// Um passo do modelo: aviso (PUSH), espera (WAIT) ou mensagem no chat
+/// (CHAT_TEMPLATE), como o servidor manda em `TemplateInfo.passos`.
+class AutomacaoPassoDef {
+  const AutomacaoPassoDef({
+    required this.acaoTipo,
+    this.config = const {},
+    this.delayMinutos = 0,
+  });
+
+  final String acaoTipo;
+  final Map<String, dynamic> config;
+  final int delayMinutos;
+
+  factory AutomacaoPassoDef.fromJson(Map<String, dynamic> j) =>
+      AutomacaoPassoDef(
+        acaoTipo: j['acaoTipo'] as String? ?? '',
+        config:
+            j['config'] is Map
+                ? Map<String, dynamic>.from(j['config'] as Map)
+                : const {},
+        delayMinutos: (j['delayMinutos'] as num?)?.toInt() ?? 0,
+      );
+}
+
 class AutomacaoTemplate {
   final String id;
   final String nome;
   final String descricao;
   final String triggerTipo;
+  final List<AutomacaoPassoDef> passos;
 
   AutomacaoTemplate({
     required this.id,
     required this.nome,
     required this.descricao,
     required this.triggerTipo,
+    this.passos = const [],
   });
 
   factory AutomacaoTemplate.fromJson(Map<String, dynamic> j) =>
@@ -58,6 +84,11 @@ class AutomacaoTemplate {
         nome: j['nome'] as String? ?? '',
         descricao: j['descricao'] as String? ?? '',
         triggerTipo: j['triggerTipo'] as String? ?? '',
+        passos: [
+          for (final p in (j['passos'] as List? ?? const []))
+            if (p is Map)
+              AutomacaoPassoDef.fromJson(Map<String, dynamic>.from(p)),
+        ],
       );
 }
 

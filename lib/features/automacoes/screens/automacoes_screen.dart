@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
-import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -24,8 +23,6 @@ import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../../core/widgets/fx_strip_card.dart';
-import '../../../core/widgets/fx_toggle_chip.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../../alunos/providers/alunos_provider.dart';
@@ -38,7 +35,6 @@ import '../../subscription/models/subscription_plan.dart';
 import '../../../core/api/pagina.dart';
 import '../data/automacao_repository.dart';
 import '../utils/automacao_display.dart';
-import '../../../core/widgets/fx_action_chip.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../core/theme/fx_icons.dart';
@@ -58,21 +54,12 @@ class AutomacoesScreen extends ConsumerStatefulWidget {
 }
 
 class _AutomacoesScreenState extends ConsumerState<AutomacoesScreen> {
-  final _searchCtrl = TextEditingController();
-  final _searchFocus = FocusNode();
-  Timer? _searchDebounce;
   List<AutomacaoFluxo> _fluxos = const [];
   List<AutomacaoTemplate> _templates = const [];
   PlanoFeatures? _planoFromHome;
   var _loading = true;
-  var _carregandoMais = false;
-  var _hasMore = false;
-  var _page = 0;
-  var _totalFluxos = 0;
   String? _error;
   DateTime? _fetchedAt;
-  var _query = '';
-  var _chip = AutomacaoChip.todos;
 
   @override
   void initState() {
@@ -81,45 +68,9 @@ class _AutomacoesScreenState extends ConsumerState<AutomacoesScreen> {
     _load();
   }
 
-  @override
-  void dispose() {
-    _searchDebounce?.cancel();
-    _searchCtrl.dispose();
-    _searchFocus.dispose();
-    super.dispose();
-  }
-
-  void _onQueryChanged(String value) {
-    _searchDebounce?.cancel();
-    _searchDebounce = Timer(const Duration(milliseconds: 350), () {
-      final next = value.trim();
-      if (!mounted || next == _query) return;
-      _query = next;
-      _load();
-    });
-  }
-
-  void _clearQuery() {
-    _searchDebounce?.cancel();
-    _searchCtrl.clear();
-    if (_query.isEmpty) return;
-    _query = '';
-    _load();
-  }
-
   void _leave() {
     FxKeyboardDismissScope.dismiss();
     safePopOrGo(context, '/perfil/ferramentas');
-  }
-
-  List<AutomacaoTemplate> get _visibleTemplates {
-    if (_chip == AutomacaoChip.ativos) return const [];
-    return _templates;
-  }
-
-  List<AutomacaoFluxo> get _visibleFluxos {
-    if (_chip == AutomacaoChip.templates) return const [];
-    return _fluxos;
   }
 
   Future<void> _load() async {
@@ -128,15 +79,12 @@ class _AutomacoesScreenState extends ConsumerState<AutomacoesScreen> {
       _error = null;
     });
     try {
-      final home = await ref.read(_repo).getHome(q: _query);
+      final home = await ref.read(_repo).getHome();
       if (!mounted) return;
       setState(() {
         _fluxos = home.fluxos;
         _templates = home.templates;
         _planoFromHome = home.planoFeatures;
-        _page = home.page;
-        _hasMore = home.hasNext;
-        _totalFluxos = home.totalFluxos;
         _fetchedAt = DateTime.now();
         _loading = false;
       });
@@ -149,38 +97,18 @@ class _AutomacoesScreenState extends ConsumerState<AutomacoesScreen> {
     }
   }
 
-  Future<void> _carregarMais() async {
-    if (_carregandoMais || !_hasMore) return;
-    setState(() => _carregandoMais = true);
-    try {
-      final home = await ref
-          .read(_repo)
-          .getHome(page: _page + 1, q: _query);
-      if (!mounted) return;
-      final seen = _fluxos.map((f) => f.id).toSet();
-      setState(() {
-        _fluxos = [
-          ..._fluxos,
-          ...home.fluxos.where((f) => seen.add(f.id)),
-        ];
-        _page = home.page;
-        _hasMore = home.hasNext;
-        _totalFluxos = home.totalFluxos;
-        _carregandoMais = false;
-      });
-    } catch (_) {
-      if (!mounted) return;
-      setState(() => _carregandoMais = false);
-    }
-  }
-
   Future<void> _ativar(AutomacaoTemplate t) async {
     final ok = await showFxConfirmSheet(
       context,
-      title: automacaoAtivarTitle(t.nome),
-      message: automacaoAtivarMessage(),
+      title: automacaoAtivarTitle(
+        automacaoNome(templateId: t.id, nomeGravado: t.nome),
+      ),
+      message: [
+        ...automacaoPassosLinhas(t.passos),
+        'Começa para cada aluno que entrar na regra: ${automacaoTriggerLabel(t.triggerTipo).toLowerCase()}.',
+      ].join('\n'),
       icon: FxIcons.raio,
-      confirmLabel: 'Ativar',
+      confirmLabel: 'Ligar',
     );
     if (!ok || !mounted) return;
     AnalyticsService.instance.track(
@@ -191,7 +119,10 @@ class _AutomacoesScreenState extends ConsumerState<AutomacoesScreen> {
       await ref.read(_repo).ativarTemplate(t.id);
       await _load();
       if (!mounted) return;
-      FeedbackHelper.showSuccess(context, 'Template “${t.nome}” ativado');
+      FeedbackHelper.showSuccess(
+        context,
+        '“${automacaoNome(templateId: t.id, nomeGravado: t.nome)}” ligada',
+      );
     } catch (e) {
       if (!mounted) return;
       FeedbackHelper.showError(context, friendlyError(e));
@@ -222,20 +153,23 @@ class _AutomacoesScreenState extends ConsumerState<AutomacoesScreen> {
     final pausar = fluxo.ativo;
     final ok = await showFxConfirmSheet(
       context,
-      title: pausar
-          ? automacaoPausarConfirmTitle(fluxo.nome)
-          : automacaoRetomarConfirmTitle(fluxo.nome),
-      message: pausar
-          ? automacaoPausarConfirmMessage()
-          : automacaoRetomarConfirmMessage(),
+      title:
+          pausar
+              ? automacaoPausarConfirmTitle(fluxo.nome)
+              : automacaoRetomarConfirmTitle(fluxo.nome),
+      message:
+          pausar
+              ? automacaoPausarConfirmMessage()
+              : automacaoRetomarConfirmMessage(),
       icon: pausar ? FxIcons.pausar : FxIcons.play,
       confirmLabel: pausar ? 'Pausar' : 'Retomar',
     );
     if (!ok || !mounted) return null;
     try {
-      final updated = pausar
-          ? await ref.read(_repo).pausar(fluxo.id)
-          : await ref.read(_repo).retomar(fluxo.id);
+      final updated =
+          pausar
+              ? await ref.read(_repo).pausar(fluxo.id)
+              : await ref.read(_repo).retomar(fluxo.id);
       if (!mounted) return updated;
       setState(() {
         _fluxos = [
@@ -259,9 +193,7 @@ class _AutomacoesScreenState extends ConsumerState<AutomacoesScreen> {
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
-    final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
-    final templates = _visibleTemplates;
-    final fluxos = _visibleFluxos;
+    final linhas = _linhasDeAutomacao(_templates, _fluxos);
     final planoFromHome = _planoFromHome;
     if (planoFromHome != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -277,26 +209,18 @@ class _AutomacoesScreenState extends ConsumerState<AutomacoesScreen> {
         requiredPlan: SubscriptionPlan.ENTERPRISE,
         capability: 'automacoes',
         child: PopScope(
-          canPop: !keyboardOpen && !_searchFocus.hasFocus,
+          canPop: false,
           onPopInvokedWithResult: (didPop, _) {
-            if (didPop) return;
-            if (keyboardOpen || _searchFocus.hasFocus) {
-              FxKeyboardDismissScope.dismiss();
-              return;
-            }
-            _leave();
+            if (!didPop) _leave();
           },
           child: FxShellScaffold(
             useMesh: true,
-            dismissKeyboard: true,
             appBar: FxShellAppBar(
               title: 'Automações',
               subtitle: FxHubFreshness.joinCount(
-                automacaoCountLabel(
-                  templates: _chip == AutomacaoChip.ativos
-                      ? 0
-                      : templates.length,
-                  fluxos: _chip == AutomacaoChip.templates ? 0 : _totalFluxos,
+                automacaoLigadasLabel(
+                  ligadas: linhas.where((l) => l.ligada).length,
+                  total: linhas.length,
                 ),
                 FxHubFreshness.fromFetchedAt(_fetchedAt),
               ),
@@ -304,119 +228,47 @@ class _AutomacoesScreenState extends ConsumerState<AutomacoesScreen> {
               actions: [
                 FxHelpIconButton(
                   tooltip: 'Como usar automações',
-                  onTap: () => showFxHelpSheet(
-                    context,
-                    title: 'Automações',
-                    subtitle: 'Templates viram fluxos quando o gatilho dispara.',
-                    tips: const [
-                      FxHelpTip(
-                        'Ativar',
-                        'Toque no template e confirme. O fluxo aparece em Ativos.',
+                  onTap:
+                      () => showFxHelpSheet(
+                        context,
+                        title: 'Automações',
+                        subtitle:
+                            'Avisos e mensagens que saem sozinhos quando o aluno entra na regra.',
+                        tips: const [
+                          FxHelpTip(
+                            'Ligar',
+                            'A chave mostra antes o que sai, quando e em nome de quem.',
+                          ),
+                          FxHelpTip(
+                            'Andamento',
+                            'Toque numa automação ligada para ver quem está nela.',
+                          ),
+                          FxHelpTip(
+                            'Iniciar',
+                            'No andamento, escolha um aluno para começar agora.',
+                          ),
+                        ],
                       ),
-                      FxHelpTip(
-                        'Histórico',
-                        'Toque em um fluxo ativo para ver as execuções.',
-                      ),
-                      FxHelpTip(
-                        'Iniciar',
-                        'No histórico, escolha um aluno para disparar agora.',
-                      ),
-                    ],
-                  ),
                 ),
               ],
             ),
             body: Column(
               children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    TokensStrip.s4,
-                    TokensStrip.s2,
-                    TokensStrip.s4,
-                    TokensStrip.s2,
-                  ),
-                  child: DecoratedBox(
-                    decoration: fxStripCardDecoration(
-                      context,
-                      accent: primary,
-                      radius: TokensStrip.rCard,
-                      glowStrength: 0.03,
-                    ),
-                    child: TextField(
-                      controller: _searchCtrl,
-                      focusNode: _searchFocus,
-                      onChanged: _onQueryChanged,
-                      onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
-                      textInputAction: TextInputAction.search,
-                      decoration: InputDecoration(
-                        filled: false,
-                        isDense: true,
-                        hintText: 'Buscar template ou fluxo',
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 12,
-                        ),
-                        prefixIcon: Icon(
-                          FxIcons.buscar,
-                          color: primary,
-                          size: 20,
-                        ),
-                        suffixIcon: _query.trim().isEmpty
-                            ? null
-                            : IconButton(
-                                tooltip: 'Limpar busca',
-                                onPressed: _clearQuery,
-                                icon: Icon(
-                                  FxIcons.fechar,
-                                  color: chrome.mute,
-                                  size: 18,
-                                ),
-                              ),
-                      ),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    TokensStrip.s4,
-                    0,
-                    TokensStrip.s4,
-                    TokensStrip.s2,
-                  ),
-                  child: Wrap(
-                    spacing: TokensStrip.s2,
-                    runSpacing: TokensStrip.s2,
-                    children: [
-                      for (final chip in AutomacaoChip.values)
-                        FxToggleChip(
-                          label: automacaoChipLabel(chip),
-                          selected: _chip == chip,
-                          isDark: chrome.isDark,
-                          onTap: () {
-                            if (_chip == chip) return;
-                            setState(() => _chip = chip);
-                          },
-                        ),
-                    ],
-                  ),
-                ),
                 Expanded(
-                  child: _loading
-                      ? const Padding(
-                          padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-                          child: SkeletonList(count: 5),
-                        )
-                      : _error != null
-                      ? FxErrorState(
-                          chromeOnDark: chrome.isDark,
-                          primary: primary,
-                          message: _error!,
-                          onRetry: _load,
-                        )
-                      : FxContentWidthLimiter(
-                          child: _buildList(templates, fluxos),
-                        ),
+                  child:
+                      _loading
+                          ? const Padding(
+                            padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                            child: SkeletonList(count: 5),
+                          )
+                          : _error != null
+                          ? FxErrorState(
+                            chromeOnDark: chrome.isDark,
+                            primary: primary,
+                            message: _error!,
+                            onRetry: _load,
+                          )
+                          : FxContentWidthLimiter(child: _buildList(linhas)),
                 ),
               ],
             ),

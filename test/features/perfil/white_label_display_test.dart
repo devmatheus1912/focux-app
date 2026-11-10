@@ -75,7 +75,8 @@ void main() {
       whiteLabelDnsStepShort('a' * 100, maxChars: 20).endsWith('…'),
       isTrue,
     );
-    expect(whiteLabelLandingCaption('CAPTURA'), contains('captura'));
+    expect(whiteLabelLinkCurto('focuxpersonal.com/p/joao-silva-personal-trainer'), '…/p/joao-silva-personal-trainer');
+    expect(whiteLabelFaltaTitulo(1), 'Falta 1 passo para vender pelo link');
     expect(whiteLabelChecklistValue(true), 'Pronto');
   });
 

@@ -125,10 +125,13 @@ List<EvolucaoComparativoMetrica> evolucaoComparativoMetricas({
 
 String evolucaoComparativoConfirmTitle() => 'Compartilhar no chat?';
 
-String evolucaoComparativoConfirmMessage() =>
-    'O aluno recebe um resumo da evolução na conversa com você.';
+String evolucaoComparativoConfirmMessage({bool medidaSuspeita = false}) =>
+    medidaSuspeita
+        ? 'A última medida parece fora do esperado. Confira antes de enviar: o aluno recebe o resumo na conversa com você.'
+        : 'O aluno recebe um resumo da evolução na conversa com você.';
 
-String evolucaoComparativoConfirmLabel() => 'Enviar';
+String evolucaoComparativoConfirmLabel({bool medidaSuspeita = false}) =>
+    medidaSuspeita ? 'Enviar mesmo assim' : 'Enviar';
 
 /// "30/10 → 02/11 · 3 dias".
 String evolucaoComparativoJanelaCaption({

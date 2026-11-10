@@ -65,8 +65,8 @@ class Aluno360FerramentasTab extends StatelessWidget {
   }
 }
 
-/// "Dados do aluno": contato, objetivo, nascimento e altura, mais o verbo
-/// "Editar cadastro". Cada linha abre o cadastro.
+/// "Dados do aluno": contato, objetivo, nascimento e altura. Cada linha abre
+/// o cadastro.
 class Aluno360DadosDoAlunoGrupo extends StatelessWidget {
   const Aluno360DadosDoAlunoGrupo({
     super.key,
@@ -101,9 +101,10 @@ class Aluno360DadosDoAlunoGrupo extends StatelessWidget {
     return FxSettingsGroup(
       key: const ValueKey('aluno360_dados_do_aluno'),
       header: s.aluno360DadosGrupo,
-      caption: s.aluno360DadosLegenda,
+      // Legenda só quando falta algo: completo, as linhas bastam.
+      caption: linhas.any((l) => !l.completo) ? s.aluno360DadosLegenda : null,
       children: [
-        for (final l in linhas)
+        for (final (i, l) in linhas.indexed)
           FxSettingsTile(
             icon: _icone(l.campo),
             label: _rotulo(s, l.campo),
@@ -111,18 +112,9 @@ class Aluno360DadosDoAlunoGrupo extends StatelessWidget {
             highlight: !l.completo,
             mute: chrome.mute,
             line: chrome.line,
+            showDivider: i < linhas.length - 1,
             onTap: editar,
           ),
-        FxSettingsTile(
-          icon: FxIcons.editar,
-          label: s.aluno360DadosEditar,
-          subtitle: s.aluno360DadosEditarDetalhe,
-          value: '',
-          mute: chrome.mute,
-          line: chrome.line,
-          showDivider: false,
-          onTap: editar,
-        ),
       ],
     );
   }

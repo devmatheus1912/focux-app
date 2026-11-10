@@ -19,23 +19,14 @@ import '../../subscription/widgets/upgrade_prompt_sheet.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno360_ferramentas_grupos.dart';
 import '../utils/aluno360_ferramentas_logic.dart';
-import 'aluno360_ferramentas_mini_sparkline.dart';
+import '../utils/aluno360_operacao_logic.dart';
 
+/// Grupos sem legenda: as linhas já dizem o que cada um tem.
 String aluno360GrupoTitulo(S s, Aluno360FerramentasGrupo g) => switch (g) {
   Aluno360FerramentasGrupo.treino => s.aluno360FerramentasGrupoTreino,
   Aluno360FerramentasGrupo.acompanhamento =>
     s.aluno360FerramentasGrupoAcompanhamento,
-  Aluno360FerramentasGrupo.relacao => s.aluno360FerramentasGrupoRelacao,
   Aluno360FerramentasGrupo.dinheiro => s.aluno360FerramentasGrupoDinheiro,
-};
-
-String aluno360GrupoLegenda(S s, Aluno360FerramentasGrupo g) => switch (g) {
-  Aluno360FerramentasGrupo.treino => s.aluno360FerramentasGrupoTreinoLegenda,
-  Aluno360FerramentasGrupo.acompanhamento =>
-    s.aluno360FerramentasGrupoAcompanhamentoLegenda,
-  Aluno360FerramentasGrupo.relacao => s.aluno360FerramentasGrupoRelacaoLegenda,
-  Aluno360FerramentasGrupo.dinheiro =>
-    s.aluno360FerramentasGrupoDinheiroLegenda,
 };
 
 /// Todos os módulos do aluno, em grupos. Quem pede atenção leva um selo e
@@ -48,6 +39,7 @@ class Aluno360FerramentasGrupos extends ConsumerWidget {
     required this.primary,
     this.bf,
     this.massaMagra,
+    this.composicaoData,
     this.aderenciaSemanal,
     this.anamneseStatus,
     this.anamneseDesde,
@@ -59,6 +51,9 @@ class Aluno360FerramentasGrupos extends ConsumerWidget {
   final Color primary;
   final String? bf;
   final String? massaMagra;
+
+  /// Dia da avaliação atual (aaaa-mm-dd).
+  final String? composicaoData;
   final List<Map<String, dynamic>>? aderenciaSemanal;
 
   /// De `/360/ferramentas.anamneseResumo.status`. Nulo = não iniciada.
@@ -230,14 +225,15 @@ class Aluno360FerramentasGrupos extends ConsumerWidget {
 
       final nome = aluno.nome;
       final push = context.push;
+      final composicao = aluno360ComposicaoLinha(
+        bf: bf,
+        massaMagra: massaMagra,
+        data: composicaoData,
+      );
       return switch (modulo) {
         Aluno360FerramentasModule.treinos => linha(
           label: 'Treinos',
-          subtitle: aluno.diasSemTreino == null
-              ? 'Treinos do plano'
-              : aluno.diasSemTreino! >= 7
-              ? '${aluno.diasSemTreino} dias sem treino'
-              : 'Ativo recentemente',
+          subtitle: aluno360TreinosSub(aluno),
           onTap: () => push('/alunos/$alunoId/rotina', extra: nome),
         ),
         Aluno360FerramentasModule.equipamentos => linha(
@@ -249,26 +245,13 @@ class Aluno360FerramentasGrupos extends ConsumerWidget {
         ),
         Aluno360FerramentasModule.aderencia => linha(
           label: 'Aderência',
-          subtitle: Aluno360FerramentasLogic.aderenciaModuleSub(
-            aluno: aluno,
-            aderenciaSemanal: aderenciaSemanal,
+          subtitle: aluno360AderenciaSub(
+            aluno,
+            summarizeAderenciaWeek(
+              parseAderenciaSemanal(aderenciaSemanal),
+            ).totalCheckins,
           ),
           value: aluno360AderenciaValor(aluno),
-          accessory:
-              Aluno360FerramentasLogic.aderenciaSparklineValues(
-                aderenciaSemanal,
-              ).isEmpty
-              ? null
-              : Aluno360FerramentasMiniSparkline(
-                  data: Aluno360FerramentasLogic.aderenciaSparklineValues(
-                    aderenciaSemanal,
-                  ),
-                  color: primary,
-                  semanticsLabel:
-                      Aluno360FerramentasLogic.aderenciaSparkSemanticsLabel(
-                        aderenciaSemanal,
-                      ),
-                ),
           onTap: () => push('/alunos/$alunoId/engajamento', extra: nome),
         ),
         Aluno360FerramentasModule.iaProgresso => linha(
@@ -305,12 +288,8 @@ class Aluno360FerramentasGrupos extends ConsumerWidget {
         ),
         Aluno360FerramentasModule.composicao => linha(
           label: 'Composição corporal',
-          subtitle: composicaoSuspeita(bf: bf, massaMagra: massaMagra)
-              ? 'Gordura ${bf ?? '—'}% · Massa magra ${massaMagra ?? '—'}%'
-              : bf != null || massaMagra != null
-              ? 'Última avaliação registrada'
-              : 'Registrar medidas',
-          value: aluno360ComposicaoValor(bf: bf, massaMagra: massaMagra),
+          subtitle: composicao.sub,
+          value: composicao.valor,
           onTap: () =>
               push('/alunos/$alunoId/evolucao', extra: nome),
         ),
@@ -340,15 +319,10 @@ class Aluno360FerramentasGrupos extends ConsumerWidget {
           planLocked: planLocked,
           tier: planLocked ? PlanGate.tierLabel(planLock.$2.planoMinimo) : null,
         ),
-        Aluno360FerramentasModule.chat => linha(
-          label: 'Chat',
-          subtitle: 'Conversa direta com o aluno',
-          onTap: () => push('/alunos/$alunoId/chat', extra: nome),
-        ),
         Aluno360FerramentasModule.mensalidades => linha(
           label: 'Mensalidades',
           subtitle: atencao ? 'Pagamento em atraso' : 'Em dia',
-          value: atencao ? 'Em atraso' : 'OK',
+          value: atencao ? 'Em atraso' : '',
           locked: planLocked,
           tier: planLocked ? PlanGate.tierLabel(planLock.$2.planoMinimo) : null,
           onTap: () => goPlan(
@@ -369,7 +343,6 @@ class Aluno360FerramentasGrupos extends ConsumerWidget {
             FxSettingsGroup(
               key: ValueKey('aluno360_grupo_${secao.grupo.name}'),
               header: aluno360GrupoTitulo(s, secao.grupo),
-              caption: aluno360GrupoLegenda(s, secao.grupo),
               children: [
                 for (final (j, m) in secao.modulos.indexed)
                   tile(m, ultimo: j == secao.modulos.length - 1),

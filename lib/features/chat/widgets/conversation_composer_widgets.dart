@@ -10,49 +10,6 @@ import '../../../l10n/app_localizations.dart';
 import 'conversation_composer_acao.dart';
 import '../../../core/theme/fx_icons.dart';
 
-class ConversationAttachOption extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool isDark;
-  final VoidCallback onTap;
-
-  const ConversationAttachOption({
-    super.key,
-    required this.icon,
-    required this.label,
-    required this.isDark,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(TokensStrip.rCard),
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: TokensStrip.s4,
-          vertical: TokensStrip.s3,
-        ),
-        decoration: fxListCardDecoration(context, accent: primary),
-        child: Row(
-          children: [
-            Icon(icon, color: primary),
-            const SizedBox(width: TokensStrip.s3),
-            Text(
-              label,
-              style: FocuxHubTypography.body(
-                color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class ConversationReplyComposerBar extends StatelessWidget {
   final bool isDark;
   final String sender;
@@ -270,7 +227,6 @@ class ConversationMessageComposer extends StatelessWidget {
     required this.onCancelRecording,
     required this.onSendRecording,
     required this.onAttach,
-    required this.onEmoji,
     required this.onSendText,
     required this.onStartRecording,
     required this.onStopRecordingSend,
@@ -290,7 +246,6 @@ class ConversationMessageComposer extends StatelessWidget {
   final VoidCallback onCancelRecording;
   final VoidCallback onSendRecording;
   final VoidCallback onAttach;
-  final VoidCallback onEmoji;
   final VoidCallback onSendText;
   final VoidCallback onStartRecording;
   final VoidCallback onStopRecordingSend;
@@ -404,18 +359,6 @@ class ConversationMessageComposer extends StatelessWidget {
                               onTapOutside: (_) =>
                                   FxKeyboardDismissScope.dismiss(),
                               onSubmitted: (_) => onSendText(),
-                            ),
-                          ),
-                          IconButton(
-                            onPressed: onEmoji,
-                            tooltip: S.of(context).chatEmoji,
-                            icon: const Icon(FxIcons.feliz),
-                            color: mute,
-                            style: IconButton.styleFrom(
-                              visualDensity: VisualDensity.standard,
-                              minimumSize: const Size.square(
-                                kMinInteractiveDimension,
-                              ),
                             ),
                           ),
                           if (composerHasText)

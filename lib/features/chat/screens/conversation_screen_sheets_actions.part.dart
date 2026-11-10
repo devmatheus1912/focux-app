@@ -156,114 +156,32 @@ extension ConversationScreenSheetsActions on _ConversationScreenState {
     );
   }
 
-  void _showEmojiSheet() {
-    final primary = Theme.of(context).colorScheme.primary;
-    final primarySoft = BrandPalette.soft(primary);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    showFxHomeSheet<void>(
-      context,
-      builder:
-          (sheetContext) => FxHomeSheetSurface(
-            isDark: isDark,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                FxHomeSheetHandle(isDark: isDark),
-                SizedBox(height: TokensStrip.s4),
-                Wrap(
-                  spacing: 10,
-                  runSpacing: 10,
-                  children: [
-                    for (final emoji
-                        in _ConversationScreenState._quickReactions)
-                      InkWell(
-                        onTap: () {
-                          Navigator.pop(sheetContext);
-                          final next = '${_ctrl.text}$emoji';
-                          _ctrl.value = TextEditingValue(
-                            text: next,
-                            selection: TextSelection.collapsed(
-                              offset: next.length,
-                            ),
-                          );
-                        },
-                        borderRadius: BorderRadius.circular(16),
-                        child: Container(
-                          width: 52,
-                          height: 52,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: primarySoft,
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Text(
-                            emoji,
-                            style: const TextStyle(fontSize: 24),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-    );
-  }
-
   Future<void> _showAttachmentSheet() async {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final choice = await showFxHomeSheet<Object>(
+    final escolha = await showFxGroupedActionSheet<String>(
       context,
-      builder:
-          (sheetContext) => FxHomeSheetSurface(
-            isDark: isDark,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                FxHomeSheetHandle(isDark: isDark),
-                SizedBox(height: TokensStrip.s4),
-                for (final (icone, rotulo, valor) in <(IconData, String, Object)>[
-                  (
-                    FxIcons.camera,
-                    'Tirar foto',
-                    (ConversationMediaType.photo, ImageSource.camera),
-                  ),
-                  (
-                    FxIcons.video,
-                    'Filmar',
-                    (ConversationMediaType.video, ImageSource.camera),
-                  ),
-                  (
-                    FxIcons.galeria,
-                    'Foto da galeria',
-                    (ConversationMediaType.photo, ImageSource.gallery),
-                  ),
-                  (
-                    FxIcons.videos,
-                    'Vídeo da galeria',
-                    (ConversationMediaType.video, ImageSource.gallery),
-                  ),
-                  (FxIcons.microfone, 'Gravar áudio', 'audio'),
-                ]) ...[
-                  ConversationAttachOption(
-                    icon: icone,
-                    label: rotulo,
-                    isDark: isDark,
-                    onTap: () => Navigator.pop(sheetContext, valor),
-                  ),
-                  const SizedBox(height: 8),
-                ],
-              ],
-            ),
+      titulo: 'Enviar',
+      icone: FxIcons.adicionar,
+      grupos: [
+        FxActionGroup<String>(null, const [
+          FxActionItem(valor: 'foto', rotulo: 'Tirar foto', icone: FxIcons.camera),
+          FxActionItem(valor: 'filmar', rotulo: 'Filmar', icone: FxIcons.video),
+          FxActionItem(
+            valor: 'galeria',
+            rotulo: 'Galeria',
+            descricao: 'Foto ou vídeo',
+            icone: FxIcons.galeria,
           ),
+        ]),
+      ],
     );
-    if (!mounted || choice == null) return;
-    if (choice == 'audio') {
-      await _startAudioRecording();
-      return;
-    }
-    if (choice is (ConversationMediaType, ImageSource)) {
-      await _pickAndSend(choice.$1, source: choice.$2);
+    if (!mounted || escolha == null) return;
+    switch (escolha) {
+      case 'foto':
+        await _pickAndSend(ConversationMediaType.photo, source: ImageSource.camera);
+      case 'filmar':
+        await _pickAndSend(ConversationMediaType.video, source: ImageSource.camera);
+      case 'galeria':
+        await _pickAndSend(null);
     }
   }
 }

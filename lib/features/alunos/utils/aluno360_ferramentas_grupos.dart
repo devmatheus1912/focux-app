@@ -5,9 +5,9 @@ import 'aluno360_resumo_agora.dart';
 import 'aluno_display_utils.dart';
 import '../../../l10n/pt.dart';
 
-/// Os quatro grupos da aba Ferramentas, na ordem em que aparecem sem nada
-/// pedindo atenção.
-enum Aluno360FerramentasGrupo { treino, acompanhamento, relacao, dinheiro }
+/// Os grupos da aba Ferramentas, na ordem em que aparecem sem nada pedindo
+/// atenção. O chat fica no cabeçalho do 360, não aqui.
+enum Aluno360FerramentasGrupo { treino, acompanhamento, dinheiro }
 
 /// Módulos de cada grupo, na ordem fixa dentro dele.
 const aluno360ModulosDoGrupo = <Aluno360FerramentasGrupo, List<Aluno360FerramentasModule>>{
@@ -23,7 +23,6 @@ const aluno360ModulosDoGrupo = <Aluno360FerramentasGrupo, List<Aluno360Ferrament
     Aluno360FerramentasModule.trilhas,
     Aluno360FerramentasModule.anamnese,
   ],
-  Aluno360FerramentasGrupo.relacao: [Aluno360FerramentasModule.chat],
   Aluno360FerramentasGrupo.dinheiro: [
     Aluno360FerramentasModule.mensalidades,
     Aluno360FerramentasModule.recorrencia,
@@ -182,17 +181,63 @@ List<Aluno360DadoLinha> aluno360DadosDoAluno(Aluno aluno) {
 bool aluno360DadosIncompletos(Aluno aluno) =>
     aluno360DadosDoAluno(aluno).any((l) => !l.completo);
 
-/// Valor da linha de composição: o texto do módulo, ou o aviso de valor suspeito.
-String aluno360ComposicaoValor({String? bf, String? massaMagra}) =>
-    composicaoSuspeita(bf: bf, massaMagra: massaMagra)
-        ? 'Confira o valor'
-        : Aluno360FerramentasLogic.composicaoCorporalValue(
-            bf: bf,
-            massaMagra: massaMagra,
-          );
+/// Valor da linha Aderência, com rótulo quando não é percentual: "82%",
+/// "6 treinos" nos primeiros dias, "Sem ficha".
+String aluno360AderenciaValor(Aluno aluno) => switch (aluno.aderenciaEstado) {
+  'COMECANDO' => switch (aluno.treinosJanela ?? 0) {
+    1 => '1 treino',
+    final n => '$n treinos',
+  },
+  'SEM_FICHA' => 'Sem ficha',
+  _ => aderenciaDoCard(aluno).texto,
+};
 
-/// Aderência 0% sem histórico não é nota ruim: é "ainda sem dados".
-String aluno360AderenciaValor(Aluno aluno) => aderenciaDoCard(aluno).texto;
+/// Subtítulo da Aderência: "Começando" nos primeiros 14 dias; senão os
+/// treinos dos últimos 7 dias (mesma palavra do resto do app: treino).
+String aluno360AderenciaSub(Aluno aluno, int treinosEm7Dias) {
+  if (aluno.aderenciaEstado == 'COMECANDO') return 'Começando · primeiros 14 dias';
+  if (treinosEm7Dias > 0) {
+    return treinosEm7Dias == 1
+        ? '1 treino nos últimos 7 dias'
+        : '$treinosEm7Dias treinos nos últimos 7 dias';
+  }
+  final dias = aluno.diasSemTreino;
+  if (dias != null && dias >= 7) return '$dias dias sem treino';
+  return 'Nenhum treino nos últimos 7 dias';
+}
+
+/// Subtítulo de Treinos: sem ficha em destaque; senão quando treinou.
+String aluno360TreinosSub(Aluno aluno) {
+  if (aluno.aderenciaEstado == 'SEM_FICHA') return 'Sem ficha ativa';
+  final dias = aluno.diasSemTreino;
+  if (dias == null) return 'Ficha ativa · ainda sem treino';
+  if (dias >= 7) return '$dias dias sem treino';
+  if (dias == 0) return 'Ficha ativa · treinou hoje';
+  if (dias == 1) return 'Ficha ativa · treinou ontem';
+  return 'Ficha ativa · treinou há $dias dias';
+}
+
+/// Composição corporal: data da avaliação no subtítulo e gordura no valor.
+({String sub, String valor}) aluno360ComposicaoLinha({
+  String? bf,
+  String? massaMagra,
+  String? data,
+}) {
+  if (composicaoSuspeita(bf: bf, massaMagra: massaMagra)) {
+    return (
+      sub: 'Gordura ${bf ?? '—'}% · Massa magra ${massaMagra ?? '—'}%',
+      valor: 'Confira o valor',
+    );
+  }
+  if (bf == null && massaMagra == null) {
+    return (sub: 'Registrar medidas', valor: 'Pendente');
+  }
+  final dia = DateTime.tryParse(data ?? '');
+  final quando = dia == null
+      ? 'Última avaliação'
+      : 'Avaliação de ${dia.day.toString().padLeft(2, '0')}/${dia.month.toString().padLeft(2, '0')}';
+  return (sub: quando, valor: bf != null ? '$bf% gordura' : '$massaMagra% massa magra');
+}
 
 /// O mesmo número em todo lugar: percentual, treinos dos primeiros dias ou sem ficha.
 ({String texto, String rotulo}) aderenciaDoCard(Aluno aluno) {

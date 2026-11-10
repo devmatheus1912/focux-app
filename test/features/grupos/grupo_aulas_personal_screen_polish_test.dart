@@ -4,9 +4,15 @@ import '../../support/screen_source_bundle.dart';
 
 void main() {
   test('grupo aulas personal cumpre contrato Tier S+', () {
-    final screen = readScreenSourceBundle(
-      'lib/features/grupos/screens/grupo_aulas_personal_screen.dart',
-    );
+    // A folha de criar/editar mora em widgets/; o contrato vale para as duas.
+    final screen = [
+      readScreenSourceBundle(
+        'lib/features/grupos/screens/grupo_aulas_personal_screen.dart',
+      ),
+      readScreenSourceBundle(
+        'lib/features/grupos/widgets/grupo_aula_form_sheet.dart',
+      ),
+    ].join('\n');
     expect(screen, anyOf(contains('fxScreenA11yScope'), contains('Semantics(')));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, contains('FxShellScaffold'));
@@ -20,7 +26,6 @@ void main() {
     expect(screen, contains('showFxInsetPickerSheet'));
     expect(screen, contains('showTimePicker'));
     expect(screen, isNot(contains('showDatePicker')));
-    expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, contains('ListView.builder'));
     expect(screen, isNot(contains('TabBar')));

@@ -16,10 +16,10 @@ void main() {
     expect(screen, contains('FeedbackHelper.showSuccess'));
     expect(screen, contains('FeedbackHelper.showError'));
     expect(screen, contains('Semantics('));
-    expect(screen, contains('FxFormStickyBar'));
-    expect(screen, contains('FxFormPopGuard'));
+    expect(screen, isNot(contains('FxFormStickyBar')));
+    expect(screen, contains('_salvarSeMudou'));
     expect(screen, contains('safePopOrGo'));
-    expect(screen, contains('showFxConfirmSheet'));
+    expect(screen, contains('SharePlus'));
     expect(screen, contains('ScrollViewKeyboardDismissBehavior.onDrag'));
     expect(screen, contains('whiteLabelCanVerifyDomain'));
     expect(screen, contains('whiteLabelCnameHint'));

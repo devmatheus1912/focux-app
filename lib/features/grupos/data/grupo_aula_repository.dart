@@ -42,6 +42,27 @@ class GrupoAula {
   );
 
   bool get lotada => !inscrito && inscritos >= capacidadeMax;
+  bool get cancelada => status == 'CANCELADA';
+}
+
+/// Aluno inscrito numa aula (`GET /api/grupo-aulas/{id}/inscritos`).
+class GrupoAulaInscrito {
+  const GrupoAulaInscrito({
+    required this.alunoId,
+    required this.nome,
+    this.fotoUrl,
+  });
+
+  final int alunoId;
+  final String nome;
+  final String? fotoUrl;
+
+  factory GrupoAulaInscrito.fromJson(Map<String, dynamic> j) =>
+      GrupoAulaInscrito(
+        alunoId: (j['alunoId'] as num).toInt(),
+        nome: j['nome'] as String? ?? '',
+        fotoUrl: j['fotoUrl'] as String?,
+      );
 }
 
 class GrupoAulaRepository {
@@ -108,6 +129,7 @@ class GrupoAulaRepository {
     required DateTime fim,
     int? capacidadeMax,
     String? localAula,
+    List<int> alunoIds = const [],
   }) async {
     final r = await _dio.post(
       '/api/grupo-aulas',
@@ -118,7 +140,52 @@ class GrupoAulaRepository {
         'fim': fim.toIso8601String(),
         'capacidadeMax': capacidadeMax,
         'localAula': localAula,
+        if (alunoIds.isNotEmpty) 'alunoIds': alunoIds,
       },
+    );
+    return GrupoAula.fromJson(r.data as Map<String, dynamic>);
+  }
+
+  Future<GrupoAula> editar(
+    int aulaId, {
+    required String titulo,
+    String? descricao,
+    required DateTime inicio,
+    required DateTime fim,
+    required int capacidadeMax,
+    String? localAula,
+  }) async {
+    final r = await _dio.put(
+      '/api/grupo-aulas/$aulaId',
+      data: {
+        'titulo': titulo,
+        'descricao': descricao,
+        'inicio': inicio.toIso8601String(),
+        'fim': fim.toIso8601String(),
+        'capacidadeMax': capacidadeMax,
+        'localAula': localAula,
+      },
+    );
+    return GrupoAula.fromJson(r.data as Map<String, dynamic>);
+  }
+
+  Future<GrupoAula> cancelar(int aulaId) async {
+    final r = await _dio.post('/api/grupo-aulas/$aulaId/cancelar');
+    return GrupoAula.fromJson(r.data as Map<String, dynamic>);
+  }
+
+  Future<List<GrupoAulaInscrito>> inscritos(int aulaId) async {
+    final r = await _dio.get('/api/grupo-aulas/$aulaId/inscritos');
+    return [
+      for (final item in (r.data as List? ?? const []))
+        GrupoAulaInscrito.fromJson(Map<String, dynamic>.from(item as Map)),
+    ];
+  }
+
+  Future<GrupoAula> inscreverAlunos(int aulaId, List<int> alunoIds) async {
+    final r = await _dio.post(
+      '/api/grupo-aulas/$aulaId/inscrever-alunos',
+      data: {'alunoIds': alunoIds},
     );
     return GrupoAula.fromJson(r.data as Map<String, dynamic>);
   }

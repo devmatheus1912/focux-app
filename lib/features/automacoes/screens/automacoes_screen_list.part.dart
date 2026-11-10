@@ -1,176 +1,124 @@
 part of 'automacoes_screen.dart';
 
+/// Uma automação na lista: o modelo e, se o personal já ligou alguma vez, o
+/// fluxo dele (ligado ou pausado).
+class _AutomacaoLinha {
+  const _AutomacaoLinha({this.template, this.fluxo});
+
+  final AutomacaoTemplate? template;
+  final AutomacaoFluxo? fluxo;
+
+  bool get ligada => fluxo?.ativo ?? false;
+
+  String get nome => automacaoNome(
+    templateId: template?.id ?? fluxo?.templateId,
+    nomeGravado: template?.nome ?? fluxo?.nome ?? '',
+  );
+
+  String get gatilho =>
+      automacaoTriggerLabel(template?.triggerTipo ?? fluxo?.triggerTipo ?? '');
+}
+
+/// Junta modelo e fluxo pelo `templateId`: cada automação aparece uma vez.
+List<_AutomacaoLinha> _linhasDeAutomacao(
+  List<AutomacaoTemplate> templates,
+  List<AutomacaoFluxo> fluxos,
+) {
+  final porTemplate = <String, AutomacaoFluxo>{
+    for (final f in fluxos)
+      if (f.templateId != null) f.templateId!: f,
+  };
+  return [
+    for (final t in templates)
+      _AutomacaoLinha(template: t, fluxo: porTemplate[t.id]),
+    // Fluxo sem modelo no catálogo (plano mudou, modelo antigo): continua visível.
+    for (final f in fluxos)
+      if (f.templateId == null || !templates.any((t) => t.id == f.templateId))
+        _AutomacaoLinha(fluxo: f),
+  ];
+}
+
 extension on _AutomacoesScreenState {
-  Widget _buildList(
-    List<AutomacaoTemplate> templates,
-    List<AutomacaoFluxo> fluxos,
-  ) {
+  Widget _buildList(List<_AutomacaoLinha> linhas) {
     final primary = Theme.of(context).colorScheme.primary;
-    final showMore = _hasMore && _chip != AutomacaoChip.templates;
-    if (templates.isEmpty && fluxos.isEmpty) {
-      final filtered =
-          _query.trim().isNotEmpty || _chip != AutomacaoChip.todos;
+    if (linhas.isEmpty) {
       return RefreshIndicator(
         color: primary,
         onRefresh: _load,
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           children: [
             FxEmptyState(
-              icon: filtered ? FxIcons.buscar : FxIcons.raio,
-              title: filtered
-                  ? 'Nenhuma automação encontrada'
-                  : 'Nenhuma automação ainda',
-              subtitle: filtered
-                  ? 'Ajuste a busca ou o filtro.'
-                  : 'Templates aparecem aqui para você ativar o primeiro fluxo.',
-              action: filtered
-                  ? FxEmptyAction(label: 'Limpar filtros', secondary: true, onTap: _clearQuery)
-                  : (_templates.isNotEmpty
-                      ? FxEmptyAction(
-                        label: 'Ativar ${_templates.first.nome}',
-                        onTap: () => _ativar(_templates.first),
-                      )
-                      : FxEmptyAction(label: 'Atualizar', onTap: _load)),
+              icon: FxIcons.raio,
+              title: 'Nenhuma automação disponível',
+              subtitle: 'As automações do seu plano aparecem aqui.',
+              action: FxEmptyAction(label: 'Atualizar', onTap: _load),
             ),
           ],
         ),
       );
     }
 
-    final rows = <Object>[
-      if (templates.isNotEmpty) ...['Templates', ...templates],
-      if (fluxos.isNotEmpty) ...['Fluxos ativos', ...fluxos],
-    ];
-
     return RefreshIndicator(
       color: primary,
       onRefresh: _load,
       child: ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
-        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        padding: EdgeInsets.fromLTRB(
+        padding: const EdgeInsets.fromLTRB(
           FxSettingsLayout.pageInset,
           TokensStrip.s2,
           FxSettingsLayout.pageInset,
-          TokensStrip.s6 + MediaQuery.viewInsetsOf(context).bottom,
+          TokensStrip.s6,
         ),
-        itemCount:
-            rows.length +
-            (showMore ? 1 : 0) +
-            (templates.isNotEmpty ? 1 : 0),
+        itemCount: linhas.length,
         itemBuilder: (context, i) {
-          final focusOffset = templates.isNotEmpty ? 1 : 0;
-          if (templates.isNotEmpty && i == 0) {
-            final t = templates.first;
-            final isDark = Theme.of(context).brightness == Brightness.dark;
-            return Padding(
-              padding: const EdgeInsets.only(bottom: TokensStrip.s4),
-              child: FxStripCard(
-                emphasize: true,
-                semanticsLabel: 'Ativar template ${t.nome}',
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Próximo template',
-                      style: FocuxHubTypography.chip(fxScreenMute(context)),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      t.nome,
-                      style: FocuxHubTypography.metric(
-                        color: Theme.of(context).colorScheme.onSurface,
-                        fontSize: TokensStrip.fontTitulo,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      automacaoTriggerLabel(t.triggerTipo),
-                      style: FocuxHubTypography.bodyMuted(
-                        color: fxScreenMute(context),
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: TokensStrip.s3),
-                    FxActionChip(
-                      label: 'Ativar',
-                      accent: primary,
-                      isDark: isDark,
-                      onPressed: () => _ativar(t),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }
-          final rowIndex = i - focusOffset;
-          if (showMore && rowIndex == rows.length) {
-            return FxSatelliteListTile(
-              title: _carregandoMais ? 'Carregando…' : 'Carregar mais',
-              onTap: _carregandoMais ? null : _carregarMais,
-            );
-          }
-          final row = rows[rowIndex];
-          if (row is String) {
-            return Padding(
-              padding: EdgeInsets.only(
-                top: rowIndex == 0 ? 0 : TokensStrip.s3,
-                bottom: TokensStrip.s2,
-              ),
-              child: Text(
-                row,
-                style: FocuxHubTypography.cardTitle(
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-              ),
-            );
-          }
-          if (row is AutomacaoTemplate) {
-            return FxSatelliteListTile(
-              title: row.nome,
-              titleCase: false,
-              subtitle: Text(
-                row.descricao.trim().isEmpty
-                    ? automacaoTriggerLabel(row.triggerTipo)
-                    : row.descricao,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              leading: Icon(FxIcons.raio, color: primary),
-              trailing: Text(
-                'Ativar',
-                style: FocuxHubTypography.bodyMuted(
-                  color: primary,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              onTap: () => _ativar(row),
-            );
-          }
-          final fluxo = row as AutomacaoFluxo;
+          final linha = linhas[i];
+          final template = linha.template;
+          final fluxo = linha.fluxo;
+          final resumo =
+              template == null
+                  ? linha.gatilho
+                  : '${linha.gatilho} · ${automacaoResumoPassos(template.passos)}';
           return FxSatelliteListTile(
-            title: fluxo.nome,
+            title: linha.nome,
             titleCase: false,
-            subtitle: Text(automacaoTriggerLabel(fluxo.triggerTipo)),
-            leading: Icon(
-              fluxo.ativo
-                  ? FxIcons.play
-                  : FxIcons.pausar,
-              color: primary,
+            subtitle: Text(
+              linha.ligada ? 'Ligada · $resumo' : resumo,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
-            trailing: Text(
-              automacaoFluxoStatusLabel(ativo: fluxo.ativo),
-              style: FocuxHubTypography.bodyMuted(
-                color: fxScreenMute(context),
-                fontWeight: FontWeight.w600,
+            leading: Icon(FxIcons.raio, color: primary),
+            trailing: Semantics(
+              label:
+                  linha.ligada
+                      ? 'Desligar ${linha.nome}'
+                      : 'Ligar ${linha.nome}',
+              child: Switch.adaptive(
+                value: linha.ligada,
+                onChanged: (ligar) => _alternar(linha, ligar),
               ),
             ),
-            onTap: () => _openLogs(fluxo),
+            onTap: () {
+              if (fluxo != null) {
+                _openLogs(fluxo);
+              } else if (template != null) {
+                _ativar(template);
+              }
+            },
           );
         },
       ),
     );
+  }
+
+  Future<void> _alternar(_AutomacaoLinha linha, bool ligar) async {
+    final fluxo = linha.fluxo;
+    final template = linha.template;
+    if (ligar && fluxo == null && template != null) {
+      await _ativar(template);
+      return;
+    }
+    if (fluxo == null) return;
+    await _toggleFluxoAtivo(fluxo);
   }
 }

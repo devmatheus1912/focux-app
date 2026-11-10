@@ -93,8 +93,9 @@ extension ConversationScreenMessaging on _ConversationScreenState {
     };
   }
 
+  /// [tipo] nulo: galeria com foto ou vídeo num seletor só.
   Future<void> _pickAndSend(
-    ConversationMediaType type, {
+    ConversationMediaType? tipo, {
     ImageSource source = ImageSource.gallery,
   }) async {
     if (_uploading) return;
@@ -105,19 +106,19 @@ extension ConversationScreenMessaging on _ConversationScreenState {
 
     XFile? file;
     try {
-      if (type == ConversationMediaType.photo) {
+      if (tipo == ConversationMediaType.photo) {
         file = await _picker.pickImage(
           source: source,
           maxWidth: 1600,
           imageQuality: 72,
         );
-      } else if (type == ConversationMediaType.video) {
+      } else if (tipo == ConversationMediaType.video) {
         file = await _picker.pickVideo(
           source: source,
           maxDuration: const Duration(seconds: 60),
         );
       } else {
-        file = await _picker.pickMedia();
+        file = await _picker.pickMedia(maxWidth: 1600, imageQuality: 72);
       }
     } catch (e) {
       if (mounted) {
@@ -129,6 +130,7 @@ extension ConversationScreenMessaging on _ConversationScreenState {
       return;
     }
     if (file == null) return;
+    final type = tipo ?? chatMidiaDoArquivo(file.name, file.mimeType);
 
     final size = await file.length();
     const maxChatBytes = 80 * 1024 * 1024;

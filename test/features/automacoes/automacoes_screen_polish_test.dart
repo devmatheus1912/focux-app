@@ -17,16 +17,13 @@ void main() {
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('safePopOrGo'));
     expect(screen, contains('PopScope'));
-    expect(screen, contains('FxToggleChip'));
+    expect(screen, contains('Switch.adaptive'));
     expect(screen, contains('FxHubFreshness.joinCount'));
-    expect(screen, contains('FxKeyboardDismissScope.dismiss'));
-    expect(screen, contains('viewInsetsOf'));
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('/perfil/ferramentas'));
     expect(screen, contains('ListView.builder'));
     expect(screen, contains('FxSatelliteListTile'));
-    expect(screen, contains('FxStripCard'));
-    expect(screen, contains('FxActionChip'));
+    expect(screen, contains('automacaoPassosLinhas'));
     expect(screen, contains('logs('));
     expect(screen, contains('iniciarFluxo'));
     expect(screen, contains('pausar'));
@@ -34,7 +31,6 @@ void main() {
     expect(screen, contains('_toggleFluxoAtivo'));
     expect(screen, contains('showFxInsetPickerSheet'));
     expect(screen, contains('alunosHomeProvider'));
-    expect(screen, contains('Carregar mais'));
     expect(screen, isNot(contains('FilledButton')));
     expect(screen, isNot(contains('ShellHeaderIconButton')));
     expect(screen, isNot(contains('FloatingActionButton')));

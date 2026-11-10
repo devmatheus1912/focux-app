@@ -44,7 +44,6 @@ ConversationMessageComposer _composer({
     onCancelRecording: () {},
     onSendRecording: () {},
     onAttach: () {},
-    onEmoji: () {},
     onSendText: onSendText ?? () {},
     onStartRecording: onStartRecording ?? () {},
     onStopRecordingSend: () {},
@@ -76,14 +75,13 @@ void main() {
     expect(enviou, 2);
   });
 
-  testWidgets('anexar, emoji e barra de gravação têm alvo de 48dp', (
+  testWidgets('anexar e barra de gravação têm alvo de 48dp', (
     tester,
   ) async {
     await tester.pumpWidget(_app(_composer(comTexto: false, gravando: true)));
 
     final icones = [
       FxIcons.adicionar,
-      FxIcons.feliz,
       FxIcons.excluir,
       FxIcons.setaCima,
     ];
@@ -128,12 +126,8 @@ void main() {
       tester.getSemantics(find.widgetWithIcon(IconButton, FxIcons.adicionar)),
       isSemantics(tooltip: 'Anexar', isButton: true),
     );
-    expect(
-      tester.getSemantics(
-        find.widgetWithIcon(IconButton, FxIcons.feliz),
-      ),
-      isSemantics(tooltip: 'Inserir emoji', isButton: true),
-    );
+    // Sem botão de emoji: o teclado do sistema já tem.
+    expect(find.widgetWithIcon(IconButton, FxIcons.feliz), findsNothing);
     semantics.dispose();
   });
 

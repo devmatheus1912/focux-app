@@ -1,5 +1,10 @@
+/// Texto da bolha: sem markdown leve e com a lista visível ("- item" vira
+/// "• item"), para o resumo da evolução não virar parede de texto.
 String formatChatTextForDisplay(String raw) {
-  final trimmed = normalizeChatText(raw);
+  final trimmed = raw
+      .replaceAll(RegExp(r'\*\*|__|`'), '')
+      .replaceAll(RegExp(r'^[ \t]*[-•][ \t]+', multiLine: true), '• ')
+      .trim();
   if (trimmed.isEmpty) return '';
 
   final lines = trimmed

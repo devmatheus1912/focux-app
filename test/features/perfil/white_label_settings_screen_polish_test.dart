@@ -25,8 +25,8 @@ void main() {
         contains('ref.invalidate'),
       ),
     );
-    expect(screen, contains('FxLiquidPrimaryButton'));
-    expect(screen, contains('bottomNavigationBar'));
+    expect(screen, contains('Switch.adaptive'));
+    expect(screen, isNot(contains('bottomNavigationBar')));
     expect(screen, contains('SkeletonList'));
     expect(screen, contains('FxKeyboardDismissScope'));
     expect(screen, contains('FxSettingsTile'));

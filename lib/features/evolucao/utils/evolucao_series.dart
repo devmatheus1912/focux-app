@@ -331,3 +331,18 @@ Set<String> datasConferidas(
   for (final p in [...gordura, ...massa])
     if (p.conferido && p.data.length >= 10) p.data.substring(0, 10),
 };
+
+/// O registro mais novo de alguma medida saltou demais e ninguém conferiu:
+/// antes de mandar o resumo no chat, pede para conferir.
+bool ultimaMedidaSuspeita(List<MedidaCorporal> medidas) {
+  final conferidas = datasConferidas(medidas);
+  for (final m in EvolucaoMetrica.values) {
+    final pontos = serieDaMetrica(medidas, m);
+    if (pontos.length < 2) continue;
+    if (pontosSuspeitos(pontos, m.unidade, conferidas: conferidas)
+        .contains(pontos.length - 1)) {
+      return true;
+    }
+  }
+  return false;
+}

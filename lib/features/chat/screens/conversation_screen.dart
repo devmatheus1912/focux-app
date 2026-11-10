@@ -40,6 +40,8 @@ import '../utils/chat_outgoing_dedupe.dart';
 import '../utils/chat_remetente.dart';
 import '../utils/chat_system_event.dart';
 import '../utils/chat_fio.dart';
+import '../utils/chat_cabecalho.dart';
+import '../utils/chat_midia_arquivo.dart';
 import 'chat_inbox_screen.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/feedback_helper.dart';
@@ -146,6 +148,9 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   DateTime? _recordStartedAt;
   ChatBloqueio _bloqueio = const ChatBloqueio();
 
+  /// Ao voltar do segundo plano, recarrega o fio (o WebSocket pode ter caído).
+  late final AppLifecycleListener _vidaDoApp;
+
   bool get _isAlunoMode => widget.mode == ConversationMode.aluno;
   bool get _isPersonalMode => widget.mode == ConversationMode.personal;
   bool get _bloqueadoPorMim =>
@@ -166,6 +171,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _aplicarRascunho(ref.read(chatAlunoRascunhoProvider));
     });
+    _vidaDoApp = AppLifecycleListener(onResume: () => unawaited(_loadHistorico()));
     _loadHistorico();
     unawaited(_loadBloqueio());
     if (_alunoId != null) {
@@ -187,6 +193,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   @override
   void dispose() {
     _wsLifecycleEnded = true;
+    _vidaDoApp.dispose();
     _wsReconnectTimer?.cancel();
     _markReadDebounce?.cancel();
     _stomp?.deactivate();
@@ -450,12 +457,13 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     final primarySoft = BrandPalette.soft(primary, dark: isDark);
     final brand =
         _isAlunoMode ? ref.watch(personalBrandProvider).value : null;
-    final alunoFotoUrl =
+    final alunoCadastro =
         _isPersonalMode && widget.alunoId != null
-            ? ref.watch(alunoProvider(widget.alunoId!)).value?.fotoUrl
+            ? ref.watch(alunoProvider(widget.alunoId!)).value
             : null;
-    final title = _displayName(brand);
-    final subtitle = _subtitle(brand);
+    final alunoFotoUrl = alunoCadastro?.fotoUrl;
+    final title = _displayName(brand, alunoNomeCarregado: alunoCadastro?.nome);
+    final subtitle = _subtitle();
     final fio = montarFioDoChat(_msgs, alunoMode: _isAlunoMode);
     final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
     final avatarUrl = _avatarImage(brand, alunoFotoUrl: alunoFotoUrl);
@@ -470,18 +478,36 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
         appBar: FxShellAppBar(
           title: title,
           subtitle: subtitle,
-          onBack: () {
-            FxKeyboardDismissScope.dismiss();
-            safePopOrGo(context, backFallback);
-          },
+          // A conversa do aluno é uma aba: aba não tem voltar.
+          showBack: _isPersonalMode,
+          onBack: _isAlunoMode
+              ? null
+              : () {
+                  FxKeyboardDismissScope.dismiss();
+                  safePopOrGo(context, backFallback);
+                },
           actions: [
             Padding(
               padding: const EdgeInsets.only(right: 4),
-              child: AlunoAvatar(
-                name: title,
-                photoUrl: avatarUrl,
-                variant: AlunoAvatarVariant.strip,
-              ),
+              child: _isPersonalMode && widget.alunoId != null
+                  ? Semantics(
+                      button: true,
+                      label: 'Abrir o Aluno 360 de $title',
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () => context.push('/alunos/${widget.alunoId}'),
+                        child: AlunoAvatar(
+                          name: title,
+                          photoUrl: avatarUrl,
+                          variant: AlunoAvatarVariant.strip,
+                        ),
+                      ),
+                    )
+                  : AlunoAvatar(
+                      name: title,
+                      photoUrl: avatarUrl,
+                      variant: AlunoAvatarVariant.strip,
+                    ),
             ),
             IconButton(
               onPressed: _showSearchSheet,
@@ -678,7 +704,6 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                   onCancelRecording: () => _stopAudioRecording(send: false),
                   onSendRecording: () => _stopAudioRecording(send: true),
                   onAttach: _showAttachmentSheet,
-                  onEmoji: _showEmojiSheet,
                   onSendText: _sendText,
                   onStartRecording: _startAudioRecording,
                   onStopRecordingSend: () => _stopAudioRecording(send: true),

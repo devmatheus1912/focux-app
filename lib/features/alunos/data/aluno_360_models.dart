@@ -109,9 +109,13 @@ class Aluno360ComposicaoResumo {
   final double? percGordura;
   final double? massaMuscular;
 
+  /// Dia da avaliação atual (aaaa-mm-dd), quando o servidor manda.
+  final String? data;
+
   const Aluno360ComposicaoResumo({
     this.percGordura,
     this.massaMuscular,
+    this.data,
   });
 
   factory Aluno360ComposicaoResumo.fromJson(Map<String, dynamic> json) {
@@ -122,6 +126,7 @@ class Aluno360ComposicaoResumo {
     return Aluno360ComposicaoResumo(
       percGordura: (json['percGordura'] as num?)?.toDouble(),
       massaMuscular: massa,
+      data: json['data'] as String?,
     );
   }
 }

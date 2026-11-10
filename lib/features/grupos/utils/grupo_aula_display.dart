@@ -1,67 +1,7 @@
-String grupoAulaWhenLabel(DateTime d) {
-  final day = d.day.toString().padLeft(2, '0');
-  final month = d.month.toString().padLeft(2, '0');
-  final hour = d.hour.toString().padLeft(2, '0');
-  final minute = d.minute.toString().padLeft(2, '0');
-  return '$day/$month $hour:$minute';
-}
-
 String grupoAulaDateLabel(DateTime d) {
   final day = d.day.toString().padLeft(2, '0');
   final month = d.month.toString().padLeft(2, '0');
   return '$day/$month';
-}
-
-bool grupoAulaSameDay(DateTime a, DateTime b) =>
-    a.year == b.year && a.month == b.month && a.day == b.day;
-
-DateTime grupoAulaDay(DateTime d) => DateTime(d.year, d.month, d.day);
-
-const grupoAulaDateHorizons = [0, 1, 3, 7, 14, 30];
-
-String grupoAulaDateOptionLabel(DateTime date, DateTime today) {
-  final d = grupoAulaDay(date);
-  final t = grupoAulaDay(today);
-  final diff = d.difference(t).inDays;
-  if (diff == 0) return 'Hoje';
-  if (diff == 1) return 'Amanhã';
-  if (diff == -1) return 'Ontem';
-  if (diff > 1) return 'Em $diff dias';
-  return 'Há ${-diff} dias';
-}
-
-List<DateTime> grupoAulaDateOptions({
-  required DateTime firstDate,
-  required DateTime lastDate,
-  DateTime? initial,
-  DateTime? now,
-}) {
-  final first = grupoAulaDay(firstDate);
-  final last = grupoAulaDay(lastDate);
-  final span = last.difference(first).inDays;
-  if (span <= 2) {
-    final out = <DateTime>[];
-    for (var d = first; !d.isAfter(last); d = d.add(const Duration(days: 1))) {
-      out.add(d);
-    }
-    return out;
-  }
-  final today = grupoAulaDay(now ?? DateTime.now());
-  final out = <DateTime>[];
-  for (final h in grupoAulaDateHorizons) {
-    final d = today.add(Duration(days: h));
-    if (d.isBefore(first) || d.isAfter(last)) continue;
-    if (!out.any((x) => grupoAulaSameDay(x, d))) out.add(d);
-  }
-  if (initial != null) {
-    final i = grupoAulaDay(initial);
-    if (!i.isBefore(first) &&
-        !i.isAfter(last) &&
-        !out.any((x) => grupoAulaSameDay(x, i))) {
-      out.insert(0, i);
-    }
-  }
-  return out;
 }
 
 String grupoAulaVagasLabel({
@@ -75,20 +15,7 @@ String grupoAulaVagasLabel({
   return '$livres vagas';
 }
 
-String grupoAulaSubtitle({
-  required DateTime inicio,
-  String? localAula,
-}) {
-  final when = grupoAulaWhenLabel(inicio);
-  final local = localAula?.trim();
-  if (local == null || local.isEmpty) return when;
-  return '$when · $local';
-}
-
-bool grupoAulaLotada({
-  required int inscritos,
-  required int capacidadeMax,
-}) =>
+bool grupoAulaLotada({required int inscritos, required int capacidadeMax}) =>
     capacidadeMax > 0 && inscritos >= capacidadeMax;
 
 /// Status no trailing; nulo quando a aula está aberta (o toque na linha inscreve).
@@ -117,3 +44,77 @@ String? grupoAulaChipQuery(GrupoAulaChip chip) => switch (chip) {
   GrupoAulaChip.abertas => 'ABERTAS',
   GrupoAulaChip.lotadas => 'LOTADAS',
 };
+
+/// Mesmo teto do servidor (`CAPACIDADE_MAX_LIMITE`).
+const grupoAulaCapacidadeLimite = 200;
+
+const _semana = ['seg.', 'ter.', 'qua.', 'qui.', 'sex.', 'sáb.', 'dom.'];
+
+String _hm(DateTime d) =>
+    '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
+
+/// "qui., 11/11".
+String grupoAulaDiaLabel(DateTime d) =>
+    '${_semana[d.weekday - 1]}, ${grupoAulaDateLabel(d)}';
+
+/// "07:00 – 08:00".
+String grupoAulaHorarioLabel(DateTime inicio, DateTime fim) =>
+    '${_hm(inicio)} – ${_hm(fim)}';
+
+/// "qui. 11/11 · 07:00 – 08:00 · Studio".
+String grupoAulaLinha({
+  required DateTime inicio,
+  required DateTime fim,
+  String? localAula,
+}) {
+  final local = localAula?.trim();
+  return [
+    '${_semana[inicio.weekday - 1]} ${grupoAulaDateLabel(inicio)}',
+    grupoAulaHorarioLabel(inicio, fim),
+    if (local != null && local.isNotEmpty) local,
+  ].join(' · ');
+}
+
+/// "12/20" para o personal; "Lotada" quando enche; "Cancelada".
+String grupoAulaOcupacaoLabel({
+  required int inscritos,
+  required int capacidadeMax,
+  required String status,
+}) {
+  if (status == 'CANCELADA') return 'Cancelada';
+  if (grupoAulaLotada(inscritos: inscritos, capacidadeMax: capacidadeMax)) {
+    return 'Lotada';
+  }
+  return '$inscritos/$capacidadeMax';
+}
+
+String grupoAulaAlunosEscolhidosLabel(int n) => switch (n) {
+  0 => 'Nenhum',
+  1 => '1 aluno',
+  _ => '$n alunos',
+};
+
+/// Dias para marcar aula: de hoje até 60 dias, mais o dia atual da aula se
+/// ficar fora (aula já marcada mais longe).
+List<DateTime> grupoAulaDiasDisponiveis(DateTime hoje, {DateTime? atual}) {
+  final base = DateTime(hoje.year, hoje.month, hoje.day);
+  final dias = [
+    for (var i = 0; i < 60; i++) DateTime(base.year, base.month, base.day + i),
+  ];
+  if (atual != null) {
+    final a = DateTime(atual.year, atual.month, atual.day);
+    if (!dias.contains(a)) dias.insert(a.isBefore(base) ? 0 : dias.length, a);
+  }
+  return dias;
+}
+
+/// "Hoje", "Amanhã", "Em 5 dias".
+String grupoAulaDiaRelativo(DateTime dia, DateTime hoje) {
+  final d = DateTime(dia.year, dia.month, dia.day);
+  final h = DateTime(hoje.year, hoje.month, hoje.day);
+  final n = d.difference(h).inDays;
+  if (n == 0) return 'Hoje';
+  if (n == 1) return 'Amanhã';
+  if (n < 0) return 'Já passou';
+  return 'Em $n dias';
+}

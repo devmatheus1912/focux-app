@@ -251,12 +251,15 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
 
   Future<void> _compartilharNoChat() async {
     HapticFeedback.mediumImpact();
+    final medidas =
+        ref.read(evolucaoHomeProvider(widget.alunoId)).value?.medidas ?? const [];
+    final suspeita = ultimaMedidaSuspeita(medidas);
     final ok = await showFxConfirmSheet(
       context,
       title: evolucaoComparativoConfirmTitle(),
-      message: evolucaoComparativoConfirmMessage(),
+      message: evolucaoComparativoConfirmMessage(medidaSuspeita: suspeita),
       icon: FxIcons.chat,
-      confirmLabel: evolucaoComparativoConfirmLabel(),
+      confirmLabel: evolucaoComparativoConfirmLabel(medidaSuspeita: suspeita),
     );
     if (!ok || !mounted) return;
     try {

@@ -12,22 +12,10 @@ extension ConversationScreenSheetsMenuMedia on _ConversationScreenState {
           icone: FxIcons.pessoa,
         ),
       const FxActionItem(
-        valor: 'buscar',
-        rotulo: 'Buscar conversa',
-        descricao: 'Encontrar mensagem na thread',
-        icone: FxIcons.buscar,
-      ),
-      const FxActionItem(
         valor: 'midias',
         rotulo: 'Mídias da conversa',
         descricao: 'Fotos, vídeos e áudios',
         icone: FxIcons.midia,
-      ),
-      const FxActionItem(
-        valor: 'atualizar',
-        rotulo: 'Atualizar conversa',
-        descricao: 'Recarregar mensagens',
-        icone: FxIcons.atualizar,
       ),
     ];
     final seguranca = <FxActionItem<String>>[
@@ -72,12 +60,8 @@ extension ConversationScreenSheetsMenuMedia on _ConversationScreenState {
     switch (chosen) {
       case 'perfil':
         context.push('/alunos/${widget.alunoId}');
-      case 'buscar':
-        _showSearchSheet();
       case 'midias':
         _showMediaGallerySheet();
-      case 'atualizar':
-        _loadHistorico();
       case 'denunciar':
         final msg = _ultimaRecebida();
         if (msg == null) return;
@@ -180,7 +164,7 @@ extension ConversationScreenSheetsMenuMedia on _ConversationScreenState {
                     SizedBox(height: TokensStrip.s4),
                     FxHomeSheetHeader(
                       isDark: isDark,
-                      title: 'Midias da conversa',
+                      title: 'Mídias da conversa',
                       leading: Icon(
                         FxIcons.midia,
                         color: primary,

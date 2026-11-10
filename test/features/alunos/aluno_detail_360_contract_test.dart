@@ -428,7 +428,7 @@ void main() {
         contains('class Aluno360FerramentasGrupos'),
         contains('ConsumerWidget'),
         contains('UpgradePromptSheet'),
-        contains('Aluno360FerramentasMiniSparkline'),
+        contains('aluno360AderenciaValor'),
         contains('FxSettingsGroup'),
         contains('FxSettingsTile'),
       ),

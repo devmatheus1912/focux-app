@@ -11,10 +11,13 @@ String chatRemetenteLabel({
   required String remetente,
   required bool isAlunoMode,
   String? tipoMidia,
+  String? nomePersonal,
 }) {
   if (chatIsSistema(remetente, tipoMidia)) return 'Sistema';
   if (isAlunoMode) {
-    return remetente == 'ALUNO' ? 'Você' : 'Personal';
+    if (remetente == 'ALUNO') return 'Você';
+    final primeiro = (nomePersonal ?? '').trim().split(RegExp(r'\s+')).first;
+    return primeiro.isEmpty ? 'Personal' : primeiro;
   }
   return remetente == 'PERSONAL' ? 'Você' : 'Aluno';
 }

@@ -16,11 +16,7 @@ import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_help.dart';
-import '../../../core/widgets/fx_home_sheet.dart';
-import '../../../core/widgets/fx_inset_picker_row.dart';
-import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
@@ -28,10 +24,15 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_toggle_chip.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
-import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../data/grupo_aula_repository.dart';
 import '../utils/grupo_aula_display.dart';
+import '../widgets/grupo_aula_alunos_sheet.dart';
+import '../widgets/grupo_aula_detalhe_sheet.dart';
+import '../widgets/grupo_aula_form_sheet.dart';
+import '../../alunos/data/aluno_repository.dart';
+import '../../alunos/providers/alunos_provider.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/theme/fx_icons.dart';
 
 class GrupoAulasPersonalScreen extends ConsumerStatefulWidget {
@@ -109,10 +110,9 @@ class _GrupoAulasPersonalScreenState
       _erro = null;
     });
     try {
-      final pagina =
-          await GrupoAulaRepository(
-            ref.read(apiClientProvider),
-          ).listarPersonalPagina(q: _query, chip: _chip);
+      final pagina = await GrupoAulaRepository(
+        ref.read(apiClientProvider),
+      ).listarPersonalPagina(q: _query, chip: _chip);
       if (mounted) {
         setState(() {
           _aulas = pagina.content;
@@ -143,10 +143,7 @@ class _GrupoAulasPersonalScreenState
       if (!mounted) return;
       final seen = _aulas.map((a) => a.id).toSet();
       setState(() {
-        _aulas = [
-          ..._aulas,
-          ...pagina.content.where((a) => seen.add(a.id)),
-        ];
+        _aulas = [..._aulas, ...pagina.content.where((a) => seen.add(a.id))];
         _page = pagina.page ?? (_page + 1);
         _hasMore = pagina.hasNext;
         _total = pagina.totalElements ?? _aulas.length;
@@ -159,243 +156,151 @@ class _GrupoAulasPersonalScreenState
     }
   }
 
-  Future<DateTime?> _pickDateTime(
-    BuildContext context, {
-    required DateTime initial,
-    required DateTime firstDate,
-    required DateTime lastDate,
-  }) async {
-    final today = DateTime.now();
-    final options = grupoAulaDateOptions(
-      firstDate: firstDate,
-      lastDate: lastDate,
-      initial: initial,
-      now: today,
-    );
-    final pickedDate = await showFxInsetPickerSheet<DateTime>(
-      context,
-      title: 'Data',
-      selected: grupoAulaDay(initial),
-      sameValue: grupoAulaSameDay,
-      items: [
-        for (final day in options)
-          FxInsetPickerSheetItem(
-            value: day,
-            label: grupoAulaDateOptionLabel(day, today),
-            subtitle: grupoAulaDateLabel(day),
-            icon: FxIcons.calendario,
-          ),
-      ],
-    );
-    if (pickedDate == null || !context.mounted) return null;
-    final time = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.fromDateTime(initial),
-    );
-    if (time == null) return null;
-    return DateTime(
-      pickedDate.year,
-      pickedDate.month,
-      pickedDate.day,
-      time.hour,
-      time.minute,
-    );
-  }
+  GrupoAulaRepository get _repo =>
+      GrupoAulaRepository(ref.read(apiClientProvider));
 
   Future<void> _criar() async {
     HapticFeedback.selectionClick();
-    final agora = DateTime.now();
-    var inicio = DateTime(agora.year, agora.month, agora.day + 1, 7, 0);
-    var fim = inicio.add(const Duration(hours: 1));
-    final tituloCtrl = TextEditingController();
-    final descricaoCtrl = TextEditingController();
-    final localCtrl = TextEditingController();
-    final capacidadeCtrl = TextEditingController(text: '20');
-    var created = false;
-
+    List<Aluno>? alunos;
     try {
+      alunos = (await ref.read(alunosHomeProvider.future)).alunos;
+    } catch (_) {
+      alunos = const [];
+    }
+    if (!mounted) return;
+    final rascunho = await showGrupoAulaFormSheet(context, alunos: alunos);
+    if (rascunho == null || !mounted) return;
+    try {
+      await _repo.criar(
+        titulo: rascunho.titulo,
+        descricao: rascunho.descricao,
+        inicio: rascunho.inicio,
+        fim: rascunho.fim,
+        capacidadeMax: rascunho.capacidade,
+        localAula: rascunho.local,
+        alunoIds: rascunho.alunoIds,
+      );
       if (!mounted) return;
-      final ok = await showFxFormSheet(
+      FeedbackHelper.showSuccess(
         context,
-        title: 'Nova aula em grupo',
-        subtitle: 'Defina horário, capacidade e local.',
-        icon: FxIcons.grupo,
-        confirmLabel: 'Criar aula',
-        child: StatefulBuilder(
-          builder:
-              (ctx, setDialogState) => Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  AlunoInsetFormField(
-                    controller: tituloCtrl,
-                    label: 'Título',
-                    icon: FxIcons.titulo,
-                    hint: 'Ex: Funcional ao ar livre',
-                  ),
-                  AlunoInsetFormField(
-                    controller: descricaoCtrl,
-                    label: 'Descrição (opcional)',
-                    icon: FxIcons.notas,
-                    maxLines: 2,
-                  ),
-                  FxInsetPickerRow(
-                    icon: FxIcons.calendario,
-                    label: 'Início',
-                    value: grupoAulaWhenLabel(inicio),
-                    onTap: () async {
-                      final picked = await _pickDateTime(
-                        ctx,
-                        initial: inicio,
-                        firstDate: DateTime.now().subtract(
-                          const Duration(days: 1),
-                        ),
-                        lastDate: DateTime.now().add(const Duration(days: 365)),
-                      );
-                      if (picked == null) return;
-                      setDialogState(() {
-                        inicio = picked;
-                        if (!fim.isAfter(inicio)) {
-                          fim = inicio.add(const Duration(hours: 1));
-                        }
-                      });
-                    },
-                  ),
-                  FxInsetPickerRow(
-                    icon: FxIcons.eventoConfirmado,
-                    label: 'Fim',
-                    value: grupoAulaWhenLabel(fim),
-                    onTap: () async {
-                      final picked = await _pickDateTime(
-                        ctx,
-                        initial: fim,
-                        firstDate: inicio,
-                        lastDate: inicio.add(const Duration(days: 1)),
-                      );
-                      if (picked == null) return;
-                      setDialogState(() => fim = picked);
-                    },
-                  ),
-                  AlunoInsetFormField(
-                    controller: capacidadeCtrl,
-                    label: 'Capacidade',
-                    icon: FxIcons.grupo,
-                    keyboardType: TextInputType.number,
-                  ),
-                  AlunoInsetFormField(
-                    controller: localCtrl,
-                    label: 'Local (opcional)',
-                    icon: FxIcons.local,
-                    hint: 'Studio, Praia, Online…',
-                    showDivider: false,
-                  ),
-                ],
-              ),
-        ),
+        rascunho.alunoIds.isEmpty
+            ? 'Aula criada'
+            : 'Aula criada e ${grupoAulaAlunosEscolhidosLabel(rascunho.alunoIds.length)} avisado(s)',
       );
-      if (ok != true) return;
-      if (tituloCtrl.text.trim().isEmpty) {
-        if (mounted) {
-          FeedbackHelper.showWarn(context, 'Título é obrigatório.');
-        }
-        return;
-      }
-      if (!fim.isAfter(inicio)) {
-        if (mounted) {
-          FeedbackHelper.showWarn(
-            context,
-            'Horário de fim deve ser depois do início.',
-          );
-        }
-        return;
-      }
-      await GrupoAulaRepository(ref.read(apiClientProvider)).criar(
-        titulo: tituloCtrl.text.trim(),
-        descricao:
-            descricaoCtrl.text.trim().isEmpty
-                ? null
-                : descricaoCtrl.text.trim(),
-        inicio: inicio,
-        fim: fim,
-        capacidadeMax: int.tryParse(capacidadeCtrl.text.trim()) ?? 20,
-        localAula:
-            localCtrl.text.trim().isEmpty ? null : localCtrl.text.trim(),
-      );
-      if (mounted) {
-        FeedbackHelper.showSuccess(context, 'Aula criada!');
-      }
-      created = true;
+      await _load();
     } catch (e) {
       if (mounted) FeedbackHelper.showError(context, friendlyError(e));
-    } finally {
-      tituloCtrl.dispose();
-      descricaoCtrl.dispose();
-      localCtrl.dispose();
-      capacidadeCtrl.dispose();
     }
-    if (created) await _load();
   }
 
-  List<GrupoAula> get _visible => _aulas;
-
-  void _openAula(GrupoAula aula) {
-    final chrome = ShellChrome.of(context);
-    final lotada = grupoAulaLotada(
-      inscritos: aula.inscritos,
-      capacidadeMax: aula.capacidadeMax,
-    );
-    showFxHomeSheet<void>(
+  Future<void> _openAula(GrupoAula aula) async {
+    final acao = await showGrupoAulaDetalheSheet(
       context,
-      builder: (sheetContext) => FxHomeSheetSurface(
-        isDark: chrome.isDark,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            FxHomeSheetHandle(isDark: chrome.isDark),
-            FxHomeSheetHeader(
-              isDark: chrome.isDark,
-              leading: Icon(
-                FxIcons.grupo,
-                color: Theme.of(sheetContext).colorScheme.primary,
-                size: 18,
-              ),
-              title: aula.titulo,
-              subtitle: grupoAulaVagasLabel(
-                inscritos: aula.inscritos,
-                capacidadeMax: aula.capacidadeMax,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                FxSettingsLayout.pageInset,
-                0,
-                FxSettingsLayout.pageInset,
-                TokensStrip.s4,
-              ),
-              child: Text(
-                [
-                  grupoAulaSubtitle(
-                    inicio: aula.inicio,
-                    localAula: aula.localAula,
-                  ),
-                  if ((aula.descricao ?? '').trim().isNotEmpty)
-                    aula.descricao!.trim(),
-                  if (lotada) 'Sem vagas no momento.',
-                ].join('\n'),
-                style: TextStyle(color: chrome.ink),
-              ),
-            ),
-          ],
-        ),
-      ),
+      aula: aula,
+      inscritos: _repo.inscritos(aula.id),
     );
+    if (acao == null || !mounted) return;
+    switch (acao) {
+      case GrupoAulaAcao.inscrever:
+        await _inscrever(aula);
+      case GrupoAulaAcao.editar:
+        await _editar(aula);
+      case GrupoAulaAcao.cancelar:
+        await _cancelar(aula);
+    }
   }
+
+  Future<void> _inscrever(GrupoAula aula) async {
+    try {
+      final alunos = (await ref.read(alunosHomeProvider.future)).alunos;
+      final ja = (await _repo.inscritos(aula.id)).map((i) => i.alunoId).toSet();
+      if (!mounted) return;
+      final livres = alunos.where((a) => !ja.contains(a.id)).toList();
+      final vagas = aula.capacidadeMax - aula.inscritos;
+      if (livres.isEmpty || vagas <= 0) {
+        FeedbackHelper.showWarn(
+          context,
+          vagas <= 0 ? 'Aula lotada.' : 'Todos os alunos já estão inscritos.',
+        );
+        return;
+      }
+      final escolha = await showGrupoAulaAlunosSheet(
+        context,
+        alunos: livres,
+        selecionados: const {},
+        limite: vagas,
+      );
+      if (escolha == null || escolha.isEmpty || !mounted) return;
+      await _repo.inscreverAlunos(aula.id, escolha.toList());
+      if (!mounted) return;
+      FeedbackHelper.showSuccess(
+        context,
+        '${grupoAulaAlunosEscolhidosLabel(escolha.length)} inscrito(s) e avisado(s)',
+      );
+      await _load();
+    } catch (e) {
+      if (mounted) FeedbackHelper.showError(context, friendlyError(e));
+    }
+  }
+
+  Future<void> _editar(GrupoAula aula) async {
+    final rascunho = await showGrupoAulaFormSheet(
+      context,
+      aula: aula,
+      minimoCapacidade: aula.inscritos < 1 ? 1 : aula.inscritos,
+    );
+    if (rascunho == null || !mounted) return;
+    try {
+      await _repo.editar(
+        aula.id,
+        titulo: rascunho.titulo,
+        descricao: rascunho.descricao,
+        inicio: rascunho.inicio,
+        fim: rascunho.fim,
+        capacidadeMax: rascunho.capacidade,
+        localAula: rascunho.local,
+      );
+      if (!mounted) return;
+      FeedbackHelper.showSuccess(context, 'Aula salva');
+      await _load();
+    } catch (e) {
+      if (mounted) FeedbackHelper.showError(context, friendlyError(e));
+    }
+  }
+
+  Future<void> _cancelar(GrupoAula aula) async {
+    final ok = await showFxConfirmSheet(
+      context,
+      title: 'Cancelar "${aula.titulo}"?',
+      message:
+          aula.inscritos == 0
+              ? 'A aula sai da lista dos alunos.'
+              : 'Os ${aula.inscritos} inscritos recebem um aviso de que a aula foi cancelada.',
+      confirmLabel: 'Cancelar aula',
+      cancelLabel: 'Manter',
+      destructive: true,
+      icon: FxIcons.excluir,
+    );
+    if (!ok || !mounted) return;
+    try {
+      await _repo.cancelar(aula.id);
+      if (!mounted) return;
+      FeedbackHelper.showSuccess(context, 'Aula cancelada');
+      await _load();
+    } catch (e) {
+      if (mounted) FeedbackHelper.showError(context, friendlyError(e));
+    }
+  }
+
+  /// Sem nenhuma aula (e sem filtro), busca e filtros não têm o que fazer.
+  bool get _mostrarFiltros =>
+      _total > 0 || _query.trim().isNotEmpty || _chip != GrupoAulaChip.todas;
 
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
-    final visible = _visible;
+    final visible = _aulas;
     final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
     return fxScreenA11yScope(
       label: 'Aulas em grupo',
@@ -421,114 +326,119 @@ class _GrupoAulasPersonalScreenState
             actions: [
               FxHelpIconButton(
                 tooltip: 'Como usar aulas em grupo',
-                onTap: () => showFxHelpSheet(
-                  context,
-                  title: 'Aulas em grupo',
-                  subtitle: 'Turmas com vaga para o aluno se inscrever.',
-                  tips: const [
-                    FxHelpTip(
-                      'Criar',
-                      'O botão no rodapé abre título, horário e capacidade.',
+                onTap:
+                    () => showFxHelpSheet(
+                      context,
+                      title: 'Aulas em grupo',
+                      subtitle: 'Turmas com vaga para o aluno se inscrever.',
+                      tips: const [
+                        FxHelpTip(
+                          'Criar',
+                          'O botão no rodapé abre título, horário e capacidade.',
+                        ),
+                        FxHelpTip(
+                          'Turma',
+                          'Toque na aula para ver quem se inscreveu, inscrever alunos, editar ou cancelar.',
+                        ),
+                      ],
                     ),
-                    FxHelpTip(
-                      'Detalhe',
-                      'Toque na aula vê local, vagas e a descrição.',
-                    ),
-                  ],
-                ),
               ),
             ],
           ),
           body: Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  TokensStrip.s4,
-                  TokensStrip.s2,
-                  TokensStrip.s4,
-                  TokensStrip.s2,
-                ),
-                child: DecoratedBox(
-                  decoration: fxStripCardDecoration(
-                    context,
-                    accent: primary,
-                    radius: TokensStrip.rCard,
-                    glowStrength: 0.03,
+              if (_mostrarFiltros) ...[
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    TokensStrip.s4,
+                    TokensStrip.s2,
+                    TokensStrip.s4,
+                    TokensStrip.s2,
                   ),
-                  child: TextField(
-                    controller: _searchCtrl,
-                    focusNode: _searchFocus,
-                    onChanged: _onQueryChanged,
-                    onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
-                    textInputAction: TextInputAction.search,
-                    decoration: InputDecoration(
-                      filled: false,
-                      isDense: true,
-                      hintText: 'Buscar aula ou local',
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 12,
+                  child: DecoratedBox(
+                    decoration: fxStripCardDecoration(
+                      context,
+                      accent: primary,
+                      radius: TokensStrip.rCard,
+                      glowStrength: 0.03,
+                    ),
+                    child: TextField(
+                      controller: _searchCtrl,
+                      focusNode: _searchFocus,
+                      onChanged: _onQueryChanged,
+                      onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
+                      textInputAction: TextInputAction.search,
+                      decoration: InputDecoration(
+                        filled: false,
+                        isDense: true,
+                        hintText: 'Buscar aula ou local',
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 12,
+                        ),
+                        prefixIcon: Icon(
+                          FxIcons.buscar,
+                          color: primary,
+                          size: 20,
+                        ),
+                        suffixIcon:
+                            _query.trim().isEmpty
+                                ? null
+                                : IconButton(
+                                  tooltip: 'Limpar busca',
+                                  onPressed: _clearQuery,
+                                  icon: Icon(
+                                    FxIcons.fechar,
+                                    color: chrome.mute,
+                                    size: 18,
+                                  ),
+                                ),
                       ),
-                      prefixIcon: Icon(
-                        FxIcons.buscar,
-                        color: primary,
-                        size: 20,
-                      ),
-                      suffixIcon: _query.trim().isEmpty
-                          ? null
-                          : IconButton(
-                              tooltip: 'Limpar busca',
-                              onPressed: _clearQuery,
-                              icon: Icon(
-                                FxIcons.fechar,
-                                color: chrome.mute,
-                                size: 18,
-                              ),
-                            ),
                     ),
                   ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  TokensStrip.s4,
-                  0,
-                  TokensStrip.s4,
-                  TokensStrip.s2,
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    TokensStrip.s4,
+                    0,
+                    TokensStrip.s4,
+                    TokensStrip.s2,
+                  ),
+                  child: Wrap(
+                    spacing: TokensStrip.s2,
+                    runSpacing: TokensStrip.s2,
+                    children: [
+                      for (final chip in GrupoAulaChip.values)
+                        FxToggleChip(
+                          label: grupoAulaChipLabel(chip),
+                          selected: _chip == chip,
+                          isDark: chrome.isDark,
+                          onTap: () {
+                            if (_chip == chip) return;
+                            setState(() => _chip = chip);
+                            _load();
+                          },
+                        ),
+                    ],
+                  ),
                 ),
-                child: Wrap(
-                  spacing: TokensStrip.s2,
-                  runSpacing: TokensStrip.s2,
-                  children: [
-                    for (final chip in GrupoAulaChip.values)
-                      FxToggleChip(
-                        label: grupoAulaChipLabel(chip),
-                        selected: _chip == chip,
-                        isDark: chrome.isDark,
-                        onTap: () {
-                          if (_chip == chip) return;
-                          setState(() => _chip = chip);
-                          _load();
-                        },
-                      ),
-                  ],
-                ),
-              ),
+              ],
               Expanded(
-                child: _loading
-                    ? const Padding(
-                        padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-                        child: SkeletonList(count: 4),
-                      )
-                    : _erro != null
-                    ? FxErrorState(
-                        chromeOnDark: chrome.isDark,
-                        primary: primary,
-                        message: _erro!,
-                        onRetry: _load,
-                      )
-                    : FxContentWidthLimiter(child: _buildBody(visible)),
+                child:
+                    _loading
+                        ? const Padding(
+                          padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                          child: SkeletonList(count: 4),
+                        )
+                        : _erro != null
+                        ? FxErrorState(
+                          chromeOnDark: chrome.isDark,
+                          primary: primary,
+                          message: _erro!,
+                          onRetry: _load,
+                        )
+                        : FxContentWidthLimiter(child: _buildBody(visible)),
               ),
               if (!_loading && _erro == null)
                 SafeArea(
@@ -538,8 +448,7 @@ class _GrupoAulasPersonalScreenState
                       FxSettingsLayout.pageInset,
                       TokensStrip.s2,
                       FxSettingsLayout.pageInset,
-                      TokensStrip.s3 +
-                          MediaQuery.viewInsetsOf(context).bottom,
+                      TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
                     ),
                     child: FxLiquidPrimaryButton(
                       label: 'Nova aula',
@@ -557,8 +466,7 @@ class _GrupoAulasPersonalScreenState
   Widget _buildBody(List<GrupoAula> visible) {
     final primary = Theme.of(context).colorScheme.primary;
     if (visible.isEmpty) {
-      final filtered =
-          _query.trim().isNotEmpty || _chip != GrupoAulaChip.todas;
+      final filtered = _query.trim().isNotEmpty || _chip != GrupoAulaChip.todas;
       return RefreshIndicator(
         color: primary,
         onRefresh: _load,
@@ -568,19 +476,22 @@ class _GrupoAulasPersonalScreenState
           children: [
             FxEmptyState(
               icon: filtered ? FxIcons.buscar : FxIcons.calendario,
-              title: filtered
-                  ? 'Nenhuma aula encontrada'
-                  : 'Nenhuma aula criada ainda',
-              subtitle: filtered
-                  ? 'Ajuste a busca ou o filtro.'
-                  : 'Crie uma aula em grupo para abrir vagas aos seus alunos.',
-              action: filtered
-                  ? FxEmptyAction(
-                      label: 'Limpar filtros',
-                      secondary: true,
-                      onTap: _clearFilters,
-                    )
-                  : null,
+              title:
+                  filtered
+                      ? 'Nenhuma aula encontrada'
+                      : 'Nenhuma aula criada ainda',
+              subtitle:
+                  filtered
+                      ? 'Ajuste a busca ou o filtro.'
+                      : 'Crie uma aula em grupo para abrir vagas aos seus alunos.',
+              action:
+                  filtered
+                      ? FxEmptyAction(
+                        label: 'Limpar filtros',
+                        secondary: true,
+                        onTap: _clearFilters,
+                      )
+                      : FxEmptyAction(label: 'Nova aula', onTap: _criar),
             ),
           ],
         ),
@@ -613,22 +524,26 @@ class _GrupoAulasPersonalScreenState
             );
           }
           final aula = visible[i - 1];
-          final lotada = grupoAulaLotada(
-            inscritos: aula.inscritos,
-            capacidadeMax: aula.capacidadeMax,
-          );
+          final lotada =
+              aula.cancelada ||
+              grupoAulaLotada(
+                inscritos: aula.inscritos,
+                capacidadeMax: aula.capacidadeMax,
+              );
           return FxSatelliteListTile(
             title: aula.titulo,
             subtitle: Text(
-              grupoAulaSubtitle(
+              grupoAulaLinha(
                 inicio: aula.inicio,
+                fim: aula.fim,
                 localAula: aula.localAula,
               ),
             ),
             trailing: Text(
-              grupoAulaVagasLabel(
+              grupoAulaOcupacaoLabel(
                 inscritos: aula.inscritos,
                 capacidadeMax: aula.capacidadeMax,
+                status: aula.status,
               ),
               style: FocuxHubTypography.bodyMuted(
                 color: lotada ? EagleTokens.bad : fxScreenMute(context),

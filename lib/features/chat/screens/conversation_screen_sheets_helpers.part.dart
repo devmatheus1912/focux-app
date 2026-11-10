@@ -12,20 +12,22 @@ extension ConversationScreenSheetsHelpers on _ConversationScreenState {
     return _messageKeys.putIfAbsent(identity, GlobalKey.new);
   }
 
-  String _displayName(PersonalBrand? brand) {
+  String _displayName(PersonalBrand? brand, {String? alunoNomeCarregado}) {
     if (_isPersonalMode) {
-      return widget.alunoNome ?? 'Aluno';
+      return chatNomeDoAluno(
+        daRota: widget.alunoNome,
+        carregado: alunoNomeCarregado,
+      );
     }
     return brand?.nomePersonal.isNotEmpty == true
         ? brand!.nomePersonal
         : 'Seu personal';
   }
 
-  String _subtitle(PersonalBrand? brand) {
-    if (_isPersonalMode) {
-      return 'Treino e ajustes';
-    }
-    return 'Seu personal';
+  /// Personal: o último treino do fio. Aluno: sem subtítulo (o título já é o personal).
+  String? _subtitle() {
+    if (!_isPersonalMode) return null;
+    return chatUltimoTreinoLabel(_msgs, DateTime.now());
   }
 
   String? _avatarImage(PersonalBrand? brand, {String? alunoFotoUrl}) {
@@ -36,7 +38,13 @@ extension ConversationScreenSheetsHelpers on _ConversationScreenState {
   }
 
   String _replySenderLabel(String remetente) {
-    return chatRemetenteLabel(remetente: remetente, isAlunoMode: _isAlunoMode);
+    return chatRemetenteLabel(
+      remetente: remetente,
+      isAlunoMode: _isAlunoMode,
+      nomePersonal: _isAlunoMode
+          ? ref.read(personalBrandProvider).value?.nomePersonal
+          : null,
+    );
   }
 
   String _previewText(ChatMsg msg) {

@@ -1,8 +1,8 @@
 // Copy / gates da tela Marca própria (S2).
 
 const whiteLabelLandingModos = [
-  (value: 'CAPTURA', label: 'Formulário'),
-  (value: 'SITE', label: 'Página'),
+  (value: 'CAPTURA', label: 'Formulário rápido'),
+  (value: 'SITE', label: 'Página completa'),
 ];
 
 /// Verificar só com host salvo (BE lê o domínio persistido) e ainda não verificado.
@@ -23,21 +23,17 @@ bool whiteLabelCanVerifyDomain({
 List<String> whiteLabelDnsSteps(String dnsInstrucoes) {
   final raw = dnsInstrucoes.trim();
   if (raw.isEmpty) return const [];
-  final lines =
-      raw
-          .split(RegExp(r'[\n\r]+'))
-          .map((l) => l.trim())
-          .where((l) => l.isNotEmpty)
-          .map((l) => l.replaceFirst(RegExp(r'^\d+\)\s*'), ''))
-          .toList(growable: false);
+  final lines = raw
+      .split(RegExp(r'[\n\r]+'))
+      .map((l) => l.trim())
+      .where((l) => l.isNotEmpty)
+      .map((l) => l.replaceFirst(RegExp(r'^\d+\)\s*'), ''))
+      .toList(growable: false);
   return lines;
 }
 
 /// Caption CNAME/TXT — host do draft + token do BE quando existir.
-String whiteLabelCnameHint(
-  String domainDraft, {
-  String? verificacaoToken,
-}) {
+String whiteLabelCnameHint(String domainDraft, {String? verificacaoToken}) {
   final host = domainDraft.trim().toLowerCase();
   if (host.isEmpty) {
     return 'CNAME → cname.focux.app · depois TXT _focux.';
@@ -46,8 +42,7 @@ String whiteLabelCnameHint(
   if (token.isEmpty) {
     return 'CNAME $host → cname.focux.app · salve p/ TXT.';
   }
-  final shortTok =
-      token.length > 12 ? '${token.substring(0, 10)}…' : token;
+  final shortTok = token.length > 12 ? '${token.substring(0, 10)}…' : token;
   return 'CNAME $host → cname.focux.app · TXT _focux → $shortTok';
 }
 
@@ -59,11 +54,6 @@ String whiteLabelDnsStepShort(String step, {int maxChars = 88}) {
 }
 
 String whiteLabelChecklistValue(bool done) => done ? 'Pronto' : 'Pendente';
-
-String whiteLabelLandingCaption(String modo) =>
-    modo == 'CAPTURA'
-        ? 'Link curto de captura no dashboard e anúncios.'
-        : 'Página completa com foto, planos e depoimentos.';
 
 /// Deep-link do passo pendente — null = já está nesta tela.
 String? whiteLabelChecklistRoute(String id) {
@@ -82,3 +72,20 @@ String? whiteLabelChecklistRoute(String id) {
 /// SITE exige LANDING_COMPLETA; CAPTURA não.
 bool whiteLabelNeedsLandingCompleta(String modo) =>
     modo.trim().toUpperCase() == 'SITE';
+
+/// "Falta 1 passo para vender pelo link".
+String whiteLabelFaltaTitulo(int pendentes) =>
+    pendentes == 1
+        ? 'Falta 1 passo para vender pelo link'
+        : 'Faltam $pendentes passos para vender pelo link';
+
+/// Endereço legível sem cortar o fim, que é o que identifica o personal:
+/// "focuxpersonal.com/p/joao-silva" vira "…/p/joao-silva" se for longo.
+String whiteLabelLinkCurto(String endereco, {int max = 32}) {
+  final e = endereco.trim();
+  if (e.length <= max) return e;
+  final barra = e.indexOf('/');
+  return barra < 0
+      ? '…${e.substring(e.length - max + 1)}'
+      : '…${e.substring(barra)}';
+}

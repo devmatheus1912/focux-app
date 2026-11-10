@@ -61,6 +61,7 @@ class Aluno360DetailFerramentasTab extends ConsumerWidget {
         primary: primary,
         bf: bf,
         massaMagra: massaMagra,
+        composicaoData: composicao?.data,
         aderenciaSemanal: aderenciaSemanal,
         anamneseStatus: anamneseStatus,
         anamneseDesde: ferramentasAsync.value?.anamneseResumo?.desde,

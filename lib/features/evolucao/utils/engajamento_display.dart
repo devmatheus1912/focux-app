@@ -328,3 +328,24 @@ bool _doAluno(EventoEngajamento e) =>
         ? e.descricao.toLowerCase().startsWith('aluno')
         : e.remetente!.toUpperCase() == 'ALUNO';
 
+
+/// "Ficha nova há N dias": a ficha atual começou nos últimos 14 dias e o
+/// aluno já acompanhava antes (não é o "Começando"). Senão, nulo.
+String? engajamentoFichaNova(
+  DateTime? fichaDesde, {
+  required DateTime hoje,
+  required int diaDaFicha,
+}) {
+  if (fichaDesde == null) return null;
+  final dia = DateTime(hoje.year, hoje.month, hoje.day);
+  final inicio = DateTime(fichaDesde.year, fichaDesde.month, fichaDesde.day);
+  final dias = dia.difference(inicio).inDays;
+  if (dias < 0 || dias >= 14) return null;
+  // Acompanhamento que começou junto com esta ficha: já é o "Começando".
+  if (diaDaFicha <= dias + 1) return null;
+  return switch (dias) {
+    0 => 'Ficha nova hoje: a semana ainda reflete a anterior.',
+    1 => 'Ficha nova há 1 dia: a semana ainda reflete a anterior.',
+    _ => 'Ficha nova há $dias dias: a aderência começa a refletir ela.',
+  };
+}

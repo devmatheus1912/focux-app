@@ -9,14 +9,13 @@ void main() {
   group('composição corporal', () {
     test('massa magra em % dentro da faixa não pede conferência', () {
       expect(composicaoSuspeita(bf: '15%', massaMagra: '45%'), isFalse);
-      expect(aluno360ComposicaoValor(bf: '15%', massaMagra: '45%'), 'OK');
     });
 
     test('valor impossível pede conferência', () {
       expect(composicaoSuspeita(bf: '818%', massaMagra: '45%'), isTrue);
       expect(composicaoSuspeita(bf: '15%', massaMagra: '120%'), isTrue);
       expect(
-        aluno360ComposicaoValor(bf: '818%', massaMagra: '45%'),
+        aluno360ComposicaoLinha(bf: '818%', massaMagra: '45%').valor,
         'Confira o valor',
       );
     });

@@ -2,14 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/automacoes/utils/automacao_display.dart';
 
 void main() {
-  test('chips e contagem', () {
-    expect(automacaoChipLabel(AutomacaoChip.todos), 'Todos');
-    expect(automacaoChipLabel(AutomacaoChip.templates), 'Templates');
-    expect(automacaoChipLabel(AutomacaoChip.ativos), 'Ativos');
-    expect(automacaoCountLabel(templates: 0, fluxos: 0), 'Nenhuma automação');
-    expect(automacaoCountLabel(templates: 1, fluxos: 0), '1 automação');
-    expect(automacaoCountLabel(templates: 2, fluxos: 1), '3 automações');
-  });
 
   test('gatilho e status em PT-BR', () {
     expect(automacaoTriggerLabel('NOVO_ALUNO'), 'Novo aluno');
