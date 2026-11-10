@@ -32,6 +32,7 @@ class FxSettingsTile extends StatelessWidget {
     this.upgradeTierLabel,
     this.semanticsLabel,
     this.accessory,
+    this.swatch,
   }) : assert(icon != null),
        assert(!(picker && disclosure));
 
@@ -56,6 +57,8 @@ class FxSettingsTile extends StatelessWidget {
   final String? upgradeTierLabel;
   final String? semanticsLabel;
   final Widget? accessory;
+  /// Bolinha de cor antes da seta (ex.: cor da marca). Não tira a seta.
+  final Color? swatch;
 
   @override
   Widget build(BuildContext context) {
@@ -181,6 +184,20 @@ class FxSettingsTile extends StatelessWidget {
                         if (accessory != null) ...[
                           const SizedBox(width: TokensStrip.s2),
                           accessory!,
+                        ],
+                        if (swatch != null) ...[
+                          const SizedBox(width: TokensStrip.s2),
+                          ExcludeSemantics(
+                            child: Container(
+                              width: 20,
+                              height: 20,
+                              decoration: BoxDecoration(
+                                color: swatch,
+                                shape: BoxShape.circle,
+                                border: Border.all(color: line),
+                              ),
+                            ),
+                          ),
                         ],
                         if (value.isNotEmpty && !locked) ...[
                           const SizedBox(width: TokensStrip.s2),

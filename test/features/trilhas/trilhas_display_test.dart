@@ -97,4 +97,40 @@ void main() {
     );
   });
 
+
+  group('trilhaResumo360', () {
+    MarcoModel m(int id, bool feito) =>
+        MarcoModel(id: id, titulo: 'M$id', ordem: id, concluido: feito);
+
+    test('sem dado, vazio e só concluídas', () {
+      expect(trilhaResumo360(null), 'Etapas e progresso');
+      expect(trilhaResumo360(const TrilhaLista(items: [])), 'Nenhuma trilha');
+      expect(
+        trilhaResumo360(TrilhaLista(items: [_trilha(id: 1, concluida: true)])),
+        '1 trilha concluída',
+      );
+    });
+
+    test('etapa da primeira em andamento e quantas mais', () {
+      final lista = TrilhaLista(items: [
+        _trilha(id: 1, concluida: true),
+        _trilha(id: 2, marcos: [m(1, true), m(2, false), m(3, false)]),
+        _trilha(id: 3),
+      ]);
+      expect(trilhaResumo360(lista), 'T2 · etapa 2 de 3 · +1');
+    });
+
+    test('sem marcos usa a porcentagem; todos feitos fica na última', () {
+      expect(
+        trilhaResumo360(TrilhaLista(items: [_trilha(id: 4, percentual: 40)])),
+        'T4 · 40%',
+      );
+      expect(
+        trilhaResumo360(TrilhaLista(items: [
+          _trilha(id: 5, marcos: [m(1, true), m(2, true)]),
+        ])),
+        'T5 · etapa 2 de 2',
+      );
+    });
+  });
 }

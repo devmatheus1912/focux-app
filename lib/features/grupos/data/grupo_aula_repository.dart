@@ -190,6 +190,14 @@ class GrupoAulaRepository {
     return GrupoAula.fromJson(r.data as Map<String, dynamic>);
   }
 
+  /// Próxima aula em que o aluno logado está inscrito; null sem nenhuma (204).
+  Future<GrupoAula?> minhaProxima() async {
+    final r = await _dio.get('/api/grupo-aulas/minha-proxima');
+    final data = r.data;
+    if (r.statusCode == 204 || data is! Map) return null;
+    return GrupoAula.fromJson(Map<String, dynamic>.from(data));
+  }
+
   Future<void> inscrever(int aulaId) async {
     await _dio.post('/api/grupo-aulas/$aulaId/inscrever');
   }

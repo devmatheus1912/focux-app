@@ -47,6 +47,8 @@ import '../../checkin/widgets/ficha_vigencia_aluno.dart';
 import '../../checkin/widgets/treinos_hoje_acao.dart' show descartarSessaoAberta;
 import '../../checkin/widgets/treinos_hub_rows.dart' show TreinosSessaoAbertaAviso;
 import '../../evolucao/providers/evolucao_home_provider.dart';
+import '../../grupos/providers/grupo_aula_providers.dart';
+import '../../grupos/widgets/aluno_proxima_aula_linha.dart';
 import '../../evolucao/widgets/evolucao_hero.dart';
 import '../../../core/widgets/fx_status_pill.dart';
 import '../../treinos/models/rotina_fila.dart';
@@ -282,6 +284,7 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
   Future<void> _refresh() async {
     final s = S.of(context);
     try {
+      ref.invalidate(minhaProximaAulaProvider);
       await Future.wait([refreshAlunoDashboardHome(ref), _loadAgendaVista()]);
     } catch (_) {
       if (mounted) FeedbackHelper.showError(context, s.alunoHomeAtualizarErro);
@@ -457,6 +460,8 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
             onConversar: () => openAlunoRoute(context, '/chat/aluno'),
           ),
         ),
+      if (ref.watch(minhaProximaAulaProvider).value case final aula?)
+        (TokensStrip.s3, AlunoProximaAulaLinha(aula: aula, hoje: now)),
       // A semana e o selo da ficha moram no card; aqui só o alerta de prazo.
       if (_fichaEmAlerta(home.rotina, now))
         (

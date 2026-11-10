@@ -83,7 +83,9 @@ extension on _AutomacoesScreenState {
             title: linha.nome,
             titleCase: false,
             subtitle: Text(
-              linha.ligada ? 'Ligada · $resumo' : resumo,
+              linha.ligada
+                  ? '${automacaoLigadaLabel(fluxo?.emAndamento)} · $resumo'
+                  : resumo,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),

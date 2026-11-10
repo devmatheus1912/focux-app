@@ -1,8 +1,12 @@
 import 'package:focux_app/features/recorrencia/providers/recorrencia_provider.dart';
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/features/trilhas/models/trilha.dart';
+import 'package:focux_app/features/trilhas/providers/trilhas_provider.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/providers/aluno_detail_providers.dart';
@@ -142,6 +146,9 @@ void main() {
             alunoAderenciaSemanalProvider(
               _alunoId,
             ).overrideWith((ref) async => _week()),
+            trilhasAlunoProvider(_alunoId).overrideWith(
+              (ref) => Completer<TrilhaLista>().future,
+            ),
             recorrenciaDoAlunoProvider((
               alunoId: _alunoId,
               nome: _aluno.nome,

@@ -23,6 +23,10 @@ void main() {
     expect(automacaoResumoPassos(boasVindas), '2 avisos e 1 mensagem em 3 dias');
     expect(automacaoResumoPassos(const []), 'Sem envios');
     expect(automacaoLigadasLabel(ligadas: 1, total: 4), '1 de 4 ligadas');
+    expect(automacaoLigadaLabel(null), 'Ligada');
+    expect(automacaoLigadaLabel(0), 'Ligada');
+    expect(automacaoLigadaLabel(1), 'Ligada · 1 aluno em andamento');
+    expect(automacaoLigadaLabel(3), 'Ligada · 3 alunos em andamento');
   });
 
   test('nome do catálogo atual vale para fluxo antigo', () {

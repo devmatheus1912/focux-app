@@ -131,6 +131,13 @@ String automacaoResumoPassos(List<AutomacaoPassoDef> passos) {
   return '${partes.join(' e ')}$prazo';
 }
 
+/// Linha ligada: "Ligada", "Ligada · 1 aluno em andamento", "Ligada · 3 alunos em andamento".
+String automacaoLigadaLabel(int? emAndamento) => switch (emAndamento) {
+  null || 0 => 'Ligada',
+  1 => 'Ligada · 1 aluno em andamento',
+  final n => 'Ligada · $n alunos em andamento',
+};
+
 /// Cabeçalho: "1 de 4 ligadas".
 String automacaoLigadasLabel({required int ligadas, required int total}) =>
     total == 0 ? 'Nenhuma automação' : '$ligadas de $total ligadas';

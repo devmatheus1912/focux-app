@@ -11,6 +11,9 @@ class AutomacaoFluxo {
   final bool ativo;
   final String? templateId;
 
+  /// Alunos com o fluxo em andamento. Só vem na Home de Automações.
+  final int? emAndamento;
+
   AutomacaoFluxo({
     required this.id,
     required this.nome,
@@ -18,6 +21,7 @@ class AutomacaoFluxo {
     required this.ativo,
     this.descricao,
     this.templateId,
+    this.emAndamento,
   });
 
   factory AutomacaoFluxo.fromJson(Map<String, dynamic> j) => AutomacaoFluxo(
@@ -27,6 +31,7 @@ class AutomacaoFluxo {
     triggerTipo: j['triggerTipo'] as String? ?? '',
     ativo: j['ativo'] as bool? ?? false,
     templateId: j['templateId'] as String?,
+    emAndamento: (j['emAndamento'] as num?)?.toInt(),
   );
 
   AutomacaoFluxo copyWith({bool? ativo}) => AutomacaoFluxo(
@@ -36,6 +41,7 @@ class AutomacaoFluxo {
     triggerTipo: triggerTipo,
     ativo: ativo ?? this.ativo,
     templateId: templateId,
+    emAndamento: emAndamento,
   );
 }
 

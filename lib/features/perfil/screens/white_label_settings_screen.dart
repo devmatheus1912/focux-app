@@ -30,7 +30,9 @@ import '../../planos/providers/plano_features_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../../subscription/utils/landing_editor_access.dart';
 import '../../subscription/widgets/upgrade_prompt_sheet.dart';
+import '../../../core/theme/brand_palette.dart';
 import '../data/white_label_repository.dart';
+import '../providers/perfil_provider.dart';
 import '../utils/white_label_display.dart';
 import '../../../core/theme/fx_icons.dart';
 
@@ -279,6 +281,9 @@ class _WhiteLabelSettingsScreenState
   Widget _corpo(WhiteLabelConfig config, bool isDark) {
     final chrome = ShellChrome.of(context);
     final pendentes = config.checklist.where((i) => !i.done).toList();
+    final corSalva = ref.watch(perfilProvider).value?.corPrimaria;
+    final corDaMarca =
+        corSalva == null ? null : BrandPalette.resolveStoredPrimary(corSalva);
     final temNome = _appNameCtrl.text.trim().isNotEmpty;
 
     final checklistCompleto = FxSettingsGroup(
@@ -356,6 +361,7 @@ class _WhiteLabelSettingsScreenState
               icon: FxIcons.paleta,
               label: 'Cor, logo e capa',
               value: '',
+              swatch: corDaMarca,
               mute: chrome.mute,
               line: chrome.line,
               onTap: () => context.push('/identidade-visual'),

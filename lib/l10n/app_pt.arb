@@ -1413,6 +1413,14 @@
   "alunoSemanaFaixaTreino": "treino",
   "alunoSemanaFaixaDescanso": "descanso",
   "alunoFerramentasLinhaTitulo": "Ferramentas",
+  "alunoProximaAulaTitulo": "Próxima aula: {titulo}",
+  "@alunoProximaAulaTitulo": {
+    "placeholders": {
+      "titulo": {
+        "type": "String"
+      }
+    }
+  },
   "alunoFerramentasLinhaSub": "Hábitos, desafios e mais",
   "treinosHojeVerboVer": "Ver",
   "treinosAjudaTooltip": "Sobre os treinos",

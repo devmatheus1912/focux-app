@@ -25,6 +25,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../data/grupo_aula_repository.dart';
+import '../providers/grupo_aula_providers.dart';
 import '../utils/grupo_aula_display.dart';
 import '../../../core/theme/fx_icons.dart';
 
@@ -172,6 +173,7 @@ class _GrupoAulasAlunoScreenState extends ConsumerState<GrupoAulasAlunoScreen> {
     try {
       await GrupoAulaRepository(ref.read(apiClientProvider)).inscrever(aula.id);
       if (!mounted) return;
+      ref.invalidate(minhaProximaAulaProvider);
       FeedbackHelper.showSuccess(context, 'Inscrição confirmada!');
       await _load();
     } catch (e) {
@@ -196,6 +198,7 @@ class _GrupoAulasAlunoScreenState extends ConsumerState<GrupoAulasAlunoScreen> {
         ref.read(apiClientProvider),
       ).cancelarInscricao(aula.id);
       if (!mounted) return;
+      ref.invalidate(minhaProximaAulaProvider);
       FeedbackHelper.showSuccess(context, 'Inscrição cancelada.');
       await _load();
     } catch (e) {

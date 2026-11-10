@@ -1,10 +1,14 @@
 @Tags(['golden'])
 library;
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/features/trilhas/models/trilha.dart';
+import 'package:focux_app/features/trilhas/providers/trilhas_provider.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
@@ -65,6 +69,9 @@ void main() {
         ),
         alunoAderenciaSemanalProvider(42).overrideWith(
           (ref) async => aderenciaSemanaEndingToday(),
+        ),
+        trilhasAlunoProvider(42).overrideWith(
+          (ref) => Completer<TrilhaLista>().future,
         ),
         recorrenciaDoAlunoProvider((
           alunoId: 42,

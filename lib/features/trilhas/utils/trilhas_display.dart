@@ -204,3 +204,23 @@ double? trilhaParseNumero(String raw) {
 
 List<String> trilhaMarcosTitulos(Iterable<String> raw) =>
     raw.map((t) => t.trim()).where((t) => t.isNotEmpty).toList();
+
+/// Linha de Trilhas nas Ferramentas do 360: a primeira trilha em andamento e a
+/// etapa em que o aluno está ("Força · etapa 2 de 5"). Sem marcos, a porcentagem.
+String trilhaResumo360(TrilhaLista? lista) {
+  if (lista == null) return 'Etapas e progresso';
+  if (lista.items.isEmpty) return 'Nenhuma trilha';
+  final ativa = lista.items.where((t) => !t.concluida).firstOrNull;
+  if (ativa == null) {
+    final n = lista.items.length;
+    return n == 1 ? '1 trilha concluída' : '$n trilhas concluídas';
+  }
+  final total = ativa.marcos.length;
+  final etapa = total == 0
+      ? trilhaPercentLabel(ativa.percentualConclusao)
+      : 'etapa ${(ativa.marcos.where((m) => m.concluido).length + 1).clamp(1, total)} de $total';
+  final outras = lista.items.where((t) => !t.concluida).length - 1;
+  final mais = outras > 0 ? ' · +$outras' : '';
+  return '${ativa.titulo} · $etapa$mais';
+}
+

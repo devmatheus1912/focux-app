@@ -20,6 +20,8 @@ import '../data/aluno_repository.dart';
 import '../utils/aluno360_ferramentas_grupos.dart';
 import '../utils/aluno360_ferramentas_logic.dart';
 import '../utils/aluno360_operacao_logic.dart';
+import '../../trilhas/providers/trilhas_provider.dart';
+import '../../trilhas/utils/trilhas_display.dart';
 
 /// Grupos sem legenda: as linhas já dizem o que cada um tem.
 String aluno360GrupoTitulo(S s, Aluno360FerramentasGrupo g) => switch (g) {
@@ -31,6 +33,7 @@ String aluno360GrupoTitulo(S s, Aluno360FerramentasGrupo g) => switch (g) {
 
 /// Todos os módulos do aluno, em grupos. Quem pede atenção leva um selo e
 /// o grupo sobe; módulo bloqueado pelo plano mostra o selo do plano.
+
 class Aluno360FerramentasGrupos extends ConsumerWidget {
   const Aluno360FerramentasGrupos({
     super.key,
@@ -295,7 +298,9 @@ class Aluno360FerramentasGrupos extends ConsumerWidget {
         ),
         Aluno360FerramentasModule.trilhas => linha(
           label: 'Trilhas',
-          subtitle: 'Etapas e progresso',
+          subtitle: trilhaResumo360(
+            ref.watch(trilhasAlunoProvider(alunoId)).value,
+          ),
           onTap: () => push('/alunos/$alunoId/trilhas', extra: nome),
         ),
         Aluno360FerramentasModule.anamnese => linha(
