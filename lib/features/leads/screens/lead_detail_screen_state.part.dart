@@ -178,28 +178,14 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
         inicial = DateTime.parse(_activeLead.proximoContato!);
       } catch (_) {}
     }
-    final options = alunoFollowUpDateOptions(now);
-    final picked = await showFxInsetPickerSheet<DateTime>(
+    final picked = (await showFxCalendarioSheet(
       context,
-      title: 'Follow-up',
-      subtitle: 'Quando você fala de novo com este lead.',
-      headerIcon: FxIcons.calendario,
-      selected: alunoFollowUpDateSelected(
-        options: options,
-        current: inicial,
-      ),
-      sameValue:
-          (a, b) => a.year == b.year && a.month == b.month && a.day == b.day,
-      items: [
-        for (final option in options)
-          FxInsetPickerSheetItem(
-            value: option.date,
-            label: option.label,
-            subtitle: option.subtitle,
-            icon: FxIcons.calendario,
-          ),
-      ],
-    );
+      titulo: 'Próximo contato',
+      subtitulo: 'Quando você fala de novo com este lead.',
+      inicial: inicial,
+      primeiro: now,
+      ultimo: now.add(const Duration(days: 365)),
+    ))?.data;
     if (picked == null) return;
     final dataStr =
         '${picked.year.toString().padLeft(4, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
@@ -209,7 +195,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
       ).atualizarProximoContato(_activeLead.id, dataStr);
       setState(() => _lead = updated);
       if (mounted) {
-        FeedbackHelper.showSuccess(context, 'Follow-up definido para $dataStr');
+        FeedbackHelper.showSuccess(context, 'Próximo contato em ${dataCurta(picked)}.');
       }
     } catch (e) {
       if (mounted) {

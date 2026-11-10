@@ -250,19 +250,19 @@ class _AlunoFeedbackVideoScreenState
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
     return fxScreenA11yScope(
-      label: 'Meus vídeos',
+      label: feedbackVideoNome,
       child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
-          title: 'Meus vídeos',
-          subtitle: 'Correção do seu personal',
+          title: feedbackVideoNome,
+          subtitle: 'Seu personal corrige a execução',
           onBack: () => safePopOrGo(context, _alunoHome),
           actions: [
             FxHelpIconButton(
-              tooltip: 'Ajuda — meus vídeos',
+              tooltip: 'Ajuda — feedback em vídeo',
               onTap: () => showFxHelpSheet(
                 context,
-                title: 'Meus vídeos',
+                title: feedbackVideoNome,
                 subtitle: feedbackVideoAlunoHelpTip,
               ),
             ),
@@ -322,7 +322,7 @@ class _AlunoFeedbackVideoScreenState
           children: const [
             FxEmptyState(
               key: ValueKey('aluno-feedback-vazio'),
-              icon: FxIcons.ia,
+              icon: FxIcons.video,
               title: 'Nenhum vídeo ainda',
               subtitle:
                   'Grave uma série do exercício e seu personal responde com a correção.',

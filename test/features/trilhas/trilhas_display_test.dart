@@ -24,79 +24,83 @@ TrilhaModel _trilha({
 }
 
 void main() {
-  test('trilhaMetaTipoLabel em PT-BR', () {
-    expect(trilhaMetaTipos, ['TREINOS', 'PESO', 'MEDIDA', 'CUSTOMIZADO']);
-    expect(trilhaMetaTipoLabel('TREINOS'), 'Número de treinos');
-    expect(trilhaMetaTipoLabel('peso'), 'Meta de peso');
-    expect(trilhaMetaTipoLabel('MEDIDA'), 'Meta de medida');
-    expect(trilhaMetaTipoLabel('CUSTOMIZADO'), 'Customizado');
-    expect(trilhaMetaTipoLabel(''), 'Tipo de meta');
-    expect(trilhaMetaTipoLabel(null), 'Tipo de meta');
-    expect(trilhaMetaTipoLabel('OUTRO'), 'OUTRO');
+  MarcoModel m(int id, bool feito, {int? ordem}) =>
+      MarcoModel(id: id, titulo: 'M$id', ordem: ordem ?? id, concluido: feito);
+
+  test('resumo da linha: etapa atual e próxima', () {
+    expect(
+      trilhaResumoLinha(
+        _trilha(id: 1, marcos: [m(1, true), m(2, false), m(3, false)]),
+      ),
+      'Etapa 2 de 3 · Próxima: M2',
+    );
+    expect(
+      trilhaResumoLinha(_trilha(id: 2, marcos: [m(1, true), m(2, true)])),
+      '2 etapas feitas',
+    );
+    expect(trilhaResumoLinha(_trilha(id: 3)), 'Sem etapas');
   });
 
-  test('trilha status, percentual e hub subtitle', () {
-    expect(trilhaStatusLabel(true), 'Concluída');
-    expect(trilhaStatusLabel(false), 'Em andamento');
-    expect(trilhaPercentLabel(70.4), '70%');
-    expect(trilhaHubSubtitle(alunoNome: 'Ana'), 'Ana');
-    expect(trilhaHubSubtitle(alunoNome: '  '), 'Aluno');
-  });
-
-  test('trilha métricas, filtro e parse', () {
-    const pendente = MarcoModel(
+  test('etapa atual respeita a ordem, não a posição na lista', () {
+    final t = _trilha(
       id: 1,
-      titulo: 'Semana 1',
-      ordem: 1,
-      concluido: false,
+      marcos: [m(9, false, ordem: 2), m(8, false, ordem: 1)],
     );
-    const feito = MarcoModel(
-      id: 2,
-      titulo: 'Semana 2',
-      ordem: 2,
-      concluido: true,
-    );
-    final ativas = [
-      _trilha(id: 1, percentual: 40, marcos: const [pendente, feito]),
-      _trilha(id: 2, concluida: true, percentual: 100),
-    ];
-    expect(trilhaAtivasCount(ativas), 1);
-    expect(trilhaConcluidasCount(ativas), 1);
-    expect(trilhaMarcosPendentes(ativas), 1);
-    expect(trilhaProgressoMedioLabel(ativas), '70%');
-    expect(trilhaFiltradas(ativas, trilhaFiltroAndamento).single.id, 1);
-    expect(trilhaFiltradas(ativas, trilhaFiltroConcluidas).single.id, 2);
-    expect(trilhaProximoMarco(ativas.first)?.id, 1);
-    expect(trilhaParseNumero('12,5'), 12.5);
-    expect(trilhaMarcosTitulos(['  a  ', '', 'b']), ['a', 'b']);
-    expect(trilhaMetaValorHint('TREINOS'), 'Quantos treinos fecham a meta');
-    expect(
-      trilhaValorAtualLabel(
-        _trilha(id: 3, valorAtual: 4, metaValor: 10),
-      ),
-      '4 / 10',
-    );
-    expect(trilhaValorUnidade('PESO'), ' kg');
-    expect(trilhaValorUnidade('MEDIDA'), ' cm');
-    expect(trilhaValorUnidade('TREINOS'), '');
-    expect(
-      trilhaValorAtualLabel(
-        TrilhaModel(
-          id: 4,
-          alunoId: 1,
-          titulo: 'Peso',
-          metaTipo: 'PESO',
-          valorAtual: 72.5,
-          percentualConclusao: 40,
-          concluida: false,
-          marcos: const [],
-          metaValor: 70,
-        ),
-      ),
-      '72,5 / 70 kg',
-    );
+    expect(trilhaEtapaAtual(t)?.id, 8);
   });
 
+  test('prazo: até, venceu e concluída não vence', () {
+    final hoje = DateTime(2026, 11, 10);
+    TrilhaModel com(String fim, {bool concluida = false}) => TrilhaModel(
+      id: 1,
+      alunoId: 1,
+      titulo: 'T',
+      metaTipo: 'ETAPAS',
+      valorAtual: 0,
+      percentualConclusao: 0,
+      concluida: concluida,
+      marcos: const [],
+      dataFim: fim,
+    );
+    expect(trilhaPrazoLabel(com('2026-11-30'), hoje), 'até 30/11');
+    expect(trilhaPrazoLabel(com('2026-11-01'), hoje), 'venceu 01/11');
+    expect(trilhaPrazoVencido(com('2026-11-01'), hoje), isTrue);
+    expect(
+      trilhaPrazoVencido(com('2026-11-01', concluida: true), hoje),
+      isFalse,
+    );
+    expect(trilhaPrazoLabel(_trilha(id: 1), hoje), isNull);
+  });
+
+  test('formulário: nome, de 2 a 10 etapas, vazias ignoradas', () {
+    expect(trilhaEtapasValidas([' a ', '', '  ', 'b']), ['a', 'b']);
+    expect(trilhaErroFormulario(nome: '', etapas: ['a', 'b']), isNotNull);
+    expect(
+      trilhaErroFormulario(nome: 'X', etapas: ['a']),
+      'Preencha pelo menos 2 etapas.',
+    );
+    expect(
+      trilhaErroFormulario(nome: 'X', etapas: List.filled(11, 'e')),
+      isNotNull,
+    );
+    expect(trilhaErroFormulario(nome: 'X', etapas: ['a', 'b']), isNull);
+  });
+
+  test('modelos prontos são válidos e com nomes únicos', () {
+    expect(
+      trilhaModelos.map((x) => x.nome).toSet().length,
+      trilhaModelos.length,
+    );
+    for (final mod in trilhaModelos) {
+      expect(trilhaErroFormulario(nome: mod.nome, etapas: mod.etapas), isNull);
+    }
+  });
+
+  test('grupos: em andamento e concluídas', () {
+    final g = trilhaGrupos([_trilha(id: 1), _trilha(id: 2, concluida: true)]);
+    expect(g.andamento.single.id, 1);
+    expect(g.concluidas.single.id, 2);
+  });
 
   group('trilhaResumo360', () {
     MarcoModel m(int id, bool feito) =>

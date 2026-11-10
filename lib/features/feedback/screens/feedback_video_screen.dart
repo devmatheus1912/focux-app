@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/utils/safe_external_launch.dart';
 import '../../../core/theme/focux_hub_typography.dart';
@@ -57,9 +58,10 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
   var _query = '';
   Timer? _searchDebounce;
 
-  String get _parentRoute => widget.alunoId == null
-      ? '/dashboard/personal'
-      : '/alunos/${widget.alunoId}';
+  String get _parentRoute =>
+      widget.alunoId == null
+          ? '/dashboard/personal'
+          : '/alunos/${widget.alunoId}';
 
   @override
   void initState() {
@@ -142,7 +144,9 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
     );
     if (!ok || !mounted) return;
     try {
-      await FeedbackVideoRepository(ref.read(apiClientProvider)).deletar(item.id);
+      await FeedbackVideoRepository(
+        ref.read(apiClientProvider),
+      ).deletar(item.id);
       if (!mounted) return;
       setState(() => _feedbacks.removeWhere((f) => f.id == item.id));
     } catch (e) {
@@ -250,6 +254,20 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
     }
   }
 
+  /// Abre a conversa com o texto pronto; nada é enviado sozinho.
+  void _pedirVideo() {
+    final id = widget.alunoId;
+    if (id == null) return;
+    final nome = widget.alunoNome ?? 'Aluno';
+    context.push(
+      '/alunos/$id/chat',
+      extra: {
+        'nome': nome,
+        'draft': feedbackVideoPedidoRascunho(satelliteFirstName(nome)),
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
@@ -274,12 +292,16 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
         child: FxShellScaffold(
           useMesh: true,
           appBar: FxShellAppBar(
-            title:
-                widget.alunoNome != null
-                    ? 'Feedbacks — ${widget.alunoNome}'
-                    : 'Feedbacks de vídeo',
+            title: feedbackVideoNome,
             subtitle: FxHubFreshness.joinCount(
-              feedbackVideoCountLabel(_loading ? 0 : count),
+              feedbackVideoPersonalSubtitulo(
+                primeiroNome:
+                    widget.alunoNome == null
+                        ? null
+                        : satelliteFirstName(widget.alunoNome),
+                paraResponder:
+                    _loading ? 0 : visible.where((f) => !f.respondido).length,
+              ),
               _loading ? null : FxHubFreshness.fromFetchedAt(_fetchedAt),
             ),
             onBack: () {
@@ -288,11 +310,11 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
             },
             actions: [
               FxHelpIconButton(
-                tooltip: 'Ajuda — feedback de vídeo',
+                tooltip: 'Ajuda — feedback em vídeo',
                 onTap:
                     () => showFxHelpSheet(
                       context,
-                      title: 'Feedback de vídeo',
+                      title: feedbackVideoNome,
                       subtitle: feedbackVideoHelpTip,
                     ),
               ),
@@ -300,61 +322,62 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
           ),
           body: Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  TokensStrip.s4,
-                  TokensStrip.s2,
-                  TokensStrip.s4,
-                  TokensStrip.s2,
-                ),
-                child: DecoratedBox(
-                  decoration: fxStripCardDecoration(
-                    context,
-                    accent: primary,
-                    radius: TokensStrip.rCard,
-                    glowStrength: 0.03,
+              if (count >= feedbackVideoBuscaMinimo || _query.trim().isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    TokensStrip.s4,
+                    TokensStrip.s2,
+                    TokensStrip.s4,
+                    TokensStrip.s2,
                   ),
-                  child: TextField(
-                    controller: _searchCtrl,
-                    focusNode: _searchFocus,
-                    onChanged: _onQueryChanged,
-                    onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
-                    textInputAction: TextInputAction.search,
-                    decoration: InputDecoration(
-                      filled: false,
-                      isDense: true,
-                      hintText: 'Buscar comentário',
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 12,
-                      ),
-                      prefixIcon: Icon(
-                        FxIcons.buscar,
-                        color: primary,
-                        size: 20,
-                      ),
-                      suffixIcon:
-                          _query.trim().isEmpty
-                              ? null
-                              : IconButton(
-                                tooltip: 'Limpar busca',
-                                onPressed: () {
-                                  _searchDebounce?.cancel();
-                                  _searchCtrl.clear();
-                                  setState(() => _query = '');
-                                  _load(reset: true);
-                                },
-                                icon: Icon(
-                                  FxIcons.fechar,
-                                  color: mute,
-                                  size: 18,
+                  child: DecoratedBox(
+                    decoration: fxStripCardDecoration(
+                      context,
+                      accent: primary,
+                      radius: TokensStrip.rCard,
+                      glowStrength: 0.03,
+                    ),
+                    child: TextField(
+                      controller: _searchCtrl,
+                      focusNode: _searchFocus,
+                      onChanged: _onQueryChanged,
+                      onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
+                      textInputAction: TextInputAction.search,
+                      decoration: InputDecoration(
+                        filled: false,
+                        isDense: true,
+                        hintText: 'Buscar comentário',
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 12,
+                        ),
+                        prefixIcon: Icon(
+                          FxIcons.buscar,
+                          color: primary,
+                          size: 20,
+                        ),
+                        suffixIcon:
+                            _query.trim().isEmpty
+                                ? null
+                                : IconButton(
+                                  tooltip: 'Limpar busca',
+                                  onPressed: () {
+                                    _searchDebounce?.cancel();
+                                    _searchCtrl.clear();
+                                    setState(() => _query = '');
+                                    _load(reset: true);
+                                  },
+                                  icon: Icon(
+                                    FxIcons.fechar,
+                                    color: mute,
+                                    size: 18,
+                                  ),
                                 ),
-                              ),
+                      ),
                     ),
                   ),
                 ),
-              ),
               Expanded(
                 child:
                     _loading
@@ -412,12 +435,24 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
             else
               FxEmptyState(
                 key: const ValueKey('feedback_video_empty'),
-                icon: FxIcons.ia,
-                title: 'Nenhum feedback de vídeo',
+                icon: FxIcons.video,
+                title:
+                    widget.alunoNome != null
+                        ? 'Nenhum vídeo do ${satelliteFirstName(widget.alunoNome)} ainda'
+                        : 'Nenhum vídeo ainda',
                 subtitle:
                     widget.alunoNome != null
-                        ? 'Quando ${satelliteFirstName(widget.alunoNome)} enviar um vídeo de execução, ele aparece aqui para você corrigir.'
-                        : 'Quando um aluno enviar um vídeo de execução, ele aparece aqui para você corrigir.',
+                        ? 'Quando ele mandar um vídeo de execução, ele aparece aqui para você corrigir.'
+                        : 'Quando um aluno mandar um vídeo de execução, ele aparece aqui para você corrigir.',
+                // Sem aluno (lista geral) não há para quem pedir.
+                action:
+                    widget.alunoId == null
+                        ? null
+                        : FxEmptyAction(
+                          label:
+                              'Pedir vídeo ao ${satelliteFirstName(widget.alunoNome)}',
+                          onTap: _pedirVideo,
+                        ),
               ),
           ],
         ),

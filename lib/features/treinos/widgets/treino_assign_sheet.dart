@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/fx_calendario_sheet.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/theme/brand_palette.dart';
@@ -81,15 +82,14 @@ class _TreinoAssignSheetState extends State<TreinoAssignSheet> {
   Future<void> _pickCustomDate() async {
     final now = DateTime.now();
     final initial = _customDate ?? now.add(const Duration(days: 14));
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: initial.isBefore(now) ? now : initial,
-      firstDate: now,
-      lastDate: now.add(const Duration(days: 365 * 2)),
-      helpText: 'Prazo do treino',
-      cancelText: 'Cancelar',
-      confirmText: 'Ok',
+    final escolha = await showFxCalendarioSheet(
+      context,
+      titulo: 'Prazo do treino',
+      inicial: initial,
+      primeiro: now,
+      ultimo: now.add(const Duration(days: 365 * 2)),
     );
+    final picked = escolha?.data;
     if (picked == null || !mounted) return;
     setState(() {
       _prazo = _PrazoPreset.custom;

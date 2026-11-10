@@ -478,14 +478,16 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
         appBar: FxShellAppBar(
           title: title,
           subtitle: subtitle,
-          // A conversa do aluno é uma aba: aba não tem voltar.
-          showBack: _isPersonalMode,
-          onBack: _isAlunoMode
-              ? null
-              : () {
-                  FxKeyboardDismissScope.dismiss();
-                  safePopOrGo(context, backFallback);
-                },
+          // A conversa do aluno é uma aba sem dock (AlunoShell esconde o dock
+          // no chat): a seta é a única saída e troca para a Hoje do aluno.
+          onBack: () {
+            FxKeyboardDismissScope.dismiss();
+            if (_isAlunoMode) {
+              context.go('/dashboard/aluno');
+            } else {
+              safePopOrGo(context, backFallback);
+            }
+          },
           actions: [
             Padding(
               padding: const EdgeInsets.only(right: 4),

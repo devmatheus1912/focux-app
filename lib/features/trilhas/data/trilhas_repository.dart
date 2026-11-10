@@ -24,35 +24,68 @@ class TrilhasRepository {
     return TrilhaLista.fromJson(response.data);
   }
 
-  Future<void> criarTrilha(NovaTrilhaRequest request) async {
-    await _dio.post('/api/trilhas', data: request.toJson());
+  Future<TrilhaModel> criarTrilha(NovaTrilhaRequest request) async {
+    final r = await _dio.post('/api/trilhas', data: request.toJson());
+    return _trilha(r.data);
   }
 
-  Future<void> adicionarMarco({
+  Future<TrilhaModel> editar({
+    required int trilhaId,
+    required String titulo,
+    String? descricao,
+    DateTime? dataFim,
+  }) async {
+    final r = await _dio.put(
+      '/api/trilhas/$trilhaId',
+      data: {
+        'titulo': titulo,
+        'descricao': descricao,
+        'dataFim': dataFim == null ? null : trilhaIsoDia(dataFim),
+      },
+    );
+    return _trilha(r.data);
+  }
+
+  Future<TrilhaModel> adicionarMarco({
     required int trilhaId,
     required String titulo,
   }) async {
-    await _dio.post('/api/trilhas/$trilhaId/marcos', data: {'titulo': titulo});
+    final r = await _dio.post(
+      '/api/trilhas/$trilhaId/marcos',
+      data: {'titulo': titulo},
+    );
+    return _trilha(r.data);
   }
 
-  Future<void> concluirMarco({
+  Future<TrilhaModel> concluirMarco({
     required int trilhaId,
     required int marcoId,
   }) async {
-    await _dio.post('/api/trilhas/$trilhaId/marcos/$marcoId/concluir');
+    final r = await _dio.post('/api/trilhas/$trilhaId/marcos/$marcoId/concluir');
+    return _trilha(r.data);
   }
 
-  Future<void> atualizarProgresso({
+  /// Desfaz uma etapa marcada por engano (personal ou aluno).
+  Future<TrilhaModel> reabrirMarco({
     required int trilhaId,
-    required double valor,
+    required int marcoId,
   }) async {
-    await _dio.put(
-      '/api/trilhas/$trilhaId/progresso',
-      queryParameters: {'valor': valor},
-    );
+    final r = await _dio.post('/api/trilhas/$trilhaId/marcos/$marcoId/reabrir');
+    return _trilha(r.data);
+  }
+
+  Future<TrilhaModel> removerMarco({
+    required int trilhaId,
+    required int marcoId,
+  }) async {
+    final r = await _dio.delete('/api/trilhas/$trilhaId/marcos/$marcoId');
+    return _trilha(r.data);
   }
 
   Future<void> deletar(int trilhaId) async {
     await _dio.delete('/api/trilhas/$trilhaId');
   }
+
+  TrilhaModel _trilha(dynamic data) =>
+      TrilhaModel.fromJson(Map<String, dynamic>.from(data as Map));
 }

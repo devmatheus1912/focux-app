@@ -1,26 +1,58 @@
-import 'package:flutter/widgets.dart';
 import '../../exercicios/data/enums.dart';
-import '../../../core/theme/fx_icons.dart';
 
-IconData equipamentoFxIcon(Equipamento equipamento) {
-  return switch (equipamento) {
-    Equipamento.barra ||
-    Equipamento.halter ||
-    Equipamento.kettlebell ||
-    Equipamento.smith => FxIcons.treino,
-    Equipamento.maquina || Equipamento.polia => FxIcons.alvo,
-    Equipamento.pesoCorporal => FxIcons.grupo,
-    Equipamento.banda || Equipamento.trx || Equipamento.bolaSuica => FxIcons.ia,
-    Equipamento.banco || Equipamento.caixa => FxIcons.inicio,
-    Equipamento.corda => FxIcons.fogo,
-    Equipamento.outros => FxIcons.adicionar,
-  };
-}
-
-String equipamentosCountLabel(int count) {
-  if (count <= 0) return 'Sem restrição';
-  if (count == 1) return '1 equipamento';
-  return '$count equipamentos';
+/// Resumo do título da lista: "Marcados · 3 equipamentos".
+String equipamentosMarcadosLabel(int count) {
+  if (count <= 0) return 'Marcados · nenhum';
+  if (count == 1) return 'Marcados · 1 equipamento';
+  return 'Marcados · $count equipamentos';
 }
 
 String equipamentosSaveSuccess() => 'Equipamentos atualizados.';
+
+/// Atalho de espaço: um toque preenche a lista e o personal ajusta depois.
+/// Só no app; nada de espaço é gravado no servidor.
+class EquipamentosAtalho {
+  const EquipamentosAtalho(this.rotulo, this.equipamentos);
+
+  final String rotulo;
+  final Set<Equipamento> equipamentos;
+}
+
+const equipamentosAtalhos = [
+  EquipamentosAtalho('Academia básica', {
+    Equipamento.barra,
+    Equipamento.halter,
+    Equipamento.maquina,
+    Equipamento.polia,
+    Equipamento.banco,
+    Equipamento.pesoCorporal,
+  }),
+  EquipamentosAtalho('Casa com equipamento', {
+    Equipamento.halter,
+    Equipamento.kettlebell,
+    Equipamento.banda,
+    Equipamento.banco,
+    Equipamento.pesoCorporal,
+    Equipamento.bolaSuica,
+    Equipamento.corda,
+    Equipamento.trx,
+  }),
+  EquipamentosAtalho('Só peso do corpo', {Equipamento.pesoCorporal}),
+  EquipamentosAtalho('Ao ar livre', {
+    Equipamento.pesoCorporal,
+    Equipamento.banda,
+    Equipamento.corda,
+    Equipamento.trx,
+  }),
+];
+
+/// O atalho cuja lista é exatamente a seleção (o chip fica marcado só aí).
+EquipamentosAtalho? equipamentosAtalhoDaSelecao(Set<Equipamento> selecao) {
+  for (final a in equipamentosAtalhos) {
+    if (a.equipamentos.length == selecao.length &&
+        a.equipamentos.containsAll(selecao)) {
+      return a;
+    }
+  }
+  return null;
+}

@@ -94,20 +94,6 @@ String grupoAulaAlunosEscolhidosLabel(int n) => switch (n) {
   _ => '$n alunos',
 };
 
-/// Dias para marcar aula: de hoje até 60 dias, mais o dia atual da aula se
-/// ficar fora (aula já marcada mais longe).
-List<DateTime> grupoAulaDiasDisponiveis(DateTime hoje, {DateTime? atual}) {
-  final base = DateTime(hoje.year, hoje.month, hoje.day);
-  final dias = [
-    for (var i = 0; i < 60; i++) DateTime(base.year, base.month, base.day + i),
-  ];
-  if (atual != null) {
-    final a = DateTime(atual.year, atual.month, atual.day);
-    if (!dias.contains(a)) dias.insert(a.isBefore(base) ? 0 : dias.length, a);
-  }
-  return dias;
-}
-
 /// "Hoje", "Amanhã", "Em 5 dias".
 String grupoAulaDiaRelativo(DateTime dia, DateTime hoje) {
   final d = DateTime(dia.year, dia.month, dia.day);

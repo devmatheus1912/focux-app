@@ -27,6 +27,7 @@ class ProgressaoRevisaoLinha extends StatelessWidget {
     this.cargaEditada,
     this.onEditarCarga,
     this.alunoNome,
+    this.mudaCarga = true,
   });
 
   final ProgressaoSugestao sugestao;
@@ -40,6 +41,10 @@ class ProgressaoRevisaoLinha extends StatelessWidget {
 
   /// Na fila geral, de vários alunos.
   final String? alunoNome;
+
+  /// "Fica igual": sem caixa de marcar (aplicar não muda nada) e sem o motivo
+  /// da IA; mostra só a prescrição atual.
+  final bool mudaCarga;
 
   Future<void> _acoes(BuildContext context) async {
     final escolha = await showFxGroupedActionSheet<_Acao>(
@@ -96,14 +101,17 @@ class ProgressaoRevisaoLinha extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Semantics(
-            label: sugestao.exercicio,
-            child: Checkbox(
-              value: selecionada,
-              activeColor: primary,
-              onChanged: (v) => onSelecionar(v ?? false),
-            ),
-          ),
+          if (mudaCarga)
+            Semantics(
+              label: sugestao.exercicio,
+              child: Checkbox(
+                value: selecionada,
+                activeColor: primary,
+                onChanged: (v) => onSelecionar(v ?? false),
+              ),
+            )
+          else
+            const SizedBox(width: TokensStrip.s3),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.only(top: TokensStrip.s2),
@@ -145,8 +153,13 @@ class ProgressaoRevisaoLinha extends StatelessWidget {
                     Text(
                       '${atual.prescricao}  →  ${nova.prescricao}',
                       style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                    )
+                  else if (!mudaCarga && atual.prescricao.isNotEmpty)
+                    Text(
+                      atual.prescricao,
+                      style: FocuxHubTypography.bodyMuted(color: chrome.mute),
                     ),
-                  if (motivo.isNotEmpty) ...[
+                  if (mudaCarga && motivo.isNotEmpty) ...[
                     const SizedBox(height: 2),
                     Text(
                       motivo,

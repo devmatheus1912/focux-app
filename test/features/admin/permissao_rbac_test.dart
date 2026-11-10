@@ -35,7 +35,7 @@ void main() {
       source,
       contains("'/api/trilhas/\$trilhaId/marcos/\$marcoId/concluir'"),
     );
-    expect(source, contains("'/api/trilhas/\$trilhaId/progresso'"));
+    expect(source, contains("'/api/trilhas/\$trilhaId/marcos/\$marcoId/reabrir'"));
     expect(source, contains("'/api/trilhas/minhas'"));
     expect(source, contains("'/api/trilhas/\$trilhaId'"));
     expect(source, contains('.post('));

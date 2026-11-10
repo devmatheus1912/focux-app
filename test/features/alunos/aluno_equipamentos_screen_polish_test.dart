@@ -16,16 +16,18 @@ void main() {
     expect(screen, contains('FxContentWidthLimiter'));
     expect(screen, contains('friendlyError'));
     expect(screen, contains('SkeletonList'));
-    expect(screen, isNot(contains('FxSettingsGroup')));
-    expect(screen, contains('FxSatelliteListTile'));
-    expect(screen, contains('FxHubHeader'));
+    // Escolha no topo, atalhos e lista num grupo só, sem ícone por equipamento.
+    expect(screen, contains('FxSettingsGroup'));
+    expect(screen, contains('Qualquer equipamento'));
+    expect(screen, contains('Só o que o aluno tem'));
+    expect(screen, contains('equipamentosAtalhos'));
+    expect(screen, isNot(contains('FxSatelliteListTile')));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('showFxHelpSheet'));
-    expect(screen, contains('equipamentosCountLabel'));
-    expect(screen, contains('equipamentoFxIcon'));
+    expect(screen, contains('equipamentosMarcadosLabel'));
+    expect(screen, isNot(contains('equipamentoFxIcon')));
+    expect(screen, isNot(contains('Sem restrição')));
     expect(screen, contains('Switch.adaptive'));
-    expect(screen, isNot(contains('FxIcons.check')));
-    expect(screen, contains('ListView.builder'));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('bottomNavigationBar'));

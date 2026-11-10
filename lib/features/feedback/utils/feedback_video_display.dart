@@ -11,11 +11,12 @@ String feedbackVideoSubtitle({
   required bool respondido,
 }) {
   final date = fxDateShort(criadoEm);
-  return respondido ? '$date · Respondido' : '$date · Aguardando sua resposta';
+  return respondido ? '$date · Correção enviada' : '$date · O aluno espera sua correção';
 }
 
+/// Mesmas palavras dos dois lados: "Para responder" (personal) ↔ "Enviado" (aluno).
 String feedbackVideoStatusLabel({required bool respondido}) =>
-    respondido ? 'Respondido' : 'Novo';
+    respondido ? 'Respondido' : 'Para responder';
 
 String feedbackVideoResponderLabel({required bool respondido}) =>
     respondido ? 'Editar resposta' : 'Responder';
@@ -23,10 +24,24 @@ String feedbackVideoResponderLabel({required bool respondido}) =>
 String feedbackVideoComentarioAluno(String comentario) =>
     'Aluno: "${comentario.trim()}"';
 
-String feedbackVideoCountLabel(int count) {
-  if (count == 1) return '1 feedback';
-  return '$count feedbacks';
+/// Nome único do recurso nas duas pontas (360, plano, catálogo, telas).
+const feedbackVideoNome = 'Feedback em vídeo';
+
+/// A busca só aparece quando ajuda (mesma regra das mensalidades).
+const feedbackVideoBuscaMinimo = 6;
+
+/// Subtítulo do personal: "Julio · 2 para responder" (sem pendência, só o nome).
+String feedbackVideoPersonalSubtitulo({String? primeiroNome, required int paraResponder}) {
+  return [
+    if (primeiroNome != null && primeiroNome.trim().isNotEmpty) primeiroNome.trim(),
+    if (paraResponder > 0) '$paraResponder para responder',
+  ].join(' · ');
 }
+
+/// Texto pronto do "Pedir vídeo": o personal revisa e envia no chat.
+String feedbackVideoPedidoRascunho(String primeiroNome) =>
+    'Oi, $primeiroNome! Grava um vídeo de uma série do seu treino e me manda em '
+    'Ferramentas > Feedback em vídeo, que eu corrijo a execução.';
 
 /// Título da linha: o exercício quando o backend manda, senão o comentário.
 String feedbackVideoTitulo({String? exercicioNome, String? comentario}) {
@@ -46,7 +61,7 @@ String feedbackVideoAlunoStatusLabel({required bool respondido}) =>
     respondido ? 'Respondido' : 'Enviado';
 
 const feedbackVideoAlunoHelpTip =
-    'Grave uma série do exercício e envie aqui. Seu personal assiste e '
+    'Grave uma série do exercício e envie por esta tela. Seu personal assiste e '
     'responde com a correção. Você recebe um aviso quando ele responder.';
 
 const feedbackVideoMaxBytes = 120 * 1024 * 1024;
@@ -74,4 +89,5 @@ String? feedbackVideoTamanhoErro(int bytes) {
 const feedbackVideoHelpTip =
     'O aluno envia o vídeo do exercício e você responde com a correção: '
     'toque no vídeo para assistir e escrever. Segure para remover. '
-    'Disponível no Pro e no Enterprise.';
+    'Para pedir um vídeo, use o botão da tela vazia ou o chat: o aluno envia em '
+    'Ferramentas > Feedback em vídeo. Disponível no Pro e no Enterprise.';

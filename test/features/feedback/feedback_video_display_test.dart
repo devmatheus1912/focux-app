@@ -12,13 +12,13 @@ void main() {
     final dia = DateTime(2026, 9, 30);
     expect(
       feedbackVideoSubtitle(criadoEm: dia, respondido: false),
-      endsWith('Aguardando sua resposta'),
+      endsWith('O aluno espera sua correção'),
     );
     expect(
       feedbackVideoSubtitle(criadoEm: dia, respondido: true),
-      endsWith('Respondido'),
+      endsWith('Correção enviada'),
     );
-    expect(feedbackVideoStatusLabel(respondido: false), 'Novo');
+    expect(feedbackVideoStatusLabel(respondido: false), 'Para responder');
     expect(feedbackVideoResponderLabel(respondido: true), 'Editar resposta');
     expect(feedbackVideoHelpTip, isNot(contains('IA')));
   });
@@ -56,4 +56,21 @@ void main() {
     expect(feedbackVideoTamanhoErro(feedbackVideoMaxBytes + 1), contains('120 MB'));
   });
 
+
+  test('subtítulo do personal e texto pronto do pedido', () {
+    expect(
+      feedbackVideoPersonalSubtitulo(primeiroNome: 'Julio', paraResponder: 2),
+      'Julio · 2 para responder',
+    );
+    expect(
+      feedbackVideoPersonalSubtitulo(primeiroNome: 'Julio', paraResponder: 0),
+      'Julio',
+    );
+    expect(feedbackVideoPersonalSubtitulo(paraResponder: 3), '3 para responder');
+    expect(feedbackVideoPedidoRascunho('Julio'), startsWith('Oi, Julio!'));
+    expect(
+      feedbackVideoPedidoRascunho('Julio'),
+      contains('Ferramentas > Feedback em vídeo'),
+    );
+  });
 }

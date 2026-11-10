@@ -124,6 +124,7 @@ class IaRepository {
     int alunoId, {
     required String objetivo,
     String? observacoes,
+    List<String> sinais = const [],
   }) async {
     return _withIaErrorContext(() async {
       final r = await _dio.post(
@@ -134,6 +135,7 @@ class IaRepository {
           'objetivo': objetivo,
           if (observacoes != null && observacoes.isNotEmpty)
             'observacoes': observacoes,
+          if (sinais.isNotEmpty) 'sinais': sinais,
         },
       );
       return IaProgressaoCargaResult.fromApi(

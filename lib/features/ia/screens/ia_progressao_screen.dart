@@ -47,6 +47,7 @@ class IaProgressaoScreen extends ConsumerStatefulWidget {
 
 class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
   final _observacoes = TextEditingController();
+  final Set<ProgressaoSinal> _sinais = {};
   final _openedAt = DateTime.now();
   var _objetivo = ProgressaoObjetivo.hipertrofia;
   bool _loading = false;
@@ -152,6 +153,7 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
         widget.alunoId,
         objetivo: _objetivo.api,
         observacoes: _observacoes.text.trim(),
+        sinais: [for (final s in _sinais) s.api],
       );
       if (!mounted) return;
       ref.invalidate(progressaoSugestoesProvider(widget.alunoId));
@@ -244,6 +246,10 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
                               objetivo: _objetivo,
                               onObjetivo: (o) => setState(() => _objetivo = o),
                               observacoes: _observacoes,
+                              sinais: _sinais,
+                              onSinal: (s) => setState(() {
+                                if (!_sinais.remove(s)) _sinais.add(s);
+                              }),
                               enabled: !_loading,
                             ),
                             const SizedBox(height: TokensStrip.s3),

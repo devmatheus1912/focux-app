@@ -4,9 +4,9 @@ import 'package:flutter/services.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_icons.dart';
 import '../../../core/theme/shell_chrome.dart';
+import '../../../core/widgets/fx_calendario_sheet.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_inset_picker_row.dart';
-import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
@@ -74,23 +74,16 @@ Future<GrupoAulaRascunho?> showGrupoAulaFormSheet(
           final chrome = ShellChrome.of(ctx);
           Future<void> escolherDia() async {
             final hoje = DateTime.now();
-            final dia = await showFxInsetPickerSheet<DateTime>(
+            final hojeDia = DateUtils.dateOnly(hoje);
+            final diaAtual = DateUtils.dateOnly(inicio);
+            // Aula antiga (editar): o calendário começa no dia dela.
+            final dia = (await showFxCalendarioSheet(
               ctx,
-              title: 'Dia',
-              selected: DateTime(inicio.year, inicio.month, inicio.day),
-              sameValue:
-                  (a, b) =>
-                      a.year == b.year && a.month == b.month && a.day == b.day,
-              items: [
-                for (final d in grupoAulaDiasDisponiveis(hoje, atual: inicio))
-                  FxInsetPickerSheetItem(
-                    value: d,
-                    label: grupoAulaDiaLabel(d),
-                    subtitle: grupoAulaDiaRelativo(d, hoje),
-                    icon: FxIcons.calendario,
-                  ),
-              ],
-            );
+              titulo: 'Dia',
+              inicial: diaAtual,
+              primeiro: diaAtual.isBefore(hojeDia) ? diaAtual : hojeDia,
+              ultimo: DateTime(hoje.year, hoje.month + 6, hoje.day),
+            ))?.data;
             if (dia == null) return;
             setSheet(() {
               final duracao = fim.difference(inicio);

@@ -5,18 +5,21 @@ class MarcoModel {
     required this.titulo,
     required this.ordem,
     required this.concluido,
+    this.concluidoEm,
   });
 
   final int id;
   final String titulo;
   final int ordem;
   final bool concluido;
+  final DateTime? concluidoEm;
 
   factory MarcoModel.fromJson(Map<String, dynamic> json) => MarcoModel(
     id: (json['id'] as num?)?.toInt() ?? 0,
     titulo: (json['titulo'] ?? '').toString(),
     ordem: (json['ordem'] as num?)?.toInt() ?? 0,
     concluido: json['concluido'] as bool? ?? false,
+    concluidoEm: DateTime.tryParse(json['concluidoEm']?.toString() ?? ''),
   );
 }
 
@@ -118,32 +121,32 @@ class TrilhaLista {
   );
 }
 
+/// Trilha nova: nome, etapas (2 a 10), descrição e prazo. O tipo é sempre
+/// "etapas" (o servidor grava `ETAPAS`); valor digitado não existe mais.
 class NovaTrilhaRequest {
   const NovaTrilhaRequest({
     required this.alunoId,
     required this.titulo,
-    required this.metaTipo,
+    required this.marcos,
     this.descricao,
-    this.metaValor,
     this.dataFim,
-    this.marcos,
   });
 
   final int alunoId;
   final String titulo;
   final String? descricao;
-  final String metaTipo;
-  final double? metaValor;
-  final String? dataFim;
-  final List<String>? marcos;
+  final DateTime? dataFim;
+  final List<String> marcos;
 
   Map<String, dynamic> toJson() => {
     'alunoId': alunoId,
     'titulo': titulo,
-    'metaTipo': metaTipo,
-    if (descricao != null) 'descricao': descricao,
-    if (metaValor != null) 'metaValor': metaValor,
-    if (dataFim != null) 'dataFim': dataFim,
-    if (marcos != null && marcos!.isNotEmpty) 'marcos': marcos,
+    if (descricao != null && descricao!.trim().isNotEmpty) 'descricao': descricao,
+    if (dataFim != null) 'dataFim': trilhaIsoDia(dataFim!),
+    'marcos': marcos,
   };
 }
+
+/// "2026-11-30".
+String trilhaIsoDia(DateTime d) =>
+    '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';

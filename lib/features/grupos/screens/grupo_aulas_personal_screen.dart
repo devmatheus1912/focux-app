@@ -484,6 +484,7 @@ class _GrupoAulasPersonalScreenState
                   filtered
                       ? 'Ajuste a busca ou o filtro.'
                       : 'Crie uma aula em grupo para abrir vagas aos seus alunos.',
+              // "Nova aula" mora só no rodapé fixo: um botão por tela.
               action:
                   filtered
                       ? FxEmptyAction(
@@ -491,7 +492,7 @@ class _GrupoAulasPersonalScreenState
                         secondary: true,
                         onTap: _clearFilters,
                       )
-                      : FxEmptyAction(label: 'Nova aula', onTap: _criar),
+                      : null,
             ),
           ],
         ),

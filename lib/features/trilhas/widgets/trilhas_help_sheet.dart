@@ -7,22 +7,22 @@ Future<void> showTrilhasHelpSheet(BuildContext context) {
   return showFxHelpSheet(
     context,
     title: 'Como usar as trilhas',
-    subtitle: 'Atribuir meta, marcar progresso e concluir marcos.',
+    subtitle: 'Um caminho em etapas até uma conquista.',
     tips: const [
       FxHelpTip(
-        'Atribuir',
-        'O botão de baixo cria a trilha com tipo de meta e as primeiras etapas.',
+        'Para que serve',
+        'Conquistas que não são número da balança: a primeira barra fixa, correr 5 km, agachar com técnica. Meta de peso ou medida fica em Evolução.',
+        icon: FxIcons.rota,
+      ),
+      FxHelpTip(
+        'Nova trilha',
+        'Comece de um modelo ou escreva de 2 a 10 etapas. O aluno recebe um aviso.',
         icon: FxIcons.adicionar,
       ),
       FxHelpTip(
-        'Progresso',
-        'Toque no marco pendente para concluir. Nova etapa entra no card. Se a trilha tem valor, atualize ali.',
-        icon: FxIcons.alvo,
-      ),
-      FxHelpTip(
-        'Encerrar',
-        'Uma trilha errada pode ser excluída no card. Isso não apaga o aluno.',
-        icon: FxIcons.fechar,
+        'Etapas',
+        'O aluno marca a etapa quando consegue e você recebe um aviso. Toque numa etapa para marcar, desfazer ou remover.',
+        icon: FxIcons.concluido,
       ),
     ],
   );
@@ -31,18 +31,18 @@ Future<void> showTrilhasHelpSheet(BuildContext context) {
 Future<void> showAlunoTrilhasHelpSheet(BuildContext context) {
   return showFxHelpSheet(
     context,
-    title: 'Suas trilhas',
-    subtitle: 'Metas que o personal atribuiu para você.',
+    title: 'Trilhas',
+    subtitle: 'Caminhos em etapas que seu personal montou.',
     tips: const [
       FxHelpTip(
-        'Progresso',
-        'O percentual sobe quando o personal marca um marco ou atualiza a meta.',
-        icon: FxIcons.grafico,
+        'Consegui',
+        'Quando conseguir a etapa atual, toque em "Consegui". Seu personal recebe um aviso.',
+        icon: FxIcons.concluido,
       ),
       FxHelpTip(
-        'Treinos',
-        'O botão de baixo abre seus treinos — é o caminho mais comum de avançar.',
-        icon: FxIcons.treino,
+        'Errou?',
+        'Toque numa etapa feita para desfazer.',
+        icon: FxIcons.desfazer,
       ),
     ],
   );

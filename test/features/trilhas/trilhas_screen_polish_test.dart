@@ -1,51 +1,67 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/screen_source_bundle.dart';
 
+/// Redesign de 10/11/2026: trilha é caminho em etapas, mesmas peças nos dois lados.
 void main() {
-  test('trilhas cumpre contrato Tier S+', () {
+  test('personal: título, um botão, sem cartões de número nem tipo de meta', () {
     final screen = readScreenSourceBundle(
       'lib/features/trilhas/screens/trilhas_screen.dart',
     );
-    expect(
-      screen,
-      anyOf(contains('fxScreenA11yScope'), contains('Semantics(')),
-    );
-    expect(screen, isNot(contains('CircularProgressIndicator')));
+    expect(screen, contains('fxScreenA11yScope'));
     expect(screen, contains('FxShellScaffold'));
-    expect(screen, contains('FxContentWidthLimiter'));
     expect(screen, contains('friendlyError'));
-    expect(screen, contains('FxEmptyState'));
     expect(screen, contains('SkeletonList'));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
-    expect(screen, contains('showFxInsetPickerSheet'));
-    expect(screen, contains('showFxFormSheet'));
-    expect(screen, contains('ShellHeaderIconButton'));
-    expect(screen, contains('LinearProgressIndicator'));
-    expect(screen, contains('FxHubHeader'));
-    expect(screen, contains('OperationalMetricTile'));
-    expect(screen, contains('FxLiquidPrimaryButton'));
-    expect(screen, contains('FxHelpIconButton'));
-    expect(screen, contains('AlunoSegmentedChoice'));
-    expect(screen, contains("'Atribuir trilha'"));
-    expect(screen, contains('atualizarProgresso'));
-    expect(screen, contains('adicionarMarco'));
-    expect(screen, contains('showFxConfirmSheet'));
-    expect(screen, contains("safePopOrGo(context, '/alunos/\${widget.alunoId}')"));
-    expect(screen, contains('PopScope'));
-    expect(screen, contains('/alunos/\$alunoId/chat'));
-    expect(screen, contains('/alunos/\$alunoId/evolucao'));
-    expect(screen, contains("label: 'Lista'"));
-    expect(screen, contains('trilhaListaPrazoValue'));
-    expect(screen, contains('Carregar mais'));
-    expect(screen, contains('page:'));
-    expect(screen, contains('trilhaPrazoIso'));
-    expect(screen, contains('subtitle: freshness'));
-    expect(screen, isNot(contains('TabBar')));
-    expect(screen, isNot(contains('TabBarView')));
-    expect(screen, isNot(contains('DropdownButton')));
-    expect(screen, isNot(contains('FloatingActionButton')));
-    expect(screen, isNot(contains(r'showError(context, $e)')));
+    expect(screen, contains("title: 'Trilhas'"));
+    expect(screen, contains("label: 'Nova trilha'"));
+    expect(screen, contains('showTrilhaFormSheet'));
+    expect(screen, contains('showTrilhaDetalhe'));
+    expect(screen, contains('TrilhaCartao'));
+    for (final saiu in [
+      'ShellHeaderIconButton',
+      'OperationalMetricTile',
+      'FxHubHeader',
+      "label: 'Lista'",
+      'atualizarProgresso',
+      'Atribuir trilha',
+      'Trilhas de Progresso',
+    ]) {
+      expect(screen, isNot(contains(saiu)), reason: saiu);
+    }
+  });
+
+  test('aluno usa o mesmo cartão e o mesmo detalhe', () {
+    final aluno = File(
+      'lib/features/trilhas/screens/aluno_trilhas_screen.dart',
+    ).readAsStringSync();
+    expect(aluno, contains('TrilhasLista'));
+    expect(aluno, contains('doPersonal: false'));
+    expect(aluno, contains('chatAlunoRascunhoProvider'));
+    expect(aluno, isNot(contains('OperationalMetricTile')));
+    expect(aluno, isNot(contains('Ir aos treinos')));
+  });
+
+  test('formulário sem tipo de meta, com modelos e calendário', () {
+    final form = File(
+      'lib/features/trilhas/widgets/trilha_form_sheet.dart',
+    ).readAsStringSync();
+    expect(form, contains('trilhaModelos'));
+    expect(form, contains('showFxCalendarioSheet'));
+    expect(form, isNot(contains('Tipo de meta')));
+    expect(form, isNot(contains('Customizado')));
+  });
+
+  test('detalhe: Consegui do aluno e desfazer', () {
+    final det = File(
+      'lib/features/trilhas/widgets/trilha_detalhe_sheet.dart',
+    ).readAsStringSync();
+    expect(det, contains("'Consegui'"));
+    expect(det, contains('reabrirMarco'));
+    expect(det, contains('removerMarco'));
+    expect(det, contains('showSuccessAction'));
   });
 }

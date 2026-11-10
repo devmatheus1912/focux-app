@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/fx_calendario_sheet.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/focux_hub_typography.dart';
@@ -146,31 +147,18 @@ class _Aluno360CommitmentSheetState
 
   Future<void> _pickDate() async {
     if (_busy) return;
-    final options = alunoFollowUpDateOptions(DateTime.now());
-    final picked = await showFxInsetPickerSheet<DateTime>(
+    final hoje = DateTime.now();
+    final picked = (await showFxCalendarioSheet(
       context,
-      title: _isSleep ? 'Quando combinar' : 'Próximo contato',
-      subtitle:
+      titulo: _isSleep ? 'Quando combinar' : 'Próximo contato',
+      subtitulo:
           _isSleep
               ? 'Data para falar do sono com ${aluno.nome}.'
               : 'Quando você fala de novo com ${aluno.nome}.',
-      headerIcon: FxIcons.calendario,
-      selected: alunoFollowUpDateSelected(
-        options: options,
-        current: aluno.followUpDate,
-      ),
-      sameValue:
-          (a, b) => a.year == b.year && a.month == b.month && a.day == b.day,
-      items: [
-        for (final option in options)
-          FxInsetPickerSheetItem(
-            value: option.date,
-            label: option.label,
-            subtitle: option.subtitle,
-            icon: FxIcons.calendario,
-          ),
-      ],
-    );
+      inicial: aluno.followUpDate,
+      primeiro: hoje,
+      ultimo: hoje.add(const Duration(days: 365)),
+    ))?.data;
     if (picked == null) return;
     await _runAction(
       () => ref
@@ -236,7 +224,7 @@ class _Aluno360CommitmentSheetState
     );
   }
 
-  /// Atalhos de data: amanhã, em 3 dias, em 1 semana. "Outro" abre a lista completa.
+  /// Atalhos de data: amanhã, em 3 dias, em 1 semana. "Outro" abre o calendário.
   List<DateTime> get _atalhosDeData {
     final hoje = DateTime.now();
     final base = DateTime(hoje.year, hoje.month, hoje.day);

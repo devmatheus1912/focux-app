@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/fx_calendario_sheet.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -363,14 +364,16 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen>
         await _aplicar(() => repo.removerVigencia(id));
       case AcaoDaVigencia.escolherData:
         final hoje = DateTime.now();
-        final escolhida = await showDatePicker(
-          context: context,
-          initialDate: _rotina?.vigencia.fim?.isAfter(hoje) == true
+        final escolha = await showFxCalendarioSheet(
+          context,
+          titulo: 'Ficha até',
+          inicial: _rotina?.vigencia.fim?.isAfter(hoje) == true
               ? _rotina!.vigencia.fim!
               : hoje.add(const Duration(days: 56)),
-          firstDate: hoje,
-          lastDate: hoje.add(const Duration(days: 730)),
+          primeiro: hoje,
+          ultimo: hoje.add(const Duration(days: 730)),
         );
+        final escolhida = escolha?.data;
         if (escolhida == null || !mounted) return;
         await _renovar(() => repo.definirVigenciaData(id, escolhida));
     }

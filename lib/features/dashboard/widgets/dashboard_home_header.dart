@@ -132,12 +132,16 @@ class DashboardHomeHeader extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        _Saudacao(
-                          texto: 'Olá, $firstName',
-                          estilo: dashboardPageTitleStyle(
+                        // Linha de identidade, não título: papel de seção (17).
+                        // O que se lê primeiro na Hoje é o "Agora".
+                        Text(
+                          'Olá, $firstName',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: FocuxHubTypography.sectionTitle(
                             context,
                             color: sobre.ink,
-                          ).copyWith(fontWeight: FontWeight.w700, height: 1.12),
+                          ).copyWith(fontWeight: FontWeight.w600, height: 1.15),
                         ),
                         const SizedBox(height: 2),
                         Semantics(
@@ -214,44 +218,6 @@ class _HeaderChromeCluster extends StatelessWidget {
   }
 }
 
-/// "Olá, Nome" em 22; se não couber, diminui até 17 antes de cortar.
-class _Saudacao extends StatelessWidget {
-  const _Saudacao({required this.texto, required this.estilo});
-
-  final String texto;
-  final TextStyle estilo;
-
-  static const _minimo = TokensStrip.fontSecao;
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, c) {
-        final base = estilo.fontSize ?? TokensStrip.fontTitulo;
-        final pintor = TextPainter(
-          text: TextSpan(text: texto, style: estilo),
-          maxLines: 1,
-          textDirection: Directionality.of(context),
-          textScaler: MediaQuery.textScalerOf(context),
-        )..layout();
-        final largura = pintor.width;
-        pintor.dispose();
-        final tamanho =
-            largura <= c.maxWidth || largura == 0
-                ? base
-                : (base * c.maxWidth / largura).clamp(_minimo, base);
-        return Text(
-          texto,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: estilo.copyWith(fontSize: tamanho.toDouble()),
-        );
-      },
-    );
-  }
-}
-
-/// Com letra grande do sistema, os botões do topo ficam numa linha embaixo.
 class _ComBotoesEmbaixo extends StatelessWidget {
   const _ComBotoesEmbaixo({
     required this.mostrar,

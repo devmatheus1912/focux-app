@@ -4,11 +4,10 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/pt_br_display.dart';
+import '../../../core/widgets/fx_calendario_sheet.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_grouped_action_sheet.dart';
-import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_quick_chips.dart';
-import '../../../core/widgets/fx_sheet_frame.dart';
 import '../../../l10n/pt.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../data/evolucao_repository.dart';
@@ -190,22 +189,17 @@ class _EscolhaDaData extends StatelessWidget {
   }
 }
 
-/// Calendário do último ano, na folha do kit.
-Future<DateTime?> _escolherOutraData(BuildContext context, DateTime? atual) {
+/// Calendário do último ano, no componente comum.
+Future<DateTime?> _escolherOutraData(BuildContext context, DateTime? atual) async {
   final hoje = DateTime.now();
-  return showFxHomeSheet<DateTime>(
+  final escolha = await showFxCalendarioSheet(
     context,
-    builder:
-        (ctx) => FxSheetFrame(
-          title: ptS.evolucaoMedidaData,
-          child: CalendarDatePicker(
-            initialDate: atual ?? hoje.subtract(const Duration(days: 2)),
-            firstDate: hoje.subtract(const Duration(days: 365)),
-            lastDate: hoje,
-            onDateChanged: (d) => FxHomeSheetChrome.dismissAndPop(ctx, d),
-          ),
-        ),
+    titulo: ptS.evolucaoMedidaData,
+    inicial: atual ?? hoje.subtract(const Duration(days: 2)),
+    primeiro: hoje.subtract(const Duration(days: 365)),
+    ultimo: hoje,
   );
+  return escolha?.data;
 }
 
 /// Registra medida do aluno. [medidas] traz os valores atuais como referência.

@@ -255,13 +255,14 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
   Future<void> _escolherNascimento() async {
     final agora = DateTime.now();
     final atual = DateTime.tryParse(normalizeBirthDateForApi(_dataNascimento.text) ?? '');
-    final data = await showDatePicker(
-      context: context,
-      initialDate: atual ?? DateTime(agora.year - 25),
-      firstDate: DateTime(1920),
-      lastDate: agora,
-      locale: const Locale('pt', 'BR'),
-    );
+    final data = (await showFxCalendarioSheet(
+      context,
+      titulo: 'Data de nascimento',
+      inicial: atual ?? DateTime(agora.year - 25),
+      primeiro: DateTime(1920),
+      ultimo: agora,
+      modoInicial: DatePickerMode.year,
+    ))?.data;
     if (data == null || !mounted) return;
     _dataNascimento.text = formatBirthDateForDisplay(data.toIso8601String());
   }
@@ -313,13 +314,13 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
 
             Future<void> escolherData() async {
               final hoje = DateTime.now();
-              final nova = await showDatePicker(
-                context: ctx,
-                initialDate: data,
-                firstDate: DateTime(hoje.year - 10),
-                lastDate: hoje,
-                locale: const Locale('pt', 'BR'),
-              );
+              final nova = (await showFxCalendarioSheet(
+                ctx,
+                titulo: 'Data da medida',
+                inicial: data,
+                primeiro: DateTime(hoje.year - 10),
+                ultimo: hoje,
+              ))?.data;
               if (nova != null) setModalState(() => data = nova);
             }
 

@@ -8,7 +8,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_choice_strip.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
-import '../../../core/widgets/fx_quick_chips.dart';
+import '../../../core/widgets/fx_choice_chip.dart';
 import '../../../core/widgets/fx_strip_card.dart';
 import '../../../l10n/pt.dart';
 import '../models/progressao_sugestao.dart';
@@ -23,6 +23,8 @@ class IaProgressaoPedidoCard extends StatelessWidget {
     required this.objetivo,
     required this.onObjetivo,
     required this.observacoes,
+    required this.sinais,
+    required this.onSinal,
     this.enabled = true,
   });
 
@@ -30,6 +32,8 @@ class IaProgressaoPedidoCard extends StatelessWidget {
   final ProgressaoObjetivo objetivo;
   final ValueChanged<ProgressaoObjetivo> onObjetivo;
   final TextEditingController observacoes;
+  final Set<ProgressaoSinal> sinais;
+  final ValueChanged<ProgressaoSinal> onSinal;
   final bool enabled;
 
   @override
@@ -96,14 +100,17 @@ class IaProgressaoPedidoCard extends StatelessWidget {
           style: FocuxHubTypography.cardTitle(color: chrome.ink),
         ),
         const SizedBox(height: TokensStrip.s2),
-        FxQuickChips<String>(
-          itens: progressaoAtalhosObservacao,
-          selecionado: null,
-          onSelecionar: (atalho) {
-            if (!enabled) return;
-            final atual = observacoes.text.trim();
-            observacoes.text = atual.isEmpty ? atalho : '$atual, $atalho';
-          },
+        // Seleção múltipla: cada atalho liga ou desliga um sinal.
+        Wrap(
+          spacing: TokensStrip.s2,
+          children: [
+            for (final s in ProgressaoSinal.values)
+              FxChoiceChip(
+                label: s.label,
+                selected: sinais.contains(s),
+                onTap: enabled ? () => onSinal(s) : null,
+              ),
+          ],
         ),
         const SizedBox(height: TokensStrip.s2),
         TextField(
@@ -120,7 +127,8 @@ class IaProgressaoPedidoCard extends StatelessWidget {
           style: FocuxHubTypography.body(color: chrome.ink),
           decoration: FxInputDeco.build(
             context,
-            progressaoObservacoesHint,
+            progressaoObservacoesLabel,
+            hint: progressaoObservacoesHint,
           ).copyWith(alignLabelWithHint: true),
         ),
       ],

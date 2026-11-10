@@ -22,7 +22,17 @@ enum ProgressaoObjetivo {
 
 const progressaoTitulo = 'Ajustar cargas';
 const progressaoAdicionarObservacao = 'Algo para considerar? (opcional)';
-const progressaoAtalhosObservacao = ['Dor', 'Semana leve', 'Pouco tempo'];
+/// Atalhos do pedido: viram `sinais` para o servidor (que trava o resultado),
+/// não texto no campo.
+enum ProgressaoSinal {
+  semanaLeve('Semana leve', 'SEMANA_LEVE'),
+  dor('Dor', 'DOR'),
+  poucoTempo('Pouco tempo', 'POUCO_TEMPO');
+
+  const ProgressaoSinal(this.label, this.api);
+  final String label;
+  final String api;
+}
 const progressaoSemExecucao =
     'Sem treino concluído em 4 semanas. As sugestões precisam de pelo menos um.';
 
@@ -54,7 +64,8 @@ String progressaoContextoLine(ProgressaoContextoResumo resumo) {
 const progressaoContextoTitulo = 'Sugestões com base no que foi treinado';
 const progressaoSemTreinoAtivo =
     'Sem treino ativo. Monte um treino para pedir progressão.';
-const progressaoObservacoesHint = 'Ex.: dor no ombro, semana de deload';
+const progressaoObservacoesLabel = 'Observação (opcional)';
+const progressaoObservacoesHint = 'Ex.: dor no ombro direito';
 const progressaoAbrirTreino = 'Abrir treino';
 
 /// "18 kg · 4×8-10" vira a carga e a prescrição.

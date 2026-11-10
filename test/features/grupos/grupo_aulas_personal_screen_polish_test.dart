@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/screen_source_bundle.dart';
@@ -23,9 +25,15 @@ void main() {
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
     expect(screen, contains('showFxFormSheet'));
-    expect(screen, contains('showFxInsetPickerSheet'));
+    expect(screen, contains('showFxCalendarioSheet'));
     expect(screen, contains('showTimePicker'));
     expect(screen, isNot(contains('showDatePicker')));
+    // Um "Nova aula" só: o do rodapé fixo (o vazio não repete o botão).
+    expect(screen, isNot(contains("FxEmptyAction(label: 'Nova aula'")));
+    expect(
+      File('lib/features/grupos/widgets/grupo_aula_form_sheet.dart').readAsStringSync(),
+      contains('showFxCalendarioSheet'),
+    );
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, contains('ListView.builder'));
     expect(screen, isNot(contains('TabBar')));

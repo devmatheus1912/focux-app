@@ -27,7 +27,7 @@ import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
-import '../../alunos/utils/aluno360_followup_dates.dart';
+import '../../../core/utils/pt_br_display.dart';
 import '../../alunos/widgets/aluno_form_choices.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
@@ -40,6 +40,7 @@ import '../../../core/widgets/fx_action_chip.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../core/theme/fx_icons.dart';
 
+import '../../../core/widgets/fx_calendario_sheet.dart';
 part 'lead_detail_screen_state.part.dart';
 part 'lead_detail_screen_widgets.part.dart';
 

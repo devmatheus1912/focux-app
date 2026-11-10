@@ -33,8 +33,7 @@ class FxSettingsTile extends StatelessWidget {
     this.semanticsLabel,
     this.accessory,
     this.swatch,
-  }) : assert(icon != null),
-       assert(!(picker && disclosure));
+  }) : assert(!(picker && disclosure));
 
   final IconData? icon;
   final String label;
@@ -99,11 +98,11 @@ class FxSettingsTile extends StatelessWidget {
         accessory == null;
 
     // Ícone solto na linha: fundo colorido só onde o ícone é o assunto.
-    final Widget icone = Icon(
-      icon!,
-      size: FxSettingsLayout.iconSize,
-      color: iconColor,
-    );
+    // Sem ícone (lista de opções em que o nome basta), a linha começa no texto.
+    final Widget? icone =
+        icon == null
+            ? null
+            : Icon(icon, size: FxSettingsLayout.iconSize, color: iconColor);
 
     return Semantics(
       button: interactive,
@@ -134,8 +133,10 @@ class FxSettingsTile extends StatelessWidget {
           ),
           child: Row(
             children: [
-              icone,
-              const SizedBox(width: FxSettingsLayout.iconGap),
+              if (icone != null) ...[
+                icone,
+                const SizedBox(width: FxSettingsLayout.iconGap),
+              ],
               Expanded(
                 child: DecoratedBox(
                   decoration: BoxDecoration(

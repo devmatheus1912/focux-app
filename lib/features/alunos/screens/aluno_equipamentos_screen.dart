@@ -4,6 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/widgets/fx_quick_chips.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
+import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -13,7 +17,6 @@ import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_form_chrome.dart';
 import '../../../core/widgets/fx_help.dart';
-import '../../../core/widgets/fx_hub_header.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
@@ -41,6 +44,10 @@ class _AlunoEquipamentosScreenState
     extends ConsumerState<AlunoEquipamentosScreen> {
   Set<Equipamento>? _baseline;
   Set<Equipamento>? _selected;
+
+  /// "Só o que o aluno tem": a lista aparece. Desligado = qualquer equipamento
+  /// (lista vazia no servidor).
+  bool _restrito = false;
   bool _saving = false;
 
   bool get _dirty {
@@ -51,10 +58,16 @@ class _AlunoEquipamentosScreenState
         !selected.containsAll(baseline);
   }
 
+  bool get _podeSalvar {
+    final selected = _selected ?? const <Equipamento>{};
+    return _dirty && !_saving && !(_restrito && selected.isEmpty);
+  }
+
   void _hydrate(Set<Equipamento> fromAluno) {
     if (_selected != null) return;
     _baseline = {...fromAluno};
     _selected = {...fromAluno};
+    _restrito = fromAluno.isNotEmpty;
   }
 
   void _toggle(Equipamento equipamento) {
@@ -68,9 +81,19 @@ class _AlunoEquipamentosScreenState
     setState(() => _selected = current);
   }
 
-  void _clearRestriction() {
+  void _escolherModo({required bool restrito}) {
+    if (restrito == _restrito) return;
     HapticFeedback.selectionClick();
-    setState(() => _selected = {});
+    setState(() {
+      _restrito = restrito;
+      // Qualquer equipamento é a lista vazia no servidor.
+      if (!restrito) _selected = {};
+    });
+  }
+
+  void _aplicarAtalho(EquipamentosAtalho atalho) {
+    HapticFeedback.selectionClick();
+    setState(() => _selected = {...atalho.equipamentos});
   }
 
   void _showHelp() {
@@ -80,19 +103,19 @@ class _AlunoEquipamentosScreenState
       subtitle: 'O que o aluno tem disponível no treino.',
       tips: const [
         FxHelpTip(
-          'Restrição',
-          'Marque só o que dá para usar. Substituições do copiloto respeitam essa lista.',
+          'Qualquer ou só o que tem',
+          'Com "Só o que o aluno tem", as substituições do copiloto usam só o que estiver marcado.',
           icon: FxIcons.treino,
         ),
         FxHelpTip(
-          'Sem restrição',
-          'Lista vazia = sem filtro. Qualquer equipamento pode entrar nas sugestões.',
-          icon: FxIcons.ia,
+          'Atalhos',
+          'Academia, casa ou ao ar livre preenchem a lista num toque. Ajuste depois o que faltar.',
+          icon: FxIcons.alvo,
         ),
         FxHelpTip(
           'Salvar',
-          'O botão Salvar só aparece depois que você muda alguma opção.',
-          icon: FxIcons.alvo,
+          'Salvar fica ativo quando você muda algo.',
+          icon: FxIcons.salvar,
         ),
       ],
     );
@@ -115,7 +138,19 @@ class _AlunoEquipamentosScreenState
 
   Future<void> _save() async {
     final selected = _selected;
-    if (selected == null || _saving || !_dirty) return;
+    if (selected == null || !_podeSalvar) return;
+    final antes = _baseline?.length ?? 0;
+    if (selected.isEmpty && antes > 0) {
+      final ok = await showFxConfirmSheet(
+        context,
+        title: antes == 1
+            ? 'Tirar a restrição de 1 equipamento?'
+            : 'Tirar a restrição de $antes equipamentos?',
+        message: 'As substituições passam a usar qualquer equipamento.',
+        confirmLabel: 'Tirar restrição',
+      );
+      if (!ok || !mounted) return;
+    }
     HapticFeedback.mediumImpact();
     setState(() => _saving = true);
     try {
@@ -162,13 +197,13 @@ class _AlunoEquipamentosScreenState
           bottomNavigationBar: FxFormStickyBar(
             child: Semantics(
               button: true,
-              enabled: _dirty && !_saving,
+              enabled: _podeSalvar,
               label: _saving ? 'Salvando equipamentos' : 'Salvar',
               child: FxLiquidPrimaryButton(
                 label: 'Salvar',
                 loading: _saving,
                 loadingLabel: 'Salvando…',
-                onPressed: (_dirty && !_saving) ? _save : null,
+                onPressed: _podeSalvar ? _save : null,
               ),
             ),
           ),
@@ -188,8 +223,8 @@ class _AlunoEquipamentosScreenState
                 ),
             data: (aluno) {
               _hydrate(aluno.equipamentosDisponiveis);
-              final current = _selected ?? {};
-              final noneSelected = current.isEmpty;
+              final current = _selected ?? <Equipamento>{};
+              final atalho = equipamentosAtalhoDaSelecao(current);
               return RefreshIndicator(
                 onRefresh: () async {
                   ref.invalidate(alunoProvider(widget.alunoId));
@@ -200,11 +235,12 @@ class _AlunoEquipamentosScreenState
                   setState(() {
                     _baseline = {...fresh.equipamentosDisponiveis};
                     _selected = {...fresh.equipamentosDisponiveis};
+                    _restrito = fresh.equipamentosDisponiveis.isNotEmpty;
                   });
                 },
                 child: FxKeyboardDismissScope(
                   child: FxContentWidthLimiter(
-                    child: ListView.builder(
+                    child: ListView(
                       physics: const AlwaysScrollableScrollPhysics(),
                       keyboardDismissBehavior:
                           ScrollViewKeyboardDismissBehavior.onDrag,
@@ -214,75 +250,81 @@ class _AlunoEquipamentosScreenState
                         FxSettingsLayout.pageInset,
                         TokensStrip.s6,
                       ),
-                      itemCount: Equipamento.values.length + 2,
-                      itemBuilder: (context, i) {
-                        if (i == 0) {
-                          return Padding(
-                            padding: const EdgeInsets.only(
-                              bottom: TokensStrip.s3,
-                            ),
-                            child: FxHubHeader(
-                              title: 'Disponíveis',
-                              subtitle: equipamentosCountLabel(current.length),
-                            ),
-                          );
-                        }
-                        if (i == Equipamento.values.length + 1) {
-                          return Semantics(
-                            selected: noneSelected,
-                            button: true,
-                            label: 'Sem restrição',
-                            child: FxSatelliteListTile(
-                              title: 'Sem restrição',
-                              subtitle: const Text(
-                                'Não filtrar substituições por equipamento.',
-                              ),
-                              leading: Icon(FxIcons.ia, size: FxSettingsLayout.iconSize, color:
-                                    noneSelected
-                                        ? primary
-                                        : fxScreenMute(context)),
-                              trailing: Switch.adaptive(
-                                value: noneSelected,
-                                onChanged:
-                                    _saving
-                                        ? null
-                                        : (v) {
-                                          if (v) _clearRestriction();
-                                        },
-                              ),
-                              accent: noneSelected ? primary : null,
-                              onTap: _saving ? null : _clearRestriction,
-                            ),
-                          );
-                        }
-                        final equipamento = Equipamento.values[i - 1];
-                        final selected = current.contains(equipamento);
-                        final label =
-                            TaxonomyLabels.equipamento[equipamento] ??
-                            equipamento.backendName;
-                        return Semantics(
-                          selected: selected,
-                          button: true,
-                          label: label,
-                          child: FxSatelliteListTile(
-                            title: label,
-                            leading: Icon(equipamentoFxIcon(equipamento), size: FxSettingsLayout.iconSize, color:
-                                  selected
-                                      ? primary
-                                      : fxScreenMute(context)),
-                            trailing: Switch.adaptive(
-                              value: selected,
-                              onChanged:
+                      children: [
+                        FxSettingsGroup(
+                          header: 'O que entra nas substituições',
+                          children: [
+                            _ModoLinha(
+                              label: 'Qualquer equipamento',
+                              subtitle:
+                                  'As substituições podem usar qualquer equipamento.',
+                              selecionado: !_restrito,
+                              onTap:
                                   _saving
                                       ? null
-                                      : (_) => _toggle(equipamento),
+                                      : () => _escolherModo(restrito: false),
                             ),
-                            accent: selected ? primary : null,
-                            onTap:
-                                _saving ? null : () => _toggle(equipamento),
+                            _ModoLinha(
+                              label: 'Só o que o aluno tem',
+                              subtitle:
+                                  'As substituições usam só o que estiver marcado.',
+                              selecionado: _restrito,
+                              ultimo: true,
+                              onTap:
+                                  _saving
+                                      ? null
+                                      : () => _escolherModo(restrito: true),
+                            ),
+                          ],
+                        ),
+                        if (_restrito) ...[
+                          const SizedBox(height: FxSettingsLayout.groupGap),
+                          Text(
+                            'Atalhos',
+                            style: FocuxHubTypography.chip(chrome.mute),
                           ),
-                        );
-                      },
+                          const SizedBox(height: TokensStrip.s1),
+                          FxQuickChips<EquipamentosAtalho>(
+                            itens: equipamentosAtalhos,
+                            selecionado: atalho,
+                            rotuloDe: (a) => a.rotulo,
+                            onSelecionar: _saving ? (_) {} : _aplicarAtalho,
+                          ),
+                          const SizedBox(height: FxSettingsLayout.groupGap),
+                          FxSettingsGroup(
+                            header: equipamentosMarcadosLabel(current.length),
+                            caption:
+                                current.isEmpty
+                                    ? 'Marque ao menos um para salvar.'
+                                    : null,
+                            children: [
+                              for (final (i, equipamento)
+                                  in Equipamento.values.indexed)
+                                FxSettingsTile(
+                                  label:
+                                      TaxonomyLabels.equipamento[equipamento] ??
+                                      equipamento.backendName,
+                                  value: '',
+                                  semanticsLabel:
+                                      TaxonomyLabels.equipamento[equipamento],
+                                  showDivider:
+                                      i < Equipamento.values.length - 1,
+                                  accessory: Switch.adaptive(
+                                    value: current.contains(equipamento),
+                                    onChanged:
+                                        _saving
+                                            ? null
+                                            : (_) => _toggle(equipamento),
+                                  ),
+                                  onTap:
+                                      _saving
+                                          ? null
+                                          : () => _toggle(equipamento),
+                                ),
+                            ],
+                          ),
+                        ],
+                      ],
                     ),
                   ),
                 ),
@@ -290,6 +332,50 @@ class _AlunoEquipamentosScreenState
             },
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Uma das duas escolhas do topo: marca de seleção, sem seta (não abre tela).
+class _ModoLinha extends StatelessWidget {
+  const _ModoLinha({
+    required this.label,
+    required this.subtitle,
+    required this.selecionado,
+    required this.onTap,
+    this.ultimo = false,
+  });
+
+  final String label;
+  final String subtitle;
+  final bool selecionado;
+  final VoidCallback? onTap;
+  final bool ultimo;
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    return Semantics(
+      selected: selecionado,
+      inMutuallyExclusiveGroup: true,
+      child: FxSettingsTile(
+        label: label,
+        subtitle: subtitle,
+        value: '',
+        showDivider: !ultimo,
+        accessory: SizedBox.square(
+          dimension: FxSettingsLayout.iconSize,
+          child:
+              selecionado
+                  ? Icon(
+                    FxIcons.check,
+                    size: FxSettingsLayout.iconSize,
+                    color: primary,
+                  )
+                  : null,
+        ),
+        onTap: onTap,
       ),
     );
   }

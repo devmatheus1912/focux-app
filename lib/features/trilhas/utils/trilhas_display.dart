@@ -1,212 +1,68 @@
 import '../models/trilha.dart';
-import '../../../core/utils/pt_br_display.dart';
 
-const trilhaMetaTipos = ['TREINOS', 'PESO', 'MEDIDA', 'CUSTOMIZADO'];
-const trilhaFiltroAndamento = 'andamento';
-const trilhaFiltroConcluidas = 'concluidas';
+/// Trilha = caminho em etapas até uma conquista (barra fixa, 5 km…).
+/// Peso e medida são Metas (Evolução); frequência é Aderência.
+const trilhaEtapasMin = 2;
+const trilhaEtapasMax = 10;
 
-const trilhaFiltroOpcoes = <({String value, String label})>[
-  (value: trilhaFiltroAndamento, label: 'Em andamento'),
-  (value: trilhaFiltroConcluidas, label: 'Concluídas'),
-];
+/// Etapas em ordem.
+List<MarcoModel> trilhaEtapas(TrilhaModel t) =>
+    [...t.marcos]..sort((a, b) => a.ordem.compareTo(b.ordem));
 
-String trilhaMetaTipoLabel(String? tipo) {
-  switch ((tipo ?? '').trim().toUpperCase()) {
-    case 'TREINOS':
-      return 'Número de treinos';
-    case 'PESO':
-      return 'Meta de peso';
-    case 'MEDIDA':
-      return 'Meta de medida';
-    case 'CUSTOMIZADO':
-      return 'Customizado';
-    case '':
-      return 'Tipo de meta';
-    default:
-      return tipo!.trim();
-  }
-}
+int trilhaEtapasFeitas(TrilhaModel t) => t.marcos.where((m) => m.concluido).length;
 
-String trilhaMetaValorHint(String? tipo) {
-  switch ((tipo ?? '').trim().toUpperCase()) {
-    case 'TREINOS':
-      return 'Quantos treinos fecham a meta';
-    case 'PESO':
-      return 'Peso alvo (kg)';
-    case 'MEDIDA':
-      return 'Medida alvo (cm)';
-    default:
-      return 'Valor da meta (opcional)';
-  }
-}
-
-String trilhaStatusLabel(bool concluida) =>
-    concluida ? 'Concluída' : 'Em andamento';
-
-String trilhaPercentLabel(double percentual) =>
-    '${percentual.toStringAsFixed(0)}%';
-
-String trilhaHubSubtitle({required String alunoNome}) {
-  final nome = alunoNome.trim().isEmpty ? 'Aluno' : alunoNome.trim();
-  return nome;
-}
-
-const trilhaPrazoDias = [7, 14, 30, 60, 90];
-
-DateTime? trilhaParseData(String? raw) {
-  final text = raw?.trim();
-  if (text == null || text.isEmpty) return null;
-  return DateTime.tryParse(text);
-}
-
-String trilhaDataLabel(DateTime data) {
-  final day = data.day.toString().padLeft(2, '0');
-  final month = data.month.toString().padLeft(2, '0');
-  return '$day/$month';
-}
-
-String trilhaPrazoOpcaoLabel(int? dias) {
-  if (dias == null) return 'Sem prazo';
-  return 'Em $dias dias';
-}
-
-String? trilhaPrazoIso(int? dias, DateTime today) {
-  if (dias == null) return null;
-  final data = DateTime(today.year, today.month, today.day).add(
-    Duration(days: dias),
-  );
-  final y = data.year.toString().padLeft(4, '0');
-  final m = data.month.toString().padLeft(2, '0');
-  final d = data.day.toString().padLeft(2, '0');
-  return '$y-$m-$d';
-}
-
-DateTime? trilhaProximoPrazo(List<TrilhaModel> trilhas) {
-  DateTime? nearest;
-  for (final trilha in trilhas) {
-    if (trilha.concluida) continue;
-    final data = trilhaParseData(trilha.dataFim);
-    if (data == null) continue;
-    if (nearest == null || data.isBefore(nearest)) nearest = data;
-  }
-  return nearest;
-}
-
-String trilhaPrazoMetricValue(List<TrilhaModel> trilhas) {
-  final data = trilhaProximoPrazo(trilhas);
-  if (data == null) return '—';
-  return trilhaDataLabel(data);
-}
-
-int trilhaListaAtivas(TrilhaLista lista) =>
-    lista.ativas ?? trilhaAtivasCount(lista.items);
-
-String trilhaListaProgressoLabel(TrilhaLista lista) {
-  if (lista.progressoMedio != null) {
-    return trilhaPercentLabel(lista.progressoMedio!);
-  }
-  return trilhaProgressoMedioLabel(lista.items);
-}
-
-String trilhaListaPrazoValue(TrilhaLista lista) {
-  final parsed = trilhaParseData(lista.proximoPrazo);
-  if (parsed != null) return trilhaDataLabel(parsed);
-  return trilhaPrazoMetricValue(lista.items);
-}
-
-String trilhaListaPrazoHint(TrilhaLista lista) {
-  if (trilhaListaAtivas(lista) == 0) return 'Nenhuma trilha ativa';
-  if (trilhaParseData(lista.proximoPrazo) != null ||
-      trilhaProximoPrazo(lista.items) != null) {
-    return 'Próximo prazo das ativas';
-  }
-  return 'Sem prazo nas ativas';
-}
-
-String trilhaCardContexto(TrilhaModel trilha) {
-  final parts = <String>[
-    trilhaMetaTipoLabel(trilha.metaTipo),
-    trilhaValorAtualLabel(trilha),
-  ];
-  final prazo = trilhaParseData(trilha.dataFim);
-  if (prazo != null) parts.add('até ${trilhaDataLabel(prazo)}');
-  return parts.join(' · ');
-}
-
-int trilhaAtivasCount(List<TrilhaModel> trilhas) =>
-    trilhas.where((t) => !t.concluida).length;
-
-int trilhaConcluidasCount(List<TrilhaModel> trilhas) =>
-    trilhas.where((t) => t.concluida).length;
-
-int trilhaMarcosPendentes(List<TrilhaModel> trilhas) => trilhas
-    .expand((t) => t.marcos)
-    .where((m) => !m.concluido)
-    .length;
-
-double trilhaProgressoMedio(List<TrilhaModel> trilhas) {
-  if (trilhas.isEmpty) return 0;
-  final soma = trilhas.fold<double>(0, (acc, t) => acc + t.percentualConclusao);
-  return soma / trilhas.length;
-}
-
-String trilhaProgressoMedioLabel(List<TrilhaModel> trilhas) =>
-    trilhaPercentLabel(trilhaProgressoMedio(trilhas));
-
-List<TrilhaModel> trilhaFiltradas(
-  List<TrilhaModel> trilhas,
-  String filtro,
-) {
-  if (filtro == trilhaFiltroConcluidas) {
-    return trilhas.where((t) => t.concluida).toList();
-  }
-  return trilhas.where((t) => !t.concluida).toList();
-}
-
-MarcoModel? trilhaProximoMarco(TrilhaModel trilha) {
-  for (final marco in trilha.marcos) {
-    if (!marco.concluido) return marco;
+/// A primeira etapa ainda não feita; null quando todas estão feitas.
+MarcoModel? trilhaEtapaAtual(TrilhaModel t) {
+  for (final m in trilhaEtapas(t)) {
+    if (!m.concluido) return m;
   }
   return null;
 }
 
-String trilhaValorUnidade(String? tipo) {
-  switch ((tipo ?? '').trim().toUpperCase()) {
-    case 'PESO':
-      return ' kg';
-    case 'MEDIDA':
-      return ' cm';
-    default:
-      return '';
-  }
+/// "Etapa 2 de 5 · Próxima: Correr 3 km" ou "5 etapas feitas".
+String trilhaResumoLinha(TrilhaModel t) {
+  final total = t.marcos.length;
+  if (total == 0) return 'Sem etapas';
+  final atual = trilhaEtapaAtual(t);
+  if (atual == null) return total == 1 ? '1 etapa feita' : '$total etapas feitas';
+  final n = trilhaEtapasFeitas(t) + 1;
+  return 'Etapa $n de $total · Próxima: ${atual.titulo}';
 }
 
-String trilhaNumeroLabel(double value) =>
-    value == value.roundToDouble()
-        ? value.toStringAsFixed(0)
-        : formatBrDecimal(value);
-
-String trilhaValorAtualLabel(TrilhaModel trilha) {
-  if (trilha.metaValor == null) {
-    final done = trilha.marcos.where((m) => m.concluido).length;
-    return '$done/${trilha.marcos.length}';
-  }
-  final unidade = trilhaValorUnidade(trilha.metaTipo);
-  return '${trilhaNumeroLabel(trilha.valorAtual)} / '
-      '${trilhaNumeroLabel(trilha.metaValor!)}$unidade';
+DateTime? trilhaPrazo(TrilhaModel t) {
+  final raw = t.dataFim?.trim();
+  if (raw == null || raw.isEmpty) return null;
+  return DateTime.tryParse(raw);
 }
 
-double? trilhaParseNumero(String raw) {
-  final text = raw.trim().replaceAll(',', '.');
-  if (text.isEmpty) return null;
-  return double.tryParse(text);
+String trilhaDiaMes(DateTime d) =>
+    '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}';
+
+/// "até 30/11" ou, vencido e em andamento, "venceu 30/11".
+String? trilhaPrazoLabel(TrilhaModel t, DateTime hoje) {
+  final p = trilhaPrazo(t);
+  if (p == null) return null;
+  final dia = DateTime(hoje.year, hoje.month, hoje.day);
+  if (!t.concluida && p.isBefore(dia)) return 'venceu ${trilhaDiaMes(p)}';
+  return 'até ${trilhaDiaMes(p)}';
 }
 
-List<String> trilhaMarcosTitulos(Iterable<String> raw) =>
-    raw.map((t) => t.trim()).where((t) => t.isNotEmpty).toList();
+bool trilhaPrazoVencido(TrilhaModel t, DateTime hoje) {
+  final p = trilhaPrazo(t);
+  if (p == null || t.concluida) return false;
+  return p.isBefore(DateTime(hoje.year, hoje.month, hoje.day));
+}
+
+/// Em andamento primeiro; concluídas à parte.
+({List<TrilhaModel> andamento, List<TrilhaModel> concluidas}) trilhaGrupos(
+  List<TrilhaModel> trilhas,
+) => (
+  andamento: trilhas.where((t) => !t.concluida).toList(),
+  concluidas: trilhas.where((t) => t.concluida).toList(),
+);
 
 /// Linha de Trilhas nas Ferramentas do 360: a primeira trilha em andamento e a
-/// etapa em que o aluno está ("Força · etapa 2 de 5"). Sem marcos, a porcentagem.
+/// etapa em que o aluno está ("Força · etapa 2 de 5 · +1").
 String trilhaResumo360(TrilhaLista? lista) {
   if (lista == null) return 'Etapas e progresso';
   if (lista.items.isEmpty) return 'Nenhuma trilha';
@@ -217,10 +73,55 @@ String trilhaResumo360(TrilhaLista? lista) {
   }
   final total = ativa.marcos.length;
   final etapa = total == 0
-      ? trilhaPercentLabel(ativa.percentualConclusao)
-      : 'etapa ${(ativa.marcos.where((m) => m.concluido).length + 1).clamp(1, total)} de $total';
+      ? '${ativa.percentualConclusao.toStringAsFixed(0)}%'
+      : 'etapa ${(trilhaEtapasFeitas(ativa) + 1).clamp(1, total)} de $total';
   final outras = lista.items.where((t) => !t.concluida).length - 1;
   final mais = outras > 0 ? ' · +$outras' : '';
   return '${ativa.titulo} · $etapa$mais';
 }
 
+/// Modelos prontos na criação (só no app): um toque preenche nome e etapas.
+class TrilhaModeloPronto {
+  const TrilhaModeloPronto(this.nome, this.etapas);
+  final String nome;
+  final List<String> etapas;
+}
+
+const trilhaModelos = [
+  TrilhaModeloPronto('Primeira barra fixa', [
+    'Pendurar 30 s na barra',
+    '5 negativas controladas',
+    'Barra com elástico 3×5',
+    '1 barra fixa completa',
+  ]),
+  TrilhaModeloPronto('Correr 5 km', [
+    'Correr 1 km sem parar',
+    'Correr 2 km',
+    'Correr 3 km',
+    'Correr 5 km',
+  ]),
+  TrilhaModeloPronto('Agachamento livre', [
+    'Agachar até a caixa com técnica',
+    'Agachamento com halteres 3×10',
+    'Agachamento livre com barra vazia',
+    'Agachamento livre com carga',
+  ]),
+  TrilhaModeloPronto('Flexão completa', [
+    'Flexão na parede 3×15',
+    'Flexão com joelhos 3×10',
+    'Flexão inclinada 3×10',
+    '10 flexões completas',
+  ]),
+];
+
+/// Etapas preenchidas, sem espaço sobrando.
+List<String> trilhaEtapasValidas(Iterable<String> textos) =>
+    [for (final t in textos) if (t.trim().isNotEmpty) t.trim()];
+
+/// Erro do formulário de trilha, ou null quando dá para criar.
+String? trilhaErroFormulario({required String nome, required List<String> etapas}) {
+  if (nome.trim().isEmpty) return 'Dê um nome à trilha.';
+  if (etapas.length < trilhaEtapasMin) return 'Preencha pelo menos 2 etapas.';
+  if (etapas.length > trilhaEtapasMax) return 'Uma trilha tem no máximo 10 etapas.';
+  return null;
+}

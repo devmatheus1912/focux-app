@@ -44,7 +44,6 @@ import '../utils/progressao_aceitar_route_args.dart';
 import '../utils/progressao_pdf_builder.dart';
 import '../widgets/progressao_revisao_linha.dart';
 import '../utils/progressao_copy.dart';
-import '../../../core/widgets/fx_action_link.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/theme/fx_icons.dart';
@@ -262,7 +261,9 @@ class _ProgressaoAceitarScreenState
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         for (final (treino, itens) in grupos) ...[
-          if (grupos.length > 1) ...[
+          // Com nome de treino, sempre o cabeçalho: o mesmo exercício pode
+          // estar em dois treinos e precisa ser identificável.
+          if (grupos.length > 1 || treino != null) ...[
             const SizedBox(height: TokensStrip.s2),
             DashboardSectionHeader(title: treino ?? ptS.cargasGrupoOutros),
             const SizedBox(height: TokensStrip.s2),
@@ -280,6 +281,7 @@ class _ProgressaoAceitarScreenState
                     aberta: _abertas.contains(s.id),
                     cargaEditada: _cargas[s.id],
                     alunoNome: args.alunoId == null ? s.alunoNome : null,
+                    mudaCarga: progressaoMudaCarga(s),
                     onEditarCarga:
                         s.cargaSugeridaKg == null
                             ? null
@@ -391,8 +393,10 @@ class _ProgressaoAceitarScreenState
             final comMudanca = ativas.where(progressaoMudaCarga).toList();
             final semMudanca =
                 ativas.where((s) => !progressaoMudaCarga(s)).toList();
-            final selecionadas = ativas.where(_selecionada).toList();
+            // Só quem muda de carga entra na seleção: "fica igual" não aplica nada.
+            final selecionadas = comMudanca.where(_selecionada).toList();
             final n = selecionadas.length;
+            final todas = n == comMudanca.length;
             return Column(
               children: [
                 Expanded(
@@ -407,6 +411,8 @@ class _ProgressaoAceitarScreenState
                         if (ativas.isNotEmpty) ...[
                           _ResumoDaRevisao(sugestoes: ativas),
                           const SizedBox(height: TokensStrip.s3),
+                        ],
+                        if (comMudanca.isNotEmpty) ...[
                           Row(
                             children: [
                               Expanded(
@@ -417,21 +423,23 @@ class _ProgressaoAceitarScreenState
                                   ),
                                 ),
                               ),
-                              FxActionLink(
+                              // Ação na própria tela: botão tonal, sem a seta de navegação.
+                              FxTonalButton(
+                                compact: true,
                                 label:
-                                    n == ativas.length
+                                    todas
                                         ? ptS.cargasDesmarcarTodas
-                                        : ptS.cargasMarcarTodas,
-                                onTap:
+                                        : ptS.cargasMarcarAsN(comMudanca.length),
+                                onPressed:
                                     () => setState(() {
-                                      final marcar = n != ativas.length;
-                                      _alternadas
-                                        ..clear()
-                                        ..addAll([
-                                          for (final s in ativas)
-                                            if (progressaoMudaCarga(s) != marcar)
-                                              s.id,
+                                      _alternadas.removeAll([
+                                        for (final s in comMudanca) s.id,
+                                      ]);
+                                      if (todas) {
+                                        _alternadas.addAll([
+                                          for (final s in comMudanca) s.id,
                                         ]);
+                                      }
                                     }),
                               ),
                             ],
@@ -450,7 +458,7 @@ class _ProgressaoAceitarScreenState
                             child: ExpansionTile(
                               tilePadding: EdgeInsets.zero,
                               childrenPadding: EdgeInsets.zero,
-                              initiallyExpanded: comMudanca.isEmpty,
+                              initiallyExpanded: false,
                               title: Text(
                                 '${ptS.cargasGrupoSemMudanca} · ${semMudanca.length}',
                                 style: FocuxHubTypography.cardTitle(
@@ -701,6 +709,7 @@ class _ResumoDaRevisao extends StatelessWidget {
     final sobe = sugestoes.where((s) => (s.deltaKg ?? 0) > 0).length;
     final desce = sugestoes.where((s) => (s.deltaKg ?? 0) < 0).length;
     final mantem = sugestoes.length - sobe - desce;
+    // O título conta só o que muda; quem fica igual vai na linha de baixo.
     return FxStripCard(
       marca: true,
       padding: const EdgeInsets.all(TokensStrip.s3),
@@ -710,7 +719,7 @@ class _ResumoDaRevisao extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              ptS.cargasParaRevisar(sugestoes.length),
+              ptS.cargasParaRevisar(sobe + desce),
               style: FocuxHubTypography.cardTitle(color: sobre.ink),
             ),
             Text(
