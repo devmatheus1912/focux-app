@@ -22,6 +22,7 @@ enum ProgressaoObjetivo {
 
 const progressaoTitulo = 'Ajustar cargas';
 const progressaoAdicionarObservacao = 'Algo para considerar? (opcional)';
+
 /// Atalhos do pedido: viram `sinais` para o servidor (que trava o resultado),
 /// não texto no campo.
 enum ProgressaoSinal {
@@ -33,6 +34,7 @@ enum ProgressaoSinal {
   final String label;
   final String api;
 }
+
 const progressaoSemExecucao =
     'Sem treino concluído em 4 semanas. As sugestões precisam de pelo menos um.';
 
@@ -120,7 +122,8 @@ String progressaoDataHora(DateTime d) =>
     '${_doisDigitos(d.day)}/${_doisDigitos(d.month)}/${d.year} '
     '${_doisDigitos(d.hour)}:${_doisDigitos(d.minute)}';
 
-String progressaoGeradoLabel(DateTime d) => 'Gerado em ${progressaoDataHora(d)}';
+String progressaoGeradoLabel(DateTime d) =>
+    'Gerado em ${progressaoDataHora(d)}';
 
 String progressaoSlug(String value) {
   const de = 'áàâãäéèêëíìîïóòôõöúùûüçñ';
@@ -160,4 +163,49 @@ List<(String?, List<ProgressaoSugestao>)> progressaoPorTreino(
         return a.compareTo(b);
       });
   return [for (final n in nomes) (n, grupos[n]!)];
+}
+
+/// Frase do "Gerando": muda com o tempo e diz o que a IA está fazendo, com os
+/// números do cartão de cima quando há contexto.
+String progressaoGerandoFrase(
+  Duration passou,
+  ProgressaoContextoResumo? contexto,
+) {
+  if (passou < const Duration(seconds: 4)) {
+    final n = contexto?.sessoes4Semanas ?? 0;
+    return n > 0
+        ? (n == 1
+            ? 'Lendo o treino das últimas 4 semanas…'
+            : 'Lendo os $n treinos das últimas 4 semanas…')
+        : 'Lendo os treinos recentes…';
+  }
+  if (passou < const Duration(seconds: 10)) {
+    final n = contexto?.exercicios ?? 0;
+    return n > 0
+        ? (n == 1
+            ? 'Comparando as cargas de 1 exercício…'
+            : 'Comparando as cargas de $n exercícios…')
+        : 'Comparando as cargas…';
+  }
+  return 'Quase pronto. A IA leva até 30 segundos.';
+}
+
+String progressaoProntas(int n) =>
+    n == 1 ? '1 sugestão pronta' : '$n sugestões prontas';
+
+const progressaoPodeSair =
+    'Pode sair desta tela. As sugestões ficam esperando em Ajustar cargas.';
+
+/// O que foi pedido, em uma linha: objetivo, sinais e a observação.
+String progressaoPedidoLinha({
+  required ProgressaoObjetivo objetivo,
+  required Iterable<ProgressaoSinal> sinais,
+  required String observacao,
+}) {
+  final obs = observacao.trim();
+  return [
+    objetivo.label,
+    for (final s in sinais) s.label,
+    if (obs.isNotEmpty) '“$obs”',
+  ].join(' · ');
 }

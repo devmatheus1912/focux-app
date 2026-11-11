@@ -98,6 +98,7 @@ ResumoAgora? resumoAgora(
     case OperacaoStickyDestination.commitment:
       return _comSugestao(s, sticky, proxima, motivoServidor, AgoraVerbo.registrar);
     case OperacaoStickyDestination.editAluno:
+    case OperacaoStickyDestination.progressao:
     case OperacaoStickyDestination.evolucao:
     case OperacaoStickyDestination.treino:
       return _comSugestao(s, sticky, proxima, motivoServidor, AgoraVerbo.abrir);

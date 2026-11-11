@@ -9,15 +9,6 @@ void main() {
   });
 
   test('status mostra se o personal já respondeu, sem nota de IA', () {
-    final dia = DateTime(2026, 9, 30);
-    expect(
-      feedbackVideoSubtitle(criadoEm: dia, respondido: false),
-      endsWith('O aluno espera sua correção'),
-    );
-    expect(
-      feedbackVideoSubtitle(criadoEm: dia, respondido: true),
-      endsWith('Correção enviada'),
-    );
     expect(feedbackVideoStatusLabel(respondido: false), 'Para responder');
     expect(feedbackVideoResponderLabel(respondido: true), 'Editar resposta');
     expect(feedbackVideoHelpTip, isNot(contains('IA')));
@@ -33,7 +24,7 @@ void main() {
     final dia = DateTime(2026, 9, 30);
     expect(
       feedbackVideoAlunoSubtitle(criadoEm: dia, respondido: false),
-      endsWith('Aguardando o personal'),
+      endsWith('Aguardando a correção'),
     );
     expect(
       feedbackVideoAlunoSubtitle(criadoEm: dia, respondido: true),

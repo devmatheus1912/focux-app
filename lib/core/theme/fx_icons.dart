@@ -104,6 +104,7 @@ abstract final class FxIcons {
   static const IconData documento = IconData(0xe23a, fontFamily: _light); // fileText
   static const IconData duplicar = IconData(0xe1cc, fontFamily: _light); // copySimple
   static const IconData editar = IconData(0xe3b4, fontFamily: _light); // pencilSimple
+  static const IconData novaConversa = IconData(0xe34c, fontFamily: _light); // notePencil
   static const IconData email = IconData(0xe218, fontFamily: _light); // envelopeSimple
   static const IconData emailLido = IconData(0xe216, fontFamily: _light); // envelopeOpen
   static const IconData emailNaoLido = IconData(0xe218, fontFamily: _light); // envelopeSimple
@@ -296,6 +297,10 @@ abstract final class FxIcons {
 
   // Barra inferior: a aba ativa usa o par Fill.
   static const IconData sol = IconData(0xe472, fontFamily: _light); // sun
+  // Aparência (tema): papel próprio, mesmos glifos Phosphor.
+  static const IconData temaSistema = IconData(0xe1e0, fontFamily: _light); // deviceMobile
+  static const IconData temaClaro = IconData(0xe472, fontFamily: _light); // sun
+  static const IconData temaEscuro = IconData(0xe330, fontFamily: _light); // moon
   static const IconData atividade = IconData(0xe000, fontFamily: _light); // pulse
   static const IconData caixaEntrada = IconData(0xe4aa, fontFamily: _light); // tray
   static const IconData habito = IconData(0xe210, fontFamily: _light); // drop

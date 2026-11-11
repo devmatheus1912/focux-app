@@ -46,6 +46,8 @@ void abrirOperacaoSticky({
       context.push('/financeiro?alunoId=$alunoId');
     case OperacaoStickyDestination.treino:
       context.push('/alunos/$alunoId/rotina', extra: aluno.nome);
+    case OperacaoStickyDestination.progressao:
+      context.push('/alunos/$alunoId/ia/progressao', extra: aluno.nome);
     case OperacaoStickyDestination.commitment:
       showAluno360CommitmentSheet(
         context,

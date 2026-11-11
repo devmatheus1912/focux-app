@@ -27,7 +27,6 @@ import '../utils/aluno360_copilot_task_actions.dart' show tarefasCopilotoRota;
 import '../utils/aluno_detail_aluno_actions.dart';
 import '../utils/aluno_detail_aluno_resolution.dart';
 import '../utils/aluno_display_utils.dart';
-import '../widgets/aluno360_copilot_folha.dart' show abrirCopiloto360;
 import '../widgets/aluno360_composite_header.dart';
 import '../widgets/aluno360_menu_sheet.dart';
 import '../widgets/aluno360_help_sheets.dart';

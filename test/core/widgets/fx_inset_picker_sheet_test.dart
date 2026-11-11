@@ -97,5 +97,19 @@ void main() {
     expect(source, contains('showFxInsetPickerSheet'));
     expect(source, isNot(contains('FxChoiceStrip')));
     expect(source, isNot(contains('FxIcons.check,')));
+    // Ícones de tema (Phosphor): sol, lua e celular; a linha mostra o atual.
+    expect(PerfilAppearanceSection.iconFor(ThemeMode.light), FxIcons.temaClaro);
+    expect(PerfilAppearanceSection.iconFor(ThemeMode.dark), FxIcons.temaEscuro);
+    expect(
+      PerfilAppearanceSection.iconFor(ThemeMode.system),
+      FxIcons.temaSistema,
+    );
+  });
+
+  test('folha de escolha sem moldura dentro da folha', () {
+    final source = File(
+      'lib/core/widgets/fx_inset_picker_sheet.dart',
+    ).readAsStringSync();
+    expect(source, contains('semMoldura: true'));
   });
 }

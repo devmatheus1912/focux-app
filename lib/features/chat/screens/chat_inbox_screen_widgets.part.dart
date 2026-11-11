@@ -1,9 +1,19 @@
 part of 'chat_inbox_screen.dart';
 
 class _AlunoPickerSheet extends ConsumerStatefulWidget {
-  const _AlunoPickerSheet({required this.onSelect});
+  const _AlunoPickerSheet({
+    required this.onSelect,
+    required this.conversas,
+    required this.inboxCompleto,
+  });
 
   final ValueChanged<Aluno> onSelect;
+
+  /// Conversas já carregadas no inbox, por aluno (para a prévia da linha).
+  final Map<int, ChatInboxItem> conversas;
+
+  /// Inbox sem página por carregar: dá para afirmar "Sem conversa ainda".
+  final bool inboxCompleto;
 
   @override
   ConsumerState<_AlunoPickerSheet> createState() => _AlunoPickerSheetState();
@@ -24,8 +34,7 @@ class _AlunoPickerSheetState extends ConsumerState<_AlunoPickerSheet> {
     final chrome = ShellChrome.of(context);
     final isDark = chrome.isDark;
     final primary = Theme.of(context).colorScheme.primary;
-    final homeAsync = ref.watch(alunosHomeProvider);
-    final alunos = alunoPickerAlunosFromHome(homeAsync);
+    final alunosAsync = ref.watch(alunosParaConversaProvider);
     final maxHeight =
         MediaQuery.sizeOf(context).height * FxHomeSheetChrome.maxHeightFactor;
 
@@ -37,15 +46,7 @@ class _AlunoPickerSheetState extends ConsumerState<_AlunoPickerSheet> {
         children: [
           FxHomeSheetHandle(isDark: isDark),
           SizedBox(height: TokensStrip.s4),
-          FxHomeSheetHeader(
-            isDark: isDark,
-            title: 'Nova conversa',
-            leading: Icon(
-              FxIcons.chat,
-              color: primary,
-              size: 18,
-            ),
-          ),
+          FxHomeSheetHeader(isDark: isDark, title: 'Nova conversa'),
           const SizedBox(height: 8),
           FxSheetSearchField(
             dica: 'Buscar aluno',
@@ -55,11 +56,16 @@ class _AlunoPickerSheetState extends ConsumerState<_AlunoPickerSheet> {
           ),
           const SizedBox(height: 12),
           Expanded(
-            child: _buildAlunosBody(
-              homeAsync: homeAsync,
-              alunos: alunos,
-              isDark: isDark,
-              primary: primary,
+            child: alunosAsync.when(
+              loading: () => const SkeletonList(count: 6),
+              error:
+                  (e, _) => FxErrorState(
+                    chromeOnDark: isDark,
+                    primary: primary,
+                    message: friendlyError(e),
+                    onRetry: () => ref.invalidate(alunosParaConversaProvider),
+                  ),
+              data: _buildAlunos,
             ),
           ),
         ],
@@ -67,88 +73,121 @@ class _AlunoPickerSheetState extends ConsumerState<_AlunoPickerSheet> {
     );
   }
 
-  Widget _buildAlunosBody({
-    required AsyncValue<AlunosHomeBundle> homeAsync,
-    required List<Aluno>? alunos,
-    required bool isDark,
-    required Color primary,
-  }) {
-    if (alunos != null) {
-      final filtered = filterAlunoPickerAlunos(alunos, _query);
-      if (filtered.isEmpty) {
-        return FxEmptyState(
-          icon: _query.isEmpty ? FxIcons.grupo : FxIcons.buscar,
-          title:
-              _query.isEmpty
-                  ? 'Nenhum aluno cadastrado'
-                  : 'Nenhum aluno encontrado',
-          subtitle:
-              _query.isEmpty
-                  ? 'Cadastre um aluno para poder conversar por aqui.'
-                  : 'Tente outro nome ou e-mail.',
-          quiet: true,
-        );
-      }
-      return ListView(
-        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        children: [
-          FxSettingsGroup(
-            children: [
-              for (var i = 0; i < filtered.length; i++)
-                _AlunoContactTile(
-                  aluno: filtered[i],
-                  isDark: isDark,
-                  primary: primary,
-                  showDivider: i < filtered.length - 1,
-                  onTap: () => widget.onSelect(filtered[i]),
-                ),
-            ],
-          ),
+  /// Prévia da linha: o motivo de atenção, a última mensagem ou "Sem conversa
+  /// ainda" (só quando o inbox inteiro carregou; senão, nada).
+  String? _subtitulo(Aluno aluno, {required bool atencao}) {
+    if (atencao) return alunoMotivoAtencao(aluno);
+    final conversa = widget.conversas[aluno.id];
+    if (conversa != null) {
+      return chatInboxPreview(
+        remetente: conversa.ultimoRemetente,
+        mensagem: conversa.ultimaMensagem,
+      );
+    }
+    return widget.inboxCompleto ? 'Sem conversa ainda' : null;
+  }
+
+  Widget _buildAlunos(List<Aluno> alunos) {
+    final grupos = gruposDaNovaConversa(alunos, _query);
+    if (grupos.precisam.isEmpty && grupos.todos.isEmpty) {
+      return FxEmptyState(
+        icon: _query.isEmpty ? FxIcons.grupo : FxIcons.buscar,
+        title:
+            _query.isEmpty
+                ? 'Nenhum aluno cadastrado'
+                : 'Nenhum aluno encontrado',
+        subtitle:
+            _query.isEmpty
+                ? 'Cadastre um aluno para poder conversar por aqui.'
+                : 'Tente outro nome ou e-mail.',
+        quiet: true,
+      );
+    }
+    Widget linha(Aluno a, {required bool atencao}) => _AlunoContactTile(
+      aluno: a,
+      subtitulo: _subtitulo(a, atencao: atencao),
+      atencao: atencao,
+      onTap: () => widget.onSelect(a),
+    );
+    return ListView(
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      children: [
+        if (grupos.precisam.isNotEmpty) ...[
+          _CabecalhoDaFolha('Precisam de você'),
+          for (final a in grupos.precisam) linha(a, atencao: true),
+          const SizedBox(height: TokensStrip.s3),
+          if (grupos.todos.isNotEmpty) _CabecalhoDaFolha('Todos'),
         ],
-      );
-    }
-    if (homeAsync.hasError) {
-      return FxErrorState(
-        chromeOnDark: isDark,
-        primary: primary,
-        message: friendlyError(homeAsync.error ?? 'Erro ao carregar alunos'),
-        onRetry: () => ref.invalidate(alunosHomeProvider),
-      );
-    }
-    return const SkeletonList(count: 6);
+        for (final a in grupos.todos) linha(a, atencao: false),
+      ],
+    );
   }
 }
 
-class _AlunoContactTile extends StatelessWidget {
-  const _AlunoContactTile({
-    required this.aluno,
-    required this.isDark,
-    required this.primary,
-    required this.onTap,
-    this.showDivider = true,
-  });
+class _CabecalhoDaFolha extends StatelessWidget {
+  const _CabecalhoDaFolha(this.texto);
 
-  final Aluno aluno;
-  final bool isDark;
-  final Color primary;
-  final VoidCallback onTap;
-  final bool showDivider;
+  final String texto;
 
   @override
   Widget build(BuildContext context) {
-    assert(isDark || !isDark);
-    return FxSettingsTile(
-      icon: FxIcons.chat,
-      label: fxTitleCaseName(aluno.nome),
-      subtitle: aluno.email.isNotEmpty ? aluno.email : 'Aluno',
-      value: 'Abrir',
-      showDivider: showDivider,
-      accent: primary,
-      accessory: AlunoAvatar(
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        FxSettingsLayout.groupPadH,
+        TokensStrip.s1,
+        FxSettingsLayout.groupPadH,
+        TokensStrip.s2,
+      ),
+      child: Text(
+        texto,
+        style: FxSettingsLayout.sectionHeader(color: fxScreenMute(context)),
+      ),
+    );
+  }
+}
+
+/// Linha de aluno na folha e no "Comece uma conversa": mesma pele do inbox
+/// (avatar à esquerda, prévia embaixo, seta), sem e-mail nem "Abrir".
+class _AlunoContactTile extends StatelessWidget {
+  const _AlunoContactTile({
+    required this.aluno,
+    required this.subtitulo,
+    required this.onTap,
+    this.atencao = false,
+  });
+
+  final Aluno aluno;
+  final String? subtitulo;
+  final VoidCallback onTap;
+  final bool atencao;
+
+  @override
+  Widget build(BuildContext context) {
+    final sub = subtitulo;
+    return FxSatelliteListTile(
+      margin: const EdgeInsets.only(bottom: 4),
+      title: fxTitleCaseName(aluno.nome),
+      subtitle:
+          sub == null
+              ? null
+              : Text(
+                sub,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style:
+                    atencao
+                        ? FocuxHubTypography.bodyMuted(
+                          color: EagleTokens.warn,
+                          fontWeight: FontWeight.w600,
+                        )
+                        : null,
+              ),
+      leading: AlunoAvatar(
         name: aluno.nome,
         photoUrl: aluno.fotoUrl,
         variant: AlunoAvatarVariant.strip,
       ),
+      trailing: Icon(FxIcons.chevronDireita, color: fxScreenMute(context)),
       onTap: onTap,
     );
   }
@@ -293,7 +332,11 @@ class _InboxTabPane extends StatelessWidget {
     this.showLoadMore = false,
     this.loadingMore = false,
     this.onLoadMore,
+    this.rodape,
   });
+
+  /// "Comece uma conversa" (aba Todas, inbox inteiro carregado).
+  final Widget? rodape;
 
   final AsyncValue<List<ChatInboxItem>> async;
   final bool isDark;
@@ -328,12 +371,19 @@ class _InboxTabPane extends StatelessWidget {
           ),
       data: (items) {
         if (items.isEmpty) {
-          // Sticky "Nova conversa" é o único CTA (§11) — empty quieto no topo.
-          return FxEmptyState(
+          final vazio = FxEmptyState(
             icon: isArchived ? FxIcons.artigo : FxIcons.chat,
             title: chatInboxEmptyTitle(view),
             subtitle: chatInboxEmptySubtitle(view),
             quiet: true,
+          );
+          final extra = rodape;
+          if (extra == null) return vazio;
+          return ListView(
+            padding: const EdgeInsets.symmetric(
+              horizontal: FxSettingsLayout.pageInset,
+            ),
+            children: [vazio, extra],
           );
         }
         return RefreshIndicator(
@@ -348,8 +398,15 @@ class _InboxTabPane extends StatelessWidget {
               FxSettingsLayout.pageInset,
               TokensStrip.s5,
             ),
-            itemCount: items.length + (showLoadMore ? 1 : 0),
+            itemCount:
+                items.length +
+                (showLoadMore ? 1 : 0) +
+                (rodape == null ? 0 : 1),
             itemBuilder: (context, i) {
+              if (rodape != null &&
+                  i == items.length + (showLoadMore ? 1 : 0)) {
+                return rodape!;
+              }
               if (showLoadMore && i >= items.length) {
                 return FxSatelliteListTile(
                   title: loadingMore ? 'Carregando…' : 'Carregar mais',
@@ -411,6 +468,49 @@ class _InboxTabPane extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+/// Fim da aba Todas: até 3 alunos sem conversa (quem precisa de você antes) e
+/// "Ver todos os alunos", ao alcance do polegar, sem botão flutuante.
+class _ComeceUmaConversa extends StatelessWidget {
+  const _ComeceUmaConversa({
+    required this.alunos,
+    required this.onAbrir,
+    required this.onVerTodos,
+  });
+
+  final List<Aluno> alunos;
+  final ValueChanged<Aluno> onAbrir;
+  final VoidCallback onVerTodos;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: TokensStrip.s4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const _CabecalhoDaFolha('Comece uma conversa'),
+          for (final a in alunos)
+            _AlunoContactTile(
+              aluno: a,
+              subtitulo: alunoMotivoAtencao(a) ?? 'Sem conversa ainda',
+              atencao: alunoPrecisaDeVoce(a),
+              onTap: () => onAbrir(a),
+            ),
+          FxSatelliteListTile(
+            title: 'Ver todos os alunos',
+            titleCase: false,
+            trailing: Icon(
+              FxIcons.chevronDireita,
+              color: fxScreenMute(context),
+            ),
+            onTap: onVerTodos,
+          ),
+        ],
+      ),
     );
   }
 }

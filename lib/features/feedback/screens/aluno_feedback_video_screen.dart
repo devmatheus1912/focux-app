@@ -26,6 +26,8 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../data/feedback_video_repository.dart';
+import '../../../core/widgets/fx_video_rede.dart';
+import '../../chat/widgets/conversation_media_widgets.dart';
 import '../utils/feedback_video_display.dart';
 import '../../../core/theme/fx_icons.dart';
 
@@ -51,9 +53,17 @@ class _AlunoFeedbackVideoScreenState
   var _hasNext = false;
   var _page = 0;
   var _enviando = false;
+
+  /// Fração enviada do vídeo (0 a 1) enquanto sobe.
+  double? _progresso;
+
+  /// Envio que falhou: o arquivo fica guardado para tentar de novo sem
+  /// gravar outra vez (até dar certo ou a tela fechar).
+  ({XFile arquivo, int exercicioId, String comentario})? _pendente;
   String? _erro;
 
-  FeedbackVideoRepository get _repo => ref.read(feedbackVideoRepositoryProvider);
+  FeedbackVideoRepository get _repo =>
+      ref.read(feedbackVideoRepositoryProvider);
 
   @override
   void initState() {
@@ -191,32 +201,65 @@ class _AlunoFeedbackVideoScreenState
       comentarioCtrl.dispose();
     }
 
-    setState(() => _enviando = true);
+    _pendente = (
+      arquivo: arquivo,
+      exercicioId: exercicioId,
+      comentario: comentario,
+    );
+    await _subirPendente();
+  }
+
+  Future<void> _subirPendente() async {
+    final pendente = _pendente;
+    if (pendente == null || _enviando) return;
+    setState(() {
+      _enviando = true;
+      _progresso = 0;
+    });
     try {
+      final arquivo = pendente.arquivo;
       final filename = feedbackVideoUploadFilename(
         arquivo.name.isNotEmpty ? arquivo.name : arquivo.path,
       );
-      final url = kIsWeb || arquivo.path.isEmpty
-          ? await _repo.subirVideo(
-              filename: filename,
-              bytes: await arquivo.readAsBytes(),
-            )
-          : await _repo.subirVideo(filename: filename, path: arquivo.path);
+      void progresso(double f) {
+        if (mounted) setState(() => _progresso = f);
+      }
+
+      final url =
+          kIsWeb || arquivo.path.isEmpty
+              ? await _repo.subirVideo(
+                filename: filename,
+                bytes: await arquivo.readAsBytes(),
+                onProgress: progresso,
+              )
+              : await _repo.subirVideo(
+                filename: filename,
+                path: arquivo.path,
+                onProgress: progresso,
+              );
       final novo = await _repo.enviarMeu(
-        exercicioId: exercicioId,
+        exercicioId: pendente.exercicioId,
         videoUrl: url,
-        comentario: comentario,
+        comentario: pendente.comentario,
       );
       if (!mounted) return;
-      setState(() => _feedbacks.insert(0, novo));
+      setState(() {
+        _feedbacks.insert(0, novo);
+        _pendente = null;
+      });
       FeedbackHelper.showSuccess(
         context,
-        'Vídeo enviado. Você recebe um aviso quando o personal responder.',
+        'Vídeo enviado. Você recebe um aviso quando a correção chegar.',
       );
     } catch (e) {
       if (mounted) _mostrarErro(e);
     } finally {
-      if (mounted) setState(() => _enviando = false);
+      if (mounted) {
+        setState(() {
+          _enviando = false;
+          _progresso = null;
+        });
+      }
     }
   }
 
@@ -239,13 +282,14 @@ class _AlunoFeedbackVideoScreenState
   Future<void> _abrirDetalhe(FeedbackVideo item) {
     return showFxHomeSheet<void>(
       context,
-      builder: (ctx) => _FeedbackDetalheSheet(
-        item: item,
-        onAssistir: () {
-          Navigator.of(ctx).pop();
-          _abrirVideo(item.videoUrl);
-        },
-      ),
+      builder:
+          (ctx) => _FeedbackDetalheSheet(
+            item: item,
+            onAbrirFora: () {
+              Navigator.of(ctx).pop();
+              _abrirVideo(item.videoUrl);
+            },
+          ),
     );
   }
 
@@ -264,31 +308,33 @@ class _AlunoFeedbackVideoScreenState
           actions: [
             FxHelpIconButton(
               tooltip: 'Ajuda — feedback em vídeo',
-              onTap: () => showFxHelpSheet(
-                context,
-                title: feedbackVideoNome,
-                subtitle: feedbackVideoAlunoHelpTip,
-              ),
+              onTap:
+                  () => showFxHelpSheet(
+                    context,
+                    title: feedbackVideoNome,
+                    subtitle: feedbackVideoAlunoHelpTip,
+                  ),
             ),
           ],
         ),
         body: Column(
           children: [
             Expanded(
-              child: _loading
-                  ? const Padding(
-                      padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-                      child: SkeletonList(count: 4),
-                    )
-                  : _erro != null
-                  ? FxErrorState(
-                      chromeOnDark: chrome.isDark,
-                      primary: primary,
-                      message: _erro!,
-                      onRetry: () => _load(reset: true),
-                      title: 'Não conseguimos carregar seus vídeos',
-                    )
-                  : FxContentWidthLimiter(child: _buildLista(primary)),
+              child:
+                  _loading
+                      ? const Padding(
+                        padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                        child: SkeletonList(count: 4),
+                      )
+                      : _erro != null
+                      ? FxErrorState(
+                        chromeOnDark: chrome.isDark,
+                        primary: primary,
+                        message: _erro!,
+                        onRetry: () => _load(reset: true),
+                        title: 'Não conseguimos carregar seus vídeos',
+                      )
+                      : FxContentWidthLimiter(child: _buildLista(primary)),
             ),
             if (!_loading && _erro == null)
               SafeArea(
@@ -300,13 +346,33 @@ class _AlunoFeedbackVideoScreenState
                     FxSettingsLayout.pageInset,
                     TokensStrip.s3,
                   ),
-                  child: FxLiquidPrimaryButton(
-                    key: const ValueKey('aluno-feedback-enviar'),
-                    label: 'Enviar vídeo',
-                    icon: FxIcons.video,
-                    loading: _enviando,
-                    loadingLabel: 'Enviando vídeo…',
-                    onPressed: _enviar,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      FxLiquidPrimaryButton(
+                        key: const ValueKey('aluno-feedback-enviar'),
+                        // Falhou: tenta de novo com o mesmo arquivo.
+                        label:
+                            _pendente == null
+                                ? 'Enviar vídeo'
+                                : 'Tentar enviar de novo',
+                        icon: FxIcons.video,
+                        loading: _enviando,
+                        loadingLabel: feedbackVideoEnviando(_progresso),
+                        onPressed: _pendente == null ? _enviar : _subirPendente,
+                      ),
+                      if (_enviando) ...[
+                        const SizedBox(height: TokensStrip.s1),
+                        Text(
+                          feedbackVideoNaoFeche,
+                          textAlign: TextAlign.center,
+                          style: FocuxHubTypography.bodyMuted(
+                            color: chrome.mute,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
               ),
@@ -384,10 +450,10 @@ class _AlunoFeedbackVideoScreenState
 }
 
 class _FeedbackDetalheSheet extends StatelessWidget {
-  const _FeedbackDetalheSheet({required this.item, required this.onAssistir});
+  const _FeedbackDetalheSheet({required this.item, required this.onAbrirFora});
 
   final FeedbackVideo item;
-  final VoidCallback onAssistir;
+  final VoidCallback onAbrirFora;
 
   @override
   Widget build(BuildContext context) {
@@ -418,13 +484,25 @@ class _FeedbackDetalheSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: TokensStrip.s2),
-          SelectableText(
-            resposta.isEmpty
-                ? 'Seu personal ainda não respondeu. Você recebe um aviso quando ele responder.'
-                : resposta,
-            key: const ValueKey('aluno-feedback-resposta'),
-            style: FocuxHubTypography.body(color: chrome.ink),
-          ),
+          if (item.temAudio) ...[
+            ConversationAudioInlinePlayer(
+              url: item.respostaAudioUrl!,
+              recordedDuration:
+                  item.respostaAudioSegundos == null
+                      ? null
+                      : Duration(seconds: item.respostaAudioSegundos!),
+              mine: false,
+              isDark: isDark,
+              onFallbackOpen: () => launchSafeHttpUrl(item.respostaAudioUrl!),
+            ),
+            const SizedBox(height: TokensStrip.s2),
+          ],
+          if (resposta.isNotEmpty || !item.temAudio)
+            SelectableText(
+              resposta.isEmpty ? feedbackVideoAlunoSemCorrecao : resposta,
+              key: const ValueKey('aluno-feedback-resposta'),
+              style: FocuxHubTypography.body(color: chrome.ink),
+            ),
           if (comentario.isNotEmpty) ...[
             const SizedBox(height: TokensStrip.s4),
             Text(
@@ -437,12 +515,8 @@ class _FeedbackDetalheSheet extends StatelessWidget {
             const SizedBox(height: TokensStrip.s2),
             Text(comentario, style: FocuxHubTypography.body(color: chrome.ink)),
           ],
-          const SizedBox(height: TokensStrip.s5),
-          FxLiquidSecondaryButton(
-            label: 'Assistir meu vídeo',
-            icon: FxIcons.playCirculo,
-            onPressed: onAssistir,
-          ),
+          const SizedBox(height: TokensStrip.s4),
+          FxVideoRede(url: item.videoUrl, onAbrirFora: onAbrirFora),
         ],
       ),
     );

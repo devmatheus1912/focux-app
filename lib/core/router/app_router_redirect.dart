@@ -190,7 +190,6 @@ bool isPersonalOnlyLocation(String path) {
     '/admin/rbac',
     '/retencao',
     '/dunning',
-    '/winback',
     '/ofertas-upsell',
     '/cancel-save',
     '/automacoes',

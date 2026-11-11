@@ -16,6 +16,7 @@ class FxSettingsGroup extends StatelessWidget {
     this.helpTooltip,
     this.onHelpTap,
     this.edgeToEdgeRows = false,
+    this.semMoldura = false,
   });
 
   final String? header;
@@ -28,6 +29,10 @@ class FxSettingsGroup extends StatelessWidget {
 
   /// Linhas de picker/check — fundo de seleção até a borda do card (sem recuo).
   final bool edgeToEdgeRows;
+
+  /// Sem fundo, contorno e sombra: para listas dentro de uma folha, que já é
+  /// a superfície (evita moldura dentro de moldura).
+  final bool semMoldura;
 
   @override
   Widget build(BuildContext context) {
@@ -64,35 +69,37 @@ class FxSettingsGroup extends StatelessWidget {
             padding: const EdgeInsets.symmetric(
               horizontal: FxSettingsLayout.groupPadH,
             ),
-            child: Text(
-              caption!,
-              style: FxSettingsLayout.footer(color: mute),
-            ),
+            child: Text(caption!, style: FxSettingsLayout.footer(color: mute)),
           ),
         ],
         if (header != null || caption != null)
           const SizedBox(height: FxSettingsLayout.headerToGroup),
-        DecoratedBox(
-          decoration: fxListCardDecoration(
-            context,
-            accent: accent,
-            radius: FxSettingsLayout.groupRadius,
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(FxSettingsLayout.groupRadius),
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal:
-                    edgeToEdgeRows ? 0 : FxSettingsLayout.groupPadH,
-                vertical: edgeToEdgeRows ? 0 : FxSettingsLayout.groupPadV,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: children,
+        if (semMoldura)
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: children,
+          )
+        else
+          DecoratedBox(
+            decoration: fxListCardDecoration(
+              context,
+              accent: accent,
+              radius: FxSettingsLayout.groupRadius,
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(FxSettingsLayout.groupRadius),
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: edgeToEdgeRows ? 0 : FxSettingsLayout.groupPadH,
+                  vertical: edgeToEdgeRows ? 0 : FxSettingsLayout.groupPadV,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: children,
+                ),
               ),
             ),
           ),
-        ),
         if (footer != null) ...[
           const SizedBox(height: FxSettingsLayout.footerAfterGroup),
           footer!,

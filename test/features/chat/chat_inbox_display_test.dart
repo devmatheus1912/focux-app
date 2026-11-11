@@ -6,27 +6,29 @@ void main() {
     expect(chatInboxHubViewLabel(ChatInboxHubView.todas), 'Todas');
     expect(chatInboxHubViewLabel(ChatInboxHubView.naoLidas), 'Não lidas');
     expect(chatInboxHubViewLabel(ChatInboxHubView.arquivadas), 'Arquivadas');
-    expect(
-      chatInboxHubSubtitle(view: ChatInboxHubView.todas),
-      'Todas',
-    );
-    expect(
-      chatInboxHubSubtitle(
-        view: ChatInboxHubView.naoLidas,
-        freshness: 'Atualizado agora',
-      ),
-      'Não lidas · Atualizado agora',
-    );
+    // Só a conta: o filtro já aparece no chip.
+    expect(chatInboxHubSubtitle(), isNull);
     expect(chatInboxCountLabel(0), 'Nenhuma conversa');
     expect(chatInboxCountLabel(1), '1 conversa');
     expect(
-      chatInboxHubSubtitle(
-        view: ChatInboxHubView.todas,
-        count: 12,
-        freshness: 'Atualizado agora',
-      ),
-      '12 conversas · Todas · Atualizado agora',
+      chatInboxHubSubtitle(count: 12, freshness: 'Atualizado há 8min'),
+      '12 conversas · Atualizado há 8min',
     );
+  });
+
+  test('busca e filtros só com mais de 3 conversas', () {
+    bool mostra(int? total, {int arquivadas = 0, bool buscando = false}) =>
+        chatInboxMostraBuscaEFiltros(
+          totalConversas: total,
+          arquivadas: arquivadas,
+          buscando: buscando,
+          outraAba: false,
+        );
+    expect(mostra(1), isFalse);
+    expect(mostra(4), isTrue);
+    expect(mostra(1, arquivadas: 1), isTrue);
+    expect(mostra(1, buscando: true), isTrue);
+    expect(mostra(null), isTrue);
   });
 
   test('chatInbox empty, seleção e ações', () {

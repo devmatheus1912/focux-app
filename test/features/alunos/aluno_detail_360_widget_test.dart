@@ -43,8 +43,6 @@ final _emptyEvolucao = EvolucaoInteligente(
   resumo: '',
   volumeSemanal: 0,
   volumeMensal: 0,
-  proximaAcao: '',
-  sugerirCopiloto: false,
 );
 
 List<Map<String, dynamic>> _week() {

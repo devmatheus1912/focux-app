@@ -453,12 +453,6 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                                           );
                                         }
                                       },
-                                      onOpenCopilot:
-                                          () => abrirCopiloto360(
-                                            context,
-                                            ref,
-                                            aluno: aluno,
-                                          ),
                                     ),
                                     _ => Aluno360DetailFerramentasTab(
                                       key: const ValueKey(

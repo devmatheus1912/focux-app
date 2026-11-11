@@ -5,6 +5,7 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/brand_style.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../utils/identidade_visual_display.dart';
@@ -26,8 +27,37 @@ class IdentidadeEstiloMiniaturas extends StatelessWidget {
   final ValueChanged<BrandStyle>? onSelecionar;
   final bool dark;
 
+  /// A partir daqui (mesma régua do `AlunoPersonalCard`) as três miniaturas
+  /// lado a lado cortam o nome: cada estilo vira uma linha.
+  static const escalaEmLinhas = 1.3;
+
   @override
   Widget build(BuildContext context) {
+    final emLinhas =
+        MediaQuery.textScalerOf(context).scale(1) >= escalaEmLinhas;
+    if (emLinhas) {
+      return Column(
+        children: [
+          for (final (i, e) in BrandStyle.values.indexed) ...[
+            if (i > 0) const SizedBox(height: TokensStrip.s2),
+            _Miniatura(
+              estilo: e,
+              selecionado: e == selecionado,
+              primaria: primaria,
+              dark: dark,
+              emLinha: true,
+              onTap:
+                  onSelecionar == null
+                      ? null
+                      : () {
+                        HapticFeedback.selectionClick();
+                        onSelecionar!(e);
+                      },
+            ),
+          ],
+        ],
+      );
+    }
     return Row(
       children: [
         for (final (i, e) in BrandStyle.values.indexed) ...[
@@ -60,8 +90,11 @@ class _Miniatura extends StatelessWidget {
     required this.primaria,
     required this.dark,
     required this.onTap,
+    this.emLinha = false,
   });
 
+  /// Letra grande: miniatura à esquerda e o nome inteiro à direita.
+  final bool emLinha;
   final BrandStyle estilo;
   final bool selecionado;
   final Color primaria;
@@ -90,43 +123,83 @@ class _Miniatura extends StatelessWidget {
               width: selecionado ? 2 : 1,
             ),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AspectRatio(
-                aspectRatio: 1.25,
-                child: CustomPaint(
-                  painter: _MiniCard(
-                    estilo: estilo,
-                    primaria: primaria,
-                    dark: dark,
-                    linha: chrome.mute,
-                    contorno: chrome.lineStrong,
-                  ),
-                ),
-              ),
-              const SizedBox(height: TokensStrip.s2),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (selecionado) ...[
-                    Icon(FxIcons.concluidoAtivo, size: 14, color: primaria),
-                    const SizedBox(width: 4),
-                  ],
-                  Flexible(
-                    child: Text(
-                      nome,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: FocuxHubTypography.chip(
-                        selecionado ? primaria : chrome.ink,
+          child:
+              emLinha
+                  ? Row(
+                    children: [
+                      SizedBox(
+                        width: 96,
+                        child: AspectRatio(
+                          aspectRatio: 1.25,
+                          child: CustomPaint(
+                            painter: _MiniCard(
+                              estilo: estilo,
+                              primaria: primaria,
+                              dark: dark,
+                              linha: chrome.mute,
+                              contorno: chrome.lineStrong,
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
+                      const SizedBox(width: TokensStrip.s3),
+                      Expanded(
+                        child: Text(
+                          nome,
+                          style: FocuxHubTypography.cardTitle(
+                            color: selecionado ? primaria : chrome.ink,
+                          ),
+                        ),
+                      ),
+                      if (selecionado)
+                        Icon(
+                          FxIcons.concluidoAtivo,
+                          size: FxSettingsLayout.iconSize,
+                          color: primaria,
+                        ),
+                    ],
+                  )
+                  : Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      AspectRatio(
+                        aspectRatio: 1.25,
+                        child: CustomPaint(
+                          painter: _MiniCard(
+                            estilo: estilo,
+                            primaria: primaria,
+                            dark: dark,
+                            linha: chrome.mute,
+                            contorno: chrome.lineStrong,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: TokensStrip.s2),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (selecionado) ...[
+                            Icon(
+                              FxIcons.concluidoAtivo,
+                              size: 14,
+                              color: primaria,
+                            ),
+                            const SizedBox(width: 4),
+                          ],
+                          Flexible(
+                            child: Text(
+                              nome,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: FocuxHubTypography.chip(
+                                selecionado ? primaria : chrome.ink,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ],
-          ),
         ),
       ),
     );
@@ -155,16 +228,16 @@ class _MiniCard extends CustomPainter {
       Offset.zero & size,
       const Radius.circular(10),
     );
-    final solido = estilo.cardSolido
-        ? BrandPalette.cardDeMarca(primaria, dark: dark)
-        : null;
+    final solido =
+        estilo.cardSolido
+            ? BrandPalette.cardDeMarca(primaria, dark: dark)
+            : null;
     final tinta = solido?.sobre ?? linha;
 
     if (solido != null) {
       canvas.drawRRect(
         r,
-        Paint()
-          ..shader = solido.degrade.createShader(Offset.zero & size),
+        Paint()..shader = solido.degrade.createShader(Offset.zero & size),
       );
     } else if (estilo == BrandStyle.classico) {
       canvas.drawRRect(
@@ -212,15 +285,17 @@ class _MiniCard extends CustomPainter {
     linhaBarra(
       size.height * 0.2,
       0.5,
-      barra(
-        0.9,
-        estilo == BrandStyle.minimalista ? primaria : null,
-      ),
+      barra(0.9, estilo == BrandStyle.minimalista ? primaria : null),
     );
     linhaBarra(size.height * 0.36, 0.34, barra(0.45));
     // botão
     final botao = RRect.fromRectAndRadius(
-      Rect.fromLTWH(px, size.height * 0.62, size.width - px * 2, size.height * 0.22),
+      Rect.fromLTWH(
+        px,
+        size.height * 0.62,
+        size.width - px * 2,
+        size.height * 0.22,
+      ),
       const Radius.circular(8),
     );
     if (solido != null) {

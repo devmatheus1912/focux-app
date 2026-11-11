@@ -71,8 +71,6 @@ void main() {
               resumo: '',
               volumeSemanal: 0,
               volumeMensal: 0,
-              proximaAcao: '',
-              sugerirCopiloto: false,
             ),
           ),
           timeline360Async: AsyncData(timelineEvents),

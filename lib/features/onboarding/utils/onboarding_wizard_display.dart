@@ -9,10 +9,7 @@ String wizardStickyLabel({
   if (allDone) return 'Concluir';
   final atual = steps.where((s) => !s.completed).firstOrNull;
   if (atual == null) return 'Concluir';
-  return setupStepCatalog
-          .where((e) => e.id == atual.id)
-          .firstOrNull
-          ?.acao ??
+  return setupStepCatalog.where((e) => e.id == atual.id).firstOrNull?.acao ??
       atual.title;
 }
 
@@ -20,11 +17,15 @@ String wizardFazerDepoisLabel() => 'Agora não';
 
 String wizardIntroTitle() => 'Seu primeiro aluno treinando';
 
-String wizardIntroBody() => 'Três passos e você já está usando o app de verdade.';
+String wizardIntroBody() =>
+    'Três passos e você já está usando o app de verdade.';
 
 String wizardDoneTitle() => 'Tudo pronto';
 
 String wizardDoneBody() => 'Seu aluno já pode treinar pelo app.';
+
+String wizardProximoPasso() =>
+    'Próximo: na Hoje você vê quem treinou e quem precisa de você.';
 
 int wizardEtapaCurrent({
   required int completedCount,
@@ -45,11 +46,8 @@ String wizardEtapaLabel({
   required bool allDone,
 }) {
   final total = totalCount <= 0 ? 1 : totalCount;
-  return 'Etapa ${wizardEtapaCurrent(
-    completedCount: completedCount,
-    totalCount: total,
-    allDone: allDone,
-  )} de $total';
+  if (allDone) return '$total de $total feitos';
+  return 'Etapa ${wizardEtapaCurrent(completedCount: completedCount, totalCount: total, allDone: allDone)} de $total';
 }
 
 String wizardHelpTitle() => 'Primeiros passos';
@@ -62,4 +60,3 @@ String wizardHelpPassosBody() =>
 
 String wizardHelpConcluirBody() =>
     'Concluir esconde o checklist da Home. O que você já cadastrou fica.';
-

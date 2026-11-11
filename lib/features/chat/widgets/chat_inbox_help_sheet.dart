@@ -6,7 +6,7 @@ import '../../../core/theme/fx_icons.dart';
 Future<void> showChatInboxHelpSheet(BuildContext context) {
   return showFxHelpSheet(
     context,
-    title: 'Como usar as mensagens',
+    title: 'Como usar as conversas',
     subtitle: 'A caixa do personal. A conversa em si continua no fio do aluno.',
     tips: const [
       FxHelpTip(

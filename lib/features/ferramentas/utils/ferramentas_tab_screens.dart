@@ -21,7 +21,6 @@ import '../../perfil/screens/white_label_settings_screen.dart';
 import '../../recorrencia/screens/recorrencia_screen.dart';
 import '../../referral/screens/referral_screen.dart';
 import '../../retencao/screens/churn_dashboard_screen.dart';
-import '../../winback/screens/winback_screen.dart';
 import 'ferramentas_icons.dart';
 
 /// Constrói a tela existente para [rotaApp] (abas do hub).
@@ -43,8 +42,6 @@ Widget? buildFerramentasTabScreen(String? rotaApp) {
       return const ReferralScreen();
     case '/leads-publicos':
       return const LeadsPublicosScreen();
-    case '/winback':
-      return const WinbackScreen();
     case '/retencao':
       return const ChurnDashboardScreen();
     case '/perfil/landing-editor':

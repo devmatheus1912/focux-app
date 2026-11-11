@@ -10,6 +10,7 @@ class MediaUploadService {
     required String filename,
     String folder = 'uploads',
     String resourceType = 'auto',
+    void Function(double fracao)? onProgress,
   }) async {
     final form = FormData.fromMap({
       'folder': folder,
@@ -20,8 +21,20 @@ class MediaUploadService {
         contentType: _contentTypeFor(filename, resourceType),
       ),
     });
-    final response = await _dio.post('/api/uploads', data: form);
+    final response = await _dio.post(
+      '/api/uploads',
+      data: form,
+      onSendProgress: _progresso(onProgress),
+    );
     return response.data['url'] as String;
+  }
+
+  /// Converte o progresso do Dio em fração (0 a 1) para quem quiser mostrar.
+  static ProgressCallback? _progresso(void Function(double)? onProgress) {
+    if (onProgress == null) return null;
+    return (enviado, total) {
+      if (total > 0) onProgress((enviado / total).clamp(0, 1).toDouble());
+    };
   }
 
   /// Upload direto do caminho — evita carregar vídeo inteiro em RAM.
@@ -30,6 +43,7 @@ class MediaUploadService {
     required String filename,
     String folder = 'uploads',
     String resourceType = 'auto',
+    void Function(double fracao)? onProgress,
   }) async {
     final form = FormData.fromMap({
       'folder': folder,
@@ -40,7 +54,11 @@ class MediaUploadService {
         contentType: _contentTypeFor(filename, resourceType),
       ),
     });
-    final response = await _dio.post('/api/uploads', data: form);
+    final response = await _dio.post(
+      '/api/uploads',
+      data: form,
+      onSendProgress: _progresso(onProgress),
+    );
     return response.data['url'] as String;
   }
 

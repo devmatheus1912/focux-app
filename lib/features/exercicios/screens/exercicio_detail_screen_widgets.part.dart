@@ -779,7 +779,7 @@ class _VideoPlayerState extends State<_VideoPlayer> {
 
   Future<void> _loadVideo() async {
     final controller = VideoPlayerController.networkUrl(
-      Uri.parse(_cloudinaryH264VideoUrl(widget.url)),
+      Uri.parse(cloudinaryH264VideoUrl(widget.url)),
     );
     _ctrl = controller;
     if (mounted) {
@@ -882,20 +882,6 @@ class _VideoPlayerState extends State<_VideoPlayer> {
   }
 }
 
-String _cloudinaryH264VideoUrl(String rawUrl) {
-  final url = rawUrl.trim();
-  const marker = '/video/upload/';
-  if (!url.contains(marker)) return url;
-
-  final delivery = url.substring(url.indexOf(marker) + marker.length);
-  if (delivery.startsWith('f_mp4') ||
-      delivery.startsWith('vc_h264') ||
-      delivery.startsWith('vc_auto')) {
-    return url;
-  }
-
-  return url.replaceFirst(marker, '${marker}f_mp4,vc_h264/');
-}
 
 class _OwnVideoPanel extends StatelessWidget {
   final bool hasVideo;

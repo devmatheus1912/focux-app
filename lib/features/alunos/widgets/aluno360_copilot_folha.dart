@@ -20,6 +20,7 @@ import '../../planos/utils/plan_gate.dart';
 import '../data/aluno_repository.dart';
 import '../providers/aluno_detail_providers.dart';
 import '../utils/aluno360_copilot_logic.dart';
+import '../utils/aluno_detail_aluno_actions.dart';
 import '../utils/aluno360_operacao_logic.dart';
 import 'aluno360_acao_sticky.dart';
 import 'aluno360_copilot_ia_refresh_button.dart';
@@ -47,12 +48,17 @@ Future<void> abrirCopiloto360(
   }
   final bundle = ref.read(aluno360OperacaoBundleProvider(aluno.id)).value;
   final proxima = snapshot.effectiveProxima;
+  // Sem sugestão a folha abriria vazia: vai ao Copiloto.
+  if (proxima == null || proxima.acao.trim().isEmpty) {
+    context.push('/ia/copiloto');
+    return;
+  }
   await showAluno360CopilotFolha(
     context,
     aluno: aluno,
     snapshot: snapshot,
-    acao: proxima?.acao.trim() ?? '',
-    motivo: proxima?.motivo,
+    acao: proxima.acao.trim(),
+    motivo: proxima.motivo,
     proxima: proxima,
     tarefaCriada: bundle?.hasOpenCopilotTask ?? false,
   );
@@ -116,10 +122,7 @@ class _CopilotFolha extends ConsumerWidget {
             : acao;
     final fatos = copilotoFatos(aluno, motivo: ia?.motivo ?? motivo);
     final tipo = ia?.tipoAcao ?? proxima?.tipoAcao;
-    final acaoPrincipal = copilotoAcaoDaSugestao(
-      tipo,
-      padrao: snapshot.stickyAction,
-    );
+    final acaoPrincipal = copilotoAcaoDaSugestao(tipo);
     final mensagem =
         (ia?.mensagemSugerida ?? proxima?.mensagemSugerida ?? '').trim();
     final outreach = mensagem.isEmpty ? snapshot.outreachMessage : mensagem;
@@ -133,23 +136,32 @@ class _CopilotFolha extends ConsumerWidget {
       leading: Icon(FxIcons.ia, color: primary, size: 20),
       footer: Padding(
         padding: const EdgeInsets.all(TokensStrip.s3),
+        // Com tipo, a ação que combina com o texto (mesmo com tarefa aberta);
+        // sem tipo, criar a tarefa ("Tarefa criada" depois).
         child: FxLiquidPrimaryButton(
           label:
-              tarefaCriada ? s.copilotoFolhaTarefaCriada : acaoPrincipal.label,
-          onPressed:
-              tarefaCriada
-                  ? null
-                  : () {
-                    Navigator.of(context).pop();
-                    abrirOperacaoSticky(
-                      context: context,
-                      aluno: aluno,
-                      alunoId: aluno.id,
-                      sticky: acaoPrincipal,
-                      proxima: proxima,
-                      outreach: outreach,
-                    );
-                  },
+              acaoPrincipal?.label ??
+              (tarefaCriada
+                  ? s.copilotoFolhaTarefaCriada
+                  : s.copilotoCriarTarefa),
+          onPressed: switch (acaoPrincipal) {
+            final acao? => () {
+              Navigator.of(context).pop();
+              abrirOperacaoSticky(
+                context: context,
+                aluno: aluno,
+                alunoId: aluno.id,
+                sticky: acao,
+                proxima: proxima,
+                outreach: outreach,
+              );
+            },
+            null when tarefaCriada => null,
+            null => () async {
+              await criarTarefaAluno360(context, ref, aluno);
+              if (context.mounted) Navigator.of(context).pop();
+            },
+          },
         ),
       ),
       child: Padding(
@@ -184,9 +196,10 @@ class _CopilotFolha extends ConsumerWidget {
             ),
             Text(
               texto,
-              style: FocuxHubTypography.cardTitle(
+              style: FocuxHubTypography.sectionTitle(
+                context,
                 color: chrome.ink,
-              ).copyWith(fontSize: TokensStrip.fontSecao, height: 1.3),
+              ),
             ),
             if (fatos.isNotEmpty) ...[
               const SizedBox(height: TokensStrip.s4),
@@ -198,7 +211,17 @@ class _CopilotFolha extends ConsumerWidget {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(FxIcons.concluido, size: 18, color: primary),
+                      // Ponto neutro: é motivo, não tarefa feita.
+                      Padding(
+                        padding: const EdgeInsets.only(top: 7),
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: chrome.mute,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const SizedBox.square(dimension: 6),
+                        ),
+                      ),
                       const SizedBox(width: TokensStrip.s2),
                       Expanded(
                         child: Text(
@@ -210,7 +233,8 @@ class _CopilotFolha extends ConsumerWidget {
                   ),
                 ),
             ],
-            if (acaoPrincipal.isChatAction && outreach.trim().isNotEmpty) ...[
+            if ((acaoPrincipal?.isChatAction ?? false) &&
+                outreach.trim().isNotEmpty) ...[
               const SizedBox(height: TokensStrip.s3),
               rotulo(s.copilotoMensagemPronta),
               const SizedBox(height: TokensStrip.s2),

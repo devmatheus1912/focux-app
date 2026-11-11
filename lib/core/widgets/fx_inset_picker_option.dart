@@ -25,8 +25,8 @@ class FxInsetPickerOptionSpec {
 
 /// Linha de opção única dentro de [FxSettingsGroup] — paridade picker Perfil/iOS.
 ///
-/// Use com [FxSettingsGroup.edgeToEdgeRows] para o destaque de seleção ir
-/// de borda a borda do card.
+/// A escolhida ganha um fundo recuado e arredondado (não uma faixa de borda a
+/// borda, que cortava o cartão no meio da lista); o toque vale a linha toda.
 class FxInsetPickerOption extends StatelessWidget {
   const FxInsetPickerOption({
     super.key,
@@ -37,8 +37,6 @@ class FxInsetPickerOption extends StatelessWidget {
     this.subtitle,
     this.icon,
     this.showDivider = true,
-    this.isFirst = false,
-    this.isLast = false,
   });
 
   final String label;
@@ -48,10 +46,8 @@ class FxInsetPickerOption extends StatelessWidget {
   final Color accent;
   final VoidCallback onTap;
   final bool showDivider;
-  final bool isFirst;
-  final bool isLast;
 
-  /// Monta linhas com [isFirst]/[isLast] corretos para listas de picker.
+  /// Monta as linhas de uma lista de picker (divisor entre elas).
   static List<Widget> list({
     required List<FxInsetPickerOptionSpec> items,
     required Color accent,
@@ -64,22 +60,14 @@ class FxInsetPickerOption extends StatelessWidget {
           icon: items[i].icon,
           selected: items[i].selected,
           accent: accent,
-          isFirst: i == 0,
-          isLast: i == items.length - 1,
           showDivider: i < items.length - 1,
           onTap: items[i].onTap,
         ),
     ];
   }
 
-  BorderRadius? _selectionRadius() {
-    if (!selected) return null;
-    final r = Radius.circular(FxSettingsLayout.groupRadius - 1);
-    return BorderRadius.vertical(
-      top: isFirst ? r : Radius.zero,
-      bottom: isLast && !showDivider ? r : Radius.zero,
-    );
-  }
+  /// Recuo do fundo da escolhida em relação às bordas da linha.
+  static const recuoSelecao = 4.0;
 
   @override
   Widget build(BuildContext context) {
@@ -105,10 +93,8 @@ class FxInsetPickerOption extends StatelessWidget {
             HapticFeedback.selectionClick();
             onTap();
           },
-          child: Ink(
+          child: DecoratedBox(
             decoration: BoxDecoration(
-              color: fill,
-              borderRadius: _selectionRadius(),
               border:
                   showDivider
                       ? Border(
@@ -119,34 +105,69 @@ class FxInsetPickerOption extends StatelessWidget {
                       )
                       : null,
             ),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                minHeight: FxSettingsLayout.rowMinHeight,
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: FxSettingsLayout.groupPadH,
-                  vertical: TokensStrip.s3,
+            child: Padding(
+              padding: const EdgeInsets.all(recuoSelecao),
+              child: DecoratedBox(
+                key:
+                    selected ? const ValueKey('fx-inset-picker-selecao') : null,
+                decoration: BoxDecoration(
+                  color: fill,
+                  borderRadius: BorderRadius.circular(TokensStrip.rSm),
                 ),
-                child: Row(
-                  children: [
-                    if (icon != null) ...[
-                      Icon(
-                        icon,
-                        size: FxSettingsLayout.iconSize,
-                        color: accent,
-                      ),
-                      const SizedBox(width: FxSettingsLayout.iconGap),
-                    ],
-                    Expanded(
-                      child:
-                          hasSubtitle
-                              ? Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    minHeight: FxSettingsLayout.rowMinHeight - 2 * recuoSelecao,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: FxSettingsLayout.groupPadH - recuoSelecao,
+                      vertical: TokensStrip.s3 - recuoSelecao,
+                    ),
+                    child: Row(
+                      children: [
+                        if (icon != null) ...[
+                          Icon(
+                            icon,
+                            size: FxSettingsLayout.iconSize,
+                            color: selected ? accent : chrome.mute,
+                          ),
+                          const SizedBox(width: FxSettingsLayout.iconGap),
+                        ],
+                        Expanded(
+                          child:
+                              hasSubtitle
+                                  ? Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        label,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: FxSettingsLayout.rowLabel(
+                                          color: ink,
+                                        ).copyWith(
+                                          fontWeight:
+                                              selected ? FontWeight.w700 : null,
+                                        ),
+                                      ),
+                                      const SizedBox(
+                                        height:
+                                            FxSettingsLayout.captionAfterHeader,
+                                      ),
+                                      Text(
+                                        detail,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: FxSettingsLayout.subhead(
+                                          color: chrome.mute,
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                  : Text(
                                     label,
-                                    maxLines: 1,
+                                    maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                     style: FxSettingsLayout.rowLabel(
                                       color: ink,
@@ -155,38 +176,16 @@ class FxInsetPickerOption extends StatelessWidget {
                                           selected ? FontWeight.w700 : null,
                                     ),
                                   ),
-                                  const SizedBox(
-                                    height: FxSettingsLayout.captionAfterHeader,
-                                  ),
-                                  Text(
-                                    detail,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: FxSettingsLayout.subhead(
-                                      color: chrome.mute,
-                                    ),
-                                  ),
-                                ],
-                              )
-                              : Text(
-                                label,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: FxSettingsLayout.rowLabel(
-                                  color: ink,
-                                ).copyWith(
-                                  fontWeight:
-                                      selected ? FontWeight.w700 : null,
-                                ),
-                              ),
+                        ),
+                        if (selected)
+                          Icon(
+                            FxIcons.check,
+                            color: accent,
+                            size: FxSettingsLayout.iconSize,
+                          ),
+                      ],
                     ),
-                    if (selected)
-                      Icon(
-                        FxIcons.check,
-                        color: accent,
-                        size: FxSettingsLayout.iconSize,
-                      ),
-                  ],
+                  ),
                 ),
               ),
             ),

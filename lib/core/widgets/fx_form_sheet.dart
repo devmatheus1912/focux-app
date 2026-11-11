@@ -30,6 +30,8 @@ Future<bool> showFxFormSheet(
   String cancelLabel = FocuxMicrocopy.cancelar,
   bool destructive = false,
   bool Function()? podeConfirmar,
+  Future<String?> Function()? aoConfirmar,
+  Listenable? ouvir,
 }) async {
   Animation<double>? saida;
   final confirmed = await showFxHomeSheet<bool>(
@@ -44,6 +46,8 @@ Future<bool> showFxFormSheet(
         cancelLabel: cancelLabel,
         destructive: destructive,
         podeConfirmar: podeConfirmar,
+        aoConfirmar: aoConfirmar,
+        ouvir: ouvir,
         child: child,
       );
     },
@@ -102,7 +106,17 @@ class _FxFormSheet extends StatelessWidget {
     required this.destructive,
     required this.child,
     this.podeConfirmar,
+    this.aoConfirmar,
+    this.ouvir,
   });
+
+  /// Envia com a folha aberta: `null` fecha (deu certo); texto é o erro,
+  /// mostrado acima do botão, e o que foi digitado fica.
+  final Future<String?> Function()? aoConfirmar;
+
+  /// Redesenha o botão quando o campo muda: com [podeConfirmar] falso ele
+  /// fica desligado (não só bloqueia o toque).
+  final Listenable? ouvir;
 
   final String title;
   final String? subtitle;
@@ -166,6 +180,13 @@ class _FxFormSheet extends StatelessWidget {
                 child: Text(confirmLabel),
               ),
             )
+          else if (aoConfirmar != null || ouvir != null)
+            _ConfirmarComEnvio(
+              label: confirmLabel,
+              podeConfirmar: podeConfirmar,
+              aoConfirmar: aoConfirmar,
+              ouvir: ouvir,
+            )
           else
             FxLiquidPrimaryButton(
               label: confirmLabel,
@@ -184,6 +205,88 @@ class _FxFormSheet extends StatelessWidget {
           ],
         ],
       ),
+    );
+  }
+}
+
+/// Botão da folha que envia sem fechar: desligado enquanto não pode
+/// confirmar, "Enviando…" durante o envio, erro acima dele se falhar.
+class _ConfirmarComEnvio extends StatefulWidget {
+  const _ConfirmarComEnvio({
+    required this.label,
+    required this.podeConfirmar,
+    required this.aoConfirmar,
+    required this.ouvir,
+  });
+
+  final String label;
+  final bool Function()? podeConfirmar;
+  final Future<String?> Function()? aoConfirmar;
+  final Listenable? ouvir;
+
+  @override
+  State<_ConfirmarComEnvio> createState() => _ConfirmarComEnvioState();
+}
+
+class _ConfirmarComEnvioState extends State<_ConfirmarComEnvio> {
+  var _enviando = false;
+  String? _erro;
+
+  Future<void> _confirmar() async {
+    final enviar = widget.aoConfirmar;
+    if (enviar == null) {
+      FxHomeSheetChrome.dismissAndPop(context, true);
+      return;
+    }
+    setState(() {
+      _enviando = true;
+      _erro = null;
+    });
+    final erro = await enviar();
+    if (!mounted) return;
+    if (erro == null) {
+      FxHomeSheetChrome.dismissAndPop(context, true);
+      return;
+    }
+    setState(() {
+      _enviando = false;
+      _erro = erro;
+    });
+  }
+
+  Widget _botao() {
+    final pode = widget.podeConfirmar?.call() ?? true;
+    return FxLiquidPrimaryButton(
+      label: widget.label,
+      loading: _enviando,
+      loadingLabel: 'Enviando…',
+      onPressed: _enviando || !pode ? null : _confirmar,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final erro = _erro;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (erro != null) ...[
+          Semantics(
+            liveRegion: true,
+            child: Text(
+              erro,
+              textAlign: TextAlign.center,
+              style: FocuxHubTypography.bodyMuted(color: EagleTokens.bad),
+            ),
+          ),
+          const SizedBox(height: TokensStrip.s2),
+        ],
+        if (widget.ouvir case final ouvir?)
+          ListenableBuilder(listenable: ouvir, builder: (_, _) => _botao())
+        else
+          _botao(),
+      ],
     );
   }
 }

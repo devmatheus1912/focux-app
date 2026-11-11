@@ -14,11 +14,19 @@ class PerfilAppearanceSection extends ConsumerWidget {
 
   final bool isDark;
 
-  static const _options = <(ThemeMode, String)>[
-    (ThemeMode.system, 'Sistema'),
-    (ThemeMode.light, 'Claro'),
-    (ThemeMode.dark, 'Escuro'),
+  static const _options = <(ThemeMode, String, IconData)>[
+    (ThemeMode.system, 'Sistema', FxIcons.temaSistema),
+    (ThemeMode.light, 'Claro', FxIcons.temaClaro),
+    (ThemeMode.dark, 'Escuro', FxIcons.temaEscuro),
   ];
+
+  /// Ícone do modo: a linha mostra o modo atual (sol, lua ou celular).
+  static IconData iconFor(ThemeMode mode) {
+    for (final option in _options) {
+      if (option.$1 == mode) return option.$3;
+    }
+    return FxIcons.temaSistema;
+  }
 
   static String labelFor(ThemeMode mode) {
     for (final option in _options) {
@@ -35,7 +43,7 @@ class PerfilAppearanceSection extends ConsumerWidget {
       header: 'Preferências',
       children: [
         FxSettingsTile(
-          icon: FxIcons.sono,
+          icon: iconFor(mode),
           label: 'Aparência',
           value: labelFor(mode),
           mute: chrome.mute,
@@ -49,7 +57,11 @@ class PerfilAppearanceSection extends ConsumerWidget {
               selected: mode,
               items: [
                 for (final option in _options)
-                  FxInsetPickerSheetItem(value: option.$1, label: option.$2),
+                  FxInsetPickerSheetItem(
+                    value: option.$1,
+                    label: option.$2,
+                    icon: option.$3,
+                  ),
               ],
             );
             if (escolha != null) {

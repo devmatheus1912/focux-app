@@ -26,7 +26,11 @@ class IaProgressaoPedidoCard extends StatelessWidget {
     required this.sinais,
     required this.onSinal,
     this.enabled = true,
+    this.gerando,
   });
+
+  /// Durante a geração: entra no lugar dos controles (o cartão de cima fica).
+  final Widget? gerando;
 
   final AsyncValue<ProgressaoContextoResumo> contexto;
   final ProgressaoObjetivo objetivo;
@@ -73,64 +77,68 @@ class IaProgressaoPedidoCard extends StatelessWidget {
           ),
         ),
         const SizedBox(height: TokensStrip.s4),
-        Text(
-          ptS.cargasObjetivo,
-          style: FocuxHubTypography.cardTitle(color: chrome.ink),
-        ),
-        const SizedBox(height: TokensStrip.s2),
-        IgnorePointer(
-          ignoring: !enabled,
-          child: FxChoiceStrip<ProgressaoObjetivo>(
-            itens: [
-              for (final o in ProgressaoObjetivo.values)
-                FxChoiceItem(value: o, label: o.label),
-            ],
-            selecionado: objetivo,
-            onSelecionar: onObjetivo,
+        if (gerando case final bloco?)
+          bloco
+        else ...[
+          Text(
+            ptS.cargasObjetivo,
+            style: FocuxHubTypography.cardTitle(color: chrome.ink),
           ),
-        ),
-        const SizedBox(height: TokensStrip.s1),
-        Text(
-          objetivo.descricao,
-          style: FocuxHubTypography.bodyMuted(color: chrome.mute),
-        ),
-        const SizedBox(height: TokensStrip.s4),
-        Text(
-          progressaoAdicionarObservacao,
-          style: FocuxHubTypography.cardTitle(color: chrome.ink),
-        ),
-        const SizedBox(height: TokensStrip.s2),
-        // Seleção múltipla: cada atalho liga ou desliga um sinal.
-        Wrap(
-          spacing: TokensStrip.s2,
-          children: [
-            for (final s in ProgressaoSinal.values)
-              FxChoiceChip(
-                label: s.label,
-                selected: sinais.contains(s),
-                onTap: enabled ? () => onSinal(s) : null,
-              ),
-          ],
-        ),
-        const SizedBox(height: TokensStrip.s2),
-        TextField(
-          controller: observacoes,
-          enabled: enabled,
-          minLines: 2,
-          maxLines: 4,
-          textCapitalization: TextCapitalization.sentences,
-          textInputAction: TextInputAction.newline,
-          onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
-          inputFormatters: [
-            LengthLimitingTextInputFormatter(progressaoObservacoesMax),
-          ],
-          style: FocuxHubTypography.body(color: chrome.ink),
-          decoration: FxInputDeco.build(
-            context,
-            progressaoObservacoesLabel,
-            hint: progressaoObservacoesHint,
-          ).copyWith(alignLabelWithHint: true),
-        ),
+          const SizedBox(height: TokensStrip.s2),
+          IgnorePointer(
+            ignoring: !enabled,
+            child: FxChoiceStrip<ProgressaoObjetivo>(
+              itens: [
+                for (final o in ProgressaoObjetivo.values)
+                  FxChoiceItem(value: o, label: o.label),
+              ],
+              selecionado: objetivo,
+              onSelecionar: onObjetivo,
+            ),
+          ),
+          const SizedBox(height: TokensStrip.s1),
+          Text(
+            objetivo.descricao,
+            style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+          ),
+          const SizedBox(height: TokensStrip.s4),
+          Text(
+            progressaoAdicionarObservacao,
+            style: FocuxHubTypography.cardTitle(color: chrome.ink),
+          ),
+          const SizedBox(height: TokensStrip.s2),
+          // Seleção múltipla: cada atalho liga ou desliga um sinal.
+          Wrap(
+            spacing: TokensStrip.s2,
+            children: [
+              for (final s in ProgressaoSinal.values)
+                FxChoiceChip(
+                  label: s.label,
+                  selected: sinais.contains(s),
+                  onTap: enabled ? () => onSinal(s) : null,
+                ),
+            ],
+          ),
+          const SizedBox(height: TokensStrip.s2),
+          TextField(
+            controller: observacoes,
+            enabled: enabled,
+            minLines: 2,
+            maxLines: 4,
+            textCapitalization: TextCapitalization.sentences,
+            textInputAction: TextInputAction.newline,
+            onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
+            inputFormatters: [
+              LengthLimitingTextInputFormatter(progressaoObservacoesMax),
+            ],
+            style: FocuxHubTypography.body(color: chrome.ink),
+            decoration: FxInputDeco.build(
+              context,
+              progressaoObservacoesLabel,
+              hint: progressaoObservacoesHint,
+            ).copyWith(alignLabelWithHint: true),
+          ),
+        ],
       ],
     );
   }

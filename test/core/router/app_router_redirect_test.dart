@@ -43,7 +43,7 @@ void main() {
     expect(isPersonalOnlyLocation('/dunning'), isTrue);
     expect(isPersonalOnlyLocation('/leads-publicos'), isTrue);
     expect(isPersonalOnlyLocation('/leads/kanban'), isTrue);
-    expect(isPersonalOnlyLocation('/winback'), isTrue);
+    expect(isPersonalOnlyLocation('/automacoes'), isTrue);
     expect(isPersonalOnlyLocation('/alunos/9/ia/progressao'), isTrue);
     expect(isPersonalOnlyLocation('/ia/progressao/aceitar'), isTrue);
     expect(isPersonalOnlyLocation('/relatorio/business'), isTrue);

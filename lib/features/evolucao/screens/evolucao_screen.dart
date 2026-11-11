@@ -115,6 +115,16 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
   /// Muda a cada recarga: o Comparar busca de novo com outra chave.
   var _versao = 0;
 
+  /// Mexeu numa medida (conferiu, registrou, corrigiu ou excluiu): ao sair,
+  /// quem abriu pelo Copiloto recebe `true` e marca "Medidas revisadas".
+  var _revisou = false;
+
+  void _sair() => safePopOrGo(
+    context,
+    '/alunos/${widget.alunoId}',
+    result: _revisou,
+  );
+
   /// "Confira" do Comparar: o Histórico com as datas comparadas marcadas.
   Future<void> _conferir(EvolucaoHomeBundle? home, Set<String> datas) async {
     if (home == null) return;
@@ -153,6 +163,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
         await repo.conferirAvaliacao(widget.alunoId, id);
       }
       await _atualizar();
+      _revisou = true;
       if (mounted) FeedbackHelper.showSuccess(context, 'Conferido. O aviso saiu.');
     } catch (e) {
       if (mounted) FeedbackHelper.showError(context, friendlyError(e));
@@ -212,6 +223,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
             massa: novo.massa,
           );
         }
+        _revisou = true;
         if (mounted) FeedbackHelper.showSuccess(context, ptS.evolucaoMedidaSalva);
       } else {
         final ok = await showFxConfirmSheet(
@@ -224,6 +236,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
         );
         if (!ok || !mounted) return;
         await repo.excluirMedida(widget.alunoId, medida!.id);
+        _revisou = true;
         if (mounted) FeedbackHelper.showSuccess(context, ptS.evolucaoMedidaExcluida);
       }
       await _atualizar();
@@ -338,14 +351,14 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
         canPop: false,
         onPopInvokedWithResult: (didPop, _) {
           if (didPop) return;
-          safePopOrGo(context, '/alunos/${widget.alunoId}');
+          _sair();
         },
         child: FxShellScaffold(
           useMesh: true,
           appBar: FxShellAppBar(
             title: 'Evolução',
             subtitle: fxTitleCaseName(nome),
-            onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
+            onBack: _sair,
             actions: [
               IconButton(
                 tooltip: ptS.evolucaoMais,
@@ -610,6 +623,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
           return;
         }
       }
+      _revisou = true;
       if (mounted) FeedbackHelper.showSuccess(context, ptS.evolucaoMedidaAdicionada);
     } catch (e) {
       if (mounted) FeedbackHelper.showError(context, friendlyError(e));

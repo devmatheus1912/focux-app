@@ -33,6 +33,8 @@ import '../../planos/data/planos_repository.dart';
 import '../../planos/providers/plano_features_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../../../core/api/pagina.dart';
+import '../../winback/utils/winback_display.dart';
+import '../../winback/widgets/retomada_folha.dart';
 import '../data/automacao_repository.dart';
 import '../utils/automacao_display.dart';
 import '../../../core/utils/fx_utils.dart';
@@ -47,7 +49,11 @@ final _repo = Provider(
 );
 
 class AutomacoesScreen extends ConsumerStatefulWidget {
-  const AutomacoesScreen({super.key});
+  const AutomacoesScreen({super.key, this.abrirItem});
+
+  /// `retomada`: abre a folha do aviso para quem parou (link antigo `/winback`
+  /// e o evento da linha do tempo do 360).
+  final String? abrirItem;
 
   @override
   ConsumerState<AutomacoesScreen> createState() => _AutomacoesScreenState();
@@ -64,6 +70,11 @@ class _AutomacoesScreenState extends ConsumerState<AutomacoesScreen> {
   @override
   void initState() {
     super.initState();
+    if (widget.abrirItem == 'retomada') {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) showRetomadaFolha(context);
+      });
+    }
     prefetchAlunosHome(ref);
     _load();
   }

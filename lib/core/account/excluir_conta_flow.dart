@@ -38,6 +38,23 @@ String? excluirContaErroLocal(
   return null;
 }
 
+/// Conta de personal que nasceu por Google/Apple e nunca definiu senha
+/// (`senhaDefinida` falso no servidor, devolvido como `emailOtpPreferred` no
+/// status de MFA). Vale em qualquer aparelho; falha de rede = não sabe (false).
+/// Aluno não precisa: a trava de senha provisória obriga a criar a senha antes
+/// de usar o app.
+Future<bool> personalSemSenhaConhecida(Dio dio) async {
+  try {
+    final r = await dio.get<Map<String, dynamic>>(
+      '/api/auth/mfa/status',
+      options: Options(extra: {'fxNoRetry': true}),
+    );
+    return r.data?['emailOtpPreferred'] == true;
+  } catch (_) {
+    return false;
+  }
+}
+
 /// Folha de exclusão de conta em passos, com carregamento bloqueante durante o
 /// DELETE. [aposExcluir] roda só se o backend confirmar a exclusão.
 Future<void> excluirContaFlow(
@@ -48,7 +65,10 @@ Future<void> excluirContaFlow(
   bool avisoAssinatura = false,
 }) async {
   final l10n = S.of(context);
-  final social = await entrouComLoginSocial();
+  final social =
+      await entrouComLoginSocial() ||
+      (papel == ExcluirContaPapel.personal &&
+          await personalSemSenhaConhecida(dio));
   if (!context.mounted) return;
   final credencial = await showExcluirContaSheet(
     context,
@@ -80,22 +100,26 @@ Future<void> excluirContaFlow(
     context: context,
     barrierDismissible: false,
     useRootNavigator: true,
-    builder: (_) => PopScope(
-      canPop: false,
-      child: Dialog(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox.square(dimension: 24, child: FxLoading(size: 24)),
-              const SizedBox(width: 16),
-              Flexible(child: Text(l10n.excluirContaExcluindo)),
-            ],
+    builder:
+        (_) => PopScope(
+          canPop: false,
+          child: Dialog(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SizedBox.square(
+                    dimension: 24,
+                    child: FxLoading(size: 24),
+                  ),
+                  const SizedBox(width: 16),
+                  Flexible(child: Text(l10n.excluirContaExcluindo)),
+                ],
+              ),
+            ),
           ),
         ),
-      ),
-    ),
   );
 
   try {

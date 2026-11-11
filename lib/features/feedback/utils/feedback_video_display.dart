@@ -1,17 +1,10 @@
+import '../data/feedback_video_repository.dart';
 import '../../../core/utils/fx_utils.dart';
 
 String feedbackVideoLabel(String? comentario) {
   final value = comentario?.trim();
   if (value == null || value.isEmpty) return 'Feedback';
   return value;
-}
-
-String feedbackVideoSubtitle({
-  required DateTime criadoEm,
-  required bool respondido,
-}) {
-  final date = fxDateShort(criadoEm);
-  return respondido ? '$date · Correção enviada' : '$date · O aluno espera sua correção';
 }
 
 /// Mesmas palavras dos dois lados: "Para responder" (personal) ↔ "Enviado" (aluno).
@@ -21,12 +14,79 @@ String feedbackVideoStatusLabel({required bool respondido}) =>
 String feedbackVideoResponderLabel({required bool respondido}) =>
     respondido ? 'Editar resposta' : 'Responder';
 
-/// Palavras de dor no recado: o rótulo vai em tom de alerta.
-const _palavrasDeDor = ['dor', 'doeu', 'doendo', 'senti', 'incômodo', 'incomodo'];
+/// Palavras que já são dor.
+const _palavrasDeDor = [
+  'dor',
+  'dores',
+  'doeu',
+  'doendo',
+  'dói',
+  'doi',
+  'incômodo',
+  'incomodo',
+];
+
+/// "Senti" só é dor junto de uma parte do corpo ("senti o joelho"); sozinho
+/// ("senti evolução") não acende o alerta.
+const _sentir = ['senti', 'sinto', 'sentindo'];
+const _partesDoCorpo = [
+  'joelho',
+  'joelhos',
+  'ombro',
+  'ombros',
+  'lombar',
+  'costas',
+  'coluna',
+  'quadril',
+  'punho',
+  'punhos',
+  'cotovelo',
+  'cotovelos',
+  'tornozelo',
+  'tornozelos',
+  'pescoço',
+  'pescoco',
+];
 
 bool feedbackRecadoFalaDeDor(String recado) {
   final palavras = recado.toLowerCase().split(RegExp(r'[^a-zà-ú]+'));
-  return palavras.any(_palavrasDeDor.contains);
+  if (palavras.any(_palavrasDeDor.contains)) return true;
+  return palavras.any(_sentir.contains) &&
+      palavras.any(_partesDoCorpo.contains);
+}
+
+/// Linha da lista do personal: dor primeiro no texto, senão a prévia do
+/// recado, senão o estado.
+String feedbackVideoSubtituloDaLinha(FeedbackVideo item) {
+  final data = fxDateShort(item.criadoEm);
+  if (item.respondido) return '$data · Correção enviada';
+  final recado = item.comentario.trim();
+  if (recado.isNotEmpty && feedbackRecadoFalaDeDor(recado)) {
+    return 'Fala de dor · $data';
+  }
+  if (recado.isNotEmpty) return '“$recado” · $data';
+  return '$data · O aluno espera sua correção';
+}
+
+bool feedbackVideoComDor(FeedbackVideo item) =>
+    !item.respondido && feedbackRecadoFalaDeDor(item.comentario);
+
+/// Ordem da lista: para responder com dor, os outros para responder, os
+/// respondidos; dentro de cada grupo, do mais novo ao mais antigo.
+List<FeedbackVideo> feedbackVideosOrdenados(Iterable<FeedbackVideo> itens) {
+  int grupo(FeedbackVideo f) =>
+      feedbackVideoComDor(f) ? 0 : (f.respondido ? 2 : 1);
+  return [...itens]..sort((a, b) {
+    final g = grupo(a).compareTo(grupo(b));
+    return g != 0 ? g : b.criadoEm.compareTo(a.criadoEm);
+  });
+}
+
+/// "0:42" para o áudio da correção.
+String feedbackAudioDuracao(int segundos) {
+  final m = segundos ~/ 60;
+  final s = (segundos % 60).toString().padLeft(2, '0');
+  return '$m:$s';
 }
 
 /// Subtítulo do "Assistir vídeo": quando o aluno mandou.
@@ -40,9 +100,13 @@ const feedbackVideoNome = 'Feedback em vídeo';
 const feedbackVideoBuscaMinimo = 6;
 
 /// Subtítulo do personal: "Julio · 2 para responder" (sem pendência, só o nome).
-String feedbackVideoPersonalSubtitulo({String? primeiroNome, required int paraResponder}) {
+String feedbackVideoPersonalSubtitulo({
+  String? primeiroNome,
+  required int paraResponder,
+}) {
   return [
-    if (primeiroNome != null && primeiroNome.trim().isNotEmpty) primeiroNome.trim(),
+    if (primeiroNome != null && primeiroNome.trim().isNotEmpty)
+      primeiroNome.trim(),
     if (paraResponder > 0) '$paraResponder para responder',
   ].join(' · ');
 }
@@ -63,7 +127,9 @@ String feedbackVideoAlunoSubtitle({
   required bool respondido,
 }) {
   final date = fxDateShort(criadoEm);
-  return respondido ? '$date · Correção pronta' : '$date · Aguardando o personal';
+  return respondido
+      ? '$date · Correção pronta'
+      : '$date · Aguardando a correção';
 }
 
 String feedbackVideoAlunoStatusLabel({required bool respondido}) =>
@@ -71,7 +137,18 @@ String feedbackVideoAlunoStatusLabel({required bool respondido}) =>
 
 const feedbackVideoAlunoHelpTip =
     'Grave uma série do exercício e envie por esta tela. Seu personal assiste e '
-    'responde com a correção. Você recebe um aviso quando ele responder.';
+    'responde com a correção. Você recebe um aviso quando ela chegar.';
+
+/// Detalhe do aluno sem resposta ainda (sem supor o gênero do personal).
+const feedbackVideoAlunoSemCorrecao =
+    'Ainda sem correção. Você recebe um aviso quando ela chegar.';
+
+const feedbackVideoBuscaDica = 'Buscar exercício ou recado';
+
+const feedbackVideoNaoFeche = 'Não feche o app até terminar.';
+
+String feedbackVideoEnviando(double? fracao) =>
+    fracao == null ? 'Enviando…' : 'Enviando… ${(fracao * 100).round()}%';
 
 const feedbackVideoMaxBytes = 120 * 1024 * 1024;
 const feedbackVideoMaxDuration = Duration(seconds: 60);

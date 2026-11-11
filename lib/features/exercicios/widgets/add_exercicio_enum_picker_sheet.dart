@@ -107,6 +107,7 @@ class _AddExercicioEnumPickerSheetState<T extends Enum>
     return FxSettingsGroup(
       accent: primary,
       edgeToEdgeRows: true,
+      semMoldura: true,
       children: FxInsetPickerOption.list(
         accent: soft,
         items: [

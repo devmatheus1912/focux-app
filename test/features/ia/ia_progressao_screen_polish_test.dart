@@ -12,7 +12,8 @@ void main() {
     expect(screen, contains('FxShellScaffold'));
     expect(screen, contains('FxContentWidthLimiter'));
     expect(screen, contains('friendlyError'));
-    expect(screen, contains('IaProgressaoLoadingSkeleton'));
+    expect(screen, contains('IaProgressaoGerando'));
+    expect(screen, isNot(contains('IaProgressaoLoadingSkeleton')));
     expect(screen, contains('_loading'));
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, contains('IaProgressaoPedidoCard'));

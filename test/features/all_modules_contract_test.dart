@@ -29,7 +29,15 @@ void main() {
             p.contains('/services/');
       });
 
-      final screenExempt = {'planos', 'pricing', 'pql', 'subscription', 'moderacao'};
+      // winback: só dados e a folha do aviso, aberta por Automações.
+      final screenExempt = {
+        'planos',
+        'pricing',
+        'pql',
+        'subscription',
+        'moderacao',
+        'winback',
+      };
       // Redirect-only ou shell fino — sem repository dedicado no módulo.
       final dataExempt = {...screenExempt, 'suporte'};
       if (!hasScreen && !screenExempt.contains(name)) {

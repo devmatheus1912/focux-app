@@ -4,15 +4,18 @@ import '../../../core/theme/fx_icons.dart';
 
 final broadcastPublicos = ['TODOS', 'ONLINE', 'PRESENCIAL', 'HIBRIDO'];
 
-String broadcastPublicoLabel(String? raw) =>
-    switch ((raw ?? 'TODOS').trim().toUpperCase()) {
-      'ONLINE' => ptS.broadcastOnline,
-      'PRESENCIAL' => ptS.broadcastPresencial,
-      'HIBRIDO' => ptS.broadcastHibrido,
-      _ => ptS.retencaoFiltroTodos,
-    };
+String broadcastPublicoLabel(String? raw) => switch ((raw ?? 'TODOS')
+    .trim()
+    .toUpperCase()) {
+  'ONLINE' => ptS.broadcastOnline,
+  'PRESENCIAL' => ptS.broadcastPresencial,
+  'HIBRIDO' => ptS.broadcastHibrido,
+  _ => ptS.retencaoFiltroTodos,
+};
 
-IconData broadcastPublicoFxIcon(String raw) => switch (raw.trim().toUpperCase()) {
+IconData broadcastPublicoFxIcon(String raw) => switch (raw
+    .trim()
+    .toUpperCase()) {
   'ONLINE' => FxIcons.chat,
   'PRESENCIAL' => FxIcons.inicio,
   'HIBRIDO' => FxIcons.grupo,
@@ -24,6 +27,26 @@ String broadcastPublicoChip(String publico, int? total) {
   final label = broadcastPublicoLabel(publico);
   return total == null ? label : '$label $total';
 }
+
+/// Público com 0 alunos não se escolhe (alcance ainda carregando = liberado).
+bool broadcastPublicoHabilitado(String publico, Map<String, int> totais) =>
+    publico == 'TODOS' || totais[publico] != 0;
+
+/// Todos os alunos no mesmo tipo (nenhum sem tipo): a escolha de público não
+/// muda nada e some. Devolve o total, ou `null` quando a escolha faz sentido.
+int? broadcastPublicoUnico(Map<String, int> totais) {
+  final todos = totais['TODOS'];
+  if (todos == null || todos <= 0) return null;
+  final comAlunos = [
+    for (final e in totais.entries)
+      if (e.key != 'TODOS' && e.value > 0) e.value,
+  ];
+  if (comAlunos.length == 1 && comAlunos.single == todos) return todos;
+  return null;
+}
+
+String broadcastVaiPara(int total) =>
+    total == 1 ? ptS.broadcastVaiPara1Aluno : ptS.broadcastVaiParaAlunos(total);
 
 /// "Todos" inclui quem ainda está sem tipo de consultoria.
 String? broadcastSemTipoAviso(Map<String, int> totais) {
@@ -57,8 +80,7 @@ final broadcastAtalhos = <({String nome, String titulo, String mensagem})>[
   ),
 ];
 
-String? broadcastTipoApi(String publico) =>
-    publico == 'TODOS' ? null : publico;
+String? broadcastTipoApi(String publico) => publico == 'TODOS' ? null : publico;
 
 String broadcastRequiredTitulo() => ptS.broadcastInformeOTitulo;
 
@@ -66,7 +88,10 @@ String broadcastRequiredMensagem() => ptS.broadcastInformeAMensagem;
 
 String broadcastSendSuccess(int count, {int? comPush}) {
   if (count <= 0) return ptS.broadcastNenhumAlunoNoPublicoEscolhido;
-  final base = count == 1 ? ptS.broadcastEnviadoPara1Aluno : ptS.broadcastEnviadoParaAlunos(count);
+  final base =
+      count == 1
+          ? ptS.broadcastEnviadoPara1Aluno
+          : ptS.broadcastEnviadoParaAlunos(count);
   if (comPush == null) return '$base.';
   if (comPush >= count) return ptS.broadcastComNotificacaoNoCelular(base);
   if (comPush <= 0) {
@@ -76,7 +101,9 @@ String broadcastSendSuccess(int count, {int? comPush}) {
 }
 
 String broadcastComPushLabel(int comPush) =>
-    comPush == 1 ? ptS.broadcast1ComNotificacao : ptS.broadcastComNotificacao(comPush);
+    comPush == 1
+        ? ptS.broadcast1ComNotificacao
+        : ptS.broadcastComNotificacao(comPush);
 
 String broadcastAlunosValue(int count, {int? comPush}) {
   final base = count == 1 ? ptS.broadcast1Aluno : '$count alunos';
@@ -88,7 +115,9 @@ String broadcastAlunosLabel(int total) =>
     total == 1 ? ptS.broadcast1Aluno : '$total alunos';
 
 String broadcastConfirmTitle(String publico, {int? total}) {
-  if (total != null) return ptS.broadcastEnviarPara(broadcastAlunosLabel(total));
+  if (total != null) {
+    return ptS.broadcastEnviarPara(broadcastAlunosLabel(total));
+  }
   if (publico == 'TODOS') return 'Enviar para todos os alunos?';
   return ptS.broadcastEnviarPara(broadcastPublicoLabel(publico).toLowerCase());
 }
@@ -114,8 +143,7 @@ String broadcastHistoricoHeader() => ptS.anamneseAlunoHistorico;
 
 String broadcastEmptyTitle() => ptS.broadcastNenhumAvisoEnviado;
 
-String broadcastEmptySubtitle() =>
-    ptS.broadcastEscrevaOPrimeiroAvisoAcima;
+String broadcastEmptySubtitle() => ptS.broadcastEscrevaOPrimeiroAvisoAcima;
 
 String broadcastFormatDate(DateTime dt) {
   final dia = dt.day.toString().padLeft(2, '0');
@@ -127,6 +155,7 @@ String broadcastFormatDate(DateTime dt) {
 
 String broadcastTileSubtitle(String mensagem, DateTime enviadoEm) {
   final compact = mensagem.trim().replaceAll(RegExp(r'\s+'), ' ');
-  final preview = compact.length > 80 ? '${compact.substring(0, 80)}…' : compact;
+  final preview =
+      compact.length > 80 ? '${compact.substring(0, 80)}…' : compact;
   return '$preview\n${broadcastFormatDate(enviadoEm)}';
 }

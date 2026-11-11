@@ -186,9 +186,6 @@ String copilotDisplayAction(Aluno aluno, String acao) {
   return 'Retomar contato e ajustar plano com base na resposta.';
 }
 
-
-
-
 const _stickyLabelMax = 32;
 
 String truncateCopilotStickyLabel(String raw) {
@@ -263,7 +260,6 @@ String copilotStickyLabel(
   return truncateCopilotStickyLabel(copilotDisplayAction(aluno, cleaned));
 }
 
-
 String copilotFallbackAction(Aluno aluno, AlunoAutonomiaResumo? resumo) {
   if (aluno.statusFinanceiro == 'INADIMPLENTE') {
     return 'Regularizar financeiro antes que isso vire atrito de acesso.';
@@ -274,21 +270,15 @@ String copilotFallbackAction(Aluno aluno, AlunoAutonomiaResumo? resumo) {
   return 'Revisar treino e propor a próxima evolução de ${aluno.objetivo ?? "objetivo"}.';
 }
 
-
 /// "Por quê": o motivo do backend em linhas, com a mesma conta de "Agora".
 /// Sem motivo, só o que há de dado real no aluno.
 List<String> copilotoFatos(Aluno aluno, {String? motivo}) {
-  final texto = motivo?.trim() ?? '';
-  if (texto.isNotEmpty) {
-    return [
-      for (final parte in texto.split(' · '))
-        if (parte.trim().isNotEmpty)
-          '${parte.trim()[0].toUpperCase()}${parte.trim().substring(1)}',
-    ].take(3).toList();
-  }
+  // Aderência e dias sem treino saem sempre da conta do app; do motivo da IA
+  // ou do servidor entra só o que fala de outra coisa (medida, sono, carga…),
+  // para o mesmo número não aparecer dito de dois jeitos.
   final aderencia = aluno.aderenciaPercent;
   final dias = aluno.diasSemTreino;
-  return [
+  final doApp = [
     if (aderencia != null) ptS.copilotoFatoAderencia(aderencia),
     if (dias != null)
       switch (dias) {
@@ -297,32 +287,58 @@ List<String> copilotoFatos(Aluno aluno, {String? motivo}) {
         _ => ptS.copilotoFatoUltimoTreinoN(dias),
       },
   ];
+  final outros = [
+    for (final parte in (motivo ?? '').split(' · '))
+      if (parte.trim().isNotEmpty && !_falaDeTreinoOuAderencia(parte))
+        '${parte.trim()[0].toUpperCase()}${parte.trim().substring(1)}',
+  ];
+  return [...doApp, ...outros].take(3).toList();
+}
+
+bool _falaDeTreinoOuAderencia(String parte) {
+  final t = parte.toLowerCase();
+  return t.contains('aderên') ||
+      t.contains('aderen') ||
+      t.contains('parad') ||
+      t.contains('sem trein') ||
+      t.contains('último treino') ||
+      t.contains('ultimo treino') ||
+      RegExp(r'\b\d+ dias?\b').hasMatch(t);
 }
 
 /// A ação da folha sai do tipo da sugestão, para o botão combinar com o texto.
-OperacaoStickyAction copilotoAcaoDaSugestao(
-  String? tipoAcao, {
-  required OperacaoStickyAction padrao,
-}) => switch (tipoAcao) {
-  'CONTATO' || 'WEARABLE' => OperacaoStickyAction(
-    label: ptS.copilotoEnviarMensagem,
-    icon: FxIcons.chat,
-    destination: OperacaoStickyDestination.chat,
-  ),
-  'PERFIL' => OperacaoStickyAction(
-    label: ptS.copilotoCompletarCadastro,
-    icon: FxIcons.cracha,
-    destination: OperacaoStickyDestination.editAluno,
-  ),
-  'TREINO' => OperacaoStickyAction(
-    label: ptS.copilotoAbrirFicha,
-    icon: FxIcons.treino,
-    destination: OperacaoStickyDestination.treino,
-  ),
-  'FINANCEIRO' => OperacaoStickyAction(
-    label: ptS.copilotoVerFinanceiro,
-    icon: FxIcons.pagamento,
-    destination: OperacaoStickyDestination.financeiro,
-  ),
-  _ => padrao,
-};
+/// `null` = sem ação própria: o botão vira "Criar tarefa".
+OperacaoStickyAction? copilotoAcaoDaSugestao(String? tipoAcao) =>
+    switch (tipoAcao) {
+      'CARGA' => OperacaoStickyAction(
+        label: ptS.copilotoAjustarCargas,
+        icon: FxIcons.treino,
+        destination: OperacaoStickyDestination.progressao,
+      ),
+      'MEDIDA' => OperacaoStickyAction(
+        label: ptS.copilotoConferirMedida,
+        icon: FxIcons.balanca,
+        destination: OperacaoStickyDestination.evolucao,
+      ),
+      'CONTATO' || 'WEARABLE' => OperacaoStickyAction(
+        label: ptS.copilotoEnviarMensagem,
+        icon: FxIcons.chat,
+        destination: OperacaoStickyDestination.chat,
+      ),
+      'PERFIL' => OperacaoStickyAction(
+        label: ptS.copilotoCompletarCadastro,
+        icon: FxIcons.cracha,
+        destination: OperacaoStickyDestination.editAluno,
+      ),
+      'TREINO' => OperacaoStickyAction(
+        label: ptS.copilotoAbrirFicha,
+        icon: FxIcons.treino,
+        destination: OperacaoStickyDestination.treino,
+      ),
+      'FINANCEIRO' => OperacaoStickyAction(
+        label: ptS.copilotoVerFinanceiro,
+        icon: FxIcons.pagamento,
+        destination: OperacaoStickyDestination.financeiro,
+      ),
+      _ => null,
+    };

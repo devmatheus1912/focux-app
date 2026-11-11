@@ -22,7 +22,19 @@ class FeedbackVideo {
   final DateTime? respondidoEm;
   final String? status;
 
-  bool get respondido => (respostaPersonal ?? '').trim().isNotEmpty;
+  /// Lista geral (sem aluno na rota): de quem é o vídeo.
+  final String? alunoNome;
+
+  /// Correção por áudio (com ou sem texto).
+  final String? respostaAudioUrl;
+  final int? respostaAudioSegundos;
+
+  bool get temAudio => (respostaAudioUrl ?? '').trim().isNotEmpty;
+
+  bool get respondido =>
+      status == 'RESPONDIDO' ||
+      (respostaPersonal ?? '').trim().isNotEmpty ||
+      temAudio;
 
   FeedbackVideo({
     required this.id,
@@ -36,6 +48,9 @@ class FeedbackVideo {
     this.respostaPersonal,
     this.respondidoEm,
     this.status,
+    this.alunoNome,
+    this.respostaAudioUrl,
+    this.respostaAudioSegundos,
   });
 
   factory FeedbackVideo.fromJson(Map<String, dynamic> j) => FeedbackVideo(
@@ -52,6 +67,9 @@ class FeedbackVideo {
         ? null
         : DateTime.parse(j['respondidoEm'] as String),
     status: j['status'] as String?,
+    alunoNome: j['alunoNome'] as String?,
+    respostaAudioUrl: j['respostaAudioUrl'] as String?,
+    respostaAudioSegundos: (j['respostaAudioSegundos'] as num?)?.toInt(),
   );
 }
 
@@ -68,6 +86,7 @@ class FeedbackVideoRepository {
     required String filename,
     String? path,
     List<int>? bytes,
+    void Function(double fracao)? onProgress,
   }) {
     if (path != null && path.isNotEmpty) {
       return _uploads.uploadFile(
@@ -75,6 +94,7 @@ class FeedbackVideoRepository {
         filename: filename,
         folder: 'feedback/videos',
         resourceType: 'video',
+        onProgress: onProgress,
       );
     }
     return _uploads.uploadBytes(
@@ -82,6 +102,17 @@ class FeedbackVideoRepository {
       filename: filename,
       folder: 'feedback/videos',
       resourceType: 'video',
+      onProgress: onProgress,
+    );
+  }
+
+  /// Áudio da correção (m4a), na mesma pasta dos áudios do chat.
+  Future<String> subirAudio({required String path, required String filename}) {
+    return _uploads.uploadFile(
+      path: path,
+      filename: filename,
+      folder: 'chat/audio',
+      resourceType: 'audio',
     );
   }
 
@@ -125,10 +156,20 @@ class FeedbackVideoRepository {
     );
   }
 
-  Future<FeedbackVideo> responder(int id, String resposta) async {
+  /// Correção: texto, áudio ou os dois.
+  Future<FeedbackVideo> responder(
+    int id,
+    String resposta, {
+    String? audioUrl,
+    int? audioSegundos,
+  }) async {
     final r = await _dio.put(
       '/api/feedback-videos/$id/resposta',
-      data: {'resposta': resposta},
+      data: {
+        'resposta': resposta,
+        if (audioUrl != null) 'audioUrl': audioUrl,
+        if (audioSegundos != null) 'audioSegundos': audioSegundos,
+      },
     );
     return FeedbackVideo.fromJson(Map<String, dynamic>.from(r.data as Map));
   }

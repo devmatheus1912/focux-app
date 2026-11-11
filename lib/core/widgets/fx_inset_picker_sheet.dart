@@ -63,8 +63,8 @@ Future<T?> showFxInsetPickerSheet<T>(
         });
       }
       final group = FxSettingsGroup(
-        accent: primary,
         edgeToEdgeRows: true,
+        semMoldura: true,
         children: FxInsetPickerOption.list(
           accent: soft,
           items: [

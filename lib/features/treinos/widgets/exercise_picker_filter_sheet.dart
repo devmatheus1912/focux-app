@@ -124,6 +124,7 @@ class _ExercisePickerFilterSheetState extends State<_ExercisePickerFilterSheet> 
           FxSettingsGroup(
             accent: primary,
             edgeToEdgeRows: true,
+            semMoldura: true,
             caption: 'Onde o aluno treina',
             children: FxInsetPickerOption.list(
               accent: brand,
@@ -147,6 +148,7 @@ class _ExercisePickerFilterSheetState extends State<_ExercisePickerFilterSheet> 
           FxSettingsGroup(
             accent: primary,
             edgeToEdgeRows: true,
+            semMoldura: true,
             caption: 'Equipamento (um ou mais)',
             children: FxInsetPickerOption.list(
               accent: brand,

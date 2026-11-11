@@ -25,7 +25,6 @@ String? recursoFromRota(String? rotaApp) {
     '/habitos' => PlanoRecursoKeys.habitos,
     '/desafios' => PlanoRecursoKeys.desafios,
     '/automacoes' => PlanoRecursoKeys.automacoes,
-    '/winback' => PlanoRecursoKeys.winback,
     '/perfil/equipe' => PlanoRecursoKeys.equipe,
     '/white-label' => PlanoRecursoKeys.whiteLabel,
     '/migracao-magica' => PlanoRecursoKeys.importacaoFoto,

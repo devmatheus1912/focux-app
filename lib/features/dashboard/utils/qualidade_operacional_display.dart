@@ -2,8 +2,7 @@ import '../../../core/money/fx_money.dart';
 import '../data/qualidade_operacional.dart';
 import '../../../l10n/pt.dart';
 
-final qualidadeComoCalculamos =
-    ptS.qualidadeIndiceDe0A100;
+final qualidadeComoCalculamos = ptS.qualidadeIndiceDe0A100;
 
 /// Abaixo disso o índice oscila com um aluno só.
 const qualidadeAlunosMinimos = 5;
@@ -77,4 +76,54 @@ String qualidadeRecomendacaoDisplay(QualidadeOperacionalData data) {
   final be = data.recomendacao.trim();
   if (be.isNotEmpty) return be;
   return ptS.qualidadeOperacaoSaudavelContinueAcompanhandoA;
+}
+
+/// Quantos alunos ativos faltam para a nota (base pequena), ou 0.
+int qualidadeAlunosFaltando(int? alunosAtivos) {
+  final ativos = alunosAtivos ?? 0;
+  final faltam = qualidadeAlunosMinimos - ativos;
+  return faltam > 0 ? faltam : 0;
+}
+
+String qualidadeFaltamTexto(int faltam) =>
+    faltam == 1 ? ptS.qualidadeFaltaUm : ptS.qualidadeFaltam(faltam);
+
+enum QualidadeAcaoRota { financeiro, retencao }
+
+/// Uma ação da Qualidade: o que está abaixo da referência, com motivo concreto.
+typedef QualidadeAcao =
+    ({String titulo, String motivo, QualidadeAcaoRota rota});
+
+/// Só o que está abaixo da referência vira ação (ticket primeiro); tudo acima,
+/// nenhuma. Sem mensalidade, a ação é lançar.
+List<QualidadeAcao> qualidadeAcoes(QualidadeOperacionalData data) {
+  final acoes = <QualidadeAcao>[];
+  if (qualidadeTicketUnavailable(data.ticketPessoal)) {
+    acoes.add((
+      titulo: ptS.qualidadeLancarMensalidades,
+      motivo: ptS.qualidadeSemMensalidadeMotivo,
+      rota: QualidadeAcaoRota.financeiro,
+    ));
+  } else if (data.ticketPessoal < data.ticketMercado) {
+    final diferenca = data.ticketMercado - data.ticketPessoal;
+    acoes.add((
+      titulo: ptS.qualidadeRevisarMensalidades,
+      motivo: ptS.qualidadeAbaixoDaReferenciaValor(
+        _qualidadeMoneyLabel(diferenca),
+      ),
+      rota: QualidadeAcaoRota.financeiro,
+    ));
+  }
+  if (data.retencaoPessoal < data.retencaoMercado) {
+    final pontos = data.retencaoMercado - data.retencaoPessoal;
+    acoes.add((
+      titulo: ptS.winbackVerEmRisco,
+      motivo:
+          pontos == 1
+              ? ptS.qualidadeUmPontoAbaixo
+              : ptS.qualidadePontosAbaixo(pontos),
+      rota: QualidadeAcaoRota.retencao,
+    ));
+  }
+  return acoes;
 }

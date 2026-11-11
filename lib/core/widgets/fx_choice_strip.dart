@@ -4,10 +4,17 @@ import '../theme/tokens_strip.dart';
 import 'fx_choice_chip.dart';
 
 class FxChoiceItem<T> {
-  const FxChoiceItem({required this.value, required this.label});
+  const FxChoiceItem({
+    required this.value,
+    required this.label,
+    this.habilitado = true,
+  });
 
   final T value;
   final String label;
+
+  /// Falso: o chip fica esmaecido e não responde (ex.: público com 0 alunos).
+  final bool habilitado;
 }
 
 /// Fileira de [FxChoiceChip]. Rola na horizontal quando não cabe; com
@@ -38,7 +45,7 @@ class FxChoiceStrip<T> extends StatelessWidget {
           label: item.label,
           selected: item.value == selecionado,
           cheio: cheio,
-          onTap: () => onSelecionar(item.value),
+          onTap: item.habilitado ? () => onSelecionar(item.value) : null,
         ),
     ];
     if (quebrar) {

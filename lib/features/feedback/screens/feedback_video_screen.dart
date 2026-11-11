@@ -30,6 +30,10 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
 import '../../alunos/providers/alunos_provider.dart' show alunoProvider;
 import '../data/feedback_video_repository.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/widgets/fx_video_rede.dart';
+import '../../alunos/widgets/aluno_avatar.dart';
+import '../widgets/feedback_gravador_audio.dart';
 import '../utils/feedback_video_display.dart';
 import '../../../core/theme/fx_icons.dart';
 
@@ -195,10 +199,16 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
     }
   }
 
+  /// Vídeo tocando na folha, recado do aluno e a correção (texto, áudio ou
+  /// os dois). Envia com a folha aberta: se falhar, o texto fica.
   Future<void> _responder(FeedbackVideo item) async {
     HapticFeedback.selectionClick();
     final ctrl = TextEditingController(text: item.respostaPersonal ?? '');
+    final gravacao = ValueNotifier<GravacaoDeAudio?>(null);
     final comentario = item.comentario.trim();
+    final repo = FeedbackVideoRepository(ref.read(apiClientProvider));
+    bool temAlgo() =>
+        ctrl.text.trim().isNotEmpty || gravacao.value != null || item.temAudio;
     try {
       final ok = await showFxFormSheet(
         context,
@@ -209,16 +219,49 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
         ),
         icon: FxIcons.avaliacao,
         confirmLabel: 'Enviar ao aluno',
+        ouvir: Listenable.merge([ctrl, gravacao]),
+        podeConfirmar: temAlgo,
+        aoConfirmar: () async {
+          try {
+            final audio = gravacao.value;
+            final audioUrl =
+                audio == null
+                    ? null
+                    : await repo.subirAudio(
+                      path: audio.path,
+                      filename: audio.path.split('/').last,
+                    );
+            final atualizado = await repo.responder(
+              item.id,
+              ctrl.text.trim(),
+              audioUrl: audioUrl ?? item.respostaAudioUrl,
+              audioSegundos: audio?.segundos ?? item.respostaAudioSegundos,
+            );
+            if (mounted) {
+              setState(() {
+                final i = _feedbacks.indexWhere((f) => f.id == item.id);
+                if (i >= 0) _feedbacks[i] = atualizado;
+              });
+            }
+            return null;
+          } catch (e) {
+            return friendlyError(e, fallback: 'Não deu para enviar agora.');
+          }
+        },
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            FxSatelliteListTile(
-              title: 'Assistir vídeo',
-              titleCase: false,
-              subtitle: Text(feedbackVideoEnviadoEm(item.criadoEm)),
-              leading: const Icon(FxIcons.playCirculo),
-              onTap: () => _abrirVideo(item.videoUrl),
+            FxVideoRede(
+              url: item.videoUrl,
+              onAbrirFora: () => _abrirVideo(item.videoUrl),
+            ),
+            const SizedBox(height: TokensStrip.s1),
+            Text(
+              feedbackVideoEnviadoEm(item.criadoEm),
+              style: FocuxHubTypography.bodyMuted(
+                color: ShellChrome.of(context).mute,
+              ),
             ),
             if (comentario.isNotEmpty) ...[
               const SizedBox(height: TokensStrip.s3),
@@ -228,33 +271,37 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
             AlunoInsetFormField(
               controller: ctrl,
               label: 'Sua correção',
-              icon: FxIcons.notas,
               hint: 'Ex.: desça mais devagar e mantenha o joelho alinhado.',
-              maxLines: 5,
+              maxLines: 6,
+              rotuloVisivel: true,
+              mostrarOpcional: false,
               showDivider: false,
+            ),
+            const SizedBox(height: TokensStrip.s2),
+            FeedbackGravadorAudio(gravacao: gravacao),
+            const SizedBox(height: TokensStrip.s3),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: FxTonalButton(
+                label: 'Remover este vídeo',
+                icon: FxIcons.excluir,
+                danger: true,
+                compact: true,
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  _deletar(item);
+                },
+              ),
             ),
           ],
         ),
       );
-      if (ok != true || !mounted) return;
-      final texto = ctrl.text.trim();
-      if (texto.isEmpty) {
-        FeedbackHelper.showError(context, 'Escreva a resposta para o aluno.');
-        return;
+      if (ok && mounted) {
+        FeedbackHelper.showSuccess(context, 'Correção enviada.');
       }
-      final atualizado = await FeedbackVideoRepository(
-        ref.read(apiClientProvider),
-      ).responder(item.id, texto);
-      if (!mounted) return;
-      setState(() {
-        final i = _feedbacks.indexWhere((f) => f.id == item.id);
-        if (i >= 0) _feedbacks[i] = atualizado;
-      });
-      FeedbackHelper.showSuccess(context, 'Resposta enviada.');
-    } catch (e) {
-      if (mounted) FeedbackHelper.showError(context, friendlyError(e));
     } finally {
       ctrl.dispose();
+      gravacao.dispose();
     }
   }
 
@@ -286,7 +333,7 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
     final mute = chrome.mute;
-    final visible = _feedbacks;
+    final visible = feedbackVideosOrdenados(_feedbacks);
     final count = _total;
     final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
     return fxScreenA11yScope(
@@ -309,9 +356,7 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
             subtitle: FxHubFreshness.joinCount(
               feedbackVideoPersonalSubtitulo(
                 primeiroNome:
-                    _nomeAluno == null
-                        ? null
-                        : satelliteFirstName(_nomeAluno),
+                    _nomeAluno == null ? null : satelliteFirstName(_nomeAluno),
                 paraResponder:
                     _loading ? 0 : visible.where((f) => !f.respondido).length,
               ),
@@ -359,7 +404,7 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
                       decoration: InputDecoration(
                         filled: false,
                         isDense: true,
-                        hintText: 'Buscar comentário',
+                        hintText: feedbackVideoBuscaDica,
                         border: InputBorder.none,
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 12,
@@ -455,7 +500,7 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
                         : 'Nenhum vídeo ainda',
                 subtitle:
                     _nomeAluno != null
-                        ? 'Quando ele mandar um vídeo de execução, ele aparece aqui para você corrigir.'
+                        ? 'Quando ${satelliteFirstName(_nomeAluno)} mandar um vídeo de execução, ele aparece aqui para você corrigir.'
                         : 'Quando um aluno mandar um vídeo de execução, ele aparece aqui para você corrigir.',
                 // Sem aluno (lista geral) não há para quem pedir.
                 action:
@@ -494,16 +539,52 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
             );
           }
           final item = visible[i];
+          final dor = feedbackVideoComDor(item);
+          final exercicio = feedbackVideoTitulo(
+            exercicioNome: item.exercicioNome,
+            comentario: item.comentario,
+          );
+          // Lista geral: o aluno é o título; o exercício vai junto do resto.
+          final geral = widget.alunoId == null && item.alunoNome != null;
+          final linha = feedbackVideoSubtituloDaLinha(item);
+          final alerta =
+              ShellChrome.of(context).isDark
+                  ? EagleTokens.warnDark
+                  : EagleTokens.warn;
           return FxSatelliteListTile(
             titleCase: false,
-            title: feedbackVideoTitulo(
-              exercicioNome: item.exercicioNome,
-              comentario: item.comentario,
-            ),
-            subtitle: Text(
-              feedbackVideoSubtitle(
-                criadoEm: item.criadoEm,
-                respondido: item.respondido,
+            title: geral ? satelliteFirstName(item.alunoNome!) : exercicio,
+            leading:
+                geral
+                    ? AlunoAvatar(
+                      name: item.alunoNome!,
+                      variant: AlunoAvatarVariant.strip,
+                    )
+                    : null,
+            subtitle: Semantics(
+              label: dor ? '$linha, fala de dor' : null,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (dor) ...[
+                    Icon(FxIcons.alertaPequeno, size: 14, color: alerta),
+                    const SizedBox(width: TokensStrip.s1),
+                  ],
+                  Flexible(
+                    child: Text(
+                      geral ? '$exercicio · $linha' : linha,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style:
+                          dor
+                              ? FocuxHubTypography.bodyMuted(
+                                color: alerta,
+                                fontWeight: FontWeight.w600,
+                              )
+                              : null,
+                    ),
+                  ),
+                ],
               ),
             ),
             trailing: Text(
@@ -548,9 +629,11 @@ class _RecadoDoAluno extends StatelessWidget {
                 Icon(FxIcons.alerta, size: 16, color: corRotulo),
                 const SizedBox(width: TokensStrip.s1),
               ],
-              Text(
-                'Recado do aluno',
-                style: FocuxHubTypography.chip(corRotulo),
+              Flexible(
+                child: Text(
+                  dor ? 'Recado do aluno · fala de dor' : 'Recado do aluno',
+                  style: FocuxHubTypography.chip(corRotulo),
+                ),
               ),
             ],
           ),

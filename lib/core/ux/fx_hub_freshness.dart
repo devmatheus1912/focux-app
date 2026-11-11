@@ -12,9 +12,16 @@ abstract final class FxHubFreshness {
     return 'Atualizado há ${hours}h';
   }
 
+  /// Abaixo disso o dado é novo e "Atualizado agora" só ocupa o topo.
+  static const silencio = Duration(minutes: 5);
+
+  /// Frescor para o subtítulo das telas: só aparece quando o dado já tem
+  /// mais de [silencio]; antes disso, `null` (o topo fica com o resto).
   static String? fromFetchedAt(DateTime? fetchedAt, {DateTime? now}) {
     if (fetchedAt == null) return null;
-    return atualizadoHa((now ?? DateTime.now()).difference(fetchedAt));
+    final idade = (now ?? DateTime.now()).difference(fetchedAt);
+    if (idade < silencio) return null;
+    return atualizadoHa(idade);
   }
 
   /// Subtítulo S4: contagem e freshness no mesmo papel, separados por ` · `.

@@ -85,6 +85,7 @@ class _FinanceiroAlunoEtapaState extends State<FinanceiroAlunoEtapa> {
                     : FxSettingsGroup(
                       accent: primary,
                       edgeToEdgeRows: true,
+                      semMoldura: true,
                       children: FxInsetPickerOption.list(
                         accent: BrandPalette.softened(primary),
                         items: [

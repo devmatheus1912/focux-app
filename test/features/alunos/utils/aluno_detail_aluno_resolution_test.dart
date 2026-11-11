@@ -59,8 +59,6 @@ final _evolucao = const Aluno360Evolucao(
     resumo: '',
     volumeSemanal: 0,
     volumeMensal: 0,
-    proximaAcao: '',
-    sugerirCopiloto: false,
   ),
 );
 

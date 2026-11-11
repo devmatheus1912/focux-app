@@ -12,8 +12,6 @@ void main() {
         volumeSemanal: 1500,
         volumeMensal: 6000,
         tendenciaVolumePct: pct,
-        proximaAcao: 'Manter plano ou microajustar volume.',
-        sugerirCopiloto: false,
       );
 
   test('tendência com sinal e %', () {
@@ -27,12 +25,5 @@ void main() {
       'Em alta',
     );
     expect(Aluno360EvolucaoInteligenteCard.tendenciaTexto(ev()), 'Estável');
-  });
-
-  test('sugestão com rótulo e minúscula depois dos dois-pontos', () {
-    expect(
-      Aluno360EvolucaoInteligenteCard.sugestaoTexto('Manter plano ou microajustar volume.'),
-      'Sugestão: manter plano ou microajustar volume.',
-    );
   });
 }

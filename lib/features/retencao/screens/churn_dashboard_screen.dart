@@ -249,12 +249,6 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
       grupos: [
         FxActionGroup<String>(null, [
           FxActionItem(
-            valor: '/winback',
-            rotulo: s.retencaoEntradaHistorico,
-            descricao: s.retencaoEntradaHistoricoSub,
-            icone: FxIcons.notificacao,
-          ),
-          FxActionItem(
             valor: '/financeiro?aba=mensalidades&filtro=atrasadas',
             rotulo: s.retencaoEntradaCobranca,
             descricao: s.retencaoEntradaCobrancaSub,

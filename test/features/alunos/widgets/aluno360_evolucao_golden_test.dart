@@ -138,8 +138,6 @@ void main() {
       volumeSemanal: 420,
       volumeMensal: 1680,
       tendenciaVolumePct: 18,
-      proximaAcao: 'Reforçar elogio e planejar próxima progressão.',
-      sugerirCopiloto: false,
       volumePorSemana: [280, 310, 350, 390, 420, 440],
     );
 
@@ -169,8 +167,6 @@ void main() {
       volumeSemanal: 420,
       volumeMensal: 1680,
       tendenciaVolumePct: 18,
-      proximaAcao: 'Reforçar elogio e planejar próxima progressão.',
-      sugerirCopiloto: false,
       volumePorSemana: [280, 310, 350, 390, 420, 440],
     );
 
@@ -208,8 +204,6 @@ void main() {
                 resumo: '',
                 volumeSemanal: 0,
                 volumeMensal: 0,
-                proximaAcao: '',
-                sugerirCopiloto: false,
               ),
             ),
             isDark: false,

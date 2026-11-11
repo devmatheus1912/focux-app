@@ -14,7 +14,7 @@ void main() {
     expect(screen, contains("safePopOrGo(context, '/dashboard/personal')"));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('FxStripCard'));
-    expect(screen, contains('emphasize: true'));
+    expect(screen, contains('marca: true'));
     expect(screen, contains('FxActionChip'));
     expect(screen, contains('FxEmptyAction'));
     expect(screen, contains('keyboardDismissBehavior'));

@@ -98,4 +98,55 @@ class WinbackRepository {
     );
     return WinbackLogPage.fromJson(response.data);
   }
+
+  Future<RetomadaConfig> config() async {
+    final r = await _dio.get('/api/winback/config');
+    return RetomadaConfig.fromJson(Map<String, dynamic>.from(r.data as Map));
+  }
+
+  /// Texto vazio volta ao padrão do Focux.
+  Future<RetomadaConfig> salvarConfig({
+    required bool ativo,
+    String? mensagem30,
+    String? mensagem60,
+  }) async {
+    final r = await _dio.put(
+      '/api/winback/config',
+      data: {
+        'ativo': ativo,
+        'mensagem30': mensagem30,
+        'mensagem60': mensagem60,
+      },
+    );
+    return RetomadaConfig.fromJson(Map<String, dynamic>.from(r.data as Map));
+  }
+}
+
+/// Aviso para quem parou: ligado e os textos (próprio ou o do Focux).
+class RetomadaConfig {
+  const RetomadaConfig({
+    required this.ativo,
+    required this.padrao30,
+    required this.padrao60,
+    this.mensagem30,
+    this.mensagem60,
+  });
+
+  final bool ativo;
+  final String? mensagem30;
+  final String? mensagem60;
+  final String padrao30;
+  final String padrao60;
+
+  bool get textoProprio => mensagem30 != null || mensagem60 != null;
+  String get texto30 => mensagem30 ?? padrao30;
+  String get texto60 => mensagem60 ?? padrao60;
+
+  factory RetomadaConfig.fromJson(Map<String, dynamic> j) => RetomadaConfig(
+    ativo: j['ativo'] as bool? ?? true,
+    mensagem30: j['mensagem30'] as String?,
+    mensagem60: j['mensagem60'] as String?,
+    padrao30: j['padrao30'] as String? ?? '',
+    padrao60: j['padrao60'] as String? ?? '',
+  );
 }

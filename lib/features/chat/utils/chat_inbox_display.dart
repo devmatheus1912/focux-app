@@ -12,18 +12,12 @@ String chatInboxCountLabel(int count) {
   return '$count conversas';
 }
 
-String chatInboxHubSubtitle({
-  required ChatInboxHubView view,
-  int? count,
-  String? freshness,
-}) {
-  final parts = <String>[
-    if (count != null) chatInboxCountLabel(count),
-    chatInboxHubViewLabel(view),
-  ];
+String? chatInboxHubSubtitle({int? count, String? freshness}) {
+  // O filtro escolhido já aparece no chip: o subtítulo fica só com a conta.
+  final parts = <String>[if (count != null) chatInboxCountLabel(count)];
   final stamp = freshness?.trim();
   if (stamp != null && stamp.isNotEmpty) parts.add(stamp);
-  return parts.join(' · ');
+  return parts.isEmpty ? null : parts.join(' · ');
 }
 
 String chatInboxEmptyTitle(ChatInboxHubView view) => switch (view) {
@@ -68,3 +62,16 @@ String chatInboxActionLabel(String action) => switch (action) {
   'clear' => 'Conversa limpa',
   _ => 'Ação aplicada',
 };
+
+/// Busca e filtros só com mais de 3 conversas, ou quando já há arquivadas,
+/// busca digitada ou outra aba aberta. Sem a conta ainda, mostra.
+bool chatInboxMostraBuscaEFiltros({
+  required int? totalConversas,
+  required int? arquivadas,
+  required bool buscando,
+  required bool outraAba,
+}) {
+  if (buscando || outraAba) return true;
+  if (totalConversas == null) return true;
+  return totalConversas > 3 || (arquivadas ?? 0) > 0;
+}

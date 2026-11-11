@@ -15,10 +15,11 @@ extension FinanceiroMensalidadesTabAluno on _FinanceiroMensalidadesTabState {
       hoje: hoje,
       comMesesVazios: _filtro == MensalidadeFiltro.todas && ativo,
     );
+    final todas = _todasDoAluno;
     final resumo = financeiroResumoDoAluno(
-      _homeItems.isEmpty ? _items : _homeItems,
+      todas ?? (_homeItems.isEmpty ? _items : _homeItems),
       hoje: hoje,
-      parcial: _hasMore,
+      parcial: todas == null && _hasMore,
     );
 
     return fxScreenA11yScope(

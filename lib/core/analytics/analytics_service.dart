@@ -308,10 +308,6 @@ class ProductEvents {
   static const convitesGenerated = 'convites_generated';
   static const convitesCopied = 'convites_copied';
   static const convitesWhatsapp = 'convites_whatsapp';
-  static const winbackHubViewed = 'winback_hub_viewed';
-  static const winbackHubTtv = 'winback_hub_ttv';
-  static const winbackHubHelpOpened = 'winback_hub_help_opened';
-  static const winbackHubRefreshed = 'winback_hub_refreshed';
   static const retencaoHubViewed = 'retencao_hub_viewed';
   static const retencaoHubTtv = 'retencao_hub_ttv';
   static const retencaoHubHelpOpened = 'retencao_hub_help_opened';

@@ -69,6 +69,7 @@ class _AlunosBulkActionsSheetState extends State<_AlunosBulkActionsSheet> {
               header: 'Status',
               caption: 'Escolha a ação e confirme.',
               edgeToEdgeRows: true,
+              semMoldura: true,
               accent: Theme.of(context).colorScheme.primary,
               children: FxInsetPickerOption.list(
                 accent: BrandPalette.softened(

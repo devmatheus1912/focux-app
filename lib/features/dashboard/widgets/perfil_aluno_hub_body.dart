@@ -20,6 +20,8 @@ import '../utils/aluno_delete_account.dart';
 import '../utils/aluno_perfil_completion.dart';
 import 'perfil_aluno_completar_card.dart';
 import 'perfil_progresso_bloco.dart';
+import '../../perfil/widgets/perfil_appearance_section.dart';
+import '../../perfil/widgets/perfil_sobre_grupo.dart';
 import '../../../core/theme/fx_icons.dart';
 import '../providers/dashboard_provider.dart';
 
@@ -80,27 +82,29 @@ class PerfilAlunoHubBody extends ConsumerWidget {
                       ),
                       child: CircleAvatar(
                         radius: raio,
-                        backgroundImage: hasPhoto
-                            ? fxCachedNetworkImageProvider(
-                                photo,
-                                maxWidth:
-                                    (FxSettingsLayout.avatarSize * 3).round(),
-                              )
-                            : null,
+                        backgroundImage:
+                            hasPhoto
+                                ? fxCachedNetworkImageProvider(
+                                  photo,
+                                  maxWidth:
+                                      (FxSettingsLayout.avatarSize * 3).round(),
+                                )
+                                : null,
                         backgroundColor: BrandPalette.soft(
                           primary,
                           dark: chrome.isDark,
                         ),
-                        child: hasPhoto
-                            ? null
-                            : Text(
-                                aluno.nome.isNotEmpty
-                                    ? aluno.nome[0].toUpperCase()
-                                    : 'A',
-                                style: FxSettingsLayout.avatarInitials(
-                                  color: chrome.ink,
+                        child:
+                            hasPhoto
+                                ? null
+                                : Text(
+                                  aluno.nome.isNotEmpty
+                                      ? aluno.nome[0].toUpperCase()
+                                      : 'A',
+                                  style: FxSettingsLayout.avatarInitials(
+                                    color: chrome.ink,
+                                  ),
                                 ),
-                              ),
                       ),
                     ),
                   ),
@@ -111,17 +115,49 @@ class PerfilAlunoHubBody extends ConsumerWidget {
                   textAlign: TextAlign.center,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: FxSettingsLayout.profileName(context, color: chrome.ink),
+                  style: FxSettingsLayout.profileName(
+                    context,
+                    color: chrome.ink,
+                  ),
                 ),
                 // Com quem treina; o e-mail fica em Editar cadastro.
                 if (personal != null && personal.isNotEmpty) ...[
                   const SizedBox(height: TokensStrip.s1),
-                  Text(
-                    s.alunoPerfilTreinaCom(personal),
-                    textAlign: TextAlign.center,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: perfilAlunoSubtituloStyle(chrome),
+                  // Toque abre a conversa com o personal (aba Chat).
+                  Semantics(
+                    button: true,
+                    label: s.alunoPerfilConversarCom(personal),
+                    excludeSemantics: true,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(TokensStrip.rSm),
+                      onTap: () => context.go('/chat/aluno'),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: TokensStrip.s2,
+                          vertical: TokensStrip.s1,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Flexible(
+                              child: Text(
+                                s.alunoPerfilTreinaCom(personal),
+                                textAlign: TextAlign.center,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: perfilAlunoSubtituloStyle(chrome),
+                              ),
+                            ),
+                            const SizedBox(width: TokensStrip.s1),
+                            Icon(
+                              FxIcons.chevronDireitaPequeno,
+                              size: 14,
+                              color: chrome.mute,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                 ],
                 const SizedBox(height: TokensStrip.s4),
@@ -163,10 +199,11 @@ class PerfilAlunoHubBody extends ConsumerWidget {
                   mute: chrome.mute,
                   line: chrome.line,
                   showDivider: false,
-                  onTap: () => showPerfilLgpdConsentSheet(
-                    context,
-                    tipos: lgpdConsentTiposAluno,
-                  ),
+                  onTap:
+                      () => showPerfilLgpdConsentSheet(
+                        context,
+                        tipos: lgpdConsentTiposAluno,
+                      ),
                 ),
               ],
             ),
@@ -193,6 +230,17 @@ class PerfilAlunoHubBody extends ConsumerWidget {
           const SizedBox(height: FxSettingsLayout.groupGap),
           FxStaggerItem(
             index: 4,
+            child: PerfilAppearanceSection(isDark: chrome.isDark),
+          ),
+          const SizedBox(height: FxSettingsLayout.groupGap),
+          FxStaggerItem(
+            index: 5,
+            child: PerfilSobreGrupo(mute: chrome.mute, line: chrome.line),
+          ),
+          const SizedBox(height: FxSettingsLayout.groupGap),
+          // Sair e excluir no fim. Sair não apaga nada: sem vermelho, sem seta.
+          FxStaggerItem(
+            index: 6,
             child: FxSettingsGroup(
               children: [
                 FxSettingsTile(
@@ -201,7 +249,7 @@ class PerfilAlunoHubBody extends ConsumerWidget {
                   value: '',
                   mute: chrome.mute,
                   line: chrome.line,
-                  danger: true,
+                  accessory: const SizedBox.shrink(),
                   onTap: () => confirmAlunoLogout(context, ref),
                 ),
                 FxSettingsTile(

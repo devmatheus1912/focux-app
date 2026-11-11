@@ -28,7 +28,7 @@ import '../data/ia_repository.dart';
 import '../providers/progressao_sugestoes_provider.dart';
 import '../utils/progressao_aceitar_route_args.dart';
 import '../utils/progressao_copy.dart';
-import '../widgets/ia_progressao_loading_skeleton.dart';
+import '../widgets/ia_progressao_gerando.dart';
 import '../widgets/ia_progressao_pedido_card.dart';
 import '../widgets/ia_quota_upgrade.dart';
 import '../../../core/theme/fx_icons.dart';
@@ -52,6 +52,9 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
   final _openedAt = DateTime.now();
   var _objetivo = ProgressaoObjetivo.hipertrofia;
   bool _loading = false;
+
+  /// Sugestões registradas na última geração: mostra o ✓ antes da revisão.
+  int? _prontas;
   String? _erro;
   var _viewTracked = false;
 
@@ -173,6 +176,13 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
       if (!mounted) return;
       ref.invalidate(progressaoSugestoesProvider(widget.alunoId));
       if (r.sugestoesRegistradas > 0) {
+        setState(() => _prontas = r.sugestoesRegistradas);
+        await Future<void>.delayed(const Duration(milliseconds: 400));
+        if (!mounted) return;
+        setState(() {
+          _prontas = null;
+          _loading = false;
+        });
         _abrirAceitar();
       } else {
         setState(() => _erro = progressaoNadaParaAjustar);
@@ -264,9 +274,21 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
                               if (!_sinais.remove(s)) _sinais.add(s);
                             }),
                         enabled: !_loading,
+                        gerando:
+                            _loading
+                                ? IaProgressaoGerando(
+                                  pedido: progressaoPedidoLinha(
+                                    objetivo: _objetivo,
+                                    sinais: _sinais,
+                                    observacao: _observacoes.text,
+                                  ),
+                                  contexto: contexto.value,
+                                  prontas: _prontas,
+                                )
+                                : null,
                       ),
                       const SizedBox(height: TokensStrip.s3),
-                      if (semExecucao) ...[
+                      if (semExecucao && !_loading) ...[
                         Text(
                           progressaoSemExecucao,
                           style: FocuxHubTypography.bodyMuted(
@@ -275,10 +297,11 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
                         ),
                         const SizedBox(height: TokensStrip.s3),
                       ],
-                      IaSafetyDisclaimer(
-                        compact: true,
-                        customText: ptS.cargasNadaMudaSemAprovacao,
-                      ),
+                      if (!_loading)
+                        IaSafetyDisclaimer(
+                          compact: true,
+                          customText: ptS.cargasNadaMudaSemAprovacao,
+                        ),
                       if (_erro != null) ...[
                         const SizedBox(height: TokensStrip.s4),
                         FxErrorState(
@@ -288,7 +311,6 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
                           onRetry: _gerar,
                         ),
                       ],
-                      if (_loading) const IaProgressaoLoadingSkeleton(),
                     ],
                   ),
                 ),

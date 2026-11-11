@@ -70,6 +70,12 @@ class Aluno360TimelineCard extends StatelessWidget {
         color = TokensStrip.textSecondary;
         kind = 'Financeiro';
         break;
+      case 'RETOMADA':
+        // Aviso automático para quem parou (Automações).
+        icon = FxIcons.notificacao;
+        color = TokensStrip.textSecondary;
+        kind = 'Aviso';
+        break;
       default:
         if (tipo.startsWith('CHAT_')) {
           icon = FxIcons.chat;

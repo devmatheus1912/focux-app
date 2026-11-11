@@ -20,6 +20,7 @@ import '../../../core/widgets/fx_wizard_chrome.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
@@ -71,9 +72,7 @@ class _OnboardingWizardScreenState
   Future<void> _load({bool silent = false}) async {
     final cachedRaw = OnboardingWizardClientCache.getIfFresh();
     final cached =
-        cachedRaw == null
-            ? null
-            : normalizeOnboardingWizard(cachedRaw);
+        cachedRaw == null ? null : normalizeOnboardingWizard(cachedRaw);
     final keepFold = silent && _wizard != null;
     if (!keepFold) {
       if (cached != null) {
@@ -150,9 +149,7 @@ class _OnboardingWizardScreenState
     unawaited(
       AnalyticsService.instance.track(
         ProductEvents.setupWizardTtv,
-        props: {
-          'ms': DateTime.now().difference(_openedAt).inMilliseconds,
-        },
+        props: {'ms': DateTime.now().difference(_openedAt).inMilliseconds},
       ),
     );
   }
@@ -206,31 +203,39 @@ class _OnboardingWizardScreenState
     return FxWizardPopGuard(
       onLeave: _sairSemConcluir,
       child: fxScreenA11yScope(
-      label: 'Primeiros passos, configuração inicial',
-      child: FxShellScaffold(
-        useMesh: true,
-        appBar: FxShellAppBar(
-          title: 'Primeiros passos',
-          subtitle:
-              wizard == null
-                  ? null
-                  : wizardEtapaLabel(
-                    completedCount: wizard.completedCount,
-                    totalCount: wizard.totalCount,
-                    allDone: _allDone,
-                  ),
-          leadingWidth: 108,
-          leading: FxTonalButton(label: wizardFazerDepoisLabel(), onPressed: _sairSemConcluir, compact: true),
-          actions: [
-            FxHelpIconButton(
-              tooltip: wizardHelpTitle(),
-              onTap: _abrirAjuda,
-            ),
-          ],
-        ),
-        bottomNavigationBar:
-            ready
-                ? FxWizardStickyBar(
+        label: 'Primeiros passos, configuração inicial',
+        child: FxShellScaffold(
+          useMesh: true,
+          appBar: FxShellAppBar(
+            title: 'Primeiros passos',
+            subtitle:
+                wizard == null
+                    ? null
+                    : wizardEtapaLabel(
+                      completedCount: wizard.completedCount,
+                      totalCount: wizard.totalCount,
+                      allDone: _allDone,
+                    ),
+            // Concluído: sem "Agora não" (não há o que adiar); a seta sai sem
+            // concluir, e "Concluir" fica no rodapé.
+            leadingWidth: _allDone ? null : 108,
+            leading:
+                _allDone
+                    ? null
+                    : FxTonalButton(
+                      label: wizardFazerDepoisLabel(),
+                      onPressed: _sairSemConcluir,
+                      compact: true,
+                    ),
+            showBack: _allDone ? true : null,
+            onBack: _allDone ? _sairSemConcluir : null,
+            actions: [
+              FxHelpIconButton(tooltip: wizardHelpTitle(), onTap: _abrirAjuda),
+            ],
+          ),
+          bottomNavigationBar:
+              ready
+                  ? FxWizardStickyBar(
                     primary: FxLiquidPrimaryButton(
                       label: wizardStickyLabel(
                         allDone: _allDone,
@@ -247,61 +252,59 @@ class _OnboardingWizardScreenState
                               ),
                     ),
                   )
-                : null,
-        body:
-            _loading && wizard == null
-                ? const SkeletonList(count: 5)
-                : _erro != null && wizard == null
-                ? FxErrorState(
-                  chromeOnDark: chrome.isDark,
-                  primary: primary,
-                  message: _erro!,
-                  onRetry: () => _load(),
-                )
-                : wizard == null
-                ? FxEmptyState(
-                  icon: FxIcons.ia,
-                  title: 'Setup ainda não disponível',
-                  subtitle: 'Não encontramos os passos iniciais agora.',
-                  action: FxEmptyAction(
-                    label: 'Tentar novamente',
-                    onTap: () => _load(),
-                  ),
-                )
-                : RefreshIndicator(
-                  onRefresh: _refresh,
-                  child: FxContentWidthLimiter(
-                    child: ListView(
-                      padding: const EdgeInsets.fromLTRB(
-                        FxSettingsLayout.pageInset,
-                        FxSettingsLayout.headerToGroup,
-                        FxSettingsLayout.pageInset,
-                        TokensStrip.s5,
+                  : null,
+          body:
+              _loading && wizard == null
+                  ? const SkeletonList(count: 5)
+                  : _erro != null && wizard == null
+                  ? FxErrorState(
+                    chromeOnDark: chrome.isDark,
+                    primary: primary,
+                    message: _erro!,
+                    onRetry: () => _load(),
+                  )
+                  : wizard == null
+                  ? FxEmptyState(
+                    icon: FxIcons.ia,
+                    title: 'Setup ainda não disponível',
+                    subtitle: 'Não encontramos os passos iniciais agora.',
+                    action: FxEmptyAction(
+                      label: 'Tentar novamente',
+                      onTap: () => _load(),
+                    ),
+                  )
+                  : RefreshIndicator(
+                    onRefresh: _refresh,
+                    child: FxContentWidthLimiter(
+                      child: ListView(
+                        padding: const EdgeInsets.fromLTRB(
+                          FxSettingsLayout.pageInset,
+                          FxSettingsLayout.headerToGroup,
+                          FxSettingsLayout.pageInset,
+                          TokensStrip.s5,
+                        ),
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: _buildCurrentStep(wizard, chrome),
                       ),
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      children: _buildCurrentStep(wizard, chrome),
                     ),
                   ),
-                ),
-      ),
+        ),
       ),
     );
   }
 
-  List<Widget> _buildCurrentStep(
-    OnboardingWizard wizard,
-    ShellPalette chrome,
-  ) {
+  List<Widget> _buildCurrentStep(OnboardingWizard wizard, ShellPalette chrome) {
     final primary = Theme.of(context).colorScheme.primary;
+    if (_allDone) return _buildConcluido(wizard, chrome);
     final atual = wizard.steps.where((s) => !s.completed).firstOrNull;
     return [
       Text(
-        _allDone ? wizardDoneTitle() : wizardIntroTitle(),
+        wizardIntroTitle(),
         style: FocuxHubTypography.pageTitle(context, color: chrome.ink),
       ),
       const SizedBox(height: TokensStrip.s1),
       Text(
-        _allDone ? wizardDoneBody() : wizardIntroBody(),
+        wizardIntroBody(),
         style: FocuxHubTypography.bodyMuted(color: chrome.mute),
       ),
       const SizedBox(height: TokensStrip.s4),
@@ -351,6 +354,93 @@ class _OnboardingWizardScreenState
             ],
           ),
         ),
+    ];
+  }
+
+  /// Fim da ativação: bloco de marca com o ✓, os passos feitos em lista
+  /// simples (não são botões) e o que vem depois.
+  List<Widget> _buildConcluido(OnboardingWizard wizard, ShellPalette chrome) {
+    final sobre = fxPaletaSobreMarca(context);
+    final reduzir = TokensStrip.prefersReducedMotion(context);
+    return [
+      FxStripCard(
+        marca: true,
+        semanticsLabel: '${wizardDoneTitle()}. ${wizardDoneBody()}',
+        child: Row(
+          children: [
+            TweenAnimationBuilder<double>(
+              tween: Tween(begin: reduzir ? 1 : 0.8, end: 1),
+              duration:
+                  reduzir ? Duration.zero : const Duration(milliseconds: 360),
+              curve: Curves.easeOutBack,
+              builder:
+                  (_, escala, child) =>
+                      Transform.scale(scale: escala, child: child),
+              child: Icon(FxIcons.concluido, color: sobre.ink, size: 40),
+            ),
+            const SizedBox(width: TokensStrip.s3),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    wizardDoneTitle(),
+                    style: FocuxHubTypography.sectionTitle(
+                      context,
+                      color: sobre.ink,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    wizardDoneBody(),
+                    style: FocuxHubTypography.bodyMuted(color: sobre.mute),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+      const SizedBox(height: FxSettingsLayout.groupGap),
+      // Lista simples, sem cartão: os passos feitos não são botões.
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (final (i, step) in wizard.steps.indexed)
+            Container(
+              constraints: const BoxConstraints(
+                minHeight: FxSettingsLayout.rowMinHeight,
+              ),
+              decoration: BoxDecoration(
+                border:
+                    i < wizard.steps.length - 1
+                        ? Border(bottom: BorderSide(color: chrome.line))
+                        : null,
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    FxIcons.check,
+                    color: Theme.of(context).colorScheme.primary,
+                    size: FxSettingsLayout.iconSize,
+                  ),
+                  const SizedBox(width: FxSettingsLayout.iconGap),
+                  Expanded(
+                    child: Text(
+                      step.title,
+                      style: FxSettingsLayout.rowLabel(color: chrome.ink),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+      const SizedBox(height: TokensStrip.s3),
+      Text(
+        wizardProximoPasso(),
+        style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+      ),
     ];
   }
 }

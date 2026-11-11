@@ -54,6 +54,7 @@ class PerfilProgressoBloco extends ConsumerWidget {
               if (evolucao.value case final dados?)
                 EvolucaoMiniAneis(
                   semMoldura: true,
+                  resumoDoAluno: true,
                   aneis: dados.aneis,
                   metaNome: nomeDaMetaPrincipal(dados.metas),
                   doPersonal: false,

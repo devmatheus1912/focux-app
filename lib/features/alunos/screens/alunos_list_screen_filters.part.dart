@@ -75,6 +75,7 @@ extension AlunosListScreenFilters on _AlunosListScreenState {
               FxSettingsGroup(
                 header: 'Ordenação',
                 edgeToEdgeRows: true,
+                semMoldura: true,
                 accent: primary,
                 children: FxInsetPickerOption.list(
                   accent: brand,

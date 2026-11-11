@@ -25,7 +25,7 @@ void main() {
         contains('ref.invalidate'),
       ),
     );
-    expect(screen, contains('alunosHomeProvider'));
+    expect(screen, contains('alunosParaConversaProvider'));
     expect(screen, contains('SkeletonList'));
     expect(screen, isNot(contains('Center(child: FxLoading')));
     expect(screen, contains('RefreshIndicator'));

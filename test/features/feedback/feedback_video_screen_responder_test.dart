@@ -108,11 +108,14 @@ void main() {
     expect(find.text('Novo feedback'), findsNothing);
     await tester.tap(find.textContaining('Puxada').first);
     await _settle(tester);
-    expect(find.textContaining('Assistir'), findsOneWidget);
-    expect(find.text('Recado do aluno'), findsOneWidget);
+    expect(find.textContaining('Enviado em'), findsOneWidget);
+    expect(find.textContaining('Recado do aluno'), findsOneWidget);
     expect(find.text('senti a lombar'), findsOneWidget);
     await tester.enterText(find.byType(TextField).last, 'Desça devagar');
-    await tester.tap(find.text('Enviar ao aluno'));
+    await tester.pump();
+    await tester.ensureVisible(find.text('Enviar ao aluno'));
+    await tester.pump();
+    await tester.tap(find.text('Enviar ao aluno'), warnIfMissed: false);
     await _settle(tester);
 
     expect(adapter.chamadas, contains('PUT /api/feedback-videos/1/resposta'));

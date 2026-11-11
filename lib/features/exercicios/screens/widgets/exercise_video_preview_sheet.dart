@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:video_player/video_player.dart';
+
+import '../../../../core/widgets/fx_video_rede.dart';
 
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/theme/focux_hub_typography.dart';
@@ -300,59 +301,10 @@ class ExerciseVideoPreviewSheet extends StatefulWidget {
 }
 
 class _ExerciseVideoPreviewSheetState extends State<ExerciseVideoPreviewSheet> {
-  VideoPlayerController? _controller;
-  bool _ready = false;
-  bool _failed = false;
-  int _attempt = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadPreview();
-  }
-
-  Future<void> _loadPreview() async {
-    final controller = VideoPlayerController.networkUrl(
-      Uri.parse(_cloudinaryH264VideoUrl(widget.url)),
-    );
-    _controller = controller;
-    if (mounted) {
-      setState(() {
-        _ready = false;
-        _failed = false;
-      });
-    }
-
-    try {
-      await controller.initialize();
-      if (!mounted || _controller != controller) return;
-      setState(() => _ready = true);
-      await controller.play();
-    } catch (_) {
-      await controller.dispose();
-      if (!mounted || _controller != controller) return;
-      _controller = null;
-      if (_attempt < 8) {
-        _attempt += 1;
-        await Future<void>.delayed(Duration(seconds: 2 + _attempt));
-        if (mounted) await _loadPreview();
-        return;
-      }
-      if (mounted) setState(() => _failed = true);
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller?.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
     return FxHomeSheetSurface(
       isDark: isDark,
@@ -377,44 +329,7 @@ class _ExerciseVideoPreviewSheetState extends State<ExerciseVideoPreviewSheet> {
             ),
           ),
           const SizedBox(height: 12),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            clipBehavior: Clip.hardEdge,
-            child: AspectRatio(
-              aspectRatio: 16 / 9,
-              child: ColoredBox(
-                color: isDark
-                    ? TokensStrip.cinematicSurface
-                    : TokensStrip.cardBg,
-                child:
-                    _failed
-                        ? Center(
-                          child: Text(
-                            'Prévia indisponível agora.',
-                            style: FocuxHubTypography.bodyMuted(color: mute),
-                          ),
-                        )
-                        : _ready && _controller != null
-                        ? FittedBox(
-                          fit: BoxFit.cover,
-                          clipBehavior: Clip.hardEdge,
-                          child: SizedBox(
-                            width: _controller!.value.size.width,
-                            height: _controller!.value.size.height,
-                            child: VideoPlayer(_controller!),
-                          ),
-                        )
-                        : Center(
-                          child: FxLoading(
-                            size: 28,
-                            color: isDark
-                                ? Colors.white
-                                : TokensStrip.textPrimary,
-                          ),
-                        ),
-              ),
-            ),
-          ),
+          FxVideoRede(url: widget.url, autoplay: true),
           const SizedBox(height: 8),
           if (widget.rodape != null) ...[
             const SizedBox(height: 4),
@@ -424,16 +339,4 @@ class _ExerciseVideoPreviewSheetState extends State<ExerciseVideoPreviewSheet> {
       ),
     );
   }
-}
-
-String _cloudinaryH264VideoUrl(String rawUrl) {
-  const marker = '/video/upload/';
-  if (!rawUrl.contains(marker)) return rawUrl;
-  final delivery = rawUrl.substring(rawUrl.indexOf(marker) + marker.length);
-  if (delivery.startsWith('f_mp4') ||
-      delivery.startsWith('vc_h264') ||
-      delivery.startsWith('vc_auto')) {
-    return rawUrl;
-  }
-  return rawUrl.replaceFirst(marker, '${marker}f_mp4,vc_h264/');
 }

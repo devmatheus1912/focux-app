@@ -110,10 +110,6 @@ Widget _app(_Adapter adapter) {
             (_, s) => Scaffold(body: Text('CHAT ${s.pathParameters['id']}')),
       ),
       GoRoute(
-        path: '/winback',
-        builder: (_, _) => const Scaffold(body: Text('WINBACK')),
-      ),
-      GoRoute(
         path: '/dunning',
         builder: (_, _) => const Scaffold(body: Text('DUNNING')),
       ),
@@ -243,16 +239,14 @@ void main() {
     expect(find.text('Cobrar'), findsNothing);
   });
 
-  testWidgets('Histórico e Cobrança ficam no menu do topo', (tester) async {
+  testWidgets('menu do topo não tem mais o histórico de retomada', (tester) async {
     telaAlta(tester);
     await tester.pumpWidget(_app(_Adapter(alunos: _cinco, alto: 5)));
     await _settle(tester);
-    expect(find.text('Histórico de retomada'), findsNothing);
     await tester.tap(find.byTooltip('Mais ações'));
     await _settle(tester);
-    await tester.tap(find.text('Histórico de retomada'));
-    await _settle(tester);
-    expect(find.text('WINBACK'), findsOneWidget);
+    // O aviso para quem parou mora em Automações.
+    expect(find.text('Histórico de retomada'), findsNothing);
   });
 
   for (final tela in kDynamicTypeTelas) {

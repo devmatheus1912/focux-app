@@ -18,7 +18,6 @@ import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno360_evolucao_inteligente_logic.dart';
 import 'aluno_outreach_message_sheet.dart';
-import '../../../core/widgets/fx_tonal_button.dart';
 
 class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
   const Aluno360EvolucaoInteligenteCard({
@@ -27,7 +26,6 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
     required this.alunoNome,
     required this.evolucaoAsync,
     required this.isDark,
-    this.onOpenCopilot,
     this.timelineHasSignals = false,
     this.hasRadarP0 = false,
   });
@@ -36,7 +34,6 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
   final String alunoNome;
   final AsyncValue<EvolucaoInteligente> evolucaoAsync;
   final bool isDark;
-  final VoidCallback? onOpenCopilot;
   final bool timelineHasSignals;
   final bool hasRadarP0;
 
@@ -92,13 +89,6 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
       return sinal;
     }
     return '$sinal · ${pct > 0 ? '+' : ''}$pct%';
-  }
-
-  /// "Sugestão: manter plano ou microajustar volume."
-  static String sugestaoTexto(String acao) {
-    final a = acao.trim();
-    if (a.isEmpty) return a;
-    return 'Sugestão: ${a[0].toLowerCase()}${a.substring(1)}';
   }
 
   static String? _ultimoPrValue(EvolucaoInteligente ev) {
@@ -300,26 +290,6 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                                   mute: mute,
                                   volumeLabel: formatAlunoVolumeKg(
                                     ev.volumeSemanal,
-                                  ),
-                                ),
-                              ],
-                              if (ev.proximaAcao.trim().isNotEmpty) ...[
-                                const SizedBox(height: TokensStrip.s3),
-                                Text(
-                                  sugestaoTexto(ev.proximaAcao),
-                                  style: FocuxHubTypography.bodyMuted(
-                                    color: mute,
-                                  ),
-                                ),
-                              ],
-                              if (ev.sugerirCopiloto &&
-                                  onOpenCopilot != null) ...[
-                                Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: FxTonalButton(
-                                    label: 'Abrir Copiloto',
-                                    onPressed: onOpenCopilot,
-                                    compact: true,
                                   ),
                                 ),
                               ],

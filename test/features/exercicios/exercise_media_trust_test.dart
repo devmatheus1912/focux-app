@@ -73,8 +73,8 @@ void main() {
         File(
           'lib/features/exercicios/screens/widgets/exercise_video_preview_sheet.dart',
         ).readAsStringSync();
-    expect(preview, contains('VideoPlayer(_controller!)'));
-    expect(preview, contains('FittedBox'));
+    // O player real é o comum (FxVideoRede), não um stub.
+    expect(preview, contains('FxVideoRede('));
     expect(preview, contains('FxHomeSheetSurface'));
     expect(preview, isNot(contains('Demo oficial em breve')));
     expect(preview, isNot(contains('ExerciseLibraryDemoStandbySheet')));

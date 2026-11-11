@@ -48,3 +48,50 @@ List<NpsItem> npsItemsForFiltro(List<NpsItem> items, String? filtro) {
   }
   return items;
 }
+
+/// Abaixo disso o NPS oscila com uma nota só: o topo mostra o progresso.
+const npsRespostasMinimas = 5;
+
+bool npsBasePequena(int total) => total < npsRespostasMinimas;
+
+/// NPS é inteiro de −100 a 100 ("100", "−20"), sem casa decimal.
+String npsScoreTexto(double score) {
+  final n = score.round();
+  return n < 0 ? '−${-n}' : '$n';
+}
+
+String npsFaltamTexto(int total) {
+  final faltam = npsRespostasMinimas - total;
+  if (faltam <= 0) return '';
+  return faltam == 1
+      ? 'Falta 1. As respostas já aparecem abaixo.'
+      : 'Faltam $faltam. As respostas já aparecem abaixo.';
+}
+
+String npsRespostasLabel(int n) => n == 1 ? '1 resposta' : '$n respostas';
+
+String npsTituloTopo(int detratores) => switch (detratores) {
+  0 => 'Nenhum detrator',
+  1 => '1 detrator para contato',
+  _ => '$detratores detratores para contato',
+};
+
+const npsDesdeOInicio = 'Todas as respostas desde o início';
+
+/// Média sem ",0" quando é inteira ("10", "8,5").
+String npsMediaTexto(double media) {
+  final arred = (media * 10).round() / 10;
+  if (arred == arred.roundToDouble()) return '${arred.round()}';
+  return arred.toStringAsFixed(1).replaceAll('.', ',');
+}
+
+/// Filtros só ajudam com mais de 3 respostas.
+bool npsMostraFiltros(int total) => total > 3;
+
+enum NpsClasse { promotor, neutro, detrator }
+
+NpsClasse npsClasseDe(int score) {
+  if (score >= 9) return NpsClasse.promotor;
+  if (score >= 7) return NpsClasse.neutro;
+  return NpsClasse.detrator;
+}

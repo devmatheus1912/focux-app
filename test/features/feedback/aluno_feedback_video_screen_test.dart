@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/core/widgets/fx_video_rede.dart';
 import 'package:focux_app/core/api/pagina.dart';
 import 'package:focux_app/features/feedback/data/feedback_video_repository.dart';
 import 'package:focux_app/features/feedback/screens/aluno_feedback_video_screen.dart';
@@ -35,6 +36,7 @@ class _FakeRepo implements FeedbackVideoRepository {
     required String filename,
     String? path,
     List<int>? bytes,
+    void Function(double fracao)? onProgress,
   }) async {
     subiuArquivo = filename;
     return 'https://cdn.example.com/v.mp4';
@@ -133,7 +135,7 @@ void main() {
 
     expect(find.text('Desça a barra mais devagar.'), findsOneWidget);
     expect(find.text('Senti o ombro'), findsOneWidget);
-    expect(find.text('Assistir meu vídeo'), findsOneWidget);
+    expect(find.byType(FxVideoRede), findsOneWidget);
   });
 
   testWidgets('enviar: exercício, galeria, recado e entra na lista', (

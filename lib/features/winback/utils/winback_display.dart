@@ -1,3 +1,4 @@
+import '../data/winback_repository.dart';
 import '../../../core/utils/fx_utils.dart';
 
 String winbackAlunoLabel(String? nome) {
@@ -9,13 +10,13 @@ String winbackAlunoLabel(String? nome) {
 String winbackTipoLabel(String? tipo) {
   switch ((tipo ?? '').trim().toUpperCase()) {
     case 'ALUNO_INATIVO_7D':
-      return 'Inativo 7 dias';
+      return '7 dias sem treino';
     case 'ALUNO_INATIVO_30D':
-      return 'Inativo 30 dias';
+      return '30 dias sem treino';
     case 'ALUNO_INATIVO_60D':
-      return 'Inativo 60 dias';
+      return '60 dias sem treino';
     case '':
-      return 'Envio automático';
+      return 'Aviso para quem parou';
     default:
       return tipo!.trim().replaceAll('_', ' ');
   }
@@ -27,13 +28,14 @@ String winbackWhenLabel(String enviadoEm, {DateTime? now}) {
 }
 
 /// `null` quando o push chegou ao provedor (ou log antigo sem status).
-String? winbackEntregaFalhaLabel(String? status) =>
-    switch ((status ?? '').trim().toUpperCase()) {
-      'SEM_TOKEN' => 'Não entregue: aluno sem notificações ativas',
-      'FALHOU' => 'Não entregue: o envio falhou',
-      'DESLIGADO' => 'Não entregue: push desligado no servidor',
-      _ => null,
-    };
+String? winbackEntregaFalhaLabel(String? status) => switch ((status ?? '')
+    .trim()
+    .toUpperCase()) {
+  'SEM_TOKEN' => 'Não entregue: aluno sem notificações ativas',
+  'FALHOU' => 'Não entregue: o envio falhou',
+  'DESLIGADO' => 'Não entregue: push desligado no servidor',
+  _ => null,
+};
 
 String winbackSubtitle({
   required String? tipo,
@@ -48,25 +50,16 @@ String winbackSubtitle({
   return '$tipoLabel · $msg';
 }
 
-const winbackComoCalculamos =
-    'Push no 30º e 60º dia sem treino, nos planos com automações. O lembrete da primeira semana sai pela rotina de engajamento, sem repetir aqui. Quem não tem o app ou desligou as notificações não recebe, e o envio aparece como não entregue.';
+const retomadaTitulo = 'Aviso para quem parou';
 
-String winbackCountLabel(int count) {
-  if (count <= 0) return 'Nenhum envio';
-  if (count == 1) return '1 envio';
-  return '$count envios';
-}
+const retomadaVazio =
+    'Nenhum aviso enviado. Quando um aluno passar 30 dias sem treinar, o aviso sai às 10h.';
 
-String winbackSearchEmptyTitle(String query) =>
-    query.trim().isEmpty ? 'Nenhum envio ainda' : 'Nenhum envio encontrado';
-
-String winbackSearchEmptySubtitle(String query) => query.trim().isEmpty
-    ? 'Quando a automação disparar, os registros aparecem aqui.'
-    : 'Nada com esse nome neste log.';
-
-String winbackHubSubtitle(String? freshness) {
-  const base = 'Log dos pushes automáticos';
-  final stamp = freshness?.trim();
-  if (stamp == null || stamp.isEmpty) return base;
-  return '$base · $stamp';
+/// "Ligado · 30 e 60 dias sem treino", "Desligado", "Ligado · texto seu".
+String retomadaSubtituloDaLinha(RetomadaConfig? config) {
+  if (config == null) return '30 e 60 dias sem treino · Push do Focux';
+  if (!config.ativo) return 'Desligado';
+  return config.textoProprio
+      ? 'Ligado · texto seu'
+      : 'Ligado · 30 e 60 dias sem treino';
 }

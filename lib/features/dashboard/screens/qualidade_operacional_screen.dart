@@ -62,10 +62,7 @@ class _QualidadeOperacionalScreenState
     unawaited(
       AnalyticsService.instance.track(
         ProductEvents.relatoriosHubViewed,
-        props: {
-          'surface': 'qualidade',
-          'score': data.score,
-        },
+        props: {'surface': 'qualidade', 'score': data.score},
       ),
     );
     unawaited(
@@ -116,7 +113,10 @@ class _QualidadeOperacionalScreenState
                   title: ptS.qualidadeQualidade,
                   subtitle: ptS.qualidadeComoSuaOperacaoSeCompara,
                   tips: [
-                    FxHelpTip(ptS.alunoHomeAjudaCalculoTitulo, qualidadeComoCalculamos),
+                    FxHelpTip(
+                      ptS.alunoHomeAjudaCalculoTitulo,
+                      qualidadeComoCalculamos,
+                    ),
                     FxHelpTip(
                       ptS.qualidadeIndice,
                       ptS.qualidadeCalculadoNaHoraComSeus,
@@ -235,6 +235,8 @@ class _QualidadeBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final basePequena = qualidadeBasePequena(alunosAtivos);
+    final ativos = alunosAtivos ?? 0;
+    final acoes = qualidadeAcoes(data);
     final sobre = fxPaletaSobreMarca(context);
     final ticketUnavailable = qualidadeTicketUnavailable(data.ticketPessoal);
     final ticketHint = qualidadeTicketHint(
@@ -251,20 +253,42 @@ class _QualidadeBody extends StatelessWidget {
       children: [
         FxStripCard(
           marca: true,
+          // Base pequena: sem nota (oscila com um aluno só); o anel mostra
+          // quanto falta para ela aparecer.
           semanticsLabel:
-              ptS.qualidadeIndiceDe100(data.score, qualidadeScoreLabel(data.score)),
+              basePequena
+                  ? ptS.qualidadeAnelProgressoA11y(
+                    ativos,
+                    qualidadeAlunosMinimos,
+                  )
+                  : ptS.qualidadeIndiceDe100(
+                    data.score,
+                    qualidadeScoreLabel(data.score),
+                  ),
           child: Row(
             children: [
               FxAnel(
-                fracao: data.score / 100,
+                fracao:
+                    basePequena
+                        ? ativos / qualidadeAlunosMinimos
+                        : data.score / 100,
                 cor: sobre.ink,
                 fundo: sobre.ink.withValues(alpha: 0.2),
                 child: Text(
-                  '${data.score}',
-                  style: FocuxHubTypography.metric(
-                    color: sobre.ink,
-                    fontSize: TokensStrip.fontTitulo,
-                  ),
+                  basePequena
+                      ? ptS.qualidadeAnelProgresso(
+                        ativos,
+                        qualidadeAlunosMinimos,
+                      )
+                      : '${data.score}',
+                  textAlign: TextAlign.center,
+                  style:
+                      basePequena
+                          ? FocuxHubTypography.cardTitle(color: sobre.ink)
+                          : FocuxHubTypography.metric(
+                            color: sobre.ink,
+                            fontSize: TokensStrip.fontTitulo,
+                          ),
                 ),
               ),
               const SizedBox(width: TokensStrip.s4),
@@ -279,13 +303,17 @@ class _QualidadeBody extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       basePequena
-                          ? ptS.qualidadePoucosAlunosParaMedirBem
+                          ? ptS.qualidadeNotaComAlunos(qualidadeAlunosMinimos)
                           : qualidadeScoreLabel(data.score),
                       style: FocuxHubTypography.cardTitle(color: sobre.ink),
                     ),
                     const SizedBox(height: TokensStrip.s1),
                     Text(
-                      qualidadeRecomendacaoDisplay(data),
+                      basePequena
+                          ? qualidadeFaltamTexto(
+                            qualidadeAlunosFaltando(alunosAtivos),
+                          )
+                          : qualidadeRecomendacaoDisplay(data),
                       style: FocuxHubTypography.bodyMuted(color: sobre.mute),
                     ),
                   ],
@@ -325,20 +353,21 @@ class _QualidadeBody extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: TokensStrip.s3),
-        FxActionRow(
-          titulo: ptS.qualidadeRevisarMensalidades,
-          motivo: ticketHint,
-          verbo: ptS.aluno360EvolucaoAjustarTreinoVerbo,
-          onTap: () => context.push('/financeiro'),
-        ),
-        const SizedBox(height: TokensStrip.s2),
-        FxActionRow(
-          titulo: ptS.winbackVerEmRisco,
-          motivo: retencaoHint,
-          verbo: ptS.aluno360EvolucaoAjustarTreinoVerbo,
-          onTap: () => context.push('/retencao'),
-        ),
+        for (final (i, acao) in acoes.indexed) ...[
+          SizedBox(height: i == 0 ? TokensStrip.s3 : TokensStrip.s2),
+          FxActionRow(
+            titulo: acao.titulo,
+            motivo: acao.motivo,
+            verbo: ptS.qualidadeVerboAbrir,
+            // Só a primeira ação é cheia: duas iguais competiam.
+            forte: i == 0,
+            onTap:
+                () => context.push(switch (acao.rota) {
+                  QualidadeAcaoRota.financeiro => '/financeiro',
+                  QualidadeAcaoRota.retencao => '/retencao',
+                }),
+          ),
+        ],
       ],
     );
   }

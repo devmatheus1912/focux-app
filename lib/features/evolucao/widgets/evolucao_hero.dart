@@ -11,7 +11,10 @@ import '../data/evolucao_repository.dart';
 import '../utils/evolucao_aneis.dart';
 import '../../../core/theme/fx_icons.dart';
 
-List<AnelConcentrico> _aneisDe(List<LeituraDoAnel> leituras, List<Color> cores) => [
+List<AnelConcentrico> _aneisDe(
+  List<LeituraDoAnel> leituras,
+  List<Color> cores,
+) => [
   for (final (i, l) in leituras.indexed)
     AnelConcentrico(fracao: l.fracao, cor: cores[i]),
 ];
@@ -65,47 +68,51 @@ class EvolucaoHero extends StatelessWidget {
           ),
           curve: Curves.easeOutCubic,
           alignment: Alignment.topCenter,
-          child: recolhido
-              ? Row(
-                children: [
-                  for (final (i, l) in leituras.indexed)
-                    Expanded(child: _Valor(leitura: l, cor: cores[i])),
-                ],
-              )
-              : Column(
-                children: [
-                  Row(
+          child:
+              recolhido
+                  ? Row(
                     children: [
-                      FxAneisConcentricos(
-                        aneis: _aneisDe(leituras, cores),
-                        resumo: _resumo(leituras),
+                      for (final (i, l) in leituras.indexed)
+                        Expanded(child: _Valor(leitura: l, cor: cores[i])),
+                    ],
+                  )
+                  : Column(
+                    children: [
+                      Row(
+                        children: [
+                          FxAneisConcentricos(
+                            aneis: _aneisDe(leituras, cores),
+                            resumo: _resumo(leituras),
+                          ),
+                          const SizedBox(width: TokensStrip.s4),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                for (final (i, l) in leituras.indexed)
+                                  _Legenda(
+                                    leitura: l,
+                                    cor: cores[i],
+                                    onTap:
+                                        i == 1 && l.vazio
+                                            ? onDefinirMeta
+                                            : null,
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: TokensStrip.s4),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            for (final (i, l) in leituras.indexed)
-                              _Legenda(
-                                leitura: l,
-                                cor: cores[i],
-                                onTap: i == 1 && l.vazio ? onDefinirMeta : null,
-                              ),
-                          ],
+                      if (frase case final frase?) ...[
+                        const SizedBox(height: TokensStrip.s3),
+                        Text(
+                          frase,
+                          textAlign: TextAlign.center,
+                          style: FocuxHubTypography.body(color: sobre.ink),
                         ),
-                      ),
+                      ],
                     ],
                   ),
-                  if (frase case final frase?) ...[
-                    const SizedBox(height: TokensStrip.s3),
-                    Text(
-                      frase,
-                      textAlign: TextAlign.center,
-                      style: FocuxHubTypography.body(color: sobre.ink),
-                    ),
-                  ],
-                ],
-              ),
         ),
       ),
     );
@@ -194,7 +201,9 @@ class _Legenda extends StatelessWidget {
                             '${leitura.valor} ›',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: FocuxHubTypography.cardTitle(color: sobre.ink),
+                            style: FocuxHubTypography.cardTitle(
+                              color: sobre.ink,
+                            ),
                           ),
                         ),
                       ),
@@ -259,10 +268,15 @@ class EvolucaoMiniAneis extends StatelessWidget {
     this.pesoRotulo,
     this.metaNome,
     this.semMoldura = false,
+    this.resumoDoAluno = false,
   });
 
   /// Dentro de um grupo que já é cartão (Perfil): sem a moldura própria.
   final bool semMoldura;
+
+  /// Perfil do aluno: a semana de treino vira a frase principal, sem rótulo,
+  /// e a meta vazia ("Sem meta") some em vez de virar dado.
+  final bool resumoDoAluno;
 
   final EvolucaoAneis aneis;
   final bool doPersonal;
@@ -306,15 +320,40 @@ class EvolucaoMiniAneis extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      for (final l in leituras)
-                        Text(
-                          '${l.rotulo}: ${l.valor}',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: FocuxHubTypography.bodyMuted(
-                            color: scheme.onSurface,
+                      for (final (i, l) in leituras.indexed)
+                        if (resumoDoAluno && i == 0)
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              bottom: TokensStrip.s1,
+                            ),
+                            child: Text(
+                              aneis.treinoPrevistos == null
+                                  ? '${l.rotulo}: ${l.valor}'
+                                  : ptS.evolucaoAnelTreinoFrase(
+                                    '${aneis.treinoFeitos}',
+                                    '${aneis.treinoPrevistos}',
+                                  ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: FocuxHubTypography.cardTitle(
+                                color: scheme.onSurface,
+                              ),
+                            ),
+                          )
+                        else if (!(resumoDoAluno &&
+                            l.rotulo == ptS.evolucaoAnelMeta &&
+                            l.vazio))
+                          Text(
+                            '${l.rotulo}: ${l.valor}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: FocuxHubTypography.bodyMuted(
+                              color:
+                                  resumoDoAluno
+                                      ? scheme.onSurfaceVariant
+                                      : scheme.onSurface,
+                            ),
                           ),
-                        ),
                       if (pesoLinha case final peso?)
                         Text(
                           '${pesoRotulo ?? ptS.evolucaoMetricaPeso}: $peso',

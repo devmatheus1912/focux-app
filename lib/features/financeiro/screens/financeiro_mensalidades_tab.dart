@@ -83,6 +83,23 @@ class FinanceiroMensalidadesTab extends ConsumerStatefulWidget {
 class _FinanceiroMensalidadesTabState
     extends ConsumerState<FinanceiroMensalidadesTab> {
   List<Mensalidade> _homeItems = [];
+
+  /// Visão de um aluno: todas as cobranças dele, para o resumo somar tudo e
+  /// não só as páginas carregadas. `null` enquanto não chega (ou se falhar).
+  List<Mensalidade>? _todasDoAluno;
+
+  Future<void> _carregarTodasDoAluno() async {
+    final alunoId = widget.initialAlunoId;
+    if (alunoId == null) return;
+    try {
+      final todas = await FinanceiroRepository(
+        ref.read(apiClientProvider),
+      ).listarPorAluno(alunoId, size: 200);
+      if (mounted) setState(() => _todasDoAluno = todas);
+    } catch (_) {
+      // Sem a lista completa o resumo usa o que carregou, com o aviso.
+    }
+  }
   List<Mensalidade> _items = [];
   var _page = 0;
   var _homePage = 0;
@@ -232,6 +249,7 @@ class _FinanceiroMensalidadesTabState
   }
 
   Future<void> _load({bool force = false, bool silent = false}) async {
+    unawaited(_carregarTodasDoAluno());
     if (!silent) {
       setState(() {
         _loading = true;

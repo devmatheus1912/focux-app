@@ -206,15 +206,6 @@ FerramentasCatalogo ferramentasCatalogoBootstrap() {
             'abas': [],
           },
           {
-            'id': 'winback',
-            'titulo': 'Histórico de retomada',
-            'rotaApp': '/winback',
-            'featureGate': 'AUTOMACOES',
-            'unlocked': true,
-            'legacyIds': ['winback'],
-            'abas': [],
-          },
-          {
             'id': 'nps',
             'titulo': 'Pesquisa NPS',
             'rotaApp': '/nps',

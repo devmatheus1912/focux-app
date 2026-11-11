@@ -100,6 +100,7 @@ IconData stickyIconForDestination(OperacaoStickyDestination destination) {
     OperacaoStickyDestination.financeiro => FxIcons.pagamento,
     OperacaoStickyDestination.treino => FxIcons.treino,
     OperacaoStickyDestination.commitment => FxIcons.sono,
+    OperacaoStickyDestination.progressao => FxIcons.treino,
   };
 }
 

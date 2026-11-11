@@ -36,9 +36,9 @@ void main() {
     expect(screen, contains('alertaRiscoOpened'));
     expect(screen, contains('PopScope'));
     expect(screen, contains('FxKeyboardPopScope'));
-    expect(screen, contains("'/winback'"));
+    // O histórico de retomada saiu do "⋯": mora em Automações.
+    expect(screen, isNot(contains("'/winback'")));
     expect(screen, contains("'/financeiro?aba=mensalidades&filtro=atrasadas'"));
-    expect(screen, contains('retencaoEntradaHistorico'));
     expect(screen, contains('retencaoEntradaCobranca'));
     // O que saiu desta tela
     expect(screen, isNot(contains('showRetencaoCatalogSheet')));

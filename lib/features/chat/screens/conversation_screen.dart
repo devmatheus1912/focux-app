@@ -492,7 +492,9 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
             Padding(
               padding: const EdgeInsets.only(right: 4),
               child: _isPersonalMode && widget.alunoId != null
-                  ? Semantics(
+                  ? Tooltip(
+                    message: 'Ver aluno',
+                    child: Semantics(
                       button: true,
                       label: 'Abrir o Aluno 360 de $title',
                       child: GestureDetector(
@@ -504,20 +506,24 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                           variant: AlunoAvatarVariant.strip,
                         ),
                       ),
-                    )
+                    ),
+                  )
                   : AlunoAvatar(
                       name: title,
                       photoUrl: avatarUrl,
                       variant: AlunoAvatarVariant.strip,
                     ),
             ),
-            IconButton(
-              onPressed: _showSearchSheet,
-              icon: const Icon(FxIcons.buscar),
+            ShellHeaderIconButton(
+              icon: FxIcons.buscar,
+              tooltip: 'Buscar na conversa',
+              onTap: _showSearchSheet,
             ),
-            IconButton(
-              onPressed: _showChatMenu,
-              icon: const Icon(FxIcons.mais),
+            const SizedBox(width: TokensStrip.s2),
+            ShellHeaderIconButton(
+              icon: FxIcons.mais,
+              tooltip: 'Mais opções',
+              onTap: _showChatMenu,
             ),
           ],
         ),
@@ -763,7 +769,7 @@ class _ConversationBlockedBar extends StatelessWidget {
           Expanded(
             child: Text(
               message,
-              style: TextStyle(color: mute, fontSize: TokensStrip.fontBodySm, height: 1.35),
+              style: FocuxHubTypography.bodyMuted(color: mute),
             ),
           ),
         ],

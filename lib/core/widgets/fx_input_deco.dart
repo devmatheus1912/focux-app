@@ -93,14 +93,13 @@ class FxInputDeco {
     Widget? suffix,
     Color? iconColor,
     double iconSize = FxSettingsLayout.iconSize,
-
-    /// Campo de várias linhas: o ícone fica na primeira linha, não no meio.
-    bool multilinha = false,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
     final iconeDoCampo =
-        icon == null ? null : Icon(icon, size: iconSize, color: iconColor ?? mute);
+        icon == null
+            ? null
+            : Icon(icon, size: iconSize, color: iconColor ?? mute);
 
     return InputDecoration(
       hintText: hint,
@@ -108,20 +107,7 @@ class FxInputDeco {
       hintStyle: FocuxHubTypography.bodyMuted(
         color: placeholderColor(isDark: isDark),
       ),
-      prefixIcon:
-          iconeDoCampo == null
-              ? null
-              : multilinha
-              ? Align(
-                alignment: Alignment.topCenter,
-                widthFactor: 1,
-                heightFactor: 1,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: TokensStrip.s3),
-                  child: iconeDoCampo,
-                ),
-              )
-              : iconeDoCampo,
+      prefixIcon: iconeDoCampo,
       prefixIconConstraints: const BoxConstraints(
         minWidth: FxSettingsLayout.insetPrefixWidth,
         minHeight: FxSettingsLayout.insetPrefixWidth,

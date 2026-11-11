@@ -37,15 +37,15 @@ void main() {
   test('recomendação segue as métricas, não o texto cru do BE', () {
     expect(
       qualidadeRecomendacaoDisplay(data(ticket: 200, retencao: 80)),
-      contains('precificação'),
+      contains('valor das mensalidades'),
     );
     expect(
       qualidadeRecomendacaoDisplay(data(retencao: 60)),
-      contains('retenção'),
+      contains('risco'),
     );
     expect(
       qualidadeRecomendacaoDisplay(data(ticket: 0, retencao: 80)),
-      contains('Cadastre mensalidades'),
+      contains('Lance as mensalidades'),
     );
     expect(
       qualidadeRecomendacaoDisplay(data()),
@@ -74,5 +74,43 @@ void main() {
   test('ticket compacto arredonda, não trunca', () {
     expect(qualidadeTicketValueLabel(149.9), 'R\$ 150');
     expect(qualidadeTicketValueLabel(149.49), 'R\$ 149');
+  });
+
+  QualidadeOperacionalData dados({
+    double ticket = 175,
+    int retencao = 100,
+  }) => QualidadeOperacionalData(
+    ticketPessoal: ticket,
+    ticketMercado: 250,
+    retencaoPessoal: retencao,
+    retencaoMercado: 75,
+    score: 85,
+    recomendacao: '',
+  );
+
+  test('base pequena: quanto falta para a nota', () {
+    expect(qualidadeAlunosFaltando(1), 4);
+    expect(qualidadeAlunosFaltando(5), 0);
+    expect(qualidadeFaltamTexto(4), startsWith('Faltam 4.'));
+    expect(qualidadeFaltamTexto(1), startsWith('Falta 1.'));
+  });
+
+  test('ação só para o que está abaixo da referência', () {
+    final ticketBaixo = qualidadeAcoes(dados());
+    expect(ticketBaixo, hasLength(1));
+    expect(ticketBaixo.single.titulo, 'Revisar mensalidades');
+    expect(ticketBaixo.single.motivo, contains('abaixo da referência'));
+
+    expect(qualidadeAcoes(dados(ticket: 300)), isEmpty);
+
+    final dois = qualidadeAcoes(dados(retencao: 60));
+    expect(dois.map((a) => a.rota), [
+      QualidadeAcaoRota.financeiro,
+      QualidadeAcaoRota.retencao,
+    ]);
+    expect(dois.last.motivo, '15 pontos abaixo da referência');
+
+    final semTicket = qualidadeAcoes(dados(ticket: 0));
+    expect(semTicket.single.titulo, 'Lançar mensalidades');
   });
 }

@@ -15,7 +15,7 @@ class AlunoInsetFormField extends StatelessWidget {
     super.key,
     required this.controller,
     required this.label,
-    required this.icon,
+    this.icon,
     this.hint,
     this.focusNode,
     this.keyboardType,
@@ -46,7 +46,9 @@ class AlunoInsetFormField extends StatelessWidget {
 
   final TextEditingController controller;
   final String label;
-  final IconData icon;
+
+  /// Opcional: sem ícone o campo começa no texto.
+  final IconData? icon;
   final String? hint;
   final FocusNode? focusNode;
   final TextInputType? keyboardType;
@@ -76,40 +78,62 @@ class AlunoInsetFormField extends StatelessWidget {
       return _comRotulo(context, chrome, soft);
     }
 
+    // Várias linhas: o ícone sai do campo e fica no topo, ao lado. Como
+    // prefixIcon o InputDecorator o centraliza na altura do campo inteiro.
+    final iconeDentro = icon != null && maxLines <= 1;
+    final campo = Semantics(
+      label: label,
+      child: TextFormField(
+        controller: controller,
+        focusNode: focusNode,
+        keyboardType: keyboardType,
+        textCapitalization: textCapitalization,
+        inputFormatters: inputFormatters,
+        validator: validator,
+        maxLines: maxLines,
+        maxLength: maxLength,
+        textInputAction:
+            maxLines > 1 ? TextInputAction.newline : TextInputAction.next,
+        onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
+        style: FxSettingsLayout.rowLabel(color: fxScreenInk(context)),
+        decoration: FxInputDeco.insetGrouped(
+          context,
+          icon: iconeDentro ? icon : null,
+          hint: hint ?? label,
+          iconColor: soft,
+        ).copyWith(
+          // Contador só nos campos curtos (BE @Size ≤ 50).
+          counterText: (maxLength != null && maxLength! <= 50) ? null : '',
+          labelText: rotuloFlutuante ? label : null,
+          floatingLabelBehavior:
+              rotuloFlutuante ? FloatingLabelBehavior.always : null,
+        ),
+      ),
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Semantics(
-          label: label,
-          child: TextFormField(
-            controller: controller,
-            focusNode: focusNode,
-            keyboardType: keyboardType,
-            textCapitalization: textCapitalization,
-            inputFormatters: inputFormatters,
-            validator: validator,
-            maxLines: maxLines,
-            maxLength: maxLength,
-            textInputAction:
-                maxLines > 1 ? TextInputAction.newline : TextInputAction.next,
-            onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
-            style: FxSettingsLayout.rowLabel(color: fxScreenInk(context)),
-            decoration: FxInputDeco.insetGrouped(
-              context,
-              icon: icon,
-              hint: hint ?? label,
-              iconColor: soft,
-              multilinha: maxLines > 1,
-            ).copyWith(
-              // Contador só nos campos curtos (BE @Size ≤ 50).
-              counterText: (maxLength != null && maxLength! <= 50) ? null : '',
-              labelText: rotuloFlutuante ? label : null,
-              floatingLabelBehavior: rotuloFlutuante
-                  ? FloatingLabelBehavior.always
-                  : null,
-            ),
+        if (iconeDentro || icon == null)
+          campo
+        else
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: FxSettingsLayout.insetPrefixWidth,
+                child: Padding(
+                  key: const ValueKey('aluno-inset-icone-topo'),
+                  padding: const EdgeInsets.only(top: TokensStrip.s3),
+                  child: Icon(
+                    icon,
+                    size: FxSettingsLayout.iconSize,
+                    color: soft,
+                  ),
+                ),
+              ),
+              Expanded(child: campo),
+            ],
           ),
-        ),
         if (showDivider)
           Divider(
             height: 1,
@@ -120,13 +144,12 @@ class AlunoInsetFormField extends StatelessWidget {
     );
   }
 
-  Widget _comRotulo(
-    BuildContext context,
-    ShellPalette chrome,
-    Color soft,
-  ) {
+  Widget _comRotulo(BuildContext context, ShellPalette chrome, Color soft) {
     return Padding(
-      padding: const EdgeInsets.only(top: TokensStrip.s2, bottom: TokensStrip.s2),
+      padding: const EdgeInsets.only(
+        top: TokensStrip.s2,
+        bottom: TokensStrip.s2,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -167,9 +190,10 @@ class AlunoInsetFormField extends StatelessWidget {
                   validator: validator,
                   maxLines: maxLines,
                   maxLength: maxLength,
-                  textInputAction: maxLines > 1
-                      ? TextInputAction.newline
-                      : TextInputAction.next,
+                  textInputAction:
+                      maxLines > 1
+                          ? TextInputAction.newline
+                          : TextInputAction.next,
                   onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
                   style: FxSettingsLayout.rowLabel(color: fxScreenInk(context)),
                   decoration: FxInputDeco.insetGrouped(
@@ -188,7 +212,10 @@ class AlunoInsetFormField extends StatelessWidget {
             Text(
               ajuda!,
               style: FxSettingsLayout.footer(
-                color: ajudaErro ? Theme.of(context).colorScheme.error : chrome.mute,
+                color:
+                    ajudaErro
+                        ? Theme.of(context).colorScheme.error
+                        : chrome.mute,
               ),
             ),
           ],

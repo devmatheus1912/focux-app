@@ -55,8 +55,6 @@ const _byKey = <String, IconData>{
   'captacao': FxIcons.megafone,
   'captação': FxIcons.megafone,
   'recuperacao': FxIcons.historico,
-  'winback': FxIcons.historico,
-  '/winback': FxIcons.historico,
   'landing': FxIcons.site,
   '/perfil/landing-editor': FxIcons.site,
   'nps': FxIcons.estrela,

@@ -23,6 +23,8 @@ enum OperacaoStickyDestination {
   financeiro,
   treino,
   commitment,
+  // Revisão de cargas (Ajustar cargas), aberta pela sugestão do Copiloto.
+  progressao,
 }
 
 /// Sticky bar action resolved from 360 payload and queue state.

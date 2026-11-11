@@ -60,4 +60,28 @@ void main() {
       '01/09 · 08:05',
     );
   });
+
+  test('público com 0 alunos fica desligado; Todos sempre liga', () {
+    final totais = {'TODOS': 1, 'ONLINE': 1, 'PRESENCIAL': 0, 'HIBRIDO': 0};
+    expect(broadcastPublicoHabilitado('PRESENCIAL', totais), isFalse);
+    expect(broadcastPublicoHabilitado('ONLINE', totais), isTrue);
+    expect(broadcastPublicoHabilitado('TODOS', {'TODOS': 0}), isTrue);
+    // Alcance ainda não chegou: não trava a escolha.
+    expect(broadcastPublicoHabilitado('HIBRIDO', const {}), isTrue);
+  });
+
+  test('todos no mesmo tipo: a escolha some e vira "Vai para N"', () {
+    expect(
+      broadcastPublicoUnico({'TODOS': 1, 'ONLINE': 1, 'PRESENCIAL': 0}),
+      1,
+    );
+    // Alguém sem tipo: Todos ≠ Online, a escolha continua.
+    expect(broadcastPublicoUnico({'TODOS': 3, 'ONLINE': 2}), isNull);
+    expect(
+      broadcastPublicoUnico({'TODOS': 4, 'ONLINE': 2, 'PRESENCIAL': 2}),
+      isNull,
+    );
+    expect(broadcastVaiPara(1), 'Vai para 1 aluno');
+    expect(broadcastVaiPara(3), 'Vai para 3 alunos');
+  });
 }

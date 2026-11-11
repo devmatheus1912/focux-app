@@ -58,7 +58,6 @@ import '../../features/coach/screens/coach_screen.dart';
 import '../../features/perfil/screens/identidade_visual_screen.dart';
 import '../../features/perfil/screens/white_label_settings_screen.dart';
 import '../../features/perfil/screens/landing_editor_screen.dart';
-import '../../features/winback/screens/winback_screen.dart';
 import '../../features/evolucao/screens/engajamento_screen.dart';
 import '../../features/financeiro/screens/financeiro_aluno_screen.dart';
 import '../../features/financeiro/screens/financeiro_mensalidade_detail_screen.dart';
@@ -623,7 +622,11 @@ RouteBase buildChromeShellRoute() {
           ),
           GoRoute(
             path: '/ia/progressao/aceitar',
-            builder: (context, state) => const ProgressaoAceitarScreen(),
+            pageBuilder:
+                (context, state) => fxTransitionPage(
+                  state: state,
+                  child: const ProgressaoAceitarScreen(),
+                ),
           ),
 
           // Copiloto: ferramenta que abre por cima (não é mais aba).
@@ -852,7 +855,10 @@ RouteBase buildChromeShellRoute() {
           ),
           GoRoute(
             path: '/automacoes',
-            builder: (context, state) => const AutomacoesScreen(),
+            builder:
+                (context, state) => AutomacoesScreen(
+                  abrirItem: state.uri.queryParameters['item'],
+                ),
           ),
           GoRoute(
             path: '/desafios',
@@ -914,13 +920,8 @@ RouteBase buildChromeShellRoute() {
           ),
           GoRoute(
             path: '/winback',
-            builder:
-                (context, state) => const FeatureGate(
-                  featureName: 'Win-back',
-                  requiredPlan: SubscriptionPlan.ENTERPRISE,
-                  capability: 'winback',
-                  child: WinbackScreen(),
-                ),
+            // "Histórico de retomada" virou o item fixo de Automações.
+            redirect: (context, state) => '/automacoes?item=retomada',
           ),
           GoRoute(
             path: '/relatorio/business',

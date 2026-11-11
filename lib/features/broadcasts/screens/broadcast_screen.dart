@@ -43,15 +43,14 @@ final _broadcastHistoricoProvider = FutureProvider<List<Broadcast>>((ref) {
 });
 
 /// Sem alcance a tela segue: só perde a contagem.
-final _broadcastAlcanceProvider = FutureProvider.autoDispose<
-  Map<String, BroadcastAlcance>
->((ref) async {
-  try {
-    return await ref.read(_broadcastRepositoryProvider).alcance();
-  } catch (_) {
-    return const {};
-  }
-});
+final _broadcastAlcanceProvider =
+    FutureProvider.autoDispose<Map<String, BroadcastAlcance>>((ref) async {
+      try {
+        return await ref.read(_broadcastRepositoryProvider).alcance();
+      } catch (_) {
+        return const {};
+      }
+    });
 
 class BroadcastScreen extends ConsumerStatefulWidget {
   const BroadcastScreen({super.key});
@@ -200,6 +199,14 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
+    final totais = {for (final e in alcance.entries) e.key: e.value.total};
+    final publicoUnico = broadcastPublicoUnico(totais);
+    // O alcance chegou e o público escolhido ficou vazio: volta para Todos.
+    if (!broadcastPublicoHabilitado(_publicoAlvo, totais)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) setState(() => _publicoAlvo = 'TODOS');
+      });
+    }
 
     return fxScreenA11yScope(
       label: ptS.broadcastAvisos,
@@ -221,21 +228,26 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
               ),
             ],
           ),
-          bottomNavigationBar: semAlunos
-              ? null
-              : FxFormStickyBar(
-            child: Semantics(
-              button: true,
-              enabled: !_enviando,
-              label: _enviando ? ptS.broadcastEnviandoAviso : ptS.npsPromptEnviar,
-              child: FxLiquidPrimaryButton(
-                label: ptS.npsPromptEnviar,
-                loading: _enviando,
-                loadingLabel: ptS.anamneseAlunoEnviando,
-                onPressed: _enviando || !prontoParaEnviar ? null : _enviar,
-              ),
-            ),
-          ),
+          bottomNavigationBar:
+              semAlunos
+                  ? null
+                  : FxFormStickyBar(
+                    child: Semantics(
+                      button: true,
+                      enabled: !_enviando,
+                      label:
+                          _enviando
+                              ? ptS.broadcastEnviandoAviso
+                              : ptS.npsPromptEnviar,
+                      child: FxLiquidPrimaryButton(
+                        label: ptS.npsPromptEnviar,
+                        loading: _enviando,
+                        loadingLabel: ptS.anamneseAlunoEnviando,
+                        onPressed:
+                            _enviando || !prontoParaEnviar ? null : _enviar,
+                      ),
+                    ),
+                  ),
           body: SafeArea(
             bottom: false,
             child: RefreshIndicator(
@@ -256,130 +268,170 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
                       24,
                     ),
                     children: [
-                    if (semAlunos)
-                      FxEmptyState(
-                        icon: FxIcons.grupo,
-                        title: ptS.broadcastSemAlunosParaAvisar,
-                        subtitle: ptS.broadcastCadastreUmAlunoParaEnviar,
-                        action: FxEmptyAction(
-                          label: ptS.broadcastVerAlunos,
-                          onTap: () => goPersonalShellTab(context, '/alunos'),
-                        ),
-                      )
-                    else ...[
-                    FxQuickChips<({String nome, String titulo, String mensagem})>(
-                      itens: broadcastAtalhos,
-                      selecionado: null,
-                      rotuloDe: (atalho) => atalho.nome,
-                      onSelecionar:
-                          (atalho) =>
-                              _preencher(atalho.titulo, atalho.mensagem),
-                    ),
-                    const SizedBox(height: TokensStrip.s3),
-                    FxSettingsGroup(
-                      header: ptS.broadcastNovoAviso,
-                      caption: ptS.broadcastChegaComoNotificacaoNoCelular,
-                      children: [
-                      AlunoInsetFormField(
-                        controller: _tituloCtrl,
-                        label: ptS.agendaTituloGrupo,
-                        hint: ptS.broadcastExLembreteDeTreino,
-                        icon: FxIcons.titulo,
-                        textCapitalization: TextCapitalization.sentences,
-                        inputFormatters: [
-                          LengthLimitingTextInputFormatter(100),
-                        ],
-                        validator:
-                            (v) =>
-                                v == null || v.trim().isEmpty
-                                    ? broadcastRequiredTitulo()
-                                    : null,
-                      ),
-                      AlunoInsetFormField(
-                        controller: _mensagemCtrl,
-                        label: ptS.copilotoMensagemCampo,
-                        hint: ptS.broadcastOQueOsAlunosVao,
-                        icon: FxIcons.notas,
-                        maxLines: 4,
-                        textCapitalization: TextCapitalization.sentences,
-                        inputFormatters: [
-                          LengthLimitingTextInputFormatter(2000),
-                        ],
-                        showDivider: false,
-                        validator:
-                            (v) =>
-                                v == null || v.trim().isEmpty
-                                    ? broadcastRequiredMensagem()
-                                    : null,
-                      ),
-                    ],
-                  ),
-                  if (prontoParaEnviar) ...[
-                    const SizedBox(height: TokensStrip.s3),
-                    _PreviaNotificacao(
-                      titulo: _tituloCtrl.text.trim(),
-                      mensagem: _mensagemCtrl.text.trim(),
-                    ),
-                  ],
-                  const SizedBox(height: FxSettingsLayout.groupGap),
-                  Text(
-                    ptS.broadcastQuemRecebe,
-                    style: FocuxHubTypography.sectionTitle(
-                      context,
-                      color: chrome.ink,
-                    ),
-                  ),
-                  const SizedBox(height: TokensStrip.s2),
-                  FxChoiceStrip<String>(
-                    itens: [
-                      for (final publico in broadcastPublicos)
-                        FxChoiceItem(
-                          value: publico,
-                          label: broadcastPublicoChip(
-                            publico,
-                            alcance[publico]?.total,
+                      if (semAlunos)
+                        FxEmptyState(
+                          icon: FxIcons.grupo,
+                          title: ptS.broadcastSemAlunosParaAvisar,
+                          subtitle: ptS.broadcastCadastreUmAlunoParaEnviar,
+                          action: FxEmptyAction(
+                            label: ptS.broadcastVerAlunos,
+                            onTap: () => goPersonalShellTab(context, '/alunos'),
+                          ),
+                        )
+                      else ...[
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            left: FxSettingsLayout.groupPadH,
+                            bottom: FxSettingsLayout.headerToGroup,
+                          ),
+                          child: Text(
+                            ptS.broadcastComecarDeUmModelo,
+                            style: FxSettingsLayout.sectionHeader(
+                              color: chrome.mute,
+                            ),
                           ),
                         ),
+                        FxQuickChips<
+                          ({String nome, String titulo, String mensagem})
+                        >(
+                          itens: broadcastAtalhos,
+                          selecionado: null,
+                          rotuloDe: (atalho) => atalho.nome,
+                          onSelecionar:
+                              (atalho) =>
+                                  _preencher(atalho.titulo, atalho.mensagem),
+                        ),
+                        const SizedBox(height: TokensStrip.s3),
+                        FxSettingsGroup(
+                          header: ptS.broadcastNovoAviso,
+                          caption: ptS.broadcastChegaComoNotificacaoNoCelular,
+                          children: [
+                            AlunoInsetFormField(
+                              controller: _tituloCtrl,
+                              label: ptS.agendaTituloGrupo,
+                              hint: ptS.broadcastExLembreteDeTreino,
+                              icon: FxIcons.titulo,
+                              textCapitalization: TextCapitalization.sentences,
+                              inputFormatters: [
+                                LengthLimitingTextInputFormatter(100),
+                              ],
+                              validator:
+                                  (v) =>
+                                      v == null || v.trim().isEmpty
+                                          ? broadcastRequiredTitulo()
+                                          : null,
+                            ),
+                            AlunoInsetFormField(
+                              controller: _mensagemCtrl,
+                              label: ptS.copilotoMensagemCampo,
+                              hint: ptS.broadcastOQueOsAlunosVao,
+                              icon: FxIcons.notas,
+                              maxLines: 4,
+                              textCapitalization: TextCapitalization.sentences,
+                              inputFormatters: [
+                                LengthLimitingTextInputFormatter(2000),
+                              ],
+                              showDivider: false,
+                              validator:
+                                  (v) =>
+                                      v == null || v.trim().isEmpty
+                                          ? broadcastRequiredMensagem()
+                                          : null,
+                            ),
+                          ],
+                        ),
+                        if (prontoParaEnviar) ...[
+                          const SizedBox(height: TokensStrip.s3),
+                          _PreviaNotificacao(
+                            titulo: _tituloCtrl.text.trim(),
+                            mensagem: _mensagemCtrl.text.trim(),
+                          ),
+                        ],
+                        const SizedBox(height: FxSettingsLayout.groupGap),
+                        FxSettingsGroup(
+                          header: ptS.broadcastQuemRecebe,
+                          children: [
+                            if (publicoUnico != null)
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: TokensStrip.s2,
+                                ),
+                                child: Text(
+                                  broadcastVaiPara(publicoUnico),
+                                  style: FxSettingsLayout.rowLabel(
+                                    color: chrome.ink,
+                                  ),
+                                ),
+                              )
+                            else
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: TokensStrip.s1,
+                                ),
+                                child: FxChoiceStrip<String>(
+                                  itens: [
+                                    for (final publico in broadcastPublicos)
+                                      FxChoiceItem(
+                                        value: publico,
+                                        habilitado: broadcastPublicoHabilitado(
+                                          publico,
+                                          totais,
+                                        ),
+                                        label: broadcastPublicoChip(
+                                          publico,
+                                          alcance[publico]?.total,
+                                        ),
+                                      ),
+                                  ],
+                                  selecionado: _publicoAlvo,
+                                  onSelecionar:
+                                      (publico) => setState(
+                                        () => _publicoAlvo = publico,
+                                      ),
+                                ),
+                              ),
+                            if (broadcastSemTipoAviso(totais) case final aviso?)
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  bottom: TokensStrip.s2,
+                                ),
+                                child: Text(
+                                  aviso,
+                                  style: FocuxHubTypography.bodyMuted(
+                                    color: chrome.mute,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ],
+                      const SizedBox(height: FxSettingsLayout.groupGap),
+                      historicoAsync.when(
+                        loading: () => const SkeletonList(count: 4),
+                        error:
+                            (e, _) => FxErrorState(
+                              chromeOnDark: chrome.isDark,
+                              primary: primary,
+                              message: friendlyError(e),
+                              onRetry:
+                                  () => ref.invalidate(
+                                    _broadcastHistoricoProvider,
+                                  ),
+                            ),
+                        data:
+                            (lista) => BroadcastHistorico(
+                              itens: lista,
+                              onUsarDeNovo:
+                                  (item) =>
+                                      _preencher(item.titulo, item.mensagem),
+                            ),
+                      ),
                     ],
-                    selecionado: _publicoAlvo,
-                    onSelecionar:
-                        (publico) => setState(() => _publicoAlvo = publico),
                   ),
-                  if (broadcastSemTipoAviso({
-                    for (final e in alcance.entries) e.key: e.value.total,
-                  }) case final aviso?) ...[
-                    const SizedBox(height: TokensStrip.s2),
-                    Text(
-                      aviso,
-                      style: FocuxHubTypography.bodyMuted(color: chrome.mute),
-                    ),
-                  ],
-                  ],
-                  const SizedBox(height: FxSettingsLayout.groupGap),
-                  historicoAsync.when(
-                    loading: () => const SkeletonList(count: 4),
-                    error:
-                        (e, _) => FxErrorState(
-                          chromeOnDark: chrome.isDark,
-                          primary: primary,
-                          message: friendlyError(e),
-                          onRetry:
-                              () =>
-                                  ref.invalidate(_broadcastHistoricoProvider),
-                        ),
-                    data:
-                        (lista) => BroadcastHistorico(
-                          itens: lista,
-                          onUsarDeNovo:
-                              (item) => _preencher(item.titulo, item.mensagem),
-                        ),
-                  ),
-                ],
+                ),
               ),
             ),
           ),
-        ),
-      ),
         ),
       ),
     );

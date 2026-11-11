@@ -70,8 +70,10 @@ extension on _AutomacoesScreenState {
           FxSettingsLayout.pageInset,
           TokensStrip.s6,
         ),
-        itemCount: linhas.length,
+        // Por último, o aviso para quem parou (30 e 60 dias), que é do Focux.
+        itemCount: linhas.length + 1,
         itemBuilder: (context, i) {
+          if (i == linhas.length) return const _LinhaRetomada();
           final linha = linhas[i];
           final template = linha.template;
           final fluxo = linha.fluxo;
@@ -124,3 +126,43 @@ extension on _AutomacoesScreenState {
     await _toggleFluxoAtivo(fluxo);
   }
 }
+
+/// Item fixo: o aviso automático para quem parou, com o interruptor e a folha.
+class _LinhaRetomada extends ConsumerWidget {
+  const _LinhaRetomada();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final config = ref.watch(retomadaConfigProvider).value;
+    return FxSatelliteListTile(
+      title: retomadaTitulo,
+      titleCase: false,
+      subtitle: Text(retomadaSubtituloDaLinha(config)),
+      leading: Icon(FxIcons.raio, color: primary),
+      trailing:
+          config == null
+              ? null
+              : Semantics(
+                label:
+                    config.ativo
+                        ? 'Desligar $retomadaTitulo'
+                        : 'Ligar $retomadaTitulo',
+                child: Switch.adaptive(
+                  value: config.ativo,
+                  onChanged: (_) async {
+                    try {
+                      await alternarRetomada(context, ref, config);
+                    } catch (e) {
+                      if (context.mounted) {
+                        FeedbackHelper.showError(context, friendlyError(e));
+                      }
+                    }
+                  },
+                ),
+              ),
+      onTap: () => showRetomadaFolha(context),
+    );
+  }
+}
+

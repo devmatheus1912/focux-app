@@ -150,6 +150,7 @@ class _TreinoAssignSheetState extends State<TreinoAssignSheet> {
                 child: FxSettingsGroup(
                   accent: primary,
                   edgeToEdgeRows: true,
+                  semMoldura: true,
                   children: FxInsetPickerOption.list(
                     accent: soft,
                     items: [

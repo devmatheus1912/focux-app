@@ -474,12 +474,9 @@ const Map<String, FocuxSurfaceSpec> focuxSurfaceCatalog = {
     hasInput: true,
     logicalParent: _perfil,
   ),
-  '/winback': FocuxSurfaceSpec(
-    type: _s1,
-    hasInput: true,
-    logicalParent: _home,
-  ),
   '/dunning': FocuxSurfaceSpec(type: _s1, logicalParent: '/financeiro'),
+  // Redireciona para o aviso de retomada em Automações.
+  '/winback': FocuxSurfaceSpec(type: _s1, logicalParent: '/automacoes'),
   '/relatorio/business': FocuxSurfaceSpec(type: _s1, logicalParent: _home),
   '/recorrencia': FocuxSurfaceSpec(
     type: _s4,

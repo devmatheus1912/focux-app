@@ -197,8 +197,6 @@ class EvolucaoInteligente {
   final double volumeSemanal;
   final double volumeMensal;
   final int? tendenciaVolumePct;
-  final String proximaAcao;
-  final bool sugerirCopiloto;
   final List<double> volumePorSemana;
 
   const EvolucaoInteligente({
@@ -210,8 +208,6 @@ class EvolucaoInteligente {
     required this.volumeSemanal,
     required this.volumeMensal,
     this.tendenciaVolumePct,
-    required this.proximaAcao,
-    required this.sugerirCopiloto,
     this.volumePorSemana = const [],
   });
 
@@ -225,8 +221,6 @@ class EvolucaoInteligente {
         volumeSemanal: (json['volumeSemanal'] as num?)?.toDouble() ?? 0,
         volumeMensal: (json['volumeMensal'] as num?)?.toDouble() ?? 0,
         tendenciaVolumePct: (json['tendenciaVolumePct'] as num?)?.toInt(),
-        proximaAcao: json['proximaAcao'] as String? ?? '',
-        sugerirCopiloto: json['sugerirCopiloto'] as bool? ?? false,
         volumePorSemana:
             (json['volumePorSemana'] as List<dynamic>?)
                 ?.map((e) => (e as num).toDouble())
