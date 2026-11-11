@@ -118,7 +118,7 @@ class AlunoAutonomyAnalytics {
         event,
         props: {
           'taskId': task.taskId,
-          'taskTitle': task.taskTitle,
+          // Sem o título: pode ter nome e contexto de saúde (Amplitude/Crashlytics).
           'route': task.route,
           'priority': task.priority.toLowerCase(),
           'done': done,

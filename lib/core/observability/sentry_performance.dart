@@ -26,7 +26,9 @@ Future<void> initSentryPerformance() async {
 
     // ── Erros HTTP (5xx capturados como issues no Sentry) ────────────────────
     o.captureFailedRequests = true;
-    o.maxRequestBodySize = MaxRequestBodySize.small;
+    // Nunca o corpo: medida, anamnese e chat são dado de saúde (o DPA do
+    // Sentry proíbe dado sensível).
+    o.maxRequestBodySize = MaxRequestBodySize.never;
 
     // ── Preservar comportamento de crashes: Crashlytics continua como handler ─
     // enableNativeCrashHandling = false evita duplicata com Crashlytics.

@@ -20,7 +20,21 @@ Map<String, Object> amplitudeSafeProps(Map<String, Object?>? props) {
 }
 
 final RegExp _idKey = RegExp(r'(^id$|_ids?$|Ids?$)');
-const Set<String> _blockedKeys = {'codigo', 'code', 'token', 'email'};
+/// Texto livre pode ter nome, mensagem ou dado de saúde: o DPA do Amplitude
+/// proíbe dado sensível, então essas chaves nunca saem.
+const Set<String> _blockedKeys = {
+  'codigo',
+  'code',
+  'token',
+  'email',
+  'title',
+  'tasktitle',
+  'nome',
+  'mensagem',
+  'texto',
+  'comentario',
+  'observacoes',
+};
 
 /// Termina em `_id` mas guarda nome de plano, não identifica pessoa.
 const Set<String> _allowedIdKeys = {'plan_id'};

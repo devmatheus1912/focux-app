@@ -43,4 +43,15 @@ void main() {
     });
     expect(out, {'route': '/alunos/:id/treinos/:id'});
   });
+
+  test('texto livre (título, nome, mensagem) nunca vai ao Amplitude', () {
+    final out = amplitudeSafeProps({
+      'title': 'Cobrar Julio Cesar',
+      'taskTitle': 'Registrar medida',
+      'nome': 'Julio',
+      'mensagem': 'dor no joelho',
+      'route': '/alunos/12',
+    });
+    expect(out.keys, ['route']);
+  });
 }

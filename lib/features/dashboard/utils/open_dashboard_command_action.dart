@@ -16,7 +16,7 @@ Future<void> openDashboardCommandAction({
     ProductEvents.homeDayFocusAction,
     props: {
       'route': item.route,
-      'title': item.title,
+      // Sem o título: traz nome do aluno e o motivo (ex.: medida, dor).
       'priority': item.priorityBadge,
       'source': source,
       if (item.actionKey != null) 'actionKey': item.actionKey,

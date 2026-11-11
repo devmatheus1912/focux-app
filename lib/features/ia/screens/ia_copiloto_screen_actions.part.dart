@@ -278,7 +278,8 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
         ProductEvents.iaCopilotFailure,
         props: {
           'mode': _mode,
-          'error': e.toString(),
+          // Só o tipo: a mensagem pode repetir texto do aluno.
+          'error': e.runtimeType.toString(),
           if (e is IaOperationalException) 'retryable': e.retryable,
           if (e is IaOperationalException && e.reference != null)
             'reference': e.reference,
