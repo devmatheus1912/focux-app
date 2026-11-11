@@ -56,8 +56,7 @@ List<Widget> buildDashboardHomePrimarySlivers({
       atendimentos: commandCenter.agendaHojeCount,
       freshness: freshnessLabel,
     ),
-    onConversas: () => context.push('/chat/inbox'),
-    conversasCount: snap.unreadCount,
+    onCopiloto: () => context.push('/ia/copiloto'),
   );
 
   final itens = hojeAgora(

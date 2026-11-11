@@ -49,10 +49,28 @@ String vencimentoAvisoAtraso(DateTime vencimento, DateTime hoje) {
       : 'Vai entrar como atrasada (venceu há $dias dias).';
 }
 
-/// Meses oferecidos: o próximo, o atual e os [anteriores] de antes.
+/// Meses à frente oferecidos na folha (e procurados pelo primeiro livre).
+const vencimentoMesesAdiante = 3;
+
+/// Meses oferecidos: os [vencimentoMesesAdiante] à frente, o atual e os
+/// [anteriores] de antes, do mais novo para o mais antigo.
 List<DateTime> vencimentoMeses(DateTime hoje, {int anteriores = 3}) => [
-  for (var i = -1; i <= anteriores; i++) DateTime(hoje.year, hoje.month - i, 1),
+  for (var i = -vencimentoMesesAdiante; i <= anteriores; i++)
+    DateTime(hoje.year, hoje.month - i, 1),
 ];
+
+/// Primeiro mês sem cobrança viva a partir do mês de hoje (até
+/// [vencimentoMesesAdiante] à frente; depois disso, o primeiro livre que houver).
+DateTime vencimentoPrimeiroMesLivre({
+  required DateTime hoje,
+  required Map<String, MesOcupado> ocupados,
+}) {
+  for (var i = 0; i < 24; i++) {
+    final mes = DateTime(hoje.year, hoje.month + i, 1);
+    if (!(ocupados[vencimentoChaveMes(mes)]?.bloqueia ?? false)) return mes;
+  }
+  return DateTime(hoje.year, hoje.month, 1);
+}
 
 /// O que o aluno já tem num mês: bloqueia o mês, salvo se a cobrança foi
 /// cancelada (o backend reaproveita a linha).
@@ -116,7 +134,10 @@ DateTime? vencimentoSugerido({
   required int dia,
 }) {
   final dataHoje = _soData(hoje);
-  for (final mes in [DateTime(hoje.year, hoje.month, 1), DateTime(hoje.year, hoje.month + 1, 1)]) {
+  for (final mes in [
+    for (var i = 0; i <= vencimentoMesesAdiante; i++)
+      DateTime(hoje.year, hoje.month + i, 1),
+  ]) {
     if (ocupados[vencimentoChaveMes(mes)]?.bloqueia ?? false) continue;
     var d = vencimentoNoDia(mes, dia);
     if (d.isBefore(dataHoje)) {

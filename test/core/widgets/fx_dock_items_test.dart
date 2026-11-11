@@ -74,9 +74,14 @@ void main() {
 
   testWidgets('personal: abas e selos de risco e agenda', (tester) async {
     await tester.pumpWidget(_app(_personal));
-    for (final r in ['Hoje', 'Alunos', 'Treinos', 'Agenda', 'IA']) {
+    // Ordem nova: Conversas no meio, Treinos no fim; IA saiu da barra.
+    final rotulos = ['Hoje', 'Alunos', 'Conversas', 'Agenda', 'Treinos'];
+    for (final r in rotulos) {
       expect(find.text(r), findsOneWidget);
     }
+    expect(find.text('IA'), findsNothing);
+    final xs = [for (final r in rotulos) tester.getCenter(find.text(r)).dx];
+    expect(xs, orderedEquals([...xs]..sort()));
     expect(find.text('3'), findsOneWidget); // alunos em risco
     expect(find.text('9+'), findsOneWidget); // agenda do dia passa de 9
   });
@@ -136,6 +141,14 @@ void main() {
     expect(dock, isNot(contains('glowSize')));
     expect(dock, isNot(contains('RadialGradient')));
     expect(dock, isNot(contains('height: 3,')));
+  });
+  testWidgets('personal: selo de Conversas diz quantas esperam resposta', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _app((s) => FxDockItems.personal(s, conversasSemResposta: 2)),
+    );
+    expect(find.bySemanticsLabel(RegExp('2 sem resposta')), findsOneWidget);
   });
 }
 

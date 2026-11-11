@@ -99,7 +99,7 @@ class _Aluno360CommitmentSheetState
       await action();
       if (!mounted) return;
       if (successMessage.isNotEmpty) {
-        FeedbackHelper.showOperacaoSuccess(
+        FeedbackHelper.showSuccess(
           widget.hostContext.mounted ? widget.hostContext : context,
           successMessage,
         );
@@ -107,7 +107,7 @@ class _Aluno360CommitmentSheetState
       if (mounted) Navigator.of(context).pop();
     } catch (e) {
       if (!mounted) return;
-      FeedbackHelper.showOperacaoError(
+      FeedbackHelper.showError(
         widget.hostContext.mounted ? widget.hostContext : context,
         friendlyError(e, fallback: 'Não foi possível salvar o follow-up.'),
       );
@@ -129,14 +129,14 @@ class _Aluno360CommitmentSheetState
               : (_isSleep
                   ? 'Combinado em ${_formatDate(when)}'
                   : 'Contato registrado em ${_formatDate(when)}');
-      FeedbackHelper.showOperacaoSuccess(
+      FeedbackHelper.showSuccess(
         widget.hostContext.mounted ? widget.hostContext : context,
         msg,
       );
       if (mounted) Navigator.of(context).pop();
     } catch (e) {
       if (!mounted) return;
-      FeedbackHelper.showOperacaoError(
+      FeedbackHelper.showError(
         widget.hostContext.mounted ? widget.hostContext : context,
         friendlyError(e, fallback: 'Não foi possível salvar o follow-up.'),
       );
@@ -148,17 +148,18 @@ class _Aluno360CommitmentSheetState
   Future<void> _pickDate() async {
     if (_busy) return;
     final hoje = DateTime.now();
-    final picked = (await showFxCalendarioSheet(
-      context,
-      titulo: _isSleep ? 'Quando combinar' : 'Próximo contato',
-      subtitulo:
-          _isSleep
-              ? 'Data para falar do sono com ${aluno.nome}.'
-              : 'Quando você fala de novo com ${aluno.nome}.',
-      inicial: aluno.followUpDate,
-      primeiro: hoje,
-      ultimo: hoje.add(const Duration(days: 365)),
-    ))?.data;
+    final picked =
+        (await showFxCalendarioSheet(
+          context,
+          titulo: _isSleep ? 'Quando combinar' : 'Próximo contato',
+          subtitulo:
+              _isSleep
+                  ? 'Data para falar do sono com ${aluno.nome}.'
+                  : 'Quando você fala de novo com ${aluno.nome}.',
+          inicial: aluno.followUpDate,
+          primeiro: hoje,
+          ultimo: hoje.add(const Duration(days: 365)),
+        ))?.data;
     if (picked == null) return;
     await _runAction(
       () => ref
@@ -249,7 +250,9 @@ class _Aluno360CommitmentSheetState
 
   Future<void> _definirAtalho(DateTime data) {
     return _runAction(
-      () => ref.read(alunoFollowUpActionsProvider).setFollowUpDate(aluno.id, data),
+      () => ref
+          .read(alunoFollowUpActionsProvider)
+          .setFollowUpDate(aluno.id, data),
       _isSleep
           ? 'Sono combinado para ${_formatDate(data)}'
           : 'Follow-up definido para ${_formatDate(data)}',
@@ -291,17 +294,21 @@ class _Aluno360CommitmentSheetState
               FxSettingsTile(
                 icon: FxIcons.historico,
                 label: 'Último contato',
-                value: ultimo == null ? 'Ainda não registrado' : _formatDate(ultimo),
+                value:
+                    ultimo == null
+                        ? 'Ainda não registrado'
+                        : _formatDate(ultimo),
                 showDivider: true,
               ),
               FxSettingsTile(
                 icon: FxIcons.eventoConfirmado,
                 label: _isSleep ? 'Combinado para' : 'Próximo contato',
-                value: isSnoozed
-                    ? 'Adiado até ${_formatDate(snoozedUntil)} ${_formatTime(snoozedUntil)}'
-                    : (followUpDate == null
-                          ? 'Sem data'
-                          : _formatDate(followUpDate)),
+                value:
+                    isSnoozed
+                        ? 'Adiado até ${_formatDate(snoozedUntil)} ${_formatTime(snoozedUntil)}'
+                        : (followUpDate == null
+                            ? 'Sem data'
+                            : _formatDate(followUpDate)),
                 showDivider: false,
               ),
             ],
@@ -319,14 +326,16 @@ class _Aluno360CommitmentSheetState
           ),
           FxQuickChips<DateTime>(
             itens: atalhos,
-            selecionado: dataAtual == null
-                ? null
-                : atalhos.where((d) => _mesmoDia(d, dataAtual)).firstOrNull,
+            selecionado:
+                dataAtual == null
+                    ? null
+                    : atalhos.where((d) => _mesmoDia(d, dataAtual)).firstOrNull,
             rotuloDe: _rotuloAtalho,
             outroSelecionado: dataAtual != null && !dataEhAtalho,
-            outroRotulo: dataAtual != null && !dataEhAtalho
-                ? _formatDate(dataAtual)
-                : 'Escolher data',
+            outroRotulo:
+                dataAtual != null && !dataEhAtalho
+                    ? _formatDate(dataAtual)
+                    : 'Escolher data',
             onSelecionar: (d) {
               if (!_busy) _definirAtalho(d);
             },

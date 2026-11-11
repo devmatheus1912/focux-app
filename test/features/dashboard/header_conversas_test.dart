@@ -9,8 +9,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 Future<void> _abrir(
   WidgetTester tester, {
-  required int conversas,
-  VoidCallback? onConversas,
+  VoidCallback? onCopiloto,
   double largura = 390,
 }) async {
   tester.view.physicalSize = Size(largura * 3, 1800);
@@ -35,8 +34,7 @@ Future<void> _abrir(
             primary: EagleTokens.brandAccent,
             onProfileTap: () {},
             onQuickSearch: () {},
-            onConversas: onConversas,
-            conversasCount: conversas,
+            onCopiloto: onCopiloto,
           ),
         ),
       ),
@@ -48,39 +46,27 @@ Future<void> _abrir(
 void main() {
   setUp(() => GoogleFonts.config.allowRuntimeFetching = false);
 
-  test('dica do botão diz quantas conversas esperam resposta', () {
-    expect(dashboardConversasTooltip(0), 'Conversas');
-    expect(dashboardConversasTooltip(1), 'Conversas, 1 sem resposta');
-    expect(dashboardConversasTooltip(12), 'Conversas, 12 sem resposta');
-  });
-
-  testWidgets('botão Conversas aparece com o selo e abre a caixa de entrada', (
+  // Conversas virou aba (SPEC-navegacao-personal): o topo da Hoje tem
+  // Buscar · Copiloto de IA · Notificações, sem selo no Copiloto.
+  testWidgets('botão do Copiloto no topo, sem selo, abre o Copiloto', (
     tester,
   ) async {
     var abriu = 0;
-    await _abrir(tester, conversas: 3, onConversas: () => abriu++);
-    expect(find.byTooltip('Conversas, 3 sem resposta'), findsOneWidget);
-    // até 9 o selo é um ponto; o número vai na dica e no leitor de tela
-    expect(find.text('9+'), findsNothing);
-    await tester.tap(find.byTooltip('Conversas, 3 sem resposta'));
+    await _abrir(tester, onCopiloto: () => abriu++);
+    expect(find.byTooltip('Copiloto de IA'), findsOneWidget);
+    expect(find.byTooltip('Conversas'), findsNothing);
+    await tester.tap(find.byTooltip('Copiloto de IA'));
     expect(abriu, 1);
   });
 
-  testWidgets('sem conversas pendentes: botão sem selo', (tester) async {
-    await _abrir(tester, conversas: 0, onConversas: () {});
-    expect(find.byTooltip('Conversas'), findsOneWidget);
-    expect(find.text('0'), findsNothing);
-  });
-
   testWidgets('sem callback, o botão não existe', (tester) async {
-    await _abrir(tester, conversas: 2);
-    expect(find.byTooltip('Conversas, 2 sem resposta'), findsNothing);
+    await _abrir(tester);
+    expect(find.byTooltip('Copiloto de IA'), findsNothing);
   });
 
   testWidgets('cabe em tela estreita (360)', (tester) async {
-    await _abrir(tester, conversas: 12, onConversas: () {}, largura: 360);
+    await _abrir(tester, onCopiloto: () {}, largura: 360);
     expect(tester.takeException(), isNull);
-    expect(find.byTooltip('Conversas, 12 sem resposta'), findsOneWidget);
-    expect(find.text('9+'), findsOneWidget);
+    expect(find.byTooltip('Copiloto de IA'), findsOneWidget);
   });
 }

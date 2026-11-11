@@ -11,6 +11,9 @@ import '../widgets/mesh_scope.dart';
 import '../../features/dashboard/providers/dashboard_provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../widgets/fx_shell_inset_owner.dart';
+import '../navigation/focux_navigation.dart';
+import '../navigation/fx_aba_topo.dart';
+import '../../features/dashboard/utils/dashboard_unread.dart';
 
 /// Shell scaffold wrapping the 5 main personal-trainer tabs.
 class MainShell extends ConsumerWidget {
@@ -36,6 +39,11 @@ class MainShell extends ConsumerWidget {
     final agendaHoje = ref.watch(
       dashboardHomeProvider.select(
         (async) => async.value?.commandCenter.agendaHojeCount ?? 0,
+      ),
+    );
+    final conversas = ref.watch(
+      dashboardHomeProvider.select(
+        (async) => dashboardChatUnreadCount(async.value?.pulse?.mensagensNaoLidas),
       ),
     );
 
@@ -71,14 +79,17 @@ class MainShell extends ConsumerWidget {
                       S.of(context),
                       alunosEmRisco: emRisco,
                       agendaHoje: agendaHoje,
+                      conversasSemResposta: conversas,
                     ),
                     currentIndex: navigationShell.currentIndex,
                     cinematicChrome: true,
                     isDark: isDark,
                     onTap:
-                        (i) => navigationShell.goBranch(
+                        (i) => fxTocarAba(
+                          context,
+                          navigationShell,
                           i,
-                          initialLocation: i == navigationShell.currentIndex,
+                          raizes: FocuxNavigation.shellTabPaths,
                         ),
                   ),
                 ),

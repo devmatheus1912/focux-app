@@ -15,7 +15,7 @@ void main() {
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('migracaoIniciarLabel'));
     expect(screen, contains('FxLiquidPrimaryButton'));
-    expect(screen, contains('FxToggleChip'));
+    expect(screen, contains('FxSettingsGroup'));
     expect(screen, contains('migracaoEtapaLabel'));
     expect(screen, contains('FxWizardStickyBar'));
     expect(screen, contains('FxWizardStepDots'));
@@ -23,7 +23,7 @@ void main() {
     expect(screen, contains('MigracaoMagicaDraftCache'));
     expect(screen, contains('MigracaoEtapa.acesso'));
     expect(screen, contains('migracaoVagasHint'));
-    expect(screen, isNot(contains('FxSettingsTile')));
+    // A fonte é escolhida numa lista (FxSettingsGroup), não em chips (SPEC-migracao).
     expect(screen, isNot(contains('FeatureGate')));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });

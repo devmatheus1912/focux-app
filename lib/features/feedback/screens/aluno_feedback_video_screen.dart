@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import '../../../core/widgets/fx_grouped_action_sheet.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -109,14 +110,17 @@ class _AlunoFeedbackVideoScreenState
       );
       return;
     }
-    final exercicioId = await showFxInsetPickerSheet<int>(
+    final exercicioId = await showFxGroupedActionSheet<int>(
       context,
-      title: 'Qual exercício?',
-      subtitle: 'Escolha o que você vai gravar.',
-      headerIcon: FxIcons.treino,
-      items: [
-        for (final e in exercicios)
-          FxInsetPickerSheetItem(value: e.id, label: e.nome),
+      titulo: 'Qual exercício?',
+      subtitulo: 'Escolha o que você vai gravar.',
+      icone: FxIcons.treino,
+      grupos: [
+        for (final (treino, itens) in exerciciosPorTreino(exercicios))
+          FxActionGroup<int>(treino, [
+            for (final e in itens)
+              FxActionItem(valor: e.id, rotulo: e.nome, icone: FxIcons.treino),
+          ]),
       ],
     );
     if (exercicioId == null || !mounted) return;
@@ -352,6 +356,7 @@ class _AlunoFeedbackVideoScreenState
           }
           final item = _feedbacks[i];
           return FxSatelliteListTile(
+            titleCase: false,
             title: feedbackVideoTitulo(
               exercicioNome: item.exercicioNome,
               comentario: item.comentario,

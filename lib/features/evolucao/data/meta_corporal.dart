@@ -118,9 +118,13 @@ class Conquista {
     required this.detalhe,
     required this.data,
     required this.valor,
+    this.metrica,
   });
 
-  /// O número que vai no centro do selo ("−8,0 kg", "60,0 kg", "82,0 kg").
+  /// Métrica da meta (`PESO`, `CINTURA`…); nula no recorde. Escolhe o glifo.
+  final String? metrica;
+
+  /// O número da conquista (embaixo do selo) ("−8,0 kg", "60,0 kg", "82,0 kg").
   final String valor;
 
   /// Para celebrar uma vez só.
@@ -214,6 +218,7 @@ List<Conquista> conquistasDe(
         Conquista(
           chave: 'meta_${m.id}',
           tipo: ConquistaTipo.meta,
+          metrica: m.metrica,
           titulo: valor,
           valor: valor,
           detalhe: ptS.conquistaMetaDetalhe(
@@ -232,6 +237,7 @@ List<Conquista> conquistasDe(
         Conquista(
           chave: 'mantido_${m.id}',
           tipo: ConquistaTipo.mantido,
+          metrica: m.metrica,
           titulo: ptS.conquistaMantidoTitulo,
           valor: metaValor(m.metrica, m.valorAlvo),
           detalhe: ptS.conquistaMantidoDetalhe(metaValor(m.metrica, m.valorAlvo)),

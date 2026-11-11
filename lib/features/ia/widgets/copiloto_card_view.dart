@@ -24,7 +24,11 @@ class CopilotoCardView extends StatelessWidget {
     required this.onEscolherAluno,
     required this.onVerTarefas,
     this.podeAnalisar = true,
+    this.rotuloAnalisar,
   });
+
+  /// Rótulo do botão por aluno (ex.: "Ver análise" quando já há uma guardada).
+  final String? Function(int alunoId)? rotuloAnalisar;
 
   /// Cota esgotada: sai todo botão de analisar; a lista continua de leitura.
   final bool podeAnalisar;
@@ -84,6 +88,7 @@ class CopilotoCardView extends StatelessWidget {
               child: _PrioridadeRow(
                 prioridade: prioridades.first,
                 sobreMarca: true,
+                rotulo: rotuloAnalisar?.call(prioridades.first.alunoId),
                 onAnalisar:
                     podeAnalisar
                         ? () => onAnalisar(
@@ -103,6 +108,7 @@ class CopilotoCardView extends StatelessWidget {
                       if (i > 0) const Divider(height: 1),
                       _PrioridadeRow(
                         prioridade: p,
+                        rotulo: rotuloAnalisar?.call(p.alunoId),
                         onAnalisar:
                             podeAnalisar
                                 ? () => onAnalisar(p.alunoId, p.nome)
@@ -142,7 +148,10 @@ class _PrioridadeRow extends StatelessWidget {
     required this.prioridade,
     required this.onAnalisar,
     this.sobreMarca = false,
+    this.rotulo,
   });
+
+  final String? rotulo;
 
   final CopilotoPrioridade prioridade;
   final VoidCallback? onAnalisar;
@@ -181,7 +190,7 @@ class _PrioridadeRow extends StatelessWidget {
             // sai quase preto sobre o teal).
             if (sobreMarca)
               FxTonalButton(
-                label: s.copilotoAnalisarCurto,
+                label: rotulo ?? s.copilotoAnalisarCurto,
                 compact: true,
                 fundo: chrome.ink.withValues(alpha: 0.16),
                 texto: chrome.ink,
@@ -189,7 +198,7 @@ class _PrioridadeRow extends StatelessWidget {
               )
             else
               FxActionChip(
-                label: s.copilotoAnalisarCurto,
+                label: rotulo ?? s.copilotoAnalisarCurto,
                 accent: Theme.of(context).colorScheme.primary,
                 isDark: chrome.isDark,
                 onPressed: analisar,

@@ -95,7 +95,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
   @override
   Widget build(BuildContext context) {
     return fxScreenA11yScope(
-      label: 'Migração Focux — importar alunos',
+      label: 'Trazer alunos — importar',
       child: _buildContent(context),
     );
   }
@@ -139,7 +139,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
       child: FxShellScaffold(
           useMesh: true,
           appBar: FxShellAppBar(
-            title: 'Migração Focux',
+            title: 'Trazer alunos',
             subtitle: migracaoEtapaLabel(_etapa),
             onBack: _handleBack,
             actions: [
@@ -147,7 +147,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                 tooltip: 'Como funciona a migração',
                 onTap: () => showFxHelpSheet(
                   context,
-                  title: 'Migração Focux',
+                  title: 'Trazer alunos',
                   subtitle: 'Importe alunos e revise antes de salvar.',
                   tips: [
                     FxHelpTip(
@@ -186,7 +186,9 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
             primary: FxLiquidPrimaryButton(
               label:
                   _isAcesso
-                      ? migracaoIrParaListaLabel()
+                      ? migracaoRodapeAcessoLabel(
+                        todosAvisados: _faltamAvisar == 0,
+                      )
                       : _isReviewing
                       ? (_isSaving
                           ? migracaoSalvandoLabel()
@@ -248,22 +250,31 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                 ),
               ] else if (!_isReviewing) ...[
               const SizedBox(height: FxSettingsLayout.headerToGroup),
-              Wrap(
-                spacing: TokensStrip.s2,
-                runSpacing: TokensStrip.s2,
+              // Escolha única com a descrição de cada fonte.
+              FxSettingsGroup(
                 children: [
-                  for (final fonte in MigracaoFonte.values)
-                    FxToggleChip(
+                  for (final (i, fonte) in MigracaoFonte.values.indexed)
+                    FxSettingsTile(
+                      icon: switch (fonte) {
+                        MigracaoFonte.planilha => FxIcons.documento,
+                        MigracaoFonte.texto => FxIcons.notas,
+                        MigracaoFonte.foto => FxIcons.imagem,
+                      },
                       label: migracaoFonteLabel(fonte),
-                      selected: _fonte == fonte,
-                      isDark: isDark,
-                      showCheckmark: true,
-                      onTap: _captureBusy
-                          ? null
-                          : () {
-                            setState(() => _fonte = fonte);
-                            _persistDraft();
-                          },
+                      subtitle: migracaoFonteDescricao(fonte),
+                      value: '',
+                      showDivider: i < MigracaoFonte.values.length - 1,
+                      accessory:
+                          _fonte == fonte
+                              ? Icon(FxIcons.check, color: brand, size: 20)
+                              : const SizedBox(width: 20),
+                      onTap:
+                          _captureBusy
+                              ? null
+                              : () {
+                                setState(() => _fonte = fonte);
+                                _persistDraft();
+                              },
                     ),
                 ],
               ),
@@ -277,11 +288,6 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Importar dados',
-                        style: FocuxHubTypography.cardTitle(color: ink),
-                      ),
-                      const SizedBox(height: 4),
                       Text(
                         migracaoAjudaDaFonte(_fonte),
                         style: TextStyle(
@@ -307,12 +313,12 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                               ),
                             );
                           }
-                          final limite = plano.limiteMigracaoFotoMensal ?? 0;
                           return Padding(
                             padding: const EdgeInsets.only(top: 8),
                             child: Text(
-                              'Fotos este mês: ${plano.migracaoFotosUsadasMes}/$limite · '
-                              '${ptCountLabel(plano.migracaoFotosRestantes, 'restante', 'restantes')}',
+                              migracaoFotosRestantes(
+                                plano.migracaoFotosRestantes,
+                              ),
                               style: TextStyle(
                                 fontSize: TokensStrip.fontMinimo,
                                 fontWeight: FontWeight.w600,

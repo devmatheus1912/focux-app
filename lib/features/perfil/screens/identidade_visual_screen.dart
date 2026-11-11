@@ -38,7 +38,6 @@ import '../../../core/widgets/skeleton_loader.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 import '../../../core/theme/brand_style.dart';
-import '../../../core/widgets/fx_action_link.dart';
 import '../../../core/widgets/fx_choice_strip.dart';
 import '../widgets/identidade_previa_app.dart';
 import '../widgets/identidade_capa_tile.dart';
@@ -212,7 +211,8 @@ class _IdentidadeVisualScreenState
     final reduceMotion = TokensStrip.prefersReducedMotion(context);
 
     return FxFormPopGuard(
-      dirty: _dirty,
+      // Sem Enterprise nada é gravado: sair não pergunta.
+      dirty: _dirty && hasWhiteLabel,
       onCancel: _pedirSair,
       child: fxScreenA11yScope(
         label: 'Identidade Visual',
@@ -247,7 +247,13 @@ class _IdentidadeVisualScreenState
                                   _pedirSalvar(hasWhiteLabel: hasWhiteLabel),
                     ),
                   )
-                  : null,
+                  // Sem Enterprise: experimenta na prévia; nada é gravado.
+                  : FxFormStickyBar(
+                    child: FxLiquidPrimaryButton(
+                      label: 'Assinar Enterprise para usar',
+                      onPressed: _abrirEnterprise,
+                    ),
+                  ),
           body: FxKeyboardDismissScope(
             child: RefreshIndicator(
               color: Theme.of(context).colorScheme.primary,
@@ -269,17 +275,16 @@ class _IdentidadeVisualScreenState
                     sliver: SliverList(
                       delegate: SliverChildListDelegate([
                         if (!hasWhiteLabel) ...[
-                          _PaywallCard(
-                            onTap: () => context.push('/assinatura'),
-                            chrome: chrome,
+                          Text(
+                            'Experimente à vontade. Para o aluno ver, assine o Enterprise.',
+                            style: FocuxHubTypography.bodyMuted(
+                              color: chrome.mute,
+                            ),
                           ),
-                          const SizedBox(height: 18),
+                          const SizedBox(height: TokensStrip.s3),
                         ],
-                        AbsorbPointer(
-                          absorbing: !hasWhiteLabel,
-                          child: Opacity(
-                            opacity: hasWhiteLabel ? 1 : 0.38,
-                            child: Column(
+                        Builder(
+                          builder: (_) => Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
                                 Text(
@@ -329,6 +334,59 @@ class _IdentidadeVisualScreenState
                                 const SizedBox(height: TokensStrip.s4),
                                 ShellSurface(
                                   accent: chromeAccent,
+                                  padding: const EdgeInsets.fromLTRB(
+                                    18,
+                                    18,
+                                    18,
+                                    14,
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      _PanelTitle(
+                                        title: 'Cores',
+                                        mute: chrome.mute,
+                                      ),
+                                      const SizedBox(height: TokensStrip.s3),
+                                      IdentidadePaletasGrade(
+                                        selecionada: _palette,
+                                        onSelect: (p) {
+                                          HapticFeedback.selectionClick();
+                                          setState(() => _palette = p);
+                                        },
+                                      ),
+                                      if (identidadeAvisoContraste(_palette)
+                                          case final aviso?) ...[
+                                        const SizedBox(height: 10),
+                                        Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Icon(
+                                              FxIcons.verPequeno,
+                                              size: 16,
+                                              color: chrome.mute,
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Expanded(
+                                              child: Text(
+                                                aviso,
+                                                style:
+                                                    FocuxHubTypography.bodyMuted(
+                                                      color: chrome.mute,
+                                                    ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 14),
+                                ShellSurface(
+                                  accent: chromeAccent,
                                   padding: const EdgeInsets.all(18),
                                   child: Column(
                                     crossAxisAlignment:
@@ -344,11 +402,7 @@ class _IdentidadeVisualScreenState
                                         primaria: _corPrimaria,
                                         dark: _previa == 1,
                                         onSelecionar:
-                                            hasWhiteLabel
-                                                ? (e) => setState(
-                                                  () => _estilo = e,
-                                                )
-                                                : null,
+                                            (e) => setState(() => _estilo = e),
                                       ),
                                       const SizedBox(height: TokensStrip.s2),
                                       Text(
@@ -383,22 +437,24 @@ class _IdentidadeVisualScreenState
                                           onTap:
                                               hasWhiteLabel
                                                   ? _pedirTrocarLogo
-                                                  : null,
+                                                  : _abrirEnterprise,
                                         ),
                                       ),
                                       const SizedBox(height: 18),
                                       Text(
-                                        'CAPA',
+                                        'Capa',
                                         style: FocuxHubTypography.chip(
                                           chrome.mute,
-                                        ).copyWith(letterSpacing: 1.2),
+                                        ),
                                       ),
                                       const SizedBox(height: 8),
                                       IdentidadeCapaTile(
                                         url: _capaUrl,
                                         uploading: _uploadingCapa,
                                         onEscolher:
-                                            hasWhiteLabel ? _pickCapa : null,
+                                            hasWhiteLabel
+                                                ? _pickCapa
+                                                : _abrirEnterprise,
                                         onRemover:
                                             hasWhiteLabel
                                                 ? () => setState(
@@ -410,90 +466,21 @@ class _IdentidadeVisualScreenState
                                       _BrandField(
                                         label: 'Slogan',
                                         controller: _sloganCtrl,
-                                        enabled: hasWhiteLabel,
+                                        enabled: true,
                                         accent: chromeAccent,
                                         icon: FxIcons.citacao,
                                         hint:
                                             'Transformando vidas através do movimento',
-                                        maxLength: 200,
-                                        maxLines: 2,
+                                        maxLength: identidadeSloganMax,
+                                        avisoDepoisDe: identidadeSloganAviso,
+                                        maxLines: 3,
                                       ),
                                     ],
                                   ),
                                 ),
                                 const SizedBox(height: 14),
-                                ShellSurface(
-                                  accent: chromeAccent,
-                                  padding: const EdgeInsets.fromLTRB(
-                                    18,
-                                    18,
-                                    18,
-                                    14,
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      _PanelTitle(
-                                        title: 'Cores',
-                                        mute: chrome.mute,
-                                      ),
-                                      const SizedBox(height: TokensStrip.s3),
-                                      IdentidadePaletasGrade(
-                                        selecionada: _palette,
-                                        onSelect:
-                                            hasWhiteLabel
-                                                ? (p) {
-                                                  HapticFeedback.selectionClick();
-                                                  setState(() => _palette = p);
-                                                }
-                                                : null,
-                                      ),
-                                      if (identidadeAvisoContraste(_palette)
-                                          case final aviso?) ...[
-                                        const SizedBox(height: 10),
-                                        Row(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Icon(
-                                              FxIcons.verPequeno,
-                                              size: 16,
-                                              color: chrome.mute,
-                                            ),
-                                            const SizedBox(width: 8),
-                                            Expanded(
-                                              child: Text(
-                                                aviso,
-                                                style:
-                                                    FocuxHubTypography.bodyMuted(
-                                                      color: chrome.mute,
-                                                    ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                      if (hasWhiteLabel) ...[
-                                        const SizedBox(height: 6),
-                                        Align(
-                                          alignment: Alignment.centerLeft,
-                                          child: FxActionLink(
-                                            label:
-                                                identidadeRestaurarCoresLabel(),
-                                            onTap:
-                                                () => _pedirRestaurarCores(
-                                                  hasWhiteLabel: hasWhiteLabel,
-                                                ),
-                                          ),
-                                        ),
-                                      ],
-                                    ],
-                                  ),
-                                ),
                               ],
                             ),
-                          ),
                         ),
                       ]),
                     ),

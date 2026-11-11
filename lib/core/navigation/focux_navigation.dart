@@ -31,9 +31,9 @@ abstract final class FocuxNavigation {
   static const List<String> shellTabPaths = [
     '/dashboard/personal',
     '/alunos',
-    '/treinos',
+    '/chat/inbox',
     '/agenda',
-    '/ia/copiloto',
+    '/treinos',
   ];
 
   /// Branches do [AlunoShell]; ordem = índice do dock.

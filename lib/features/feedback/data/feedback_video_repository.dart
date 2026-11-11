@@ -172,10 +172,30 @@ class ExercicioOpcao {
   final int id;
   final String nome;
 
-  ExercicioOpcao({required this.id, required this.nome});
+  /// Primeiro treino ativo em que o exercício aparece (backend antigo: nulo).
+  final String? treinoNome;
+
+  ExercicioOpcao({required this.id, required this.nome, this.treinoNome});
 
   factory ExercicioOpcao.fromJson(Map<String, dynamic> j) => ExercicioOpcao(
     id: (j['id'] as num).toInt(),
     nome: j['nome'] as String? ?? '',
+    treinoNome: (j['treinoNome'] as String?)?.trim(),
   );
+}
+
+/// Exercícios agrupados pelo treino, na ordem do servidor. Sem nome de treino
+/// em nenhum (backend antigo), um grupo só, sem título.
+List<(String?, List<ExercicioOpcao>)> exerciciosPorTreino(
+  List<ExercicioOpcao> exercicios,
+) {
+  if (exercicios.every((e) => (e.treinoNome ?? '').isEmpty)) {
+    return [(null, exercicios)];
+  }
+  final grupos = <String, List<ExercicioOpcao>>{};
+  for (final e in exercicios) {
+    final treino = (e.treinoNome ?? '').isEmpty ? 'Outros' : e.treinoNome!;
+    grupos.putIfAbsent(treino, () => []).add(e);
+  }
+  return [for (final g in grupos.entries) (g.key, g.value)];
 }

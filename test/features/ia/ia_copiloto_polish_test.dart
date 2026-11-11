@@ -26,19 +26,16 @@ void main() {
     expect(screen, contains('FxShellScaffold'));
     expect(screen, contains('FxShellAppBar'));
     expect(screen, contains('FxHelpIconButton'));
-    expect(screen, isNot(contains('FxSettingsGroup')));
-    expect(screen, isNot(contains('FxSettingsTile')));
+    // Abertura em grupos: Análises recentes e O que a IA faz (SPEC-copiloto).
     expect(shellWidgets, contains('IaCopilotResultActionBar'));
     expect(shellWidgets, contains('DashboardPrioritiesOverlay'));
-    expect(shellWidgets, contains('scrollReserve'));
     expect(shellWidgets, isNot(contains('chrome.cardFill')));
     expect(shellWidgets, isNot(contains('Recomendações prontas')));
     expect(shellWidgets, isNot(contains('FxSettingsGroup')));
     expect(shellWidgets, isNot(contains('SafeArea(')));
-    expect(screen, isNot(contains('bottomNavigationBar:')));
-    expect(screen, contains('IaCopilotResultActionBar.scrollReserve'));
-    expect(screen, contains('Positioned('));
-    expect(screen, contains('Stack('));
+    // Rodapé do resultado no bottomNavigationBar: "Concluir" + próxima ação.
+    expect(screen, contains('bottomNavigationBar:'));
+    expect(screen, contains('onConcluir: _concluir'));
     expect(screen, contains('if (!_gerado)'));
     expect(screen, contains('CopilotoCardView'));
     expect(screen, isNot(contains('Tarefas IA')));

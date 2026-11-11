@@ -69,7 +69,18 @@ extension on _LandingEditorScreenState {
     _faq = List.of(g.faq);
   }
 
+  /// Conta os aprovados para o resumo da seção Depoimentos.
+  Future<void> _contarDepoimentos() async {
+    try {
+      final pagina = await DepoimentoRepository(
+        ref.read(apiClientProvider),
+      ).listarParaPersonalPagina(aprovado: true);
+      if (mounted) setState(() => _depoimentosAprovados = pagina.totalElements);
+    } catch (_) {}
+  }
+
   Future<void> _load({bool fromRefresh = false}) async {
+    unawaited(_contarDepoimentos());
     if (!fromRefresh) {
       setState(() {
         _loading = true;
@@ -239,6 +250,13 @@ extension on _LandingEditorScreenState {
     }
   }
 
+  /// Só o caminho ("/p/matheus"): cabe com fonte grande. O endereço inteiro
+  /// vai ao copiar e ao leitor de tela.
+  String _publicUrlCurto() {
+    final slug = (_slug ?? '').trim();
+    return slug.isEmpty ? _publicUrlLabel() : '/p/$slug';
+  }
+
   String _publicUrlLabel() {
     final slug = (_slug ?? '').trim();
     if (slug.isNotEmpty) return Env.landingPageDisplayLabel(slug);
@@ -393,22 +411,93 @@ extension on _LandingEditorScreenState {
     return switch (secao) {
       LandingSecao.capa => primeira(_heroTitle.text),
       LandingSecao.sobre => primeira(_bio.text),
-      LandingSecao.metodo => s.landingItens(_metodo.length),
-      LandingSecao.inclui => s.landingItens(_servicos.length),
+      LandingSecao.metodo => landingResumoTitulos(
+        [for (final m in _metodo) m.titulo],
+        vazio: s.landingVazio,
+      ),
+      LandingSecao.inclui => landingResumoTitulos(
+        [for (final i in _servicos) i.titulo],
+        vazio: s.landingVazio,
+      ),
       LandingSecao.planos => primeira(
         [_ofertaNome.text, _ofertaPreco.text]
             .where((t) => t.trim().isNotEmpty)
             .join(' · '),
       ),
-      LandingSecao.depoimentos => s.landingDepoimentosResumo,
-      LandingSecao.perguntas => s.landingItens(_faq.length),
+      LandingSecao.depoimentos => landingDepoimentosResumo(_depoimentosAprovados),
+      LandingSecao.perguntas => landingResumoTitulos(
+        [for (final f in _faq) f.pergunta],
+        vazio: s.landingVazio,
+      ),
       LandingSecao.contato => primeira(_whatsapp.text),
     };
   }
 
-  /// Texto novo só desta seção; o resto continua como está.
-  Future<void> _refazerSecao(LandingSecao secao) async {
+  /// "⋯" do topo: refazer a página pela entrevista (pede confirmação).
+  Future<void> _maisDaLanding() async {
+    final escolha = await showFxGroupedActionSheet<String>(
+      context,
+      titulo: 'Mais ações',
+      grupos: [
+        FxActionGroup<String>(null, const [
+          FxActionItem(
+            valor: 'refazer',
+            rotulo: 'Refazer pela entrevista',
+            icone: FxIcons.ia,
+          ),
+        ]),
+      ],
+    );
+    if (escolha != 'refazer' || !mounted) return;
+    final ok = await showFxConfirmSheet(
+      context,
+      title: 'Refazer a página?',
+      message:
+          'Os textos de todas as seções serão trocados por novos. Fotos, planos e depoimentos ficam.',
+      confirmLabel: 'Refazer',
+    );
+    if (ok && mounted) _voltarParaEntrevista();
+  }
+
+  /// Textos atuais de uma seção (para desfazer o "Refazer com IA").
+  VoidCallback _guardarSecao(LandingSecao secao) {
+    final titulo = _heroTitle.text;
+    final sub = _heroSubtitle.text;
+    final cta = _primaryCta.text;
+    final bio = _bio.text;
+    final metodo = List.of(_metodo);
+    final servicos = List.of(_servicos);
+    final faq = List.of(_faq);
+    final fechamento = _fechamento.text;
+    return () => setState(() {
+      switch (secao) {
+        case LandingSecao.capa:
+          _heroTitle.text = titulo;
+          _heroSubtitle.text = sub;
+          _primaryCta.text = cta;
+        case LandingSecao.sobre:
+          _bio.text = bio;
+        case LandingSecao.metodo:
+          _metodo = metodo;
+        case LandingSecao.inclui:
+          _servicos = servicos;
+        case LandingSecao.perguntas:
+          _faq = faq;
+        case LandingSecao.contato:
+          _fechamento.text = fechamento;
+        case LandingSecao.planos:
+        case LandingSecao.depoimentos:
+          break;
+      }
+      _dirty = true;
+    });
+  }
+
+  /// Texto novo só desta seção; o resto continua como está. Avisa com
+  /// "Desfazer", que volta o texto anterior.
+  Future<void> _refazerSecao(LandingSecao secao, {VoidCallback? depois}) async {
     FocusScope.of(context).unfocus();
+    final desfazer = _guardarSecao(secao);
     try {
       final g = await ref
           .read(landingStudioRepositoryProvider)
@@ -436,6 +525,15 @@ extension on _LandingEditorScreenState {
         }
         _dirty = true;
       });
+      FeedbackHelper.showSuccessAction(
+        context,
+        'Textos de ${landingSecaoTitulo(S.of(context), secao)} refeitos.',
+        actionLabel: 'Desfazer',
+        onAction: () {
+          desfazer();
+          depois?.call();
+        },
+      );
     } catch (e) {
       if (mounted) FeedbackHelper.showError(context, friendlyError(e));
     }
@@ -457,3 +555,20 @@ extension on _LandingEditorScreenState {
             : 'Rascunho';
   }
 }
+
+/// "Diagnóstico, Programa, Ajustes"; vazio: "Ainda vazio".
+String landingResumoTitulos(List<String> titulos, {required String vazio}) {
+  final limpos = [
+    for (final t in titulos)
+      if (t.trim().isNotEmpty) t.trim(),
+  ];
+  return limpos.isEmpty ? vazio : limpos.join(', ');
+}
+
+/// "2 aprovados" / "Nenhum aprovado ainda"; sem contagem, o texto de antes.
+String landingDepoimentosResumo(int? aprovados) => switch (aprovados) {
+  null => 'Vêm dos depoimentos aprovados',
+  0 => 'Nenhum aprovado ainda',
+  1 => '1 aprovado',
+  final n => '$n aprovados',
+};

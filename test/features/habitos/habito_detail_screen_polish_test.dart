@@ -20,7 +20,7 @@ void main() {
     expect(screen, contains('AlunoSegmentedChoice'));
     expect(screen, contains('FxActionChip'));
     expect(screen, contains('RefreshIndicator'));
-    expect(screen, contains('viewInsetsOf'));
+    expect(screen, isNot(contains('TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom')));
     expect(screen, contains('FeatureGate'));
     expect(screen, contains('habitCoaching'));
     expect(screen, contains('habitoStickyPersonal'));

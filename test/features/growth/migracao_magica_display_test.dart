@@ -22,8 +22,18 @@ void main() {
     expect(migracaoCopiarConvitesLabel(1), 'Copiar o convite');
     expect(migracaoCopiarConvitesLabel(4), 'Copiar os 4 convites');
     expect(migracaoSalvarConfirmMessage(), isNot(contains('um a um')));
-    expect(migracaoEtapaLabel(MigracaoEtapa.acesso), 'Etapa 3 de 3');
-    expect(migracaoIrParaListaLabel(), 'Ir para lista');
+    expect(migracaoEtapaLabel(MigracaoEtapa.acesso), 'Etapa 3 de 3 · Enviar acesso');
+    expect(migracaoRodapeAcessoLabel(todosAvisados: false), 'Concluir');
+    expect(migracaoRodapeAcessoLabel(todosAvisados: true), 'Ver alunos');
+    expect(migracaoImportadosLinha(1), '1 aluno importado');
+    expect(migracaoImportadosLinha(12), '12 alunos importados');
+    expect(migracaoDuplicadosLinha(2), '2 já estavam na sua lista');
+    expect(migracaoIdentificados(1), '1 aluno identificado');
+    expect(migracaoLidosDe(3, 'a.xlsx'), '3 alunos lidos de a.xlsx');
+    expect(
+      migracaoGrupoProgresso('Só telefone', feitos: 0, total: 1),
+      'Só telefone · 0 de 1 enviado',
+    );
     expect(migracaoDiscardConfirmLabel(), 'Sair');
   });
 
@@ -51,7 +61,7 @@ void main() {
     test('a leitura de imagem só é citada na foto', () {
       expect(migracaoAjudaDaFonte(MigracaoFonte.planilha), isNot(contains('foto')));
       expect(migracaoAjudaDaFonte(MigracaoFonte.texto), isNot(contains('aparelho')));
-      expect(migracaoAjudaDaFonte(MigracaoFonte.foto), contains('leitura gratuita'));
+      expect(migracaoAjudaDaFonte(MigracaoFonte.foto), contains('sem custo'));
       expect(migracaoAjudaDaFonte(MigracaoFonte.foto), isNot(contains('OCR')));
     });
 

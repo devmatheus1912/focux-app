@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../l10n/app_localizations.dart';
-import '../legal/focux_legal.dart';
 import '../theme/design_tokens.dart';
 import '../theme/focux_hub_typography.dart';
 import '../theme/shell_chrome.dart';
@@ -59,6 +58,20 @@ List<String> excluirContaConsequencias(
       l10n.excluirContaAcComum,
     ],
   };
+}
+
+/// Texto do botão vermelho: o que falta, ou "Excluir definitivamente".
+String excluirContaRotuloBotao(
+  S l10n, {
+  required String senha,
+  required String codigo,
+  required String confirmacao,
+  required bool usarCodigo,
+}) {
+  if (usarCodigo && codigo.trim().length != 6) return 'Digite o código';
+  if (!usarCodigo && senha.isEmpty) return 'Digite sua senha';
+  if (confirmacao.trim() != 'EXCLUIR') return 'Digite EXCLUIR';
+  return l10n.excluirContaBotao;
 }
 
 /// Credencial e confirmação válidas: habilita o botão vermelho.
@@ -247,6 +260,7 @@ class _ExcluirContaSheetState extends State<_ExcluirContaSheet> {
       subtitle: l10n.excluirContaSubtitulo,
       leading: const Icon(FxIcons.excluir, color: perigo, size: 20),
       maxHeightFactor: 0.92,
+      semFechar: true,
       footer: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -267,7 +281,16 @@ class _ExcluirContaSheetState extends State<_ExcluirContaSheet> {
                   borderRadius: BorderRadius.circular(16),
                 ),
               ),
-              child: Text(l10n.excluirContaBotao),
+              // Desativado, o botão diz o que falta.
+              child: Text(
+                excluirContaRotuloBotao(
+                  l10n,
+                  senha: _senha.text,
+                  codigo: _codigo.text,
+                  confirmacao: _confirmacao.text,
+                  usarCodigo: _usarCodigo,
+                ),
+              ),
             ),
           ),
           const SizedBox(height: TokensStrip.s2),
@@ -300,13 +323,7 @@ class _ExcluirContaSheetState extends State<_ExcluirContaSheet> {
                     linhas[i],
                   ),
                 ],
-                const SizedBox(height: TokensStrip.s3),
-                linha(
-                  FxIcons.alerta,
-                  perigo,
-                  l10n.excluirContaAcComum,
-                  corTexto: perigo,
-                ),
+
               ],
             ),
           ),
@@ -329,13 +346,6 @@ class _ExcluirContaSheetState extends State<_ExcluirContaSheet> {
               ),
             ),
           ],
-          const SizedBox(height: TokensStrip.s3),
-          FxTonalButton(
-            label: l10n.excluirContaWebBotao,
-            icon: FxIcons.abrirFora,
-            compact: true,
-            onPressed: FocuxLegal.openDeleteAccount,
-          ),
           const SizedBox(height: TokensStrip.s4),
           secao(l10n.excluirContaSecaoConfirmar),
           if (_usarCodigo)
@@ -354,6 +364,14 @@ class _ExcluirContaSheetState extends State<_ExcluirContaSheet> {
               onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
               decoration: _deco(context, l10n.excluirContaSenhaLabel),
             ),
+          const SizedBox(height: TokensStrip.s3),
+          TextField(
+            key: const ValueKey('excluir-conta-confirmacao'),
+            controller: _confirmacao,
+            textCapitalization: TextCapitalization.characters,
+            onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
+            decoration: _deco(context, l10n.excluirContaConfirmLabel),
+          ),
           const SizedBox(height: TokensStrip.s3),
           if (!_usarCodigo)
             Padding(
@@ -385,14 +403,6 @@ class _ExcluirContaSheetState extends State<_ExcluirContaSheet> {
                   onPressed: () => setState(() => _usarCodigo = false),
                 ),
             ],
-          ),
-          const SizedBox(height: TokensStrip.s4),
-          secao(l10n.excluirContaSecaoFinalizar),
-          TextField(
-            controller: _confirmacao,
-            textCapitalization: TextCapitalization.characters,
-            onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
-            decoration: _deco(context, l10n.excluirContaConfirmLabel),
           ),
           const SizedBox(height: TokensStrip.s2),
         ],

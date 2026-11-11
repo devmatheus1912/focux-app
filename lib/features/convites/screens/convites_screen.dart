@@ -387,6 +387,7 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
                                       onTap:
                                           () => showPerfilCodigoSheet(
                                             context,
+                                            origemConvites: true,
                                             perfil: perfil,
                                           ),
                                     ),

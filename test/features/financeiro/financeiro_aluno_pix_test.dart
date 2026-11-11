@@ -166,7 +166,8 @@ void main() {
   Future<void> abrirPixDaPrimeira(WidgetTester tester) async {
     await tester.tap(find.text('Setembro 2026'));
     await _settle(tester);
-    await tester.tap(find.text('Pagar com PIX'));
+    // O rodapé da tela também diz "Pagar com PIX": o da folha é o último.
+    await tester.tap(find.text('Pagar com PIX').last);
     await _settle(tester);
   }
 
@@ -247,7 +248,7 @@ void main() {
 
       expect(find.textContaining('149,90'), findsWidgets);
       expect(find.textContaining(_truncado), findsNothing);
-      expect(find.text('Em todas as cobranças'), findsWidgets);
+      expect(find.textContaining('Vence em'), findsWidgets);
       expect(adapter.listas, hasLength(1));
 
       await abrirPixDaPrimeira(tester);
@@ -295,7 +296,7 @@ void main() {
         ),
       );
       await _settle(tester);
-      expect(find.text('Suas cobranças'), findsOneWidget);
+      expect(find.text('Mensalidades'), findsOneWidget);
       expect(tester.takeException(), isNull);
 
       await tester.dragUntilVisible(
@@ -311,8 +312,8 @@ void main() {
       tester.widget<InkWell>(linha.first).onTap!();
       await _settle(tester);
       expect(tester.takeException(), isNull);
-      await tester.ensureVisible(find.text('Pagar com PIX'));
-      await tester.tap(find.text('Pagar com PIX'));
+      await tester.ensureVisible(find.text('Pagar com PIX').last);
+      await tester.tap(find.text('Pagar com PIX').last);
       await _settle(tester);
       expect(find.text('Copiar código PIX'), findsOneWidget);
       expect(find.text('PIX - Escaneie ou copie'), findsOneWidget);
@@ -339,7 +340,7 @@ void main() {
       _app(adapter: adapter, home: const FinanceiroAlunoScreen()),
     );
     await _settle(tester);
-    expect(find.text('Nas cobranças carregadas'), findsWidgets);
+    expect(find.textContaining('nas cobranças carregadas'), findsWidgets);
 
     await tester.tap(find.text('Carregar mais'));
     await _settle(tester);

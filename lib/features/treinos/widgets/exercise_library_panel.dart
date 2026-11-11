@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import '../../../core/widgets/fx_choice_strip.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/design_tokens.dart';
@@ -46,7 +47,32 @@ typedef ExerciseLibraryPageLoader =
       required ExercisePickerFilter filter,
       PadraoMovimento? padrao,
       GrupoMuscular? grupo,
+      String? aba,
     });
+
+/// Abas do seletor: todos, os do personal e a biblioteca do Focux.
+enum ExerciseLibraryAba { todos, meus, focux }
+
+String? exerciseLibraryAbaApi(ExerciseLibraryAba aba) => switch (aba) {
+  ExerciseLibraryAba.todos => null,
+  ExerciseLibraryAba.meus => 'MEUS',
+  ExerciseLibraryAba.focux => 'FOCUX',
+};
+
+/// Na aba "Meus" os filtros automáticos (grupos do nome do treino e
+/// equipamentos do aluno) não valem; os escolhidos à mão continuam.
+({Set<GrupoMuscular> grupos, ExercisePickerFilter filtro}) exerciseLibraryFiltrosDaAba(
+  ExerciseLibraryAba aba, {
+  required Set<GrupoMuscular> grupos,
+  required Set<GrupoMuscular> gruposAutomaticos,
+  required ExercisePickerFilter filtro,
+}) {
+  if (aba != ExerciseLibraryAba.meus) return (grupos: grupos, filtro: filtro);
+  return (
+    grupos: grupos.difference(gruposAutomaticos),
+    filtro: filtro.copyWith(clearAluno: true),
+  );
+}
 
 /// Biblioteca paginada: busca, filtros, grupos musculares combináveis e lista
 /// A–Z com favoritos, recentes e mais usados no topo.
@@ -138,6 +164,7 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
   late ExercisePickerFilter _filter;
   String _committedQuery = '';
   final Set<GrupoMuscular> _grupos = {};
+  var _aba = ExerciseLibraryAba.todos;
   final Map<int, Exercicio> _localUpdates = {};
   final List<Exercicio> _items = [];
   final Map<String, GlobalKey> _chavesDasLetras = {};
@@ -343,15 +370,23 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
 
     try {
       // Vários grupos: uma consulta por grupo (mesma página) e a lista junta.
-      final alvos = _grupos.isEmpty ? <GrupoMuscular?>[null] : _grupos.toList();
+      final daAba = exerciseLibraryFiltrosDaAba(
+        _aba,
+        grupos: _grupos,
+        gruposAutomaticos: widget.gruposIniciais,
+        filtro: _filter,
+      );
+      final alvos =
+          daAba.grupos.isEmpty ? <GrupoMuscular?>[null] : daAba.grupos.toList();
       final resultados = await Future.wait([
         for (final grupo in alvos)
           widget.onLoadPage(
             busca: _committedQuery,
             page: _page,
-            filter: _filter,
+            filter: daAba.filtro,
             padrao: null,
             grupo: grupo,
+            aba: exerciseLibraryAbaApi(_aba),
           ),
       ]);
       if (!mounted) return;
@@ -509,6 +544,22 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               if (widget.header != null) widget.header!,
+              Padding(
+                padding: const EdgeInsets.only(bottom: TokensStrip.s2),
+                child: FxChoiceStrip<ExerciseLibraryAba>(
+                  itens: const [
+                    FxChoiceItem(value: ExerciseLibraryAba.todos, label: 'Todos'),
+                    FxChoiceItem(value: ExerciseLibraryAba.meus, label: 'Meus'),
+                    FxChoiceItem(value: ExerciseLibraryAba.focux, label: 'Focux'),
+                  ],
+                  selecionado: _aba,
+                  onSelecionar: (aba) {
+                    if (aba == _aba) return;
+                    setState(() => _aba = aba);
+                    _fetchPage(reset: true);
+                  },
+                ),
+              ),
               TextField(
                 controller: _searchCtrl,
                 focusNode: _searchFocus,
@@ -695,6 +746,30 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
           primary: primary,
           message: _error!,
           onRetry: () => _fetchPage(reset: true),
+        ),
+      );
+    }
+    if (_items.isEmpty &&
+        _aba == ExerciseLibraryAba.meus &&
+        _committedQuery.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(
+          FxSettingsLayout.pageInset,
+          12,
+          FxSettingsLayout.pageInset,
+          12,
+        ),
+        child: FxEmptyState(
+          icon: FxIcons.treino,
+          title: 'Você ainda não criou exercícios.',
+          subtitle: 'Os exercícios e vídeos que você criar aparecem aqui.',
+          action:
+              widget.onCadastrar == null
+                  ? null
+                  : FxEmptyAction(
+                    label: 'Criar exercício',
+                    onTap: () => widget.onCadastrar!(''),
+                  ),
         ),
       );
     }

@@ -1,12 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../models/copiloto_analise.dart';
+
 import '../../../core/auth/sessao_provider.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../dashboard/data/command_center_data.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../../dashboard/utils/copilot_actions_display.dart';
 import '../data/ia_repository.dart';
-import '../models/ia_copilot_insight.dart';
 import '../models/ia_copilot_proxima_acao.dart';
 import '../models/ia_copiloto_home.dart';
 
@@ -25,30 +26,6 @@ final copilotoTarefasAbertasProvider =
 
 /// Parameters for the insights provider.
 /// Equality + hashCode ensure Riverpod dedupes by (alunoId, mode).
-class InsightsQuery {
-  final int? alunoId;
-  final String? mode;
-  const InsightsQuery({this.alunoId, this.mode});
-
-  @override
-  bool operator ==(Object other) =>
-      other is InsightsQuery && other.alunoId == alunoId && other.mode == mode;
-
-  @override
-  int get hashCode => Object.hash(alunoId, mode);
-}
-
-final insightsProvider =
-    FutureProvider.family<List<IaCopilotInsight>, InsightsQuery>((
-      ref,
-      query,
-    ) async {
-      ref.watch(sessaoProvider);
-      return IaRepository(
-        ref.read(apiClientProvider),
-      ).insights(alunoId: query.alunoId, mode: query.mode);
-    });
-
 final proximaAcaoProvider =
     FutureProvider.family<IaCopilotProximaAcao, int>((ref, alunoId) async {
   ref.watch(sessaoProvider);
@@ -61,3 +38,19 @@ class IaCopilotTaskDraft {
   final String acao;
   final String motivo;
 }
+
+/// "Análises recentes" da abertura do Copiloto (7 dias).
+final copilotoAnalisesRecentesProvider =
+    FutureProvider.autoDispose<List<CopilotoAnaliseResumo>>((ref) async {
+      ref.watch(sessaoProvider);
+      return IaRepository(ref.read(apiClientProvider)).analisesRecentes();
+    });
+
+/// Sugestões de carga esperando revisão (linha "Cargas para revisar").
+final cargasParaRevisarProvider = FutureProvider.autoDispose<int>((ref) async {
+  ref.watch(sessaoProvider);
+  final lista = await IaRepository(
+    ref.read(apiClientProvider),
+  ).sugestoesProgressao(limit: 50);
+  return lista.length;
+});

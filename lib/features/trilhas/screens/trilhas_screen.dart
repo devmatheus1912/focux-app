@@ -262,7 +262,7 @@ class _TrilhasScreenState extends ConsumerState<TrilhasScreen> {
                       FxSettingsLayout.pageInset,
                       TokensStrip.s2,
                       FxSettingsLayout.pageInset,
-                      TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
+                      TokensStrip.s3,
                     ),
                     child: FxLiquidPrimaryButton(
                       label: 'Nova trilha',
@@ -325,21 +325,10 @@ class TrilhasLista extends StatelessWidget {
                 TrilhaCartao(trilha: t, onTap: () => onAbrir(t)),
             ],
             if (grupos.concluidas.isNotEmpty)
-              Theme(
-                data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-                child: ExpansionTile(
-                  tilePadding: EdgeInsets.zero,
-                  childrenPadding: EdgeInsets.zero,
-                  initiallyExpanded: grupos.andamento.isEmpty,
-                  title: Text(
-                    'Concluídas · ${grupos.concluidas.length}',
-                    style: FocuxHubTypography.cardTitle(color: chrome.ink),
-                  ),
-                  children: [
-                    for (final t in grupos.concluidas)
-                      TrilhaCartao(trilha: t, onTap: () => onAbrir(t)),
-                  ],
-                ),
+              _Concluidas(
+                trilhas: grupos.concluidas,
+                abertaNoInicio: grupos.andamento.isEmpty,
+                onAbrir: onAbrir,
               ),
             if (lista.hasMore && onCarregarMais != null)
               Align(
@@ -352,6 +341,65 @@ class TrilhasLista extends StatelessWidget {
           ],
         ],
       ),
+    );
+  }
+}
+
+/// "Concluídas · N": rótulo no mesmo estilo do "Em andamento", seta à direita.
+class _Concluidas extends StatefulWidget {
+  const _Concluidas({
+    required this.trilhas,
+    required this.abertaNoInicio,
+    required this.onAbrir,
+  });
+
+  final List<TrilhaModel> trilhas;
+  final bool abertaNoInicio;
+  final ValueChanged<TrilhaModel> onAbrir;
+
+  @override
+  State<_Concluidas> createState() => _ConcluidasState();
+}
+
+class _ConcluidasState extends State<_Concluidas> {
+  late var _aberta = widget.abertaNoInicio;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Semantics(
+          button: true,
+          expanded: _aberta,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(TokensStrip.rSm),
+            onTap: () => setState(() => _aberta = !_aberta),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 48),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Concluídas · ${widget.trilhas.length}',
+                      style: FocuxHubTypography.chip(chrome.mute),
+                    ),
+                  ),
+                  Icon(
+                    _aberta ? FxIcons.chevronCima : FxIcons.chevronBaixo,
+                    size: 18,
+                    color: chrome.mute,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        if (_aberta)
+          for (final t in widget.trilhas)
+            TrilhaCartao(trilha: t, onTap: () => widget.onAbrir(t)),
+      ],
     );
   }
 }

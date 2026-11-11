@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -10,6 +11,9 @@ import '../../ia/data/ia_repository.dart';
 import '../utils/aluno360_operacao_logic.dart';
 import '../data/aluno_repository.dart';
 import '../providers/aluno_detail_providers.dart';
+
+/// Tela de Tarefas do Copiloto.
+const tarefasCopilotoRota = '/dashboard/command-center/copiloto';
 
 /// Creates or surfaces an open Copilot task in Command Center from Aluno 360.
 Future<bool> criarTarefaCopilotoFromAluno360({
@@ -27,10 +31,13 @@ Future<bool> criarTarefaCopilotoFromAluno360({
     if (existing != null) {
       ref.invalidate(alunoOpenIaActionsProvider(aluno.id));
       if (context.mounted) {
-        FeedbackHelper.showInfo(
+        final nome = aluno.nome.trim().split(RegExp(r'\s+')).first;
+        final router = GoRouter.of(context);
+        FeedbackHelper.showSuccessAction(
           context,
-          'Tarefa já aberta em ${FocuxMicrocopy.commandCenter}.',
-          placement: FeedbackPlacement.operacaoTop,
+          'Já existe uma tarefa para $nome.',
+          actionLabel: 'Ver',
+          onAction: () => router.push(tarefasCopilotoRota),
         );
       }
       return true;
@@ -61,7 +68,7 @@ Future<bool> criarTarefaCopilotoFromAluno360({
     ref.invalidate(commandCenterProvider);
     ref.invalidate(alunoOpenIaActionsProvider(aluno.id));
     if (context.mounted) {
-      FeedbackHelper.showOperacaoSuccess(
+      FeedbackHelper.showSuccess(
         context,
         persisted
             ? 'Tarefa criada em ${FocuxMicrocopy.commandCenter}.'
@@ -71,7 +78,7 @@ Future<bool> criarTarefaCopilotoFromAluno360({
     return persisted;
   } catch (e) {
     if (context.mounted) {
-      FeedbackHelper.showOperacaoError(
+      FeedbackHelper.showError(
         context,
         'Não foi possível criar tarefa: ${friendlyError(e)}',
       );

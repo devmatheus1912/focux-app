@@ -2,6 +2,8 @@ import '../../../core/observability/sentry_performance.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import '../../../core/widgets/fx_grouped_action_sheet.dart';
+import '../widgets/alunos_convide_mais.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';

@@ -93,7 +93,8 @@ class _TrilhaDetalheState extends ConsumerState<_TrilhaDetalhe> {
     await _rodar(
       () => repo.concluirMarco(trilhaId: _trilha.id, marcoId: etapa.id),
     );
-    if (!mounted || !_trilha.marcos.any((m) => m.id == etapa.id && m.concluido)) {
+    if (!mounted ||
+        !_trilha.marcos.any((m) => m.id == etapa.id && m.concluido)) {
       return;
     }
     final msg =
@@ -110,8 +111,19 @@ class _TrilhaDetalheState extends ConsumerState<_TrilhaDetalhe> {
     );
   }
 
-  Future<void> _desfazer(MarcoModel etapa) {
+  Future<void> _desfazer(MarcoModel etapa) async {
     final repo = ref.read(trilhasRepositoryProvider);
+    // A folha já fechou: desfaz pelo repositório e avisa a lista.
+    if (!mounted) {
+      try {
+        final nova = await repo.reabrirMarco(
+          trilhaId: _trilha.id,
+          marcoId: etapa.id,
+        );
+        widget.onMudou(nova);
+      } catch (_) {}
+      return;
+    }
     return _rodar(
       () => repo.reabrirMarco(trilhaId: _trilha.id, marcoId: etapa.id),
       ok: 'Etapa desfeita.',
@@ -217,7 +229,10 @@ class _TrilhaDetalheState extends ConsumerState<_TrilhaDetalhe> {
     return FxSheetFrame(
       title: _trilha.titulo,
       subtitle: [
-        trilhaResumoLinha(_trilha).split(' · ').first,
+        if (atual == null)
+          trilhaResumoLinha(_trilha)
+        else
+          trilhaResumoLinha(_trilha).split(' · ').first,
         if (prazo != null) prazo,
       ].join(' · '),
       leading: Icon(FxIcons.rota, color: chrome.brand, size: 20),
@@ -320,16 +335,18 @@ class _EtapaLinha extends StatelessWidget {
     return Semantics(
       label:
           'Etapa $numero: ${etapa.titulo}. '
-          '${feita ? 'Feita' : atual ? 'Etapa atual' : 'A fazer'}',
+          '${feita
+              ? 'Feita'
+              : atual
+              ? 'Etapa atual'
+              : 'A fazer'}',
       child: InkWell(
         onTap: onTap,
         onLongPress: onTap,
         child: Container(
           decoration: BoxDecoration(
             border:
-                ultima
-                    ? null
-                    : Border(bottom: BorderSide(color: chrome.line)),
+                ultima ? null : Border(bottom: BorderSide(color: chrome.line)),
           ),
           padding: const EdgeInsets.symmetric(vertical: TokensStrip.s2),
           child: Row(

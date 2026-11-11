@@ -29,9 +29,19 @@ extension on _IdentidadeVisualScreenState {
     await _pickLogo();
   }
 
+  /// Sem Enterprise: logo, capa e o rodapé levam ao plano.
+  void _abrirEnterprise() => context.push('/assinatura');
+
   Future<void> _pedirSalvar({required bool hasWhiteLabel}) async {
     if (!hasWhiteLabel || _salvando) return;
     FxKeyboardDismissScope.dismiss();
+    if (_sloganCtrl.text.trim().length > identidadeSloganMax) {
+      FeedbackHelper.showError(
+        context,
+        'Encurte o slogan para até $identidadeSloganMax caracteres.',
+      );
+      return;
+    }
     final ok = await showFxConfirmSheet(
       context,
       title: identidadeSalvarConfirmTitle(),
@@ -40,19 +50,6 @@ extension on _IdentidadeVisualScreenState {
     );
     if (!ok || !mounted) return;
     await _salvar(hasWhiteLabel: hasWhiteLabel);
-  }
-
-  Future<void> _pedirRestaurarCores({required bool hasWhiteLabel}) async {
-    if (!hasWhiteLabel || _salvando) return;
-    FxKeyboardDismissScope.dismiss();
-    final ok = await showFxConfirmSheet(
-      context,
-      title: identidadeRestaurarConfirmTitle(),
-      message: identidadeRestaurarConfirmMessage(),
-      confirmLabel: identidadeRestaurarCoresLabel(),
-    );
-    if (!ok || !mounted) return;
-    await _restoreDefaultBrandColors(hasWhiteLabel: hasWhiteLabel);
   }
 
   Future<void> _pickLogo() async {
@@ -106,16 +103,6 @@ extension on _IdentidadeVisualScreenState {
     } finally {
       if (mounted) setState(() => _uploadingCapa = false);
     }
-  }
-
-  Future<void> _restoreDefaultBrandColors({required bool hasWhiteLabel}) async {
-    if (!hasWhiteLabel) return;
-    setState(() => _palette = CuratedBrandPalette.focuxDefault);
-    await _salvar(
-      hasWhiteLabel: hasWhiteLabel,
-      successMessage: 'Cores padrão do Focux restauradas!',
-      restored: true,
-    );
   }
 
   Future<void> _salvar({

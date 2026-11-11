@@ -78,7 +78,8 @@ void main() {
   test('só as 5 abas do dock contam como aba', () {
     expect(isPersonalShellTabLocation('/dashboard/personal'), isTrue);
     expect(isPersonalShellTabLocation('/alunos?q=ana'), isTrue);
-    expect(isPersonalShellTabLocation('/ia/copiloto'), isTrue);
+    expect(isPersonalShellTabLocation('/chat/inbox'), isTrue);
+    expect(isPersonalShellTabLocation('/ia/copiloto'), isFalse);
     expect(isPersonalShellTabLocation('/financeiro'), isFalse);
     expect(isPersonalShellTabLocation('/assinatura'), isFalse);
     expect(isPersonalShellTabLocation('/alunos/12'), isFalse);

@@ -1,61 +1,65 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_motion.dart';
-import '../../../l10n/app_localizations.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../utils/ia_copiloto_display.dart';
 import '../../../core/utils/pt_br_display.dart';
 import '../../../core/theme/fx_icons.dart';
 
 /// Chip sticky S1 após gerar — paridade [DashboardPrioritiesOverlay].
 /// Overlay flutuante (não barra `bottomNavigationBar` / S3–S5).
 /// O pai posiciona no Stack; scroll reserva folga para não cobrir Insights.
+/// Rodapé do resultado: "Concluir" sempre e, à direita, a próxima ação que
+/// falta. Sem pendente, só "Concluir" (como botão principal).
 class IaCopilotResultActionBar extends StatelessWidget {
   const IaCopilotResultActionBar({
     super.key,
-    required this.brand,
-    required this.onPrimary,
-    required this.onMore,
-    this.primaryLabel,
+    required this.onConcluir,
+    this.proximaLabel,
+    this.onProxima,
   });
 
-  final Color brand;
-  final String? primaryLabel;
-  final VoidCallback onPrimary;
-  final VoidCallback onMore;
-
-  /// Folga de scroll quando a barra está visível (botão + padding + nav).
-  static const double scrollReserve = 96;
+  final VoidCallback onConcluir;
+  final String? proximaLabel;
+  final VoidCallback? onProxima;
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final proxima = onProxima;
     return Material(
       color: isDark ? EagleTokens.darkBg : TokensStrip.pageBg,
       child: Padding(
         padding: EdgeInsets.fromLTRB(
           TokensStrip.s4,
           TokensStrip.s2,
-          TokensStrip.s2,
+          TokensStrip.s4,
           TokensStrip.s2 + MediaQuery.paddingOf(context).bottom,
         ),
-        child: Row(
-          children: [
-            Expanded(
-              child: FxLiquidPrimaryButton(
-                label: primaryLabel ?? iaCopilotoCriarTarefaLabel(),
-                onPressed: onPrimary,
-              ),
-            ),
-            IconButton(
-              tooltip: S.of(context).copilotoMenuTitulo,
-              icon: Icon(FxIcons.mais, color: brand),
-              onPressed: onMore,
-            ),
-          ],
-        ),
+        child:
+            proxima == null
+                ? FxLiquidPrimaryButton(label: 'Concluir', onPressed: onConcluir)
+                : Row(
+                  children: [
+                    Expanded(
+                      child: FxTonalButton(
+                        label: 'Concluir',
+                        expanded: true,
+                        onPressed: onConcluir,
+                      ),
+                    ),
+                    const SizedBox(width: TokensStrip.s2),
+                    Expanded(
+                      flex: 2,
+                      child: FxLiquidPrimaryButton(
+                        label: proximaLabel ?? '',
+                        onPressed: proxima,
+                      ),
+                    ),
+                  ],
+                ),
       ),
     );
   }

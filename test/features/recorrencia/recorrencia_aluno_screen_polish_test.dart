@@ -12,10 +12,8 @@ void main() {
     expect(screen, anyOf(contains('friendlyError'), contains('DashboardErrorState'), contains('FxEmptyState'), contains('_erro'), contains('_TrainingEmptyState'), contains('ref.invalidate')));
     expect(screen, anyOf(contains('FxLoading'), contains('SkeletonLoader'), contains('SkeletonList'), contains('DashboardShimmer'), contains('Shimmer'), contains('IaCopilotInsightsLoading'), contains('_loading')));
     expect(screen, contains('RefreshIndicator'));
-    expect(screen, contains('FxHubHeader'));
     expect(screen, contains('safePopOrGo'));
     expect(screen, contains('FxLiquidPrimaryButton'));
-    expect(screen, contains('OperationalMetricTile'));
     expect(screen, contains('recorrenciaAlunoStickyLabel'));
     expect(screen, contains('PopScope'));
     expect(screen, contains('recorrenciaValorLabel'));
@@ -25,12 +23,14 @@ void main() {
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('FxContentWidthLimiter'));
     expect(screen, contains('/chat/aluno'));
-    expect(screen, contains('/financeiro/aluno'));
-    expect(screen, contains("label: 'Hoje'"));
-    expect(screen, contains('recorrenciaPagamentoValue'));
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
-    expect(screen, contains('FxActionChip'));
-    expect(screen, contains('viewInsetsOf'));
     expect(screen, isNot(contains('FilledButton')));
+    // Um nome só, um cartão e um botão; sem atalhos soltos.
+    expect(screen, isNot(contains('OperationalMetricTile')));
+    expect(screen, isNot(contains('FxHubHeader')));
+    expect(screen, isNot(contains('FxActionChip')));
+    expect(screen, isNot(contains("'Assinatura'")));
+    expect(screen, contains("'Pagamento automático'"));
+    expect(screen, contains('recorrenciaFormaLabel'));
   });
 }

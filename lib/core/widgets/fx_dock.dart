@@ -41,6 +41,7 @@ class FxDockItems {
     S s, {
     int alunosEmRisco = 0,
     int agendaHoje = 0,
+    int conversasSemResposta = 0,
   }) => [
     FxDockItem(
       icon: FxIcons.inicio,
@@ -55,9 +56,14 @@ class FxDockItems {
       badgeLabel: alunosEmRisco > 0 ? s.dockBadgeEmRisco(alunosEmRisco) : null,
     ),
     FxDockItem(
-      icon: FxIcons.treino,
-      iconAtivo: FxIcons.treinoAtivo,
-      label: s.dockTreinos,
+      icon: FxIcons.chat,
+      iconAtivo: FxIcons.chatAtivo,
+      label: s.dockConversas,
+      badgeCount: conversasSemResposta,
+      badgeLabel:
+          conversasSemResposta > 0
+              ? s.dockBadgeSemResposta(conversasSemResposta)
+              : null,
     ),
     FxDockItem(
       icon: FxIcons.calendario,
@@ -67,7 +73,11 @@ class FxDockItems {
       badgeTone: FxDockBadgeTone.info,
       badgeLabel: agendaHoje > 0 ? s.dockBadgeHoje(agendaHoje) : null,
     ),
-    FxDockItem(icon: FxIcons.ia, iconAtivo: FxIcons.iaAtivo, label: s.dockIa),
+    FxDockItem(
+      icon: FxIcons.treino,
+      iconAtivo: FxIcons.treinoAtivo,
+      label: s.dockTreinos,
+    ),
   ];
 
   static List<FxDockItem> aluno(S s, {int chatUnread = 0}) => [

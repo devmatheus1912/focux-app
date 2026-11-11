@@ -18,6 +18,9 @@ class ExercicioPickerQuery {
   final bool somenteComVideo;
   final int page;
 
+  /// `MEUS`, `FOCUX` ou nulo (todos).
+  final String? aba;
+
   const ExercicioPickerQuery({
     this.busca,
     this.padraoMovimento,
@@ -28,6 +31,7 @@ class ExercicioPickerQuery {
     this.somenteFavoritos = false,
     this.somenteComVideo = false,
     this.page = 0,
+    this.aba,
   });
 
   ExercicioPickerQuery nextPage() => ExercicioPickerQuery(
@@ -40,6 +44,7 @@ class ExercicioPickerQuery {
     somenteFavoritos: somenteFavoritos,
     somenteComVideo: somenteComVideo,
     page: page + 1,
+    aba: aba,
   );
 
   @override
@@ -53,7 +58,8 @@ class ExercicioPickerQuery {
       _setEquals(other.equipamentosAluno, equipamentosAluno) &&
       other.somenteFavoritos == somenteFavoritos &&
       other.somenteComVideo == somenteComVideo &&
-      other.page == page;
+      other.page == page &&
+      other.aba == aba;
 
   @override
   int get hashCode => Object.hash(
@@ -66,6 +72,7 @@ class ExercicioPickerQuery {
     somenteFavoritos,
     somenteComVideo,
     page,
+    aba,
   );
 }
 
@@ -104,6 +111,7 @@ final exercicioPickerPageProvider =
         equipamentos: enumSetQueryParam(query.equipamentosAluno),
         hasVideo: query.somenteComVideo ? true : null,
         favoritos: query.somenteFavoritos ? true : null,
+        aba: query.aba,
         page: query.page,
       );
     });

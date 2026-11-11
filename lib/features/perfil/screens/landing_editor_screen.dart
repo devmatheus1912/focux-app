@@ -1,6 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
+import '../../../core/widgets/fx_grouped_action_sheet.dart';
+import '../../depoimentos/data/depoimento_repository.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -65,6 +68,9 @@ class LandingEditorScreen extends ConsumerStatefulWidget {
 
 class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
   final _formKey = GlobalKey<FormState>();
+
+  /// Depoimentos aprovados (resumo da seção); nulo até carregar.
+  int? _depoimentosAprovados;
 
   // Entrevista
   late final TextEditingController _nomeMarca;
@@ -189,6 +195,12 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
               subtitle: _appBarSubtitle,
               onBack: _onBack,
               actions: [
+                if (_step == 1)
+                  IconButton(
+                    tooltip: 'Mais ações',
+                    icon: const Icon(FxIcons.mais),
+                    onPressed: _busy ? null : _maisDaLanding,
+                  ),
                 FxHelpIconButton(
                   tooltip: 'Como funciona a landing',
                   onTap: () {
@@ -228,12 +240,20 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
                 ? null
                 : FxFormStickyBar(
                     child: _step == 1
-                        ? FxLiquidPrimaryButton(
-                            label: _textoPublicar(S.of(context)),
-                            loading: _busy,
-                            loadingLabel: 'Publicando…',
-                            onPressed: _canPublish ? _publicar : null,
-                          )
+                        // No ar e sem mudança: o rodapé abre a página.
+                        ? (_publicado && !_dirty && !_busy
+                            ? FxTonalButton(
+                                label: 'Ver página',
+                                icon: FxIcons.abrirFora,
+                                expanded: true,
+                                onPressed: _openPublicOrPreview,
+                              )
+                            : FxLiquidPrimaryButton(
+                                label: _textoPublicar(S.of(context)),
+                                loading: _busy,
+                                loadingLabel: 'Publicando…',
+                                onPressed: _canPublish ? _publicar : null,
+                              ))
                         : Row(
                             children: [
                               if (_etapa > 0) ...[

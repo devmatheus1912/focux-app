@@ -109,7 +109,8 @@ void main() {
     await tester.tap(find.textContaining('Puxada').first);
     await _settle(tester);
     expect(find.textContaining('Assistir'), findsOneWidget);
-    expect(find.text('Aluno: "senti a lombar"'), findsOneWidget);
+    expect(find.text('Recado do aluno'), findsOneWidget);
+    expect(find.text('senti a lombar'), findsOneWidget);
     await tester.enterText(find.byType(TextField).last, 'Desça devagar');
     await tester.tap(find.text('Enviar ao aluno'));
     await _settle(tester);

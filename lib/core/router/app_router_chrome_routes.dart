@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
+import '../../features/ia/screens/ia_copiloto_screen.dart';
 import '../../features/ferramentas/screens/ferramentas_hub_screen.dart';
 import '../../features/alunos/data/aluno_repository.dart';
 import '../../features/dashboard/screens/copilot_actions_screen.dart';
@@ -38,7 +39,6 @@ import '../../features/financeiro/screens/financeiro_screen.dart';
 import '../../features/financeiro/utils/financeiro_hub_display.dart';
 import '../../features/feed/screens/feed_screen.dart';
 import '../../features/feed/screens/feed_aluno_screen.dart';
-import '../../features/chat/screens/chat_inbox_screen.dart';
 import '../../features/ia/screens/ia_chat_screen.dart';
 import '../../features/leads/screens/leads_list_screen.dart';
 import '../../features/leads/screens/leads_kanban_screen.dart';
@@ -296,7 +296,7 @@ RouteBase buildChromeShellRoute() {
             builder:
                 (context, state) => FeedbackVideoScreen(
                   alunoId: intPathParam(state, 'id')!,
-                  alunoNome: stringRouteExtra(state) ?? 'Aluno',
+                  alunoNome: stringRouteExtra(state),
                 ),
           ),
           GoRoute(
@@ -626,10 +626,10 @@ RouteBase buildChromeShellRoute() {
             builder: (context, state) => const ProgressaoAceitarScreen(),
           ),
 
-          // Chat
+          // Copiloto: ferramenta que abre por cima (não é mais aba).
           GoRoute(
-            path: '/chat/inbox',
-            builder: (context, state) => const ChatInboxScreen(),
+            path: '/ia/copiloto',
+            builder: (context, state) => const IaCopilotoScreen(),
           ),
           // Financeiro sub-routes
           GoRoute(

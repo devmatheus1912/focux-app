@@ -129,14 +129,20 @@ void main() {
     expect(find.text('O que acontece'), findsOneWidget);
     expect(find.text('Seus alunos perdem o acesso ao app na hora.'),
         findsOneWidget);
-    // ordem: o que acontece -> confirme que é você -> para finalizar
+    // ordem: o que acontece -> confirme que é você -> campo EXCLUIR logo depois
     final y1 = tester.getTopLeft(find.text('O que acontece')).dy;
     final y2 = tester.getTopLeft(find.text('Confirme que é você')).dy;
-    final y3 = tester.getTopLeft(find.text('Para finalizar')).dy;
+    final y3 = tester.getTopLeft(
+      find.byKey(const ValueKey('excluir-conta-confirmacao')),
+    ).dy;
     expect(y1, lessThan(y2));
     expect(y2, lessThan(y3));
+    expect(find.text('Para finalizar'), findsNothing);
+    expect(find.text('Prefiro excluir pela web'), findsNothing);
+    expect(find.byTooltip('Fechar'), findsNothing);
+    // Desativado, o botão diz o que falta.
     final botao = tester.widget<ElevatedButton>(
-      find.widgetWithText(ElevatedButton, 'Excluir definitivamente'),
+      find.widgetWithText(ElevatedButton, 'Digite sua senha'),
     );
     expect(botao.onPressed, isNull);
   });
@@ -148,10 +154,13 @@ void main() {
     await tester.enterText(find.widgetWithText(TextField, 'Senha atual'), 'segredo');
     await tester.pump();
     var botao = tester.widget<ElevatedButton>(
-      find.widgetWithText(ElevatedButton, 'Excluir definitivamente'),
+      find.widgetWithText(ElevatedButton, 'Digite EXCLUIR'),
     );
     expect(botao.onPressed, isNull, reason: 'falta digitar EXCLUIR');
-    await tester.enterText(find.widgetWithText(TextField, 'Digite EXCLUIR'), 'EXCLUIR');
+    await tester.enterText(
+      find.byKey(const ValueKey('excluir-conta-confirmacao')),
+      'EXCLUIR',
+    );
     await tester.pump();
     botao = tester.widget<ElevatedButton>(
       find.widgetWithText(ElevatedButton, 'Excluir definitivamente'),
@@ -182,7 +191,7 @@ void main() {
         textScale: escala,
       );
       expect(tester.takeException(), isNull);
-      expect(find.text('Não dá para desfazer.'), findsOneWidget);
+      expect(find.text('Não dá para desfazer.'), findsNothing);
     });
   }
 
@@ -201,12 +210,13 @@ void main() {
       ),
       findsOneWidget,
     );
+    // "Não pode ser desfeita" fica só no subtítulo: sem a linha de alerta.
     expect(
       find.descendant(
         of: cartao,
         matching: find.byIcon(FxIcons.alerta),
       ),
-      findsOneWidget,
+      findsNothing,
     );
   });
 
@@ -251,7 +261,7 @@ void main() {
   ) async {
     await _abrir(tester, papel: ExcluirContaPapel.aluno);
     final botao = tester.widget<ElevatedButton>(
-      find.widgetWithText(ElevatedButton, 'Excluir definitivamente'),
+      find.widgetWithText(ElevatedButton, 'Digite sua senha'),
     );
     final fundo = botao.style!.backgroundColor!.resolve({WidgetState.disabled})!;
     final texto = botao.style!.foregroundColor!.resolve({WidgetState.disabled})!;

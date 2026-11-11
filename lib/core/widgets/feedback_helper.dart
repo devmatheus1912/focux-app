@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../features/alunos/constants/aluno_360_layout.dart';
 import '../../l10n/app_localizations.dart';
 import '../api/offline_queued_ack.dart';
 import '../api/plan_upgrade_error_hub.dart';
@@ -11,15 +10,6 @@ import '../theme/design_tokens.dart';
 import '../utils/friendly_error.dart';
 import '../theme/fx_icons.dart';
 import '../theme/tokens_strip.dart';
-
-/// Where transient feedback should anchor on screen.
-enum FeedbackPlacement {
-  /// Default floating snackbar above bottom inset / nav bar.
-  standard,
-
-  /// Below pinned Aluno 360 header — avoids overlap with scrollable cards + sticky CTA.
-  operacaoTop,
-}
 
 /// Premium snackbar feedback — uses design tokens, tinted fills,
 /// and haptic feedback for every state.
@@ -31,11 +21,7 @@ class FeedbackHelper {
   static EdgeInsets _snackMargin(
     BuildContext context, {
     double reserveBottom = 0,
-    FeedbackPlacement placement = FeedbackPlacement.standard,
   }) {
-    if (placement == FeedbackPlacement.operacaoTop) {
-      return Aluno360Layout.operacaoTopSnackMargin(context);
-    }
     if (reserveBottom <= 0) {
       return const EdgeInsets.fromLTRB(16, 0, 16, 16);
     }
@@ -51,7 +37,6 @@ class FeedbackHelper {
     BuildContext context,
     SnackBar snackBar, {
     double reserveBottom = 0,
-    FeedbackPlacement placement = FeedbackPlacement.standard,
   }) {
     if (!context.mounted) return null;
     final messenger = ScaffoldMessenger.maybeOf(context);
@@ -59,10 +44,9 @@ class FeedbackHelper {
     final margin = _snackMargin(
       context,
       reserveBottom: reserveBottom,
-      placement: placement,
     );
     final useFloating =
-        placement == FeedbackPlacement.operacaoTop || reserveBottom > 0;
+reserveBottom > 0;
     messenger.hideCurrentSnackBar();
     return messenger.showSnackBar(
       SnackBar(
@@ -76,10 +60,7 @@ class FeedbackHelper {
         persist: snackBar.persist,
         elevation: snackBar.elevation,
         margin: useFloating ? margin : snackBar.margin,
-        dismissDirection:
-            placement == FeedbackPlacement.operacaoTop
-                ? DismissDirection.up
-                : snackBar.dismissDirection,
+        dismissDirection: snackBar.dismissDirection,
       ),
     );
   }
@@ -88,7 +69,6 @@ class FeedbackHelper {
     BuildContext context,
     String message, {
     double reserveBottom = 0,
-    FeedbackPlacement placement = FeedbackPlacement.standard,
   }) {
     HapticFeedback.mediumImpact();
     _showSnackbar(
@@ -97,7 +77,6 @@ class FeedbackHelper {
       fill: EagleTokens.good,
       icon: FxIcons.concluido,
       reserveBottom: reserveBottom,
-      placement: placement,
     );
   }
 
@@ -116,6 +95,8 @@ class FeedbackHelper {
         content: Text(message),
         backgroundColor: EagleTokens.good,
         duration: duration,
+        // Com ação, o SnackBar fica até ser tocado (Flutter ≥ 3.29) e atravessa telas.
+        persist: false,
         action: SnackBarAction(
           label: actionLabel,
           textColor: Colors.white,
@@ -129,7 +110,6 @@ class FeedbackHelper {
     BuildContext context,
     String message, {
     double reserveBottom = 0,
-    FeedbackPlacement placement = FeedbackPlacement.standard,
   }) {
     // A sheet de upgrade já explica o erro de plano; toast por baixo é ruído.
     if (PlanUpgradeErrorHub.isShowing) return;
@@ -140,7 +120,6 @@ class FeedbackHelper {
       fill: EagleTokens.bad,
       icon: FxIcons.erro,
       reserveBottom: reserveBottom,
-      placement: placement,
     );
   }
 
@@ -168,7 +147,6 @@ class FeedbackHelper {
     BuildContext context,
     String message, {
     double reserveBottom = 0,
-    FeedbackPlacement placement = FeedbackPlacement.standard,
   }) {
     if (!context.mounted) return;
     HapticFeedback.selectionClick();
@@ -178,7 +156,6 @@ class FeedbackHelper {
       fill: Theme.of(context).colorScheme.primary,
       icon: FxIcons.info,
       reserveBottom: reserveBottom,
-      placement: placement,
     );
   }
 
@@ -186,7 +163,6 @@ class FeedbackHelper {
     BuildContext context,
     String message, {
     double reserveBottom = 0,
-    FeedbackPlacement placement = FeedbackPlacement.standard,
   }) {
     HapticFeedback.selectionClick();
     _showSnackbar(
@@ -195,7 +171,6 @@ class FeedbackHelper {
       fill: EagleTokens.warn,
       icon: FxIcons.alerta,
       reserveBottom: reserveBottom,
-      placement: placement,
     );
   }
 
@@ -224,26 +199,12 @@ class FeedbackHelper {
     showError(context, friendlyError(error, fallback: fallback));
   }
 
-  /// Operação tab feedback — pins below header so scroll position never hides CTAs.
-  static void showOperacaoSuccess(BuildContext context, String message) {
-    showSuccess(context, message, placement: FeedbackPlacement.operacaoTop);
-  }
-
-  static void showOperacaoWarn(BuildContext context, String message) {
-    showWarn(context, message, placement: FeedbackPlacement.operacaoTop);
-  }
-
-  static void showOperacaoError(BuildContext context, String message) {
-    showError(context, message, placement: FeedbackPlacement.operacaoTop);
-  }
-
   static void _showSnackbar(
     BuildContext context,
     String message, {
     required Color fill,
     required IconData icon,
     double reserveBottom = 0,
-    FeedbackPlacement placement = FeedbackPlacement.standard,
   }) {
     if (!context.mounted) return;
     final messenger = ScaffoldMessenger.maybeOf(context);
@@ -253,7 +214,6 @@ class FeedbackHelper {
     final margin = _snackMargin(
       context,
       reserveBottom: reserveBottom,
-      placement: placement,
     );
 
     messenger.hideCurrentSnackBar();
@@ -291,10 +251,7 @@ class FeedbackHelper {
         margin: margin,
         duration: const Duration(seconds: 3),
         elevation: 0,
-        dismissDirection:
-            placement == FeedbackPlacement.operacaoTop
-                ? DismissDirection.up
-                : DismissDirection.down,
+        dismissDirection: DismissDirection.down,
       ),
     );
   }

@@ -74,7 +74,6 @@ Future<void> _abrir(
               isDark: false,
               primary: const Color(0xFF0B4F5C),
               proximaAcao360: _proxima,
-              hasOpenCopilotTask360: false,
               aderenciaSemanal: null,
               recoveryAsync: const AsyncData(null),
               autonomiaResumoAsync: const AsyncLoading(),

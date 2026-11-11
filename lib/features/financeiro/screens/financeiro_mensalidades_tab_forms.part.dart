@@ -1,7 +1,8 @@
 part of 'financeiro_mensalidades_tab.dart';
 
 extension FinanceiroMensalidadesTabForms on _FinanceiroMensalidadesTabState {
-  Future<void> _abrirFormularioNovaMensalidade() async {
+  /// [mesPedido]: "Lançar" num mês sem cobrança abre já com o vencimento nele.
+  Future<void> _abrirFormularioNovaMensalidade({DateTime? mesPedido}) async {
     final formKey = GlobalKey<FormState>();
     final valorCtrl = TextEditingController();
     final hoje = DateTime.now();
@@ -22,11 +23,13 @@ extension FinanceiroMensalidadesTabForms on _FinanceiroMensalidadesTabState {
       final occ = vencimentoMesesOcupados(doAluno);
       set(() {
         ocupados = occ;
-        vencimento = vencimentoSugerido(
-          hoje: hoje,
-          ocupados: occ,
-          dia: vencimentoDiaPreferido(doAluno),
-        );
+        final dia = vencimentoDiaPreferido(doAluno);
+        final pedido = mesPedido;
+        vencimento =
+            pedido != null &&
+                    !(occ[vencimentoChaveMes(pedido)]?.bloqueia ?? false)
+                ? vencimentoNoDia(pedido, dia)
+                : vencimentoSugerido(hoje: hoje, ocupados: occ, dia: dia);
         if (valorCtrl.text.trim().isEmpty && doAluno.isNotEmpty) {
           valorCtrl.text = fxMoneyCampoTexto(doAluno.first.valor);
         }
@@ -142,7 +145,7 @@ extension FinanceiroMensalidadesTabForms on _FinanceiroMensalidadesTabState {
                               hint: 'R\$ 0,00',
                               icon: FxIcons.dinheiro,
                               rotuloVisivel: true,
-                              obrigatorio: true,
+                              // "Lançar" já fica desativado sem valor.
                               keyboardType: TextInputType.number,
                               inputFormatters: const [FxMoneyInputFormatter()],
                               validator: fxMoneyValidar,

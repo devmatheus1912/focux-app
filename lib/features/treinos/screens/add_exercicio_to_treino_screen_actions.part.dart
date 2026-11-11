@@ -480,6 +480,7 @@ extension _AddExercicioToTreinoScreenActions
     required ExercisePickerFilter filter,
     PadraoMovimento? padrao,
     GrupoMuscular? grupo,
+    String? aba,
   }) {
     return ref.read(
       exercicioPickerPageProvider(
@@ -498,6 +499,7 @@ extension _AddExercicioToTreinoScreenActions
           somenteFavoritos: filter.somenteFavoritos,
           somenteComVideo: filter.somenteComVideo,
           page: page,
+          aba: aba,
         ),
       ).future,
     );

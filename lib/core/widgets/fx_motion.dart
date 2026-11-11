@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/physics.dart';
 
+import '../theme/design_tokens.dart';
 import '../theme/tokens_strip.dart';
 import '../utils/motion_preferences.dart';
 import 'fx_loading.dart';
@@ -149,6 +150,13 @@ class FxLiquidPrimaryButton extends StatelessWidget {
             ? Theme.of(context).colorScheme.onPrimary
             : Colors.white;
     final enabled = onPressed != null && !loading;
+    // Desativado (sem ação e sem carregar): apagado, sem degradê nem brilho.
+    final desativado = onPressed == null && !loading;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final corTexto =
+        desativado
+            ? (isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute)
+            : labelColor;
 
     final button = FxInteractiveGlow(
       color: primary,
@@ -161,9 +169,17 @@ class FxLiquidPrimaryButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(TokensStrip.rButton),
           child: Ink(
             decoration: BoxDecoration(
-              gradient: TokensStrip.primaryButtonGradient(primary),
+              gradient:
+                  desativado ? null : TokensStrip.primaryButtonGradient(primary),
+              color:
+                  desativado
+                      ? primary.withValues(alpha: isDark ? 0.16 : 0.12)
+                      : null,
               borderRadius: BorderRadius.circular(TokensStrip.rButton),
-              border: Border.all(color: labelColor.withValues(alpha: 0.22)),
+              border:
+                  desativado
+                      ? null
+                      : Border.all(color: labelColor.withValues(alpha: 0.22)),
             ),
             padding: const EdgeInsets.symmetric(
               horizontal: TokensStrip.s5,
@@ -200,7 +216,7 @@ class FxLiquidPrimaryButton extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           if (icon != null) ...[
-                            Icon(icon, size: 18, color: labelColor),
+                            Icon(icon, size: 18, color: corTexto),
                             const SizedBox(width: TokensStrip.s2),
                           ],
                           Flexible(
@@ -211,7 +227,7 @@ class FxLiquidPrimaryButton extends StatelessWidget {
                                 maxLines: 1,
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  color: labelColor,
+                                  color: corTexto,
                                   fontWeight: FontWeight.w700,
                                   fontSize: TokensStrip.fontBody,
                                 ),
@@ -226,12 +242,17 @@ class FxLiquidPrimaryButton extends StatelessWidget {
       ),
     );
 
-    if (!expand) return button;
+    final semantico = Semantics(
+      button: true,
+      enabled: enabled || loading,
+      child: button,
+    );
+    if (!expand) return semantico;
     return SizedBox(
       width: double.infinity,
       child: ConstrainedBox(
         constraints: const BoxConstraints(minHeight: 48, maxHeight: 52),
-        child: button,
+        child: semantico,
       ),
     );
   }

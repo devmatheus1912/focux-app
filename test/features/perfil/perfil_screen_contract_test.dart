@@ -59,12 +59,13 @@ void main() {
     expect(find.text('Vitrine'), findsNothing);
     expect(find.text('Seu código'), findsOneWidget);
     // O que falta vira cartão abaixo da identidade (fixture sem foto/telefone).
-    expect(find.textContaining('% completo'), findsOneWidget);
+    // Sem "% completo" no cartão: o que falta fica no cartão de baixo.
+    expect(find.textContaining('% completo'), findsNothing);
     expect(find.textContaining('passos no seu perfil'), findsOneWidget);
     expect(find.text('Completar'), findsNothing);
     expect(find.text('Ver ao vivo'), findsNothing);
     expect(find.text('Migração Focux'), findsNothing);
-    expect(find.text('Acesso dos alunos'), findsOneWidget);
+    expect(find.text('Alunos'), findsWidgets);
 
     await tester.scrollUntilVisible(
       find.text('Aparência'),
@@ -73,9 +74,8 @@ void main() {
     );
     await tester.pump();
     expect(find.text('Aparência'), findsOneWidget);
+    // Aparência numa linha com o modo atual.
     expect(find.text('Sistema'), findsOneWidget);
-    expect(find.text('Claro'), findsOneWidget);
-    expect(find.text('Escuro'), findsOneWidget);
     expect(find.text('Negócio'), findsOneWidget);
     await tester.scrollUntilVisible(
       find.text('Carteira e PIX'),
@@ -127,10 +127,10 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 800));
 
-    expect(find.text('Acesso dos alunos'), findsOneWidget);
+    expect(find.text('Alunos'), findsWidgets);
     expect(find.text('Cadastro completo'), findsNothing);
     expect(find.text('Completar'), findsNothing);
-    expect(find.text('Perfil completo'), findsOneWidget);
+    expect(find.text('Perfil completo'), findsNothing);
     expect(find.textContaining('passos no seu perfil'), findsNothing);
 
     await tester.scrollUntilVisible(
@@ -181,10 +181,11 @@ void main() {
     expect(find.text('Excluir minha conta'), findsOneWidget);
     expect(find.text('Preferências'), findsOneWidget);
     expect(find.text('Tema'), findsNothing);
-    expect(find.text('Termos e privacidade'), findsOneWidget);
+    expect(find.text('Consentimentos'), findsOneWidget);
+    expect(find.text('Sobre'), findsOneWidget);
   });
 
-  testWidgets('aparência troca o tema direto, sem abrir sheet', (tester) async {
+  testWidgets('aparência em uma linha abre a escolha e troca o tema', (tester) async {
     dashboardHomeClientCache.clear();
     SharedPreferences.setMockInitialValues({});
     tester.view.physicalSize = const Size(390, 2400);
@@ -214,10 +215,11 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 800));
 
-    await tester.tap(find.text('Escuro'));
-    await tester.pump();
+    await tester.tap(find.text('Aparência'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Escuro').last);
+    await tester.pumpAndSettle();
     expect(container.read(themeModeProvider), ThemeMode.dark);
-    expect(find.byType(BottomSheet), findsNothing);
   });
 }
 

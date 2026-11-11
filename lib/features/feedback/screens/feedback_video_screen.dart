@@ -1,4 +1,5 @@
 import 'dart:async';
+import '../../../core/theme/design_tokens.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -27,6 +28,7 @@ import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/alunos/widgets/aluno_inset_form_field.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
+import '../../alunos/providers/alunos_provider.dart' show alunoProvider;
 import '../data/feedback_video_repository.dart';
 import '../utils/feedback_video_display.dart';
 import '../../../core/theme/fx_icons.dart';
@@ -213,13 +215,15 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
           children: [
             FxSatelliteListTile(
               title: 'Assistir vídeo',
-              subtitle:
-                  comentario.isEmpty
-                      ? null
-                      : Text(feedbackVideoComentarioAluno(comentario)),
+              titleCase: false,
+              subtitle: Text(feedbackVideoEnviadoEm(item.criadoEm)),
               leading: const Icon(FxIcons.playCirculo),
               onTap: () => _abrirVideo(item.videoUrl),
             ),
+            if (comentario.isNotEmpty) ...[
+              const SizedBox(height: TokensStrip.s3),
+              _RecadoDoAluno(recado: comentario),
+            ],
             const SizedBox(height: TokensStrip.s2),
             AlunoInsetFormField(
               controller: ctrl,
@@ -258,7 +262,7 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
   void _pedirVideo() {
     final id = widget.alunoId;
     if (id == null) return;
-    final nome = widget.alunoNome ?? 'Aluno';
+    final nome = _nomeAluno ?? 'Aluno';
     context.push(
       '/alunos/$id/chat',
       extra: {
@@ -266,6 +270,15 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
         'draft': feedbackVideoPedidoRascunho(satelliteFirstName(nome)),
       },
     );
+  }
+
+  /// Nome do aluno: o que veio na rota ou, sem ele (aviso, Tarefas), o do cadastro.
+  String? get _nomeAluno {
+    final daRota = widget.alunoNome?.trim();
+    if (daRota != null && daRota.isNotEmpty) return daRota;
+    final id = widget.alunoId;
+    if (id == null) return null;
+    return ref.watch(alunoProvider(id)).value?.nome;
   }
 
   @override
@@ -296,9 +309,9 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
             subtitle: FxHubFreshness.joinCount(
               feedbackVideoPersonalSubtitulo(
                 primeiroNome:
-                    widget.alunoNome == null
+                    _nomeAluno == null
                         ? null
-                        : satelliteFirstName(widget.alunoNome),
+                        : satelliteFirstName(_nomeAluno),
                 paraResponder:
                     _loading ? 0 : visible.where((f) => !f.respondido).length,
               ),
@@ -437,11 +450,11 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
                 key: const ValueKey('feedback_video_empty'),
                 icon: FxIcons.video,
                 title:
-                    widget.alunoNome != null
-                        ? 'Nenhum vídeo do ${satelliteFirstName(widget.alunoNome)} ainda'
+                    _nomeAluno != null
+                        ? 'Nenhum vídeo do ${satelliteFirstName(_nomeAluno)} ainda'
                         : 'Nenhum vídeo ainda',
                 subtitle:
-                    widget.alunoNome != null
+                    _nomeAluno != null
                         ? 'Quando ele mandar um vídeo de execução, ele aparece aqui para você corrigir.'
                         : 'Quando um aluno mandar um vídeo de execução, ele aparece aqui para você corrigir.',
                 // Sem aluno (lista geral) não há para quem pedir.
@@ -450,7 +463,7 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
                         ? null
                         : FxEmptyAction(
                           label:
-                              'Pedir vídeo ao ${satelliteFirstName(widget.alunoNome)}',
+                              'Pedir vídeo ao ${satelliteFirstName(_nomeAluno)}',
                           onTap: _pedirVideo,
                         ),
               ),
@@ -482,6 +495,7 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
           }
           final item = visible[i];
           return FxSatelliteListTile(
+            titleCase: false,
             title: feedbackVideoTitulo(
               exercicioNome: item.exercicioNome,
               comentario: item.comentario,
@@ -504,6 +518,45 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
             onLongPress: () => _abrirAcoes(item),
           );
         },
+      ),
+    );
+  }
+}
+
+/// Recado que o aluno mandou com o vídeo, em destaque; fala de dor vai em alerta.
+class _RecadoDoAluno extends StatelessWidget {
+  const _RecadoDoAluno({required this.recado});
+
+  final String recado;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    final dor = feedbackRecadoFalaDeDor(recado);
+    final corRotulo =
+        dor
+            ? (chrome.isDark ? EagleTokens.warnDark : EagleTokens.warn)
+            : chrome.mute;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: TokensStrip.s1),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              if (dor) ...[
+                Icon(FxIcons.alerta, size: 16, color: corRotulo),
+                const SizedBox(width: TokensStrip.s1),
+              ],
+              Text(
+                'Recado do aluno',
+                style: FocuxHubTypography.chip(corRotulo),
+              ),
+            ],
+          ),
+          const SizedBox(height: TokensStrip.s1),
+          Text(recado, style: FocuxHubTypography.body(color: chrome.ink)),
+        ],
       ),
     );
   }

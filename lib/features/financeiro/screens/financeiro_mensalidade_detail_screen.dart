@@ -510,7 +510,7 @@ class _DetailBody extends StatelessWidget {
               FxSettingsLayout.pageInset,
               TokensStrip.s2,
               FxSettingsLayout.pageInset,
-              TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
+              TokensStrip.s3,
             ),
             child:
                 !pending

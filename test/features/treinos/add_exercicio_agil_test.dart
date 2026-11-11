@@ -304,6 +304,7 @@ void main() {
                         required filter,
                         padrao,
                         grupo,
+                        aba,
                       }) async => ExercicioPickerPage(
                         content: [
                           for (final e in itens)

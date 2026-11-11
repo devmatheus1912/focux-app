@@ -9,10 +9,13 @@ import '../../../core/theme/fx_icons.dart';
 
 /// Folha do ⋮ do perfil 360: cadastro, acesso e, por último, o que é perigoso.
 /// Devolve o item escolhido; quem chama roda o fluxo (cada um já confirma).
+///
+/// Com tarefa do Copiloto já aberta ([tarefaAberta]), "Criar tarefa" vira "Ver tarefa".
 Future<Aluno360MenuItem?> showAluno360MenuSheet(
   BuildContext context,
-  Aluno aluno,
-) {
+  Aluno aluno, {
+  bool tarefaAberta = false,
+}) {
   final s = S.of(context);
   final itens = aluno360MenuItens(aluno);
 
@@ -23,11 +26,18 @@ Future<Aluno360MenuItem?> showAluno360MenuSheet(
         s.aluno360MenuEditar,
         s.aluno360MenuEditarSub,
       ),
-      Aluno360MenuAcao.criarTarefa => (
-        FxIcons.checklist,
-        s.aluno360MenuCriarTarefa,
-        s.aluno360MenuCriarTarefaSub,
-      ),
+      Aluno360MenuAcao.criarTarefa =>
+        tarefaAberta
+            ? (
+              FxIcons.checklist,
+              s.aluno360MenuVerTarefa,
+              s.aluno360MenuVerTarefaSub,
+            )
+            : (
+              FxIcons.checklist,
+              s.aluno360MenuCriarTarefa,
+              s.aluno360MenuCriarTarefaSub,
+            ),
       Aluno360MenuAcao.reenviarLink =>
         aluno.contaAtiva
             ? (
@@ -80,7 +90,10 @@ Future<Aluno360MenuItem?> showAluno360MenuSheet(
         s.aluno360MenuGrupoCadastro,
         doGrupo(Aluno360MenuGrupo.cadastro),
       ),
-      FxActionGroup(s.aluno360MenuGrupoAcesso, doGrupo(Aluno360MenuGrupo.acesso)),
+      FxActionGroup(
+        s.aluno360MenuGrupoAcesso,
+        doGrupo(Aluno360MenuGrupo.acesso),
+      ),
       if (perigo.isNotEmpty) FxActionGroup(s.aluno360MenuGrupoPerigo, perigo),
     ],
     destrutiva: excluir.isEmpty ? null : linha(excluir.first),

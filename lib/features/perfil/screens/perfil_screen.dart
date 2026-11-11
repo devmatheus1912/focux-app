@@ -7,7 +7,6 @@ import '../../../core/account/excluir_conta_flow.dart';
 import '../../../core/account/excluir_conta_sheet.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/utils/friendly_error.dart';
-import '../../../core/ux/fx_hub_freshness.dart';
 
 import '../../../core/api/api_client.dart';
 import '../../../core/api/media_upload_service.dart';
@@ -205,7 +204,6 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
             ),
         data: (perfil) {
           _markFetched();
-          final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
           final readiness = PerfilReadinessView.from(perfil);
           _trackViewedOnce(profileComplete: readiness.score >= 100);
 
@@ -214,7 +212,6 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
             uploadingPhoto: _uploadingPhoto,
             primeirosPassosFeitos: primeirosPassosFeitos,
             showMfa: _mfaAvailable,
-            freshnessLabel: freshnessLabel,
             onRefresh: _refreshHub,
             onPickPhoto: _pickAndUploadPhoto,
             onEditPerfil: () => _openEditPerfil(perfil),

@@ -205,6 +205,19 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
     });
   }
 
+  /// "Ajustar cargas" da abertura: escolhe o aluno e abre o ajuste dele.
+  Future<void> _ajustarCargasDeUmAluno() async {
+    await _selecionarAluno();
+    final id = _selectedAlunoId;
+    if (!mounted || id == null) return;
+    setState(() {
+      _selectedAlunoId = null;
+      _selectedAlunoNome = null;
+    });
+    await context.push('/alunos/$id/ia/progressao');
+    if (mounted) ref.invalidate(cargasParaRevisarProvider);
+  }
+
   /// Escolher o aluno já analisa (o custo aparece na folha).
   Future<void> _escolherEAnalisar() async {
     await _selecionarAluno();
@@ -220,25 +233,13 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
     return _gerar();
   }
 
-  /// Análise já feita nesta sessão volta sem gastar cota; [refazer] pede outra.
+  /// Gera e guarda a análise do aluno. [refazer] pede outra (gasta 1 uso).
   Future<void> _gerar({bool refazer = false}) async {
     if (_selectedAlunoId == null) {
       await _selecionarAluno();
       if (_selectedAlunoId == null) return;
     }
     if (!mounted) return;
-    final guardada = ref.read(
-      insightsProvider(InsightsQuery(alunoId: _selectedAlunoId, mode: _mode)),
-    );
-    final acaoGuardada = ref.read(proximaAcaoProvider(_selectedAlunoId!));
-    if (!refazer && guardada.hasValue && acaoGuardada.hasValue) {
-      setState(() {
-        _proximaAcao = acaoGuardada.value;
-        _gerado = true;
-        _erro = null;
-      });
-      return;
-    }
     // Aceite do personal e cota, antes de qualquer dado sair para a IA.
     if (!await IaQuotaUpgrade.guardBeforeRequest(context, ref)) return;
     if (!mounted) return;
@@ -256,17 +257,22 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
         ProductEvents.iaInsightRequested,
         props: {'mode': _mode, 'alunoId': _selectedAlunoId},
       );
-      final query = InsightsQuery(alunoId: _selectedAlunoId, mode: _mode);
-      ref.invalidate(insightsProvider(query));
+      final repo = IaRepository(ref.read(apiClientProvider));
+      // Gera e guarda (só checa a cota); a próxima ação é o que consome o uso.
+      final analise = await repo.criarAnalise(
+        alunoId: _selectedAlunoId!,
+        mode: _mode,
+      );
       ref.invalidate(proximaAcaoProvider(_selectedAlunoId!));
-      await ref.read(insightsProvider(query).future);
       _proximaAcao = await ref.read(
         proximaAcaoProvider(_selectedAlunoId!).future,
       );
       ref.invalidate(iaCopilotoHomeProvider);
+      ref.invalidate(copilotoAnalisesRecentesProvider);
       stopwatch.stop();
       if (mounted) {
         setState(() {
+          _analise = analise;
           _gerando = false;
           _gerado = true;
           _geracaoMs = stopwatch.elapsedMilliseconds;
@@ -294,6 +300,73 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
         await IaQuotaUpgrade.handleError(context, ref, e);
       }
     }
+  }
+
+  /// Reabre uma análise guardada: sem IA e sem gastar uso.
+  Future<void> _abrirAnaliseGuardada(int analiseId, String nome) async {
+    try {
+      final analise = await IaRepository(
+        ref.read(apiClientProvider),
+      ).analise(analiseId);
+      if (!mounted) return;
+      setState(() {
+        _analise = analise;
+        _selectedAlunoId = analise.alunoId;
+        _selectedAlunoNome = analise.alunoNome ?? nome;
+        _proximaAcao = null;
+        _gerado = true;
+        _erro = null;
+      });
+    } catch (e) {
+      if (mounted) FeedbackHelper.showError(context, friendlyError(e));
+    }
+  }
+
+  /// Muda o estado de uma recomendação; grava no servidor e desfaz se falhar.
+  Future<void> _marcar(
+    CopilotoRecomendacao rec,
+    CopilotoEstado estado, {
+    String? resultado,
+  }) async {
+    final analise = _analise;
+    if (analise == null) return;
+    final antes = analise;
+    setState(
+      () => _analise = analise.comRecomendacao(
+        rec.copyWith(estado: estado, resultado: resultado),
+      ),
+    );
+    try {
+      final salva = await IaRepository(
+        ref.read(apiClientProvider),
+      ).marcarRecomendacao(
+        analiseId: analise.id,
+        recomendacaoId: rec.id,
+        estado: estado,
+        resultado: resultado,
+      );
+      if (mounted) setState(() => _analise = salva);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _analise = antes);
+      FeedbackHelper.showError(context, friendlyError(e));
+    }
+  }
+
+  /// "Concluir": grava e volta à abertura.
+  Future<void> _concluir() async {
+    final analise = _analise;
+    final nome = satelliteFirstName(_selectedAlunoNome);
+    if (analise != null) {
+      try {
+        await IaRepository(ref.read(apiClientProvider)).concluirAnalise(analise.id);
+      } catch (_) {
+        // Concluir é só marca; a análise segue reaberta em "Análises recentes".
+      }
+    }
+    if (!mounted) return;
+    _voltarAoInicio();
+    FeedbackHelper.showSuccess(context, 'Análise do $nome concluída.');
   }
 
   bool _erroSugereUpgrade(Object erro) =>
@@ -335,7 +408,11 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
   }
 
   /// Tarefa a partir de uma recomendação: o texto é o "O que fazer" dela.
-  Future<void> _atribuir({String? texto, String? motivo}) async {
+  Future<void> _atribuir({
+    String? texto,
+    String? motivo,
+    CopilotoRecomendacao? rec,
+  }) async {
     if (_selectedAlunoId == null) {
       await _selecionarAluno();
       if (_selectedAlunoId == null) return;
@@ -379,6 +456,9 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
             ? S.of(context).copilotoTarefaSalva
             : S.of(context).copilotoTarefaConfirme,
       );
+      if (rec != null) {
+        await _marcar(rec, CopilotoEstado.feita, resultado: 'TAREFA_CRIADA');
+      }
     } catch (_) {
       if (!mounted) return;
       FeedbackHelper.showError(context, 'Não foi possível atribuir agora.');

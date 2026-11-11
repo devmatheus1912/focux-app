@@ -27,6 +27,11 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/widgets/fx_action_chip.dart';
 import '../../../core/widgets/fx_toggle_chip.dart';
+import '../../../core/widgets/fx_choice_strip.dart';
+import '../../../core/widgets/fx_form_chrome.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/theme/focux_hub_typography.dart';
+import '../utils/financeiro_do_aluno.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../../alunos/providers/alunos_provider.dart';
@@ -45,6 +50,7 @@ import '../../../core/theme/fx_icons.dart';
 part 'financeiro_mensalidades_tab_actions.part.dart';
 part 'financeiro_mensalidades_tab_forms.part.dart';
 part 'financeiro_mensalidades_tab_widgets.part.dart';
+part 'financeiro_mensalidades_tab_aluno.part.dart';
 
 class FinanceiroMensalidadesTab extends ConsumerStatefulWidget {
   const FinanceiroMensalidadesTab({
@@ -53,6 +59,7 @@ class FinanceiroMensalidadesTab extends ConsumerStatefulWidget {
     this.novaMensalidadeToken = 0,
     this.filtroPedido,
     this.filtroToken = 0,
+    this.loteToken = 0,
   });
 
   final int? initialAlunoId;
@@ -64,6 +71,9 @@ class FinanceiroMensalidadesTab extends ConsumerStatefulWidget {
   /// [filtroToken] muda.
   final MensalidadeFiltro? filtroPedido;
   final int filtroToken;
+
+  /// Quando muda, entra no modo "marcar várias como pagas" (o "⋯" do topo).
+  final int loteToken;
 
   @override
   ConsumerState<FinanceiroMensalidadesTab> createState() =>
@@ -128,6 +138,9 @@ class _FinanceiroMensalidadesTabState
     final pedido = widget.filtroPedido;
     if (pedido != null && widget.filtroToken != oldWidget.filtroToken) {
       _trocarFiltro(pedido);
+    }
+    if (widget.loteToken != oldWidget.loteToken && !_modoSelecao) {
+      _entrarModoLote();
     }
   }
 
@@ -316,6 +329,7 @@ class _FinanceiroMensalidadesTabState
 
   @override
   Widget build(BuildContext context) {
+    if (widget.initialAlunoId != null) return _buildDoAluno(context);
     final chrome = ShellChrome.of(context);
     final mute = chrome.mute;
     final primary = Theme.of(context).colorScheme.primary;

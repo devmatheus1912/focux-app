@@ -5,6 +5,8 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_icons.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/fx_calendario_sheet.dart';
+import '../../../core/widgets/fx_choice_strip.dart';
+import '../../../core/widgets/fx_horario.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_inset_picker_row.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
@@ -47,7 +49,11 @@ Future<GrupoAulaRascunho?> showGrupoAulaFormSheet(
   final agora = DateTime.now();
   var inicio =
       aula?.inicio ?? DateTime(agora.year, agora.month, agora.day + 1, 7);
-  var fim = aula?.fim ?? inicio.add(const Duration(hours: 1));
+  var fim =
+      aula?.fim ??
+      inicio.add(const Duration(minutes: grupoAulaDuracaoPadrao));
+  // Aula gravada com duração fora das quatro: fica como opção a mais.
+  final duracaoFora = grupoAulaDuracaoFora(fim.difference(inicio).inMinutes);
   var capacidade = aula?.capacidadeMax ?? 20;
   var escolhidos = <int>[];
   String? erroTitulo;
@@ -99,41 +105,22 @@ Future<GrupoAulaRascunho?> showGrupoAulaFormSheet(
           }
 
           Future<void> escolherHorario() async {
-            final comeco = await showTimePicker(
-              context: ctx,
-              initialTime: TimeOfDay.fromDateTime(inicio),
-              helpText: 'Começa às',
+            final comeco = await showFxHorario(
+              ctx,
+              titulo: 'Começa às',
+              inicial: TimeOfDay.fromDateTime(inicio),
             );
-            if (comeco == null || !ctx.mounted) return;
-            final duracao = fim.difference(inicio);
-            final novoInicio = DateTime(
-              inicio.year,
-              inicio.month,
-              inicio.day,
-              comeco.hour,
-              comeco.minute,
-            );
-            final termino = await showTimePicker(
-              context: ctx,
-              initialTime: TimeOfDay.fromDateTime(novoInicio.add(duracao)),
-              helpText: 'Termina às',
-            );
-            if (termino == null) return;
+            if (comeco == null) return;
             setSheet(() {
-              inicio = novoInicio;
-              var novoFim = DateTime(
+              final duracao = fim.difference(inicio);
+              inicio = DateTime(
                 inicio.year,
                 inicio.month,
                 inicio.day,
-                termino.hour,
-                termino.minute,
+                comeco.hour,
+                comeco.minute,
               );
-              if (!novoFim.isAfter(inicio)) {
-                novoFim = inicio.add(
-                  duracao.inMinutes > 0 ? duracao : const Duration(hours: 1),
-                );
-              }
-              fim = novoFim;
+              fim = inicio.add(duracao);
             });
           }
 
@@ -176,9 +163,37 @@ Future<GrupoAulaRascunho?> showGrupoAulaFormSheet(
               ),
               FxInsetPickerRow(
                 icon: FxIcons.relogio,
-                label: 'Horário',
+                label: 'Começa às',
                 value: grupoAulaHorarioLabel(inicio, fim),
                 onTap: escolherHorario,
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Builder(
+                  builder: (_) {
+                    final atual = fim.difference(inicio).inMinutes;
+                    final fora = duracaoFora;
+                    return FxChoiceStrip<int>(
+                      itens: [
+                        for (final m in grupoAulaDuracoes)
+                          FxChoiceItem(
+                            value: m,
+                            label: grupoAulaDuracaoLabel(m),
+                          ),
+                        if (fora != null)
+                          FxChoiceItem(
+                            value: fora,
+                            label: grupoAulaDuracaoLabel(fora),
+                          ),
+                      ],
+                      selecionado: atual,
+                      onSelecionar:
+                          (m) => setSheet(
+                            () => fim = inicio.add(Duration(minutes: m)),
+                          ),
+                    );
+                  },
+                ),
               ),
               FxSettingsTile(
                 icon: FxIcons.grupo,

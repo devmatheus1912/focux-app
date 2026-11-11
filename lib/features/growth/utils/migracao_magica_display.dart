@@ -73,9 +73,9 @@ enum MigracaoFonte { planilha, texto, foto }
 enum MigracaoEtapa { captura, revisao, acesso }
 
 String migracaoEtapaLabel(MigracaoEtapa etapa) => switch (etapa) {
-  MigracaoEtapa.captura => 'Etapa 1 de 3',
-  MigracaoEtapa.revisao => 'Etapa 2 de 3',
-  MigracaoEtapa.acesso => 'Etapa 3 de 3',
+  MigracaoEtapa.captura => 'Etapa 1 de 3 · De onde vêm',
+  MigracaoEtapa.revisao => 'Etapa 2 de 3 · Revisar',
+  MigracaoEtapa.acesso => 'Etapa 3 de 3 · Enviar acesso',
 };
 
 int migracaoEtapaIndex(MigracaoEtapa etapa) => switch (etapa) {
@@ -126,7 +126,42 @@ String migracaoContinueCaptureLabel({
 
 String migracaoVoltarLabel() => 'Voltar';
 
-String migracaoIrParaListaLabel() => 'Ir para lista';
+/// Rodapé da etapa 3: "Concluir" enquanto falta convite; "Ver alunos" no fim.
+String migracaoRodapeAcessoLabel({required bool todosAvisados}) =>
+    todosAvisados ? 'Ver alunos' : 'Concluir';
+
+/// Uma linha no lugar dos três números: "1 aluno importado".
+String migracaoImportadosLinha(int n) =>
+    n == 1 ? '1 aluno importado' : '$n alunos importados';
+
+String migracaoDuplicadosLinha(int n) =>
+    n == 1 ? '1 já estava na sua lista' : '$n já estavam na sua lista';
+
+String migracaoErrosLinha(int n) =>
+    n == 1 ? '1 não deu para ler' : '$n não deu para ler';
+
+/// Cabeçalho do grupo com o progresso: "Só telefone · 0 de 1 enviados".
+String migracaoGrupoProgresso(String titulo, {required int feitos, required int total}) =>
+    '$titulo · $feitos de $total ${total == 1 ? 'enviado' : 'enviados'}';
+
+/// "12 alunos identificados".
+String migracaoIdentificados(int n) =>
+    n == 1 ? '1 aluno identificado' : '$n alunos identificados';
+
+/// "12 alunos lidos de planilha.xlsx".
+String migracaoLidosDe(int n, String arquivo) =>
+    n == 1 ? '1 aluno lido de $arquivo' : '$n alunos lidos de $arquivo';
+
+/// Linha de cada fonte na escolha da etapa 1.
+String migracaoFonteDescricao(MigracaoFonte fonte) => switch (fonte) {
+  MigracaoFonte.planilha => 'Excel ou CSV de outro app',
+  MigracaoFonte.texto => 'Lista copiada do WhatsApp ou de notas',
+  MigracaoFonte.foto => 'Foto de uma lista ou print da tela',
+};
+
+/// "78 fotos restantes este mês".
+String migracaoFotosRestantes(int n) =>
+    n == 1 ? '1 foto restante este mês' : '$n fotos restantes este mês';
 
 
 /// Uma frase sobre a fonte escolhida: o texto de OCR só aparece na foto.
@@ -134,7 +169,7 @@ String migracaoAjudaDaFonte(MigracaoFonte fonte) => switch (fonte) {
   MigracaoFonte.planilha => 'A planilha vai direto para a revisão.',
   MigracaoFonte.texto => 'Cole os dados dos alunos. Você revisa antes de gravar.',
   MigracaoFonte.foto =>
-    'A foto é lida no seu aparelho (leitura gratuita). Você revisa antes de gravar.',
+    'A foto é lida no seu celular, sem custo. Você revisa antes de salvar.',
 };
 
 final _temLetraOuNumero = RegExp(r'[\p{L}\p{N}]', unicode: true);

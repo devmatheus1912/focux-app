@@ -17,9 +17,6 @@ abstract final class FocuxFeedback {
     'showError',
     'showWarn',
     'showInfo',
-    'showOperacaoSuccess',
-    'showOperacaoWarn',
-    'showOperacaoError',
   ];
 
   static const List<String> hubFeedbackPatterns = [

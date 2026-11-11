@@ -64,7 +64,7 @@ class EvolucaoConquistas extends StatelessWidget {
                       padding: const EdgeInsets.all(TokensStrip.s3),
                       child: Row(
                         children: [
-                          ConquistaSelo(tipo: c.tipo),
+                          ConquistaSelo(tipo: c.tipo, glifo: conquistaGlifo(c)),
                           const SizedBox(width: TokensStrip.s3),
                           Expanded(
                             child: Column(
@@ -153,35 +153,49 @@ class _FolhaConquistaState extends ConsumerState<_FolhaConquista> {
     final chrome = ShellChrome.of(context);
     final c = widget.conquista;
     if (!widget.compartilhar) {
-      final numero = conquistaNumero(c.valor, chrome.ink);
+      final glifo = conquistaGlifo(c);
       return FxSheetFrame(
         title: ptS.conquistaTitulo,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: TokensStrip.s2),
-            widget.celebrar
-                ? ConquistaSeloAnimado(tipo: c.tipo, tamanho: 120, miolo: numero)
-                : ConquistaSelo(tipo: c.tipo, tamanho: 120, miolo: numero),
-            const SizedBox(height: TokensStrip.s3),
-            Text(
-              c.tipoRotulo,
-              textAlign: TextAlign.center,
-              style: FocuxHubTypography.cardTitle(color: chrome.ink),
-            ),
-            const SizedBox(height: TokensStrip.s1),
-            Text(
-              c.detalhe,
-              textAlign: TextAlign.center,
-              style: FocuxHubTypography.bodyMuted(color: chrome.mute),
-            ),
-            const SizedBox(height: TokensStrip.s2),
-          ],
+        child: Semantics(
+          container: true,
+          label: '${c.tipoRotulo}: ${c.detalhe}',
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: TokensStrip.s2),
+              widget.celebrar
+                  ? ConquistaSeloAnimado(
+                    tipo: c.tipo,
+                    glifo: glifo,
+                    tamanho: 160,
+                  )
+                  : ConquistaSelo(tipo: c.tipo, glifo: glifo, tamanho: 160),
+              const SizedBox(height: TokensStrip.s3),
+              // O número fica embaixo do selo, no papel de destaque.
+              conquistaNumero(c.valor, chrome.ink),
+              const SizedBox(height: TokensStrip.s1),
+              Text(
+                c.tipoRotulo,
+                textAlign: TextAlign.center,
+                style: FocuxHubTypography.cardTitle(color: chrome.ink),
+              ),
+              const SizedBox(height: TokensStrip.s1),
+              Text(
+                c.detalhe,
+                textAlign: TextAlign.center,
+                style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+              ),
+              const SizedBox(height: TokensStrip.s2),
+            ],
+          ),
         ),
       );
     }
     final brand = ref.watch(personalBrandProvider).value;
-    final marca = (logoUrl: brand?.logoUrl, nome: brand?.appDisplayName ?? brand?.nomePersonal);
+    final marca = (
+      logoUrl: brand?.logoUrl,
+      nome: brand?.appDisplayName ?? brand?.nomePersonal,
+    );
     return FxSheetFrame(
       title: ptS.conquistaTitulo,
       child: Column(

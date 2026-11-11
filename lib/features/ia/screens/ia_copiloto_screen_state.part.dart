@@ -7,7 +7,9 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
     with SingleTickerProviderStateMixin {
   bool _gerando = false;
   bool _gerado = false;
-  bool _mensagemEnviada = false;
+
+  /// Análise aberta (gerada agora ou reaberta de "Análises recentes").
+  CopilotoAnalise? _analise;
   Object? _erro;
   int? _selectedAlunoId;
   String? _selectedAlunoNome;
@@ -18,16 +20,6 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
   bool _viewTracked = false;
   bool _ttvTracked = false;
 
-  List<IaCopilotInsight> get _insights =>
-      ref
-          .read(
-            insightsProvider(
-              InsightsQuery(alunoId: _selectedAlunoId, mode: _mode),
-            ),
-          )
-          .value ??
-      const [];
-
   IaCopilotoApplySpec? _acaoDoInsight(IaCopilotInsight insight) =>
       iaCopilotoApplySpec(
         tipoAcao: insight.tipoAcao,
@@ -35,44 +27,21 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
         alunoId: _selectedAlunoId,
       );
 
-  /// A barra usa a ação da primeira recomendação que tem ação; sem nenhuma,
-  /// a da próxima ação.
-  IaCopilotoApplySpec? get _applySpec {
-    for (final i in _insights) {
-      final acao = _acaoDoInsight(i);
-      if (acao != null) return acao;
+  /// Próxima recomendação pendente e a ação dela (para o rodapé).
+  (CopilotoRecomendacao, IaCopilotoApplySpec)? get _proximaComAcao {
+    for (final r in _analise?.recomendacoes ?? const <CopilotoRecomendacao>[]) {
+      if (!r.pendente) continue;
+      final acao = _acaoDoInsight(r.insight);
+      if (acao != null) return (r, acao);
     }
-    return iaCopilotoApplySpec(
-      tipoAcao: _proximaAcao?.tipoAcao,
-      mensagemSugerida: _proximaAcao?.mensagemSugerida,
-      alunoId: _selectedAlunoId,
-    );
-  }
-
-  String get _resultPrimaryLabel =>
-      _mensagemEnviada
-          ? S.of(context).copilotoAnalisarOutro
-          : _applySpec?.label ?? iaCopilotoCriarTarefaLabel();
-
-  VoidCallback get _resultPrimaryAction {
-    if (_mensagemEnviada) return _voltarAoInicio;
-    final acao = _applySpec;
-    if (acao == null) {
-      return () {
-        final primeiro = _insights.firstOrNull;
-        _atribuir(
-          texto: primeiro?.recomendacao,
-          motivo: primeiro?.detalhe,
-        );
-      };
-    }
-    return () => _aplicarAcao(acao);
+    return null;
   }
 
   void _voltarAoInicio() {
+    ref.invalidate(copilotoAnalisesRecentesProvider);
     setState(() {
       _gerado = false;
-      _mensagemEnviada = false;
+      _analise = null;
       _selectedAlunoId = null;
       _selectedAlunoNome = null;
       _proximaAcao = null;

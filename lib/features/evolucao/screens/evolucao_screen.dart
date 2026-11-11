@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import '../../../core/observability/sentry_performance.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -279,13 +280,28 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
   final _rolagem = <EvolucaoHubView, double>{};
 
   /// Anéis recolhem depois de um pouco de rolagem; voltam ao topo.
-  Widget _aoRolar(Widget filho) => NotificationListener<ScrollUpdateNotification>(
+  /// Recolhe o topo ao rolar e só abre de novo quando o usuário puxa para baixo
+  /// no início da lista. Lista curta (rolagem máxima < 48) também recolhe; e a
+  /// lista que passa a caber depois de recolher não reabre sozinha.
+  Widget _aoRolar(Widget filho) => NotificationListener<ScrollNotification>(
     onNotification: (n) {
       if (n.metrics.axis != Axis.vertical) return false;
-      // Só a aba visível rola; guarda a posição de cada uma.
-      _rolagem[_view] = n.metrics.pixels;
-      final recolher = n.metrics.pixels > 48;
-      if (recolher != _recolhido) setState(() => _recolhido = recolher);
+      if (n is ScrollUpdateNotification) {
+        // Só a aba visível rola; guarda a posição de cada uma.
+        _rolagem[_view] = n.metrics.pixels;
+        final limite = math.min(48.0, n.metrics.maxScrollExtent);
+        final puxouParaBaixo = (n.dragDetails?.delta.dy ?? 0) > 0;
+        if (!_recolhido && n.metrics.pixels > 0 && n.metrics.pixels >= limite) {
+          setState(() => _recolhido = true);
+        } else if (_recolhido && n.metrics.pixels <= 0 && puxouParaBaixo) {
+          setState(() => _recolhido = false);
+        }
+      } else if (n is OverscrollNotification) {
+        final puxouParaBaixo = (n.dragDetails?.delta.dy ?? 0) > 0;
+        if (_recolhido && n.overscroll < 0 && puxouParaBaixo) {
+          setState(() => _recolhido = false);
+        }
+      }
       return false;
     },
     child: filho,

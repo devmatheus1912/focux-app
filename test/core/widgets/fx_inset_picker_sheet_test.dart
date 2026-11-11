@@ -88,14 +88,14 @@ void main() {
     expect(find.text('Item 29').hitTestable(), findsOneWidget);
   });
 
-  test('perfil appearance mostra as três opções à vista, sem sheet', () {
+  test('perfil appearance em uma linha que abre a escolha', () {
     final source = File(
       'lib/features/perfil/widgets/perfil_appearance_section.dart',
     ).readAsStringSync();
 
     expect(PerfilAppearanceSection.labelFor(ThemeMode.light), 'Claro');
-    expect(source, contains('FxChoiceStrip'));
-    expect(source, isNot(contains('showFxInsetPickerSheet')));
+    expect(source, contains('showFxInsetPickerSheet'));
+    expect(source, isNot(contains('FxChoiceStrip')));
     expect(source, isNot(contains('FxIcons.check,')));
   });
 }

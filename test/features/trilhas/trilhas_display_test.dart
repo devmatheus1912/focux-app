@@ -36,7 +36,7 @@ void main() {
     );
     expect(
       trilhaResumoLinha(_trilha(id: 2, marcos: [m(1, true), m(2, true)])),
-      '2 etapas feitas',
+      'Concluída',
     );
     expect(trilhaResumoLinha(_trilha(id: 3)), 'Sem etapas');
   });

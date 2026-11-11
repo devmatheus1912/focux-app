@@ -407,7 +407,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                   FxSettingsLayout.pageInset,
                   TokensStrip.s2,
                   FxSettingsLayout.pageInset,
-                  TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
+                  TokensStrip.s3,
                 ),
                 child: FxLiquidPrimaryButton(
                   label: leadStickyP0Label(sticky),

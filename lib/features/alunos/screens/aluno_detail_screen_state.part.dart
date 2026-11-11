@@ -51,8 +51,22 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
   }
 
   Future<void> _abrirMenu(Aluno aluno) async {
-    final item = await showAluno360MenuSheet(context, aluno);
+    final tarefaAberta =
+        ref
+            .read(aluno360OperacaoBundleProvider(alunoId))
+            .value
+            ?.hasOpenCopilotTask ??
+        false;
+    final item = await showAluno360MenuSheet(
+      context,
+      aluno,
+      tarefaAberta: tarefaAberta,
+    );
     if (item == null || !mounted) return;
+    if (item.acao == Aluno360MenuAcao.criarTarefa && tarefaAberta) {
+      await context.push(tarefasCopilotoRota);
+      return;
+    }
     await _onMenu(item, aluno);
   }
 
@@ -210,265 +224,271 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
           safePopOrGo(context, '/alunos');
         },
         child: FxShellScaffold(
-        useMesh: true,
-        constrainWidth: false,
-        safeArea: false,
-        appBar:
-            showErrorChrome
-                ? FxShellAppBar(
-                  title: 'Ficha do aluno',
-                  subtitle: freshness,
-                  onBack: () => safePopOrGo(context, '/alunos'),
-                )
-                : null,
-        body: Stack(
-          fit: StackFit.expand,
-          children: [
-            loadingPrimary || loadingFallback
-                ? AlunoDetailLoadingSkeleton.forChrome(
-                  tabController: _tabController,
-                  chrome: chrome,
-                  primary: primary,
-                  listPreview: listPreview,
-                )
-                : resolvedAlunoAsync.when(
-                  loading:
-                      () => AlunoDetailLoadingSkeleton.forChrome(
-                        tabController: _tabController,
-                        chrome: chrome,
-                        primary: primary,
-                        listPreview: listPreview,
-                      ),
-                  error:
-                      (e, _) => FxErrorState(
-                        chromeOnDark: isDark,
-                        primary: primary,
-                        message: friendlyError(
-                          operacaoAsync.error ?? e,
-                          fallback:
-                              'Não foi possível carregar os dados do aluno.',
+          useMesh: true,
+          constrainWidth: false,
+          safeArea: false,
+          appBar:
+              showErrorChrome
+                  ? FxShellAppBar(
+                    title: 'Ficha do aluno',
+                    subtitle: freshness,
+                    onBack: () => safePopOrGo(context, '/alunos'),
+                  )
+                  : null,
+          body: Stack(
+            fit: StackFit.expand,
+            children: [
+              loadingPrimary || loadingFallback
+                  ? AlunoDetailLoadingSkeleton.forChrome(
+                    tabController: _tabController,
+                    chrome: chrome,
+                    primary: primary,
+                    listPreview: listPreview,
+                  )
+                  : resolvedAlunoAsync.when(
+                    loading:
+                        () => AlunoDetailLoadingSkeleton.forChrome(
+                          tabController: _tabController,
+                          chrome: chrome,
+                          primary: primary,
+                          listPreview: listPreview,
                         ),
-                        onRetry: _reload360,
-                        title: 'Não conseguimos carregar o aluno',
-                      ),
-                  data: (aluno) {
-                    reportarTelaPronta();
-                    final perfilCompletion = copilotProfileCompletion(aluno);
-                    final uiHints = operacaoAsync.value?.operacaoUiHints;
-                    final proximaForPriority = proximaAcao360;
-                    final contactPriority = resolveOperacaoContactPriority(
-                      aluno: aluno,
-                      proximaAcao: proximaForPriority,
-                      uiHints: uiHints,
-                    );
-                    final compactHero = contactPriority;
-                    final topInset = MediaQuery.paddingOf(context).top;
-                    final heroBodyHeight = Aluno360Layout.heroBodyHeight(
-                      context,
-                      comAvisoDeRisco: AlunoDetailHeroCard.mostraAvisoDeRisco(aluno),
-                    );
-                    final displayName = fxTitleCaseName(aluno.nome);
-
-                    void openTabHelp() {
-                      AnalyticsService.instance.track(
-                        ProductEvents.aluno360HelpOpened,
-                        props: {
-                          'tab': switch (tabIndex) {
-                            0 => 'operacao',
-                            1 => 'evolucao',
-                            _ => 'ferramentas',
-                          },
-                        },
+                    error:
+                        (e, _) => FxErrorState(
+                          chromeOnDark: isDark,
+                          primary: primary,
+                          message: friendlyError(
+                            operacaoAsync.error ?? e,
+                            fallback:
+                                'Não foi possível carregar os dados do aluno.',
+                          ),
+                          onRetry: _reload360,
+                          title: 'Não conseguimos carregar o aluno',
+                        ),
+                    data: (aluno) {
+                      reportarTelaPronta();
+                      final perfilCompletion = copilotProfileCompletion(aluno);
+                      final uiHints = operacaoAsync.value?.operacaoUiHints;
+                      final proximaForPriority = proximaAcao360;
+                      final contactPriority = resolveOperacaoContactPriority(
+                        aluno: aluno,
+                        proximaAcao: proximaForPriority,
+                        uiHints: uiHints,
                       );
-                      switch (tabIndex) {
-                        case 0:
-                          showAluno360ResumoHelpSheet(context);
-                        case 1:
-                          showAluno360EvolucaoHelpSheet(context);
-                        default:
-                          showAluno360FerramentasHelpSheet(context);
-                      }
-                    }
+                      final compactHero = contactPriority;
+                      final topInset = MediaQuery.paddingOf(context).top;
+                      final heroBodyHeight = Aluno360Layout.heroBodyHeight(
+                        context,
+                        comAvisoDeRisco: AlunoDetailHeroCard.mostraAvisoDeRisco(
+                          aluno,
+                        ),
+                      );
+                      final displayName = fxTitleCaseName(aluno.nome);
 
-                    if (_fetchedAt == null) {
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        if (mounted && _fetchedAt == null) _markFetched();
-                      });
-                    }
-                    if (!_loggedFirstPaint) {
-                      _loggedFirstPaint = true;
-                      final totalMs =
-                          DateTime.now().difference(_openedAt).inMilliseconds;
-                      if (kDebugMode) {
-                        debugPrint(
-                          '[aluno360] first-paint total=${totalMs}ms '
-                          'id=$alunoId (GET /360/operacao alone should dominate)',
+                      void openTabHelp() {
+                        AnalyticsService.instance.track(
+                          ProductEvents.aluno360HelpOpened,
+                          props: {
+                            'tab': switch (tabIndex) {
+                              0 => 'operacao',
+                              1 => 'evolucao',
+                              _ => 'ferramentas',
+                            },
+                          },
+                        );
+                        switch (tabIndex) {
+                          case 0:
+                            showAluno360ResumoHelpSheet(context);
+                          case 1:
+                            showAluno360EvolucaoHelpSheet(context);
+                          default:
+                            showAluno360FerramentasHelpSheet(context);
+                        }
+                      }
+
+                      if (_fetchedAt == null) {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (mounted && _fetchedAt == null) _markFetched();
+                        });
+                      }
+                      if (!_loggedFirstPaint) {
+                        _loggedFirstPaint = true;
+                        final totalMs =
+                            DateTime.now().difference(_openedAt).inMilliseconds;
+                        if (kDebugMode) {
+                          debugPrint(
+                            '[aluno360] first-paint total=${totalMs}ms '
+                            'id=$alunoId (GET /360/operacao alone should dominate)',
+                          );
+                        }
+                        // ignore: unawaited_futures
+                        AnalyticsService.instance.track(
+                          ProductEvents.aluno360FirstPaint,
+                          props: {
+                            'alunoId': alunoId,
+                            'durationMs': totalMs,
+                            'hadListPreview': listPreview != null,
+                            'source': 'operacao',
+                            'endpoint': '/360/operacao',
+                          },
                         );
                       }
-                      // ignore: unawaited_futures
-                      AnalyticsService.instance.track(
-                        ProductEvents.aluno360FirstPaint,
-                        props: {
-                          'alunoId': alunoId,
-                          'durationMs': totalMs,
-                          'hadListPreview': listPreview != null,
-                          'source': 'operacao',
-                          'endpoint': '/360/operacao',
-                        },
-                      );
-                    }
 
-                    return RefreshIndicator(
-                      onRefresh: _reload360,
-                      child: CustomScrollView(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        slivers: [
-                          SliverPersistentHeader(
-                            pinned: true,
-                            delegate: Aluno360CompositeHeaderDelegate(
-                              topInset: topInset,
-                              heroBodyHeight: heroBodyHeight,
-                              heroChild: AlunoDetailHeroCard(
-                                aluno: aluno,
-                                isDark: isDark,
+                      return RefreshIndicator(
+                        onRefresh: _reload360,
+                        child: CustomScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          slivers: [
+                            SliverPersistentHeader(
+                              pinned: true,
+                              delegate: Aluno360CompositeHeaderDelegate(
+                                topInset: topInset,
+                                heroBodyHeight: heroBodyHeight,
+                                heroChild: AlunoDetailHeroCard(
+                                  aluno: aluno,
+                                  isDark: isDark,
+                                  primary: primary,
+                                  compactContactPriority: compactHero,
+                                  onDefineObjective:
+                                      alunoObjectiveIsDefined(aluno.objetivo)
+                                          ? null
+                                          : () async {
+                                            final updated = await context
+                                                .push<bool>(
+                                                  '/alunos/$alunoId/editar',
+                                                  extra: aluno,
+                                                );
+                                            if (updated == true) {
+                                              await _reload360();
+                                            }
+                                          },
+                                ),
+                                tabController: _tabController,
                                 primary: primary,
-                                compactContactPriority: compactHero,
-                                onDefineObjective:
-                                    alunoObjectiveIsDefined(aluno.objetivo)
-                                        ? null
-                                        : () async {
-                                          final updated = await context
-                                              .push<bool>(
-                                                '/alunos/$alunoId/editar',
-                                                extra: aluno,
-                                              );
-                                          if (updated == true) {
-                                            await _reload360();
-                                          }
-                                        },
-                              ),
-                              tabController: _tabController,
-                              primary: primary,
-                              mute: mute,
-                              line: chrome.line,
-                              displayName: displayName,
-                              freshnessLabel: freshness,
-                              ink: ink,
-                              isDark: isDark,
-                              onBack: () => safePopOrGo(context, '/alunos'),
-                              onHelp: openTabHelp,
-                              onChat: () => abrirChatAluno360(context, ref, aluno),
-                              onMenu: () => _abrirMenu(aluno),
-                            ),
-                          ),
-                          SliverToBoxAdapter(
-                            child: Padding(
-                              padding: EdgeInsets.only(
-                                top: Aluno360Layout.tabContentGap,
-                                left: Aluno360Layout.screenPadding,
-                                right: Aluno360Layout.screenPadding,
-                                bottom: MediaQuery.paddingOf(context).bottom + 8,
-                              ),
-                              child: AnimatedSwitcher(
-                                duration:
-                                    reduceMotionOf(context)
-                                        ? Duration.zero
-                                        : const Duration(milliseconds: 200),
-                                switchInCurve: Curves.easeOutCubic,
-                                switchOutCurve: Curves.easeInCubic,
-                                transitionBuilder: (child, animation) {
-                                  if (reduceMotionOf(context)) return child;
-                                  return FadeTransition(
-                                    opacity: animation,
-                                    child: SlideTransition(
-                                      position: Tween<Offset>(
-                                        begin: const Offset(0, 0.015),
-                                        end: Offset.zero,
-                                      ).animate(animation),
-                                      child: child,
-                                    ),
-                                  );
-                                },
-                                child: switch (tabIndex) {
-                                  0 => Aluno360ResumoTab(
-                                    key: const ValueKey(
-                                      'aluno360_tab_resumo',
-                                    ),
-                                    aluno: aluno,
-                                    alunoId: alunoId,
-                                    isDark: isDark,
-                                    primary: primary,
-                                    proximaAcao360: proximaAcao360,
-                                    hasOpenCopilotTask360:
-                                        operacaoAsync
-                                            .value
-                                            ?.hasOpenCopilotTask ??
-                                        false,
-                                    aderenciaSemanal:
-                                        operacaoAsync
-                                            .value
-                                            ?.aderenciaSemanal
-                                            .diasMaps,
-                                    aderenciaBundle:
-                                        operacaoAsync
-                                            .value
-                                            ?.aderenciaSemanal,
-                                    recoveryAsync: recoveryAsync,
-                                    autonomiaResumoAsync:
-                                        resolvedAutonomiaResumoAsync,
-                                    riscoMotivo:
-                                        operacaoAsync
-                                            .value
-                                            ?.riscoResumo
-                                            ?.motivos
-                                            .firstOrNull,
-                                  ),
-                                  1 => Aluno360DetailEvolucaoTab(
-                                    key: const ValueKey(
-                                      'aluno360_tab_evolucao',
-                                    ),
-                                    aluno: aluno,
-                                    alunoId: alunoId,
-                                    isDark: isDark,
-                                    ink: ink,
-                                    evolucaoAsync: resolvedEvolucaoAsync,
-                                    timeline360Async: resolvedTimelineAsync,
-                                    animateEntrance: !_entrancePlayed,
-                                    onEntrancePlayed: () {
-                                      if (!_entrancePlayed) {
-                                        setState(() => _entrancePlayed = true);
-                                      }
-                                    },
-                                    onOpenCopilot:
-                                        () => _tabController.animateTo(0),
-                                  ),
-                                  _ => Aluno360DetailFerramentasTab(
-                                    key: const ValueKey(
-                                      'aluno360_tab_ferramentas',
-                                    ),
-                                    aluno: aluno,
-                                    alunoId: alunoId,
-                                    isDark: isDark,
-                                    primary: primary,
-                                    perfilCompletion: perfilCompletion,
-                                    animateEntrance: !_entrancePlayed,
-                                    onEntrancePlayed: () {
-                                      if (!_entrancePlayed) {
-                                        setState(() => _entrancePlayed = true);
-                                      }
-                                    },
-                                  ),
-                                },
+                                mute: mute,
+                                line: chrome.line,
+                                displayName: displayName,
+                                freshnessLabel: freshness,
+                                ink: ink,
+                                isDark: isDark,
+                                onBack: () => safePopOrGo(context, '/alunos'),
+                                onHelp: openTabHelp,
+                                onChat:
+                                    () =>
+                                        abrirChatAluno360(context, ref, aluno),
+                                onMenu: () => _abrirMenu(aluno),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-          ],
-        ),
+                            SliverToBoxAdapter(
+                              child: Padding(
+                                padding: EdgeInsets.only(
+                                  top: Aluno360Layout.tabContentGap,
+                                  left: Aluno360Layout.screenPadding,
+                                  right: Aluno360Layout.screenPadding,
+                                  bottom:
+                                      MediaQuery.paddingOf(context).bottom + 8,
+                                ),
+                                child: AnimatedSwitcher(
+                                  duration:
+                                      reduceMotionOf(context)
+                                          ? Duration.zero
+                                          : const Duration(milliseconds: 200),
+                                  switchInCurve: Curves.easeOutCubic,
+                                  switchOutCurve: Curves.easeInCubic,
+                                  transitionBuilder: (child, animation) {
+                                    if (reduceMotionOf(context)) return child;
+                                    return FadeTransition(
+                                      opacity: animation,
+                                      child: SlideTransition(
+                                        position: Tween<Offset>(
+                                          begin: const Offset(0, 0.015),
+                                          end: Offset.zero,
+                                        ).animate(animation),
+                                        child: child,
+                                      ),
+                                    );
+                                  },
+                                  child: switch (tabIndex) {
+                                    0 => Aluno360ResumoTab(
+                                      key: const ValueKey(
+                                        'aluno360_tab_resumo',
+                                      ),
+                                      aluno: aluno,
+                                      alunoId: alunoId,
+                                      isDark: isDark,
+                                      primary: primary,
+                                      proximaAcao360: proximaAcao360,
+                                      aderenciaSemanal:
+                                          operacaoAsync
+                                              .value
+                                              ?.aderenciaSemanal
+                                              .diasMaps,
+                                      aderenciaBundle:
+                                          operacaoAsync.value?.aderenciaSemanal,
+                                      recoveryAsync: recoveryAsync,
+                                      autonomiaResumoAsync:
+                                          resolvedAutonomiaResumoAsync,
+                                      riscoMotivo:
+                                          operacaoAsync
+                                              .value
+                                              ?.riscoResumo
+                                              ?.motivos
+                                              .firstOrNull,
+                                    ),
+                                    1 => Aluno360DetailEvolucaoTab(
+                                      key: const ValueKey(
+                                        'aluno360_tab_evolucao',
+                                      ),
+                                      aluno: aluno,
+                                      alunoId: alunoId,
+                                      isDark: isDark,
+                                      ink: ink,
+                                      evolucaoAsync: resolvedEvolucaoAsync,
+                                      timeline360Async: resolvedTimelineAsync,
+                                      animateEntrance: !_entrancePlayed,
+                                      onEntrancePlayed: () {
+                                        if (!_entrancePlayed) {
+                                          setState(
+                                            () => _entrancePlayed = true,
+                                          );
+                                        }
+                                      },
+                                      onOpenCopilot:
+                                          () => abrirCopiloto360(
+                                            context,
+                                            ref,
+                                            aluno: aluno,
+                                          ),
+                                    ),
+                                    _ => Aluno360DetailFerramentasTab(
+                                      key: const ValueKey(
+                                        'aluno360_tab_ferramentas',
+                                      ),
+                                      aluno: aluno,
+                                      alunoId: alunoId,
+                                      isDark: isDark,
+                                      primary: primary,
+                                      perfilCompletion: perfilCompletion,
+                                      animateEntrance: !_entrancePlayed,
+                                      onEntrancePlayed: () {
+                                        if (!_entrancePlayed) {
+                                          setState(
+                                            () => _entrancePlayed = true,
+                                          );
+                                        }
+                                      },
+                                    ),
+                                  },
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+            ],
+          ),
         ),
       ),
     );

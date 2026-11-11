@@ -9,7 +9,6 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../../core/widgets/fx_sparkline.dart';
 import '../../../l10n/app_localizations.dart';
 import '../constants/alunos_layout.dart';
 import '../constants/alunos_list_filters.dart';
@@ -116,8 +115,6 @@ class AlunoListCard extends ConsumerWidget {
       cachedAderenciaPercent: aluno.aderenciaPercent,
     );
     final aderenciaPercent = sparkline.aderenciaPercent;
-    final sparkValues = sparkline.sparkValues;
-    final sparkWidth = compact ? 48.0 : 56.0;
     final aderColor = EagleTokens.aderenciaColor(
       (aderenciaPercent ?? 0).toDouble(),
       isDark: isDark,
@@ -126,12 +123,17 @@ class AlunoListCard extends ConsumerWidget {
       aluno: aluno,
       diasComTreino: sparkline.diasComTreino,
     );
-    final opsText = alunoListOpsText(
-      adherenceLabel: adherenceLabel,
-      triageContextActive: triageContextActive,
-      aderenciaPercent: aderenciaPercent,
-      filtro: activeFiltro,
-    );
+    final opsText =
+        alunoListOpsText(
+          adherenceLabel: adherenceLabel,
+          triageContextActive: triageContextActive,
+          aderenciaPercent: aderenciaPercent,
+          filtro: activeFiltro,
+        ) +
+        alunoListAderenciaSufixo(
+          aderenciaPercent,
+          rotulo: adherenceLabel,
+        );
     final opsIsDias = adherenceLabel.isNotEmpty;
     final meaningfulPercent = alunoListHasMeaningfulPercent(aderenciaPercent);
     final needsOutreach =
@@ -343,43 +345,15 @@ class AlunoListCard extends ConsumerWidget {
                           color: secondaryInk.withValues(alpha: 0.9),
                         ),
                       )
+                    // Sem o gráfico de 7 dias: chat e seta lado a lado,
+                    // centralizados (a linha de treinos já diz o mesmo).
                     else if (!modoSelecao)
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          if (sparkValues.isNotEmpty) ...[
-                            FxSparkline(
-                              data: sparkValues,
-                              color: aderColor,
-                              width: sparkWidth,
-                              height: compact ? 18 : 22,
-                              strokeWidth: 1.8,
-                            ),
-                            const SizedBox(height: 2),
-                            ExcludeSemantics(
-                              child: SizedBox(
-                                width: sparkWidth,
-                                child: Text(
-                                  alunoListSparklineLabel,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  textAlign: TextAlign.right,
-                                  style: FocuxHubTypography.chip(secondaryInk),
-                                ),
-                              ),
-                            ),
-                          ] else
-                            const SizedBox(height: 3),
-                          const SizedBox(height: 6),
-                          ExcludeSemantics(
-                            child: Icon(
-                              FxIcons.chevronDireita,
-                              size: 17,
-                              color: secondaryInk.withValues(alpha: 0.9),
-                            ),
-                          ),
-                        ],
+                      ExcludeSemantics(
+                        child: Icon(
+                          FxIcons.chevronDireita,
+                          size: 17,
+                          color: secondaryInk.withValues(alpha: 0.9),
+                        ),
                       ),
                   ],
                 ),

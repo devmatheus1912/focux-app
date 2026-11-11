@@ -47,7 +47,7 @@ void main() {
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('identidadeHasWhiteLabel'));
-    expect(screen, contains('Assinar Enterprise'));
+    expect(screen, contains('Assinar Enterprise para usar'));
     expect(screen, contains('_PaletteThemePreview('));
     expect(screen, isNot(contains('_PaletteThemePreviewPair')));
     expect(screen, contains('IdentidadeEstiloMiniaturas'));
@@ -62,10 +62,10 @@ void main() {
     expect(screen, contains('FxFormPopGuard'));
     expect(screen, contains('FxKeyboardDismissScope'));
     expect(screen, contains("safePopOrGo(context, '/perfil')"));
-    expect(screen, contains('identidadeRestaurarCoresLabel()'));
+    // Escolher "Focux" já restaura; sem botão de restaurar à parte.
+    expect(screen, isNot(contains('identidadeRestaurarCoresLabel')));
     expect(screen, contains('ProductEvents.identidadeViewed'));
     expect(screen, contains('identidadeAppBarSubtitle'));
-    expect(screen, isNot(contains('label: identidadeRestaurarCoresLabel')));
     expect(screen, isNot(contains('picker: true')));
     expect(screen, isNot(contains('OutlinedButton')));
     expect(screen, isNot(contains('Editor da landing (Enterprise)')));

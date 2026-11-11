@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/router/safe_navigation.dart';
@@ -16,15 +15,12 @@ import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
-import '../../../core/widgets/fx_hub_header.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_strip_card.dart';
-import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../../../core/widgets/fx_action_chip.dart';
 import '../data/recorrencia_repository.dart';
 import '../utils/recorrencia_display.dart';
 import '../widgets/recorrencia_aluno_help_sheet.dart';
@@ -110,7 +106,7 @@ class _RecorrenciaAlunoScreenState
         _assinatura = a;
         _fetchedAt = DateTime.now();
       });
-      FeedbackHelper.showSuccess(context, 'Cobrança pausada.');
+      FeedbackHelper.showSuccess(context, 'Pagamento automático pausado.');
     } catch (e) {
       if (!mounted) return;
       FeedbackHelper.showError(context, friendlyError(e));
@@ -139,7 +135,7 @@ class _RecorrenciaAlunoScreenState
         _assinatura = a;
         _fetchedAt = DateTime.now();
       });
-      FeedbackHelper.showSuccess(context, 'Cobrança retomada.');
+      FeedbackHelper.showSuccess(context, 'Pagamento automático retomado.');
     } catch (e) {
       if (!mounted) return;
       FeedbackHelper.showError(context, friendlyError(e));
@@ -159,90 +155,47 @@ class _RecorrenciaAlunoScreenState
     };
   }
 
-  Widget _chips({required Color primary, required bool isDark}) {
-    return Wrap(
-      spacing: TokensStrip.s2,
-      runSpacing: TokensStrip.s2,
-      children: [
-        FxActionChip(
-          label: 'Hoje',
-          accent: primary,
-          isDark: isDark,
-          onPressed: () => context.go('/dashboard/aluno'),
-        ),
-        FxActionChip(
-          label: 'Financeiro',
-          accent: primary,
-          isDark: isDark,
-          onPressed: () => context.push('/financeiro/aluno'),
-        ),
-        FxActionChip(
-          label: 'Chat',
-          accent: primary,
-          isDark: isDark,
-          onPressed: () => openAlunoRoute(context, '/chat/aluno'),
-        ),
-      ],
+  /// Uma linha do cartão: rótulo à esquerda, valor à direita.
+  Widget _linha(String rotulo, String valor) {
+    final chrome = ShellChrome.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(top: TokensStrip.s2),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              rotulo,
+              style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+            ),
+          ),
+          Text(valor, style: FocuxHubTypography.body(color: chrome.ink)),
+        ],
+      ),
     );
   }
 
-  List<Widget> _metricTiles({
-    required String valor,
-    required String valorHint,
-    required String status,
-    required String statusHint,
-    required String proxima,
-    required bool proximaMuted,
-    required String pagamento,
-    required String pagamentoHint,
-    required bool muted,
-    required Color primary,
-    required bool isDark,
-  }) {
-    final emphasis =
-        muted
-            ? OperationalMetricEmphasis.muted
-            : OperationalMetricEmphasis.normal;
-    return [
-      OperationalMetricTile(
-        label: 'Valor mensal',
-        value: valor,
-        hint: valorHint,
-        color: primary,
-        isDark: isDark,
-        emphasis: emphasis,
+  Widget _cartao(RecorrenciaAssinatura a) {
+    final chrome = ShellChrome.of(context);
+    final forma = recorrenciaFormaLabel(a.forma);
+    final proxima = recorrenciaProximaValue(a.proximaCobranca);
+    return FxStripCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            recorrenciaAlunoStatusLabel(status: a.status, initPoint: a.initPoint),
+            style: FocuxHubTypography.sectionTitle(context, color: chrome.ink),
+          ),
+          const SizedBox(height: TokensStrip.s1),
+          Text(
+            '${recorrenciaValorLabel(a.valor)} por mês',
+            style: FocuxHubTypography.metric(color: chrome.ink),
+          ),
+          if (proxima != '—') _linha('Próxima cobrança', proxima),
+          if (forma != null) _linha('Forma', forma),
+        ],
       ),
-      const SizedBox(height: TokensStrip.s2),
-      OperationalMetricTile(
-        label: 'Status',
-        value: status,
-        hint: statusHint,
-        color: primary,
-        isDark: isDark,
-        emphasis: emphasis,
-      ),
-      const SizedBox(height: TokensStrip.s2),
-      OperationalMetricTile(
-        label: 'Próxima',
-        value: proxima,
-        hint: recorrenciaCicloValue(),
-        color: primary,
-        isDark: isDark,
-        emphasis:
-            muted || proximaMuted
-                ? OperationalMetricEmphasis.muted
-                : OperationalMetricEmphasis.normal,
-      ),
-      const SizedBox(height: TokensStrip.s2),
-      OperationalMetricTile(
-        label: 'Pagamento',
-        value: pagamento,
-        hint: pagamentoHint,
-        color: primary,
-        isDark: isDark,
-        emphasis: emphasis,
-      ),
-    ];
+    );
   }
 
   @override
@@ -258,7 +211,7 @@ class _RecorrenciaAlunoScreenState
     final showSticky = !_loading && _erro == null;
 
     return fxScreenA11yScope(
-      label: 'Minha assinatura',
+      label: 'Pagamento automático',
       child: PopScope(
         canPop: false,
         onPopInvokedWithResult: (didPop, _) {
@@ -269,12 +222,12 @@ class _RecorrenciaAlunoScreenState
         useMesh: true,
         constrainWidth: false,
         appBar: FxShellAppBar(
-          title: 'Assinatura',
+          title: 'Pagamento automático',
           subtitle: freshnessLabel,
           onBack: _leave,
           actions: [
             FxHelpIconButton(
-              tooltip: 'Como usar sua assinatura',
+              tooltip: 'Como funciona o pagamento automático',
               onTap: () => showRecorrenciaAlunoHelpSheet(context),
             ),
           ],
@@ -289,7 +242,7 @@ class _RecorrenciaAlunoScreenState
                 ? FxErrorState(
                   chromeOnDark: isDark,
                   primary: primary,
-                  title: 'Não conseguimos carregar sua assinatura',
+                  title: 'Não conseguimos carregar o pagamento automático',
                   message: _erro!,
                   onRetry: _load,
                 )
@@ -308,109 +261,15 @@ class _RecorrenciaAlunoScreenState
                             ),
                             physics: const AlwaysScrollableScrollPhysics(),
                             children: [
-                              if (assinatura == null) ...[
-                                FxHubHeader(
-                                  title: 'Sem assinatura ainda',
-                                  subtitle: recorrenciaAlunoEmptySubtitle(),
-                                ),
-                                const SizedBox(height: TokensStrip.s4),
-                                ..._metricTiles(
-                                  valor: '—',
-                                  valorHint: 'Quando o personal criar a cobrança',
-                                  status: 'Sem ciclo',
-                                  statusHint: recorrenciaAlunoEmptySubtitle(),
-                                  proxima: '—',
-                                  proximaMuted: true,
-                                  pagamento: '—',
-                                  pagamentoHint: 'Sem autorização ainda',
-                                  muted: true,
-                                  primary: primary,
-                                  isDark: isDark,
-                                ),
-                                const SizedBox(height: TokensStrip.s4),
-                                _chips(primary: primary, isDark: isDark),
-                                const SizedBox(height: TokensStrip.s4),
+                              if (assinatura == null)
                                 FxEmptyState(
                                   icon: FxIcons.dinheiro,
-                                  title: 'Sem assinatura recorrente ainda',
+                                  title: 'Sem pagamento automático',
                                   subtitle:
-                                      'Seu personal ainda não configurou cobrança automática mensal.',
-                                ),
-                              ] else ...[
-                                FxHubHeader(
-                                  title: recorrenciaStatusLabel(
-                                    assinatura.status,
-                                  ),
-                                  subtitle: recorrenciaAlunoHubSubtitle(),
-                                ),
-                                const SizedBox(height: TokensStrip.s4),
-                                FxStripCard(
-                                  emphasize: true,
-                                  accent: primary,
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        recorrenciaStatusLabel(
-                                          assinatura.status,
-                                        ),
-                                        style: FocuxHubTypography.sectionTitle(
-                                          context,
-                                          color: ShellChrome.forBrightness(context, isDark).ink,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 6),
-                                      Text(
-                                        recorrenciaValorLabel(assinatura.valor),
-                                        style: FocuxHubTypography.metric(
-                                          color: ShellChrome.forBrightness(context, isDark).ink,
-                                          fontSize: TokensStrip.fontTitulo,
-                                        ),
-                                      ),
-                                      const SizedBox(height: TokensStrip.s3),
-                                      FxActionChip(
-                                        label: recorrenciaAlunoStickyLabel(
-                                          stickyKind,
-                                        ),
-                                        accent: primary,
-                                        isDark: isDark,
-                                        enabled: !_mutando,
-                                        onPressed: _stickyOnPressed(stickyKind),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(height: TokensStrip.s4),
-                                ..._metricTiles(
-                                  valor: recorrenciaValorLabel(
-                                    assinatura.valor,
-                                  ),
-                                  valorHint: recorrenciaCicloHint(),
-                                  status: recorrenciaStatusLabel(
-                                    assinatura.status,
-                                  ),
-                                  statusHint: recorrenciaCicloValue(),
-                                  proxima: recorrenciaProximaValue(
-                                    assinatura.proximaCobranca,
-                                  ),
-                                  proximaMuted:
-                                      assinatura.proximaCobranca == null,
-                                  pagamento: recorrenciaPagamentoValue(
-                                    status: assinatura.status,
-                                    initPoint: assinatura.initPoint,
-                                  ),
-                                  pagamentoHint: recorrenciaPagamentoHint(
-                                    status: assinatura.status,
-                                    initPoint: assinatura.initPoint,
-                                  ),
-                                  muted: false,
-                                  primary: primary,
-                                  isDark: isDark,
-                                ),
-                                const SizedBox(height: TokensStrip.s4),
-                                _chips(primary: primary, isDark: isDark),
-                              ],
+                                      'Seu personal ainda não ligou o pagamento automático.',
+                                )
+                              else
+                                _cartao(assinatura),
                             ],
                           ),
                         ),

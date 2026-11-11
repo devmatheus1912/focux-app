@@ -28,7 +28,7 @@ void main() {
     expect(screen, isNot(contains('.converter(')));
     expect(screen, contains('FxActionChip'));
     expect(screen, contains('showFxConfirmSheet'));
-    expect(screen, contains('viewInsetsOf'));
+    expect(screen, isNot(contains('TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom')));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('leadHubSubtitle'));
     expect(screen, contains('leadInteracoesMetricHint'));

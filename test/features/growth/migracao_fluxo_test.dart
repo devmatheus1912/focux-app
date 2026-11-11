@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:focux_app/core/widgets/fx_metric_strip.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
 
 import '../../support/migracao_harness.dart';
@@ -14,8 +13,8 @@ void main() {
       await assentarMigracao(tester);
 
       expect(find.textContaining('Cole os dados dos alunos'), findsOneWidget);
-      expect(find.textContaining('leitura gratuita'), findsNothing);
-      expect(find.textContaining('Fotos este mês'), findsNothing);
+      expect(find.textContaining('sem custo'), findsNothing);
+      expect(find.textContaining('restantes este mês'), findsNothing);
       expect(find.widgetWithText(OutlinedButton, 'Colar texto'), findsOneWidget);
     });
 
@@ -25,8 +24,8 @@ void main() {
       await tester.tap(find.text('Foto ou print').first);
       await assentarMigracao(tester);
 
-      expect(find.textContaining('leitura gratuita'), findsOneWidget);
-      expect(find.textContaining('Fotos este mês'), findsOneWidget);
+      expect(find.textContaining('sem custo'), findsOneWidget);
+      expect(find.textContaining('restantes este mês'), findsOneWidget);
     });
   });
 
@@ -63,7 +62,7 @@ void main() {
   });
 
   group('etapa 3', () {
-    testWidgets('números sem alarme: zero apagado e sem botão', (tester) async {
+    testWidgets('resumo em uma linha; duplicados e erros só quando há', (tester) async {
       await abrirMigracao(
         tester,
         alunos: [linhaMigracao('Ana Souza', email: 'ana@x.com')],
@@ -72,12 +71,9 @@ void main() {
       await ateRevisaoMigracao(tester);
       await ateResultadoMigracao(tester, 'Importar 1 aluno');
 
-      expect(find.byType(FxMetricStrip), findsOneWidget);
-      expect(find.text('Importados'), findsOneWidget);
-      expect(find.text('Duplicados'), findsOneWidget);
-      expect(find.text('Erros'), findsOneWidget);
-      final strip = tester.widget<FxMetricStrip>(find.byType(FxMetricStrip));
-      expect(strip.metricas.every((m) => m.onTap == null), isTrue);
+      expect(find.text('1 aluno importado'), findsOneWidget);
+      expect(find.textContaining('já estava'), findsNothing);
+      expect(find.textContaining('não deu para ler'), findsNothing);
     });
 
     testWidgets('e-mail que não saiu não diz "sem e-mail"', (tester) async {
@@ -89,12 +85,12 @@ void main() {
       await ateRevisaoMigracao(tester);
       await ateResultadoMigracao(tester, 'Importar 1 aluno');
 
-      expect(find.text('E-mail não saiu'), findsOneWidget);
+      expect(find.text('E-mail não saiu · 0 de 1 enviado'), findsOneWidget);
       expect(find.textContaining('não têm telefone nem e-mail'), findsNothing);
       expect(find.textContaining('Envie manualmente'), findsNothing);
     });
 
-    testWidgets('um primário só; WhatsApp e link como secundários', (tester) async {
+    testWidgets('uma linha por aluno: WhatsApp e "⋯"; rodapé "Concluir"', (tester) async {
       await abrirMigracao(
         tester,
         alunos: [linhaMigracao('Carlos Lima', telefone: '11988887777')],
@@ -103,10 +99,11 @@ void main() {
       await ateRevisaoMigracao(tester);
       await ateResultadoMigracao(tester, 'Importar 1 aluno');
 
-      expect(find.text('Só telefone'), findsOneWidget);
-      expect(find.widgetWithText(FxLiquidPrimaryButton, 'Ir para lista'), findsOneWidget);
-      expect(find.widgetWithText(OutlinedButton, 'Enviar no WhatsApp'), findsOneWidget);
-      expect(find.widgetWithText(FxLiquidPrimaryButton, 'Enviar no WhatsApp'), findsNothing);
+      expect(find.text('Só telefone · 0 de 1 enviado'), findsOneWidget);
+      expect(find.widgetWithText(FxLiquidPrimaryButton, 'Concluir'), findsOneWidget);
+      expect(find.byTooltip('Enviar no WhatsApp'), findsOneWidget);
+      expect(find.byTooltip('Mais opções de Carlos Lima'), findsOneWidget);
+      expect(find.widgetWithText(OutlinedButton, 'Enviar no WhatsApp'), findsNothing);
     });
 
     testWidgets('"Copiar os N convites" só com 2 ou mais no grupo', (tester) async {
@@ -142,9 +139,9 @@ void main() {
       await ateResultadoMigracao(tester, 'Importar 4 alunos');
 
       expect(find.text('E-mail enviado'), findsWidgets);
-      expect(find.text('E-mail não saiu'), findsOneWidget);
-      expect(find.text('Só telefone'), findsOneWidget);
-      expect(find.text('Sem contato'), findsOneWidget);
+      expect(find.text('E-mail não saiu · 0 de 1 enviado'), findsOneWidget);
+      expect(find.text('Só telefone · 0 de 1 enviado'), findsOneWidget);
+      expect(find.text('Sem contato · 0 de 1 enviado'), findsOneWidget);
       expect(find.textContaining('Os links valem 7 dias'), findsOneWidget);
     });
   });

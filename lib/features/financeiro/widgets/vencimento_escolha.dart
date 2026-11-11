@@ -50,7 +50,24 @@ class _VencimentoSheet extends StatefulWidget {
 }
 
 class _VencimentoSheetState extends State<_VencimentoSheet> {
-  late DateTime _data = DateTime(widget.atual.year, widget.atual.month, widget.atual.day);
+  late DateTime _data = _inicial();
+
+  /// Abre no mês recebido; se ele já tem cobrança (lançar nova), no primeiro
+  /// mês livre a partir do de hoje, no mesmo dia.
+  DateTime _inicial() {
+    final a = widget.atual;
+    final dia = DateTime(a.year, a.month, a.day);
+    final ocupado = widget.ocupados[vencimentoChaveMes(dia)]?.bloqueia ?? false;
+    if (!ocupado) return dia;
+    final livre = vencimentoPrimeiroMesLivre(
+      hoje: widget.hoje,
+      ocupados: widget.ocupados,
+    );
+    return vencimentoNoDia(livre, dia.day);
+  }
+
+  bool get _mesBloqueado =>
+      widget.ocupados[vencimentoChaveMes(_data)]?.bloqueia ?? false;
   var _maisMeses = false;
   var _calendario = false;
 
@@ -82,8 +99,11 @@ class _VencimentoSheetState extends State<_VencimentoSheet> {
       subtitle: 'O mês da cobrança é o mês do vencimento.',
       leading: Icon(FxIcons.calendario, color: chrome.brand, size: 20),
       footer: FxLiquidPrimaryButton(
-        label: 'Vence ${dataCurta(_data)}',
-        onPressed: () => FxHomeSheetChrome.dismissAndPop(context, _data),
+        label: _mesBloqueado ? 'Mês já lançado' : 'Vence ${dataCurta(_data)}',
+        onPressed:
+            _mesBloqueado
+                ? null
+                : () => FxHomeSheetChrome.dismissAndPop(context, _data),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

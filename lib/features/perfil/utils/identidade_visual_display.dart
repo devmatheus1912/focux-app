@@ -24,13 +24,6 @@ String identidadeSalvarConfirmTitle() => 'Salvar identidade visual?';
 String identidadeSalvarConfirmMessage() =>
     'Logo, cores e slogan passam a aparecer no app do personal e do aluno.';
 
-String identidadeRestaurarCoresLabel() => 'Restaurar cores padrão';
-
-String identidadeRestaurarConfirmTitle() => 'Restaurar cores padrão?';
-
-String identidadeRestaurarConfirmMessage() =>
-    'Aplica a paleta Focux e salva a marca agora.';
-
 String identidadeLogoConfirmTitle() => 'Trocar o logo?';
 
 String identidadeLogoConfirmMessage() =>
@@ -86,7 +79,7 @@ bool identidadeIsDirty({
 
 String identidadeEstiloLabel(BrandStyle estilo) => switch (estilo) {
   BrandStyle.classico => 'Clássico',
-  BrandStyle.cinematografico => 'Cinematográfico',
+  BrandStyle.cinematografico => 'Cinema',
   BrandStyle.minimalista => 'Minimalista',
 };
 
@@ -139,3 +132,7 @@ String identidadeAppBarSubtitle({
   // Tela de configuração: "atualizado há…" não ajuda quem está escolhendo.
   return hasWhiteLabel ? 'Sua marca no app' : 'Marca no app';
 }
+
+/// Slogan: a prévia do aluno corta perto de 40; o app limita a 60.
+const identidadeSloganMax = 60;
+const identidadeSloganAviso = 40;

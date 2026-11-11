@@ -62,57 +62,65 @@ class PerfilContaSegurancaSection extends StatelessWidget {
                 value: '',
                 mute: mute,
                 line: line,
+                showDivider: onConsentTap != null,
                 onTap: onMfaTap,
               ),
             if (onConsentTap != null)
               FxSettingsTile(
                 icon: FxIcons.conferir,
                 label: 'Consentimentos',
-                value: 'Termos e privacidade',
+                value: '',
                 mute: mute,
                 line: line,
+                showDivider: false,
                 onTap: onConsentTap,
-              )
-            else ...[
-              FxSettingsTile(
-                icon: FxIcons.juridico,
-                label: 'Termos de uso',
-                value: '',
-                mute: mute,
-                line: line,
-                onTap: () => FocuxLegal.openTerms(),
               ),
-              FxSettingsTile(
-                icon: FxIcons.seguranca,
-                label: 'Política de privacidade',
-                value: '',
-                mute: mute,
-                line: line,
-                onTap: () => FocuxLegal.openPrivacy(),
-              ),
-            ],
+          ],
+        ),
+        const SizedBox(height: FxSettingsLayout.groupGap),
+        FxSettingsGroup(
+          header: 'Sobre',
+          children: [
+            FxSettingsTile(
+              icon: FxIcons.juridico,
+              label: 'Termos de uso',
+              value: '',
+              mute: mute,
+              line: line,
+              onTap: () => FocuxLegal.openTerms(),
+            ),
+            FxSettingsTile(
+              icon: FxIcons.seguranca,
+              label: 'Política de privacidade',
+              value: '',
+              mute: mute,
+              line: line,
+              onTap: () => FocuxLegal.openPrivacy(),
+            ),
             FxSettingsTile(
               icon: FxIcons.juridico,
               label: 'Licenças de código aberto',
               value: '',
               mute: mute,
               line: line,
+              showDivider: false,
               onTap: () => FocuxLegal.abrirLicencas(context),
             ),
+          ],
+        ),
+        const SizedBox(height: FxSettingsLayout.groupGap),
+        // Sair e excluir no fim, juntos. Sair não abre tela: sem seta.
+        FxSettingsGroup(
+          children: [
             FxSettingsTile(
               icon: FxIcons.sair,
               label: 'Sair da conta',
               value: '',
               mute: mute,
               line: line,
-              showDivider: false,
+              accessory: const SizedBox.shrink(),
               onTap: onLogout,
             ),
-          ],
-        ),
-        const SizedBox(height: FxSettingsLayout.groupGap),
-        FxSettingsGroup(
-          children: [
             FxSettingsTile(
               icon: FxIcons.excluir,
               label: 'Excluir minha conta',

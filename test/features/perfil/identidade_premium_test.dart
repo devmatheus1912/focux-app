@@ -40,7 +40,7 @@ void main() {
       expect(descricoes, hasLength(3));
       expect(
         identidadeEstiloLabel(BrandStyle.cinematografico),
-        'Cinematográfico',
+        'Cinema',
       );
     });
 
@@ -158,11 +158,14 @@ void main() {
         ),
       );
       expect(CuratedBrandPalette.premium.length, greaterThanOrEqualTo(8));
-      for (final p in CuratedBrandPalette.premium) {
-        expect(find.text(p.name), findsOneWidget, reason: p.name);
-      }
+      // Amostras sem nome; o nome da escolhida fica embaixo da grade.
+      expect(
+        find.bySemanticsLabel(RegExp('Noite e ouro')),
+        findsOneWidget,
+      );
+      expect(find.textContaining('Focux · '), findsOneWidget);
       expect(find.byIcon(FxIcons.check), findsOneWidget);
-      await tester.tap(find.text('Midnight Gold'));
+      await tester.tap(find.bySemanticsLabel(RegExp('Noite e ouro')));
       expect(escolhida?.id, 'midnight_gold');
     });
 
@@ -175,7 +178,7 @@ void main() {
           IdentidadePaletasGrade(selecionada: CuratedBrandPalette.premium[0]),
         ),
       );
-      await tester.tap(find.text('Midnight Gold'));
+      await tester.tap(find.bySemanticsLabel(RegExp('Noite e ouro')));
       expect(tester.takeException(), isNull);
     });
   });

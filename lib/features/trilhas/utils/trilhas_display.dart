@@ -19,12 +19,25 @@ MarcoModel? trilhaEtapaAtual(TrilhaModel t) {
   return null;
 }
 
-/// "Etapa 2 de 5 · Próxima: Correr 3 km" ou "5 etapas feitas".
+/// Data em que a última etapa foi feita (a conclusão da trilha).
+DateTime? trilhaConcluidaEm(TrilhaModel t) {
+  DateTime? ultima;
+  for (final m in t.marcos) {
+    final em = m.concluidoEm;
+    if (em != null && (ultima == null || em.isAfter(ultima))) ultima = em;
+  }
+  return ultima;
+}
+
+/// "Etapa 2 de 5 · Próxima: Correr 3 km"; concluída, "Concluída em 10/11".
 String trilhaResumoLinha(TrilhaModel t) {
   final total = t.marcos.length;
   if (total == 0) return 'Sem etapas';
   final atual = trilhaEtapaAtual(t);
-  if (atual == null) return total == 1 ? '1 etapa feita' : '$total etapas feitas';
+  if (atual == null) {
+    final em = trilhaConcluidaEm(t);
+    return em == null ? 'Concluída' : 'Concluída em ${trilhaDiaMes(em.toLocal())}';
+  }
   final n = trilhaEtapasFeitas(t) + 1;
   return 'Etapa $n de $total · Próxima: ${atual.titulo}';
 }
@@ -38,10 +51,12 @@ DateTime? trilhaPrazo(TrilhaModel t) {
 String trilhaDiaMes(DateTime d) =>
     '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}';
 
-/// "até 30/11" ou, vencido e em andamento, "venceu 30/11".
+/// "até 30/11" ou, vencido e em andamento, "venceu 30/11". Concluída: sem prazo.
 String? trilhaPrazoLabel(TrilhaModel t, DateTime hoje) {
   final p = trilhaPrazo(t);
-  if (p == null) return null;
+  if (p == null || trilhaEtapaAtual(t) == null && t.marcos.isNotEmpty) {
+    return null;
+  }
   final dia = DateTime(hoje.year, hoje.month, hoje.day);
   if (!t.concluida && p.isBefore(dia)) return 'venceu ${trilhaDiaMes(p)}';
   return 'até ${trilhaDiaMes(p)}';

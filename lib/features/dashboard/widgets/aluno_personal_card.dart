@@ -43,8 +43,17 @@ class AlunoPersonalCard extends StatelessWidget {
       child: FxStripCard(
         glowStrength: 0.04,
         padding: const EdgeInsets.all(TokensStrip.s3),
-        child: Row(
-          children: [
+        child: _comBotao(
+          context,
+          // Fonte grande: o "Conversar" desce para baixo do nome.
+          empilhar: MediaQuery.textScalerOf(context).scale(10) >= 13,
+          botao: FxTonalButton(
+            label: s.alunoPersonalCardConversar,
+            icon: FxIcons.chat,
+            compact: true,
+            onPressed: onConversar,
+          ),
+          linha: [
             CircleAvatar(
               radius: 22,
               backgroundColor: BrandPalette.soft(primary, dark: isDark),
@@ -74,7 +83,7 @@ class AlunoPersonalCard extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     nomeLimpo,
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: FocuxHubTypography.cardTitle(color: chrome.ink),
                   ),
@@ -88,16 +97,30 @@ class AlunoPersonalCard extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(width: TokensStrip.s2),
-            FxTonalButton(
-              label: s.alunoPersonalCardConversar,
-              icon: FxIcons.chat,
-              compact: true,
-              onPressed: onConversar,
-            ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _comBotao(
+    BuildContext context, {
+    required bool empilhar,
+    required Widget botao,
+    required List<Widget> linha,
+  }) {
+    if (empilhar) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(children: linha),
+          const SizedBox(height: TokensStrip.s2),
+          botao,
+        ],
+      );
+    }
+    return Row(
+      children: [...linha, const SizedBox(width: TokensStrip.s2), botao],
     );
   }
 }

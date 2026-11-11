@@ -69,6 +69,7 @@ void main() {
                   required filter,
                   padrao,
                   grupo,
+                  aba,
                 }) async => ExercicioPickerPage(
                   content: itens,
                   meta: const ExercicioPageMeta(

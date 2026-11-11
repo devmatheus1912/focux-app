@@ -28,7 +28,7 @@ void main() {
         contains('SkeletonList'),
         contains('DashboardShimmer'),
         contains('Shimmer'),
-        contains('IaCopilotInsightsLoading'),
+        contains('IaCopilotGenerationStatus'),
         contains('_loading'),
       ),
     );
@@ -44,14 +44,14 @@ void main() {
     expect(screen, contains('FxErrorState'));
     expect(screen, contains('CopilotoCardView'));
     expect(screen, contains('FxHelpIconButton'));
-    expect(screen, isNot(contains('FxSettingsGroup')));
-    expect(screen, isNot(contains('FxSettingsTile')));
+    expect(screen, contains('IaCopilotResultActionBar'));
     expect(screen, contains('iaCopilotoViewed'));
     expect(screen, contains('iaCopilotoHelpOpened'));
     expect(screen, contains('iaCopilotoHomeProvider'));
     expect(screen, contains("retryLabel:"));
     expect(screen, isNot(contains('OutlinedButton')));
-    expect(screen, contains('showBack: _gerado'));
+    // Abre por cima (não é mais aba): o voltar do topo sai ou volta à abertura.
+    expect(screen, contains('onBack: _gerado ? _voltarAoInicio : null'));
     expect(screen, contains('constrainWidth: false'));
     expect(screen, contains('FxContentWidthLimiter'));
     expect(screen, contains('keyboardDismissBehavior'));

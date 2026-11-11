@@ -56,7 +56,7 @@ void main() {
     expect(find.text(identidadePreviaHomeEscuro()), findsOneWidget);
     expect(find.text(identidadePreviaLogin()), findsOneWidget);
     expect(find.text('Estilo'), findsOneWidget);
-    expect(find.text('Assinar Enterprise'), findsNothing);
+    expect(find.text('Assinar Enterprise para usar'), findsNothing);
     expect(find.byType(FxLiquidPrimaryButton), findsWidgets);
   });
 
@@ -83,8 +83,10 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
-    expect(find.text('Assinar Enterprise'), findsOneWidget);
-    expect(find.text('Recurso Enterprise'), findsOneWidget);
+    // Sem Enterprise: experimenta na prévia; o rodapé leva ao plano.
+    expect(find.text('Assinar Enterprise para usar'), findsOneWidget);
+    expect(find.textContaining('Experimente à vontade'), findsOneWidget);
+    expect(find.byType(Opacity), findsNothing);
     expect(find.text(identidadeSalvarLabel(isSetup: false)), findsNothing);
   });
 
@@ -113,7 +115,9 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
-    final midnight = find.text('Midnight Gold');
+    final midnight = find.byWidgetPredicate(
+      (w) => w is Semantics && (w.properties.label ?? '').startsWith('Noite e ouro'),
+    );
     // a grade é montada inteira (shrinkWrap): basta trazer a amostra para a tela
     await tester.ensureVisible(midnight);
     await tester.pump();

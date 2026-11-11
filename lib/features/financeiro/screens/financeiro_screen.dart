@@ -1,9 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import '../../../core/theme/fx_icons.dart';
+import '../../../core/widgets/fx_grouped_action_sheet.dart';
+import '../../alunos/utils/satellite_screen_utils.dart' show satelliteFirstName;
 
 import '../../alunos/widgets/aluno_form_choices.dart';
-import '../../../core/utils/fx_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/analytics/analytics_service.dart';
@@ -168,19 +170,53 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen> {
     );
   }
 
+  var _loteToken = 0;
+
+  /// "⋯" do topo na tela de um aluno: marcar várias como pagas.
+  Future<void> _abrirMaisDoAluno() async {
+    final escolha = await showFxGroupedActionSheet<String>(
+      context,
+      titulo: 'Mais ações',
+      grupos: [
+        FxActionGroup<String>(null, const [
+          FxActionItem(
+            valor: 'lote',
+            rotulo: 'Marcar várias como pagas',
+            icone: FxIcons.concluido,
+          ),
+        ]),
+      ],
+    );
+    if (escolha == 'lote' && mounted) setState(() => _loteToken++);
+  }
+
   Widget _buildContent(BuildContext context, DateTime? fetchedAt) {
+    final alunoId = widget.initialAlunoId;
+    final freshness = FxHubFreshness.fromFetchedAt(fetchedAt);
+    // De um aluno só: "Mensalidades", com o primeiro nome no subtítulo.
+    final primeiroNome =
+        alunoId == null
+            ? null
+            : satelliteFirstName(ref.watch(alunoProvider(alunoId)).value?.nome);
     return fxScreenA11yScope(
-      label: 'Financeiro',
+      label: alunoId == null ? 'Financeiro' : 'Mensalidades',
       child: FxShellScaffold(
         useMesh: true,
         constrainWidth: false,
         appBar: FxShellAppBar(
-          title: 'Financeiro',
-          subtitle: financeiroHubSubtitle(
-            freshness: FxHubFreshness.fromFetchedAt(fetchedAt),
-          ),
+          title: alunoId == null ? 'Financeiro' : 'Mensalidades',
+          subtitle:
+              alunoId == null
+                  ? financeiroHubSubtitle(freshness: freshness)
+                  : FxHubFreshness.joinCount(primeiroNome ?? '', freshness),
           onBack: () => safePopOrGo(context, '/dashboard/personal'),
           actions: [
+            if (alunoId != null)
+              IconButton(
+                tooltip: 'Mais ações',
+                icon: const Icon(FxIcons.mais),
+                onPressed: _abrirMaisDoAluno,
+              ),
             FxHelpIconButton(
               tooltip: 'Como usar o financeiro',
               onTap: () {
@@ -199,9 +235,7 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen> {
             openFiltro: _abrirFiltro,
             child: Column(
               children: [
-                if (widget.initialAlunoId != null)
-                  _FinanceiroAlunoContextBanner(alunoId: widget.initialAlunoId!)
-                else
+                if (widget.initialAlunoId == null)
                   Padding(
                     padding: const EdgeInsets.fromLTRB(
                       FxSettingsLayout.pageInset,
@@ -237,6 +271,7 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen> {
                         novaMensalidadeToken: _novaMensalidadeToken,
                         filtroPedido: _filtroPedido,
                         filtroToken: _filtroToken,
+                        loteToken: _loteToken,
                       ),
                       _visitados.contains(FinanceiroSegmento.recorrencias)
                           ? const RecorrenciaScreen(embedded: true)

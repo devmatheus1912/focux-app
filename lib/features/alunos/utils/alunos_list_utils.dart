@@ -163,7 +163,15 @@ String alunoListAderenciaLabel(int aderenciaPercent) =>
     '$aderenciaPercent% em 30 dias';
 
 /// Legenda do sparkline do card; curta para caber na largura do gráfico.
-const alunoListSparklineLabel = '7 dias';
+/// O que o ponto colorido quer dizer, quando sai do verde
+/// (`EagleTokens.aderenciaColor`: ≥ 75 verde, ≥ 50 laranja, abaixo vermelho).
+String alunoListAderenciaSufixo(int? aderenciaPercent, {required String rotulo}) {
+  if (aderenciaPercent == null || rotulo.isEmpty) return '';
+  if (rotulo.startsWith('Parado')) return '';
+  if (aderenciaPercent >= 75) return '';
+  if (aderenciaPercent >= 50) return ' · abaixo do previsto';
+  return ' · parado';
+}
 
 /// O BFF ainda não filtra por status: `inativos` cai em todos e o recorte
 /// é feito aqui. Em Prioridade, pausados e bloqueados vão para o fim.

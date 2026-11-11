@@ -148,53 +148,18 @@ String? recorrenciaHubFiltroStatus(RecorrenciaHubFiltro filtro) => switch (filtr
   RecorrenciaHubFiltro.cancelada => 'CANCELADA',
 };
 
-String recorrenciaAlunoHubSubtitle() => 'Cobrança mensal';
-
-String recorrenciaAlunoEmptySubtitle() => 'Ainda sem cobrança automática';
-
-String recorrenciaPagamentoValue({
-  required String? status,
-  String? initPoint,
-}) {
+/// Status no cartão do Pagamento automático do aluno.
+String recorrenciaAlunoStatusLabel({required String? status, String? initPoint}) {
   if (recorrenciaTemLinkCheckout(status ?? '', initPoint)) {
-    return 'Autorizar';
+    return 'Aguardando sua autorização';
   }
-  switch ((status ?? '').trim().toUpperCase()) {
-    case 'ATIVA':
-      return 'Ativa';
-    case 'PAUSADA':
-      return 'Pausado';
-    case 'CANCELADA':
-      return 'Encerrado';
-    case 'PENDENTE':
-      return 'Pendente';
-    default:
-      return '—';
-  }
+  return switch ((status ?? '').trim().toUpperCase()) {
+    'ATIVA' => 'Ativo',
+    'PAUSADA' => 'Pausado',
+    'CANCELADA' => 'Cancelado',
+    _ => 'Pendente',
+  };
 }
-
-String recorrenciaPagamentoHint({
-  required String? status,
-  String? initPoint,
-}) {
-  if (recorrenciaTemLinkCheckout(status ?? '', initPoint)) {
-    return 'Abre o link de autorização';
-  }
-  switch ((status ?? '').trim().toUpperCase()) {
-    case 'ATIVA':
-      return 'Mensalidade todo mês';
-    case 'PAUSADA':
-      return 'Retome quando quiser';
-    case 'CANCELADA':
-      return 'Ciclo encerrado';
-    default:
-      return 'Aguardando o personal';
-  }
-}
-
-String recorrenciaCicloValue() => 'Mensal';
-
-String recorrenciaCicloHint() => 'PIX para o personal';
 
 enum RecorrenciaAlunoStickyKind { autorizar, pausar, retomar, chat }
 
@@ -220,23 +185,23 @@ String recorrenciaAlunoStickyLabel(RecorrenciaAlunoStickyKind kind) {
     case RecorrenciaAlunoStickyKind.autorizar:
       return 'Autorizar pagamento';
     case RecorrenciaAlunoStickyKind.pausar:
-      return 'Pausar cobrança';
+      return 'Pausar pagamento automático';
     case RecorrenciaAlunoStickyKind.retomar:
-      return 'Retomar cobrança';
+      return 'Retomar pagamento automático';
     case RecorrenciaAlunoStickyKind.chat:
       return 'Falar com o personal';
   }
 }
 
-String recorrenciaPausarConfirmTitle() => 'Pausar a cobrança automática?';
+String recorrenciaPausarConfirmTitle() => 'Pausar pagamento automático?';
 
 String recorrenciaPausarConfirmMessage() =>
-    'As próximas mensalidades não são lançadas até você retomar.';
+    'As próximas mensalidades viram cobrança manual. Seu personal recebe um aviso.';
 
-String recorrenciaRetomarConfirmTitle() => 'Retomar a cobrança automática?';
+String recorrenciaRetomarConfirmTitle() => 'Retomar pagamento automático?';
 
 String recorrenciaRetomarConfirmMessage() =>
-    'A mensalidade volta a ser lançada todo mês.';
+    'A próxima mensalidade volta a ser cobrada sozinha. Seu personal recebe um aviso.';
 
 String recorrenciaProximaValue(String? proximaCobranca) {
   final prox = proximaCobranca?.trim();
@@ -246,3 +211,27 @@ String recorrenciaProximaValue(String? proximaCobranca) {
   return fxDateShort(parsed);
 }
 
+
+/// Status curto do Pagamento automático na linha das Mensalidades.
+String recorrenciaAlunoStatusCurto({required String? status, String? initPoint}) {
+  switch ((status ?? '').trim().toUpperCase()) {
+    case 'ATIVA':
+      return 'Ativo';
+    case 'PAUSADA':
+      return 'Pausado';
+    case 'CANCELADA':
+      return 'Cancelado';
+    case 'PENDENTE':
+      return (initPoint ?? '').trim().isEmpty ? 'Pendente' : 'Autorizar';
+    default:
+      return '';
+  }
+}
+
+/// Forma do pagamento automático; sem o campo (backend antigo), nada.
+String? recorrenciaFormaLabel(String? forma) =>
+    switch ((forma ?? '').trim().toUpperCase()) {
+      'PIX' => 'PIX todo mês',
+      'CARTAO' => 'Cartão (Mercado Pago)',
+      _ => null,
+    };

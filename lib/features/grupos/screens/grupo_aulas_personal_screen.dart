@@ -448,7 +448,7 @@ class _GrupoAulasPersonalScreenState
                       FxSettingsLayout.pageInset,
                       TokensStrip.s2,
                       FxSettingsLayout.pageInset,
-                      TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
+                      TokensStrip.s3,
                     ),
                     child: FxLiquidPrimaryButton(
                       label: 'Nova aula',

@@ -18,7 +18,12 @@ class _LandingSecaoFolhaState extends State<_LandingSecaoFolha> {
 
   Future<void> _refazer() async {
     setState(() => _refazendo = true);
-    await st._refazerSecao(widget.secao);
+    await st._refazerSecao(
+      widget.secao,
+      depois: () {
+        if (mounted) setState(() {});
+      },
+    );
     if (mounted) setState(() => _refazendo = false);
   }
 
@@ -72,6 +77,7 @@ class _LandingSecaoFolhaState extends State<_LandingSecaoFolha> {
         itens: [for (final m in st._metodo) (m.titulo, m.descricao)],
         rotuloTitulo: s.landingPassoTitulo,
         rotuloTexto: s.landingPassoTexto,
+        nomeDoItem: 'Etapa',
         onMudou: (l) => st._mudarLista(() {
           st._metodo = [
             for (final (t, d) in l) LandingMetodoPasso(titulo: t, descricao: d),
@@ -84,6 +90,7 @@ class _LandingSecaoFolhaState extends State<_LandingSecaoFolha> {
         itens: [for (final i in st._servicos) (i.titulo, i.descricao)],
         rotuloTitulo: s.landingItemTitulo,
         rotuloTexto: s.landingItemTexto,
+        nomeDoItem: 'Item',
         onMudou: (l) => st._mudarLista(() {
           st._servicos = [
             for (final (t, d) in l)
@@ -123,6 +130,7 @@ class _LandingSecaoFolhaState extends State<_LandingSecaoFolha> {
         itens: [for (final f in st._faq) (f.pergunta, f.resposta)],
         rotuloTitulo: s.landingPergunta,
         rotuloTexto: s.landingResposta,
+        nomeDoItem: 'Pergunta',
         onMudou: (l) => st._mudarLista(() {
           st._faq = [
             for (final (t, d) in l) LandingStudioFaq(pergunta: t, resposta: d),
@@ -153,6 +161,21 @@ class _LandingSecaoFolhaState extends State<_LandingSecaoFolha> {
           FxHomeSheetHeader(
             isDark: ShellChrome.of(context).isDark,
             title: landingSecaoTitulo(s, secao),
+            // Sem X: fecha por "Concluir", arrastar ou tocar fora. O ícone de
+            // IA refaz os textos desta seção.
+            trailing:
+                landingSecaoAceitaIa(secao)
+                    ? (_refazendo
+                        ? const Padding(
+                          padding: EdgeInsets.all(12),
+                          child: FxLoading(size: 20, strokeWidth: 2),
+                        )
+                        : IconButton(
+                          tooltip: s.landingRefazerSecao,
+                          icon: const Icon(FxIcons.ia),
+                          onPressed: _refazer,
+                        ))
+                    : const SizedBox.shrink(),
           ),
           const SizedBox(height: TokensStrip.s3),
           Expanded(
@@ -164,14 +187,6 @@ class _LandingSecaoFolhaState extends State<_LandingSecaoFolha> {
               children: _corpo(s),
             ),
           ),
-          if (landingSecaoAceitaIa(secao)) ...[
-            const SizedBox(height: TokensStrip.s2),
-            FxTonalButton(
-              label: _refazendo ? s.landingRefazendo : s.landingRefazerSecao,
-              expanded: true,
-              onPressed: _refazendo ? null : _refazer,
-            ),
-          ],
           const SizedBox(height: TokensStrip.s2),
           FxLiquidPrimaryButton(
             label: s.landingConcluir,
@@ -190,8 +205,11 @@ class _LandingListaEditavel extends StatefulWidget {
     required this.rotuloTitulo,
     required this.rotuloTexto,
     required this.onMudou,
+    required this.nomeDoItem,
   });
 
+  /// "Etapa", "Item", "Pergunta": título de cada bloco e da linha de adicionar.
+  final String nomeDoItem;
   final List<(String, String)> itens;
   final String rotuloTitulo;
   final String rotuloTexto;
@@ -249,78 +267,130 @@ class _LandingListaEditavelState extends State<_LandingListaEditavel> {
     _avisar();
   }
 
+  /// Some na hora, com "Desfazer" que volta o item no mesmo lugar.
   void _remover(int i) {
     final saiu = _linhas[i];
     setState(() => _linhas = [..._linhas]..removeAt(i));
     _avisar();
-    _soltar([saiu]);
+    _removidos.add(saiu);
+    FeedbackHelper.showSuccessAction(
+      context,
+      '${widget.nomeDoItem} removida.'.replaceFirst('Item removida', 'Item removido'),
+      actionLabel: 'Desfazer',
+      onAction: () {
+        if (!mounted) return;
+        setState(() {
+          final l = [..._linhas];
+          l.insert(i.clamp(0, l.length), saiu);
+          _linhas = l;
+        });
+        _removidos.remove(saiu);
+        _avisar();
+      },
+    );
   }
 
-  void _subir(int i) {
+  /// [para] já vem ajustado (onReorderItem).
+  void _mover(int de, int para) {
     setState(() {
       final l = [..._linhas];
-      l.insert(i - 1, l.removeAt(i));
+      l.insert(para, l.removeAt(de));
       _linhas = l;
     });
     _avisar();
   }
 
+  /// Removidos ficam vivos até a folha fechar (o "Desfazer" devolve).
+  final _removidos = <(TextEditingController, TextEditingController)>[];
+
   @override
   void dispose() {
     _soltar(_linhas);
+    _soltar(_removidos);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final s = S.of(context);
+    final chrome = ShellChrome.of(context);
+    final primary = Theme.of(context).colorScheme.primary;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        for (final (i, linha) in _linhas.indexed) ...[
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  '${i + 1}',
-                  style: FocuxHubTypography.cardTitle(
-                    color: ShellChrome.of(context).mute,
+        ReorderableListView(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          buildDefaultDragHandles: false,
+          onReorderItem: _mover,
+          children: [
+            for (final (i, linha) in _linhas.indexed)
+              Column(
+                key: ObjectKey(linha.$1),
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      ReorderableDragStartListener(
+                        index: i,
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Icon(
+                            FxIcons.arrastar,
+                            size: 20,
+                            color: chrome.mute,
+                            semanticLabel: 'Arrastar para mudar a ordem',
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Text(
+                          '${widget.nomeDoItem} ${i + 1}',
+                          style: FocuxHubTypography.cardTitle(color: chrome.mute),
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: s.landingRemover,
+                        onPressed: () => _remover(i),
+                        icon: const Icon(FxIcons.excluir),
+                      ),
+                    ],
                   ),
-                ),
+                  TextFormField(
+                    controller: linha.$1,
+                    textCapitalization: TextCapitalization.sentences,
+                    decoration: FxInputDeco.build(context, widget.rotuloTitulo),
+                  ),
+                  const SizedBox(height: TokensStrip.s2),
+                  TextFormField(
+                    controller: linha.$2,
+                    textCapitalization: TextCapitalization.sentences,
+                    minLines: 2,
+                    maxLines: 4,
+                    decoration: FxInputDeco.build(context, widget.rotuloTexto),
+                  ),
+                  const SizedBox(height: TokensStrip.s3),
+                ],
               ),
-              if (i > 0)
-                IconButton(
-                  tooltip: s.landingSubir,
-                  onPressed: () => _subir(i),
-                  icon: const Icon(FxIcons.setaCima),
+          ],
+        ),
+        // Adicionar é a última linha da lista, não um botão grande.
+        InkWell(
+          onTap: _adicionar,
+          borderRadius: BorderRadius.circular(TokensStrip.rSm),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 48),
+            child: Row(
+              children: [
+                Icon(FxIcons.adicionar, size: 20, color: primary),
+                const SizedBox(width: TokensStrip.s2),
+                Text(
+                  '${s.landingAdicionarItem} ${widget.nomeDoItem.toLowerCase()}',
+                  style: FocuxHubTypography.body(color: primary),
                 ),
-              IconButton(
-                tooltip: s.landingRemover,
-                onPressed: () => _remover(i),
-                icon: const Icon(FxIcons.excluir),
-              ),
-            ],
+              ],
+            ),
           ),
-          TextFormField(
-            controller: linha.$1,
-            textCapitalization: TextCapitalization.sentences,
-            decoration: FxInputDeco.build(context, widget.rotuloTitulo),
-          ),
-          const SizedBox(height: TokensStrip.s2),
-          TextFormField(
-            controller: linha.$2,
-            textCapitalization: TextCapitalization.sentences,
-            minLines: 2,
-            maxLines: 4,
-            decoration: FxInputDeco.build(context, widget.rotuloTexto),
-          ),
-          const SizedBox(height: TokensStrip.s3),
-        ],
-        FxTonalButton(
-          label: s.landingAdicionarItem,
-          icon: FxIcons.adicionar,
-          expanded: true,
-          onPressed: _adicionar,
         ),
       ],
     );

@@ -57,11 +57,15 @@ class _LandingStudioRevisaoBody extends StatelessWidget {
                       style: FocuxHubTypography.cardTitle(color: chrome.ink),
                     ),
                     const SizedBox(height: 2),
-                    Text(
-                      state._publicUrlLabel(),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                    Semantics(
+                      label: state._publicUrlLabel(),
+                      excludeSemantics: true,
+                      child: Text(
+                        state._publicUrlCurto(),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                      ),
                     ),
                   ],
                 ),
@@ -95,13 +99,19 @@ class _LandingStudioRevisaoBody extends StatelessWidget {
             style: FxSettingsLayout.sectionHeader(color: chrome.mute),
           ),
           const SizedBox(height: FxSettingsLayout.headerToGroup),
-          for (final p in pendencias)
-            FxSatelliteListTile(
-              title: p.texto,
-              titleCase: false,
-              leading: Icon(FxIcons.info, color: EagleTokens.warn, size: 20),
-              onTap: () => state._abrirSecao(context, p.secao),
-            ),
+          FxSettingsGroup(
+            children: [
+              for (final (i, p) in pendencias.indexed)
+                FxSettingsTile(
+                  icon: FxIcons.info,
+                  label: p.texto,
+                  value: '',
+                  accent: EagleTokens.warn,
+                  showDivider: i < pendencias.length - 1,
+                  onTap: () => state._abrirSecao(context, p.secao),
+                ),
+            ],
+          ),
         ],
         const SizedBox(height: FxSettingsLayout.groupGap),
         Text(
@@ -109,22 +119,17 @@ class _LandingStudioRevisaoBody extends StatelessWidget {
           style: FxSettingsLayout.sectionHeader(color: chrome.mute),
         ),
         const SizedBox(height: FxSettingsLayout.headerToGroup),
-        for (final secao in LandingSecao.values)
-          FxSatelliteListTile(
-            title: landingSecaoTitulo(s, secao),
-            titleCase: false,
-            subtitle: Text(
-              state._resumoDaSecao(s, secao),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            onTap: () => state._abrirSecao(context, secao),
-          ),
-        const SizedBox(height: TokensStrip.s3),
-        FxTonalButton(
-          label: s.landingRefazerTudo,
-          expanded: true,
-          onPressed: state._busy ? null : state._voltarParaEntrevista,
+        FxSettingsGroup(
+          children: [
+            for (final (i, secao) in LandingSecao.values.indexed)
+              FxSettingsTile(
+                label: landingSecaoTitulo(s, secao),
+                subtitle: state._resumoDaSecao(s, secao),
+                value: '',
+                showDivider: i < LandingSecao.values.length - 1,
+                onTap: () => state._abrirSecao(context, secao),
+              ),
+          ],
         ),
         const SizedBox(height: TokensStrip.s8),
       ],

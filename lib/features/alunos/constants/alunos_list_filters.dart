@@ -18,6 +18,16 @@ String alunosListCountLabel(int total) {
 
 enum AlunoOrdenacao { prioridade, nome, semFoto }
 
+/// Até quantos alunos a lista esconde os filtros e chama para convidar mais.
+const alunosPoucos = 3;
+
+/// "Prioridade", "Nome A-Z", "Sem foto primeiro".
+String alunoOrdenacaoRotulo(AlunoOrdenacao o) => switch (o) {
+  AlunoOrdenacao.prioridade => 'Prioridade',
+  AlunoOrdenacao.nome => 'Nome A-Z',
+  AlunoOrdenacao.semFoto => 'Sem foto primeiro',
+};
+
 /// Aba Alunos filtrada pelo termo. O nome **não** vai na URL (histórico web / LGPD).
 String alunosBuscaLocation(String termo) {
   AlunosPendingSearch.offer(termo.trim());

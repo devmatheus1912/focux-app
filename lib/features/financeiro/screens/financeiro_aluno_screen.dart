@@ -1,9 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/brand/focux_microcopy.dart';
-import '../../../core/money/fx_money.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
@@ -16,18 +17,21 @@ import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
-import '../../../core/widgets/fx_hub_header.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_strip_card.dart';
-import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/alunos/utils/satellite_screen_utils.dart';
 import '../../../features/auth/providers/auth_provider.dart';
-import '../../../l10n/app_localizations.dart';
 import '../data/financeiro_repository.dart';
+import '../utils/financeiro_aluno_estado.dart';
 import '../utils/financeiro_hub_display.dart';
+import '../../recorrencia/data/recorrencia_repository.dart';
+import '../../recorrencia/utils/recorrencia_display.dart';
+import '../../../core/theme/shell_chrome.dart';
+import '../../../core/widgets/fx_form_chrome.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 import '../utils/mensalidade_surface_actions.dart';
 import '../widgets/financeiro_aluno_cobranca_sheet.dart';
 import '../widgets/financeiro_aluno_help_sheet.dart';
@@ -49,14 +53,26 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
   var _carregandoMais = false;
   String? _erro;
   DateTime? _fetchedAt;
+  RecorrenciaAssinatura? _automatico;
 
   @override
   void initState() {
     super.initState();
     _carregar();
+    _carregarAutomatico();
+  }
+
+  /// Pagamento automático do aluno; sem ele (ou com erro), a linha não aparece.
+  Future<void> _carregarAutomatico() async {
+    try {
+      final a =
+          await RecorrenciaRepository(ref.read(apiClientProvider)).minha();
+      if (mounted) setState(() => _automatico = a);
+    } catch (_) {}
   }
 
   Future<void> _carregar() async {
+    if (_fetchedAt != null) unawaited(_carregarAutomatico());
     setState(() {
       _loading = true;
       _erro = null;
@@ -137,104 +153,75 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
     }
   }
 
-  List<Mensalidade> get _abertas =>
-      _mensalidades
-          .where((m) => m.status == 'PENDENTE' || m.status == 'ATRASADO')
-          .toList();
+  FinanceiroAlunoEstado get _estado =>
+      financeiroAlunoEstado(_mensalidades, parcial: _hasMore);
 
-  FxMoney get _abertoTotal =>
-      _abertas.fold(FxMoney.zero, (sum, item) => sum + item.valor);
-
-  int get _atrasadas =>
-      _mensalidades.where((m) => m.status == 'ATRASADO').length;
-
-  int get _pagas => _mensalidades.where((m) => m.status == 'PAGO').length;
-
-  Iterable<String> get _vencimentosAbertos => _abertas.map((item) {
-    final raw = item.vencimento?.trim();
-    if (raw != null && raw.isNotEmpty) return raw;
-    return item.mesReferencia;
-  });
-
-  Widget _fold({required Color primary, required bool isDark}) {
-    final nextValue = financeiroAlunoProximoVencimentoValue(_vencimentosAbertos);
-    final s = S.of(context);
-    final emAbertoHint = financeiroAlunoEmAbertoHint(
-      s,
-      atrasadas: _atrasadas,
-      parcial: _hasMore,
-    );
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        FxHubHeader(
-          title: 'Suas cobranças',
-          subtitle: financeiroAlunoHubSubtitle(
-            lancamentos: _mensalidades.length,
-          ),
-        ),
-        const SizedBox(height: TokensStrip.s4),
-        if (_atrasadas > 0)
-          FxStripCard(
-            emphasize: true,
-            accent: EagleTokens.bad,
-            child: OperationalMetricTile(
-              label: 'Em aberto',
-              value: _abertoTotal.formatCobranca(),
-              hint: emAbertoHint,
-              color: EagleTokens.bad,
-              isDark: isDark,
-              emphasis: OperationalMetricEmphasis.alert,
+  /// Cartão de estado: deve algo? quanto e quando.
+  Widget _cartaoEstado(FinanceiroAlunoEstado estado) {
+    final chrome = ShellChrome.of(context);
+    final atrasado = estado.situacao == FinanceiroAlunoSituacao.atrasado;
+    final corTitulo =
+        atrasado ? EagleTokens.semanticBad(isDark: chrome.isDark) : chrome.ink;
+    return FxStripCard(
+      emphasize: atrasado,
+      accent: atrasado ? EagleTokens.bad : null,
+      child: Semantics(
+        container: true,
+        label: '${estado.titulo}. ${estado.linha}',
+        excludeSemantics: true,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              estado.titulo,
+              style:
+                  estado.situacao == FinanceiroAlunoSituacao.emDia
+                      ? FocuxHubTypography.sectionTitle(context, color: corTitulo)
+                      : FocuxHubTypography.metric(color: corTitulo),
             ),
-          )
-        else
-          OperationalMetricTile(
-            label: 'Em aberto',
-            value: _abertoTotal.formatCobranca(),
-            hint: emAbertoHint,
-            color: primary,
-            isDark: isDark,
-            emphasis: OperationalMetricEmphasis.normal,
-          ),
-        const SizedBox(height: TokensStrip.s2),
-        OperationalMetricTile(
-          label: 'Pagas',
-          value: '$_pagas',
-          hint: financeiroAlunoRecorteHint(s, parcial: _hasMore),
-          color: primary,
-          isDark: isDark,
+            const SizedBox(height: TokensStrip.s1),
+            Text(
+              estado.linha,
+              style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+            ),
+          ],
         ),
-        const SizedBox(height: TokensStrip.s2),
-        OperationalMetricTile(
-          label: 'Atrasadas',
-          value: '$_atrasadas',
-          hint: financeiroAlunoAtrasadasTileHint(
-            s,
-            atrasadas: _atrasadas,
-            parcial: _hasMore,
-          ),
-          color: _atrasadas > 0 ? EagleTokens.bad : primary,
-          isDark: isDark,
-          emphasis:
-              _atrasadas > 0
-                  ? OperationalMetricEmphasis.alert
-                  : OperationalMetricEmphasis.muted,
-        ),
-        const SizedBox(height: TokensStrip.s2),
-        OperationalMetricTile(
-          label: 'Vence',
-          value: nextValue,
-          hint: financeiroAlunoVenceHint(
-            s,
-            temAberto: _abertas.isNotEmpty,
-            temData: nextValue != '—',
-            parcial: _hasMore,
-          ),
-          color: primary,
-          isDark: isDark,
-        ),
-      ],
+      ),
     );
+  }
+
+  /// Linha do Pagamento automático (só quando existe).
+  Widget? _linhaAutomatico() {
+    final a = _automatico;
+    if (a == null) return null;
+    return Padding(
+      padding: const EdgeInsets.only(top: TokensStrip.s2),
+      child: FxSatelliteListTile(
+        title: 'Pagamento automático',
+        titleCase: false,
+        leading: const Icon(FxIcons.atualizar, size: 18),
+        trailing: Text(
+          recorrenciaAlunoStatusCurto(status: a.status, initPoint: a.initPoint),
+          style: FocuxHubTypography.bodyMuted(
+            color: fxScreenMute(context),
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        onTap: () async {
+          await context.push('/aluno/recorrencia');
+          if (mounted) await _carregarAutomatico();
+        },
+      ),
+    );
+  }
+
+  List<Widget> _topo(FinanceiroAlunoEstado estado) {
+    final automatico = _linhaAutomatico();
+    return [
+      _cartaoEstado(estado),
+      if (automatico != null) automatico,
+      const SizedBox(height: TokensStrip.s4),
+    ];
   }
 
   @override
@@ -242,7 +229,10 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final freshness = FxHubFreshness.fromFetchedAt(_fetchedAt);
-    final showSticky = !_loading && _erro == null;
+    final pronto = !_loading && _erro == null;
+    final estado = _estado;
+    final paraPagar = estado.paraPagar;
+    final automatico = _linhaAutomatico();
 
     return fxScreenA11yScope(
       label: 'Minhas mensalidades',
@@ -253,182 +243,132 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
           safePopOrGo(context, '/dashboard/aluno');
         },
         child: FxShellScaffold(
-        useMesh: true,
-        constrainWidth: false,
-        appBar: FxShellAppBar(
-          title: 'Mensalidades',
-          subtitle: freshness,
-          onBack: () => safePopOrGo(context, '/dashboard/aluno'),
-          actions: [
-            FxHelpIconButton(
-              tooltip: 'Como usar suas mensalidades',
-              onTap: () => showFinanceiroAlunoHelpSheet(context),
-            ),
-          ],
-        ),
-        body: Column(
-          children: [
-            Expanded(
-              child: FxContentWidthLimiter(
-                child:
-                    _loading
-                        ? const Padding(
-                          padding: EdgeInsets.only(top: TokensStrip.s4),
-                          child: SkeletonList(count: 5),
-                        )
-                        : _erro != null
-                        ? FxErrorState(
-                          chromeOnDark: isDark,
-                          primary: primary,
-                          title: FocuxMicrocopy.naoFoiPossivelCarregar,
-                          message: _erro!,
-                          onRetry: _carregar,
-                        )
-                        : RefreshIndicator(
-                          onRefresh: _carregar,
-                          child:
-                              _mensalidades.isEmpty
-                                  ? ListView(
-                                    physics:
-                                        const AlwaysScrollableScrollPhysics(),
-                                    padding: const EdgeInsets.fromLTRB(
-                                      FxSettingsLayout.pageInset,
-                                      TokensStrip.s4,
-                                      FxSettingsLayout.pageInset,
-                                      32,
-                                    ),
-                                    children: [
-                                      _fold(
-                                        primary: primary,
-                                        isDark: isDark,
-                                      ),
-                                      const SizedBox(height: TokensStrip.s4),
-                                      FxEmptyState(
-                                        icon: FxIcons.dinheiro,
-                                        title: 'Nenhuma mensalidade',
-                                        subtitle:
-                                            'Quando seu personal lançar uma cobrança, ela aparece aqui.',
-                                      ),
-                                    ],
-                                  )
-                                  : ListView.builder(
-                                    physics:
-                                        const AlwaysScrollableScrollPhysics(),
-                                    padding: const EdgeInsets.fromLTRB(
-                                      FxSettingsLayout.pageInset,
-                                      TokensStrip.s4,
-                                      FxSettingsLayout.pageInset,
-                                      32,
-                                    ),
-                                    itemCount:
-                                        1 +
-                                        _mensalidades.length +
-                                        (_hasMore ? 1 : 0),
-                                    itemBuilder: (context, i) {
-                                      if (i == 0) {
-                                        return Padding(
-                                          padding: const EdgeInsets.only(
-                                            bottom: TokensStrip.s4,
-                                          ),
-                                          child: _fold(
-                                            primary: primary,
-                                            isDark: isDark,
-                                          ),
-                                        );
-                                      }
-                                      final itemIndex = i - 1;
-                                      if (itemIndex >= _mensalidades.length) {
-                                        return FxSatelliteListTile(
-                                          title:
-                                              _carregandoMais
-                                                  ? 'Carregando…'
-                                                  : 'Carregar mais',
-                                          titleCase: false,
-                                          onTap:
-                                              _carregandoMais
-                                                  ? null
-                                                  : _carregarMais,
-                                          leading: Icon(FxIcons.adicionar, size: 18, color: primary),
-                                        );
-                                      }
-                                      final item = _mensalidades[itemIndex];
-                                      final overdue = item.status == 'ATRASADO';
-                                      return FxSatelliteListTile(
-                                        title:
-                                            financeiroMensalidadeMesPorExtenso(
-                                              item.mesReferencia,
-                                            ),
-                                        titleCase: false,
-                                        onTap:
-                                            () =>
-                                                showFinanceiroAlunoCobrancaSheet(
-                                                  context,
-                                                  item: item,
-                                                  onFalar:
-                                                      () => context.push(
-                                                        '/chat/aluno',
-                                                      ),
-                                                  onPagarPix:
-                                                      item.status ==
-                                                                  'PENDENTE' ||
-                                                              item.status ==
-                                                                  'ATRASADO'
-                                                          ? () => _pagarPix(
-                                                            item,
-                                                          )
-                                                          : null,
-                                                ),
-                                        subtitle: Text(
-                                          financeiroMensalidadeStatusLabel(
-                                            item.status,
-                                          ),
-                                        ),
-                                        accent:
-                                            overdue
-                                                ? EagleTokens.bad
-                                                : primary,
-                                        leading: Icon(overdue
-                                                  ? FxIcons.alerta
-                                                  : item.status == 'PAGO'
-                                                  ? FxIcons.concluido
-                                                  : FxIcons.dinheiro, size: 18, color:
-                                              overdue
-                                                  ? EagleTokens.bad
-                                                  : primary),
-                                        trailing: Text(
-                                          item.valor.formatCobranca(),
-                                          style: FocuxHubTypography.metric(
-                                            color:
-                                                Theme.of(
-                                                  context,
-                                                ).colorScheme.onSurface,
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  ),
+          useMesh: true,
+          constrainWidth: false,
+          appBar: FxShellAppBar(
+            title: 'Mensalidades',
+            subtitle:
+                pronto && _mensalidades.isNotEmpty
+                    ? FxHubFreshness.joinCount(estado.subtituloTopo, freshness)
+                    : freshness,
+            onBack: () => safePopOrGo(context, '/dashboard/aluno'),
+            actions: [
+              FxHelpIconButton(
+                tooltip: 'Como usar suas mensalidades',
+                onTap: () => showFinanceiroAlunoHelpSheet(context),
+              ),
+            ],
+          ),
+          // Em aberto: pagar é a ação; em dia, não há rodapé.
+          bottomNavigationBar:
+              pronto && paraPagar != null
+                  ? FxFormStickyBar(
+                    child: FxLiquidPrimaryButton(
+                      label: 'Pagar com PIX',
+                      onPressed: () => _pagarPix(paraPagar),
+                    ),
+                  )
+                  : null,
+          body: FxContentWidthLimiter(
+            child:
+                _loading
+                    ? const Padding(
+                      padding: EdgeInsets.only(top: TokensStrip.s4),
+                      child: SkeletonList(count: 5),
+                    )
+                    : _erro != null
+                    ? FxErrorState(
+                      chromeOnDark: isDark,
+                      primary: primary,
+                      title: FocuxMicrocopy.naoFoiPossivelCarregar,
+                      message: _erro!,
+                      onRetry: _carregar,
+                    )
+                    : RefreshIndicator(
+                      onRefresh: _carregar,
+                      child: ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: const EdgeInsets.fromLTRB(
+                          FxSettingsLayout.pageInset,
+                          TokensStrip.s4,
+                          FxSettingsLayout.pageInset,
+                          32,
                         ),
-              ),
-            ),
-            if (showSticky)
-              SafeArea(
-                top: false,
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    FxSettingsLayout.pageInset,
-                    TokensStrip.s2,
-                    FxSettingsLayout.pageInset,
-                    TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
-                  ),
-                  child: FxLiquidPrimaryButton(
-                    label: 'Falar com o personal',
-                    onPressed: () => openAlunoRoute(context, '/chat/aluno'),
-                  ),
-                ),
-              ),
-          ],
+                        children: [
+                          if (_mensalidades.isEmpty) ...[
+                            if (automatico != null) automatico,
+                            FxEmptyState(
+                              icon: FxIcons.dinheiro,
+                              title: 'Nenhuma mensalidade',
+                              subtitle:
+                                  'Quando seu personal lançar uma cobrança, ela aparece aqui.',
+                            ),
+                          ] else ...[
+                            ..._topo(estado),
+                            for (final item in _mensalidades)
+                              _linhaMensalidade(item, primary),
+                            if (_hasMore) ...[
+                              const SizedBox(height: TokensStrip.s2),
+                              FxTonalButton(
+                                label:
+                                    _carregandoMais
+                                        ? 'Carregando…'
+                                        : 'Carregar mais',
+                                expanded: true,
+                                onPressed: _carregandoMais ? null : _carregarMais,
+                              ),
+                            ],
+                          ],
+                          if (paraPagar == null) ...[
+                            const SizedBox(height: TokensStrip.s3),
+                            Align(
+                              child: FxTonalButton(
+                                label: 'Falar com o personal',
+                                icon: FxIcons.chat,
+                                compact: true,
+                                onPressed:
+                                    () => openAlunoRoute(context, '/chat/aluno'),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+          ),
         ),
       ),
+    );
+  }
+
+  Widget _linhaMensalidade(Mensalidade item, Color primary) {
+    final overdue = item.status == 'ATRASADO';
+    final aberta = item.status == 'PENDENTE' || overdue;
+    return FxSatelliteListTile(
+      title: financeiroMensalidadeMesPorExtenso(item.mesReferencia),
+      titleCase: false,
+      onTap:
+          () => showFinanceiroAlunoCobrancaSheet(
+            context,
+            item: item,
+            onFalar: () => context.push('/chat/aluno'),
+            onPagarPix: aberta ? () => _pagarPix(item) : null,
+          ),
+      subtitle: Text(financeiroMensalidadeStatusLabel(item.status)),
+      accent: overdue ? EagleTokens.bad : primary,
+      leading: Icon(
+        overdue
+            ? FxIcons.alerta
+            : item.status == 'PAGO'
+            ? FxIcons.concluido
+            : FxIcons.dinheiro,
+        size: 18,
+        color: overdue ? EagleTokens.bad : primary,
+      ),
+      trailing: Text(
+        item.valor.formatCobranca(),
+        style: FocuxHubTypography.metric(
+          color: Theme.of(context).colorScheme.onSurface,
+        ),
       ),
     );
   }

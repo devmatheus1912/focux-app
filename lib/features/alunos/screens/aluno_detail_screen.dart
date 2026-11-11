@@ -23,9 +23,11 @@ import '../providers/alunos_provider.dart';
 import '../utils/aluno360_copilot_logic.dart';
 import '../utils/aluno360_operacao_logic.dart';
 import '../utils/aluno360_menu_acoes.dart';
+import '../utils/aluno360_copilot_task_actions.dart' show tarefasCopilotoRota;
 import '../utils/aluno_detail_aluno_actions.dart';
 import '../utils/aluno_detail_aluno_resolution.dart';
 import '../utils/aluno_display_utils.dart';
+import '../widgets/aluno360_copilot_folha.dart' show abrirCopiloto360;
 import '../widgets/aluno360_composite_header.dart';
 import '../widgets/aluno360_menu_sheet.dart';
 import '../widgets/aluno360_help_sheets.dart';
@@ -34,13 +36,15 @@ import '../widgets/aluno360_detail_ferramentas_tab.dart';
 import '../widgets/aluno360_resumo_tab.dart';
 import '../widgets/aluno_detail_hero_card.dart';
 import '../widgets/aluno_detail_loading_skeleton.dart';
-import '../../evolucao/providers/evolucao_home_provider.dart' show prefetchEvolucaoHome;
+import '../../evolucao/providers/evolucao_home_provider.dart'
+    show prefetchEvolucaoHome;
 
 part 'aluno_detail_screen_state.part.dart';
 
 class AlunoDetailScreen extends ConsumerStatefulWidget {
   final int alunoId;
   final int? initialTabIndex;
+
   /// Nome/foto/status from the alunos list for optimistic skeleton.
   final Aluno? listPreview;
 

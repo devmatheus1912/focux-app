@@ -490,13 +490,18 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                 tooltip: AlunosMicrocopy.helpA11y,
                 onTap: _openHelp,
               ),
-              IconButton(
-                tooltip: AlunosMicrocopy.selectA11y,
-                onPressed: _toggleModoSelecao,
-                icon: Icon(
-                  _modoSelecao ? FxIcons.fechar : FxIcons.checklist,
+              if (_modoSelecao)
+                IconButton(
+                  tooltip: 'Sair da seleção',
+                  onPressed: _toggleModoSelecao,
+                  icon: const Icon(FxIcons.fechar),
+                )
+              else
+                IconButton(
+                  tooltip: 'Mais ações',
+                  icon: const Icon(FxIcons.mais),
+                  onPressed: _maisDaLista,
                 ),
-              ),
             ],
           ),
           body:

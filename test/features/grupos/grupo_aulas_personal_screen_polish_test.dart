@@ -26,7 +26,7 @@ void main() {
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
     expect(screen, contains('showFxFormSheet'));
     expect(screen, contains('showFxCalendarioSheet'));
-    expect(screen, contains('showTimePicker'));
+    expect(screen, contains('showFxHorario'));
     expect(screen, isNot(contains('showDatePicker')));
     // Um "Nova aula" só: o do rodapé fixo (o vazio não repete o botão).
     expect(screen, isNot(contains("FxEmptyAction(label: 'Nova aula'")));

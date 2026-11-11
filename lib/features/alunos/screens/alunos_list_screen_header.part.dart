@@ -1,6 +1,39 @@
 part of 'alunos_list_screen.dart';
 
 extension AlunosListScreenHeader on _AlunosListScreenState {
+  /// Com até 3 alunos não há o que filtrar (salvo filtro já ativo).
+  bool _mostraFiltros({required int totalAlunos}) =>
+      totalAlunos > alunosPoucos || _filtro != AlunoFiltro.todos;
+
+  /// "⋯" do topo: selecionar vários e trazer alunos de outro app.
+  Future<void> _maisDaLista() async {
+    final escolha = await showFxGroupedActionSheet<String>(
+      context,
+      titulo: 'Mais ações',
+      grupos: [
+        FxActionGroup<String>(null, const [
+          FxActionItem(
+            valor: 'selecionar',
+            rotulo: 'Selecionar alunos',
+            icone: FxIcons.checklist,
+          ),
+          FxActionItem(
+            valor: 'trazer',
+            rotulo: 'Trazer alunos',
+            icone: FxIcons.enviarArquivo,
+          ),
+        ]),
+      ],
+    );
+    if (!mounted) return;
+    switch (escolha) {
+      case 'selecionar':
+        _toggleModoSelecao();
+      case 'trazer':
+        _importarVarios();
+    }
+  }
+
   Widget _buildAlunosListHeader({
     required int contatoCount,
     required int ativosCount,
@@ -8,6 +41,7 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
     required int riscoCount,
     required int novosCount,
     required int? inativosCount,
+    required int totalAlunos,
     required bool isDark,
     required Color primary,
     required Color ink,
@@ -120,51 +154,6 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                               child: Icon(FxIcons.fechar, size: 18, color: mute),
                             ),
                           )
-                        else
-                          Tooltip(
-                            message: AlunosMicrocopy.organizeTooltip,
-                            child: InkWell(
-                              onTap: _showListOptions,
-                              borderRadius: BorderRadius.circular(999),
-                              child: SizedBox(
-                                width: 34,
-                                height: 34,
-                                child: Stack(
-                                  alignment: Alignment.center,
-                                  clipBehavior: Clip.none,
-                                  children: [
-                                    Icon(
-                                      FxIcons.filtros,
-                                      size: FxSettingsLayout.iconSize,
-                                      color: primary,
-                                    ),
-                                    if (_ordenacao !=
-                                            AlunoOrdenacao.prioridade ||
-                                        _filtro != AlunoFiltro.todos)
-                                      Positioned(
-                                        right: -2,
-                                        top: -2,
-                                        child: Container(
-                                          width: 7,
-                                          height: 7,
-                                          decoration: BoxDecoration(
-                                            color: primary,
-                                            shape: BoxShape.circle,
-                                            border: Border.all(
-                                              color:
-                                                  isDark
-                                                      ? EagleTokens.darkCard
-                                                      : TokensStrip.cardBg,
-                                              width: 1.5,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
                       ],
                     ),
                   ),
@@ -172,6 +161,7 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
               ),
             ),
 
+            if (_mostraFiltros(totalAlunos: totalAlunos))
             Padding(
               padding: AlunosLayout.filterRowPadding,
               child: FxHorizontalScrollPeek(
@@ -204,12 +194,18 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                             AlunoFiltro.risco => riscoCount,
                             AlunoFiltro.novos => novosCount,
                             AlunoFiltro.inativos => inativosCount,
-                            AlunoFiltro.todos => null,
+                            AlunoFiltro.todos => totalAlunos,
                           },
                           isDark: isDark,
                         ),
                         const SizedBox(width: 8),
                       ],
+                      // A ordem da lista, dita em texto (não parece filtro).
+                      FxTonalButton(
+                        label: 'Ordem: ${alunoOrdenacaoRotulo(_ordenacao)}',
+                        compact: true,
+                        onPressed: _showListOptions,
+                      ),
                       const SizedBox(width: AlunosLayout.filterRowEndInset),
                     ],
                   ),
@@ -231,10 +227,13 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
     return KeyedSubtree(
       key: _chipKeys[filtro],
       child: FxToggleChip(
-        label: count == null || count <= 0 ? label : '$label $count',
+        label: count == null || (count <= 0 && filtro != AlunoFiltro.todos)
+            ? label
+            : '$label $count',
         selected: _filtro == filtro,
         isDark: isDark,
-        filledWhenSelected: true,
+        // Pílula com contorno, como as escolhas do resto do app.
+        filledWhenSelected: false,
         // O chip marcado não desliga: quem volta para a lista inteira é o "Todos".
         onTap: () => _setFiltro(filtro),
       ),

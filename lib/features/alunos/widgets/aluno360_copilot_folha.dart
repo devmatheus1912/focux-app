@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
@@ -23,6 +24,39 @@ import '../utils/aluno360_operacao_logic.dart';
 import 'aluno360_acao_sticky.dart';
 import 'aluno360_copilot_ia_refresh_button.dart';
 import '../../../core/theme/fx_icons.dart';
+
+/// Abre o Copiloto do 360 com os dados da operação do aluno: Resumo e Evolução
+/// usam este caminho. Sem dados ainda, busca; sem como abrir a folha, vai ao Copiloto.
+Future<void> abrirCopiloto360(
+  BuildContext context,
+  WidgetRef ref, {
+  required Aluno aluno,
+}) async {
+  var snapshot = ref.read(aluno360OperacaoProvider(aluno.id));
+  if (snapshot == null) {
+    try {
+      await ref.read(aluno360OperacaoBundleProvider(aluno.id).future);
+    } catch (_) {}
+    if (!context.mounted) return;
+    snapshot = ref.read(aluno360OperacaoProvider(aluno.id));
+  }
+  if (!context.mounted) return;
+  if (snapshot == null) {
+    context.push('/ia/copiloto');
+    return;
+  }
+  final bundle = ref.read(aluno360OperacaoBundleProvider(aluno.id)).value;
+  final proxima = snapshot.effectiveProxima;
+  await showAluno360CopilotFolha(
+    context,
+    aluno: aluno,
+    snapshot: snapshot,
+    acao: proxima?.acao.trim() ?? '',
+    motivo: proxima?.motivo,
+    proxima: proxima,
+    tarefaCriada: bundle?.hasOpenCopilotTask ?? false,
+  );
+}
 
 Future<void> showAluno360CopilotFolha(
   BuildContext context, {
@@ -164,11 +198,7 @@ class _CopilotFolha extends ConsumerWidget {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(
-                        FxIcons.concluido,
-                        size: 18,
-                        color: primary,
-                      ),
+                      Icon(FxIcons.concluido, size: 18, color: primary),
                       const SizedBox(width: TokensStrip.s2),
                       Expanded(
                         child: Text(

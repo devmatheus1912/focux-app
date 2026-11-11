@@ -21,8 +21,17 @@ String feedbackVideoStatusLabel({required bool respondido}) =>
 String feedbackVideoResponderLabel({required bool respondido}) =>
     respondido ? 'Editar resposta' : 'Responder';
 
-String feedbackVideoComentarioAluno(String comentario) =>
-    'Aluno: "${comentario.trim()}"';
+/// Palavras de dor no recado: o rótulo vai em tom de alerta.
+const _palavrasDeDor = ['dor', 'doeu', 'doendo', 'senti', 'incômodo', 'incomodo'];
+
+bool feedbackRecadoFalaDeDor(String recado) {
+  final palavras = recado.toLowerCase().split(RegExp(r'[^a-zà-ú]+'));
+  return palavras.any(_palavrasDeDor.contains);
+}
+
+/// Subtítulo do "Assistir vídeo": quando o aluno mandou.
+String feedbackVideoEnviadoEm(DateTime criadoEm) =>
+    'Enviado em ${fxDateShort(criadoEm)}';
 
 /// Nome único do recurso nas duas pontas (360, plano, catálogo, telas).
 const feedbackVideoNome = 'Feedback em vídeo';

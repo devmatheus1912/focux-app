@@ -78,7 +78,6 @@ Widget _tab(Aluno aluno) => Scaffold(
       isDark: false,
       primary: EagleTokens.brand,
       proximaAcao360: _proxima,
-      hasOpenCopilotTask360: false,
       aderenciaSemanal: null,
       recoveryAsync: const AsyncData(null),
       autonomiaResumoAsync: const AsyncLoading(),

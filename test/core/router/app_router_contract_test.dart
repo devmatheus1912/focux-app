@@ -131,8 +131,8 @@ void main() {
     expect(helper, contains('context.go(fallbackLocation)'));
     expect(helper, contains('void safePopOr'));
     expect(checkin, contains("safePopOrGo(context, '/checkin/treinos')"));
-    // Copiloto é tab do shell — sem seta/safePop (showBack: false).
-    expect(copilot, contains("showBack: _gerado"));
+    // Copiloto abre por cima (não é mais aba): o voltar sai ou volta à abertura.
+    expect(copilot, contains('onBack: _gerado ? _voltarAoInicio : null'));
     expect(copilot, isNot(contains('safePopOr(')));
     expect(
       chat,

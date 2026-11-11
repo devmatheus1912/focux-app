@@ -106,12 +106,12 @@ void main() {
     expect(dashboard, contains('FxStripCard'));
   });
 
-  test('ia hub loads insights with async when', () {
+  test('ia hub carrega a abertura e as análises guardadas', () {
     final ia = readScreenSourceBundle(
       'lib/features/ia/screens/ia_copiloto_screen.dart',
     );
     expect(ia, contains('iaCopilotoHomeProvider'));
-    expect(ia, contains('insightsProvider'));
-    expect(ia, contains('.when('));
+    // A análise vem guardada do servidor (SPEC-copiloto).
+    expect(ia, contains('copilotoAnalisesRecentesProvider'));
   });
 }

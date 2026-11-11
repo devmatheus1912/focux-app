@@ -48,13 +48,26 @@ class _MigracaoImportacaoResumoBody extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        FxMetricStrip(
-          metricas: [
-            FxMetric(valor: data.importados, rotulo: 'Importados'),
-            FxMetric(valor: data.duplicados, rotulo: 'Duplicados'),
-            FxMetric(valor: data.erros, rotulo: 'Erros'),
-          ],
+        Text(
+          migracaoImportadosLinha(data.importados),
+          style: FocuxHubTypography.sectionTitle(context, color: ink),
         ),
+        if (data.duplicados > 0)
+          _MigracaoLinhaDeQuais(
+            texto: migracaoDuplicadosLinha(data.duplicados),
+            itens: [
+              for (final d in data.detalhes)
+                if (d.status == 'DUPLICADO') d,
+            ],
+          ),
+        if (data.erros > 0)
+          _MigracaoLinhaDeQuais(
+            texto: migracaoErrosLinha(data.erros),
+            itens: [
+              for (final d in data.detalhes)
+                if (d.status != 'DUPLICADO' && d.status != 'IMPORTADO') d,
+            ],
+          ),
         if (comAcesso.isNotEmpty) ...[
           SizedBox(height: TokensStrip.s4),
           Text(
@@ -83,7 +96,11 @@ class _MigracaoImportacaoResumoBody extends StatelessWidget {
             _MigracaoGrupoHeader(
               icon: FxIcons.email,
               color: EagleTokens.warn,
-              titulo: 'E-mail não saiu',
+              titulo: migracaoGrupoProgresso(
+                'E-mail não saiu',
+                feitos: data.emailNaoSaiu.where((d) => status.containsKey(d.alunoId)).length,
+                total: data.emailNaoSaiu.length,
+              ),
               subtitulo:
                   'Esses alunos têm e-mail, mas o envio falhou. Mande o convite pelo WhatsApp ou copie o link.',
               count: data.emailNaoSaiu.length,
@@ -98,7 +115,11 @@ class _MigracaoImportacaoResumoBody extends StatelessWidget {
             _MigracaoGrupoHeader(
               icon: FxIcons.enviar,
               color: EagleTokens.whatsapp,
-              titulo: 'Só telefone',
+              titulo: migracaoGrupoProgresso(
+                'Só telefone',
+                feitos: data.soTelefone.where((d) => status.containsKey(d.alunoId)).length,
+                total: data.soTelefone.length,
+              ),
               subtitulo: 'Sem e-mail. Envie o convite pelo WhatsApp.',
               count: data.soTelefone.length,
               ink: ink,
@@ -112,7 +133,11 @@ class _MigracaoImportacaoResumoBody extends StatelessWidget {
             _MigracaoGrupoHeader(
               icon: FxIcons.link,
               color: mute,
-              titulo: 'Sem contato',
+              titulo: migracaoGrupoProgresso(
+                'Sem contato',
+                feitos: data.semContato.where((d) => status.containsKey(d.alunoId)).length,
+                total: data.semContato.length,
+              ),
               subtitulo:
                   'Sem telefone nem e-mail. Copie o link e envie pelo canal que preferir.',
               count: data.semContato.length,
@@ -235,78 +260,155 @@ class _MigracaoConviteTile extends StatelessWidget {
     final email = _emailVisivel;
     final feito = status != null;
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: TokensStrip.s3),
-      child: Container(
-        padding: const EdgeInsets.all(TokensStrip.s3),
-        decoration: fxListCardDecoration(
-          context,
-          accent: feito ? EagleTokens.good : brand,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
+    final contato = [
+      if (item.telefone?.trim().isNotEmpty ?? false) item.telefone!.trim(),
+      if (email != null) email,
+    ].join(' · ');
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: TokensStrip.s2),
+      padding: const EdgeInsets.fromLTRB(
+        TokensStrip.s3,
+        TokensStrip.s2,
+        TokensStrip.s1,
+        TokensStrip.s2,
+      ),
+      decoration: fxListCardDecoration(context),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: Text(
-                    item.nome,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      color: ink,
-                      fontSize: TokensStrip.fontBody,
-                    ),
-                  ),
+                Text(
+                  item.nome,
+                  style: FocuxHubTypography.cardTitle(color: ink),
                 ),
-                if (feito)
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        FxIcons.concluido,
-                        size: 16,
-                        color: EagleTokens.good,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        status == MigracaoAcessoStatus.enviado
-                            ? s.migracaoAcessoEnviado
-                            : s.migracaoAcessoCopiado,
-                        style: TextStyle(
-                          fontSize: TokensStrip.fontRotulo,
-                          fontWeight: FontWeight.w700,
-                          color: EagleTokens.good,
-                        ),
-                      ),
-                    ],
+                if (contato.isNotEmpty)
+                  Text(
+                    contato,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: FocuxHubTypography.bodyMuted(color: mute),
                   ),
               ],
             ),
-            if (email != null)
-              Text(
-                email,
-                style: TextStyle(fontSize: TokensStrip.fontRotulo, color: mute, height: 1.35),
+          ),
+          if (feito)
+            Padding(
+              padding: const EdgeInsets.only(right: TokensStrip.s2),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(FxIcons.concluido, size: 16, color: EagleTokens.good),
+                  const SizedBox(width: 4),
+                  Text(
+                    status == MigracaoAcessoStatus.enviado
+                        ? s.migracaoAcessoEnviado
+                        : s.migracaoAcessoCopiado,
+                    style: FocuxHubTypography.chip(EagleTokens.good),
+                  ),
+                ],
               ),
-            const SizedBox(height: TokensStrip.s2),
-            if (whatsAppUri != null) ...[
-              OutlinedButton(
+            )
+          else ...[
+            if (whatsAppUri != null)
+              IconButton(
+                tooltip: s.alunoLinkEnviarWhatsApp,
                 onPressed: () => _whatsapp(context, whatsAppUri),
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(48),
-                  shape: const StadiumBorder(),
-                ),
-                child: Text(s.alunoLinkEnviarWhatsApp),
+                icon: const Icon(FxIcons.chat, color: EagleTokens.whatsapp),
               ),
-              FxTonalButton(label: s.alunoLinkCopiar, onPressed: () => _copiar(context), expanded: true),
-            ] else
-              OutlinedButton(
-                onPressed: () => _copiar(context),
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(48),
-                  shape: const StadiumBorder(),
-                ),
-                child: Text(s.alunoLinkCopiar),
+            IconButton(
+              tooltip: 'Mais opções de ${item.nome}',
+              icon: Icon(FxIcons.mais, color: mute),
+              onPressed: () async {
+                final escolha = await showFxGroupedActionSheet<String>(
+                  context,
+                  titulo: item.nome,
+                  grupos: [
+                    FxActionGroup<String>(null, [
+                      FxActionItem(
+                        valor: 'copiar',
+                        rotulo: 'Copiar convite',
+                        icone: FxIcons.copiar,
+                      ),
+                    ]),
+                  ],
+                );
+                if (escolha == 'copiar' && context.mounted) {
+                  await _copiar(context);
+                }
+              },
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// "2 já estavam na sua lista": toque mostra quais (nome e motivo).
+class _MigracaoLinhaDeQuais extends StatelessWidget {
+  const _MigracaoLinhaDeQuais({required this.texto, required this.itens});
+
+  final String texto;
+  final List<MigracaoImportacaoDetalhe> itens;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    return InkWell(
+      onTap:
+          itens.isEmpty
+              ? null
+              : () => showFxHomeSheet<void>(
+                context,
+                builder:
+                    (_) => FxSheetFrame(
+                      title: texto,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          for (final d in itens)
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                bottom: TokensStrip.s2,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    d.nome,
+                                    style: FocuxHubTypography.cardTitle(
+                                      color: chrome.ink,
+                                    ),
+                                  ),
+                                  if (d.motivo.isNotEmpty)
+                                    Text(
+                                      d.motivo,
+                                      style: FocuxHubTypography.bodyMuted(
+                                        color: chrome.mute,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
               ),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 44),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                texto,
+                style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+              ),
+            ),
+            if (itens.isNotEmpty)
+              Icon(FxIcons.chevronDireita, size: 16, color: chrome.mute),
           ],
         ),
       ),

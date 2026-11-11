@@ -152,7 +152,7 @@ void main() {
     expect(iconColor('WhatsApp'), iconColor('Contato feito'));
   });
 
-  testWidgets('rótulos dizem a janela: % de 30 dias e sparkline de 7', (
+  testWidgets('rótulos dizem a janela: % de 30 dias; sem gráfico de 7 dias', (
     tester,
   ) async {
     await tester.pumpWidget(cardHarness(isDark: false));
@@ -177,12 +177,12 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.text('3 de 7 dias com treino'), findsOneWidget);
-    expect(find.text('7 dias'), findsOneWidget);
+    expect(find.textContaining('3 de 7 dias com treino'), findsOneWidget);
+    expect(find.text('7 dias'), findsNothing);
     expect(find.textContaining('esta semana'), findsNothing);
   });
 
-  testWidgets('legenda do sparkline cabe em 320px com textScaler 1.3', (
+  testWidgets('linha de treinos cabe em 320px com textScaler 1.3', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(320, 800);
@@ -208,18 +208,8 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-
     expect(tester.takeException(), isNull);
-    final legenda = find.text('7 dias');
-    expect(legenda, findsOneWidget);
-    // Fonte de teste desenha glifos quadrados: largura não prova corte real.
-    // A altura prova que a legenda segue o textScaler em vez de encolher.
-    final fonte = TokensStrip.fontBodySm - 2;
-    expect(tester.getSize(legenda).height, greaterThanOrEqualTo(fonte * 1.3));
-    expect(
-      find.ancestor(of: legenda, matching: find.byType(ExcludeSemantics)),
-      findsWidgets,
-    );
+    expect(find.textContaining('dias com treino'), findsOneWidget);
   });
 
   testWidgets('compact convite nao mostra 0% nem risco', (tester) async {

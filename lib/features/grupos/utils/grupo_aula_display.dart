@@ -18,12 +18,26 @@ String grupoAulaVagasLabel({
 bool grupoAulaLotada({required int inscritos, required int capacidadeMax}) =>
     capacidadeMax > 0 && inscritos >= capacidadeMax;
 
-/// Status no trailing; nulo quando a aula está aberta (o toque na linha inscreve).
-String? grupoAulaStatusLabel({required bool inscrito, required bool lotada}) {
+/// O que a linha da aula faz, à direita: "Inscrito", "Inscrever" ou "Lotada".
+String grupoAulaStatusLabel({required bool inscrito, required bool lotada}) {
   if (inscrito) return 'Inscrito';
   if (lotada) return 'Lotada';
-  return null;
+  return 'Inscrever';
 }
+
+/// Vagas no subtítulo só quando restam poucas ("3 vagas"); senão nada.
+String? grupoAulaPoucasVagas({
+  required int inscritos,
+  required int capacidadeMax,
+}) {
+  if (capacidadeMax <= 0) return null;
+  final livres = capacidadeMax - inscritos;
+  if (livres <= 0 || livres > 3) return null;
+  return livres == 1 ? '1 vaga' : '$livres vagas';
+}
+
+/// Busca só quando ajuda (mesma regra do Feedback em vídeo e das mensalidades).
+const grupoAulaBuscaMinimo = 6;
 
 enum GrupoAulaChip { todas, abertas, lotadas }
 
@@ -104,3 +118,19 @@ String grupoAulaDiaRelativo(DateTime dia, DateTime hoje) {
   if (n < 0) return 'Já passou';
   return 'Em $n dias';
 }
+
+/// Durações da aula em grupo, em minutos (padrão 1 h).
+const grupoAulaDuracoes = [30, 45, 60, 90];
+const grupoAulaDuracaoPadrao = 60;
+
+/// "30 min", "1 h", "1 h 30".
+String grupoAulaDuracaoLabel(int minutos) {
+  if (minutos < 60) return '$minutos min';
+  final h = minutos ~/ 60;
+  final m = minutos % 60;
+  return m == 0 ? '$h h' : '$h h ${m.toString().padLeft(2, '0')}';
+}
+
+/// Duração gravada que não é uma das quatro: aparece como opção a mais.
+int? grupoAulaDuracaoFora(int minutos) =>
+    minutos > 0 && !grupoAulaDuracoes.contains(minutos) ? minutos : null;

@@ -11,6 +11,8 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../l10n/app_localizations.dart';
 import '../data/perfil_repository.dart';
 import '../../../core/theme/fx_icons.dart';
@@ -20,9 +22,13 @@ String perfilCodigoMensagem(S s, {required String codigo, required String link})
     s.perfilCodigoMensagem(codigo, link);
 
 /// Código do personal: o que o aluno digita para entrar. Vale em todo plano.
+///
+/// [origemConvites]: aberta de Convidar aluno; esconde "Convidar aluno novo"
+/// (seria abrir a mesma tela por cima).
 Future<void> showPerfilCodigoSheet(
   BuildContext context, {
   required PerfilPersonal perfil,
+  bool origemConvites = false,
 }) async {
   final s = S.of(context);
   final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -35,16 +41,25 @@ Future<void> showPerfilCodigoSheet(
           leading: Icon(FxIcons.chave, color: primary, size: 22),
           title: s.perfilCodigoTitulo,
           subtitle: s.perfilCodigoSubtitulo,
-          child: _PerfilCodigoBody(perfil: perfil, parent: context),
+          child: _PerfilCodigoBody(
+            perfil: perfil,
+            parent: context,
+            origemConvites: origemConvites,
+          ),
         ),
   );
 }
 
 class _PerfilCodigoBody extends StatelessWidget {
-  const _PerfilCodigoBody({required this.perfil, required this.parent});
+  const _PerfilCodigoBody({
+    required this.perfil,
+    required this.parent,
+    this.origemConvites = false,
+  });
 
   final PerfilPersonal perfil;
   final BuildContext parent;
+  final bool origemConvites;
 
   Future<void> _copiar(BuildContext context, String texto, String aviso) async {
     await Clipboard.setData(ClipboardData(text: texto));
@@ -92,20 +107,29 @@ class _PerfilCodigoBody extends StatelessWidget {
             await launchUrl(uri, mode: LaunchMode.externalApplication);
           },
         ),
-        const SizedBox(height: TokensStrip.s2),
-        FxTonalButton(
-          label: s.perfilCodigoCopiarLink,
-          expanded: true,
-          onPressed: () => _copiar(context, link, s.perfilCodigoLinkCopiado),
-        ),
-        const SizedBox(height: TokensStrip.s2),
-        FxTonalButton(
-          label: s.perfilCodigoConvidar,
-          expanded: true,
-          onPressed: () {
-            Navigator.of(context).pop();
-            parent.push('/convites');
-          },
+        const SizedBox(height: TokensStrip.s3),
+        // Ações menores em linhas, embaixo dos dois botões principais.
+        FxSettingsGroup(
+          children: [
+            FxSettingsTile(
+              icon: FxIcons.link,
+              label: s.perfilCodigoCopiarLink,
+              value: '',
+              showDivider: !origemConvites,
+              onTap: () => _copiar(context, link, s.perfilCodigoLinkCopiado),
+            ),
+            if (!origemConvites)
+              FxSettingsTile(
+                icon: FxIcons.adicionarPessoa,
+                label: s.perfilCodigoConvidar,
+                value: '',
+                showDivider: false,
+                onTap: () {
+                  Navigator.of(context).pop();
+                  parent.push('/convites');
+                },
+              ),
+          ],
         ),
         const SizedBox(height: TokensStrip.s2),
         if (perfil.slugEditable)

@@ -26,6 +26,9 @@ class RecorrenciaAssinatura {
   final String? initPoint;
   final String? proximaCobranca;
 
+  /// `PIX` ou `CARTAO`; nulo quando o backend ainda não manda.
+  final String? forma;
+
   RecorrenciaAssinatura({
     required this.id,
     required this.alunoId,
@@ -34,6 +37,7 @@ class RecorrenciaAssinatura {
     this.alunoNome,
     this.initPoint,
     this.proximaCobranca,
+    this.forma,
   }) : valor = FxMoney.parse(valor);
 
   factory RecorrenciaAssinatura.fromJson(Map<String, dynamic> j) =>
@@ -45,6 +49,7 @@ class RecorrenciaAssinatura {
         status: j['status'] as String? ?? 'PENDENTE',
         initPoint: j['initPoint'] as String?,
         proximaCobranca: j['proximaCobranca'] as String?,
+        forma: j['forma'] as String?,
       );
 }
 

@@ -19,7 +19,8 @@ void main() {
       'lib/features/growth/screens/migracao_magica_screen.dart',
     );
 
-    expect(screen, contains('Migração Focux'));
+    expect(screen, contains('Trazer alunos'));
+    expect(screen, isNot(contains('Migração Focux')));
     expect(screen, contains('MigracaoOcrService'));
     expect(screen, contains('MigracaoFotoLimits'));
     expect(screen, contains('_verificarAcessoFoto'));
@@ -73,13 +74,13 @@ void main() {
 
     expect(find.text('Foto ou print'), findsOneWidget);
     // Fora da aba de foto, nada de cota nem de leitura de imagem.
-    expect(find.textContaining('Fotos este mês'), findsNothing);
-    expect(find.textContaining('leitura gratuita'), findsNothing);
+    expect(find.textContaining('restantes este mês'), findsNothing);
+    expect(find.textContaining('sem custo'), findsNothing);
 
     await tester.tap(find.text('Foto ou print'));
     await tester.pump(const Duration(milliseconds: 300));
 
-    expect(find.textContaining('leitura gratuita'), findsOneWidget);
-    expect(find.textContaining('Fotos este mês'), findsOneWidget);
+    expect(find.textContaining('sem custo'), findsOneWidget);
+    expect(find.textContaining('restantes este mês'), findsOneWidget);
   });
 }

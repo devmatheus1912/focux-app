@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/router/safe_navigation.dart';
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
@@ -278,7 +277,7 @@ class _GrupoAulasAlunoScreenState extends ConsumerState<GrupoAulasAlunoScreen> {
                   )
                   : Column(
                     children: [
-                      if (_aulas.isNotEmpty ||
+                      if (_aulas.length >= grupoAulaBuscaMinimo ||
                           searching ||
                           _searchCtrl.text.isNotEmpty)
                         Padding(
@@ -380,31 +379,36 @@ class _GrupoAulasAlunoScreenState extends ConsumerState<GrupoAulasAlunoScreen> {
                     lotada: lotada,
                   );
                   final statusColor =
+                      lotada && !a.inscrito
+                          ? fxScreenMute(context)
+                          : Theme.of(context).colorScheme.primary;
+                  final poucas =
                       a.inscrito
-                          ? Theme.of(context).colorScheme.primary
-                          : EagleTokens.warn;
+                          ? null
+                          : grupoAulaPoucasVagas(
+                            inscritos: a.inscritos,
+                            capacidadeMax: a.capacidadeMax,
+                          );
                   return FxSatelliteListTile(
                     title: a.titulo,
                     titleCase: false,
                     subtitle: Text(
-                      a.inscrito
-                          ? grupoAulaLinha(
-                            inicio: a.inicio,
-                            fim: a.fim,
-                            localAula: a.localAula,
-                          )
-                          : '${grupoAulaLinha(inicio: a.inicio, fim: a.fim, localAula: a.localAula)} · ${grupoAulaVagasLabel(inscritos: a.inscritos, capacidadeMax: a.capacidadeMax)}',
+                      [
+                        grupoAulaLinha(
+                          inicio: a.inicio,
+                          fim: a.fim,
+                          localAula: a.localAula,
+                        ),
+                        if (poucas != null) poucas,
+                      ].join(' · '),
                     ),
-                    trailing:
-                        status == null
-                            ? null
-                            : Text(
-                              status,
-                              style: FocuxHubTypography.bodyMuted(
-                                color: statusColor,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
+                    trailing: Text(
+                      status,
+                      style: FocuxHubTypography.bodyMuted(
+                        color: statusColor,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                     onTap: () => _inscrever(a),
                   );
                 },

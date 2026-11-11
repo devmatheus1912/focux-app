@@ -24,7 +24,7 @@ void main() {
       ),
     );
     expect(find.text('Clássico'), findsOneWidget);
-    expect(find.text('Cinematográfico'), findsOneWidget);
+    expect(find.text('Cinema'), findsOneWidget);
     expect(find.text('Minimalista'), findsOneWidget);
     expect(find.byIcon(FxIcons.concluidoAtivo), findsOneWidget);
   });

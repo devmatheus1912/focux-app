@@ -67,10 +67,7 @@ class Aluno360CopilotIaRefreshButtonState
       await ref.read(alunoCopilotoActionProvider(widget.alunoId).future);
       if (!_isLatestRequest(requestSeq)) return;
       if (mounted) {
-        FeedbackHelper.showOperacaoSuccess(
-          context,
-          'Sugestão atualizada com IA',
-        );
+        FeedbackHelper.showSuccess(context, 'Sugestão atualizada com IA');
       }
     } catch (e) {
       if (!_isLatestRequest(requestSeq)) return;
@@ -86,12 +83,12 @@ class Aluno360CopilotIaRefreshButtonState
       }
       if (!mounted) return;
       if (_shouldSurfaceIaRefreshError(e)) {
-        FeedbackHelper.showOperacaoWarn(
+        FeedbackHelper.showWarn(
           context,
           friendlyError(e, fallback: 'IA indisponível agora.'),
         );
       } else {
-        FeedbackHelper.showOperacaoError(
+        FeedbackHelper.showError(
           context,
           friendlyError(
             e,
@@ -179,11 +176,7 @@ class Aluno360CopilotIaRefreshButtonState
             onPressed: _refreshIa,
             icon:
                 _refreshing
-                    ? FxLoading(
-                      size: 18,
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    )
+                    ? FxLoading(size: 18, strokeWidth: 2, color: Colors.white)
                     : const Icon(FxIcons.ia, size: 18),
             label: Text(_refreshing ? 'Gerando…' : 'Gerar com IA'),
             style: Aluno360Layout.operacaoFilledButtonStyle(

@@ -1,6 +1,217 @@
 part of 'ia_copiloto_screen.dart';
 
+/// Rótulo do que foi feito numa recomendação ("Mensagem enviada").
+String copilotoResultadoLabel(String? resultado) => switch (resultado) {
+  'MENSAGEM_ENVIADA' => 'Mensagem enviada',
+  'CHECKIN_PEDIDO' => 'Check-in pedido',
+  'CONTATO_REGISTRADO' => 'Contato registrado',
+  'TAREFA_CRIADA' => 'Tarefa criada',
+  'CARGAS_AJUSTADAS' => 'Cargas ajustadas',
+  'MEDIDAS_REVISADAS' => 'Medidas revisadas',
+  _ => 'Feito à mão',
+};
+
+/// "Hoje · 2 de 3 feitas", "Ontem · Concluída", "seg · 1 pendente".
+String copilotoResumoLinha(CopilotoAnaliseResumo r, DateTime agora) {
+  final criada = r.criadaEm?.toLocal();
+  final dia =
+      criada == null
+          ? ''
+          : DateUtils.isSameDay(criada, agora)
+          ? 'Hoje'
+          : DateUtils.isSameDay(criada, agora.subtract(const Duration(days: 1)))
+          ? 'Ontem'
+          : dataCurta(criada);
+  final estado =
+      r.concluidaEm != null || r.pendentes == 0
+          ? 'Concluída'
+          : r.feitas + r.dispensadas == 0
+          ? (r.pendentes == 1 ? '1 pendente' : '${r.pendentes} pendentes')
+          : '${r.feitas + r.dispensadas} de ${r.total} feitas';
+  return dia.isEmpty ? estado : '$dia · $estado';
+}
+
 extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
+  /// Grupos da abertura: análises recentes e o que a IA faz.
+  Widget _abertura({
+    required bool cotaEsgotada,
+    required List<CopilotoAnaliseResumo> recentes,
+  }) {
+    final chrome = ShellChrome.of(context);
+    final cargas = ref.watch(cargasParaRevisarProvider).value ?? 0;
+    final agora = DateTime.now();
+    String descricao(String texto) =>
+        cotaEsgotada ? 'Seus usos de IA deste mês acabaram' : texto;
+    final ordenadas = [...recentes]..sort((a, b) {
+      final pa = a.concluidaEm == null && a.pendentes > 0 ? 0 : 1;
+      final pb = b.concluidaEm == null && b.pendentes > 0 ? 0 : 1;
+      if (pa != pb) return pa - pb;
+      return (b.criadaEm ?? agora).compareTo(a.criadaEm ?? agora);
+    });
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        FxSettingsLayout.pageInset,
+        TokensStrip.s4,
+        FxSettingsLayout.pageInset,
+        0,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (ordenadas.isNotEmpty) ...[
+            Text(
+              'Análises recentes',
+              style: FxSettingsLayout.sectionHeader(color: chrome.mute),
+            ),
+            const SizedBox(height: FxSettingsLayout.headerToGroup),
+            FxSettingsGroup(
+              children: [
+                for (final (i, r) in ordenadas.indexed)
+                  FxSettingsTile(
+                    icon: FxIcons.ia,
+                    label: satelliteFirstName(r.alunoNome),
+                    subtitle: copilotoResumoLinha(r, agora),
+                    value: '',
+                    showDivider: i < ordenadas.length - 1,
+                    onTap:
+                        () => _abrirAnaliseGuardada(r.id, r.alunoNome ?? ''),
+                  ),
+              ],
+            ),
+            const SizedBox(height: FxSettingsLayout.groupGap),
+          ],
+          Text(
+            'O que a IA faz',
+            style: FxSettingsLayout.sectionHeader(color: chrome.mute),
+          ),
+          const SizedBox(height: FxSettingsLayout.headerToGroup),
+          FxSettingsGroup(
+            children: [
+              FxSettingsTile(
+                icon: FxIcons.ia,
+                label: 'Analisar um aluno',
+                subtitle: descricao(
+                  'Vê treino, check-ins e evolução e sugere o próximo passo. ${iaCopilotoCustoAnalise()}',
+                ),
+                value: '',
+                onTap: cotaEsgotada ? null : _escolherEAnalisar,
+              ),
+              FxSettingsTile(
+                icon: FxIcons.subindo,
+                label: 'Ajustar cargas',
+                subtitle: descricao(
+                  'Sugere a carga de cada exercício pelo histórico.',
+                ),
+                value: '',
+                onTap: cotaEsgotada ? null : _ajustarCargasDeUmAluno,
+              ),
+              if (cargas > 0)
+                FxSettingsTile(
+                  icon: FxIcons.checklist,
+                  label: 'Cargas para revisar',
+                  subtitle:
+                      cargas == 1
+                          ? '1 sugestão esperando sua revisão.'
+                          : '$cargas sugestões esperando sua revisão.',
+                  value: '',
+                  onTap: () => context.push('/ia/progressao/aceitar'),
+                ),
+              FxSettingsTile(
+                icon: FxIcons.chat,
+                label: 'Conversar com a IA',
+                subtitle: 'Tire dúvidas de treino e prescrição.',
+                value: '',
+                showDivider: false,
+                onTap: () => context.push('/ia/chat'),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Resultado: o motivo, as recomendações com estado e o aviso de segurança.
+  Widget _resultado({
+    required Color brand,
+    required Color mute,
+    required Color ink,
+  }) {
+    final analise = _analise;
+    final motivo = (_proximaAcao?.motivo ?? analise?.motivo ?? '').trim();
+    final criada = analise?.criadaEm?.toLocal();
+    final deOutroDia =
+        criada != null && !DateUtils.isSameDay(criada, DateTime.now());
+    final recs = analise?.recomendacoes ?? const <CopilotoRecomendacao>[];
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        FxSettingsLayout.pageInset,
+        0,
+        FxSettingsLayout.pageInset,
+        16,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (deOutroDia) ...[
+            Text(
+              'Análise de ${dataCurta(criada)}',
+              style: FocuxHubTypography.chip(mute),
+            ),
+            const SizedBox(height: TokensStrip.s2),
+          ],
+          if (motivo.isNotEmpty) ...[
+            Text(motivo, style: FocuxHubTypography.body(color: ink)),
+            const SizedBox(height: TokensStrip.s3),
+          ],
+          if (recs.isEmpty)
+            FxEmptyState(
+              icon: FxIcons.ia,
+              title: 'Sem recomendações no momento',
+              subtitle:
+                  'Adicione mais treinos e check-ins para que a IA gere recomendações personalizadas.',
+              action: FxEmptyAction(
+                label: 'Gerar novamente',
+                onTap: () => _gerar(refazer: true),
+              ),
+            )
+          else ...[
+            if (recs.any((r) => !r.insight.ready)) ...[
+              Text(
+                'A IA respondeu fora do formato ideal. Mantivemos as recomendações para revisão manual.',
+                style: FocuxHubTypography.bodyMuted(color: mute),
+              ),
+              const SizedBox(height: TokensStrip.s3),
+            ],
+            for (final (i, rec) in recs.indexed)
+              IaCopilotInsightItem(
+                key: ValueKey('rec-${rec.id}-${rec.estado.name}'),
+                index: i,
+                insight: rec.insight,
+                brand: brand,
+                mute: mute,
+                acaoLabel: _acaoDoInsight(rec.insight)?.label,
+                onAcao: switch (_acaoDoInsight(rec.insight)) {
+                  final acao? when rec.pendente =>
+                    () => _aplicarAcao(acao, rec: rec),
+                  _ => null,
+                },
+                onMais: () => _menuDoInsight(rec),
+                feitoLabel:
+                    rec.estado == CopilotoEstado.feita
+                        ? copilotoResultadoLabel(rec.resultado)
+                        : null,
+                dispensada: rec.estado == CopilotoEstado.dispensada,
+              ),
+            const SizedBox(height: TokensStrip.s2),
+            const IaSafetyDisclaimer(compact: true),
+          ],
+        ],
+      ),
+    );
+  }
+
   Widget buildIaCopilotoBody(BuildContext context) {
     final chrome = ShellChrome.of(context);
     final dark = chrome.isDark;
@@ -12,6 +223,9 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
     final homeAsync = ref.watch(iaCopilotoHomeProvider);
     final home = homeAsync.value;
     final tarefas = ref.watch(copilotoTarefasAbertasProvider).value;
+    final recentes =
+        ref.watch(copilotoAnalisesRecentesProvider).value ??
+        const <CopilotoAnaliseResumo>[];
     final planoFromHome = home?.planoFeatures;
     if (planoFromHome != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -47,6 +261,17 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
       });
     }
 
+    // Aluno com análise de hoje sai de "Quem precisa de você"; com análise
+    // de outro dia, o "Analisar" abre a guardada.
+    final hoje = DateTime.now();
+    final analisadosHoje = {
+      for (final r in recentes)
+        if (r.criadaEm != null && DateUtils.isSameDay(r.criadaEm!.toLocal(), hoje))
+          r.alunoId,
+    };
+    final guardadas = {for (final r in recentes) r.alunoId: r};
+    final proxima = _proximaComAcao;
+
     return fxScreenA11yScope(
       label: 'Copiloto',
       child: PopScope(
@@ -65,9 +290,14 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
             appBar: FxShellAppBar(
               title: 'Copiloto',
               subtitle: _gerado ? _selectedAlunoNome : null,
-              showBack: _gerado,
-              onBack: _voltarAoInicio,
+              onBack: _gerado ? _voltarAoInicio : null,
               actions: [
+                if (_gerado)
+                  IconButton(
+                    tooltip: S.of(context).copilotoMenuTitulo,
+                    icon: Icon(FxIcons.mais, color: brand),
+                    onPressed: _abrirMenu,
+                  ),
                 FxHelpIconButton(
                   tooltip: 'Como usar o Copiloto',
                   onTap: () {
@@ -79,315 +309,166 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                 ),
               ],
             ),
+            bottomNavigationBar:
+                _gerado && _analise != null
+                    ? IaCopilotResultActionBar(
+                      onConcluir: _concluir,
+                      proximaLabel: proxima?.$2.label,
+                      onProxima:
+                          proxima == null
+                              ? null
+                              : () => _aplicarAcao(proxima.$2, rec: proxima.$1),
+                    )
+                    : null,
             body: SafeArea(
               bottom: false,
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  FxContentWidthLimiter(
-                    child: SingleChildScrollView(
-                      clipBehavior: Clip.hardEdge,
-                      keyboardDismissBehavior:
-                          ScrollViewKeyboardDismissBehavior.onDrag,
-                      padding: EdgeInsets.only(
-                        bottom:
-                            _gerado
-                                ? IaCopilotResultActionBar.scrollReserve
-                                : 24,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(height: TokensStrip.s3),
-
-                          if (!_gerado) ...[
-                            if (planoFromHome case final plano?
-                                when (plano.limiteIaMensal ?? 0) > 0)
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(
-                                  FxSettingsLayout.pageInset,
-                                  0,
-                                  FxSettingsLayout.pageInset,
-                                  TokensStrip.s4,
-                                ),
-                                child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
-                                  children: [
-                                    IaUsoLinha(
-                                      usado: plano.iaUsadaMes,
-                                      limite: plano.limiteIaMensal!,
-                                    ),
-                                    if (cotaEsgotada) ...[
-                                      const SizedBox(height: TokensStrip.s3),
-                                      _cotaEsgotadaCard(plano),
-                                    ],
-                                  ],
-                                ),
-                              ),
-                            if (homeAsync.hasError)
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(
-                                  FxSettingsLayout.pageInset,
-                                  0,
-                                  FxSettingsLayout.pageInset,
-                                  12,
-                                ),
-                                child: FxErrorState(
-                                  chromeOnDark: dark,
-                                  primary: brand,
-                                  message: friendlyError(
-                                    homeAsync.error!,
-                                    fallback:
-                                        'Não foi possível carregar alunos e cota.',
-                                  ),
-                                  onRetry:
-                                      () => ref.invalidate(
-                                        iaCopilotoHomeProvider,
-                                      ),
-                                ),
-                              )
-                            else if (!_gerando)
-                              Semantics(
-                                hint: iaCopilotoComoCalculamos,
-                                child: CopilotoCardView(
-                                  prioridades: copilotoPrioridades(
-                                    tarefas?.itens ?? const [],
-                                    {
-                                      for (final a
-                                          in home?.alunosResumo ??
-                                              const <IaCopilotoAlunoResumo>[])
-                                        a.id: a.nome,
-                                    },
-                                  ),
-                                  tarefasAbertas: tarefas?.totalItens ?? 0,
-                                  podeAnalisar: !cotaEsgotada,
-                                  onAnalisar: _analisar,
-                                  onEscolherAluno: _escolherEAnalisar,
-                                  onVerTarefas:
-                                      () => context.push(
-                                        '/dashboard/command-center/copiloto',
-                                      ),
-                                ),
-                              ),
-                          ],
-
-                          if (_gerando)
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(
-                                FxSettingsLayout.pageInset,
-                                0,
-                                FxSettingsLayout.pageInset,
-                                18,
-                              ),
-                              child: IaCopilotGenerationStatus(
-                                gerando: _gerando,
-                                gerado: false,
-                                elapsedMs: _geracaoMs,
-                                ink: ink,
-                                mute: mute,
-                                wash: wash,
-                              ),
+              child: FxContentWidthLimiter(
+                child: SingleChildScrollView(
+                  clipBehavior: Clip.hardEdge,
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
+                  padding: const EdgeInsets.only(bottom: 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: TokensStrip.s3),
+                      if (!_gerado) ...[
+                        if (planoFromHome case final plano?
+                            when (plano.limiteIaMensal ?? 0) > 0)
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(
+                              FxSettingsLayout.pageInset,
+                              0,
+                              FxSettingsLayout.pageInset,
+                              TokensStrip.s4,
                             ),
-
-                          // Resultado — Insights above the fold (pilar 13); sticky = único P0.
-                          if (_erro != null) ...[
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(
-                                TokensStrip.s4,
-                                0,
-                                16,
-                                16,
-                              ),
-                              child: FxErrorState(
-                                chromeOnDark: dark,
-                                primary: brand,
-                                message: _erroIaTexto(_erro!),
-                                icon: FxIcons.erro,
-                                onRetry:
-                                    _erroSugereUpgrade(_erro!)
-                                        ? _mostrarUpgradePorErro
-                                        : () => _gerar(refazer: true),
-                                retryLabel:
-                                    _erroSugereUpgrade(_erro!)
-                                        ? 'Fazer upgrade'
-                                        : null,
-                                retryIcon:
-                                    _erroSugereUpgrade(_erro!)
-                                        ? FxIcons.premium
-                                        : FxIcons.atualizar,
-                              ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                IaUsoLinha(
+                                  usado: plano.iaUsadaMes,
+                                  limite: plano.limiteIaMensal!,
+                                ),
+                                if (cotaEsgotada) ...[
+                                  const SizedBox(height: TokensStrip.s3),
+                                  _cotaEsgotadaCard(plano),
+                                ],
+                              ],
                             ),
-                          ] else if (_gerado) ...[
-                            // O nome já está no topo; aqui só o motivo.
-                            if (_proximaAcao?.motivo
-                                case final motivo?
-                                when motivo.trim().isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(
-                                  FxSettingsLayout.pageInset,
-                                  0,
-                                  FxSettingsLayout.pageInset,
-                                  TokensStrip.s3,
-                                ),
-                                child: Text(
-                                  motivo.trim(),
-                                  style: FocuxHubTypography.body(color: ink),
-                                ),
+                          ),
+                        if (homeAsync.hasError)
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(
+                              FxSettingsLayout.pageInset,
+                              0,
+                              FxSettingsLayout.pageInset,
+                              12,
+                            ),
+                            child: FxErrorState(
+                              chromeOnDark: dark,
+                              primary: brand,
+                              message: friendlyError(
+                                homeAsync.error!,
+                                fallback:
+                                    'Não foi possível carregar alunos e cota.',
                               ),
-                            Consumer(
-                              builder: (context, ref, _) {
-                                final query = InsightsQuery(
-                                  alunoId: _selectedAlunoId,
-                                  mode: _mode,
-                                );
-                                final insightsAsync = ref.watch(
-                                  insightsProvider(query),
-                                );
-                                return insightsAsync.when(
-                                  loading:
-                                      () => Padding(
-                                        padding: const EdgeInsets.fromLTRB(
-                                          TokensStrip.s4,
-                                          0,
-                                          16,
-                                          16,
-                                        ),
-                                        child: IaCopilotInsightsLoading(
-                                          ink: ink,
-                                          mute: mute,
-                                          brand: brand,
-                                        ),
-                                      ),
-                                  error:
-                                      (e, _) => Padding(
-                                        padding: const EdgeInsets.fromLTRB(
-                                          TokensStrip.s4,
-                                          0,
-                                          16,
-                                          16,
-                                        ),
-                                        child: FxErrorState(
-                                          chromeOnDark: dark,
-                                          primary: brand,
-                                          message: _erroIaTexto(e),
-                                          icon: FxIcons.erro,
-                                          onRetry:
-                                              () => ref.invalidate(
-                                                insightsProvider(query),
-                                              ),
-                                        ),
-                                      ),
-                                  data: (insights) {
-                                    final degraded = insights.any(
-                                      (insight) => !insight.ready,
-                                    );
-                                    if (insights.isEmpty) {
-                                      return Padding(
-                                        padding: const EdgeInsets.fromLTRB(
-                                          TokensStrip.s4,
-                                          0,
-                                          16,
-                                          16,
-                                        ),
-                                        child: FxEmptyState(
-                                          icon: FxIcons.ia,
-                                          title: 'Sem insights no momento',
-                                          subtitle:
-                                              'Adicione mais treinos e check-ins para que a IA gere recomendações personalizadas.',
-                                          action: FxEmptyAction(
-                                            label: 'Gerar novamente',
-                                            onTap: () => _gerar(refazer: true),
-                                          ),
-                                        ),
-                                      );
-                                    }
-                                    return Padding(
-                                      padding: const EdgeInsets.fromLTRB(
-                                        FxSettingsLayout.pageInset,
-                                        0,
-                                        FxSettingsLayout.pageInset,
-                                        16,
-                                      ),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.stretch,
-                                        children: [
-                                          if (degraded) ...[
-                                            Text(
-                                              'A IA respondeu fora do formato ideal. Mantivemos as recomendações para revisão manual.',
-                                              style:
-                                                  FocuxHubTypography.bodyMuted(
-                                                    color: mute,
-                                                  ),
-                                            ),
-                                            const SizedBox(
-                                              height: TokensStrip.s3,
-                                            ),
-                                          ],
-                                          for (final e
-                                              in insights.asMap().entries)
-                                            IaCopilotInsightItem(
-                                              index: e.key,
-                                              insight: e.value,
-                                              brand: brand,
-                                              mute: mute,
-                                              acaoLabel:
-                                                  _acaoDoInsight(
-                                                    e.value,
-                                                  )?.label,
-                                              onAcao: switch (_acaoDoInsight(
-                                                e.value,
-                                              )) {
-                                                final acao? =>
-                                                  () => _aplicarAcao(acao),
-                                                null => null,
-                                              },
-                                              onMais:
-                                                  () => _menuDoInsight(e.value),
-                                            ),
-                                          const SizedBox(
-                                            height: TokensStrip.s2,
-                                          ),
-                                          const IaSafetyDisclaimer(
-                                            compact: true,
-                                          ),
-                                          const SizedBox(
-                                            height: TokensStrip.s3,
-                                          ),
-                                          FxTonalButton(
-                                            label:
-                                                S
-                                                    .of(context)
-                                                    .copilotoAnalisarOutro,
-                                            expanded: true,
-                                            onPressed: _voltarAoInicio,
-                                          ),
-                                        ],
-                                      ),
-                                    );
+                              onRetry:
+                                  () => ref.invalidate(iaCopilotoHomeProvider),
+                            ),
+                          )
+                        else if (!_gerando) ...[
+                          Semantics(
+                            hint: iaCopilotoComoCalculamos,
+                            child: CopilotoCardView(
+                              prioridades: [
+                                for (final p in copilotoPrioridades(
+                                  tarefas?.itens ?? const [],
+                                  {
+                                    for (final a
+                                        in home?.alunosResumo ??
+                                            const <IaCopilotoAlunoResumo>[])
+                                      a.id: a.nome,
                                   },
-                                );
+                                ))
+                                  if (!analisadosHoje.contains(p.alunoId)) p,
+                              ],
+                              tarefasAbertas: tarefas?.totalItens ?? 0,
+                              podeAnalisar: !cotaEsgotada,
+                              rotuloAnalisar:
+                                  (alunoId) =>
+                                      guardadas.containsKey(alunoId)
+                                          ? 'Ver análise'
+                                          : null,
+                              onAnalisar: (alunoId, nome) {
+                                final guardada = guardadas[alunoId];
+                                if (guardada != null) {
+                                  _abrirAnaliseGuardada(guardada.id, nome);
+                                } else {
+                                  _analisar(alunoId, nome);
+                                }
                               },
+                              onEscolherAluno: _escolherEAnalisar,
+                              onVerTarefas:
+                                  () => context.push(
+                                    '/dashboard/command-center/copiloto',
+                                  ),
                             ),
-                          ],
+                          ),
+                          _abertura(
+                            cotaEsgotada: cotaEsgotada,
+                            recentes: recentes,
+                          ),
                         ],
-                      ),
-                    ),
+                      ],
+                      if (_gerando)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            FxSettingsLayout.pageInset,
+                            0,
+                            FxSettingsLayout.pageInset,
+                            18,
+                          ),
+                          child: IaCopilotGenerationStatus(
+                            gerando: _gerando,
+                            gerado: false,
+                            elapsedMs: _geracaoMs,
+                            ink: ink,
+                            mute: mute,
+                            wash: wash,
+                          ),
+                        ),
+                      if (_erro != null)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            TokensStrip.s4,
+                            0,
+                            16,
+                            16,
+                          ),
+                          child: FxErrorState(
+                            chromeOnDark: dark,
+                            primary: brand,
+                            message: _erroIaTexto(_erro!),
+                            icon: FxIcons.erro,
+                            onRetry:
+                                _erroSugereUpgrade(_erro!)
+                                    ? _mostrarUpgradePorErro
+                                    : () => _gerar(refazer: true),
+                            retryLabel:
+                                _erroSugereUpgrade(_erro!)
+                                    ? 'Fazer upgrade'
+                                    : null,
+                            retryIcon:
+                                _erroSugereUpgrade(_erro!)
+                                    ? FxIcons.premium
+                                    : FxIcons.atualizar,
+                          ),
+                        )
+                      else if (_gerado)
+                        _resultado(brand: brand, mute: mute, ink: ink),
+                    ],
                   ),
-                  if (_gerado)
-                    Positioned(
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      child: IaCopilotResultActionBar(
-                        brand: brand,
-                        primaryLabel: _resultPrimaryLabel,
-                        onPrimary: _resultPrimaryAction,
-                        onMore: _abrirMenu,
-                      ),
-                    ),
-                ],
+                ),
               ),
             ),
           ),

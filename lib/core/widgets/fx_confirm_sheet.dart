@@ -95,12 +95,14 @@ class _FxConfirmSheet extends StatelessWidget {
             title: title,
             subtitle: subtitle,
             leading: Icon(icon, color: accent, size: 18),
+            // Confirmação não tem X: sair é "Cancelar", arrastar ou tocar fora.
+            trailing: const SizedBox.shrink(),
           ),
           if (message != null && message!.trim().isNotEmpty) ...[
             SizedBox(height: TokensStrip.s3),
             Text(
               message!,
-              textAlign: TextAlign.center,
+              textAlign: TextAlign.start,
               style: FocuxHubTypography.bodyMuted(
                 color: mute,
                 fontWeight: FontWeight.w400,
@@ -132,9 +134,10 @@ class _FxConfirmSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: TokensStrip.s2),
-          SizedBox(
-            height: 48,
-            child: FxTonalButton(label: cancelLabel, onPressed: () => FxHomeSheetChrome.dismissAndPop(context, false), compact: true),
+          FxTonalButton(
+            label: cancelLabel,
+            expanded: true,
+            onPressed: () => FxHomeSheetChrome.dismissAndPop(context, false),
           ),
         ],
       ),
@@ -156,12 +159,13 @@ class _FxConfirmSheet extends StatelessWidget {
             title: title,
             subtitle: subtitle,
             leading: Icon(icon, color: theme.colorScheme.primary, size: 18),
+            trailing: const SizedBox.shrink(),
           ),
           if (message != null && message!.trim().isNotEmpty) ...[
             SizedBox(height: TokensStrip.s3),
             Text(
               message!,
-              textAlign: TextAlign.center,
+              textAlign: TextAlign.start,
               style: FocuxHubTypography.bodyMuted(
                 color: mute,
                 fontWeight: FontWeight.w400,
@@ -187,12 +191,14 @@ class _FxConfirmSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: TokensStrip.s2),
-          SizedBox(
-            height: 48,
-            child: FxTonalButton(label: confirmLabel, onPressed: () {
-                HapticFeedback.mediumImpact();
-                FxHomeSheetChrome.dismissAndPop(context, true);
-              }, compact: true),
+          FxTonalButton(
+            label: confirmLabel,
+            expanded: true,
+            danger: true,
+            onPressed: () {
+              HapticFeedback.mediumImpact();
+              FxHomeSheetChrome.dismissAndPop(context, true);
+            },
           ),
         ],
       ),

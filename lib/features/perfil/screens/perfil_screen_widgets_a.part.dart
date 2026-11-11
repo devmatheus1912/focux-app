@@ -4,7 +4,6 @@ class _PerfilBody extends StatefulWidget {
   final PerfilPersonal perfil;
   final bool uploadingPhoto;
   final bool showMfa;
-  final String? freshnessLabel;
   final Future<void> Function() onRefresh;
   final VoidCallback onPickPhoto;
   final VoidCallback onEditPerfil;
@@ -17,7 +16,6 @@ class _PerfilBody extends StatefulWidget {
     required this.uploadingPhoto,
     required this.primeirosPassosFeitos,
     this.showMfa = false,
-    this.freshnessLabel,
     required this.onRefresh,
     required this.onPickPhoto,
     required this.onEditPerfil,
@@ -47,7 +45,6 @@ class _PerfilBodyState extends State<_PerfilBody> {
   Widget build(BuildContext context) {
     final perfil = widget.perfil;
     final uploadingPhoto = widget.uploadingPhoto;
-    final freshnessLabel = widget.freshnessLabel;
     final onRefresh = widget.onRefresh;
     final onPickPhoto = widget.onPickPhoto;
     final onEditPerfil = widget.onEditPerfil;
@@ -73,31 +70,10 @@ class _PerfilBodyState extends State<_PerfilBody> {
       useMesh: true,
       constrainWidth: true,
       appBar: FxShellAppBar(
+        // Dados do próprio personal: sem "Atualizado há"; editar é pelo avatar.
         title: 'Perfil',
-        subtitle: freshnessLabel,
         onBack: () => safePopOrGo(context, '/dashboard/personal'),
         actions: [
-          Tooltip(
-            message: 'Editar perfil',
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: onEditPerfil,
-                borderRadius: BorderRadius.circular(18),
-                child: Container(
-                  width: 36,
-                  height: 36,
-                  decoration: chrome.headerAction(radius: 18),
-                  alignment: Alignment.center,
-                  child: Icon(
-                    FxIcons.editar,
-                    size: 18,
-                    color: BrandPalette.softened(primaryColor),
-                  ),
-                ),
-              ),
-            ),
-          ),
           FxHelpIconButton(
             tooltip: 'Sobre o perfil',
             onTap:
@@ -205,14 +181,7 @@ class _PerfilBodyState extends State<_PerfilBody> {
                             overflow: TextOverflow.ellipsis,
                             style: FxSettingsLayout.subhead(color: sobre.mute),
                           ),
-                          const SizedBox(height: TokensStrip.s1),
-                          Text(
-                            profileComplete
-                                ? 'Perfil completo'
-                                : 'Perfil $profileScore% completo',
-                            textAlign: TextAlign.center,
-                            style: FxSettingsLayout.subhead(color: sobre.mute),
-                          ),
+
                         ],
                       ),
                       ),
@@ -260,10 +229,6 @@ class _PerfilBodyState extends State<_PerfilBody> {
                               line: line,
                             ),
                           ),
-                          const SizedBox(
-                            height: PerfilLayout.sectionGapPrimary,
-                          ),
-                          _PerfilIndique(mute: mute, line: line),
                           const SizedBox(
                             height: PerfilLayout.sectionGapPrimary,
                           ),

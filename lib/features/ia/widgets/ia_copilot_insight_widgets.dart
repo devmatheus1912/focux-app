@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/design_tokens.dart';
 
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -18,7 +19,15 @@ class IaCopilotInsightItem extends StatefulWidget {
     this.acaoLabel,
     this.onAcao,
     this.onMais,
+    this.feitoLabel,
+    this.dispensada = false,
   });
+
+  /// Feita: "Feito · Mensagem enviada" no lugar do botão.
+  final String? feitoLabel;
+
+  /// Dispensada: "Dispensada", em tom apagado, sem botão.
+  final bool dispensada;
 
   final int index;
   final IaCopilotInsight insight;
@@ -56,8 +65,9 @@ class _IaCopilotInsightItemState extends State<IaCopilotInsightItem> {
       ],
     );
 
+    final resolvida = widget.feitoLabel != null || widget.dispensada;
     final temBotoes =
-        _expanded && (widget.onAcao != null || widget.onMais != null);
+        _expanded && (widget.onAcao != null || widget.onMais != null || resolvida);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: TokensStrip.s2),
@@ -134,7 +144,23 @@ class _IaCopilotInsightItemState extends State<IaCopilotInsightItem> {
                 ),
                 child: Row(
                   children: [
-                    if (widget.onAcao case final acao?)
+                    if (widget.feitoLabel case final feito?)
+                      Row(
+                        children: [
+                          Icon(FxIcons.concluido, size: 16, color: EagleTokens.good),
+                          const SizedBox(width: TokensStrip.s1),
+                          Text(
+                            'Feito · $feito',
+                            style: FocuxHubTypography.chip(EagleTokens.good),
+                          ),
+                        ],
+                      )
+                    else if (widget.dispensada)
+                      Text(
+                        'Dispensada',
+                        style: FocuxHubTypography.chip(widget.mute),
+                      )
+                    else if (widget.onAcao case final acao?)
                       FxTonalButton(
                         label: widget.acaoLabel ?? '',
                         compact: true,
@@ -157,85 +183,3 @@ class _IaCopilotInsightItemState extends State<IaCopilotInsightItem> {
   }
 }
 
-class IaCopilotInsightsLoading extends StatelessWidget {
-  const IaCopilotInsightsLoading({
-    super.key,
-    required this.ink,
-    required this.mute,
-    required this.brand,
-  });
-
-  final Color ink;
-  final Color mute;
-  final Color brand;
-
-  @override
-  Widget build(BuildContext context) {
-    final soft = brand.withValues(alpha: 0.10);
-    final primary = Theme.of(context).colorScheme.primary;
-
-    return Container(
-      padding: const EdgeInsets.all(TokensStrip.s4),
-      decoration: fxListCardDecoration(context, accent: primary, radius: 22),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 34,
-                height: 34,
-                decoration: BoxDecoration(
-                  color: soft,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(FxIcons.ia, color: brand, size: 17),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Preparando recomendações',
-                      style: TextStyle(
-                        color: ink,
-                        fontSize: TokensStrip.fontBodySm,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      'Organizando as recomendações...',
-                      style: TextStyle(
-                        color: mute,
-                        fontSize: TokensStrip.fontMinimo,
-                        height: 1.25,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: TokensStrip.s4),
-          for (final width in const [0.92, 0.74, 0.84])
-            Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: FractionallySizedBox(
-                widthFactor: width,
-                alignment: Alignment.centerLeft,
-                child: Container(
-                  height: 12,
-                  decoration: BoxDecoration(
-                    color: soft,
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}

@@ -53,6 +53,14 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                   !listRefreshing &&
                   !(filtrados.isEmpty &&
                       (_hasActiveFilter || _query.trim().isNotEmpty));
+              // Com poucos alunos, uma linha discreta para chamar mais.
+              final convidarMais =
+                  !_modoSelecao &&
+                  !tail.hasNext &&
+                  _filtro == AlunoFiltro.todos &&
+                  _query.trim().isEmpty &&
+                  stats.total >= 1 &&
+                  stats.total <= alunosPoucos;
               final listBottomGap = AlunosLayout.listBottomPad(
                 context,
                 stickyVisible: showStickyCreate,
@@ -69,6 +77,7 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                       riscoCount: riscoCount,
                       novosCount: novosCount,
                       inativosCount: inativosCount,
+                      totalAlunos: stats.total,
                       isDark: isDark,
                       primary: primary,
                       ink: ink,
@@ -128,7 +137,9 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                                     bottom: listBottomGap,
                                   ),
                                   itemCount:
-                                      filtrados.length + (tail.hasNext ? 1 : 0),
+                                      filtrados.length +
+                                      (tail.hasNext ? 1 : 0) +
+                                      (convidarMais ? 1 : 0),
                                   separatorBuilder:
                                       (_, __) => SizedBox(
                                         height:
@@ -137,6 +148,9 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                                                 : AlunosLayout.listItemGap,
                                       ),
                                   itemBuilder: (context, i) {
+                                    if (convidarMais && i == filtrados.length) {
+                                      return const AlunosConvideMais();
+                                    }
                                     if (i >= filtrados.length) {
                                       return Padding(
                                         padding: const EdgeInsets.symmetric(
@@ -238,28 +252,14 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                                     minimumSize: const Size.fromHeight(48),
                                     shape: const StadiumBorder(),
                                   ),
-                                  child: const Text('Importar vários'),
+                                  child: const Text('Trazer alunos'),
                                 ),
                               ]
                             else
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: FxLiquidPrimaryButton(
-                                      label: 'Novo aluno',
-                                      onPressed: _adicionarAluno,
-                                    ),
-                                  ),
-                                  const SizedBox(width: TokensStrip.s2),
-                                  IconButton.outlined(
-                                    tooltip: 'Importar vários',
-                                    onPressed: _importarVarios,
-                                    icon: const Icon(FxIcons.enviarArquivo),
-                                    style: IconButton.styleFrom(
-                                      minimumSize: const Size(48, 48),
-                                    ),
-                                  ),
-                                ],
+                              // "Trazer alunos" fica no "⋯" do topo.
+                              FxLiquidPrimaryButton(
+                                label: 'Novo aluno',
+                                onPressed: _adicionarAluno,
                               ),
                           ],
                         ),

@@ -28,33 +28,3 @@ class _NumerosDoMes extends ConsumerWidget {
     );
   }
 }
-
-class _FinanceiroAlunoContextBanner extends ConsumerWidget {
-  const _FinanceiroAlunoContextBanner({required this.alunoId});
-
-  final int alunoId;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final alunoAsync = ref.watch(alunoProvider(alunoId));
-    final nome = alunoAsync.value?.nome;
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        FxSettingsLayout.pageInset,
-        TokensStrip.s2,
-        FxSettingsLayout.pageInset,
-        0,
-      ),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: Text(
-          financeiroAlunoContextLabel(nome == null ? null : fxTitleCaseName(nome)),
-          textAlign: TextAlign.start,
-          style: FxSettingsLayout.sectionHeader(
-            color: ShellChrome.of(context).mute,
-          ),
-        ),
-      ),
-    );
-  }
-}

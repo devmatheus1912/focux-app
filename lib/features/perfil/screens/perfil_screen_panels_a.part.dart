@@ -1,34 +1,5 @@
 part of 'perfil_screen.dart';
 
-/// Indicação rende meses de plano: fica à vista, não só em Ferramentas.
-class _PerfilIndique extends StatelessWidget {
-  const _PerfilIndique({required this.mute, required this.line});
-
-  final Color mute;
-  final Color line;
-
-  @override
-  Widget build(BuildContext context) {
-    final s = S.of(context);
-    return FxSettingsGroup(
-      children: [
-        FxSettingsTile(
-          icon: FxIcons.presente,
-          label: s.perfilIndiqueGanhe,
-          value: s.perfilIndiqueValor,
-          mute: mute,
-          line: line,
-          showDivider: false,
-          onTap: () {
-            AnalyticsService.instance.track(ProductEvents.referralPerfilAberto);
-            context.push('/referral');
-          },
-        ),
-      ],
-    );
-  }
-}
-
 /// Código do personal: o aluno precisa dele em todo plano, sem cadeado.
 class _PerfilAcessoAlunos extends StatelessWidget {
   const _PerfilAcessoAlunos({
@@ -46,8 +17,9 @@ class _PerfilAcessoAlunos extends StatelessWidget {
     final s = S.of(context);
     final codigo = perfil.slug?.trim() ?? '';
     final escolher = perfil.needsBrandPublicIdentity || codigo.isEmpty;
+    // Grupo "Alunos": o código e a indicação (que rende meses de plano).
     return FxSettingsGroup(
-      header: s.perfilAcessoAlunos,
+      header: 'Alunos',
       caption: escolher ? s.perfilEscolhaCodigoTexto : null,
       children: [
         FxSettingsTile(
@@ -61,11 +33,22 @@ class _PerfilAcessoAlunos extends StatelessWidget {
                   : codigo,
           mute: mute,
           line: line,
-          showDivider: false,
           onTap:
               escolher
                   ? () => context.push('/perfil/link-publico', extra: perfil)
                   : () => showPerfilCodigoSheet(context, perfil: perfil),
+        ),
+        FxSettingsTile(
+          icon: FxIcons.presente,
+          label: s.perfilIndiqueGanhe,
+          value: s.perfilIndiqueValor,
+          mute: mute,
+          line: line,
+          showDivider: false,
+          onTap: () {
+            AnalyticsService.instance.track(ProductEvents.referralPerfilAberto);
+            context.push('/referral');
+          },
         ),
       ],
     );

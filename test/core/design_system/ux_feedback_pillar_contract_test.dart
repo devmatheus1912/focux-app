@@ -47,7 +47,8 @@ void main() {
     for (final method in FocuxFeedback.toastMethods) {
       expect(helper, contains(method));
     }
-    expect(helper, contains('FeedbackPlacement'));
+    // O aviso preso abaixo do topo do 360 era da antiga aba Operação.
+    expect(helper, isNot(contains('operacaoTop')));
   });
 
   test('hub screens use centralized feedback patterns', () {

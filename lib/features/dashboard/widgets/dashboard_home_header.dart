@@ -14,12 +14,6 @@ import '../utils/dashboard_screen_helpers.dart';
 import 'dashboard_header_profile_avatar.dart';
 import '../../../core/theme/fx_icons.dart';
 
-String dashboardConversasTooltip(int semResposta) {
-  if (semResposta <= 0) return 'Conversas';
-  if (semResposta == 1) return 'Conversas, 1 sem resposta';
-  return 'Conversas, $semResposta sem resposta';
-}
-
 /// Header Home 10/10 — identidade limpa + chrome soft; «Foco» só no banner.
 class DashboardHomeHeader extends StatelessWidget {
   const DashboardHomeHeader({
@@ -32,8 +26,7 @@ class DashboardHomeHeader extends StatelessWidget {
     this.notificacoesCountOverride,
     this.onQuickSearch,
     this.freshnessLabel,
-    this.onConversas,
-    this.conversasCount = 0,
+    this.onCopiloto,
   });
 
   final String? nomePersonal;
@@ -46,8 +39,8 @@ class DashboardHomeHeader extends StatelessWidget {
   final String? freshnessLabel;
 
   /// Abre a caixa de entrada; o selo mostra as conversas sem resposta.
-  final VoidCallback? onConversas;
-  final int conversasCount;
+  /// Botão do Copiloto de IA no topo (era Conversas, que virou aba).
+  final VoidCallback? onCopiloto;
 
   static const double _chrome = FxHelpChrome.iconSize;
   static const double _chromeGap = FxHelpChrome.gap;
@@ -69,8 +62,7 @@ class DashboardHomeHeader extends StatelessWidget {
       // <360: busca cai (catálogo/tools cobrem).
       onQuickSearch: compactChrome ? null : onQuickSearch,
       notificacoesCountOverride: notificacoesCountOverride,
-      onConversas: onConversas,
-      conversasCount: conversasCount,
+      onCopiloto: onCopiloto,
     );
     // Letra do sistema acima de 1,3: os botões descem para a linha de baixo.
     final letraGrande = MediaQuery.textScalerOf(context).scale(10) > 13;
@@ -174,12 +166,11 @@ class _HeaderChromeCluster extends StatelessWidget {
   const _HeaderChromeCluster({
     this.onQuickSearch,
     this.notificacoesCountOverride,
-    this.onConversas,
-    this.conversasCount = 0,
+    this.onCopiloto,
   });
 
-  final VoidCallback? onConversas;
-  final int conversasCount;
+  /// Botão do Copiloto de IA no topo (era Conversas, que virou aba).
+  final VoidCallback? onCopiloto;
   final VoidCallback? onQuickSearch;
   final int? notificacoesCountOverride;
 
@@ -199,13 +190,12 @@ class _HeaderChromeCluster extends StatelessWidget {
           ),
           const SizedBox(width: gap),
         ],
-        if (onConversas != null) ...[
+        if (onCopiloto != null) ...[
           ShellHeaderIconButton(
-            icon: FxIcons.chat,
+            icon: FxIcons.ia,
             size: size,
-            badgeCount: conversasCount,
-            tooltip: dashboardConversasTooltip(conversasCount),
-            onTap: onConversas!,
+            tooltip: 'Copiloto de IA',
+            onTap: onCopiloto!,
           ),
           const SizedBox(width: gap),
         ],

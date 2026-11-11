@@ -55,7 +55,7 @@ final _alunos = [
 ];
 
 const _stats = AlunosStats(
-  total: 3,
+  total: 8,
   totalAtivos: 3,
   totalInadimplentes: 0,
   totalRiscoAlto: 1,
@@ -117,7 +117,7 @@ void main() {
     testWidgets('Todos marcado sem filtro; chips só com o que mostrar', (tester) async {
       await _abrir(tester, _home(_alunos, _stats));
 
-      expect(_marcados(tester), {'Todos'});
+      expect(_marcados(tester), {'Todos 8'});
       expect(find.text('Contato hoje 1'), findsOneWidget);
       expect(find.text('Ativos 3'), findsOneWidget);
       expect(find.text('Em risco 1'), findsOneWidget);
@@ -125,7 +125,7 @@ void main() {
       expect(find.textContaining('Em atraso'), findsNothing);
     });
 
-    testWidgets('chip com zero não aparece', (tester) async {
+    testWidgets('com até 3 alunos não há filtros', (tester) async {
       await _abrir(
         tester,
         _home(
@@ -141,11 +141,9 @@ void main() {
         ),
       );
 
-      expect(find.textContaining('Contato hoje'), findsNothing);
-      expect(find.textContaining('Em risco'), findsNothing);
-      expect(find.textContaining('Convites'), findsNothing);
-      expect(find.text('Todos'), findsOneWidget);
-      expect(find.text('Ativos 1'), findsOneWidget);
+      expect(find.byType(FxToggleChip), findsNothing);
+      // Poucos alunos: a lista chama para convidar mais.
+      expect(find.text('Convide mais alunos'), findsOneWidget);
     });
 
     testWidgets('tocar no chip marcado não desliga; o Todos volta', (tester) async {
@@ -161,10 +159,10 @@ void main() {
       await _assentar(tester);
       expect(_marcados(tester), {'Em risco 1'});
 
-      await tester.ensureVisible(find.text('Todos'));
-      await tester.tap(find.text('Todos'));
+      await tester.ensureVisible(find.text('Todos 8'));
+      await tester.tap(find.text('Todos 8'));
       await _assentar(tester);
-      expect(_marcados(tester), {'Todos'});
+      expect(_marcados(tester), {'Todos 8'});
     });
   });
 
@@ -211,12 +209,12 @@ void main() {
   });
 
   group('rodapé', () {
-    testWidgets('um botão principal e o de importar só com ícone', (tester) async {
+    testWidgets('um botão só; "Trazer alunos" fica no "⋯"', (tester) async {
       await _abrir(tester, _home(_alunos, _stats));
 
       expect(find.text('Novo aluno'), findsOneWidget);
-      expect(find.byTooltip('Importar vários'), findsOneWidget);
-      expect(find.text('Importar vários'), findsNothing);
+      expect(find.byTooltip('Importar vários'), findsNothing);
+      expect(find.byTooltip('Mais ações'), findsOneWidget);
     });
 
     testWidgets('sem nenhum aluno, os dois viram botões com texto', (tester) async {
@@ -236,7 +234,7 @@ void main() {
       );
 
       expect(find.text('Novo aluno'), findsWidgets);
-      expect(find.widgetWithText(OutlinedButton, 'Importar vários'), findsOneWidget);
+      expect(find.widgetWithText(OutlinedButton, 'Trazer alunos'), findsOneWidget);
     });
   });
 }

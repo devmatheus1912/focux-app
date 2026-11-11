@@ -21,7 +21,7 @@ void main() {
     expect(screen, isNot(contains('historicoTreinos')));
     expect(screen, isNot(contains('_resultado = null')));
     expect(screen, contains('FxKeyboardPopScope'));
-    expect(screen, contains('viewInsetsOf'));
+    expect(screen, contains('FxFormStickyBar'));
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('iaProgressaoViewed'));
     expect(screen, contains('iaProgressaoCtaTapped'));

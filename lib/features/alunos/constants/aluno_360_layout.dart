@@ -26,22 +26,7 @@ abstract final class Aluno360Layout {
   static const double stickyBarSecondaryRowHeight = 0;
   static const double stickyBarScrimHeight = 28;
   static const double snackbarStickyReserve = 76;
-  static const double operacaoTopSnackHeight = 52;
   static const double operacaoMaxContentWidth = 720;
-
-  /// Pins floating snackbar below pinned toolbar + tabs (scroll-safe).
-  static EdgeInsets operacaoTopSnackMargin(BuildContext context) {
-    final size = MediaQuery.sizeOf(context);
-    final top =
-        MediaQuery.paddingOf(context).top + kToolbarHeight + tabBarHeight + 8;
-    const snackBelowHeaderGap = 12.0;
-    return EdgeInsets.fromLTRB(
-      screenPadding,
-      0,
-      screenPadding,
-      size.height - top - operacaoTopSnackHeight - snackBelowHeaderGap,
-    );
-  }
 
   /// Teto da fonte no bloco de identidade: ele fica fixo no topo da ficha e,
   /// sem teto, comeria a tela com fonte grande. A altura abaixo usa o mesmo

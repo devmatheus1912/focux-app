@@ -26,7 +26,7 @@ abstract final class FocuxDataViz {
     '_EvolucaoChart',
     'PieChart',
     'OperationalMetricTile',
-    'insightsProvider',
+    'copilotoAnalisesRecentesProvider',
     'resolveVolumeSparklineData',
   ];
 

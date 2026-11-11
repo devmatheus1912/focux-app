@@ -3,6 +3,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/core/widgets/fx_selo_glifos.dart';
 import 'package:focux_app/features/evolucao/data/meta_corporal.dart';
 import 'package:focux_app/features/evolucao/widgets/conquista_cartao.dart';
 import 'package:focux_app/features/evolucao/widgets/conquista_selo.dart';
@@ -61,7 +62,7 @@ void main() {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     for (final t in ConquistaTipo.values) ...[
-                      ConquistaSelo(tipo: t),
+                      ConquistaSelo(tipo: t, glifo: FxSeloGlifo.balanca),
                       const SizedBox(width: 24),
                     ],
                   ],
@@ -71,7 +72,7 @@ void main() {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     for (final t in ConquistaTipo.values) ...[
-                      ConquistaSelo(tipo: t, tamanho: 120, miolo: conquistaNumero('−8,0 kg', marca)),
+                      ConquistaSelo(tipo: t, glifo: FxSeloGlifo.trofeu, tamanho: 120),
                       const SizedBox(width: 8),
                     ],
                   ],

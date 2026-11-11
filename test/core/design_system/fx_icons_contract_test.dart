@@ -67,6 +67,7 @@ void main() {
     'lib/features/exercicios/screens/widgets/template_split_picker.dart', // selecionado
     'lib/features/feed/widgets/feed_post_card.dart', // curtido / fixado
     'lib/features/financeiro/screens/financeiro_mensalidades_tab.dart', // seleção em lote
+    'lib/features/financeiro/screens/financeiro_mensalidades_tab_aluno.part.dart', // seleção em lote
     'lib/features/monetizacao/screens/cancel_save_screen.dart', // opção escolhida
     'lib/features/perfil/widgets/identidade_estilo_miniaturas.dart', // estilo escolhido
     'lib/features/perfil/widgets/perfil_lgpd_consent_sheet.dart', // consentimento dado

@@ -109,7 +109,8 @@ void main() {
     expect(detail, contains('cobrarMensalidadeViaChat'));
     expect(detail, contains('registrarContatoMensalidade'));
     expect(detail, contains('showEditarMensalidadeSheet'));
-    expect(detail, contains('viewInsetsOf'));
+    // Rodapé no corpo não soma o teclado (o Scaffold já encolhe o corpo).
+    expect(detail, isNot(contains('TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom')));
     expect(detail, contains('FxContentWidthLimiter'));
     expect(detail, contains('RefreshIndicator'));
     expect(detail, contains('Abrir aluno'));

@@ -29,12 +29,24 @@ extension IaCopilotScreenApply on _IaCopilotoScreenState {
     };
   }
 
-  Future<void> _aplicarAcao(IaCopilotoApplySpec apply) async {
+  Future<void> _aplicarAcao(
+    IaCopilotoApplySpec apply, {
+    CopilotoRecomendacao? rec,
+  }) async {
     final alunoId = _selectedAlunoId;
     if (alunoId == null || _aplicando) return;
-    // Carga e medida abrem a tela de revisão; nada é aplicado daqui.
+    // Carga e medida abrem a tela de revisão; nada é aplicado daqui. Voltando
+    // com resultado aplicado (pop true), a recomendação fica feita.
     if (apply.rota case final rota?) {
-      context.push(rota, extra: _selectedAlunoNome);
+      final aplicou = await context.push<bool>(rota, extra: _selectedAlunoNome);
+      if (aplicou == true && rec != null && mounted) {
+        await _marcar(
+          rec,
+          CopilotoEstado.feita,
+          resultado:
+              rota.contains('progressao') ? 'CARGAS_AJUSTADAS' : 'MEDIDAS_REVISADAS',
+        );
+      }
       return;
     }
 
@@ -74,10 +86,18 @@ extension IaCopilotScreenApply on _IaCopilotoScreenState {
       );
       if (!mounted) return;
       if (resp.ok) {
-        if (spec.backendTipo == 'ENVIAR_PUSH') {
-          setState(() => _mensagemEnviada = true);
-        }
         FeedbackHelper.showSuccess(context, resp.mensagem);
+        if (rec != null) {
+          await _marcar(
+            rec,
+            CopilotoEstado.feita,
+            resultado: switch (spec.backendTipo) {
+              'ENVIAR_PUSH' => 'MENSAGEM_ENVIADA',
+              'REDUZIR_CARGA' => 'CARGAS_AJUSTADAS',
+              _ => 'CONTATO_REGISTRADO',
+            },
+          );
+        }
       } else {
         FeedbackHelper.showError(context, resp.mensagem);
       }
@@ -106,11 +126,12 @@ extension IaCopilotScreenApply on _IaCopilotoScreenState {
     context.push('/alunos/$alunoId/ia/progressao');
   }
 
-  /// "⋯" de uma recomendação: criar tarefa com o "O que fazer" dela.
-  Future<void> _menuDoInsight(IaCopilotInsight insight) async {
+  /// "⋯" de uma recomendação: criar tarefa, marcar feita, não fazer agora
+  /// ou desfazer.
+  Future<void> _menuDoInsight(CopilotoRecomendacao rec) async {
     final action = await showFxGroupedActionSheet<String>(
       context,
-      titulo: insight.titulo,
+      titulo: rec.insight.titulo,
       subtitulo: _selectedAlunoNome,
       icone: FxIcons.ia,
       grupos: [
@@ -120,28 +141,51 @@ extension IaCopilotScreenApply on _IaCopilotoScreenState {
             rotulo: iaCopilotoCriarTarefaLabel(),
             icone: FxIcons.pranchetaFeita,
           ),
+          if (rec.pendente) ...[
+            const FxActionItem(
+              valor: 'feita',
+              rotulo: 'Marcar como feita',
+              icone: FxIcons.concluido,
+            ),
+            const FxActionItem(
+              valor: 'dispensar',
+              rotulo: 'Não fazer agora',
+              icone: FxIcons.fechar,
+            ),
+          ] else
+            const FxActionItem(
+              valor: 'desfazer',
+              rotulo: 'Desfazer',
+              icone: FxIcons.desfazer,
+            ),
         ]),
       ],
     );
-    if (!mounted || action != 'criar') return;
-    await _atribuir(texto: insight.recomendacao, motivo: insight.detalhe);
+    if (!mounted || action == null) return;
+    switch (action) {
+      case 'criar':
+        await _atribuir(
+          texto: rec.insight.recomendacao,
+          motivo: rec.insight.detalhe,
+          rec: rec,
+        );
+      case 'feita':
+        await _marcar(rec, CopilotoEstado.feita, resultado: 'FEITA_A_MAO');
+      case 'dispensar':
+        await _marcar(rec, CopilotoEstado.dispensada);
+      case 'desfazer':
+        await _marcar(rec, CopilotoEstado.pendente);
+    }
   }
 
   Future<void> _denunciar() async {
-    final insights =
-        ref
-            .read(
-              insightsProvider(
-                InsightsQuery(alunoId: _selectedAlunoId, mode: _mode),
-              ),
-            )
-            .value;
+    final recs = _analise?.recomendacoes ?? const <CopilotoRecomendacao>[];
     await showDenunciarSheet(
       context,
       repo: ModeracaoRepository(ref.read(apiClientProvider)),
       tipo: DenunciaTipo.iaResposta,
-      conteudo: (insights ?? const [])
-          .map((i) => '${i.titulo}: ${i.detalhe}')
+      conteudo: recs
+          .map((r) => '${r.insight.titulo}: ${r.insight.detalhe}')
           .join('\n'),
     );
   }

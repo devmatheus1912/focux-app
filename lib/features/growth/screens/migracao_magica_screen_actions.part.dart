@@ -89,7 +89,7 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
     if (parsed != null && parsed.isNotEmpty && mounted) {
       FeedbackHelper.showSuccess(
         context,
-        '${parsed.length} aluno(s) identificado(s)$successSuffix.',
+        '${migracaoIdentificados(parsed.length)}$successSuffix.',
       );
     }
   }
@@ -420,7 +420,7 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
         if (alunos.isNotEmpty) {
           FeedbackHelper.showSuccess(
             context,
-            '${alunos.length} aluno(s) lidos de ${file.name}.',
+            '${migracaoLidosDe(alunos.length, file.name)}.',
           );
         }
         return;
@@ -614,12 +614,15 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
     }
   }
 
+  /// Alunos que ainda não receberam o convite nesta tela.
+  int get _faltamAvisar =>
+      _importResumo?.importadosComAcesso
+          .where((d) => !d.emailEnviado && !_acessoStatus.containsKey(d.alunoId))
+          .length ??
+      0;
+
   Future<void> _irParaListaAlunos() async {
-    final pendentes =
-        _importResumo?.importadosComAcesso
-            .where((d) => !_acessoStatus.containsKey(d.alunoId))
-            .length ??
-        0;
+    final pendentes = _faltamAvisar;
     if (pendentes > 0) {
       final s = S.of(context);
       final sair = await showFxConfirmSheet(

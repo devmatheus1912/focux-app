@@ -17,6 +17,7 @@ class FxSheetFrame extends StatelessWidget {
     this.maxHeightFactor = FxHomeSheetChrome.maxHeightFactor,
     this.expand = false,
     this.rolar = true,
+    this.semFechar = false,
   });
 
   final String title;
@@ -32,6 +33,9 @@ class FxSheetFrame extends StatelessWidget {
   /// False quando o corpo já tem a própria lista: lista dentro de rolagem não
   /// tem altura e some.
   final bool rolar;
+
+  /// Sem o X do cabeçalho: sair é pelo botão da folha, arrastar ou tocar fora.
+  final bool semFechar;
 
   @override
   Widget build(BuildContext context) {
@@ -52,6 +56,7 @@ class FxSheetFrame extends StatelessWidget {
             leading: leading,
             title: title,
             subtitle: subtitle,
+            trailing: semFechar ? const SizedBox.shrink() : null,
           ),
           const SizedBox(height: TokensStrip.s3),
           Flexible(

@@ -1,9 +1,10 @@
 import 'package:dio/dio.dart';
+
+import '../models/copiloto_analise.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/api/api_error.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../subscription/models/subscription_plan.dart';
-import '../models/ia_copilot_insight.dart';
 import '../models/ia_copilot_proxima_acao.dart';
 import '../models/ia_copiloto_home.dart';
 import '../models/ia_progressao_carga_result.dart';
@@ -180,30 +181,65 @@ class IaRepository {
     });
   }
 
-  Future<List<IaCopilotInsight>> insights({
-    int? alunoId,
+  // ── Análise guardada ───────────────────────────────────────────────────────
+
+  /// Gera e guarda a análise do aluno (mesma regra de cota de `insights`).
+  Future<CopilotoAnalise> criarAnalise({
+    required int alunoId,
     String? mode,
+    String? motivo,
   }) async {
     return _withIaErrorContext(() async {
-      final r = await _dio.get(
-        '/api/ia/copiloto/insights',
+      final r = await _dio.post(
+        '/api/ia/copiloto/analises',
         options: _iaOpts,
-        queryParameters: {
-          if (alunoId != null) 'alunoId': alunoId,
+        data: {
+          'alunoId': alunoId,
           if (mode != null && mode.isNotEmpty) 'mode': mode,
+          if (motivo != null && motivo.trim().isNotEmpty) 'motivo': motivo.trim(),
         },
       );
-      return (r.data as List)
-          .asMap()
-          .entries
-          .map(
-            (e) => IaCopilotInsight.fromJson(
-              Map<String, dynamic>.from(e.value as Map),
-              index: e.key,
-            ),
-          )
-          .toList();
+      return CopilotoAnalise.fromJson(Map<String, dynamic>.from(r.data as Map));
     });
+  }
+
+  /// A análise mais nova de cada aluno nos últimos [dias].
+  Future<List<CopilotoAnaliseResumo>> analisesRecentes({int dias = 7}) async {
+    final r = await _dio.get(
+      '/api/ia/copiloto/analises',
+      queryParameters: {'dias': dias},
+    );
+    return [
+      for (final row in r.data as List)
+        CopilotoAnaliseResumo.fromJson(Map<String, dynamic>.from(row as Map)),
+    ];
+  }
+
+  /// Reabre uma análise guardada: sem IA e sem gastar uso.
+  Future<CopilotoAnalise> analise(int id) async {
+    final r = await _dio.get('/api/ia/copiloto/analises/$id');
+    return CopilotoAnalise.fromJson(Map<String, dynamic>.from(r.data as Map));
+  }
+
+  Future<CopilotoAnalise> marcarRecomendacao({
+    required int analiseId,
+    required int recomendacaoId,
+    required CopilotoEstado estado,
+    String? resultado,
+  }) async {
+    final r = await _dio.patch(
+      '/api/ia/copiloto/analises/$analiseId/recomendacoes/$recomendacaoId',
+      data: {
+        'estado': copilotoEstadoApi(estado),
+        if (resultado != null) 'resultado': resultado,
+      },
+    );
+    return CopilotoAnalise.fromJson(Map<String, dynamic>.from(r.data as Map));
+  }
+
+  Future<CopilotoAnalise> concluirAnalise(int analiseId) async {
+    final r = await _dio.post('/api/ia/copiloto/analises/$analiseId/concluir');
+    return CopilotoAnalise.fromJson(Map<String, dynamic>.from(r.data as Map));
   }
 
   Future<IaCopilotProximaAcao> salvarAcaoCopiloto({

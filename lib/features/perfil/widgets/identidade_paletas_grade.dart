@@ -6,8 +6,8 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/fx_icons.dart';
 
-/// Paletas curadas em grade de amostras (3 por linha): amostra redonda com
-/// gradiente primária → secundária, nome embaixo e marca de escolhida.
+/// Paletas curadas em grade (5 por linha): amostra redonda com gradiente
+/// primária → secundária e marca de escolhida; o nome da escolhida embaixo.
 class IdentidadePaletasGrade extends StatelessWidget {
   const IdentidadePaletasGrade({
     super.key,
@@ -21,71 +21,69 @@ class IdentidadePaletasGrade extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 8,
-        mainAxisExtent: 108,
-      ),
-      itemCount: CuratedBrandPalette.premium.length,
-      itemBuilder: (context, i) {
-        final p = CuratedBrandPalette.premium[i];
-        final escolhida = p.id == selecionada.id;
-        return Semantics(
-          button: true,
-          selected: escolhida,
-          label: '${p.name}. ${p.subtitle}',
-          excludeSemantics: true,
-          child: InkWell(
-            onTap: onSelect == null ? null : () => onSelect!(p),
-            borderRadius: BorderRadius.circular(16),
-            child: Column(
-              children: [
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 180),
-                  width: 60,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [BrandPalette.deep(p.primary), p.primary, p.secondary],
-                      stops: const [0.0, 0.5, 1.0],
-                    ),
-                    border: Border.all(
-                      color: escolhida ? p.chromeFor(dark: chrome.isDark) : chrome.line,
-                      width: escolhida ? 3 : 1,
-                    ),
-                  ),
-                  child:
-                      escolhida
-                          ? Icon(
-                            FxIcons.check,
-                            size: 26,
-                            color: CuratedBrandPalette.readableOn(p.primary),
-                          )
-                          : null,
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  p.name,
-                  maxLines: 2,
-                  textAlign: TextAlign.center,
-                  overflow: TextOverflow.ellipsis,
-                  style: FocuxHubTypography.chip(chrome.ink).copyWith(
-                    fontWeight: escolhida ? FontWeight.w700 : FontWeight.w600,
-                    height: 1.15,
-                  ),
-                ),
-              ],
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 5,
+            mainAxisSpacing: 10,
+            crossAxisSpacing: 8,
+            mainAxisExtent: 52,
           ),
-        );
-      },
+          itemCount: CuratedBrandPalette.premium.length,
+          itemBuilder: (context, i) {
+            final p = CuratedBrandPalette.premium[i];
+            final escolhida = p.id == selecionada.id;
+            return Semantics(
+              button: true,
+              selected: escolhida,
+              label: '${p.name}. ${p.subtitle}',
+              excludeSemantics: true,
+              child: InkResponse(
+                onTap: onSelect == null ? null : () => onSelect!(p),
+                radius: 28,
+                child: Center(
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [BrandPalette.deep(p.primary), p.primary, p.secondary],
+                        stops: const [0.0, 0.5, 1.0],
+                      ),
+                      border: Border.all(
+                        color: escolhida ? p.chromeFor(dark: chrome.isDark) : chrome.line,
+                        width: escolhida ? 3 : 1,
+                      ),
+                    ),
+                    child:
+                        escolhida
+                            ? Icon(
+                              FxIcons.check,
+                              size: 22,
+                              color: CuratedBrandPalette.readableOn(p.primary),
+                            )
+                            : null,
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+        const SizedBox(height: 8),
+        // Nome só da escolhida, numa linha embaixo da grade.
+        Text(
+          '${selecionada.name} · ${selecionada.subtitle}',
+          style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+        ),
+      ],
     );
   }
 }

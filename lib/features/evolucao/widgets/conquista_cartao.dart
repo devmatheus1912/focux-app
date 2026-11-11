@@ -38,96 +38,137 @@ class ConquistaCartao extends StatelessWidget {
   final bool mostrarValor;
   final MarcaDoCartao? marca;
 
+  /// Áreas que o Instagram cobre no story (na imagem de 1080 × 1920):
+  /// 250 px em cima (perfil e progresso) e 340 px embaixo (resposta).
+  static const livreTopo = 250 / escala;
+  static const livreBase = 340 / escala;
+
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final tinta = scheme.onSurface;
-    final apagada = scheme.onSurfaceVariant;
+    final marcaCor = Theme.of(context).colorScheme.primary;
+    final cores = conquistaSeloCores(marcaCor);
+    const tinta = Colors.white;
+    final apagada = Colors.white.withValues(alpha: 0.72);
     final c = conquista;
     final logo = marca?.logoUrl;
     final nome = marca?.nome?.trim();
+    final temMarcaPropria =
+        (logo != null && logo.isNotEmpty) || (nome != null && nome.isNotEmpty);
     return SizedBox(
       width: largura,
       height: altura,
+      // Fundo fixo escuro da marca, igual em qualquer aparelho e tema.
       child: DecoratedBox(
         decoration: BoxDecoration(
-          // Véu da marca só no topo, já misturado ao fundo: cor translúcida
-          // deixava vazar o que estivesse atrás da imagem.
           gradient: LinearGradient(
             begin: Alignment.topCenter,
-            end: Alignment.center,
-            colors: [
-              Color.alphaBlend(scheme.primary.withValues(alpha: 0.06), scheme.surface),
-              scheme.surface,
-            ],
+            end: Alignment.bottomCenter,
+            colors: [cores.miolo, Color.lerp(cores.miolo, Colors.black, 0.45)!],
           ),
         ),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(32, 56, 32, 40),
-          child: Column(
-            children: [
-              SizedBox(
-                height: 40,
-                child:
-                    logo != null && logo.isNotEmpty
-                        ? FocuxOfficialLogo(height: 40, logoUrl: logo)
-                        : nome != null && nome.isNotEmpty
-                        ? Center(
-                          child: Text(
-                            nome,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: FocuxHubTypography.cardTitle(color: tinta),
-                          ),
-                        )
-                        : const FocuxOfficialLogo(height: 32),
-              ),
-              const Spacer(),
-              if (animar && mostrarValor)
-                ConquistaSeloAnimado(
-                  tipo: c.tipo,
-                  tamanho: 187,
-                  miolo: _Numero(texto: c.valor, cor: tinta),
-                )
-              else
-                ConquistaSelo(
-                  tipo: c.tipo,
-                  tamanho: 187,
-                  miolo: mostrarValor ? _Numero(texto: c.valor, cor: tinta) : null,
+        child: Stack(
+          children: [
+            // Brilho radial da cor da marca atrás do selo.
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: RadialGradient(
+                    center: const Alignment(0, -0.12),
+                    radius: 0.7,
+                    colors: [
+                      marcaCor.withValues(alpha: 0.42),
+                      marcaCor.withValues(alpha: 0),
+                    ],
+                  ),
                 ),
-              const SizedBox(height: TokensStrip.s5),
-              Text(
-                c.tipoRotulo,
-                textAlign: TextAlign.center,
-                style: FocuxHubTypography.cardTitle(color: tinta).copyWith(fontSize: TokensStrip.fontTitulo),
               ),
-              if (mostrarValor) ...[
-                const SizedBox(height: TokensStrip.s2),
-                Text(
-                  c.detalhe,
-                  textAlign: TextAlign.center,
-                  style: FocuxHubTypography.bodyMuted(color: apagada),
-                ),
-              ],
-              const Spacer(),
-              Text(
-                dataPorExtenso(c.data),
-                style: FocuxHubTypography.chip(apagada),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(28, livreTopo, 28, livreBase),
+              child: Column(
+                children: [
+                  const Spacer(),
+                  if (animar)
+                    ConquistaSeloAnimado(
+                      tipo: c.tipo,
+                      glifo: conquistaGlifo(c),
+                      tamanho: 220,
+                    )
+                  else
+                    ConquistaSelo(
+                      tipo: c.tipo,
+                      glifo: conquistaGlifo(c),
+                      tamanho: 220,
+                    ),
+                  const SizedBox(height: TokensStrip.s5),
+                  Text(
+                    c.tipoRotulo.toUpperCase(),
+                    textAlign: TextAlign.center,
+                    style: FocuxHubTypography.chip(apagada).copyWith(letterSpacing: 2),
+                  ),
+                  const SizedBox(height: TokensStrip.s2),
+                  if (mostrarValor)
+                    _Numero(texto: c.valor, cor: tinta, tamanho: TokensStrip.fontNumeroTela)
+                  else
+                    Text(
+                      c.titulo == c.valor ? c.tipoRotulo : c.titulo,
+                      textAlign: TextAlign.center,
+                      style: FocuxHubTypography.sectionTitle(context, color: tinta),
+                    ),
+                  if (mostrarValor) ...[
+                    const SizedBox(height: TokensStrip.s2),
+                    Text(
+                      c.detalhe,
+                      textAlign: TextAlign.center,
+                      style: FocuxHubTypography.bodyMuted(color: apagada),
+                    ),
+                  ],
+                  const Spacer(),
+                  // Assinatura embaixo, acima da área livre.
+                  SizedBox(
+                    height: 32,
+                    child:
+                        logo != null && logo.isNotEmpty
+                            ? FocuxOfficialLogo(height: 32, logoUrl: logo)
+                            : nome != null && nome.isNotEmpty
+                            ? Center(
+                              child: Text(
+                                nome,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: FocuxHubTypography.cardTitle(color: tinta),
+                              ),
+                            )
+                            : const FocuxOfficialLogo(height: 24),
+                  ),
+                  const SizedBox(height: TokensStrip.s1),
+                  Text(
+                    temMarcaPropria
+                        ? dataPorExtenso(c.data)
+                        : '${dataPorExtenso(c.data)} · Focux',
+                    style: FocuxHubTypography.chip(apagada),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-/// Número no centro do anel; encolhe para caber numa linha.
+/// Número da conquista (embaixo do selo); encolhe para caber numa linha.
 class _Numero extends StatelessWidget {
-  const _Numero({required this.texto, required this.cor});
+  const _Numero({
+    required this.texto,
+    required this.cor,
+    this.tamanho = TokensStrip.fontDestaque,
+  });
 
   final String texto;
   final Color cor;
+  final double tamanho;
 
   @override
   Widget build(BuildContext context) => FittedBox(
@@ -136,12 +177,12 @@ class _Numero extends StatelessWidget {
       texto,
       maxLines: 1,
       textScaler: TextScaler.noScaling,
-      style: FocuxHubTypography.metric(color: cor, fontSize: TokensStrip.fontDestaque),
+      style: FocuxHubTypography.metric(color: cor, fontSize: tamanho),
     ),
   );
 }
 
-/// Número do selo da folha (fora do cartão).
+/// Número da folha de celebração, embaixo do selo.
 Widget conquistaNumero(String texto, Color cor) => _Numero(texto: texto, cor: cor);
 
 /// Exporta o [RepaintBoundary] do cartão em PNG 1080 × 1920 e abre o

@@ -5,7 +5,7 @@ import '../../features/dashboard/screens/personal_dashboard_screen.dart';
 import '../../features/alunos/screens/alunos_list_screen.dart';
 import '../../features/treinos/screens/modelos_de_treino_view.dart';
 import '../../features/agenda/screens/agenda_screen.dart';
-import '../../features/ia/screens/ia_copiloto_screen.dart';
+import '../../features/chat/screens/chat_inbox_screen.dart';
 import '../observability/sentry_performance.dart';
 import 'app_router_redirect.dart';
 import 'fx_lazy_shell_container.dart';
@@ -46,15 +46,13 @@ RouteBase buildPersonalShellRoute() {
           ),
         ],
       ),
-      // Tab 2: Treinos
+      // Tab 2: Conversas
       StatefulShellBranch(
         observers: sentryNavObservers(),
         routes: [
           GoRoute(
-            path: '/treinos',
-            builder: (context, state) => ModelosDeTreinoView(
-              abrirNovoModelo: state.uri.queryParameters['novo'] == '1',
-            ),
+            path: '/chat/inbox',
+            builder: (context, state) => const ChatInboxScreen(),
           ),
         ],
       ),
@@ -68,13 +66,15 @@ RouteBase buildPersonalShellRoute() {
           ),
         ],
       ),
-      // Tab 4: IA Copiloto
+      // Tab 4: Treinos
       StatefulShellBranch(
         observers: sentryNavObservers(),
         routes: [
           GoRoute(
-            path: '/ia/copiloto',
-            builder: (context, state) => const IaCopilotoScreen(),
+            path: '/treinos',
+            builder: (context, state) => ModelosDeTreinoView(
+              abrirNovoModelo: state.uri.queryParameters['novo'] == '1',
+            ),
           ),
         ],
       ),

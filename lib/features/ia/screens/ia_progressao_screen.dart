@@ -1,5 +1,6 @@
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/widgets/fx_form_chrome.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -95,7 +96,9 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
     showFxHelpSheet(
       context,
       title: progressaoTitulo,
-      subtitle: ref.read(alunoProvider(widget.alunoId)).value?.nome ?? widget.alunoNome,
+      subtitle:
+          ref.read(alunoProvider(widget.alunoId)).value?.nome ??
+          widget.alunoNome,
       tips: const [
         FxHelpTip(
           'Dados reais',
@@ -213,140 +216,123 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
               ),
             ],
           ),
-          body: Column(
-            children: [
-              Expanded(
-                child: SafeArea(
-                  bottom: false,
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(
-                      FxSettingsLayout.pageInset,
-                      TokensStrip.s4,
-                      FxSettingsLayout.pageInset,
-                      TokensStrip.s4,
-                    ),
-                    child: Aluno360Layout.operacaoContentWidthLimiter(
-                      child: FxContentWidthLimiter(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            if (pendentes > 0) ...[
-                              Text(
-                                pendentes == 1
-                                    ? ptS.cargasEsperandoUma
-                                    : ptS.cargasEsperando(pendentes),
-                                style: FocuxHubTypography.cardTitle(
-                                  color: chrome.ink,
-                                ),
-                              ),
-                              const SizedBox(height: TokensStrip.s3),
-                            ],
-                            IaProgressaoPedidoCard(
-                              contexto: contexto,
-                              objetivo: _objetivo,
-                              onObjetivo: (o) => setState(() => _objetivo = o),
-                              observacoes: _observacoes,
-                              sinais: _sinais,
-                              onSinal: (s) => setState(() {
-                                if (!_sinais.remove(s)) _sinais.add(s);
-                              }),
-                              enabled: !_loading,
-                            ),
-                            const SizedBox(height: TokensStrip.s3),
-                            if (semExecucao) ...[
-                              Text(
-                                progressaoSemExecucao,
-                                style: FocuxHubTypography.bodyMuted(
-                                  color: chrome.mute,
-                                ),
-                              ),
-                              const SizedBox(height: TokensStrip.s3),
-                            ],
-                            IaSafetyDisclaimer(
-                              compact: true,
-                              customText: ptS.cargasNadaMudaSemAprovacao,
-                            ),
-                            if (_erro != null) ...[
-                              const SizedBox(height: TokensStrip.s4),
-                              FxErrorState(
-                                chromeOnDark: chrome.isDark,
-                                primary: primary,
-                                message: _erro!,
-                                onRetry: _gerar,
-                              ),
-                            ],
-                            if (_loading) const IaProgressaoLoadingSkeleton(),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+          body: SafeArea(
+            bottom: false,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(
+                FxSettingsLayout.pageInset,
+                TokensStrip.s4,
+                FxSettingsLayout.pageInset,
+                TokensStrip.s4,
               ),
-              SafeArea(
-                top: false,
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    FxSettingsLayout.pageInset,
-                    TokensStrip.s2,
-                    FxSettingsLayout.pageInset,
-                    TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
-                  ),
+              child: Aluno360Layout.operacaoContentWidthLimiter(
+                child: FxContentWidthLimiter(
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: TokensStrip.s2),
-                        child: Text(
-                          ptS.cargasCustoUmUso,
-                          textAlign: TextAlign.center,
-                          style: FocuxHubTypography.bodyMuted(
-                            color: chrome.mute,
-                          ),
-                        ),
-                      ),
-                      if (pendentes > 0 && !semTreino) ...[
-                        FxLiquidPrimaryButton(
-                          label: ptS.cargasRevisar,
-                          onPressed: _loading ? null : _abrirAceitar,
-                        ),
-                        const SizedBox(height: TokensStrip.s2),
-                        FxTonalButton(
-                          label: ptS.cargasGerarDeNovo,
-                          expanded: true,
-                          onPressed: _loading || semExecucao ? null : _gerar,
-                        ),
-                        const SizedBox(height: TokensStrip.s1),
+                      if (pendentes > 0) ...[
                         Text(
-                          ptS.cargasSubstitui,
-                          textAlign: TextAlign.center,
+                          pendentes == 1
+                              ? ptS.cargasEsperandoUma
+                              : ptS.cargasEsperando(pendentes),
+                          style: FocuxHubTypography.cardTitle(
+                            color: chrome.ink,
+                          ),
+                        ),
+                        const SizedBox(height: TokensStrip.s3),
+                      ],
+                      IaProgressaoPedidoCard(
+                        contexto: contexto,
+                        objetivo: _objetivo,
+                        onObjetivo: (o) => setState(() => _objetivo = o),
+                        observacoes: _observacoes,
+                        sinais: _sinais,
+                        onSinal:
+                            (s) => setState(() {
+                              if (!_sinais.remove(s)) _sinais.add(s);
+                            }),
+                        enabled: !_loading,
+                      ),
+                      const SizedBox(height: TokensStrip.s3),
+                      if (semExecucao) ...[
+                        Text(
+                          progressaoSemExecucao,
                           style: FocuxHubTypography.bodyMuted(
                             color: chrome.mute,
                           ),
                         ),
-                      ] else
-                        FxLiquidPrimaryButton(
-                          label:
-                              semTreino
-                                  ? progressaoAbrirTreino
-                                  : progressaoGerarSugestoes,
-                          loading: _loading,
-                          loadingLabel: progressaoStickyLoadingLabel(),
-                          onPressed:
-                              _loading
-                                  ? null
-                                  : semTreino
-                                  ? _abrirTreinos
-                                  : semExecucao
-                                  ? null
-                                  : _gerar,
+                        const SizedBox(height: TokensStrip.s3),
+                      ],
+                      IaSafetyDisclaimer(
+                        compact: true,
+                        customText: ptS.cargasNadaMudaSemAprovacao,
+                      ),
+                      if (_erro != null) ...[
+                        const SizedBox(height: TokensStrip.s4),
+                        FxErrorState(
+                          chromeOnDark: chrome.isDark,
+                          primary: primary,
+                          message: _erro!,
+                          onRetry: _gerar,
                         ),
+                      ],
+                      if (_loading) const IaProgressaoLoadingSkeleton(),
                     ],
                   ),
                 ),
               ),
-            ],
+            ),
+          ),
+          // Rodapé fora do corpo: o Scaffold não o encolhe, e só ele soma o teclado.
+          bottomNavigationBar: FxFormStickyBar(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(bottom: TokensStrip.s2),
+                  child: Text(
+                    ptS.cargasCustoUmUso,
+                    textAlign: TextAlign.center,
+                    style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                  ),
+                ),
+                if (pendentes > 0 && !semTreino) ...[
+                  FxLiquidPrimaryButton(
+                    label: ptS.cargasRevisar,
+                    onPressed: _loading ? null : _abrirAceitar,
+                  ),
+                  const SizedBox(height: TokensStrip.s2),
+                  FxTonalButton(
+                    label: ptS.cargasGerarDeNovo,
+                    expanded: true,
+                    onPressed: _loading || semExecucao ? null : _gerar,
+                  ),
+                  const SizedBox(height: TokensStrip.s1),
+                  Text(
+                    ptS.cargasSubstitui,
+                    textAlign: TextAlign.center,
+                    style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                  ),
+                ] else
+                  FxLiquidPrimaryButton(
+                    label:
+                        semTreino
+                            ? progressaoAbrirTreino
+                            : progressaoGerarSugestoes,
+                    loading: _loading,
+                    loadingLabel: progressaoStickyLoadingLabel(),
+                    onPressed:
+                        _loading
+                            ? null
+                            : semTreino
+                            ? _abrirTreinos
+                            : semExecucao
+                            ? null
+                            : _gerar,
+                  ),
+              ],
+            ),
           ),
         ),
       ),

@@ -41,7 +41,7 @@ void main() {
     final screen = readScreenSourceBundle(
       'lib/features/financeiro/screens/financeiro_aluno_screen.dart',
     );
-    expect(screen, contains('viewInsetsOf'));
+    expect(screen, contains('FxFormStickyBar'));
     final actions = readScreenSourceBundle(
       'lib/features/financeiro/utils/mensalidade_surface_actions.dart',
     );

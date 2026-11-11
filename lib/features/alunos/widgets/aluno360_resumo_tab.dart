@@ -34,7 +34,6 @@ class Aluno360ResumoTab extends ConsumerWidget {
     required this.isDark,
     required this.primary,
     required this.proximaAcao360,
-    required this.hasOpenCopilotTask360,
     required this.aderenciaSemanal,
     this.aderenciaBundle,
     required this.recoveryAsync,
@@ -48,7 +47,6 @@ class Aluno360ResumoTab extends ConsumerWidget {
   final bool isDark;
   final Color primary;
   final ProximaAcaoResumo? proximaAcao360;
-  final bool hasOpenCopilotTask360;
   final List<Map<String, dynamic>>? aderenciaSemanal;
   final AderenciaSemanalBundle? aderenciaBundle;
   final AsyncValue<RecoverySnapshot?> recoveryAsync;
@@ -99,16 +97,17 @@ class Aluno360ResumoTab extends ConsumerWidget {
     final financeiroEmAtraso =
         aluno.statusFinanceiro == 'INADIMPLENTE' || aluno.inadimplente;
     final contactPriority = snapshot?.contactPriority ?? false;
-    final agora = snapshot == null
-        ? null
-        : resumoAgora(
-            s,
-            sticky: snapshot.stickyAction,
-            proxima: snapshot.effectiveProxima,
-            aluno: aluno,
-            contactPriority: contactPriority,
-            riscoMotivo: riscoMotivo,
-          );
+    final agora =
+        snapshot == null
+            ? null
+            : resumoAgora(
+              s,
+              sticky: snapshot.stickyAction,
+              proxima: snapshot.effectiveProxima,
+              aluno: aluno,
+              contactPriority: contactPriority,
+              riscoMotivo: riscoMotivo,
+            );
     final acaoCopiloto = snapshot?.effectiveProxima?.acao.trim() ?? '';
     // O copiloto não repete o que "Agora" já mostra (título ou motivo).
     final mostraCopiloto =
@@ -122,10 +121,8 @@ class Aluno360ResumoTab extends ConsumerWidget {
     final checkins = aluno.diasTreino7 ?? week.totalCheckins.round();
     final semTreinos = semHistoricoDeTreino(aluno) && checkins == 0;
     final temRecuperacao = recoveryAsync.value != null;
-    void abrirEngajamento() => context.push(
-      '/alunos/$alunoId/engajamento',
-      extra: aluno.nome,
-    );
+    void abrirEngajamento() =>
+        context.push('/alunos/$alunoId/engajamento', extra: aluno.nome);
 
     final blocos = <Widget>[
       // "Agora" só existe com algo a fazer; sem urgência, a seção some.
@@ -133,7 +130,9 @@ class Aluno360ResumoTab extends ConsumerWidget {
         _agora(context, s, chrome, snapshot, agora),
       // Sem treino nenhum, o cartão da ficha ("Sem ficha ainda") já diz tudo.
       if (!semTreinos)
-        FxMetricStrip(metricas: _metricas(context, s, checkins, abrirEngajamento)),
+        FxMetricStrip(
+          metricas: _metricas(context, s, checkins, abrirEngajamento),
+        ),
       Aluno360FichaCard(
         alunoId: alunoId,
         alunoNome: aluno.nome,
@@ -157,15 +156,7 @@ class Aluno360ResumoTab extends ConsumerWidget {
           titulo: s.alunoResumoCopilotoTitulo,
           motivo: acaoCopiloto,
           verbo: s.alunoResumoCopilotoVerbo,
-          onTap: () => showAluno360CopilotFolha(
-            context,
-            aluno: aluno,
-            snapshot: snapshot!,
-            acao: acaoCopiloto,
-            motivo: snapshot.effectiveProxima?.motivo,
-            proxima: snapshot.effectiveProxima,
-            tarefaCriada: hasOpenCopilotTask360,
-          ),
+          onTap: () => abrirCopiloto360(context, ref, aluno: aluno),
         ),
       if (temRecuperacao)
         Aluno360RecoveryInsightCard(
@@ -208,20 +199,21 @@ class Aluno360ResumoTab extends ConsumerWidget {
         ),
         const SizedBox(height: TokensStrip.s2),
         FxActionRow(
-            key: const ValueKey('aluno360_resumo_agora'),
-            leading: snapshot.stickyAction.icon,
-            titulo: agora.titulo,
-            motivo: agora.motivo,
-            verbo: agoraVerboTexto(s, agora.verbo),
-            onTap: () => abrirOperacaoSticky(
-              context: context,
-              aluno: aluno,
-              alunoId: alunoId,
-              sticky: snapshot.stickyAction,
-              proxima: snapshot.effectiveProxima,
-              outreach: snapshot.outreachMessage,
-            ),
-          ),
+          key: const ValueKey('aluno360_resumo_agora'),
+          leading: snapshot.stickyAction.icon,
+          titulo: agora.titulo,
+          motivo: agora.motivo,
+          verbo: agoraVerboTexto(s, agora.verbo),
+          onTap:
+              () => abrirOperacaoSticky(
+                context: context,
+                aluno: aluno,
+                alunoId: alunoId,
+                sticky: snapshot.stickyAction,
+                proxima: snapshot.effectiveProxima,
+                outreach: snapshot.outreachMessage,
+              ),
+        ),
       ],
     );
   }

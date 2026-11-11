@@ -6,6 +6,7 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_choice_strip.dart';
+import '../../../core/widgets/fx_horario.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_toggle_chip.dart';
@@ -143,7 +144,42 @@ class _AgendaSlotPickerSheetState extends State<AgendaSlotPickerSheet> {
       !agendaDateTimeIsInPast(slot, now: _now) &&
       agendaSlotFitsDay(slot, _duracao) &&
       _conflict(slot) == null &&
-      agendaSlotsDoDia(_day).contains(slot);
+      DateUtils.isSameDay(slot, _day);
+
+  /// Aviso do "Outro horário" que bateu com um ocupado ou já passou.
+  String? _avisoOutro;
+
+  /// Horário fora da grade, no relógio do sistema. Ocupado: avisa e não marca
+  /// (o servidor também recusa conflito, 409 AGENDA_CONFLITO).
+  Future<void> _outroHorario() async {
+    final base = _inicio ?? DateTime(_day.year, _day.month, _day.day, 7);
+    final escolhido = await showFxHorario(
+      context,
+      titulo: 'Outro horário',
+      inicial: TimeOfDay.fromDateTime(base),
+    );
+    if (escolhido == null || !mounted) return;
+    final slot = DateTime(
+      _day.year,
+      _day.month,
+      _day.day,
+      escolhido.hour,
+      escolhido.minute,
+    );
+    final conflito = _conflict(slot);
+    setState(() {
+      if (conflito != null) {
+        _avisoOutro = agendaConflitoMensagem(conflito);
+      } else if (agendaDateTimeIsInPast(slot, now: _now)) {
+        _avisoOutro = 'Esse horário já passou.';
+      } else if (!agendaSlotFitsDay(slot, _duracao)) {
+        _avisoOutro = 'O atendimento passaria da meia-noite.';
+      } else {
+        _avisoOutro = null;
+        _inicio = slot;
+      }
+    });
+  }
 
   DateTime? _defaultSlot() {
     final def = agendaDefaultSlot(_day, now: _now);
@@ -295,6 +331,29 @@ class _AgendaSlotPickerSheetState extends State<AgendaSlotPickerSheet> {
                 selecionado: _periodo,
                 onSelecionar: (p) => setState(() => _periodo = p),
               ),
+              const SizedBox(height: TokensStrip.s2),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: FxTonalButton(
+                  label: 'Outro horário',
+                  icon: FxIcons.relogio,
+                  compact: true,
+                  onPressed: _outroHorario,
+                ),
+              ),
+              if (_avisoOutro case final aviso?) ...[
+                const SizedBox(height: TokensStrip.s2),
+                Semantics(
+                  liveRegion: true,
+                  child: Text(
+                    aviso,
+                    style: FocuxHubTypography.bodyMuted(
+                      color: EagleTokens.semanticBad(isDark: chrome.isDark),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
               SizedBox(height: TokensStrip.s3),
               Expanded(child: _buildSlots(s, chrome, primary)),
             ],

@@ -3,6 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../navigation/focux_navigation.dart';
+import '../navigation/fx_aba_topo.dart';
+
 import '../platform/focux_platform.dart';
 import '../theme/focux_system_chrome.dart';
 import '../widgets/cinematic_mesh_background.dart';
@@ -74,9 +77,11 @@ class AlunoShell extends ConsumerWidget {
                       cinematicChrome: true,
                       isDark: isDark,
                       onTap:
-                          (i) => navigationShell.goBranch(
+                          (i) => fxTocarAba(
+                            context,
+                            navigationShell,
                             i,
-                            initialLocation: i == navigationShell.currentIndex,
+                            raizes: FocuxNavigation.alunoShellTabPaths,
                           ),
                     ),
                   ),

@@ -99,6 +99,7 @@ class AlunoInsetFormField extends StatelessWidget {
               icon: icon,
               hint: hint ?? label,
               iconColor: soft,
+              multilinha: maxLines > 1,
             ).copyWith(
               // Contador só nos campos curtos (BE @Size ≤ 50).
               counterText: (maxLength != null && maxLength! <= 50) ? null : '',

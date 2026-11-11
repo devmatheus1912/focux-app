@@ -33,7 +33,7 @@ void main() {
       identidadeSalvarConfirmMessage(),
       contains('app do personal e do aluno'),
     );
-    expect(identidadeRestaurarConfirmTitle(), contains('cores padrão'));
+    expect(identidadeSloganMax, 60);
     expect(identidadeLogoConfirmMessage(), contains('rascunho'));
     expect(identidadeHelpSubtitle(), contains('Editar perfil'));
     expect(identidadeLightPreviewLabel(), 'Modo claro');

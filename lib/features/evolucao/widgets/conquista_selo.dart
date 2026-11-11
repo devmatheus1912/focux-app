@@ -1,94 +1,105 @@
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
-import '../../../core/widgets/fx_aneis_concentricos.dart';
+import '../../../core/theme/brand_palette.dart';
 import '../../../core/utils/motion_preferences.dart';
+import '../../../core/widgets/fx_selo_glifos.dart';
 import '../data/meta_corporal.dart';
 
-/// Selo de conquista: anel de traço fino na cor da marca, a mesma linguagem
-/// dos anéis do topo da Evolução. A forma diz o tipo:
-/// - meta batida: anel fechado com trilha por fora ("fechou o anel");
-/// - meta mantida: dois anéis paralelos (ficou na faixa);
-/// - recorde: anel aberto embaixo com um traço no topo, o ponteiro no máximo.
-///
-/// Pequeno, leva um glifo desenhado no mesmo traço (✓, =, ↑); grande, recebe
-/// o [miolo] (o número da conquista). Decorativo para leitor de tela: quem
-/// usa já lê título e detalhe.
+/// Glifo de cada conquista (SPEC-selo-conquista). Meta pela métrica;
+/// recorde, troféu.
+FxSeloGlifo conquistaGlifo(Conquista c) {
+  if (c.tipo == ConquistaTipo.recorde) return FxSeloGlifo.trofeu;
+  return switch ((c.metrica ?? '').toUpperCase()) {
+    'PESO' => FxSeloGlifo.balanca,
+    'CINTURA' || 'QUADRIL' => FxSeloGlifo.fitaMetrica,
+    'BRACO' => FxSeloGlifo.biceps,
+    'GORDURA' => FxSeloGlifo.tronco,
+    'MASSA' => FxSeloGlifo.anilhas,
+    _ => FxSeloGlifo.trofeu,
+  };
+}
+
+/// Cores do selo saídas da cor da marca (nunca fixas): moldura em degradê,
+/// miolo escuro nos dois temas e glifo claro com brilho.
+({Color molduraTopo, Color molduraBase, Color miolo, Color glifo}) conquistaSeloCores(
+  Color marca,
+) => (
+  molduraTopo: Color.lerp(marca, Colors.white, 0.45)!,
+  molduraBase: BrandPalette.deep(marca),
+  miolo: Color.lerp(marca, Colors.black, 0.78)!,
+  glifo: Color.lerp(marca, Colors.white, 0.6)!,
+);
+
+/// Selo de conquista: hexágono de pontas arredondadas, moldura metálica na
+/// cor da marca, miolo escuro e o glifo aceso. Meta mantida ganha moldura
+/// dupla. Decorativo para leitor de tela (o texto ao lado já diz a conquista).
 class ConquistaSelo extends StatelessWidget {
   const ConquistaSelo({
     super.key,
     required this.tipo,
+    required this.glifo,
     this.tamanho = 40,
-    this.miolo,
     this.progresso = 1,
+    this.glifoOpacidade = 1,
+    this.marca,
   });
 
   final ConquistaTipo tipo;
+  final FxSeloGlifo glifo;
+
+  /// 40 (lista), 64 (cartão), 160 (celebração).
   final double tamanho;
 
-  /// Conteúdo do centro; sem ele, o glifo do tipo.
-  final Widget? miolo;
-
-  /// Quanto do anel está desenhado (0 a 1), para a celebração.
+  /// Quanto da moldura está desenhado (0 a 1), para a celebração.
   final double progresso;
+  final double glifoOpacidade;
 
-  /// Traço proporcional: 2,5 em 40, 4 em 120, ~4,7 em 187.
-  static double tracoDe(double tamanho) =>
-      tamanho <= 40 ? 2.5 : math.min(2.5 + (tamanho - 40) * 0.01875, 4.7);
-
-  /// Cor do traço: a marca, puxada até ter contraste com o fundo (marca clara
-  /// sobre fundo claro escurece).
-  static Color corDe(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return fxCoresDeAnel(scheme.surface, marca: scheme.primary).first;
-  }
+  /// Cor da marca; sem ela, a primária do tema.
+  final Color? marca;
 
   @override
   Widget build(BuildContext context) {
-    final cor = corDe(context);
-    final miolo = this.miolo;
+    final cor = marca ?? Theme.of(context).colorScheme.primary;
     return ExcludeSemantics(
       child: SizedBox.square(
         dimension: tamanho,
         child: CustomPaint(
           painter: _PintorDoSelo(
-            tipo: tipo,
-            cor: cor,
-            traco: tracoDe(tamanho),
+            cores: conquistaSeloCores(cor),
+            glifo: glifo,
+            dupla: tipo == ConquistaTipo.mantido,
             progresso: progresso.clamp(0.0, 1.0),
-            glifo: miolo == null,
+            glifoOpacidade: glifoOpacidade.clamp(0.0, 1.0),
           ),
-          child:
-              miolo == null
-                  ? null
-                  : Padding(
-                    padding: EdgeInsets.all(tamanho * 0.2),
-                    child: Center(child: miolo),
-                  ),
         ),
       ),
     );
   }
 }
 
-/// O anel se desenha uma vez (celebração); com Reduzir movimento, pronto.
+/// A moldura se desenha (700 ms), o miolo aparece e o glifo acende (150 ms).
+/// Com Reduzir movimento, pronto.
 class ConquistaSeloAnimado extends StatelessWidget {
   const ConquistaSeloAnimado({
     super.key,
     required this.tipo,
+    required this.glifo,
     required this.tamanho,
-    required this.miolo,
+    this.marca,
   });
 
   final ConquistaTipo tipo;
+  final FxSeloGlifo glifo;
   final double tamanho;
-  final Widget miolo;
+  final Color? marca;
 
   @override
   Widget build(BuildContext context) {
     if (fxMotionDurationMs(context) == 0) {
-      return ConquistaSelo(tipo: tipo, tamanho: tamanho, miolo: miolo);
+      return ConquistaSelo(tipo: tipo, glifo: glifo, tamanho: tamanho, marca: marca);
     }
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: 1),
@@ -96,117 +107,132 @@ class ConquistaSeloAnimado extends StatelessWidget {
       builder:
           (context, t, _) => ConquistaSelo(
             tipo: tipo,
+            glifo: glifo,
             tamanho: tamanho,
-            // 700 ms de anel com easeOutCubic, depois o número em 150 ms.
+            marca: marca,
             progresso: Curves.easeOutCubic.transform((t / 0.82).clamp(0.0, 1.0)),
-            miolo: Opacity(
-              opacity: ((t - 0.82) / 0.18).clamp(0.0, 1.0),
-              child: miolo,
-            ),
+            glifoOpacidade: ((t - 0.82) / 0.18).clamp(0.0, 1.0),
           ),
     );
   }
 }
 
+/// Hexágono em pé, de pontas arredondadas.
+Path seloHexagono(Offset centro, double raio, {double arredondado = 0.18}) {
+  final pontos = [
+    for (var i = 0; i < 6; i++)
+      centro +
+          Offset(
+            raio * math.cos(-math.pi / 2 + i * math.pi / 3),
+            raio * math.sin(-math.pi / 2 + i * math.pi / 3),
+          ),
+  ];
+  final path = Path();
+  final corte = raio * arredondado;
+  for (var i = 0; i < 6; i++) {
+    final atual = pontos[i];
+    final anterior = pontos[(i + 5) % 6];
+    final proximo = pontos[(i + 1) % 6];
+    final entrada = atual + (anterior - atual) / (anterior - atual).distance * corte;
+    final saida = atual + (proximo - atual) / (proximo - atual).distance * corte;
+    if (i == 0) {
+      path.moveTo(entrada.dx, entrada.dy);
+    } else {
+      path.lineTo(entrada.dx, entrada.dy);
+    }
+    path.quadraticBezierTo(atual.dx, atual.dy, saida.dx, saida.dy);
+  }
+  return path..close();
+}
+
 class _PintorDoSelo extends CustomPainter {
   _PintorDoSelo({
-    required this.tipo,
-    required this.cor,
-    required this.traco,
-    required this.progresso,
+    required this.cores,
     required this.glifo,
+    required this.dupla,
+    required this.progresso,
+    required this.glifoOpacidade,
   });
 
-  final ConquistaTipo tipo;
-  final Color cor;
-  final double traco;
+  final ({Color molduraTopo, Color molduraBase, Color miolo, Color glifo}) cores;
+  final FxSeloGlifo glifo;
+  final bool dupla;
   final double progresso;
-  final bool glifo;
-
-  Paint _pincel(Color c, double largura) =>
-      Paint()
-        ..color = c
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = largura
-        ..strokeCap = StrokeCap.round
-        ..strokeJoin = StrokeJoin.round;
+  final double glifoOpacidade;
 
   @override
   void paint(Canvas canvas, Size size) {
     final centro = size.center(Offset.zero);
     final raio = size.shortestSide / 2;
-    final principal = _pincel(cor, traco);
-    final fino = _pincel(cor.withValues(alpha: 0.18), traco);
-    const topo = -math.pi / 2;
+    final moldura = math.max(1.5, raio * 0.13);
+    final externo = seloHexagono(centro, raio - moldura / 2);
+    final rect = Offset.zero & size;
+    final degrade = LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [cores.molduraTopo, cores.molduraBase],
+    ).createShader(rect);
 
-    void arco(double r, double inicio, double varre, Paint p) => canvas.drawArc(
-      Rect.fromCircle(center: centro, radius: r),
-      inicio,
-      varre,
-      false,
-      p,
+    // Miolo escuro (aparece com a moldura).
+    canvas.drawPath(
+      seloHexagono(centro, raio - moldura),
+      Paint()..color = cores.miolo.withValues(alpha: progresso),
     );
 
-    switch (tipo) {
-      case ConquistaTipo.meta:
-        final externo = raio - traco / 2;
-        final interno = externo - traco * 2.2;
-        arco(externo, 0, 2 * math.pi, fino);
-        arco(interno, topo, 2 * math.pi * progresso, principal);
-      case ConquistaTipo.mantido:
-        final externo = raio - traco / 2;
-        final interno = externo - traco * 2.6;
-        arco(externo, topo, 2 * math.pi * progresso, principal);
-        arco(interno, topo, 2 * math.pi * progresso, principal);
-      case ConquistaTipo.recorde:
-        // 300°, abertura de 60° embaixo, desenhado a partir da esquerda.
-        final r = raio - traco / 2 - traco * 1.6;
-        const abertura = math.pi / 3;
-        arco(r, math.pi / 2 + abertura / 2, (2 * math.pi - abertura) * progresso, principal);
-        if (progresso >= 1) {
-          // Ponteiro no topo, para fora do anel.
-          canvas.drawLine(
-            centro.translate(0, -r + traco * 0.2),
-            centro.translate(0, -raio + traco / 2),
-            principal,
-          );
-        }
+    // Moldura: desenhada até [progresso] do contorno.
+    final pincel =
+        Paint()
+          ..shader = degrade
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = moldura
+          ..strokeJoin = StrokeJoin.round
+          ..strokeCap = StrokeCap.round;
+    for (final m in externo.computeMetrics()) {
+      canvas.drawPath(m.extractPath(0, m.length * progresso), pincel);
+    }
+    if (dupla && progresso >= 1) {
+      canvas.drawPath(
+        seloHexagono(centro, raio - moldura * 2.2),
+        Paint()
+          ..color = cores.molduraTopo.withValues(alpha: 0.7)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = math.max(1, moldura * 0.35),
+      );
+    }
+    // Brilho curto no canto de cima (o "metal").
+    if (progresso >= 1) {
+      final brilho =
+          Paint()
+            ..color = Colors.white.withValues(alpha: 0.55)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = moldura * 0.35
+            ..strokeCap = StrokeCap.round;
+      final a = centro + Offset(-raio * 0.42, -raio * 0.62);
+      final b = centro + Offset(-raio * 0.12, -raio * 0.8);
+      canvas.drawLine(a, b, brilho);
     }
 
-    if (glifo && progresso >= 1) _desenharGlifo(canvas, centro, raio, principal);
-  }
-
-  void _desenharGlifo(Canvas canvas, Offset c, double raio, Paint p) {
-    final m = raio * 0.32;
-    final path = Path();
-    switch (tipo) {
-      case ConquistaTipo.meta:
-        path
-          ..moveTo(c.dx - m, c.dy + m * 0.05)
-          ..lineTo(c.dx - m * 0.25, c.dy + m * 0.7)
-          ..lineTo(c.dx + m, c.dy - m * 0.6);
-      case ConquistaTipo.mantido:
-        path
-          ..moveTo(c.dx - m * 0.8, c.dy - m * 0.35)
-          ..lineTo(c.dx + m * 0.8, c.dy - m * 0.35)
-          ..moveTo(c.dx - m * 0.8, c.dy + m * 0.35)
-          ..lineTo(c.dx + m * 0.8, c.dy + m * 0.35);
-      case ConquistaTipo.recorde:
-        path
-          ..moveTo(c.dx, c.dy + m * 0.85)
-          ..lineTo(c.dx, c.dy - m * 0.85)
-          ..moveTo(c.dx - m * 0.65, c.dy - m * 0.2)
-          ..lineTo(c.dx, c.dy - m * 0.85)
-          ..lineTo(c.dx + m * 0.65, c.dy - m * 0.2);
-    }
-    canvas.drawPath(path, p);
+    if (glifoOpacidade <= 0) return;
+    final lado = raio * 0.95;
+    final area = Rect.fromCenter(center: centro, width: lado, height: lado);
+    final cor = cores.glifo.withValues(alpha: glifoOpacidade);
+    // Brilho do glifo: o mesmo desenho, desfocado, por baixo.
+    final sigma = math.max(1.0, raio * 0.06);
+    canvas.saveLayer(
+      rect,
+      Paint()..imageFilter = ui.ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
+    );
+    fxPintarSeloGlifo(canvas, glifo, area, cor.withValues(alpha: 0.6 * glifoOpacidade));
+    canvas.restore();
+    fxPintarSeloGlifo(canvas, glifo, area, cor);
   }
 
   @override
   bool shouldRepaint(_PintorDoSelo old) =>
-      old.tipo != tipo ||
-      old.cor != cor ||
-      old.traco != traco ||
+      old.cores != cores ||
+      old.glifo != glifo ||
+      old.dupla != dupla ||
       old.progresso != progresso ||
-      old.glifo != glifo;
+      old.glifoOpacidade != glifoOpacidade;
 }
+

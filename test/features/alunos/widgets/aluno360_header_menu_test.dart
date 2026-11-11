@@ -49,7 +49,11 @@ class _Folha {
   Future<Aluno360MenuItem?>? resultado;
 }
 
-Future<_Folha> _abrirFolha(WidgetTester tester, Aluno aluno) async {
+Future<_Folha> _abrirFolha(
+  WidgetTester tester,
+  Aluno aluno, {
+  bool tarefaAberta = false,
+}) async {
   GoogleFonts.config.allowRuntimeFetching = false;
   tester.view.physicalSize = const Size(1200, 3000);
   tester.view.devicePixelRatio = 2;
@@ -62,7 +66,12 @@ Future<_Folha> _abrirFolha(WidgetTester tester, Aluno aluno) async {
             (context) => Center(
               child: ElevatedButton(
                 onPressed:
-                    () => folha.resultado = showAluno360MenuSheet(context, aluno),
+                    () =>
+                        folha.resultado = showAluno360MenuSheet(
+                          context,
+                          aluno,
+                          tarefaAberta: tarefaAberta,
+                        ),
                 child: const Text('abrir'),
               ),
             ),
@@ -172,5 +181,19 @@ void main() {
     await tester.pumpAndSettle();
     final item = await folha.resultado;
     expect(item?.acao, Aluno360MenuAcao.excluir);
+  });
+
+  testWidgets('com tarefa do Copiloto aberta, o item vira "Ver tarefa"', (
+    tester,
+  ) async {
+    await _abrirFolha(tester, _aluno(), tarefaAberta: true);
+    expect(find.text('Ver tarefa'), findsOneWidget);
+    expect(find.text('Criar tarefa'), findsNothing);
+  });
+
+  testWidgets('sem tarefa aberta, segue "Criar tarefa"', (tester) async {
+    await _abrirFolha(tester, _aluno());
+    expect(find.text('Criar tarefa'), findsOneWidget);
+    expect(find.text('Ver tarefa'), findsNothing);
   });
 }

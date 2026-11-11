@@ -254,7 +254,11 @@ class _BrandField extends StatelessWidget {
     this.maxLength,
     this.maxLines = 1,
     this.enabled = true,
+    this.avisoDepoisDe,
   });
+
+  /// Passando de tantos caracteres, avisa que pode aparecer cortado.
+  final int? avisoDepoisDe;
 
   final String label;
   final TextEditingController controller;
@@ -300,7 +304,8 @@ class _BrandField extends StatelessWidget {
             controller: controller,
             enabled: enabled,
             maxLines: maxLines,
-            maxLength: maxLength,
+            // Slogan salvo mais longo continua inteiro no campo.
+            maxLength: null,
             style: FocuxHubTypography.body(color: chrome.ink).copyWith(
               fontWeight: FontWeight.w600,
               height: maxLines > 1 ? 1.45 : 1.2,
@@ -338,13 +343,32 @@ class _BrandField extends StatelessWidget {
               child: ListenableBuilder(
                 listenable: controller,
                 builder: (context, _) {
-                  return Text(
-                    '${controller.text.length}/$maxLength',
-                    style: TextStyle(
-                      fontSize: TokensStrip.fontMinimo,
-                      fontWeight: FontWeight.w600,
-                      color: chrome.mute.withValues(alpha: 0.75),
-                    ),
+                  final n = controller.text.length;
+                  final passou = n > maxLength!;
+                  final aviso = avisoDepoisDe;
+                  final alerta = chrome.isDark ? EagleTokens.warnDark : EagleTokens.warn;
+                  return Row(
+                    children: [
+                      if (aviso != null && n > aviso)
+                        Expanded(
+                          child: Text(
+                            passou
+                                ? 'Encurte para até $maxLength caracteres.'
+                                : 'Pode aparecer cortado no celular do aluno.',
+                            style: FocuxHubTypography.chip(
+                              passou ? EagleTokens.bad : alerta,
+                            ),
+                          ),
+                        )
+                      else
+                        const Spacer(),
+                      Text(
+                        '$n/$maxLength',
+                        style: FocuxHubTypography.chip(
+                          passou ? EagleTokens.bad : chrome.mute,
+                        ),
+                      ),
+                    ],
                   );
                 },
               ),
@@ -376,40 +400,3 @@ class _PanelTitle extends StatelessWidget {
   }
 }
 
-class _PaywallCard extends StatelessWidget {
-  const _PaywallCard({required this.onTap, required this.chrome});
-
-  final VoidCallback onTap;
-  final ShellPalette chrome;
-
-  @override
-  Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    return ShellSurface(
-      accent: primary,
-      padding: const EdgeInsets.all(18),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(FxIcons.cadeado, color: primary, size: 20),
-              const SizedBox(width: 8),
-              Text(
-                'Recurso Enterprise',
-                style: FocuxHubTypography.cardTitle(color: chrome.ink),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Logo, slogan e paletas curadas para deixar seu app com cara de marca premium.',
-            style: TextStyle(color: chrome.mute, fontSize: TokensStrip.fontRotulo, height: 1.35),
-          ),
-          const SizedBox(height: 14),
-          FxLiquidPrimaryButton(label: 'Assinar Enterprise', onPressed: onTap),
-        ],
-      ),
-    );
-  }
-}
