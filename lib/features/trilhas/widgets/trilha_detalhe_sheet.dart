@@ -14,6 +14,9 @@ import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_sheet_frame.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/widgets/fx_selo_glifos.dart';
+import '../../evolucao/data/meta_corporal.dart';
+import '../../evolucao/widgets/conquista_selo.dart';
 import '../models/trilha.dart';
 import '../providers/trilhas_provider.dart';
 import '../utils/trilhas_display.dart';
@@ -109,6 +112,13 @@ class _TrilhaDetalheState extends ConsumerState<_TrilhaDetalhe> {
       actionLabel: 'Desfazer',
       onAction: () => _desfazer(etapa),
     );
+    // O aluno fechou a última etapa: o selo da trilha se desenha.
+    if (eraUltima && !widget.doPersonal) {
+      await showFxHomeSheet<void>(
+        context,
+        builder: (_) => _TrilhaConcluidaSelo(titulo: _trilha.titulo),
+      );
+    }
   }
 
   Future<void> _desfazer(MarcoModel etapa) async {
@@ -404,6 +414,48 @@ class _EtapaLinha extends StatelessWidget {
                 ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TrilhaConcluidaSelo extends StatelessWidget {
+  const _TrilhaConcluidaSelo({required this.titulo});
+
+  final String titulo;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    return FxSheetFrame(
+      title: 'Trilha concluída',
+      child: Semantics(
+        container: true,
+        label: 'Trilha concluída: $titulo',
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: TokensStrip.s2),
+            const ConquistaSeloAnimado(
+              tipo: ConquistaTipo.meta,
+              glifo: FxSeloGlifo.setasCima,
+              tamanho: 160,
+            ),
+            const SizedBox(height: TokensStrip.s3),
+            Text(
+              titulo,
+              textAlign: TextAlign.center,
+              style: FocuxHubTypography.cardTitle(color: chrome.ink),
+            ),
+            const SizedBox(height: TokensStrip.s1),
+            Text(
+              'Todas as etapas feitas. Seu personal vai ver.',
+              textAlign: TextAlign.center,
+              style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+            ),
+            const SizedBox(height: TokensStrip.s2),
+          ],
         ),
       ),
     );

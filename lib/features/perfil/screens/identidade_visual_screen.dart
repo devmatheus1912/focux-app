@@ -71,6 +71,11 @@ class _IdentidadeVisualScreenState
   BrandStyle _baselineEstilo = BrandStyle.classico;
   String? _baselineCapa;
   int _previa = 0;
+  final _scroll = ScrollController();
+  final _previaKey = GlobalKey();
+  final _corpoKey = GlobalKey();
+  // A prévia saiu da tela: uma faixa presa no topo mostra cor e estilo.
+  bool _faixaVisivel = false;
   bool _perfilLoaded = false;
   bool _viewTracked = false;
   DateTime? _fetchedAt;
@@ -90,6 +95,7 @@ class _IdentidadeVisualScreenState
 
   @override
   void dispose() {
+    _scroll.dispose();
     _sloganCtrl.dispose();
     super.dispose();
   }
@@ -154,7 +160,8 @@ class _IdentidadeVisualScreenState
 
     primary = CuratedBrandPalette.safePrimary(primary);
     secondary = CuratedBrandPalette.safeSecondaryFor(primary, secondary);
-    _palette = CuratedBrandPalette.resolve(primary, secondary);    _perfilLoaded = true;
+    _palette = CuratedBrandPalette.resolve(primary, secondary);
+    _perfilLoaded = true;
     _fetchedAt = DateTime.now();
     _snapshotBaseline();
   }
@@ -203,8 +210,7 @@ class _IdentidadeVisualScreenState
     final chromeAccent = _palette.chromeFor(dark: chrome.isDark);
     final plano = perfil.plano;
     final hasWhiteLabel = identidadeHasWhiteLabel(
-      featureWhiteLabel:
-          ref.watch(planoFeaturesProvider).value?.whiteLabel,
+      featureWhiteLabel: ref.watch(planoFeaturesProvider).value?.whiteLabel,
       plano: plano,
     );
     final nomePersonal = perfil.nome;
@@ -255,238 +261,280 @@ class _IdentidadeVisualScreenState
                     ),
                   ),
           body: FxKeyboardDismissScope(
-            child: RefreshIndicator(
-              color: Theme.of(context).colorScheme.primary,
-              onRefresh: _refresh,
-              child: CustomScrollView(
-                keyboardDismissBehavior:
-                    ScrollViewKeyboardDismissBehavior.onDrag,
-                physics: const BouncingScrollPhysics(
-                  parent: AlwaysScrollableScrollPhysics(),
-                ),
-                slivers: [
-                  SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(
-                      FxSettingsLayout.pageInset,
-                      4,
-                      FxSettingsLayout.pageInset,
-                      120,
-                    ),
-                    sliver: SliverList(
-                      delegate: SliverChildListDelegate([
-                        if (!hasWhiteLabel) ...[
-                          Text(
-                            'Experimente à vontade. Para o aluno ver, assine o Enterprise.',
-                            style: FocuxHubTypography.bodyMuted(
-                              color: chrome.mute,
-                            ),
+            child: Stack(
+              key: _corpoKey,
+              children: [
+                RefreshIndicator(
+                  color: Theme.of(context).colorScheme.primary,
+                  onRefresh: _refresh,
+                  child: NotificationListener<ScrollNotification>(
+                    onNotification: (_) {
+                      _atualizarFaixa();
+                      return false;
+                    },
+                    child: CustomScrollView(
+                      controller: _scroll,
+                      keyboardDismissBehavior:
+                          ScrollViewKeyboardDismissBehavior.onDrag,
+                      physics: const BouncingScrollPhysics(
+                        parent: AlwaysScrollableScrollPhysics(),
+                      ),
+                      slivers: [
+                        SliverPadding(
+                          padding: const EdgeInsets.fromLTRB(
+                            FxSettingsLayout.pageInset,
+                            4,
+                            FxSettingsLayout.pageInset,
+                            120,
                           ),
-                          const SizedBox(height: TokensStrip.s3),
-                        ],
-                        Builder(
-                          builder: (_) => Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
+                          sliver: SliverList(
+                            delegate: SliverChildListDelegate([
+                              if (!hasWhiteLabel) ...[
                                 Text(
-                                  identidadeAlunoVisibilityLabel(),
-                                  style: FocuxHubTypography.chip(chrome.mute)
-                                      .copyWith(letterSpacing: 0.2),
-                                ),
-                                const SizedBox(height: TokensStrip.s2),
-                                FxChoiceStrip<int>(
-                                  itens: [
-                                    FxChoiceItem(
-                                      value: 0,
-                                      label: identidadePreviaHomeClaro(),
-                                    ),
-                                    FxChoiceItem(
-                                      value: 1,
-                                      label: identidadePreviaHomeEscuro(),
-                                    ),
-                                    FxChoiceItem(
-                                      value: 2,
-                                      label: identidadePreviaLogin(),
-                                    ),
-                                  ],
-                                  selecionado: _previa,
-                                  onSelecionar: (v) => setState(() => _previa = v),
+                                  'Experimente à vontade. Para o aluno ver, assine o Enterprise.',
+                                  style: FocuxHubTypography.bodyMuted(
+                                    color: chrome.mute,
+                                  ),
                                 ),
                                 const SizedBox(height: TokensStrip.s3),
-                                if (_previa == 2)
-                                  _PaletteThemePreview(
-                                    dark: true,
-                                    palette: _palette,
-                                    name: nomePersonal,
-                                    slogan: _sloganCtrl.text.trim(),
-                                    logoUrl: _logoUrl,
-                                    reduceMotion: reduceMotion,
-                                  )
-                                else
-                                  IdentidadePreviaApp(
-                                    palette: _palette,
-                                    estilo: _estilo,
-                                    escuro: _previa == 1,
-                                    nomePersonal: nomePersonal,
-                                    slogan: _sloganCtrl.text.trim(),
-                                    logoUrl: _logoUrl,
-                                    capaUrl: _capaUrl,
-                                  ),
-                                const SizedBox(height: TokensStrip.s4),
-                                ShellSurface(
-                                  accent: chromeAccent,
-                                  padding: const EdgeInsets.fromLTRB(
-                                    18,
-                                    18,
-                                    18,
-                                    14,
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      _PanelTitle(
-                                        title: 'Cores',
-                                        mute: chrome.mute,
-                                      ),
-                                      const SizedBox(height: TokensStrip.s3),
-                                      IdentidadePaletasGrade(
-                                        selecionada: _palette,
-                                        onSelect: (p) {
-                                          HapticFeedback.selectionClick();
-                                          setState(() => _palette = p);
-                                        },
-                                      ),
-                                      if (identidadeAvisoContraste(_palette)
-                                          case final aviso?) ...[
-                                        const SizedBox(height: 10),
-                                        Row(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Icon(
-                                              FxIcons.verPequeno,
-                                              size: 16,
-                                              color: chrome.mute,
+                              ],
+                              Builder(
+                                builder:
+                                    (_) => Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: [
+                                        Text(
+                                          identidadeAlunoVisibilityLabel(),
+                                          style: FocuxHubTypography.chip(
+                                            chrome.mute,
+                                          ).copyWith(letterSpacing: 0.2),
+                                        ),
+                                        const SizedBox(height: TokensStrip.s2),
+                                        FxChoiceStrip<int>(
+                                          itens: [
+                                            FxChoiceItem(
+                                              value: 0,
+                                              label:
+                                                  identidadePreviaHomeClaro(),
                                             ),
-                                            const SizedBox(width: 8),
-                                            Expanded(
-                                              child: Text(
-                                                aviso,
+                                            FxChoiceItem(
+                                              value: 1,
+                                              label:
+                                                  identidadePreviaHomeEscuro(),
+                                            ),
+                                            FxChoiceItem(
+                                              value: 2,
+                                              label: identidadePreviaLogin(),
+                                            ),
+                                          ],
+                                          selecionado: _previa,
+                                          onSelecionar:
+                                              (v) =>
+                                                  setState(() => _previa = v),
+                                        ),
+                                        const SizedBox(height: TokensStrip.s3),
+                                        KeyedSubtree(
+                                          key: _previaKey,
+                                          child:
+                                              _previa == 2
+                                                  ? _PaletteThemePreview(
+                                                    dark: true,
+                                                    palette: _palette,
+                                                    name: nomePersonal,
+                                                    slogan:
+                                                        _sloganCtrl.text.trim(),
+                                                    logoUrl: _logoUrl,
+                                                    reduceMotion: reduceMotion,
+                                                  )
+                                                  : IdentidadePreviaApp(
+                                                    palette: _palette,
+                                                    estilo: _estilo,
+                                                    escuro: _previa == 1,
+                                                    nomePersonal: nomePersonal,
+                                                    slogan:
+                                                        _sloganCtrl.text.trim(),
+                                                    logoUrl: _logoUrl,
+                                                    capaUrl: _capaUrl,
+                                                  ),
+                                        ),
+                                        const SizedBox(height: TokensStrip.s4),
+                                        ShellSurface(
+                                          accent: chromeAccent,
+                                          padding: const EdgeInsets.fromLTRB(
+                                            18,
+                                            18,
+                                            18,
+                                            14,
+                                          ),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              _PanelTitle(
+                                                title: 'Cores',
+                                                mute: chrome.mute,
+                                              ),
+                                              const SizedBox(
+                                                height: TokensStrip.s3,
+                                              ),
+                                              IdentidadePaletasGrade(
+                                                selecionada: _palette,
+                                                onSelect: (p) {
+                                                  HapticFeedback.selectionClick();
+                                                  setState(() => _palette = p);
+                                                },
+                                              ),
+                                              if (identidadeAvisoContraste(
+                                                    _palette,
+                                                  )
+                                                  case final aviso?) ...[
+                                                const SizedBox(height: 10),
+                                                Row(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Icon(
+                                                      FxIcons.verPequeno,
+                                                      size: 16,
+                                                      color: chrome.mute,
+                                                    ),
+                                                    const SizedBox(width: 8),
+                                                    Expanded(
+                                                      child: Text(
+                                                        aviso,
+                                                        style:
+                                                            FocuxHubTypography.bodyMuted(
+                                                              color:
+                                                                  chrome.mute,
+                                                            ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(height: 14),
+                                        ShellSurface(
+                                          accent: chromeAccent,
+                                          padding: const EdgeInsets.all(18),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              _PanelTitle(
+                                                title: 'Estilo',
+                                                mute: chrome.mute,
+                                              ),
+                                              const SizedBox(
+                                                height: TokensStrip.s3,
+                                              ),
+                                              IdentidadeEstiloMiniaturas(
+                                                selecionado: _estilo,
+                                                primaria: _corPrimaria,
+                                                dark: _previa == 1,
+                                                onSelecionar:
+                                                    (e) => setState(
+                                                      () => _estilo = e,
+                                                    ),
+                                              ),
+                                              const SizedBox(
+                                                height: TokensStrip.s2,
+                                              ),
+                                              Text(
+                                                identidadeEstiloDescricao(
+                                                  _estilo,
+                                                ),
                                                 style:
                                                     FocuxHubTypography.bodyMuted(
                                                       color: chrome.mute,
                                                     ),
                                               ),
-                                            ),
-                                          ],
+                                            ],
+                                          ),
                                         ),
+                                        const SizedBox(height: 14),
+                                        ShellSurface(
+                                          accent: chromeAccent,
+                                          padding: const EdgeInsets.all(18),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              _PanelTitle(
+                                                title: 'Logo, capa e slogan',
+                                                mute: chrome.mute,
+                                              ),
+                                              const SizedBox(
+                                                height: TokensStrip.s3,
+                                              ),
+                                              Center(
+                                                child: _LogoUploadRing(
+                                                  nome: nomePersonal,
+                                                  logoUrl: _logoUrl,
+                                                  primary: _corPrimaria,
+                                                  secondary: _corSecundaria,
+                                                  uploading: _uploadingLogo,
+                                                  onTap:
+                                                      hasWhiteLabel
+                                                          ? _pedirTrocarLogo
+                                                          : _abrirEnterprise,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 18),
+                                              Text(
+                                                'Capa',
+                                                style: FocuxHubTypography.chip(
+                                                  chrome.mute,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 8),
+                                              IdentidadeCapaTile(
+                                                url: _capaUrl,
+                                                uploading: _uploadingCapa,
+                                                onEscolher:
+                                                    hasWhiteLabel
+                                                        ? _pickCapa
+                                                        : _abrirEnterprise,
+                                                onRemover:
+                                                    hasWhiteLabel
+                                                        ? () => setState(
+                                                          () => _capaUrl = null,
+                                                        )
+                                                        : null,
+                                              ),
+                                              const SizedBox(height: 18),
+                                              _BrandField(
+                                                label: 'Slogan',
+                                                controller: _sloganCtrl,
+                                                enabled: true,
+                                                accent: chromeAccent,
+                                                icon: FxIcons.citacao,
+                                                hint:
+                                                    'Transformando vidas através do movimento',
+                                                maxLength: identidadeSloganMax,
+                                                avisoDepoisDe:
+                                                    identidadeSloganAviso,
+                                                maxLines: 3,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(height: 14),
                                       ],
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(height: 14),
-                                ShellSurface(
-                                  accent: chromeAccent,
-                                  padding: const EdgeInsets.all(18),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      _PanelTitle(
-                                        title: 'Estilo',
-                                        mute: chrome.mute,
-                                      ),
-                                      const SizedBox(height: TokensStrip.s3),
-                                      IdentidadeEstiloMiniaturas(
-                                        selecionado: _estilo,
-                                        primaria: _corPrimaria,
-                                        dark: _previa == 1,
-                                        onSelecionar:
-                                            (e) => setState(() => _estilo = e),
-                                      ),
-                                      const SizedBox(height: TokensStrip.s2),
-                                      Text(
-                                        identidadeEstiloDescricao(_estilo),
-                                        style: FocuxHubTypography.bodyMuted(
-                                          color: chrome.mute,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(height: 14),
-                                ShellSurface(
-                                  accent: chromeAccent,
-                                  padding: const EdgeInsets.all(18),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      _PanelTitle(
-                                        title: 'Logo, capa e slogan',
-                                        mute: chrome.mute,
-                                      ),
-                                      const SizedBox(height: TokensStrip.s3),
-                                      Center(
-                                        child: _LogoUploadRing(
-                                          nome: nomePersonal,
-                                          logoUrl: _logoUrl,
-                                          primary: _corPrimaria,
-                                          secondary: _corSecundaria,
-                                          uploading: _uploadingLogo,
-                                          onTap:
-                                              hasWhiteLabel
-                                                  ? _pedirTrocarLogo
-                                                  : _abrirEnterprise,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 18),
-                                      Text(
-                                        'Capa',
-                                        style: FocuxHubTypography.chip(
-                                          chrome.mute,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      IdentidadeCapaTile(
-                                        url: _capaUrl,
-                                        uploading: _uploadingCapa,
-                                        onEscolher:
-                                            hasWhiteLabel
-                                                ? _pickCapa
-                                                : _abrirEnterprise,
-                                        onRemover:
-                                            hasWhiteLabel
-                                                ? () => setState(
-                                                  () => _capaUrl = null,
-                                                )
-                                                : null,
-                                      ),
-                                      const SizedBox(height: 18),
-                                      _BrandField(
-                                        label: 'Slogan',
-                                        controller: _sloganCtrl,
-                                        enabled: true,
-                                        accent: chromeAccent,
-                                        icon: FxIcons.citacao,
-                                        hint:
-                                            'Transformando vidas através do movimento',
-                                        maxLength: identidadeSloganMax,
-                                        avisoDepoisDe: identidadeSloganAviso,
-                                        maxLines: 3,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(height: 14),
-                              ],
-                            ),
+                                    ),
+                              ),
+                            ]),
+                          ),
                         ),
-                      ]),
+                      ],
                     ),
                   ),
-                ],
-              ),
+                ),
+                _faixa(),
+              ],
             ),
           ),
         ),

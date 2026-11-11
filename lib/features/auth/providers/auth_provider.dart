@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/account/login_social_memo.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/auth/session_invalidator.dart';
@@ -74,6 +75,7 @@ class AuthNotifier extends Notifier<AuthStatus> {
 
   Future<AuthLoginResult> login(String email, String password) async {
     final result = await _repo.loginPersonal(email, password);
+    lembrarLoginSocial(false);
     if (result.mfaRequired) return result;
     _currentRole = UserRole.personal;
     _requiresPasswordChange = false;
@@ -97,6 +99,7 @@ class AuthNotifier extends Notifier<AuthStatus> {
       telefone: telefone,
       emailCodigo: emailCodigo,
     );
+    lembrarLoginSocial(false);
     _currentRole = UserRole.personal;
     _requiresPasswordChange = false;
     state = AuthStatus.authenticated;
@@ -116,6 +119,7 @@ class AuthNotifier extends Notifier<AuthStatus> {
       password,
       personalSlug: personalSlug,
     );
+    lembrarLoginSocial(false);
     _currentRole = UserRole.aluno;
     state = AuthStatus.authenticated;
   }
@@ -128,6 +132,7 @@ class AuthNotifier extends Notifier<AuthStatus> {
       idToken: idToken,
       referralCodigo: referralCodigo,
     );
+    lembrarLoginSocial(true);
     if (result.mfaRequired) return result;
     _currentRole = UserRole.personal;
     _requiresPasswordChange = false;
@@ -151,6 +156,7 @@ class AuthNotifier extends Notifier<AuthStatus> {
       rawNonce: rawNonce,
       referralCodigo: referralCodigo,
     );
+    lembrarLoginSocial(true);
     if (result.mfaRequired) return result;
     _currentRole = UserRole.personal;
     _requiresPasswordChange = false;

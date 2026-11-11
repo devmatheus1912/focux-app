@@ -16,6 +16,49 @@ Future<void> _abrirIdentidadeAjuda(BuildContext context) {
 }
 
 extension on _IdentidadeVisualScreenState {
+  /// A faixa aparece quando o fim da prévia passa do topo da área rolável.
+  void _atualizarFaixa() {
+    final previa = _previaKey.currentContext?.findRenderObject();
+    final corpo = _corpoKey.currentContext?.findRenderObject();
+    bool visivel;
+    if (previa is RenderBox && corpo is RenderBox && previa.attached) {
+      final fundo =
+          previa
+              .localToGlobal(Offset(0, previa.size.height), ancestor: corpo)
+              .dy;
+      visivel = fundo < 0;
+    } else {
+      visivel = _scroll.hasClients && _scroll.offset > 0;
+    }
+    if (visivel != _faixaVisivel) setState(() => _faixaVisivel = visivel);
+  }
+
+  Widget _faixa() {
+    final parado = TokensStrip.prefersReducedMotion(context);
+    return Positioned(
+      top: TokensStrip.s2,
+      left: FxSettingsLayout.pageInset,
+      right: FxSettingsLayout.pageInset,
+      child: IgnorePointer(
+        ignoring: !_faixaVisivel,
+        child: AnimatedOpacity(
+          opacity: _faixaVisivel ? 1 : 0,
+          duration: Duration(milliseconds: parado ? 0 : 180),
+          child: _FaixaDaPrevia(
+            palette: _palette,
+            estilo: identidadeEstiloLabel(_estilo),
+            onTap:
+                () => _scroll.animateTo(
+                  0,
+                  duration: Duration(milliseconds: parado ? 0 : 280),
+                  curve: Curves.easeOutCubic,
+                ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Future<void> _pedirTrocarLogo() async {
     if (_uploadingLogo) return;
     FxKeyboardDismissScope.dismiss();

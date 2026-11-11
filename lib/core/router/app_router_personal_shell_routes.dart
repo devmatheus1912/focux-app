@@ -6,6 +6,7 @@ import '../../features/alunos/screens/alunos_list_screen.dart';
 import '../../features/treinos/screens/modelos_de_treino_view.dart';
 import '../../features/agenda/screens/agenda_screen.dart';
 import '../../features/chat/screens/chat_inbox_screen.dart';
+import '../../features/chat/screens/chat_screen.dart';
 import '../observability/sentry_performance.dart';
 import 'app_router_redirect.dart';
 import 'fx_lazy_shell_container.dart';
@@ -53,6 +54,19 @@ RouteBase buildPersonalShellRoute() {
           GoRoute(
             path: '/chat/inbox',
             builder: (context, state) => const ChatInboxScreen(),
+          ),
+          // Conversa aberta pela aba: fica no ramo, com a barra de abas.
+          GoRoute(
+            path: '/chat/inbox/conversa/:id',
+            redirect:
+                (context, state) =>
+                    intPathParam(state, 'id') == null ? '/chat/inbox' : null,
+            builder:
+                (context, state) => ChatScreen(
+                  alunoId: intPathParam(state, 'id')!,
+                  alunoNome: chatAlunoNomeExtra(state) ?? 'Aluno',
+                  initialDraft: chatDraftExtra(state),
+                ),
           ),
         ],
       ),

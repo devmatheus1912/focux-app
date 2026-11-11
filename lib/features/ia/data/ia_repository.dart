@@ -183,11 +183,10 @@ class IaRepository {
 
   // ── Análise guardada ───────────────────────────────────────────────────────
 
-  /// Gera e guarda a análise do aluno (mesma regra de cota de `insights`).
+  /// Gera e guarda a análise do aluno, com o motivo (gasta 1 uso de IA).
   Future<CopilotoAnalise> criarAnalise({
     required int alunoId,
     String? mode,
-    String? motivo,
   }) async {
     return _withIaErrorContext(() async {
       final r = await _dio.post(
@@ -196,7 +195,6 @@ class IaRepository {
         data: {
           'alunoId': alunoId,
           if (mode != null && mode.isNotEmpty) 'mode': mode,
-          if (motivo != null && motivo.trim().isNotEmpty) 'motivo': motivo.trim(),
         },
       );
       return CopilotoAnalise.fromJson(Map<String, dynamic>.from(r.data as Map));

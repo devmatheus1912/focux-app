@@ -943,7 +943,12 @@ class _GroupedExerciseList extends StatelessWidget {
 
   String? _alerta(Exercicio e) {
     final comum = regioesEmComum(regioesAluno, e);
-    return comum.isEmpty ? null : 'Atenção: ${resumoRegioes(comum)}';
+    if (comum.isNotEmpty) return 'Atenção: ${resumoRegioes(comum)}';
+    // Exercício do personal sem grupo some do volume por grupo.
+    if (!e.isFocuxLibrary && e.grupoMuscularPrimario == null) {
+      return 'Sem grupo muscular';
+    }
+    return null;
   }
 
   @override

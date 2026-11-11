@@ -119,8 +119,11 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
     );
   }
 
-  void _abrirAceitar() {
-    context.push(
+  /// A revisão aplicou cargas: ao sair, quem abriu (Copiloto) recebe `true`.
+  var _aplicou = false;
+
+  Future<void> _abrirAceitar() async {
+    final aplicou = await context.push<bool>(
       '/ia/progressao/aceitar',
       extra:
           ProgressaoAceitarRouteArgs(
@@ -131,6 +134,15 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
                 widget.alunoNome,
           ).toExtra(),
     );
+    if (aplicou == true && mounted) _aplicou = true;
+  }
+
+  void _sair() {
+    if (_aplicou && context.canPop()) {
+      context.pop(true);
+      return;
+    }
+    safePopOrGo(context, '/alunos/${widget.alunoId}');
   }
 
   void _abrirTreinos() {
@@ -208,7 +220,7 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
           appBar: FxShellAppBar(
             title: progressaoTitulo,
             subtitle: _nome,
-            onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
+            onBack: _sair,
             actions: [
               FxHelpIconButton(
                 tooltip: 'Como funciona o ajuste de cargas',

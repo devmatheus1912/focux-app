@@ -1157,6 +1157,7 @@
   "excluirContaCodigoLabel": "Código de 6 dígitos",
   "excluirContaConfirmLabel": "Digite EXCLUIR para confirmar",
   "excluirContaSemSenhaDica": "Entrou com Google ou Apple? Receba um código por e-mail.",
+  "excluirContaSocialDica": "Você entrou com Google ou Apple. Peça o código por e-mail para confirmar.",
   "excluirContaPedirCodigo": "Receber código por e-mail",
   "excluirContaReenviarCodigo": "Reenviar código",
   "excluirContaUsarSenha": "Prefiro usar minha senha",

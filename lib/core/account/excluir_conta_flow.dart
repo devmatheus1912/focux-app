@@ -6,6 +6,7 @@ import '../utils/friendly_error.dart';
 import '../widgets/feedback_helper.dart';
 import '../widgets/fx_loading.dart';
 import 'excluir_conta_sheet.dart';
+import 'login_social_memo.dart';
 
 const excluirContaPath = '/api/lgpd/me/delete';
 const excluirContaCodigoPath = '/api/lgpd/me/delete/codigo';
@@ -47,11 +48,14 @@ Future<void> excluirContaFlow(
   bool avisoAssinatura = false,
 }) async {
   final l10n = S.of(context);
+  final social = await entrouComLoginSocial();
+  if (!context.mounted) return;
   final credencial = await showExcluirContaSheet(
     context,
     dio: dio,
     papel: papel,
     avisoAssinatura: avisoAssinatura,
+    social: social,
   );
   if (credencial == null || !context.mounted) return;
   final senha = credencial.senha;

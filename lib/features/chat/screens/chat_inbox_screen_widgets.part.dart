@@ -193,7 +193,7 @@ class _SearchResultTile extends StatelessWidget {
       ),
       onTap: () {
         if (msg.alunoId != null) {
-          context.push('/alunos/${msg.alunoId}/chat');
+          context.push('/chat/inbox/conversa/${msg.alunoId}');
         }
       },
     );

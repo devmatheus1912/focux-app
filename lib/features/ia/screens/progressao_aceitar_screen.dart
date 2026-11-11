@@ -238,6 +238,7 @@ class _ProgressaoAceitarScreenState
           _alternadas.clear();
           _cargas.clear();
           if (aplicadas > 0) {
+            _aplicouAlguma = true;
             _successBanner =
                 aplicadas == 1
                     ? ptS.cargasAplicadaUma
@@ -246,6 +247,17 @@ class _ProgressaoAceitarScreenState
         });
       }
     }
+  }
+
+  /// Aplicou alguma carga: quem abriu (Ajustar cargas, Copiloto) recebe `true`.
+  var _aplicouAlguma = false;
+
+  void _sair(ProgressaoAceitarRouteArgs args, String fallback) {
+    if (_aplicouAlguma && context.canPop()) {
+      context.pop(true);
+      return;
+    }
+    safePopOrGo(context, fallback);
   }
 
   void _abrirTreinos(ProgressaoAceitarRouteArgs args, int alunoId) {
@@ -343,7 +355,7 @@ class _ProgressaoAceitarScreenState
         appBar: FxShellAppBar(
           title: ptS.cargasRevisarTitulo,
           subtitle: args.alunoNome,
-          onBack: () => safePopOrGo(context, args.returnTo ?? '/ia/copiloto'),
+          onBack: () => _sair(args, args.returnTo ?? '/ia/copiloto'),
           actions: [
             FxHelpIconButton(
               tooltip: ptS.cargasComoRevisar,
@@ -564,10 +576,7 @@ class _ProgressaoAceitarScreenState
               label: 'Voltar ao Aluno 360',
               icon: FxIcons.voltar,
               onPressed:
-                  () => safePopOrGo(
-                    context,
-                    args.returnTo ?? '/alunos/${args.alunoId}',
-                  ),
+                  () => _sair(args, args.returnTo ?? '/alunos/${args.alunoId}'),
               compact: true,
             ),
           ),

@@ -395,7 +395,7 @@ class _MeuPill extends StatelessWidget {
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
-        'Meu',
+        'Seu',
         style: FxSettingsLayout.footer(
           color: brand,
         ).copyWith(fontWeight: FontWeight.w700),

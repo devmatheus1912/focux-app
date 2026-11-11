@@ -26,10 +26,12 @@ class MainShell extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bottomInset = FocuxPlatform.safeBottomInset(context);
     final compact = FocuxPlatform.isCompact(context);
-    final dockClearance = FxDock.shellClearance(
-      bottomInset: bottomInset,
-      compact: compact,
-    );
+    // Teclado aberto: o dock sai (senão sobe junto e cobre o campo).
+    final tecladoAberto = MediaQuery.viewInsetsOf(context).bottom > 0;
+    final dockClearance =
+        tecladoAberto
+            ? 0.0
+            : FxDock.shellClearance(bottomInset: bottomInset, compact: compact);
 
     final emRisco = ref.watch(
       dashboardHomeProvider.select(
@@ -70,6 +72,7 @@ class MainShell extends ConsumerWidget {
                     child: FxShellInsetOwner(child: navigationShell),
                   ),
                 ),
+                if (!tecladoAberto)
                 Positioned(
                   bottom: bottomInset + FxDock.floatGap,
                   left: FxDock.sideInset,

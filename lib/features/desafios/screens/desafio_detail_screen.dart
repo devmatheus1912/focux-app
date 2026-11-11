@@ -31,6 +31,9 @@ import '../data/desafio_repository.dart';
 import '../../../l10n/pt.dart';
 import '../utils/desafio_display.dart';
 import '../../../core/theme/fx_icons.dart';
+import '../../../core/widgets/fx_selo_glifos.dart';
+import '../../evolucao/data/meta_corporal.dart';
+import '../../evolucao/widgets/conquista_selo.dart';
 
 class DesafioDetailScreen extends ConsumerStatefulWidget {
   const DesafioDetailScreen({
@@ -470,6 +473,18 @@ class _DesafioDetailBody extends StatelessWidget {
                               ranking[i].alunoId == meId,
                         ),
                         subtitle: Text(desafioLugarLabel(i)),
+                        // Selo do pódio: coroa para o líder, halteres no 2º e 3º.
+                        leading: i < 3 && ranking[i].pontos > 0
+                            ? ConquistaSelo(
+                                tipo: i == 0
+                                    ? ConquistaTipo.recorde
+                                    : ConquistaTipo.meta,
+                                glifo: i == 0
+                                    ? FxSeloGlifo.coroa
+                                    : FxSeloGlifo.halteresCruzados,
+                                tamanho: 36,
+                              )
+                            : null,
                         trailing: Text(
                           desafioLeaderboardPoints(ranking[i].pontos),
                           style: FocuxHubTypography.bodyMuted(

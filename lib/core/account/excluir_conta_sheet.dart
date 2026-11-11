@@ -91,6 +91,7 @@ Future<ExcluirContaCredencial?> showExcluirContaSheet(
   required Dio dio,
   required ExcluirContaPapel papel,
   bool avisoAssinatura = false,
+  bool social = false,
 }) {
   return showFxHomeSheet<ExcluirContaCredencial>(
     context,
@@ -99,6 +100,7 @@ Future<ExcluirContaCredencial?> showExcluirContaSheet(
           dio: dio,
           papel: papel,
           avisoAssinatura: avisoAssinatura,
+          social: social,
         ),
   );
 }
@@ -108,11 +110,15 @@ class _ExcluirContaSheet extends StatefulWidget {
     required this.dio,
     required this.papel,
     required this.avisoAssinatura,
+    required this.social,
   });
 
   final Dio dio;
   final ExcluirContaPapel papel;
   final bool avisoAssinatura;
+
+  /// Último login foi com Google ou Apple: não há senha, só o código.
+  final bool social;
 
   @override
   State<_ExcluirContaSheet> createState() => _ExcluirContaSheetState();
@@ -357,6 +363,12 @@ class _ExcluirContaSheetState extends State<_ExcluirContaSheet> {
               onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
               decoration: _deco(context, l10n.excluirContaCodigoLabel),
             )
+          else if (widget.social)
+            Text(
+              l10n.excluirContaSocialDica,
+              key: const ValueKey('excluir-conta-social'),
+              style: FocuxHubTypography.bodyMuted(color: chrome.ink),
+            )
           else
             TextField(
               controller: _senha,
@@ -373,7 +385,7 @@ class _ExcluirContaSheetState extends State<_ExcluirContaSheet> {
             decoration: _deco(context, l10n.excluirContaConfirmLabel),
           ),
           const SizedBox(height: TokensStrip.s3),
-          if (!_usarCodigo)
+          if (!_usarCodigo && !widget.social)
             Padding(
               padding: const EdgeInsets.only(bottom: TokensStrip.s2),
               child: Text(

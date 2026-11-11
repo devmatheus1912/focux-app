@@ -346,7 +346,8 @@ class _BrandField extends StatelessWidget {
                   final n = controller.text.length;
                   final passou = n > maxLength!;
                   final aviso = avisoDepoisDe;
-                  final alerta = chrome.isDark ? EagleTokens.warnDark : EagleTokens.warn;
+                  final alerta =
+                      chrome.isDark ? EagleTokens.warnDark : EagleTokens.warn;
                   return Row(
                     children: [
                       if (aviso != null && n > aviso)
@@ -400,3 +401,61 @@ class _PanelTitle extends StatelessWidget {
   }
 }
 
+/// Faixa presa no topo quando a prévia sai da tela: cores e estilo à vista,
+/// toque volta para a prévia.
+class _FaixaDaPrevia extends StatelessWidget {
+  const _FaixaDaPrevia({
+    required this.palette,
+    required this.estilo,
+    required this.onTap,
+  });
+
+  final CuratedBrandPalette palette;
+  final String estilo;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    Widget bolinha(Color cor) => Container(
+      width: 18,
+      height: 18,
+      decoration: BoxDecoration(
+        color: cor,
+        shape: BoxShape.circle,
+        border: Border.all(color: chrome.ink.withValues(alpha: 0.12)),
+      ),
+    );
+    return Semantics(
+      button: true,
+      label: 'Prévia: $estilo. Toque para ver.',
+      excludeSemantics: true,
+      child: ShellSurface(
+        accent: palette.chromeFor(dark: chrome.isDark),
+        blur: true,
+        onTap: onTap,
+        padding: const EdgeInsets.symmetric(
+          horizontal: TokensStrip.s3,
+          vertical: TokensStrip.s2,
+        ),
+        child: Row(
+          children: [
+            bolinha(palette.primary),
+            const SizedBox(width: 4),
+            bolinha(palette.secondary),
+            const SizedBox(width: TokensStrip.s2),
+            Expanded(
+              child: Text(
+                'Prévia · $estilo',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: FocuxHubTypography.rotulo(color: chrome.ink),
+              ),
+            ),
+            Icon(FxIcons.chevronCima, size: 18, color: chrome.mute),
+          ],
+        ),
+      ),
+    );
+  }
+}

@@ -258,15 +258,14 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
         props: {'mode': _mode, 'alunoId': _selectedAlunoId},
       );
       final repo = IaRepository(ref.read(apiClientProvider));
-      // Gera e guarda (só checa a cota); a próxima ação é o que consome o uso.
+      // Gera, guarda e já traz o motivo (o servidor faz a próxima ação, que
+      // consome o uso): uma análise = um uso.
       final analise = await repo.criarAnalise(
         alunoId: _selectedAlunoId!,
         mode: _mode,
       );
+      _proximaAcao = null;
       ref.invalidate(proximaAcaoProvider(_selectedAlunoId!));
-      _proximaAcao = await ref.read(
-        proximaAcaoProvider(_selectedAlunoId!).future,
-      );
       ref.invalidate(iaCopilotoHomeProvider);
       ref.invalidate(copilotoAnalisesRecentesProvider);
       stopwatch.stop();

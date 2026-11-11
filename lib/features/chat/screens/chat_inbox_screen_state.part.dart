@@ -529,7 +529,7 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
       ProductEvents.chatThreadOpened,
       props: {'feature': 'chat', 'aluno_id': alunoId},
     );
-    context.push('/alunos/$alunoId/chat', extra: extra);
+    context.push('/chat/inbox/conversa/$alunoId', extra: extra);
   }
 
   void _showAlunoPicker() {
