@@ -37,6 +37,9 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
+          # Mesma versão do iOS e da máquina de dev: o stable novo marca
+          # package:flutter/material.dart como deprecated (material_ui).
+          flutter-version: '3.47.x'
           channel: stable
           cache: true
 
