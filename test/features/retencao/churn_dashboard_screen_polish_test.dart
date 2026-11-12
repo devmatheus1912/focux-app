@@ -39,7 +39,9 @@ void main() {
     // O histórico de retomada saiu do "⋯": mora em Automações.
     expect(screen, isNot(contains("'/winback'")));
     expect(screen, contains("'/financeiro?aba=mensalidades&filtro=atrasadas'"));
-    expect(screen, contains('retencaoEntradaCobranca'));
+    // O "⋯" de um item só saiu; a linha das atrasadas fica em Quem acompanhar.
+    expect(screen, isNot(contains('_maisAcoes')));
+    expect(screen, contains('_LinhaAtrasadas'));
     // O que saiu desta tela
     expect(screen, isNot(contains('showRetencaoCatalogSheet')));
     expect(screen, isNot(contains('scoreAtual')));

@@ -49,6 +49,9 @@ import '../utils/landing_studio_guidance.dart';
 import 'landing_preview_screen.dart';
 import '../../../core/theme/fx_icons.dart';
 
+import '../../leads/providers/leads_provider.dart';
+import '../../leads/utils/interessados_display.dart';
+
 part 'landing_editor_screen_actions.part.dart';
 part 'landing_studio_screen_entrevista.part.dart';
 part 'landing_studio_screen_revisao.part.dart';
@@ -191,7 +194,7 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
           child: FxShellScaffold(
             useMesh: true,
             appBar: FxShellAppBar(
-              title: 'Landing page',
+              title: 'Sua página',
               subtitle: _appBarSubtitle,
               onBack: _onBack,
               actions: [
@@ -211,8 +214,8 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
                     );
                     showFxHelpSheet(
                       context,
-                      title: 'Landing page',
-                      subtitle: 'Página pública que captura leads.',
+                      title: 'Sua página',
+                      subtitle: 'A página que você compartilha; quem se interessa vai para Interessados.',
                       tips: const [
                         FxHelpTip(
                           'Entrevista rápida',

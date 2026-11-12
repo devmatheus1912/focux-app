@@ -8,7 +8,6 @@ import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
-import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
@@ -21,7 +20,7 @@ import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../../core/widgets/fx_toggle_chip.dart';
+import '../../../core/widgets/fx_grouped_action_sheet.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../l10n/app_localizations.dart';
@@ -32,13 +31,17 @@ import '../../moderacao/widgets/denunciar_sheet.dart';
 import '../data/feed_repository.dart';
 import '../utils/feed_display.dart';
 import '../widgets/feed_comments_sheet.dart';
+import '../widgets/feed_lista.dart';
 import '../widgets/feed_post_card.dart';
 import '../../../core/theme/fx_icons.dart';
 
 part 'feed_aluno_screen_state.part.dart';
 
 class FeedAlunoScreen extends ConsumerStatefulWidget {
-  const FeedAlunoScreen({super.key});
+  const FeedAlunoScreen({super.key, this.postId});
+
+  /// Post do aviso (push): aparece primeiro.
+  final int? postId;
 
   @override
   ConsumerState<FeedAlunoScreen> createState() => _FeedAlunoScreenState();

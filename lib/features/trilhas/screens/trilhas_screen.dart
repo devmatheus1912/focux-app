@@ -118,7 +118,10 @@ class _TrilhasScreenState extends ConsumerState<TrilhasScreen> {
             ),
           );
       if (!mounted) return;
-      FeedbackHelper.showSuccess(context, 'Trilha criada. $_primeiroNome recebe um aviso.');
+      FeedbackHelper.showSuccess(
+        context,
+        'Trilha criada. $_primeiroNome recebe um aviso.',
+      );
       await _refresh();
     } catch (e) {
       if (mounted) FeedbackHelper.showError(context, friendlyError(e));
@@ -202,7 +205,7 @@ class _TrilhasScreenState extends ConsumerState<TrilhasScreen> {
           useMesh: true,
           appBar: FxShellAppBar(
             title: 'Trilhas',
-            subtitle: [_primeiroNome, freshness].join(' · '),
+            subtitle: FxHubFreshness.joinCount(_primeiroNome, freshness),
             onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
             actions: [
               FxHelpIconButton(
@@ -238,6 +241,8 @@ class _TrilhasScreenState extends ConsumerState<TrilhasScreen> {
                     );
                     return FxContentWidthLimiter(
                       child: TrilhasLista(
+                        semAndamento:
+                            'Nenhuma trilha em andamento. Comece outra com Nova trilha.',
                         lista: merged,
                         vazio: FxEmptyState(
                           icon: FxIcons.rota,
@@ -282,6 +287,7 @@ class _TrilhasScreenState extends ConsumerState<TrilhasScreen> {
 class TrilhasLista extends StatelessWidget {
   const TrilhasLista({
     super.key,
+    this.semAndamento = 'Nenhuma trilha em andamento agora.',
     required this.lista,
     required this.vazio,
     required this.onRefresh,
@@ -296,6 +302,9 @@ class TrilhasLista extends StatelessWidget {
   final ValueChanged<TrilhaModel> onAbrir;
   final bool loadingMore;
   final VoidCallback? onCarregarMais;
+
+  /// Linha quieta quando não há trilha em andamento (só concluídas).
+  final String semAndamento;
 
   @override
   Widget build(BuildContext context) {
@@ -316,13 +325,18 @@ class TrilhasLista extends StatelessWidget {
             vazio
           else ...[
             if (grupos.andamento.isNotEmpty) ...[
-              Text(
-                'Em andamento',
-                style: FocuxHubTypography.chip(chrome.mute),
-              ),
+              Text('Em andamento', style: FocuxHubTypography.chip(chrome.mute)),
               const SizedBox(height: TokensStrip.s2),
               for (final t in grupos.andamento)
                 TrilhaCartao(trilha: t, onTap: () => onAbrir(t)),
+            ],
+            // Só concluídas: diz por que só aparece o histórico.
+            if (grupos.andamento.isEmpty) ...[
+              Text(
+                semAndamento,
+                style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+              ),
+              const SizedBox(height: TokensStrip.s3),
             ],
             if (grupos.concluidas.isNotEmpty)
               _Concluidas(

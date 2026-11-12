@@ -14,6 +14,10 @@ class Desafio {
   final bool ativo;
   final List<DesafioLeaderboardEntry>? ranking;
 
+  /// Líder e a contagem dele (lista); nulos sem contagem.
+  final String? liderNome;
+  final int? liderContagem;
+
   const Desafio({
     required this.id,
     required this.titulo,
@@ -25,6 +29,8 @@ class Desafio {
     this.grupoAulaId,
     this.ativo = true,
     this.ranking,
+    this.liderNome,
+    this.liderContagem,
   });
 
   factory Desafio.fromJson(Map<String, dynamic> j) => Desafio(
@@ -32,12 +38,14 @@ class Desafio {
     titulo: j['titulo'] as String? ?? '',
     descricao: j['descricao'] as String?,
     tipo: j['tipo'] as String? ?? 'HABITOS',
-    metaPontos: (j['metaPontos'] as num?)?.toInt() ?? 100,
+    metaPontos: (j['metaPontos'] as num?)?.toInt() ?? 12,
     inicio: _date(j['inicio']),
     fim: _date(j['fim']),
     grupoAulaId: (j['grupoAulaId'] as num?)?.toInt(),
     ativo: j['ativo'] as bool? ?? true,
     ranking: _ranking(j['ranking']),
+    liderNome: j['liderNome'] as String?,
+    liderContagem: (j['liderContagem'] as num?)?.toInt(),
   );
 }
 
@@ -70,9 +78,7 @@ List<DesafioLeaderboardEntry>? _ranking(dynamic raw) {
   return raw
       .whereType<Map>()
       .map(
-        (e) => DesafioLeaderboardEntry.fromJson(
-          Map<String, dynamic>.from(e),
-        ),
+        (e) => DesafioLeaderboardEntry.fromJson(Map<String, dynamic>.from(e)),
       )
       .toList();
 }
@@ -104,7 +110,9 @@ class DesafioRepository {
     );
     final data = r.data;
     if (data is! Map) {
-      throw FormatException('GET /api/desafios devolve Pagina, não lista crua.');
+      throw FormatException(
+        'GET /api/desafios devolve Pagina, não lista crua.',
+      );
     }
     return Pagina.fromJson(
       Map<String, dynamic>.from(data),
@@ -130,7 +138,9 @@ class DesafioRepository {
     );
     final data = r.data;
     if (data is! Map) {
-      throw FormatException('GET /api/desafios/me devolve Pagina, não lista crua.');
+      throw FormatException(
+        'GET /api/desafios/me devolve Pagina, não lista crua.',
+      );
     }
     return Pagina.fromJson(
       Map<String, dynamic>.from(data),
@@ -141,8 +151,8 @@ class DesafioRepository {
   Future<Desafio> criar({
     required String titulo,
     String? descricao,
-    String tipo = 'HABITOS',
-    int metaPontos = 100,
+    String tipo = 'TREINOS',
+    int metaPontos = 12,
     DateTime? inicio,
     DateTime? fim,
   }) async {
@@ -178,9 +188,7 @@ class DesafioRepository {
     return (r.data as List)
         .whereType<Map>()
         .map(
-          (e) => DesafioLeaderboardEntry.fromJson(
-            Map<String, dynamic>.from(e),
-          ),
+          (e) => DesafioLeaderboardEntry.fromJson(Map<String, dynamic>.from(e)),
         )
         .toList();
   }

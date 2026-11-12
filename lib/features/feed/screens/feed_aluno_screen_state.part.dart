@@ -117,7 +117,7 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
       );
       if (!mounted) return;
       setState(() {
-        _posts = pagina.content;
+        _posts = feedComDestaque(pagina.content, widget.postId);
         _hasMore = pagina.hasNext;
         _nextCursor = pagina.nextCursor;
         for (final p in pagina.content) {
@@ -169,11 +169,19 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
     }
   }
 
+  /// Coração e número mudam na hora; o servidor confirma o total depois.
   Future<void> _curtir(int postId) async {
     final post = _posts.where((p) => p.id == postId).firstOrNull;
     final antes = _curtidosLocais[postId] ?? post?.curtidoPorMim ?? false;
+    final totalAntes = _curtidasLocais[postId] ?? post?.totalCurtidas ?? 0;
     HapticFeedback.lightImpact();
-    setState(() => _curtidosLocais[postId] = !antes);
+    setState(() {
+      _curtidosLocais[postId] = !antes;
+      _curtidasLocais[postId] = (totalAntes + (antes ? -1 : 1)).clamp(
+        0,
+        1 << 30,
+      );
+    });
     try {
       final novoTotal = await FeedRepository(
         ref.read(apiClientProvider),
@@ -183,7 +191,10 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _curtidosLocais[postId] = antes);
+        setState(() {
+          _curtidosLocais[postId] = antes;
+          _curtidasLocais[postId] = totalAntes;
+        });
         FeedbackHelper.showError(context, friendlyError(e));
       }
     }
@@ -193,20 +204,60 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
     final aluno = ref.read(alunoMeProvider).value;
     showFxHomeSheet<void>(
       context,
-      builder: (ctx) => FeedCommentsSheet(
-        postId: postId,
-        repo: FeedRepository(ref.read(apiClientProvider)),
-        currentAlunoId: aluno?.id,
-        currentAlunoFotoUrl: aluno?.fotoUrl,
-        onComentou: (novoTotal) =>
-            setState(() => _comentariosLocais[postId] = novoTotal),
-      ),
+      builder:
+          (ctx) => FeedCommentsSheet(
+            postId: postId,
+            repo: FeedRepository(ref.read(apiClientProvider)),
+            currentAlunoId: aluno?.id,
+            currentAlunoFotoUrl: aluno?.fotoUrl,
+            onComentou:
+                (novoTotal) =>
+                    setState(() => _comentariosLocais[postId] = novoTotal),
+          ),
     );
   }
 
+  bool get _filtrando =>
+      _query.trim().isNotEmpty || _chip != FeedListChip.todos;
+
+  /// O post do aviso vem primeiro, antes do bloco Fixado.
+  bool get _comDestaque =>
+      widget.postId != null &&
+      _posts.isNotEmpty &&
+      _posts.first.id == widget.postId;
+
+  Future<void> _maisOpcoes(FeedPost p) async {
+    final l10n = S.of(context);
+    final acao = await showFxGroupedActionSheet<String>(
+      context,
+      titulo: 'Publicação',
+      grupos: [
+        FxActionGroup<String>(null, [
+          FxActionItem(
+            valor: 'denunciar',
+            rotulo: l10n.moderacaoDenunciarPost,
+            icone: FxIcons.meta,
+          ),
+          FxActionItem(
+            valor: 'bloquear',
+            rotulo: l10n.feedBloquearAutor,
+            icone: FxIcons.bloquear,
+            perigo: true,
+          ),
+        ]),
+      ],
+    );
+    if (!mounted) return;
+    switch (acao) {
+      case 'denunciar':
+        await _denunciarPost(p);
+      case 'bloquear':
+        await _bloquearAutor();
+    }
+  }
+
   Widget _buildBody(Color primary) {
-    final searching =
-        _query.trim().isNotEmpty || _chip != FeedListChip.todos;
+    final searching = _filtrando;
     if (_posts.isEmpty) {
       return RefreshIndicator(
         color: primary,
@@ -223,18 +274,25 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
                   child: Center(
                     child: FxEmptyState(
                       icon: searching ? FxIcons.buscar : FxIcons.feed,
-                      title: searching
-                          ? 'Nada encontrado'
-                          : 'Nenhuma publicação ainda',
-                      subtitle: searching
-                          ? 'Ajuste a busca ou o filtro para achar outra publicação.'
-                          : 'Seu personal ainda não publicou.',
-                      action: searching
-                          ? FxEmptyAction(label: 'Limpar filtros', secondary: true, onTap: _clearFilters)
-                          : FxEmptyAction(
-                              label: 'Voltar ao início',
-                              onTap: _leave,
-                            ),
+                      title:
+                          searching
+                              ? 'Nada encontrado'
+                              : 'Nenhuma publicação ainda',
+                      subtitle:
+                          searching
+                              ? 'Ajuste a busca ou o filtro para achar outra publicação.'
+                              : 'Quando seu personal publicar um aviso, uma dica ou uma foto, aparece aqui.',
+                      action:
+                          searching
+                              ? FxEmptyAction(
+                                label: 'Limpar filtros',
+                                secondary: true,
+                                onTap: _clearFilters,
+                              )
+                              : FxEmptyAction(
+                                label: 'Voltar ao início',
+                                onTap: _leave,
+                              ),
                     ),
                   ),
                 ),
@@ -244,28 +302,15 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
         ),
       );
     }
-    return RefreshIndicator(
-      color: primary,
+    return FeedLista(
+      posts: _posts,
+      filtrando: searching || _comDestaque,
       onRefresh: _load,
-      child: ListView.builder(
-        physics: const AlwaysScrollableScrollPhysics(),
-        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        padding: EdgeInsets.fromLTRB(
-          FxSettingsLayout.pageInset,
-          TokensStrip.s2,
-          FxSettingsLayout.pageInset,
-          TokensStrip.s4 + MediaQuery.viewInsetsOf(context).bottom,
-        ),
-        itemCount: _posts.length + (_hasMore ? 1 : 0),
-        itemBuilder: (_, i) {
-          if (i >= _posts.length) {
-            return FxSatelliteListTile(
-              title: _loadingMore ? 'Carregando…' : 'Carregar mais',
-              onTap: _loadingMore ? null : _carregarMais,
-            );
-          }
-          final p = _posts[i];
-          return FeedPostCard(
+      hasMore: _hasMore,
+      loadingMore: _loadingMore,
+      onCarregarMais: _carregarMais,
+      cartao:
+          (p, i) => FeedPostCard(
             post: p,
             index: i,
             primary: primary,
@@ -274,11 +319,8 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
             onCurtir: () => _curtir(p.id),
             curtido: _curtidosLocais[p.id] ?? p.curtidoPorMim,
             onComentar: () => _abrirComentarios(p.id),
-            onDenunciar: () => _denunciarPost(p),
-            onBloquearAutor: _bloquearAutor,
-          );
-        },
-      ),
+            onMais: () => _maisOpcoes(p),
+          ),
     );
   }
 
@@ -287,7 +329,6 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
     final chrome = ShellChrome.of(context);
     final isDark = chrome.isDark;
     final primary = Theme.of(context).colorScheme.primary;
-    final mute = chrome.mute;
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
     final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
     return fxScreenA11yScope(
@@ -316,141 +357,68 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
               actions: [
                 FxHelpIconButton(
                   tooltip: 'Como usar o feed',
-                  onTap: () => showFxHelpSheet(
-                    context,
-                    title: 'Feed',
-                    subtitle: 'Novidades que seu personal publica para você.',
-                    tips: const [
-                      FxHelpTip(
-                        'Curtir e comentar',
-                        'Toque em Curtir ou Comentários em qualquer publicação.',
+                  onTap:
+                      () => showFxHelpSheet(
+                        context,
+                        title: 'Feed',
+                        subtitle:
+                            'Novidades que seu personal publica para você.',
+                        tips: const [
+                          FxHelpTip(
+                            'Curtir e comentar',
+                            'Toque no coração para curtir e no balão para comentar.',
+                          ),
+                          FxHelpTip('Vídeo', 'O vídeo toca no próprio post.'),
+                          FxHelpTip(
+                            'Fixado',
+                            'O que seu personal fixou fica no topo.',
+                          ),
+                        ],
                       ),
-                      FxHelpTip(
-                        'Vídeo',
-                        'Toque no preview para abrir o vídeo em tela cheia.',
-                      ),
-                      FxHelpTip(
-                        'Filtros',
-                        'Busque por texto ou filtre por tipo e fixados.',
-                      ),
-                    ],
-                  ),
                 ),
               ],
             ),
-            body: _loading
-                ? const Padding(
-                    padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-                    child: SkeletonList(count: 4),
-                  )
-                : _erro != null
-                ? FxErrorState(
-                    chromeOnDark: isDark,
-                    primary: primary,
-                    title: FocuxMicrocopy.naoFoiPossivelCarregar,
-                    message: _erro!,
-                    onRetry: _load,
-                  )
-                : Column(
-                    children: [
-                      if (feedMostraFiltros(
-                        total: _posts.length,
-                        query: _query,
-                        filtrando: _chip != FeedListChip.todos,
-                      )) ...[
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(
-                          TokensStrip.s4,
-                          TokensStrip.s2,
-                          TokensStrip.s4,
-                          TokensStrip.s2,
-                        ),
-                        child: DecoratedBox(
-                          decoration: fxStripCardDecoration(
-                            context,
-                            accent: primary,
-                            radius: TokensStrip.rCard,
-                            glowStrength: 0.03,
-                          ),
-                          child: TextField(
+            body:
+                _loading
+                    ? const Padding(
+                      padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                      child: SkeletonList(count: 4),
+                    )
+                    : _erro != null
+                    ? FxErrorState(
+                      chromeOnDark: isDark,
+                      primary: primary,
+                      title: FocuxMicrocopy.naoFoiPossivelCarregar,
+                      message: _erro!,
+                      onRetry: _load,
+                    )
+                    : Column(
+                      children: [
+                        if (feedMostraFiltros(
+                          total: _posts.length,
+                          query: _query,
+                          filtrando: _chip != FeedListChip.todos,
+                        )) ...[
+                          FeedFiltros(
                             controller: _searchController,
                             focusNode: _searchFocus,
-                            onChanged: _onQueryChanged,
-                            onTapOutside: (_) =>
-                                FxKeyboardDismissScope.dismiss(),
-                            textInputAction: TextInputAction.search,
-                            decoration: InputDecoration(
-                              filled: false,
-                              isDense: true,
-                              hintText: 'Buscar publicação',
-                              border: InputBorder.none,
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 12,
-                              ),
-                              prefixIcon: Icon(
-                                FxIcons.buscar,
-                                color: primary,
-                                size: 20,
-                              ),
-                              suffixIcon: _query.trim().isEmpty
-                                  ? null
-                                  : IconButton(
-                                      tooltip: 'Limpar busca',
-                                      onPressed: _clearQuery,
-                                      icon: Icon(
-                                        FxIcons.fechar,
-                                        color: mute,
-                                        size: 18,
-                                      ),
-                                    ),
-                            ),
+                            query: _query,
+                            chip: _chip,
+                            onQuery: _onQueryChanged,
+                            onLimparBusca: _clearQuery,
+                            onChip: (c) {
+                              setState(() => _chip = c);
+                              _load();
+                            },
+                          ),
+                        ],
+                        Expanded(
+                          child: FxContentWidthLimiter(
+                            child: _buildBody(primary),
                           ),
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(
-                          TokensStrip.s4,
-                          0,
-                          TokensStrip.s4,
-                          TokensStrip.s2,
-                        ),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
-                              children: [
-                                for (final chip in FeedListChip.values)
-                                  Padding(
-                                    padding: const EdgeInsets.only(
-                                      right: TokensStrip.s2,
-                                    ),
-                                    child: FxToggleChip(
-                                      label: feedListChipLabel(chip),
-                                      selected: _chip == chip,
-                                      isDark: isDark,
-                                      filledWhenSelected: true,
-                                      onTap: () {
-                                        if (_chip == chip) return;
-                                        setState(() => _chip = chip);
-                                        _load();
-                                      },
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
                       ],
-                      Expanded(
-                        child: FxContentWidthLimiter(
-                          child: _buildBody(primary),
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
           ),
         ),
       ),

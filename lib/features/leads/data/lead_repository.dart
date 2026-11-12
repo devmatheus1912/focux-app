@@ -17,6 +17,9 @@ class Lead {
   final String? email;
   final int? alunoId;
 
+  /// Só no detalhe: e-mails automáticos de quem veio pela página.
+  final List<LeadEmailAutomatico> emailsAutomaticos;
+
   Lead({
     required this.id,
     required this.nome,
@@ -30,6 +33,7 @@ class Lead {
     this.proximoContato,
     this.email,
     this.alunoId,
+    this.emailsAutomaticos = const [],
   });
 
   factory Lead.fromJson(Map<String, dynamic> j) => Lead(
@@ -45,12 +49,27 @@ class Lead {
     proximoContato: _dateOnly(j['proximoContato']),
     email: j['email'] as String?,
     alunoId: (j['alunoId'] as num?)?.toInt(),
+    emailsAutomaticos: [
+      for (final e in (j['emailsAutomaticos'] as List?) ?? const [])
+        if (e is Map)
+          LeadEmailAutomatico(
+            etapa: e['etapa'] as String? ?? '',
+            enviadoEm: DateTime.tryParse('${e['enviadoEm'] ?? ''}'),
+          ),
+    ],
   );
 
   static String? _dateOnly(Object? raw) {
     if (raw is! String) return null;
     return raw.length >= 10 ? raw.substring(0, 10) : raw;
   }
+}
+
+class LeadEmailAutomatico {
+  const LeadEmailAutomatico({required this.etapa, this.enviadoEm});
+
+  final String etapa;
+  final DateTime? enviadoEm;
 }
 
 class LeadInteracao {

@@ -9,38 +9,40 @@ void main() {
     );
     expect(screen, contains('fxScreenA11yScope'));
     expect(screen, contains('FxShellScaffold'));
-    expect(screen, contains('FxHubHeader'));
     expect(screen, contains('FxStripCard'));
-    expect(screen, contains('OperationalMetricTile'));
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('safePopOrGo'));
     expect(screen, contains('PopScope'));
-    expect(screen, contains('FxActionChip'));
     expect(screen, contains('RefreshIndicator'));
-    expect(screen, isNot(contains('TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom')));
+    expect(
+      screen,
+      isNot(
+        contains('TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom'),
+      ),
+    );
     expect(screen, contains('FeatureGate'));
     expect(screen, contains('comunidadeGrupos'));
-    expect(screen, contains('desafioStickyEncerrarLabel'));
     expect(screen, contains('desafioStickyAlunoLabel'));
     expect(screen, contains('participar'));
     expect(screen, contains('encerrar'));
     expect(screen, contains('leaderboard'));
     expect(screen, contains('found.ranking'));
-    expect(screen, contains("'/alunos/\${first.alunoId}'"));
-    expect(screen, contains('Lista'));
-    expect(screen, contains("label: 'Hoje'"));
-    expect(screen, contains("'/dashboard/aluno'"));
     expect(screen, isNot(contains('freshness: freshness')));
     expect(screen, contains('desafio.ativo'));
-    expect(screen, contains('AlunoSegmentedChoice'));
     expect(screen, contains('alunoMeProvider'));
-    expect(screen, contains('desafioMeuLugarValue'));
     expect(screen, contains('marca: true'));
     expect(screen, isNot(contains('emphasize: true')));
     expect(screen, contains('desafioStickyAlunoPath'));
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, isNot(contains('onTap: () {}')));
+    // Redesign 11/11: ranking direto com barra; encerrar no ⋯.
+    expect(screen, contains('DesafioLinhaRanking'));
+    expect(screen, contains('desafioMeuResumo'));
+    expect(screen, contains('showFxGroupedActionSheet'));
+    expect(screen, isNot(contains('OperationalMetricTile')));
+    expect(screen, isNot(contains('AlunoSegmentedChoice')));
+    expect(screen, isNot(contains('FxActionChip')));
   });
 }

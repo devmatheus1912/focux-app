@@ -48,11 +48,12 @@ class PacotesHomePerfil {
 
   const PacotesHomePerfil({this.slug, this.nome, this.paginaNoAr = true});
 
-  factory PacotesHomePerfil.fromJson(Map<String, dynamic> j) => PacotesHomePerfil(
-    slug: j['slug'] as String?,
-    nome: j['nome'] as String?,
-    paginaNoAr: j['paginaNoAr'] as bool? ?? true,
-  );
+  factory PacotesHomePerfil.fromJson(Map<String, dynamic> j) =>
+      PacotesHomePerfil(
+        slug: j['slug'] as String?,
+        nome: j['nome'] as String?,
+        paginaNoAr: j['paginaNoAr'] as bool? ?? true,
+      );
 }
 
 class PacotesHomeBundle {
@@ -111,7 +112,9 @@ class PacoteRepository {
     );
     final data = r.data;
     if (data is! Map) {
-      throw const FormatException('GET /api/pacotes devolve Pagina, não lista crua.');
+      throw const FormatException(
+        'GET /api/pacotes devolve Pagina, não lista crua.',
+      );
     }
     return Pagina.fromJson(
       Map<String, dynamic>.from(data),
@@ -159,6 +162,32 @@ class PacoteRepository {
         'incluiNutri': false,
         'incluiConsultoria': incluiConsultoria,
         'destaque': destaque,
+      },
+    );
+    return Pacote.fromJson(r.data as Map<String, dynamic>);
+  }
+
+  /// PUT parcial: só os campos enviados mudam (ex.: só `destaque`).
+  Future<Pacote> atualizar(
+    int id, {
+    String? titulo,
+    String? descricao,
+    Object? valor,
+    int? duracaoMeses,
+    bool? incluiTreino,
+    bool? incluiConsultoria,
+    bool? destaque,
+  }) async {
+    final r = await _dio.put(
+      '/api/pacotes/$id',
+      data: {
+        if (titulo != null) 'titulo': titulo,
+        if (descricao != null) 'descricao': descricao,
+        if (valor != null) 'valor': FxMoney.parse(valor).wire,
+        if (duracaoMeses != null) 'duracaoMeses': duracaoMeses,
+        if (incluiTreino != null) 'incluiTreino': incluiTreino,
+        if (incluiConsultoria != null) 'incluiConsultoria': incluiConsultoria,
+        if (destaque != null) 'destaque': destaque,
       },
     );
     return Pacote.fromJson(r.data as Map<String, dynamic>);

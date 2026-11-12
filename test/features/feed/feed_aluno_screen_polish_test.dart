@@ -54,9 +54,10 @@ void main() {
     expect(screen, contains('Voltar ao início'));
     expect(screen, contains('FeedListChip'));
     expect(screen, contains('listarAlunoPagina'));
-    expect(screen, contains('FxToggleChip'));
+    expect(screen, contains('FeedFiltros'));
+    expect(screen, contains('feedComDestaque'));
+    expect(screen, contains('showFxGroupedActionSheet'));
     expect(screen, contains('FeedPostCard'));
-    expect(screen, contains('fxStripCardDecoration'));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('FxKeyboardDismissScope'));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));

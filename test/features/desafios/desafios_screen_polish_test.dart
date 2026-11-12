@@ -7,7 +7,10 @@ void main() {
     final screen = readScreenSourceBundle(
       'lib/features/desafios/screens/desafios_screen.dart',
     );
-    expect(screen, anyOf(contains('fxScreenA11yScope'), contains('Semantics(')));
+    expect(
+      screen,
+      anyOf(contains('fxScreenA11yScope'), contains('Semantics(')),
+    );
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, contains('FxShellScaffold'));
     expect(screen, contains('FxContentWidthLimiter'));
@@ -24,13 +27,11 @@ void main() {
     expect(screen, contains('FxKeyboardDismissScope.dismiss'));
     expect(screen, contains('showFxFormSheet'));
     expect(screen, contains('desafioDetailPath'));
-    expect(screen, contains('showFxInsetPickerSheet'));
     expect(screen, contains('safePopOrGo'));
     expect(screen, contains('constrainWidth: false'));
     expect(screen, contains('FxToggleChip'));
     expect(screen, contains('ListView.builder'));
     expect(screen, contains('FxSatelliteListTile'));
-    expect(screen, contains('DashboardSectionHeader'));
     expect(screen, contains('listarPagina'));
     expect(screen, contains('Carregar mais'));
     expect(screen, isNot(contains('FxSettingsGroup')));
@@ -44,5 +45,11 @@ void main() {
     expect(screen, isNot(contains('FloatingActionButton')));
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, isNot(contains(r'showError(context, $e)')));
+    // Redesign 11/11: folha com chips e contador; linha com o líder.
+    expect(screen, contains('FxContador'));
+    expect(screen, contains('DesafioLinha('));
+    expect(screen, contains('desafioMostraFiltros'));
+    expect(screen, contains('aoConfirmar'));
+    expect(screen, isNot(contains('pts')));
   });
 }

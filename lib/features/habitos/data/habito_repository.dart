@@ -141,11 +141,15 @@ class ComplianceItem {
   final int checksSemana;
   final int compliancePct;
 
+  /// Soma das metas semanais dos hábitos do aluno (0 = sem hábito).
+  final int metaSemana;
+
   ComplianceItem({
     required this.alunoId,
     required this.alunoNome,
     required this.checksSemana,
     required this.compliancePct,
+    this.metaSemana = 0,
   });
 
   factory ComplianceItem.fromJson(Map<String, dynamic> j) => ComplianceItem(
@@ -153,7 +157,34 @@ class ComplianceItem {
     alunoNome: j['alunoNome'] as String? ?? '',
     checksSemana: (j['checksSemana'] as num?)?.toInt() ?? 0,
     compliancePct: (j['compliancePct'] as num?)?.toInt() ?? 0,
+    metaSemana: (j['metaSemana'] as num?)?.toInt() ?? 0,
   );
+}
+
+/// Um aluno no detalhe do hábito: "3 de 5" nesta semana.
+class HabitoSemanaAluno {
+  const HabitoSemanaAluno({
+    required this.alunoId,
+    required this.nome,
+    required this.feitos,
+    required this.meta,
+    this.fotoUrl,
+  });
+
+  final int alunoId;
+  final String nome;
+  final String? fotoUrl;
+  final int feitos;
+  final int meta;
+
+  factory HabitoSemanaAluno.fromJson(Map<String, dynamic> j) =>
+      HabitoSemanaAluno(
+        alunoId: (j['alunoId'] as num?)?.toInt() ?? 0,
+        nome: j['nome'] as String? ?? '',
+        fotoUrl: j['fotoUrl'] as String?,
+        feitos: (j['feitos'] as num?)?.toInt() ?? 0,
+        meta: (j['meta'] as num?)?.toInt() ?? 0,
+      );
 }
 
 /// BFF `GET /api/habitos/home` — lista + compliance + planoFeatures.
@@ -256,6 +287,15 @@ class HabitoRepository {
     throwIfQueuedOffline(await _dio.delete('/api/habitos/$id'));
   }
 
+  /// Personal: cada aluno do hábito com feitos e meta desta semana.
+  Future<List<HabitoSemanaAluno>> semana(int id) async {
+    final r = await _dio.get('/api/habitos/$id/semana');
+    return [
+      for (final e in (r.data as List? ?? const []))
+        if (e is Map) HabitoSemanaAluno.fromJson(Map<String, dynamic>.from(e)),
+    ];
+  }
+
   Future<Habito> buscar(int id) async {
     final r = await _dio.get('/api/habitos/$id');
     return Habito.fromJson(r.data as Map<String, dynamic>);
@@ -276,7 +316,9 @@ class HabitoRepository {
     );
     final data = r.data;
     if (data is! Map) {
-      throw FormatException('GET /api/habitos/me devolve Pagina, não lista crua.');
+      throw FormatException(
+        'GET /api/habitos/me devolve Pagina, não lista crua.',
+      );
     }
     return Pagina.fromJson(
       Map<String, dynamic>.from(data),

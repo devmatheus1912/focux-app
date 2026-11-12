@@ -17,6 +17,11 @@ class OfertaUpsell {
   final String tipoGatilho;
   final bool ativo;
 
+  /// Plano da oferta (título e valor vêm dele); nulo = "Outro valor".
+  final int? pacoteId;
+  final int enviadas;
+  final int aceitas;
+
   OfertaUpsell({
     required this.id,
     required this.titulo,
@@ -24,6 +29,9 @@ class OfertaUpsell {
     required this.valor,
     required this.tipoGatilho,
     this.ativo = true,
+    this.pacoteId,
+    this.enviadas = 0,
+    this.aceitas = 0,
   });
 
   factory OfertaUpsell.fromJson(Map<String, dynamic> j) => OfertaUpsell(
@@ -33,6 +41,37 @@ class OfertaUpsell {
     valor: FxMoney.parse(j['valor']),
     tipoGatilho: j['tipoGatilho'] as String? ?? 'MANUAL',
     ativo: j['ativo'] as bool? ?? true,
+    pacoteId: (j['pacoteId'] as num?)?.toInt(),
+    enviadas: (j['enviadas'] as num?)?.toInt() ?? 0,
+    aceitas: (j['aceitas'] as num?)?.toInt() ?? 0,
+  );
+}
+
+/// Oferta aceita no bloco Vendas ("Julio aceitou · Treino 3 meses").
+class OfertaAceita {
+  const OfertaAceita({
+    required this.alunoOfertaId,
+    required this.alunoId,
+    required this.alunoNome,
+    required this.titulo,
+    required this.valor,
+    this.aceitaEm,
+  });
+
+  final int alunoOfertaId;
+  final int alunoId;
+  final String alunoNome;
+  final String titulo;
+  final FxMoney valor;
+  final DateTime? aceitaEm;
+
+  factory OfertaAceita.fromJson(Map<String, dynamic> j) => OfertaAceita(
+    alunoOfertaId: (j['alunoOfertaId'] as num?)?.toInt() ?? 0,
+    alunoId: (j['alunoId'] as num?)?.toInt() ?? 0,
+    alunoNome: j['alunoNome'] as String? ?? '',
+    titulo: j['titulo'] as String? ?? '',
+    valor: FxMoney.parse(j['valor']),
+    aceitaEm: DateTime.tryParse('${j['aceitaEm'] ?? ''}'),
   );
 }
 
@@ -86,18 +125,31 @@ class UpsellRepository {
         .toList();
   }
 
+  /// Ofertas aceitas, mais recentes primeiro (até 30).
+  Future<List<OfertaAceita>> listarAceitas() async {
+    final r = await _dio.get('/api/upsell/aceitas');
+    return [
+      for (final e in (r.data as List? ?? const []))
+        if (e is Map) OfertaAceita.fromJson(Map<String, dynamic>.from(e)),
+    ];
+  }
+
+  /// Com [pacoteId], título e valor vêm do plano no backend.
   Future<OfertaUpsell> criar({
-    required String titulo,
+    String titulo = '',
     required String descricao,
-    required Object valor,
-    String tipoGatilho = 'TRILHA_CONCLUIDA',
+    Object? valor,
+    String tipoGatilho = 'MANUAL',
+    int? pacoteId,
   }) async {
     final r = await _dio.post(
       '/api/upsell/ofertas',
       data: {
-        'titulo': titulo,
+        if (pacoteId != null) 'pacoteId': pacoteId,
+        if (pacoteId == null) 'titulo': titulo,
         'descricao': descricao,
-        'valor': FxMoney.parse(valor).wire,
+        if (pacoteId == null && valor != null)
+          'valor': FxMoney.parse(valor).wire,
         'tipoGatilho': tipoGatilho,
       },
       options: ApiClient.idempotent('upsell-create'),
@@ -112,10 +164,12 @@ class UpsellRepository {
     Object? valor,
     String? tipoGatilho,
     bool? ativo,
+    int? pacoteId,
   }) async {
     final r = await _dio.patch(
       '/api/upsell/ofertas/$id',
       data: {
+        if (pacoteId != null) 'pacoteId': pacoteId,
         if (titulo != null) 'titulo': titulo,
         if (descricao != null) 'descricao': descricao,
         if (valor != null) 'valor': FxMoney.parse(valor).wire,

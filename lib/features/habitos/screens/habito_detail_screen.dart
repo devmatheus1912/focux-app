@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
+import '../../../core/widgets/fx_barra_progresso.dart';
+import '../../../core/widgets/fx_grouped_action_sheet.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/focux_hub_typography.dart';
@@ -11,21 +16,16 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/feedback_helper.dart';
-import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
-import '../../../core/widgets/fx_hub_header.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_strip_card.dart';
-import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
-import '../../alunos/widgets/aluno_form_choices.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../../../core/widgets/fx_action_chip.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../data/habito_repository.dart';
 import '../utils/habitos_display.dart';
@@ -53,7 +53,7 @@ class _HabitoDetailScreenState extends ConsumerState<HabitoDetailScreen> {
   String? _erro;
   DateTime? _fetchedAt;
   var _busy = false;
-  var _secao = habitoDetalheSecaoResumo;
+  List<HabitoSemanaAluno>? _semana;
 
   String get _parent => widget.forAluno ? '/aluno/habitos' : '/habitos';
 
@@ -66,8 +66,7 @@ class _HabitoDetailScreenState extends ConsumerState<HabitoDetailScreen> {
 
   void _leave() => safePopOrGo(context, _parent);
 
-  HabitoRepository get _repo =>
-      HabitoRepository(ref.read(apiClientProvider));
+  HabitoRepository get _repo => HabitoRepository(ref.read(apiClientProvider));
 
   Future<void> _load() async {
     setState(() {
@@ -76,9 +75,17 @@ class _HabitoDetailScreenState extends ConsumerState<HabitoDetailScreen> {
     });
     try {
       final found = await _repo.buscar(widget.habitoId);
+      // Personal vê cada aluno desta semana; sem a lista, o resto aparece.
+      List<HabitoSemanaAluno>? semana;
+      if (!widget.forAluno) {
+        try {
+          semana = await _repo.semana(widget.habitoId);
+        } catch (_) {}
+      }
       if (!mounted) return;
       setState(() {
         _habito = found;
+        _semana = semana;
         _loading = false;
         _fetchedAt = DateTime.now();
       });
@@ -93,21 +100,23 @@ class _HabitoDetailScreenState extends ConsumerState<HabitoDetailScreen> {
     }
   }
 
-  Future<void> _desativar() async {
+  Future<void> _maisOpcoes() async {
     final habito = _habito;
     if (habito == null || _busy) return;
-    final ok = await showFxConfirmSheet(
+    final acao = await showFxGroupedActionSheet<String>(
       context,
-      title: 'Desativar hábito?',
-      subtitle: habito.titulo,
-      message: habitoDetalheMessage(
-        descricao: habito.descricao,
-        metaSemanal: habito.metaSemanal,
+      titulo: habito.titulo,
+      grupos: const [],
+      destrutiva: const FxActionItem(
+        valor: 'desativar',
+        rotulo: 'Desativar',
+        icone: FxIcons.fechar,
       ),
-      confirmLabel: 'Desativar',
-      destructive: true,
+      confirmarTitulo: 'Desativar o hábito?',
+      confirmarMensagem:
+          'Os alunos param de ver e de marcar. As marcações antigas ficam.',
     );
-    if (!ok || !mounted) return;
+    if (acao != 'desativar' || !mounted) return;
     setState(() => _busy = true);
     try {
       await _repo.desativar(habito.id);
@@ -133,9 +142,10 @@ class _HabitoDetailScreenState extends ConsumerState<HabitoDetailScreen> {
         _habito = habito.copyWith(
           feitoHoje: result.feito,
           streakAtual: result.streak,
-          feitosNaSemana: result.feito
-              ? habito.feitosNaSemana + 1
-              : (habito.feitosNaSemana - 1).clamp(0, 7),
+          feitosNaSemana:
+              result.feito
+                  ? habito.feitosNaSemana + 1
+                  : (habito.feitosNaSemana - 1).clamp(0, 7),
           badgeSemana: result.streak >= 7,
           checks: habitoPatchCheckHoje(habito.checks, result.feito),
         );
@@ -172,64 +182,69 @@ class _HabitoDetailScreenState extends ConsumerState<HabitoDetailScreen> {
             constrainWidth: false,
             appBar: FxShellAppBar(
               title: 'Hábito',
-              subtitle: habito == null
-                  ? null
-                  : FxHubFreshness.fromFetchedAt(_fetchedAt),
+              subtitle:
+                  habito == null
+                      ? null
+                      : FxHubFreshness.fromFetchedAt(_fetchedAt),
               onBack: _leave,
               actions: [
                 FxHelpIconButton(
                   tooltip: 'Como usar este hábito',
-                  onTap: () => showFxHelpSheet(
-                    context,
-                    title: 'Hábito',
-                    subtitle: 'Meta da semana e o que fazer hoje.',
-                    tips: [
-                      const FxHelpTip(
-                        'Como calculamos',
-                        habitoComoCalculamos,
+                  onTap:
+                      () => showFxHelpSheet(
+                        context,
+                        title: 'Hábito',
+                        subtitle:
+                            'Quantas vezes por semana e quem está em dia.',
+                        tips: [
+                          const FxHelpTip('Esta semana', habitoComoCalculamos),
+                          FxHelpTip(
+                            widget.forAluno ? 'Marcar' : 'Desativar',
+                            widget.forAluno
+                                ? 'O botão marca ou desmarca o dia de hoje.'
+                                : 'No ⋯ do topo. Os alunos param de ver.',
+                          ),
+                        ],
                       ),
-                      FxHelpTip(
-                        widget.forAluno ? 'Marcar' : 'Desativar',
-                        widget.forAluno
-                            ? 'O botão marca ou desmarca o check de hoje.'
-                            : 'Desativar tira o hábito da lista ativa.',
-                      ),
-                    ],
-                  ),
                 ),
+                if (!widget.forAluno && (habito?.ativo ?? false))
+                  IconButton(
+                    tooltip: 'Mais opções',
+                    onPressed: _busy ? null : _maisOpcoes,
+                    icon: const Icon(FxIcons.mais),
+                  ),
               ],
             ),
-            body: _loading && habito == null
-                ? const Padding(
-                    padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-                    child: SkeletonList(count: 5),
-                  )
-                : _erro != null && habito == null
-                ? FxErrorState(
-                    chromeOnDark: isDark,
-                    primary: primary,
-                    title: FocuxMicrocopy.naoFoiPossivelCarregar,
-                    message: _erro!,
-                    onRetry: _load,
-                  )
-                : habito == null
-                ? FxEmptyState(
-                    icon: FxIcons.concluido,
-                    title: 'Hábito não encontrado',
-                    subtitle:
-                        'Ele pode ter sido desativado. Volte à lista e escolha outro.',
-                    action: FxEmptyAction(label: 'Voltar', onTap: _leave),
-                  )
-                : _HabitoDetailBody(
-                    habito: habito,
-                    forAluno: widget.forAluno,
-                    busy: _busy,
-                    secao: _secao,
-                    onSecao: (value) => setState(() => _secao = value),
-                    onRefresh: _load,
-                    onLeave: _leave,
-                    onSticky: widget.forAluno ? _toggleHoje : _desativar,
-                  ),
+            body:
+                _loading && habito == null
+                    ? const Padding(
+                      padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                      child: SkeletonList(count: 5),
+                    )
+                    : _erro != null && habito == null
+                    ? FxErrorState(
+                      chromeOnDark: isDark,
+                      primary: primary,
+                      title: FocuxMicrocopy.naoFoiPossivelCarregar,
+                      message: _erro!,
+                      onRetry: _load,
+                    )
+                    : habito == null
+                    ? FxEmptyState(
+                      icon: FxIcons.concluido,
+                      title: 'Hábito não encontrado',
+                      subtitle:
+                          'Ele pode ter sido desativado. Volte à lista e escolha outro.',
+                      action: FxEmptyAction(label: 'Voltar', onTap: _leave),
+                    )
+                    : _HabitoDetailBody(
+                      habito: habito,
+                      forAluno: widget.forAluno,
+                      busy: _busy,
+                      semana: _semana,
+                      onRefresh: _load,
+                      onMarcar: _toggleHoje,
+                    ),
           ),
         ),
       ),
@@ -242,27 +257,28 @@ class _HabitoDetailBody extends StatelessWidget {
     required this.habito,
     required this.forAluno,
     required this.busy,
-    required this.secao,
-    required this.onSecao,
+    required this.semana,
     required this.onRefresh,
-    required this.onLeave,
-    required this.onSticky,
+    required this.onMarcar,
   });
 
   final Habito habito;
   final bool forAluno;
   final bool busy;
-  final String secao;
-  final ValueChanged<String> onSecao;
+  final List<HabitoSemanaAluno>? semana;
   final Future<void> Function() onRefresh;
-  final VoidCallback onLeave;
-  final VoidCallback onSticky;
+  final VoidCallback onMarcar;
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
+    final sobre = fxPaletaSobreMarca(context, accent: primary);
     final descricao = habito.descricao?.trim() ?? '';
+    final sequencia = habitoSequenciaLinha(habito.streakAtual);
+    final lembrete = habitoLembreteLine(habito.lembreteHora);
+    final marcacoes = habitoChecksLine(habito.checks);
+    final alunos = semana;
 
     return Column(
       children: [
@@ -277,215 +293,172 @@ class _HabitoDetailBody extends StatelessWidget {
                   FxSettingsLayout.pageInset,
                   TokensStrip.s4,
                   FxSettingsLayout.pageInset,
-                  24,
+                  TokensStrip.s6,
                 ),
                 children: [
-                  FxHubHeader(
-                    title: habito.titulo,
-                    subtitle: habitoDetailSubtitle(
-                      metaSemanal: habito.metaSemanal,
-                      alunoId: habito.alunoId,
-                      ativo: habito.ativo,
-                    ),
-                  ),
-                  if (forAluno && habito.ativo) ...[
-                    const SizedBox(height: TokensStrip.s4),
-                    FxStripCard(
-                      emphasize: false,
-                      accent: primary,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Hoje',
-                            style: FocuxHubTypography.chip(
-                              fxScreenMute(context),
-                            ),
+                  FxStripCard(
+                    marca: true,
+                    accent: primary,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          habito.titulo,
+                          style: FocuxHubTypography.cardTitle(color: sobre.ink),
+                        ),
+                        const SizedBox(height: TokensStrip.s1),
+                        Text(
+                          forAluno
+                              ? habitoVezesPorSemana(habito.metaSemanal)
+                              : habitoRegra(
+                                metaSemanal: habito.metaSemanal,
+                                alunoId: habito.alunoId,
+                              ),
+                          style: FocuxHubTypography.bodyMuted(
+                            color: sobre.mute,
                           ),
-                          const SizedBox(height: 6),
+                        ),
+                        if (!habito.ativo) ...[
+                          const SizedBox(height: TokensStrip.s1),
                           Text(
-                            habito.feitoHoje ? 'Feito' : 'Pendente',
-                            style: FocuxHubTypography.metric(
-                              color: fxScreenInk(context),
-                              fontSize: TokensStrip.fontTitulo,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            habito.feitoHoje
-                                ? 'Check de hoje registrado'
-                                : 'Marque quando concluir',
-                            style: FocuxHubTypography.bodyMuted(
-                              color: fxScreenMute(context),
-                              fontWeight: FontWeight.w600,
-                            ),
+                            'Desativado',
+                            style: FocuxHubTypography.rotulo(color: sobre.ink),
                           ),
                         ],
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: TokensStrip.s4),
-                  OperationalMetricTile(
-                    label: 'Sequência',
-                    value: habitoStreakValue(habito.streakAtual),
-                    hint: habitoStreakHint(habito.streakAtual),
-                    color: primary,
-                    isDark: isDark,
-                  ),
-                  const SizedBox(height: TokensStrip.s2),
-                  OperationalMetricTile(
-                    label: 'Semana',
-                    value: habitoFeitosValue(
-                      habito.feitosNaSemana,
-                      habito.metaSemanal,
-                    ),
-                    hint: habitoFeitosHint(
-                      feitos: habito.feitosNaSemana,
-                      meta: habito.metaSemanal,
-                    ),
-                    color: primary,
-                    isDark: isDark,
-                  ),
-                  const SizedBox(height: TokensStrip.s2),
-                  OperationalMetricTile(
-                    label: 'Meta',
-                    value: habitoMetaValue(habito.metaSemanal),
-                    hint: 'Por semana',
-                    color: primary,
-                    isDark: isDark,
-                  ),
-                  if (!forAluno) ...[
-                    const SizedBox(height: TokensStrip.s2),
-                    OperationalMetricTile(
-                      label: 'Alcance',
-                      value: habitoAlcanceLabel(habito.alunoId),
-                      hint: habito.alunoId == null
-                          ? 'Vale para a base'
-                          : 'Só este aluno',
-                      color: primary,
-                      isDark: isDark,
-                    ),
-                  ],
-                  const SizedBox(height: TokensStrip.s3),
-                  Wrap(
-                    spacing: TokensStrip.s2,
-                    runSpacing: TokensStrip.s2,
-                    children: [
-                      FxActionChip(
-                        label: 'Lista',
-                        accent: primary,
-                        isDark: isDark,
-                        onPressed: onLeave,
-                      ),
-                      if (forAluno)
-                        FxActionChip(
-                          label: 'Hoje',
-                          accent: primary,
-                          isDark: isDark,
-                          onPressed: () => context.push('/dashboard/aluno'),
-                        ),
-                      if (!forAluno && habito.alunoId != null)
-                        FxActionChip(
-                          label: 'Aluno',
-                          accent: primary,
-                          isDark: isDark,
-                          onPressed: () => context.push(
-                            '/alunos/${habito.alunoId}',
+                        if (forAluno) ...[
+                          const SizedBox(height: TokensStrip.s3),
+                          Text(
+                            habitoSemanaLinha(
+                              habito.feitosNaSemana,
+                              habito.metaSemanal,
+                            ),
+                            style: FocuxHubTypography.body(color: sobre.ink),
                           ),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: TokensStrip.s4),
-                  AlunoSegmentedChoice(
-                    options: habitoDetalheSecoes,
-                    selected: secao,
-                    isDark: isDark,
-                    onSelect: onSecao,
-                  ),
-                  const SizedBox(height: TokensStrip.s4),
-                  if (secao == habitoDetalheSecaoResumo) ...[
-                    Text(
-                      habitoResumoLine(
-                        streak: habito.streakAtual,
-                        feitos: habito.feitosNaSemana,
-                        meta: habito.metaSemanal,
-                      ),
-                      style: FocuxHubTypography.bodyMuted(
-                        color: fxScreenMute(context),
-                        fontWeight: FontWeight.w600,
-                      ),
+                          const SizedBox(height: TokensStrip.s2),
+                          FxBarraProgresso(
+                            fracao: habitoFracao(
+                              habito.feitosNaSemana,
+                              habito.metaSemanal,
+                            ),
+                            cor: sobre.ink,
+                          ),
+                          if (sequencia.isNotEmpty) ...[
+                            const SizedBox(height: TokensStrip.s2),
+                            Text(
+                              sequencia,
+                              style: FocuxHubTypography.bodyMuted(
+                                color: sobre.mute,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ],
                     ),
-                    if (habitoChecksLine(habito.checks) case final checksLine
-                        when checksLine.isNotEmpty) ...[
-                      const SizedBox(height: TokensStrip.s3),
-                      Text(
-                        checksLine,
-                        style: FocuxHubTypography.bodyMuted(
-                          color: fxScreenMute(context),
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ],
-                  if (secao == habitoDetalheSecaoSobre) ...[
-                    if (!habito.ativo) ...[
-                      Text(
-                        habitoDesativadoChip(),
-                        style: FocuxHubTypography.bodyMuted(
-                          color: fxScreenMute(context),
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(height: TokensStrip.s3),
-                    ],
-                    Text(
-                      descricao.isEmpty ? habitoSobreEmpty() : descricao,
-                      style: FocuxHubTypography.bodyMuted(
-                        color: fxScreenMute(context),
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+                  ),
+                  if (descricao.isNotEmpty) ...[
                     const SizedBox(height: TokensStrip.s3),
                     Text(
-                      habitoLembreteLine(habito.lembreteHora),
-                      style: FocuxHubTypography.bodyMuted(
-                        color: fxScreenMute(context),
-                        fontWeight: FontWeight.w600,
-                      ),
+                      descricao,
+                      style: FocuxHubTypography.bodyMuted(color: chrome.mute),
                     ),
-                    if (habitoChecksLine(habito.checks) case final checksLine
-                        when checksLine.isNotEmpty) ...[
-                      const SizedBox(height: TokensStrip.s3),
-                      Text(
-                        checksLine,
-                        style: FocuxHubTypography.bodyMuted(
-                          color: fxScreenMute(context),
-                          fontWeight: FontWeight.w600,
+                  ],
+                  if (forAluno) ...[
+                    for (final linha in [lembrete, marcacoes])
+                      if (linha.isNotEmpty) ...[
+                        const SizedBox(height: TokensStrip.s2),
+                        Text(
+                          linha,
+                          style: FocuxHubTypography.bodyMuted(
+                            color: chrome.mute,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                  ] else ...[
+                    const SizedBox(height: TokensStrip.s5),
+                    const DashboardSectionHeader(title: 'Esta semana'),
+                    const SizedBox(height: TokensStrip.s2),
+                    if (alunos == null)
+                      Text(
+                        'Não deu para carregar os alunos agora. Puxe para atualizar.',
+                        style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                      )
+                    else if (alunos.isEmpty)
+                      Text(
+                        'Nenhum aluno ativo com este hábito.',
+                        style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                      )
+                    else
+                      for (final a in [...alunos]..sort(
+                        (x, y) => habitoFracao(
+                          x.feitos,
+                          x.meta,
+                        ).compareTo(habitoFracao(y.feitos, y.meta)),
+                      ))
+                        InkWell(
+                          onTap: () => context.push('/alunos/${a.alunoId}'),
+                          borderRadius: BorderRadius.circular(
+                            TokensStrip.rCard,
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: TokensStrip.s2,
+                              horizontal: TokensStrip.s1,
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        habitoComplianceLabel(a.nome),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: FocuxHubTypography.body(
+                                          color: chrome.ink,
+                                        ),
+                                      ),
+                                    ),
+                                    Text(
+                                      '${a.feitos} de ${a.meta}',
+                                      style: FocuxHubTypography.rotulo(
+                                        color: chrome.mute,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: TokensStrip.s1),
+                                FxBarraProgresso(
+                                  fracao: habitoFracao(a.feitos, a.meta),
+                                  cor:
+                                      a.meta > 0 && a.feitos >= a.meta
+                                          ? EagleTokens.good
+                                          : null,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                   ],
                 ],
               ),
             ),
           ),
         ),
-        if (habito.ativo)
+        if (forAluno && habito.ativo)
           SafeArea(
             top: false,
             child: Padding(
-              padding: EdgeInsets.fromLTRB(
+              padding: const EdgeInsets.fromLTRB(
                 FxSettingsLayout.pageInset,
                 TokensStrip.s2,
                 FxSettingsLayout.pageInset,
                 TokensStrip.s3,
               ),
               child: FxLiquidPrimaryButton(
-                label: forAluno
-                    ? habitoStickyAluno(habito.feitoHoje)
-                    : habitoStickyPersonal(),
+                label: habitoStickyAluno(habito.feitoHoje),
                 loading: busy,
-                onPressed: busy ? null : onSticky,
+                onPressed: busy ? null : onMarcar,
               ),
             ),
           ),

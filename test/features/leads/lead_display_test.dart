@@ -77,7 +77,6 @@ void main() {
     expect(leadEmailHint('a@b.com'), 'Vira o login do aluno');
   });
 
-
   test('lead list chrome helpers', () {
     expect(leadCountLabel(1), '1 lead');
     expect(leadCountLabel(3), '3 leads');

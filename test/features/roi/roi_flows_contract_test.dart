@@ -18,16 +18,18 @@ void main() {
 
   test('White-label repository declares expected API paths', () {
     final whiteLabel =
-        File('lib/features/perfil/data/white_label_repository.dart')
-            .readAsStringSync();
+        File(
+          'lib/features/perfil/data/white_label_repository.dart',
+        ).readAsStringSync();
     expect(whiteLabel, contains('/api/personal/white-label'));
     expect(whiteLabel, contains('/verificar-dominio'));
   });
 
   test('Landing studio repository declares v2 API paths', () {
     final landing =
-        File('lib/features/perfil/data/landing_studio_repository.dart')
-            .readAsStringSync();
+        File(
+          'lib/features/perfil/data/landing_studio_repository.dart',
+        ).readAsStringSync();
     expect(landing, contains('/api/personal/landing'));
     expect(landing, contains('/api/personal/landing/entrevista'));
     expect(landing, contains('/api/personal/landing/sugerir'));
@@ -56,15 +58,19 @@ void main() {
       'lib/features/perfil/screens/landing_editor_screen.dart',
     );
     final pacotes =
-        File('lib/features/pacotes/screens/pacotes_screen.dart').readAsStringSync();
+        File(
+          'lib/features/pacotes/widgets/pacotes_storefront_links.dart',
+        ).readAsStringSync();
     expect(landingEditor, contains('Env.landingPageUrl'));
+    expect(pacotes, contains('Env.landingPageUrl'));
     expect(pacotes, isNot(contains('https://focux.app/p/')));
   });
 
   test('ROI repositories declare expected API paths', () {
     final winback =
-        File('lib/features/winback/data/winback_repository.dart')
-            .readAsStringSync();
+        File(
+          'lib/features/winback/data/winback_repository.dart',
+        ).readAsStringSync();
 
     expect(winback, contains('/api/winback/log'));
   });

@@ -4,7 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/screen_source_bundle.dart';
 
-
 String _routerSources() {
   final routes = readRouterSourceBundle();
   final redirect =
@@ -149,10 +148,6 @@ void main() {
         File(
           'lib/features/financeiro/screens/financeiro_screen.dart',
         ).readAsStringSync();
-    final leadsKanban =
-        File(
-          'lib/features/leads/screens/leads_kanban_screen.dart',
-        ).readAsStringSync();
     final leadDetail = readScreenSourceBundle(
       'lib/features/leads/screens/lead_detail_screen.dart',
     );
@@ -169,7 +164,6 @@ void main() {
     // Home; o fallback dela é coberto em 'residual back controls'.
     expect(alertas, contains("safePopOrGo(context, '/dashboard/personal')"));
     expect(financeiro, contains("safePopOrGo(context, '/dashboard/personal')"));
-    expect(leadsKanban, contains("safePopOrGo(context, '/leads')"));
     expect(leadDetail, contains("safePopOrGo(context, '/leads')"));
     expect(assinatura, contains("safePopOrGo(context, '/dashboard/personal')"));
     expect(
@@ -185,7 +179,9 @@ void main() {
       'lib/features/alunos/screens/alunos_list_screen.dart',
     );
     final alunosChromeRoutes =
-        File('lib/core/router/app_router_chrome_routes.dart').readAsStringSync();
+        File(
+          'lib/core/router/app_router_chrome_routes.dart',
+        ).readAsStringSync();
     final exerciciosList =
         File(
           'lib/features/exercicios/screens/exercicios_list_screen.dart',
@@ -208,22 +204,13 @@ void main() {
       contains('safePopOr(context, () => goToRoleHome(context, ref))'),
     );
     expect(alunosList, contains("safePopOrGo(context, '/dashboard/personal')"));
-    expect(
-      alunosChromeRoutes,
-      contains("path: '/alunos/acoes-massa'"),
-    );
+    expect(alunosChromeRoutes, contains("path: '/alunos/acoes-massa'"));
     expect(
       alunosChromeRoutes,
       contains("redirect: (context, state) => '/alunos'"),
     );
-    expect(
-      alunosChromeRoutes,
-      isNot(contains('AcoesMassaScreen')),
-    );
-    expect(
-      exerciciosList,
-      contains("safePopOrGo(context, '/treinos')"),
-    );
+    expect(alunosChromeRoutes, isNot(contains('AcoesMassaScreen')));
+    expect(exerciciosList, contains("safePopOrGo(context, '/treinos')"));
     expect(identidade, contains("safePopOrGo(context, '/perfil')"));
     expect(agendaNovo, contains("safePopOrGo(context, '/agenda')"));
     expect(

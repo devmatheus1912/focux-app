@@ -157,7 +157,9 @@ void main() {
     addTearDown(tester.view.reset);
   }
 
-  testWidgets('cada aluno mostra o motivo, sem nota de 0 a 100', (tester) async {
+  testWidgets('cada aluno mostra o motivo, sem nota de 0 a 100', (
+    tester,
+  ) async {
     telaAlta(tester);
     await tester.pumpWidget(_app(_Adapter(alunos: _cinco, alto: 5)));
     await _settle(tester);
@@ -168,7 +170,9 @@ void main() {
     expect(find.textContaining('de 100'), findsNothing);
   });
 
-  testWidgets('"Mensagem" abre o chat de quem está em Chamar agora', (tester) async {
+  testWidgets('"Mensagem" abre o chat de quem está em Chamar agora', (
+    tester,
+  ) async {
     telaAlta(tester);
     await tester.pumpWidget(_app(_Adapter(alunos: _cinco, alto: 5)));
     await _settle(tester);
@@ -201,7 +205,9 @@ void main() {
     expect(find.text('Iara'), findsOneWidget);
   });
 
-  testWidgets('busca aparece com lista grande e vai ao servidor', (tester) async {
+  testWidgets('busca aparece com lista grande e vai ao servidor', (
+    tester,
+  ) async {
     telaAlta(tester);
     final adapter = _Adapter(alunos: _cinco, alto: 9);
     await tester.pumpWidget(_app(adapter));
@@ -222,7 +228,9 @@ void main() {
     expect(find.text('Mensagem'), findsNothing);
   });
 
-  testWidgets('Cobrar só aparece quando há mensalidade em atraso', (tester) async {
+  testWidgets('Cobrar só aparece quando há mensalidade em atraso', (
+    tester,
+  ) async {
     telaAlta(tester);
     final lista = [
       _aluno(1, 'A', 'ALTO'),
@@ -239,14 +247,14 @@ void main() {
     expect(find.text('Cobrar'), findsNothing);
   });
 
-  testWidgets('menu do topo não tem mais o histórico de retomada', (tester) async {
+  testWidgets('topo sem "⋯" e sem linha de atrasadas fora do financeiro', (
+    tester,
+  ) async {
     telaAlta(tester);
     await tester.pumpWidget(_app(_Adapter(alunos: _cinco, alto: 5)));
     await _settle(tester);
-    await tester.tap(find.byTooltip('Mais ações'));
-    await _settle(tester);
-    // O aviso para quem parou mora em Automações.
-    expect(find.text('Histórico de retomada'), findsNothing);
+    expect(find.byTooltip('Mais ações'), findsNothing);
+    expect(find.text('Mensalidades atrasadas'), findsNothing);
   });
 
   for (final tela in kDynamicTypeTelas) {

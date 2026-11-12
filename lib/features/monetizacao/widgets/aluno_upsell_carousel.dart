@@ -167,7 +167,11 @@ class _OfertaCard extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: FxTonalButton(label: s.alunoOfertaRecusar, onPressed: enviando ? null : onDecline, expanded: true),
+                child: FxTonalButton(
+                  label: s.alunoOfertaRecusar,
+                  onPressed: enviando ? null : onDecline,
+                  expanded: true,
+                ),
               ),
               const SizedBox(width: TokensStrip.s2),
               Expanded(

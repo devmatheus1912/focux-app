@@ -113,10 +113,9 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
     if (_loadingMore || !_hasMore) return;
     setState(() => _loadingMore = true);
     try {
-      final pagina = await ref.read(_repoProvider).meusHabitosPagina(
-        page: _page + 1,
-        q: _query,
-      );
+      final pagina = await ref
+          .read(_repoProvider)
+          .meusHabitosPagina(page: _page + 1, q: _query);
       if (!mounted) return;
       final seen = _habitos.map((h) => h.id).toSet();
       setState(() {
@@ -140,28 +139,31 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
     try {
       final result = await ref.read(_repoProvider).toggleHoje(h.id);
       setState(() {
-        _habitos = _habitos
-            .map(
-              (x) => x.id == h.id
-                  ? Habito(
-                      id: x.id,
-                      titulo: x.titulo,
-                      descricao: x.descricao,
-                      icone: x.icone,
-                      tipo: x.tipo,
-                      metaDiaria: x.metaDiaria,
-                      metaSemanal: x.metaSemanal,
-                      feitosNaSemana: result.feito
-                          ? x.feitosNaSemana + 1
-                          : (x.feitosNaSemana - 1).clamp(0, 7),
-                      feitoHoje: result.feito,
-                      streakAtual: result.streak,
-                      badgeSemana: result.streak >= 7,
-                      alunoId: x.alunoId,
-                    )
-                  : x,
-            )
-            .toList();
+        _habitos =
+            _habitos
+                .map(
+                  (x) =>
+                      x.id == h.id
+                          ? Habito(
+                            id: x.id,
+                            titulo: x.titulo,
+                            descricao: x.descricao,
+                            icone: x.icone,
+                            tipo: x.tipo,
+                            metaDiaria: x.metaDiaria,
+                            metaSemanal: x.metaSemanal,
+                            feitosNaSemana:
+                                result.feito
+                                    ? x.feitosNaSemana + 1
+                                    : (x.feitosNaSemana - 1).clamp(0, 7),
+                            feitoHoje: result.feito,
+                            streakAtual: result.streak,
+                            badgeSemana: result.streak >= 7,
+                            alunoId: x.alunoId,
+                          )
+                          : x,
+                )
+                .toList();
       });
     } catch (e) {
       if (!mounted) return;
@@ -194,50 +196,52 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
             safePopOrGo(context, '/dashboard/aluno');
           },
           child: FxShellScaffold(
-              useMesh: true,
-              constrainWidth: false,
-              appBar: FxShellAppBar(
-                title: 'Meus hábitos',
-                subtitle: FxHubFreshness.joinCount(
-                  habitoCountLabel(_loading ? 0 : _total),
-                  _loading ? null : freshnessLabel,
-                ),
-                onBack: () {
-                  FxKeyboardDismissScope.dismiss();
-                  safePopOrGo(context, '/dashboard/aluno');
-                },
-                actions: [
-                  FxHelpIconButton(
-                    tooltip: 'Como usar os hábitos',
-                    onTap: () => showFxHelpSheet(
-                      context,
-                      title: 'Hábitos',
-                      subtitle: 'Metas diárias que seu personal cadastrou.',
-                      tips: const [
-                        FxHelpTip('Como calculamos', habitoComoCalculamos),
-                        FxHelpTip(
-                          'Marcar',
-                          'O checkbox marca o check de hoje. Toque no hábito abre o detalhe.',
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+            useMesh: true,
+            constrainWidth: false,
+            appBar: FxShellAppBar(
+              title: 'Meus hábitos',
+              subtitle: FxHubFreshness.joinCount(
+                habitoCountLabel(_loading ? 0 : _total),
+                _loading ? null : freshnessLabel,
               ),
-              body: _loading
-                  ? const Padding(
+              onBack: () {
+                FxKeyboardDismissScope.dismiss();
+                safePopOrGo(context, '/dashboard/aluno');
+              },
+              actions: [
+                FxHelpIconButton(
+                  tooltip: 'Como usar os hábitos',
+                  onTap:
+                      () => showFxHelpSheet(
+                        context,
+                        title: 'Hábitos',
+                        subtitle: 'Metas diárias que seu personal cadastrou.',
+                        tips: const [
+                          FxHelpTip('Como calculamos', habitoComoCalculamos),
+                          FxHelpTip(
+                            'Marcar',
+                            'O checkbox marca o check de hoje. Toque no hábito abre o detalhe.',
+                          ),
+                        ],
+                      ),
+                ),
+              ],
+            ),
+            body:
+                _loading
+                    ? const Padding(
                       padding: EdgeInsets.all(FxSettingsLayout.pageInset),
                       child: SkeletonList(count: 5),
                     )
-                  : _error != null
-                  ? FxErrorState(
+                    : _error != null
+                    ? FxErrorState(
                       chromeOnDark: chrome.isDark,
                       primary: scheme.primary,
                       title: FocuxMicrocopy.naoFoiPossivelCarregar,
                       message: _error!,
                       onRetry: _carregar,
                     )
-                  : Column(
+                    : Column(
                       children: [
                         Padding(
                           padding: const EdgeInsets.fromLTRB(
@@ -251,8 +255,8 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
                             focusNode: _searchFocus,
                             textInputAction: TextInputAction.search,
                             onChanged: _onQueryChanged,
-                            onTapOutside: (_) =>
-                                FxKeyboardDismissScope.dismiss(),
+                            onTapOutside:
+                                (_) => FxKeyboardDismissScope.dismiss(),
                             decoration: InputDecoration(
                               hintText: 'Buscar hábito',
                               prefixIcon: const Icon(FxIcons.buscar),
@@ -278,79 +282,91 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
   Widget _buildList(bool searching) {
     return RefreshIndicator(
       onRefresh: _carregar,
-      child: _habitos.isEmpty
-          ? ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              children: [
-                const SizedBox(height: 48),
-                FxEmptyState(
-                  icon: searching ? FxIcons.buscar : FxIcons.treino,
-                  title: searching
-                      ? 'Nenhum hábito encontrado'
-                      : 'Nenhum hábito ainda',
-                  subtitle: searching
-                      ? 'Tente outro nome. O personal cadastra os hábitos da sua rotina.'
-                      : 'Seu personal ainda não cadastrou hábitos. Avise no chat para começar.',
-                  action: searching
-                      ? FxEmptyAction(label: 'Limpar busca', secondary: true, onTap: _clearQuery)
-                      : FxEmptyAction(
-                          label: 'Abrir chat',
-                          onTap: () => openAlunoRoute(context, '/chat/aluno'),
-                        ),
+      child:
+          _habitos.isEmpty
+              ? ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                children: [
+                  const SizedBox(height: 48),
+                  FxEmptyState(
+                    icon: searching ? FxIcons.buscar : FxIcons.treino,
+                    title:
+                        searching
+                            ? 'Nenhum hábito encontrado'
+                            : 'Nenhum hábito ainda',
+                    subtitle:
+                        searching
+                            ? 'Tente outro nome. O personal cadastra os hábitos da sua rotina.'
+                            : 'Seu personal ainda não cadastrou hábitos. Avise no chat para começar.',
+                    action:
+                        searching
+                            ? FxEmptyAction(
+                              label: 'Limpar busca',
+                              secondary: true,
+                              onTap: _clearQuery,
+                            )
+                            : FxEmptyAction(
+                              label: 'Abrir chat',
+                              onTap:
+                                  () => openAlunoRoute(context, '/chat/aluno'),
+                            ),
+                  ),
+                ],
+              )
+              : ListView.builder(
+                physics: const AlwaysScrollableScrollPhysics(),
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                padding: const EdgeInsets.fromLTRB(
+                  FxSettingsLayout.pageInset,
+                  8,
+                  FxSettingsLayout.pageInset,
+                  32,
                 ),
-              ],
-            )
-          : ListView.builder(
-              physics: const AlwaysScrollableScrollPhysics(),
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              padding: const EdgeInsets.fromLTRB(
-                FxSettingsLayout.pageInset,
-                8,
-                FxSettingsLayout.pageInset,
-                32,
-              ),
-              itemCount: _habitos.length + (_hasMore ? 1 : 0),
-              itemBuilder: (_, i) {
-                if (i >= _habitos.length) {
+                itemCount: _habitos.length + (_hasMore ? 1 : 0),
+                itemBuilder: (_, i) {
+                  if (i >= _habitos.length) {
+                    return FxSatelliteListTile(
+                      title: _loadingMore ? 'Carregando…' : 'Carregar mais',
+                      onTap: _loadingMore ? null : _carregarMais,
+                    );
+                  }
+                  final h = _habitos[i];
                   return FxSatelliteListTile(
-                    title: _loadingMore ? 'Carregando…' : 'Carregar mais',
-                    onTap: _loadingMore ? null : _carregarMais,
+                    title: h.titulo,
+                    subtitle: Text(
+                      habitoAlunoSubtitle(
+                        descricao: h.descricao,
+                        feitosNaSemana: h.feitosNaSemana,
+                        metaSemanal: h.metaSemanal,
+                      ),
+                    ),
+                    trailing: Text(
+                      '${h.streakAtual}d',
+                      style: TextStyle(
+                        color: EagleTokens.warn,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    leading: Semantics(
+                      label:
+                          h.feitoHoje
+                              ? 'Desmarcar hábito ${h.titulo}'
+                              : 'Marcar hábito ${h.titulo}',
+                      child: Checkbox(
+                        value: h.feitoHoje,
+                        onChanged: (_) => _toggle(h),
+                      ),
+                    ),
+                    onTap: () async {
+                      await context.push(habitoAlunoDetailPath(h.id), extra: h);
+                      if (mounted) await _carregar();
+                    },
                   );
-                }
-                final h = _habitos[i];
-                return FxSatelliteListTile(
-                  title: h.titulo,
-                  subtitle: Text(
-                    habitoAlunoSubtitle(
-                      descricao: h.descricao,
-                      feitosNaSemana: h.feitosNaSemana,
-                      metaSemanal: h.metaSemanal,
-                    ),
-                  ),
-                  trailing: Text(
-                    '${h.streakAtual}d',
-                    style: TextStyle(
-                      color: EagleTokens.warn,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  leading: Semantics(
-                    label: h.feitoHoje
-                        ? 'Desmarcar hábito ${h.titulo}'
-                        : 'Marcar hábito ${h.titulo}',
-                    child: Checkbox(
-                      value: h.feitoHoje,
-                      onChanged: (_) => _toggle(h),
-                    ),
-                  ),
-                  onTap: () async {
-                    await context.push(habitoAlunoDetailPath(h.id), extra: h);
-                    if (mounted) await _carregar();
-                  },
-                );
-              },
-            ),
+                },
+              ),
     );
   }
 }

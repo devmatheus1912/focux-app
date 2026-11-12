@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../automacoes/screens/automacoes_screen.dart';
 import '../../broadcasts/screens/broadcast_screen.dart';
-import '../../captura/screens/leads_publicos_screen.dart';
 import '../../dashboard/screens/qualidade_operacional_screen.dart';
 import '../../desafios/screens/desafios_screen.dart';
 import '../../financeiro/screens/financeiro_resultados_screen.dart';
@@ -10,12 +9,10 @@ import '../../exercicios/screens/exercicios_list_screen.dart';
 import '../../feed/screens/feed_screen.dart';
 import '../../grupos/screens/grupo_aulas_personal_screen.dart';
 import '../../habitos/screens/habitos_personal_screen.dart';
-import '../../leads/screens/leads_list_screen.dart';
-import '../../loja/screens/loja_screen.dart';
-import '../../monetizacao/screens/ofertas_upsell_screen.dart';
+import '../../leads/screens/interessados_screen.dart';
 import '../../nps/screens/nps_dashboard_screen.dart';
 import '../../onboarding/screens/onboarding_wizard_screen.dart';
-import '../../pacotes/screens/pacotes_screen.dart';
+import '../../pacotes/screens/vendas_screen.dart';
 import '../../perfil/screens/landing_editor_screen.dart';
 import '../../perfil/screens/white_label_settings_screen.dart';
 import '../../recorrencia/screens/recorrencia_screen.dart';
@@ -37,23 +34,17 @@ Widget? buildFerramentasTabScreen(String? rotaApp) {
     case '/desafios':
       return const DesafiosScreen();
     case '/leads':
-      return const LeadsListScreen();
+      return const InteressadosScreen();
     case '/referral':
       return const ReferralScreen();
-    case '/leads-publicos':
-      return const LeadsPublicosScreen();
     case '/retencao':
       return const ChurnDashboardScreen();
     case '/perfil/landing-editor':
       return const LandingEditorScreen();
     case '/nps':
       return const NpsDashboardScreen();
-    case '/ofertas-upsell':
-      return const OfertasUpsellScreen();
     case '/pacotes':
-      return const PacotesScreen();
-    case '/loja':
-      return const LojaScreen();
+      return const VendasScreen();
     case '/relatorio/business':
       return const FinanceiroResultadosScreen();
     case '/recorrencia':

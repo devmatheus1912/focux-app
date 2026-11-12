@@ -205,14 +205,57 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       if (!mounted) return;
       FeedbackHelper.showSuccess(
         context,
-        post == null ? 'Publicação criada com sucesso!' : 'Publicação atualizada.',
+        post == null
+            ? 'Publicação criada com sucesso!'
+            : 'Publicação atualizada.',
       );
     });
   }
 
+  bool get _filtrando =>
+      _query.trim().isNotEmpty || _chip != FeedListChip.todos;
+
+  Future<void> _maisOpcoes(FeedPost p) async {
+    final acao = await showFxGroupedActionSheet<String>(
+      context,
+      titulo: 'Publicação',
+      grupos: [
+        FxActionGroup<String>(null, [
+          const FxActionItem(
+            valor: 'editar',
+            rotulo: 'Editar',
+            icone: FxIcons.editar,
+          ),
+          FxActionItem(
+            valor: 'fixar',
+            rotulo: p.fixado ? 'Desafixar' : 'Fixar no topo',
+            descricao: p.fixado ? null : 'Fica no topo do feed dos alunos.',
+            icone: FxIcons.fixado,
+          ),
+        ]),
+      ],
+      destrutiva: const FxActionItem(
+        valor: 'excluir',
+        rotulo: 'Excluir',
+        icone: FxIcons.excluir,
+      ),
+      confirmarTitulo: 'Excluir publicação?',
+      confirmarMensagem: 'Os alunos deixam de ver. Não dá para desfazer.',
+    );
+    if (!mounted) return;
+    switch (acao) {
+      case 'editar':
+        _abrirFormulario(post: p);
+      case 'fixar':
+        await _toggleFixar(p.id);
+      case 'excluir':
+        await _deletar(p.id);
+    }
+  }
+
   Widget _buildBody(Color primary, List<FeedPost> visible) {
     if (visible.isEmpty) {
-      final searching = _query.trim().isNotEmpty || _chip != FeedListChip.todos;
+      final searching = _filtrando;
       return RefreshIndicator(
         color: primary,
         onRefresh: _load,
@@ -235,14 +278,18 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                       subtitle:
                           searching
                               ? 'Ajuste a busca para achar outra publicação.'
-                              : 'Publique a primeira dica para seus alunos.',
-                      action: searching
-                          ? FxEmptyAction(
-                              label: 'Limpar filtros',
-                              secondary: true,
-                              onTap: _clearFilters,
-                            )
-                          : null,
+                              : 'O feed é o mural dos seus alunos: avisos, dicas e fotos. Eles curtem e comentam.',
+                      action:
+                          searching
+                              ? FxEmptyAction(
+                                label: 'Limpar filtros',
+                                secondary: true,
+                                onTap: _clearFilters,
+                              )
+                              : FxEmptyAction(
+                                label: 'Nova publicação',
+                                onTap: _abrirFormulario,
+                              ),
                     ),
                   ),
                 ),
@@ -253,46 +300,28 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       );
     }
 
-    final showMore = _hasMore;
-    final stickyVisible = true;
-    final bottomPad = feedListBottomPad(stickyVisible: stickyVisible);
-    final extra = (showMore ? 1 : 0) + 0;
-
-    return RefreshIndicator(
-      color: primary,
+    final repo = FeedRepository(ref.read(apiClientProvider));
+    return FeedLista(
+      posts: visible,
+      filtrando: _filtrando,
       onRefresh: _load,
-      child: ListView.builder(
-        physics: const AlwaysScrollableScrollPhysics(),
-        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        padding: EdgeInsets.fromLTRB(
-          FxSettingsLayout.pageInset,
-          TokensStrip.s2,
-          FxSettingsLayout.pageInset,
-          bottomPad,
-        ),
-        itemCount: visible.length + extra,
-        itemBuilder: (_, i) {
-          if (showMore && i == visible.length) {
-            return FxSatelliteListTile(
-              title: _loadingMore ? 'Carregando…' : 'Carregar mais',
-              onTap: _loadingMore ? null : _carregarMais,
-            );
-          }
-          final p = visible[i];
-          return FeedPostCard(
+      hasMore: _hasMore,
+      loadingMore: _loadingMore,
+      onCarregarMais: _carregarMais,
+      bottomPad: feedListBottomPad(stickyVisible: true),
+      cartao:
+          (p, i) => FeedPostCard(
             post: p,
             index: i,
             primary: primary,
             curtidas: _curtidasLocais[p.id] ?? p.totalCurtidas,
             comentarios: _comentariosLocais[p.id] ?? p.totalComentarios,
-            onCurtir: null,
             onComentar: () => _abrirComentarios(p.id),
-            onEditar: () => _abrirFormulario(post: p),
-            onFixar: () => _toggleFixar(p.id),
-            onExcluir: () => _confirmarExclusao(p.id),
-          );
-        },
-      ),
+            onQuemCurtiu:
+                () =>
+                    showFeedQuemCurtiuSheet(context, postId: p.id, repo: repo),
+            onMais: () => _maisOpcoes(p),
+          ),
     );
   }
 
@@ -301,7 +330,6 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     final chrome = ShellChrome.of(context);
     final isDark = chrome.isDark;
     final primary = Theme.of(context).colorScheme.primary;
-    final mute = chrome.mute;
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
     final visible = _posts;
     final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
@@ -331,168 +359,92 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
               actions: [
                 FxHelpIconButton(
                   tooltip: 'Como usar o feed',
-                  onTap: () => showFxHelpSheet(
-                    context,
-                    title: 'Feed',
-                    subtitle: 'Publicações que os alunos veem no app deles.',
-                    tips: const [
-                      FxHelpTip(
-                        'Publicar',
-                        'O criar no rodapé abre texto, imagem ou vídeo.',
+                  onTap:
+                      () => showFxHelpSheet(
+                        context,
+                        title: 'Feed',
+                        subtitle:
+                            'Publicações que os alunos veem no app deles.',
+                        tips: const [
+                          FxHelpTip(
+                            'Publicar',
+                            'Nova publicação abre texto, foto ou vídeo. A primeira linha vira o título.',
+                          ),
+                          FxHelpTip(
+                            'Retorno',
+                            'Toque no número de curtidas para ver quem curtiu, e no balão para ler os comentários.',
+                          ),
+                          FxHelpTip(
+                            'Fixar',
+                            'No ⋯ do post. Fixado fica no topo do feed dos alunos.',
+                          ),
+                        ],
                       ),
-                      FxHelpTip(
-                        'Comentários',
-                        'Você lê o que os alunos escreveram. Curtir e comentar é no app deles.',
-                      ),
-                    ],
-                  ),
                 ),
               ],
             ),
-            body: _loading
-                ? const Padding(
-                    padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-                    child: SkeletonList(count: 4),
-                  )
-                : _erro != null
-                ? FxErrorState(
-                    chromeOnDark: isDark,
-                    primary: primary,
-                    message: _erro!,
-                    onRetry: _load,
-                  )
-                : Column(
-                    children: [
-                      if (feedMostraFiltros(
-                        total: _posts.length,
-                        query: _query,
-                        filtrando: _chip != FeedListChip.todos,
-                      )) ...[
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(
-                          TokensStrip.s4,
-                          TokensStrip.s2,
-                          TokensStrip.s4,
-                          TokensStrip.s2,
-                        ),
-                        child: DecoratedBox(
-                          decoration: fxStripCardDecoration(
-                            context,
-                            accent: primary,
-                            radius: TokensStrip.rCard,
-                            glowStrength: 0.03,
-                          ),
-                          child: TextField(
+            body:
+                _loading
+                    ? const Padding(
+                      padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                      child: SkeletonList(count: 4),
+                    )
+                    : _erro != null
+                    ? FxErrorState(
+                      chromeOnDark: isDark,
+                      primary: primary,
+                      message: _erro!,
+                      onRetry: _load,
+                    )
+                    : Column(
+                      children: [
+                        if (feedMostraFiltros(
+                          total: _posts.length,
+                          query: _query,
+                          filtrando: _chip != FeedListChip.todos,
+                        )) ...[
+                          FeedFiltros(
                             controller: _searchController,
                             focusNode: _searchFocus,
-                            onChanged: _onQueryChanged,
-                            onTapOutside: (_) =>
-                                FxKeyboardDismissScope.dismiss(),
-                            textInputAction: TextInputAction.search,
-                            decoration: InputDecoration(
-                              filled: false,
-                              isDense: true,
-                              hintText: 'Buscar publicação',
-                              border: InputBorder.none,
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 12,
-                              ),
-                              prefixIcon: Icon(
-                                FxIcons.buscar,
-                                color: primary,
-                                size: 20,
-                              ),
-                              suffixIcon: _query.trim().isEmpty
-                                  ? null
-                                  : IconButton(
-                                      tooltip: 'Limpar busca',
-                                      onPressed: _clearQuery,
-                                      icon: Icon(
-                                        FxIcons.fechar,
-                                        color: mute,
-                                        size: 18,
-                                      ),
-                                    ),
-                            ),
+                            query: _query,
+                            chip: _chip,
+                            onQuery: _onQueryChanged,
+                            onLimparBusca: _clearQuery,
+                            onChip: (c) {
+                              setState(() => _chip = c);
+                              _load();
+                            },
+                          ),
+                        ],
+                        Expanded(
+                          child: FxContentWidthLimiter(
+                            child: _buildBody(primary, visible),
                           ),
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(
-                          TokensStrip.s4,
-                          0,
-                          TokensStrip.s4,
-                          TokensStrip.s2,
-                        ),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
-                              children: [
-                                for (final chip in FeedListChip.values)
-                                  Padding(
-                                    padding: const EdgeInsets.only(
-                                      right: TokensStrip.s2,
-                                    ),
-                                    child: FxToggleChip(
-                                      label: feedListChipLabel(chip),
-                                      selected: _chip == chip,
-                                      isDark: isDark,
-                                      filledWhenSelected: true,
-                                      onTap: () {
-                                        if (_chip == chip) return;
-                                        setState(() => _chip = chip);
-                                        _load();
-                                      },
-                                    ),
-                                  ),
-                              ],
+                        if (!_loading &&
+                            _erro == null &&
+                            (_posts.isNotEmpty || _filtrando))
+                          SafeArea(
+                            top: false,
+                            child: Padding(
+                              padding: EdgeInsets.fromLTRB(
+                                FxSettingsLayout.pageInset,
+                                TokensStrip.s2,
+                                FxSettingsLayout.pageInset,
+                                TokensStrip.s2 +
+                                    MediaQuery.viewInsetsOf(context).bottom,
+                              ),
+                              child: FxLiquidPrimaryButton(
+                                label: 'Nova publicação',
+                                onPressed: _abrirFormulario,
+                              ),
                             ),
                           ),
-                        ),
-                      ),
                       ],
-                      Expanded(
-                        child: FxContentWidthLimiter(
-                          child: _buildBody(primary, visible),
-                        ),
-                      ),
-                      if (!_loading && _erro == null)
-                        SafeArea(
-                          top: false,
-                          child: Padding(
-                            padding: EdgeInsets.fromLTRB(
-                              FxSettingsLayout.pageInset,
-                              TokensStrip.s2,
-                              FxSettingsLayout.pageInset,
-                              TokensStrip.s2 +
-                                  MediaQuery.viewInsetsOf(context).bottom,
-                            ),
-                            child: FxLiquidPrimaryButton(
-                              label: 'Nova publicação',
-                              onPressed: _abrirFormulario,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
+                    ),
           ),
         ),
       ),
     );
-  }
-
-  Future<void> _confirmarExclusao(int id) async {
-    final ok = await showFxConfirmSheet(
-      context,
-      title: 'Excluir publicação?',
-      message: 'Esta ação não pode ser desfeita.',
-      icon: FxIcons.excluir,
-      confirmLabel: 'Excluir',
-      destructive: true,
-    );
-    if (ok) _deletar(id);
   }
 }

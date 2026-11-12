@@ -20,7 +20,6 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_grouped_action_sheet.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
@@ -29,7 +28,11 @@ import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../alunos/providers/alunos_provider.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../planos/data/plano_recurso.dart';
+import '../../planos/providers/plano_features_provider.dart';
+import '../../planos/utils/plano_capability.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/retencao_repository.dart';
 import '../utils/retencao_display.dart';
@@ -241,25 +244,6 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
     }
   }
 
-  Future<void> _maisAcoes() async {
-    final s = S.of(context);
-    final rota = await showFxGroupedActionSheet<String>(
-      context,
-      titulo: s.retencaoTitulo,
-      grupos: [
-        FxActionGroup<String>(null, [
-          FxActionItem(
-            valor: '/financeiro?aba=mensalidades&filtro=atrasadas',
-            rotulo: s.retencaoEntradaCobranca,
-            descricao: s.retencaoEntradaCobrancaSub,
-            icone: FxIcons.repetir,
-          ),
-        ]),
-      ],
-    );
-    if (rota != null && mounted) context.push(rota);
-  }
-
   void _ajuda() {
     final s = S.of(context);
     AnalyticsService.instance.track(ProductEvents.retencaoHubHelpOpened);
@@ -297,11 +281,6 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
             },
             actions: [
               FxHelpIconButton(tooltip: s.retencaoComoUsar, onTap: _ajuda),
-              IconButton(
-                tooltip: s.retencaoMaisAcoes,
-                icon: const Icon(FxIcons.mais),
-                onPressed: _maisAcoes,
-              ),
             ],
           ),
           body:

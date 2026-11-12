@@ -37,6 +37,9 @@ void main() {
         'subscription',
         'moderacao',
         'winback',
+        // Só dados desde 11/11: a tela mora em Vendas e Interessados.
+        'captura',
+        'loja',
       };
       // Redirect-only ou shell fino — sem repository dedicado no módulo.
       final dataExempt = {...screenExempt, 'suporte'};

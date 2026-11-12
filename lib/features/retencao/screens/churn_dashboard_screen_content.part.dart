@@ -109,7 +109,38 @@ extension _ChurnDashboardContent on _ChurnDashboardScreenState {
               titleCase: false,
               onTap: _carregandoMais ? null : _carregarMais,
             ),
+          // Atraso de mensalidade também tira aluno do treino: só com o
+          // recurso financeiro e com atrasada de verdade.
+          const _LinhaAtrasadas(),
         ],
+      ),
+    );
+  }
+}
+
+class _LinhaAtrasadas extends ConsumerWidget {
+  const _LinhaAtrasadas();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final plano = ref.watch(planoFeaturesProvider).value;
+    if (plano == null ||
+        !PlanoCapability.has(plano, PlanoRecursoKeys.financeiro)) {
+      return const SizedBox.shrink();
+    }
+    final n =
+        ref.watch(alunosHomeProvider).value?.stats.totalInadimplentes ?? 0;
+    if (n <= 0) return const SizedBox.shrink();
+    final s = S.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(top: TokensStrip.s4),
+      child: FxActionRow(
+        titulo: s.retencaoAtrasadasTitulo,
+        motivo: s.retencaoAtrasadasMotivo(n),
+        verbo: s.retencaoAtrasadasVer,
+        forte: false,
+        onTap:
+            () => context.push('/financeiro?aba=mensalidades&filtro=atrasadas'),
       ),
     );
   }

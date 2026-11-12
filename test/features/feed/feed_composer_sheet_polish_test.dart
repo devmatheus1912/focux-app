@@ -8,7 +8,13 @@ void main() {
       'lib/features/feed/widgets/feed_composer_sheet.dart',
     );
     expect(sheet, contains('FxLiquidPrimaryButton'));
-    expect(sheet, contains('feedPublicarTileLabel()'));
+    // Uma caixa só: a primeira linha vira o título; sai o "T" e o chip.
+    expect(sheet, contains('feedSepararTitulo'));
+    expect(sheet, contains('Avisar os alunos'));
+    expect(sheet, contains('Mostrar como dica'));
+    expect(sheet, isNot(contains('FilterChip')));
+    expect(sheet, isNot(contains('FxIcons.titulo')));
+    expect(sheet, isNot(contains('agendaTituloGrupo')));
     expect(sheet, contains('FxHomeSheetChrome.dismissAndPop'));
     expect(sheet, contains('LengthLimitingTextInputFormatter'));
     expect(sheet, isNot(contains('ElevatedButton')));

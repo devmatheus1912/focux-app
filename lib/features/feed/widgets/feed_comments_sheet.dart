@@ -5,6 +5,7 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../data/feed_repository.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_grouped_action_sheet.dart';
 import '../../../core/widgets/fx_cached_network_image.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
@@ -70,7 +71,8 @@ class _FeedCommentsSheetState extends State<FeedCommentsSheet> {
       );
       if (!mounted) return;
       setState(() {
-        _comentarios = more ? [..._comentarios, ...pagina.content] : pagina.content;
+        _comentarios =
+            more ? [..._comentarios, ...pagina.content] : pagina.content;
         _hasNext = pagina.hasNext;
         _nextCursor = pagina.nextCursor;
         _loading = false;
@@ -110,7 +112,8 @@ class _FeedCommentsSheetState extends State<FeedCommentsSheet> {
   /// Personal (sem compor) modera tudo; aluno apaga o próprio e denuncia/bloqueia o dos outros.
   List<_AcaoComentario> _acoesPara(FeedComentario c) {
     final moderador = !widget.canCompose;
-    final meu = widget.currentAlunoId != null && widget.currentAlunoId == c.alunoId;
+    final meu =
+        widget.currentAlunoId != null && widget.currentAlunoId == c.alunoId;
     if (moderador || meu) return const [_AcaoComentario.apagar];
     if (widget.currentAlunoId == null) return const [];
     return const [_AcaoComentario.denunciar, _AcaoComentario.bloquear];
@@ -119,9 +122,18 @@ class _FeedCommentsSheetState extends State<FeedCommentsSheet> {
   Future<void> _executar(_AcaoComentario acao, FeedComentario c) async {
     final l10n = S.of(context);
     final (titulo, mensagem) = switch (acao) {
-      _AcaoComentario.apagar => (l10n.feedComentarioApagar, l10n.feedComentarioApagarConfirma),
-      _AcaoComentario.denunciar => (l10n.feedComentarioDenunciar, l10n.feedComentarioDenunciarConfirma),
-      _AcaoComentario.bloquear => (l10n.feedComentarioBloquear(c.alunoNome), l10n.feedComentarioBloquearConfirma),
+      _AcaoComentario.apagar => (
+        l10n.feedComentarioApagar,
+        l10n.feedComentarioApagarConfirma,
+      ),
+      _AcaoComentario.denunciar => (
+        l10n.feedComentarioDenunciar,
+        l10n.feedComentarioDenunciarConfirma,
+      ),
+      _AcaoComentario.bloquear => (
+        l10n.feedComentarioBloquear(c.alunoNome),
+        l10n.feedComentarioBloquearConfirma,
+      ),
     };
     final ok = await showFxConfirmSheet(
       context,
@@ -150,14 +162,11 @@ class _FeedCommentsSheetState extends State<FeedCommentsSheet> {
         }
       });
       widget.onComentou(_comentarios.length);
-      FeedbackHelper.showSuccess(
-        context,
-        switch (acao) {
-          _AcaoComentario.apagar => l10n.feedComentarioApagado,
-          _AcaoComentario.denunciar => l10n.feedComentarioDenunciado,
-          _AcaoComentario.bloquear => l10n.feedComentarioBloqueado,
-        },
-      );
+      FeedbackHelper.showSuccess(context, switch (acao) {
+        _AcaoComentario.apagar => l10n.feedComentarioApagado,
+        _AcaoComentario.denunciar => l10n.feedComentarioDenunciado,
+        _AcaoComentario.bloquear => l10n.feedComentarioBloqueado,
+      });
     } catch (e) {
       if (mounted) FeedbackHelper.showError(context, friendlyError(e));
     }
@@ -167,22 +176,37 @@ class _FeedCommentsSheetState extends State<FeedCommentsSheet> {
     final acoes = _acoesPara(c);
     if (acoes.isEmpty) return const SizedBox.shrink();
     final l10n = S.of(context);
-    return PopupMenuButton<_AcaoComentario>(
+    return IconButton(
       tooltip: l10n.feedComentarioOpcoes,
-      icon: Icon(FxIcons.maisVertical, size: 18, color: mute),
-      padding: EdgeInsets.zero,
-      onSelected: (a) => _executar(a, c),
-      itemBuilder: (_) => [
-        for (final a in acoes)
-          PopupMenuItem(
-            value: a,
-            child: Text(switch (a) {
-              _AcaoComentario.apagar => l10n.feedComentarioApagar,
-              _AcaoComentario.denunciar => l10n.feedComentarioDenunciar,
-              _AcaoComentario.bloquear => l10n.feedComentarioBloquear(c.alunoNome),
-            }),
-          ),
-      ],
+      icon: Icon(FxIcons.mais, size: 20, color: mute),
+      onPressed: () async {
+        final a = await showFxGroupedActionSheet<_AcaoComentario>(
+          context,
+          titulo: l10n.feedComentarioOpcoes,
+          grupos: [
+            FxActionGroup<_AcaoComentario>(null, [
+              for (final a in acoes)
+                FxActionItem(
+                  valor: a,
+                  rotulo: switch (a) {
+                    _AcaoComentario.apagar => l10n.feedComentarioApagar,
+                    _AcaoComentario.denunciar => l10n.feedComentarioDenunciar,
+                    _AcaoComentario.bloquear => l10n.feedComentarioBloquear(
+                      c.alunoNome,
+                    ),
+                  },
+                  icone: switch (a) {
+                    _AcaoComentario.apagar => FxIcons.excluir,
+                    _AcaoComentario.denunciar => FxIcons.meta,
+                    _AcaoComentario.bloquear => FxIcons.bloquear,
+                  },
+                  perigo: a != _AcaoComentario.denunciar,
+                ),
+            ]),
+          ],
+        );
+        if (a != null && mounted) await _executar(a, c);
+      },
     );
   }
 
@@ -206,11 +230,7 @@ class _FeedCommentsSheetState extends State<FeedCommentsSheet> {
           FxHomeSheetHeader(
             isDark: isDark,
             title: 'Comentários',
-            leading: Icon(
-              FxIcons.chat,
-              color: primary,
-              size: 18,
-            ),
+            leading: Icon(FxIcons.chat, color: primary, size: 18),
           ),
           Divider(height: 1, color: line),
           Expanded(
@@ -233,9 +253,13 @@ class _FeedCommentsSheetState extends State<FeedCommentsSheet> {
                       itemCount: _comentarios.length + (_hasNext ? 1 : 0),
                       itemBuilder: (ctx, i) {
                         if (i >= _comentarios.length) {
-                          return FxTonalButton(label: _loadingMore ? 'Carregando…' : 'Carregar mais', onPressed: _loadingMore
-                                ? null
-                                : () => _load(more: true), compact: true);
+                          return FxTonalButton(
+                            label:
+                                _loadingMore ? 'Carregando…' : 'Carregar mais',
+                            onPressed:
+                                _loadingMore ? null : () => _load(more: true),
+                            compact: true,
+                          );
                         }
                         final c = _comentarios[i];
                         final useCurrentAlunoFallback =
@@ -315,66 +339,66 @@ class _FeedCommentsSheetState extends State<FeedCommentsSheet> {
           ),
           if (widget.canCompose) Divider(height: 1, color: line),
           if (widget.canCompose)
-          Padding(
-            padding: EdgeInsets.fromLTRB(
-              16,
-              10,
-              16,
-              12 + MediaQuery.viewInsetsOf(context).bottom,
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _ctrl,
-                    minLines: 1,
-                    maxLines: 3,
-                    textInputAction: TextInputAction.send,
-                    onSubmitted: (_) => _enviar(),
-                    decoration: InputDecoration(
-                      hintText: 'Escreva um comentário...',
-                      hintStyle: TextStyle(color: mute),
-                      filled: true,
-                      fillColor:
-                          isDark ? EagleTokens.darkBg : EagleTokens.paper,
-                      border: FxInputDeco.outlineBorder(
-                        borderRadius: BorderRadius.circular(18),
-                        borderSide: BorderSide(color: line),
-                      ),
-                      enabledBorder: FxInputDeco.outlineBorder(
-                        borderRadius: BorderRadius.circular(18),
-                        borderSide: BorderSide(color: line),
-                      ),
-                      focusedBorder: FxInputDeco.outlineBorder(
-                        borderRadius: BorderRadius.circular(18),
-                        borderSide: BorderSide(color: primary, width: 1.4),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
+            Padding(
+              padding: EdgeInsets.fromLTRB(
+                16,
+                10,
+                16,
+                12 + MediaQuery.viewInsetsOf(context).bottom,
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _ctrl,
+                      minLines: 1,
+                      maxLines: 3,
+                      textInputAction: TextInputAction.send,
+                      onSubmitted: (_) => _enviar(),
+                      decoration: InputDecoration(
+                        hintText: 'Escreva um comentário...',
+                        hintStyle: TextStyle(color: mute),
+                        filled: true,
+                        fillColor:
+                            isDark ? EagleTokens.darkBg : EagleTokens.paper,
+                        border: FxInputDeco.outlineBorder(
+                          borderRadius: BorderRadius.circular(18),
+                          borderSide: BorderSide(color: line),
+                        ),
+                        enabledBorder: FxInputDeco.outlineBorder(
+                          borderRadius: BorderRadius.circular(18),
+                          borderSide: BorderSide(color: line),
+                        ),
+                        focusedBorder: FxInputDeco.outlineBorder(
+                          borderRadius: BorderRadius.circular(18),
+                          borderSide: BorderSide(color: primary, width: 1.4),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                IconButton.filled(
-                  tooltip: 'Enviar',
-                  onPressed: _sending ? null : _enviar,
-                  icon:
-                      _sending
-                          ? const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: FxLoading(
-                              strokeWidth: 2,
-                              color: EagleTokens.darkInk,
-                            ),
-                          )
-                          : const Icon(FxIcons.enviar),
-                ),
-              ],
+                  const SizedBox(width: 8),
+                  IconButton.filled(
+                    tooltip: 'Enviar',
+                    onPressed: _sending ? null : _enviar,
+                    icon:
+                        _sending
+                            ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: FxLoading(
+                                strokeWidth: 2,
+                                color: EagleTokens.darkInk,
+                              ),
+                            )
+                            : const Icon(FxIcons.enviar),
+                  ),
+                ],
+              ),
             ),
-          ),
         ],
       ),
     );

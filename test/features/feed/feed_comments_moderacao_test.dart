@@ -18,21 +18,41 @@ class _FakeFeedRepo implements FeedRepository {
     return Pagina(
       hasNext: false,
       content: [
-        FeedComentario(id: 1, alunoId: 7, alunoNome: 'Eu', texto: 'meu', criadoEm: ''),
-        FeedComentario(id: 2, alunoId: 8, alunoNome: 'Outro', texto: 'chato', criadoEm: ''),
-        FeedComentario(id: 3, alunoId: 8, alunoNome: 'Outro', texto: 'de novo', criadoEm: ''),
+        FeedComentario(
+          id: 1,
+          alunoId: 7,
+          alunoNome: 'Eu',
+          texto: 'meu',
+          criadoEm: '',
+        ),
+        FeedComentario(
+          id: 2,
+          alunoId: 8,
+          alunoNome: 'Outro',
+          texto: 'chato',
+          criadoEm: '',
+        ),
+        FeedComentario(
+          id: 3,
+          alunoId: 8,
+          alunoNome: 'Outro',
+          texto: 'de novo',
+          criadoEm: '',
+        ),
       ],
     );
   }
 
   @override
-  Future<void> denunciarComentario(int comentarioId) async => denunciados.add(comentarioId);
+  Future<void> denunciarComentario(int comentarioId) async =>
+      denunciados.add(comentarioId);
 
   @override
   Future<void> bloquearAluno(int alunoId) async => bloqueados.add(alunoId);
 
   @override
-  Future<void> apagarComentario(int comentarioId) async => apagados.add(comentarioId);
+  Future<void> apagarComentario(int comentarioId) async =>
+      apagados.add(comentarioId);
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);

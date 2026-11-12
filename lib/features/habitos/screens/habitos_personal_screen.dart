@@ -15,6 +15,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feature_gate.dart';
+import '../../../core/widgets/fx_barra_progresso.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
@@ -23,8 +24,6 @@ import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../../core/widgets/fx_strip_card.dart';
-import '../../../core/widgets/fx_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/alunos/providers/alunos_provider.dart';
@@ -64,6 +63,7 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
   var _carregandoMais = false;
   String? _error;
   DateTime? _fetchedAt;
+  var _mostrarBateram = false;
 
   @override
   void initState() {
@@ -171,7 +171,7 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
     final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
 
     return fxScreenA11yScope(
-      label: 'Hábitos & Compliance',
+      label: 'Hábitos',
       child: FeatureGate(
         featureName: 'Habit Coaching',
         requiredPlan: SubscriptionPlan.PRO,
@@ -183,262 +183,138 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
             FxKeyboardDismissScope.dismiss();
           },
           child: FxShellScaffold(
-          useMesh: true,
-          safeArea: false,
-          constrainWidth: false,
-          appBar: FxShellAppBar(
-            title: 'Hábitos & Compliance',
-            subtitle: FxHubFreshness.joinCount(
-              habitoCountLabel(_loading ? 0 : _habitos.length),
-              _loading ? null : freshnessLabel,
-            ),
-            onBack: () {
-              FxKeyboardDismissScope.dismiss();
-              safePopOrGo(context, '/perfil/ferramentas');
-            },
-            actions: [
-              FxHelpIconButton(
-                tooltip: 'Como usar os hábitos',
-                onTap: () => showFxHelpSheet(
-                  context,
-                  title: 'Hábitos',
-                  subtitle: 'Metas diárias da base e quem está cumprindo.',
-                  tips: const [
-                    FxHelpTip('Como calculamos', habitoComoCalculamos),
-                    FxHelpTip(
-                      'Lista',
-                      'Toque no hábito para abrir. Desativar fica no detalhe.',
+            useMesh: true,
+            safeArea: false,
+            constrainWidth: false,
+            appBar: FxShellAppBar(
+              title: 'Hábitos',
+              subtitle: FxHubFreshness.joinCount(
+                _loading
+                    ? habitoCountLabel(0)
+                    : habitoSubtituloLista(
+                      habitos: _habitos.length,
+                      abaixoDaMeta:
+                          habitoOrdenarSemana(_compliance).pendentes.length,
+                      temSemana: _compliance.any((c) => c.metaSemana > 0),
                     ),
-                    FxHelpTip(
-                      'Novo',
-                      'O criar no rodapé abre para todos ou para um aluno só.',
-                    ),
-                  ],
-                ),
+                _loading ? null : freshnessLabel,
               ),
-            ],
-          ),
-          body:
-              _loading
-                  ? const Padding(
-                    padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-                    child: SkeletonList(count: 5),
-                  )
-                  : _error != null
-                  ? FxErrorState(
-                    chromeOnDark: chrome.isDark,
-                    primary: primary,
-                    message: _error!,
-                    onRetry: _carregar,
-                  )
-                  : Column(
-                    children: [
-                      Expanded(
-                        child: FxContentWidthLimiter(child: _buildBody()),
-                      ),
-                      SafeArea(
-                        top: false,
-                        child: Padding(
-                          padding: EdgeInsets.fromLTRB(
-                            FxSettingsLayout.pageInset,
-                            TokensStrip.s2,
-                            FxSettingsLayout.pageInset,
-                            TokensStrip.s2 +
-                                MediaQuery.viewInsetsOf(context).bottom,
+              onBack: () {
+                FxKeyboardDismissScope.dismiss();
+                safePopOrGo(context, '/perfil/ferramentas');
+              },
+              actions: [
+                FxHelpIconButton(
+                  tooltip: 'Como usar os hábitos',
+                  onTap:
+                      () => showFxHelpSheet(
+                        context,
+                        title: 'Hábitos',
+                        subtitle:
+                            'O que o aluno faz fora do treino e marca no app.',
+                        tips: const [
+                          FxHelpTip('Esta semana', habitoComoCalculamos),
+                          FxHelpTip(
+                            'Seus hábitos',
+                            'Toque no hábito para ver cada aluno. Desativar fica no ⋯.',
                           ),
-                          child: FxLiquidPrimaryButton(
-                            label: 'Novo hábito',
-                            onPressed: _novoHabito,
+                          FxHelpTip(
+                            'Novo',
+                            'Escolha um modelo, quantas vezes por semana e para quem.',
+                          ),
+                        ],
+                      ),
+                ),
+              ],
+            ),
+            body:
+                _loading
+                    ? const Padding(
+                      padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                      child: SkeletonList(count: 5),
+                    )
+                    : _error != null
+                    ? FxErrorState(
+                      chromeOnDark: chrome.isDark,
+                      primary: primary,
+                      message: _error!,
+                      onRetry: _carregar,
+                    )
+                    : Column(
+                      children: [
+                        Expanded(
+                          child: FxContentWidthLimiter(child: _buildBody()),
+                        ),
+                        SafeArea(
+                          top: false,
+                          child: Padding(
+                            padding: EdgeInsets.fromLTRB(
+                              FxSettingsLayout.pageInset,
+                              TokensStrip.s2,
+                              FxSettingsLayout.pageInset,
+                              TokensStrip.s2 +
+                                  MediaQuery.viewInsetsOf(context).bottom,
+                            ),
+                            child: FxLiquidPrimaryButton(
+                              label: 'Novo hábito',
+                              onPressed: _novoHabito,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-        ),
+                      ],
+                    ),
+          ),
         ),
       ),
     );
   }
 
-  List<Widget> get _habitoRows {
-    final mute = fxScreenMute(context);
-    final isDark = ShellChrome.of(context).isDark;
-    final primary = Theme.of(context).colorScheme.primary;
-    final focus = habitoFocusCompliance(_compliance);
-    final focusDanger =
-        focus != null && habitoComplianceDanger(focus.compliancePct);
-    final complianceRows = habitoComplianceListExcludingFocus(
-      _compliance,
-      focusDanger ? focus : null,
+  Future<void> _abrirHabito(Habito habito) async {
+    await context.push(habitoDetailPath(habito.id), extra: habito);
+    if (mounted) await _carregar();
+  }
+
+  List<Widget> get _linhas {
+    final chrome = ShellChrome.of(context);
+    final semana = habitoOrdenarSemana(_compliance);
+    final temSemana = semana.pendentes.isNotEmpty || semana.bateram.isNotEmpty;
+
+    Widget linhaAluno(ComplianceItem c) => _LinhaSemana(
+      nome: habitoComplianceLabel(c.alunoNome),
+      feitos: c.checksSemana,
+      meta: c.metaSemana,
+      onTap: () => context.push('/alunos/${c.alunoId}'),
     );
 
-    return [
-      if (focusDanger) ...[
-        FxStripCard(
-          emphasize: true,
-          semanticsLabel:
-              'Compliance baixa: ${habitoComplianceLabel(focus.alunoNome)}',
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Quem precisa de atenção',
-                style: FocuxHubTypography.chip(mute),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                habitoComplianceLabel(focus.alunoNome),
-                style: FocuxHubTypography.metric(
-                  color: ShellChrome.of(context).ink,
-                  fontSize: TokensStrip.fontTitulo,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                '${habitoComplianceValue(focus.compliancePct)} · ${habitoComplianceSubtitle(focus.checksSemana)}',
-                style: FocuxHubTypography.body(
-                  color: ShellChrome.of(context).ink,
-                ).copyWith(fontWeight: FontWeight.w700),
-              ),
-              const SizedBox(height: TokensStrip.s3),
-              Wrap(
-                spacing: TokensStrip.s2,
-                runSpacing: TokensStrip.s2,
-                children: [
-                  FxActionChip(
-                    label: 'Abrir aluno',
-                    accent: primary,
-                    isDark: isDark,
-                    onPressed: () => context.push('/alunos/${focus.alunoId}'),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: TokensStrip.s4),
-      ] else if (_habitos.isNotEmpty) ...[
-        FxStripCard(
-          emphasize: true,
-          semanticsLabel: 'Próximo hábito: ${_habitos.first.titulo}',
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Próximo hábito', style: FocuxHubTypography.chip(mute)),
-              const SizedBox(height: 6),
-              Text(
-                _habitos.first.titulo,
-                style: FocuxHubTypography.metric(
-                  color: ShellChrome.of(context).ink,
-                  fontSize: TokensStrip.fontTitulo,
-                ),
-              ),
-              const SizedBox(height: TokensStrip.s3),
-              Wrap(
-                spacing: TokensStrip.s2,
-                runSpacing: TokensStrip.s2,
-                children: [
-                  FxActionChip(
-                    label: 'Abrir',
-                    accent: primary,
-                    isDark: isDark,
-                    onPressed: () async {
-                      final habito = _habitos.first;
-                      await context.push(
-                        habitoDetailPath(habito.id),
-                        extra: habito,
-                      );
-                      if (mounted) await _carregar();
-                    },
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: TokensStrip.s4),
-      ],
-      if (_habitos.isEmpty)
+    if (_habitos.isEmpty && _query.trim().isEmpty) {
+      return [
+        const SizedBox(height: TokensStrip.s6),
         FxEmptyState(
           icon: FxIcons.concluido,
-          title: habitoEmptyTitle(hasCompliance: _compliance.isNotEmpty),
-          subtitle: habitoEmptySubtitle(hasCompliance: _compliance.isNotEmpty),
-        )
-      else ...[
-        const DashboardSectionHeader(title: 'Hábitos cadastrados'),
-        const SizedBox(height: TokensStrip.s2),
-        Text(
-          'Toque para abrir a meta e desativar.',
-          style: FocuxHubTypography.bodyMuted(
-            color: mute,
-            fontWeight: FontWeight.w600,
-          ),
+          title: 'Nenhum hábito ainda',
+          subtitle: habitoVazioTexto,
+          action: FxEmptyAction(label: 'Novo hábito', onTap: _novoHabito),
         ),
-        const SizedBox(height: TokensStrip.s3),
-        for (final habito in _habitos)
+      ];
+    }
+
+    return [
+      if (temSemana) ...[
+        const DashboardSectionHeader(title: 'Esta semana'),
+        const SizedBox(height: TokensStrip.s2),
+        for (final c in semana.pendentes) linhaAluno(c),
+        if (semana.bateram.isNotEmpty)
           FxSatelliteListTile(
-            title: habito.titulo,
-            subtitle: Text(
-              habitoSubtitle(
-                descricao: habito.descricao,
-                metaSemanal: habito.metaSemanal,
-                alunoId: habito.alunoId,
-              ),
+            title: 'Bateram a meta (${semana.bateram.length})',
+            titleCase: false,
+            trailing: Icon(
+              _mostrarBateram ? FxIcons.chevronCima : FxIcons.chevronBaixo,
+              color: chrome.mute,
             ),
-            trailing: Text(
-              habitoMetaValue(habito.metaSemanal),
-              style: FocuxHubTypography.bodyMuted(
-                color: mute,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            onTap: () async {
-              await context.push(
-                habitoDetailPath(habito.id),
-                extra: habito,
-              );
-              if (mounted) await _carregar();
-            },
+            onTap: () => setState(() => _mostrarBateram = !_mostrarBateram),
           ),
-      ],
-      const SizedBox(height: FxSettingsLayout.groupGap),
-      if (_compliance.isEmpty)
-        FxEmptyState(
-          icon: FxIcons.grafico,
-          title: habitoComplianceEmptyTitle(_query),
-          subtitle: habitoComplianceEmptySubtitle(_query),
-          action:
-              _query.trim().isEmpty
-                  ? null
-                  : FxEmptyAction(
-                    label: 'Limpar busca',
-                    secondary: true,
-                    onTap: () {
-                      _searchCtrl.clear();
-                      setState(() => _query = '');
-                      _carregar();
-                    },
-                  ),
-        )
-      else ...[
-        const DashboardSectionHeader(title: 'Compliance da semana'),
-        const SizedBox(height: TokensStrip.s3),
-        for (final item in complianceRows)
-          FxSatelliteListTile(
-            title: habitoComplianceLabel(item.alunoNome),
-            subtitle: Text(habitoComplianceSubtitle(item.checksSemana)),
-            trailing: Text(
-              habitoComplianceValue(item.compliancePct),
-              style: FocuxHubTypography.bodyMuted(
-                color:
-                    habitoComplianceDanger(item.compliancePct)
-                        ? EagleTokens.bad
-                        : mute,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            onTap: () => context.push('/alunos/${item.alunoId}'),
-          ),
+        if (_mostrarBateram)
+          for (final c in semana.bateram) linhaAluno(c),
         if (_hasMore)
           FxSatelliteListTile(
             title: _carregandoMais ? 'Carregando…' : 'Carregar mais',
@@ -446,64 +322,158 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
                 _carregandoMais
                     ? null
                     : Text(
-                      'Mais ${_totalCompliance - _compliance.length} nesta lista.',
+                      'Mais ${_totalCompliance - _compliance.length} alunos.',
                     ),
             onTap: _carregandoMais ? null : _carregarMais,
           ),
+        const SizedBox(height: FxSettingsLayout.groupGap),
+      ] else if (_query.trim().isNotEmpty) ...[
+        FxEmptyState(
+          icon: FxIcons.buscar,
+          title: 'Nenhum aluno encontrado',
+          subtitle: 'Nada com esse nome nesta semana.',
+          action: FxEmptyAction(
+            label: 'Limpar busca',
+            secondary: true,
+            onTap: () {
+              _searchCtrl.clear();
+              setState(() => _query = '');
+              _carregar();
+            },
+          ),
+        ),
+        const SizedBox(height: FxSettingsLayout.groupGap),
       ],
+      const DashboardSectionHeader(title: 'Seus hábitos'),
+      const SizedBox(height: TokensStrip.s2),
+      for (final habito in _habitos)
+        FxSatelliteListTile(
+          title: habito.titulo,
+          subtitle: Text(
+            habitoRegra(
+              metaSemanal: habito.metaSemanal,
+              alunoId: habito.alunoId,
+            ),
+          ),
+          onTap: () => _abrirHabito(habito),
+        ),
     ];
   }
 
   Widget _buildBody() {
+    final busca = habitoMostraBusca(total: _totalCompliance, query: _query);
+    final linhas = _linhas;
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(
-            TokensStrip.s4,
-            TokensStrip.s2,
-            TokensStrip.s4,
-            TokensStrip.s2,
-          ),
-          child: TextField(
-            controller: _searchCtrl,
-            focusNode: _searchFocus,
-            textInputAction: TextInputAction.search,
-            onChanged: _onQueryChanged,
-            onSubmitted: (value) {
-              _debounce?.cancel();
-              final next = value.trim();
-              if (next == _query && _compliance.isNotEmpty) return;
-              _query = next;
-              _carregar();
-            },
-            onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
-            decoration: InputDecoration(
-              hintText: 'Buscar aluno',
-              prefixIcon: const Icon(FxIcons.buscar),
-              border: FxInputDeco.outlineBorder(
-                borderRadius: BorderRadius.circular(16),
+        if (busca)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              TokensStrip.s4,
+              TokensStrip.s2,
+              TokensStrip.s4,
+              TokensStrip.s2,
+            ),
+            child: TextField(
+              controller: _searchCtrl,
+              focusNode: _searchFocus,
+              textInputAction: TextInputAction.search,
+              onChanged: _onQueryChanged,
+              onSubmitted: (value) {
+                _debounce?.cancel();
+                final next = value.trim();
+                if (next == _query && _compliance.isNotEmpty) return;
+                _query = next;
+                _carregar();
+              },
+              onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
+              decoration: InputDecoration(
+                hintText: 'Buscar aluno',
+                prefixIcon: const Icon(FxIcons.buscar),
+                border: FxInputDeco.outlineBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
               ),
             ),
           ),
-        ),
         Expanded(
           child: RefreshIndicator(
             onRefresh: _carregar,
-            child: ListView.builder(
+            child: ListView(
               physics: const AlwaysScrollableScrollPhysics(),
               keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               padding: const EdgeInsets.fromLTRB(
                 FxSettingsLayout.pageInset,
-                8,
+                TokensStrip.s2,
                 FxSettingsLayout.pageInset,
-                88,
+                TokensStrip.s6,
               ),
-              itemCount: _habitoRows.length,
-              itemBuilder: (context, index) => _habitoRows[index],
+              children: linhas,
             ),
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Um aluno em "Esta semana": nome, "3 de 7 esta semana" e a barra.
+class _LinhaSemana extends StatelessWidget {
+  const _LinhaSemana({
+    required this.nome,
+    required this.feitos,
+    required this.meta,
+    required this.onTap,
+  });
+
+  final String nome;
+  final int feitos;
+  final int meta;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    final bateu = meta > 0 && feitos >= meta;
+    return Semantics(
+      button: true,
+      label: '$nome, ${habitoSemanaLinha(feitos, meta)}',
+      excludeSemantics: true,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(TokensStrip.rCard),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            vertical: TokensStrip.s2,
+            horizontal: TokensStrip.s1,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      nome,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: FocuxHubTypography.body(color: chrome.ink),
+                    ),
+                  ),
+                  Text(
+                    habitoSemanaLinha(feitos, meta),
+                    style: FocuxHubTypography.rotulo(color: chrome.mute),
+                  ),
+                ],
+              ),
+              const SizedBox(height: TokensStrip.s1),
+              FxBarraProgresso(
+                fracao: habitoFracao(feitos, meta),
+                cor: bateu ? EagleTokens.good : null,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

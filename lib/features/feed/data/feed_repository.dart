@@ -92,6 +92,35 @@ class FeedComentario {
   );
 }
 
+class FeedCurtidor {
+  const FeedCurtidor({required this.alunoId, required this.nome, this.fotoUrl});
+
+  final int alunoId;
+  final String nome;
+  final String? fotoUrl;
+
+  factory FeedCurtidor.fromJson(Map<String, dynamic> j) => FeedCurtidor(
+    alunoId: (j['alunoId'] as num?)?.toInt() ?? 0,
+    nome: j['nome'] as String? ?? '',
+    fotoUrl: j['fotoUrl'] as String?,
+  );
+}
+
+class FeedQuemCurtiu {
+  const FeedQuemCurtiu({required this.total, required this.alunos});
+
+  final int total;
+  final List<FeedCurtidor> alunos;
+
+  factory FeedQuemCurtiu.fromJson(Map<String, dynamic> j) => FeedQuemCurtiu(
+    total: (j['total'] as num?)?.toInt() ?? 0,
+    alunos: [
+      for (final a in (j['alunos'] as List?) ?? const [])
+        if (a is Map) FeedCurtidor.fromJson(Map<String, dynamic>.from(a)),
+    ],
+  );
+}
+
 class FeedRepository {
   final ApiClient _client;
   FeedRepository(this._client);
@@ -114,9 +143,7 @@ class FeedRepository {
     );
     final data = r.data;
     if (data is! Map) {
-      throw FormatException(
-        'GET /api/feed devolve Pagina, não lista crua.',
-      );
+      throw FormatException('GET /api/feed devolve Pagina, não lista crua.');
     }
     return Pagina.fromJson(
       Map<String, dynamic>.from(data),
@@ -157,6 +184,7 @@ class FeedRepository {
     String conteudo, {
     String? tipoPost,
     String? midiaUrl,
+    bool avisar = true,
   }) async {
     final r = await _client.dio.post(
       '/api/feed',
@@ -165,6 +193,7 @@ class FeedRepository {
         'conteudo': conteudo,
         if (tipoPost != null) 'tipoPost': tipoPost,
         if (midiaUrl != null) 'midiaUrl': midiaUrl,
+        'avisar': avisar,
       },
     );
     throwIfQueuedOffline(r);
@@ -189,6 +218,12 @@ class FeedRepository {
     return FeedPost.fromJson(r.data);
   }
 
+  /// Só o dono do post: os alunos que curtiram, do mais recente (até 100).
+  Future<FeedQuemCurtiu> quemCurtiu(int postId) async {
+    final r = await _client.dio.get('/api/feed/$postId/curtidas');
+    return FeedQuemCurtiu.fromJson(Map<String, dynamic>.from(r.data as Map));
+  }
+
   Future<int> toggleCurtida(int postId) async {
     final r = await _client.dio.post('/api/feed/$postId/curtir');
     throwIfQueuedOffline(r);
@@ -208,9 +243,10 @@ class FeedRepository {
     await _client.dio.delete('/api/feed/comentarios/$comentarioId'),
   );
 
-  Future<void> denunciarComentario(int comentarioId) async => throwIfQueuedOffline(
-    await _client.dio.post('/api/feed/comentarios/$comentarioId/denunciar'),
-  );
+  Future<void> denunciarComentario(int comentarioId) async =>
+      throwIfQueuedOffline(
+        await _client.dio.post('/api/feed/comentarios/$comentarioId/denunciar'),
+      );
 
   Future<void> bloquearAluno(int alunoId) async => throwIfQueuedOffline(
     await _client.dio.post('/api/feed/alunos/$alunoId/bloquear'),
@@ -222,7 +258,9 @@ class FeedRepository {
   }) async {
     final r = await _client.dio.get(
       '/api/feed/$postId/comentarios',
-      queryParameters: {if (cursor != null && cursor.isNotEmpty) 'cursor': cursor},
+      queryParameters: {
+        if (cursor != null && cursor.isNotEmpty) 'cursor': cursor,
+      },
     );
     if (r.data is! Map) {
       throw const FormatException(

@@ -14,7 +14,6 @@ void main() {
     expect(screen, contains("safePopOrGo(context, '/dashboard/aluno')"));
     expect(screen, contains('canPop: false'));
     expect(screen, contains('ListView.builder'));
-    expect(screen, contains('FxSatelliteListTile'));
     expect(screen, contains('desafioAlunoDetailPath'));
     expect(screen, contains('FeatureGate'));
     // COMUNIDADE_GRUPOS é a capability de desafios (+ grupos); não há flag separada.
@@ -36,5 +35,7 @@ void main() {
     expect(screen, isNot(contains('FloatingActionButton')));
     expect(screen, isNot(contains('context.pop()')));
     expect(screen, isNot(contains('FilledButton')));
+    expect(screen, contains('DesafioLinha('));
+    expect(screen, contains('desafioMostraFiltros'));
   });
 }

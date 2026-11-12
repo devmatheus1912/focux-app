@@ -1,37 +1,18 @@
 import '../data/habito_repository.dart';
 
-String habitoTemplateLabel({
-  required String titulo,
-  String? icone,
-}) {
-  final nome = titulo.trim();
-  final glyph = icone?.trim();
-  if (glyph != null && glyph.isNotEmpty) {
-    return nome.isEmpty ? glyph : '$glyph $nome';
-  }
-  return nome.isEmpty ? 'Template' : nome;
+/// "5 vezes por semana", "1 vez por semana".
+String habitoVezesPorSemana(int n) =>
+    n == 1 ? '1 vez por semana' : '$n vezes por semana';
+
+String habitoAlcanceLabel(int? alunoId, {String? alunoNome}) {
+  if (alunoId == null) return habitoAlunoTodosLabel;
+  final nome = alunoNome?.trim();
+  return nome == null || nome.isEmpty ? 'Um aluno' : nome;
 }
 
-String habitoTemplateValue(String? titulo, {String? icone}) {
-  if (titulo == null || titulo.trim().isEmpty) return 'Personalizado';
-  return habitoTemplateLabel(titulo: titulo, icone: icone);
-}
-
-String habitoAlcanceLabel(int? alunoId) =>
-    alunoId == null ? habitoAlunoTodosLabel : 'Aluno específico';
-
-String habitoSubtitle({
-  String? descricao,
-  required int metaSemanal,
-  int? alunoId,
-}) {
-  final alcance = habitoAlcanceLabel(alunoId);
-  final desc = descricao?.trim();
-  if (desc != null && desc.isNotEmpty) return '$desc · $alcance';
-  return 'Meta semanal: ${metaSemanal}x · $alcance';
-}
-
-String habitoMetaValue(int metaSemanal) => '${metaSemanal}x';
+/// A regra numa frase: "5x por semana · Todos os alunos".
+String habitoRegra({required int metaSemanal, int? alunoId}) =>
+    '${metaSemanal}x por semana · ${habitoAlcanceLabel(alunoId)}';
 
 String habitoComplianceLabel(String? alunoNome) {
   final nome = alunoNome?.trim();
@@ -39,48 +20,43 @@ String habitoComplianceLabel(String? alunoNome) {
   return nome;
 }
 
-String habitoComplianceValue(int pct) => '$pct%';
+/// "3 de 7 esta semana".
+String habitoSemanaLinha(int feitos, int meta) =>
+    '$feitos de $meta esta semana';
 
-String habitoComplianceSubtitle(int checksSemana) {
-  if (checksSemana == 1) return '1 check na semana';
-  return '$checksSemana checks na semana';
+double habitoFracao(int feitos, int meta) =>
+    meta <= 0 ? 0 : (feitos / meta).clamp(0, 1).toDouble();
+
+/// "Esta semana" da lista: quem está mais longe da meta vem primeiro; quem
+/// já bateu fica num grupo fechado. Aluno sem hábito não aparece.
+({List<ComplianceItem> pendentes, List<ComplianceItem> bateram})
+habitoOrdenarSemana(List<ComplianceItem> items) {
+  final comMeta = items.where((c) => c.metaSemana > 0).toList();
+  final bateram =
+      comMeta.where((c) => c.checksSemana >= c.metaSemana).toList()
+        ..sort((a, b) => a.alunoNome.compareTo(b.alunoNome));
+  final pendentes =
+      comMeta.where((c) => c.checksSemana < c.metaSemana).toList()
+        ..sort((a, b) {
+          final fa = habitoFracao(a.checksSemana, a.metaSemana);
+          final fb = habitoFracao(b.checksSemana, b.metaSemana);
+          final c = fa.compareTo(fb);
+          return c != 0 ? c : a.alunoNome.compareTo(b.alunoNome);
+        });
+  return (pendentes: pendentes, bateram: bateram);
 }
 
-bool habitoComplianceDanger(int pct) => pct < 40;
-
-/// Prioriza quem está em risco; senão o primeiro da lista.
-ComplianceItem? habitoFocusCompliance(List<ComplianceItem> items) {
-  if (items.isEmpty) return null;
-  ComplianceItem? worst;
-  for (final item in items) {
-    if (worst == null || item.compliancePct < worst.compliancePct) {
-      worst = item;
-    }
-  }
-  return worst;
-}
-
-/// Compliance da semana sem o aluno já destacado no strip de atenção.
-List<ComplianceItem> habitoComplianceListExcludingFocus(
-  List<ComplianceItem> items,
-  ComplianceItem? focus,
-) {
-  if (focus == null) return items;
-  return items.where((c) => c.alunoId != focus.alunoId).toList(growable: false);
-}
-
-const habitoComoCalculamos =
-    'Compliance é checks da semana sobre a meta. Vale para todos os alunos ativos.';
-
-String habitoAlunoSubtitle({
-  String? descricao,
-  required int feitosNaSemana,
-  required int metaSemanal,
+/// Subtítulo da lista: o que pede ação.
+String habitoSubtituloLista({
+  required int habitos,
+  required int abaixoDaMeta,
+  required bool temSemana,
 }) {
-  final desc = descricao?.trim();
-  final meta = '$feitosNaSemana/$metaSemanal na semana';
-  if (desc != null && desc.isNotEmpty) return '$desc · $meta';
-  return meta;
+  if (habitos == 0) return 'Nenhum hábito';
+  if (!temSemana) return habitoCountLabel(habitos);
+  if (abaixoDaMeta == 0) return 'Todos em dia esta semana';
+  if (abaixoDaMeta == 1) return '1 aluno abaixo da meta esta semana';
+  return '$abaixoDaMeta alunos abaixo da meta esta semana';
 }
 
 String habitoCountLabel(int count) {
@@ -89,94 +65,47 @@ String habitoCountLabel(int count) {
   return '$count hábitos';
 }
 
-/// Empty de hábitos: com compliance na tela não afirma vazio total.
-String habitoEmptyTitle({required bool hasCompliance}) =>
-    hasCompliance ? 'Nenhum hábito ainda' : 'Nenhum hábito cadastrado';
+const habitoVazioTexto =
+    'Hábitos são o que o aluno faz fora do treino, como dormir bem e beber água. Ele marca no app, e você vê quem está cumprindo.';
 
-String habitoEmptySubtitle({required bool hasCompliance}) => hasCompliance
-    ? 'Crie um novo no rodapé. A compliance da semana segue abaixo.'
-    : 'Hábitos diários (água, sono, refeições) aumentam aderência e reduzem churn.';
+const habitoComoCalculamos =
+    'A meta da semana é quantas vezes o aluno marca o hábito. Ele marca no app dele; você vê quem está em dia.';
 
-String habitoComplianceEmptyTitle(String query) =>
-    query.trim().isEmpty ? 'Sem dados ainda' : 'Nenhum aluno encontrado';
-
-String habitoComplianceEmptySubtitle(String query) => query.trim().isEmpty
-    ? 'Cadastre hábitos e os alunos vão começar a marcar.'
-    : 'Nada com esse nome na compliance da semana.';
+/// Busca de aluno só com mais de 6 na lista.
+bool habitoMostraBusca({required int total, required String query}) =>
+    total > 6 || query.trim().isNotEmpty;
 
 const habitoAlunoTodosId = 0;
 const habitoAlunoTodosLabel = 'Todos os alunos';
-
-String habitoDetalheMessage({
-  String? descricao,
-  required int metaSemanal,
-}) {
-  final desc = descricao?.trim();
-  final meta = 'Meta semanal: ${metaSemanal}x. Os alunos marcam no app deles.';
-  if (desc == null || desc.isEmpty) return meta;
-  return '$desc\n\n$meta';
-}
 
 String habitoDetailPath(int id) => '/habitos/$id';
 
 String habitoAlunoDetailPath(int id) => '/aluno/habitos/$id';
 
-const habitoDetalheSecaoResumo = 'resumo';
-const habitoDetalheSecaoSobre = 'sobre';
+/// Lista do aluno: "Meta · 3 de 5 esta semana".
+String habitoAlunoSubtitle({
+  String? descricao,
+  required int feitosNaSemana,
+  required int metaSemanal,
+}) {
+  final desc = descricao?.trim();
+  final meta = habitoSemanaLinha(feitosNaSemana, metaSemanal);
+  if (desc != null && desc.isNotEmpty) return '$desc · $meta';
+  return meta;
+}
 
-const habitoDetalheSecoes = [
-  (value: habitoDetalheSecaoResumo, label: 'Resumo'),
-  (value: habitoDetalheSecaoSobre, label: 'Sobre'),
-];
-
-String habitoStreakValue(int streak) => '$streak';
-
-String habitoStreakHint(int streak) {
-  if (streak <= 0) return 'Sem sequência';
+String habitoSequenciaLinha(int streak) {
+  if (streak <= 0) return '';
   if (streak == 1) return '1 dia seguido';
   return '$streak dias seguidos';
 }
 
-String habitoFeitosValue(int feitos, int meta) => '$feitos/$meta';
-
-String habitoFeitosHint({required int feitos, required int meta}) {
-  if (meta <= 0) return 'Sem meta semanal';
-  if (feitos >= meta) return 'Meta da semana ok';
-  return 'Feitos na semana';
-}
-
-String habitoDetailSubtitle({
-  required int metaSemanal,
-  int? alunoId,
-  bool ativo = true,
-}) {
-  return [
-    if (!ativo) 'Desativado',
-    'Meta ${habitoMetaValue(metaSemanal)}',
-    habitoAlcanceLabel(alunoId),
-  ].join(' · ');
-}
-
-String habitoStickyPersonal() => 'Desativar hábito';
-
 String habitoStickyAluno(bool feitoHoje) =>
     feitoHoje ? 'Desmarcar hoje' : 'Marcar hoje';
 
-String habitoResumoLine({
-  required int streak,
-  required int feitos,
-  required int meta,
-}) {
-  return 'Sequência $streak · $feitos de $meta na semana.';
-}
-
-String habitoSobreEmpty() => 'Sem descrição neste hábito.';
-
-String habitoDesativadoChip() => 'Desativado';
-
 String habitoLembreteLine(String? hora) {
   final value = hora?.trim();
-  if (value == null || value.isEmpty) return 'Sem horário de lembrete';
+  if (value == null || value.isEmpty) return '';
   return 'Lembrete às $value';
 }
 
@@ -189,9 +118,12 @@ String habitoCheckDiaLabel(DateTime data) {
 String habitoChecksLine(List<HabitoCheckDia>? checks) {
   if (checks == null) return '';
   final feitos = checks.where((c) => c.feito).toList();
-  if (feitos.isEmpty) return 'Nenhum check ainda';
-  final recent = feitos.take(7).map((c) => habitoCheckDiaLabel(c.data)).join(', ');
-  return 'Feitos: $recent';
+  if (feitos.isEmpty) return 'Nenhuma marcação ainda';
+  final recent = feitos
+      .take(7)
+      .map((c) => habitoCheckDiaLabel(c.data))
+      .join(', ');
+  return 'Últimas marcações: $recent';
 }
 
 List<HabitoCheckDia>? habitoPatchCheckHoje(
@@ -202,9 +134,10 @@ List<HabitoCheckDia>? habitoPatchCheckHoje(
   if (checks == null) return null;
   final today = now ?? DateTime.now();
   final key = DateTime(today.year, today.month, today.day);
-  final rest = checks.where((c) {
-    final day = DateTime(c.data.year, c.data.month, c.data.day);
-    return day != key;
-  }).toList();
+  final rest =
+      checks.where((c) {
+        final day = DateTime(c.data.year, c.data.month, c.data.day);
+        return day != key;
+      }).toList();
   return [HabitoCheckDia(data: key, feito: feito), ...rest];
 }

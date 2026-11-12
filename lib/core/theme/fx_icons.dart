@@ -284,6 +284,7 @@ abstract final class FxIcons {
   static const IconData erroPequeno = IconData(0xe4e2, fontFamily: _regular); // warningCircle
   static const IconData fecharPequeno = IconData(0xe4f6, fontFamily: _regular); // x
   static const IconData graficoIaPequeno = IconData(0xe156, fontFamily: _regular); // chartLineUp
+  static const IconData fixadoPequeno = IconData(0xe3e2, fontFamily: _regular); // pushPin
   static const IconData ideiaPequeno = IconData(0xe2dc, fontFamily: _regular); // lightbulb
   static const IconData infoPequeno = IconData(0xe2ce, fontFamily: _regular); // info
   static const IconData linkPequeno = IconData(0xe2e2, fontFamily: _regular); // link

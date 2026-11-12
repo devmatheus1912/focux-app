@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../core/api/media_upload_service.dart';
 import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/theme/fx_icons.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -12,12 +15,17 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../../l10n/pt.dart';
 import '../data/feed_repository.dart';
 import '../utils/feed_display.dart';
-import '../../../l10n/pt.dart';
-import '../../../core/theme/fx_icons.dart';
 
+/// Compositor do feed: uma caixa só (a primeira linha vira o título), Foto e
+/// Vídeo com rótulo, "Mostrar como dica" e "Avisar os alunos". Publica com a
+/// folha aberta; se falhar, o texto e a mídia ficam.
 class FeedComposerSheet extends StatefulWidget {
   const FeedComposerSheet({super.key, required this.ref, this.post});
 
@@ -31,12 +39,11 @@ class FeedComposerSheet extends StatefulWidget {
 }
 
 class _FeedComposerSheetState extends State<FeedComposerSheet> {
-  final _tituloCtrl = TextEditingController();
-  final _conteudoCtrl = TextEditingController();
-  String _tipoSelecionado = 'IMAGEM';
+  final _textoCtrl = TextEditingController();
+  String _tipoMidia = 'IMAGEM';
   bool _dica = false;
-  bool _comTitulo = false;
-  XFile? _midiaSelecionada;
+  bool _avisar = true;
+  XFile? _midia;
   bool _salvando = false;
   bool _escolhendoMidia = false;
 
@@ -46,16 +53,14 @@ class _FeedComposerSheetState extends State<FeedComposerSheet> {
   void initState() {
     super.initState();
     final post = widget.post;
-    if (post == null) return;
-    _tituloCtrl.text = post.titulo;
-    _conteudoCtrl.text = post.conteudo;
-    _comTitulo = post.titulo.trim().isNotEmpty;
+    if (post != null) {
+      _textoCtrl.text = feedJuntarTitulo(post.titulo, post.conteudo);
+    }
   }
 
   @override
   void dispose() {
-    _tituloCtrl.dispose();
-    _conteudoCtrl.dispose();
+    _textoCtrl.dispose();
     super.dispose();
   }
 
@@ -72,10 +77,10 @@ class _FeedComposerSheetState extends State<FeedComposerSheet> {
                 imageQuality: 86,
                 maxWidth: 1600,
               );
-      if (file != null) {
+      if (file != null && mounted) {
         setState(() {
-          _midiaSelecionada = file;
-          _tipoSelecionado = tipo;
+          _midia = file;
+          _tipoMidia = tipo;
         });
       }
     } finally {
@@ -87,38 +92,38 @@ class _FeedComposerSheetState extends State<FeedComposerSheet> {
     if (_salvando) return;
     HapticFeedback.mediumImpact();
     setState(() => _salvando = true);
+    final partes = feedSepararTitulo(_textoCtrl.text);
     try {
+      final repo = FeedRepository(widget.ref.read(apiClientProvider));
       if (widget.post case final post?) {
-        await FeedRepository(widget.ref.read(apiClientProvider)).editar(
-          post.id,
-          _tituloCtrl.text.trim(),
-          _conteudoCtrl.text.trim(),
-        );
+        await repo.editar(post.id, partes.titulo, partes.conteudo);
         if (mounted) FxHomeSheetChrome.dismissAndPop(context, true);
         return;
       }
       String? midiaUrl;
-      if (_midiaSelecionada != null) {
+      if (_midia case final midia?) {
         midiaUrl = await MediaUploadService(
           widget.ref.read(apiClientProvider),
         ).uploadBytes(
-          bytes: await _midiaSelecionada!.readAsBytes(),
-          filename: _midiaSelecionada!.name,
-          folder: _tipoSelecionado == 'VIDEO' ? 'feed/videos' : 'feed/images',
-          resourceType: _tipoSelecionado == 'VIDEO' ? 'video' : 'image',
+          bytes: await midia.readAsBytes(),
+          filename: midia.name,
+          folder: _tipoMidia == 'VIDEO' ? 'feed/videos' : 'feed/images',
+          resourceType: _tipoMidia == 'VIDEO' ? 'video' : 'image',
         );
       }
-      await FeedRepository(widget.ref.read(apiClientProvider)).criar(
-        _tituloCtrl.text.trim(),
-        _conteudoCtrl.text.trim(),
+      await repo.criar(
+        partes.titulo,
+        partes.conteudo,
         tipoPost: _tipoFinal,
         midiaUrl: midiaUrl,
+        avisar: _avisar,
       );
       if (mounted) {
         HapticFeedback.heavyImpact();
         FxHomeSheetChrome.dismissAndPop(context, true);
       }
     } catch (e) {
+      // A folha fica aberta com o texto e a mídia: é só tentar de novo.
       if (mounted) {
         setState(() => _salvando = false);
         FeedbackHelper.showError(context, friendlyError(e));
@@ -128,20 +133,21 @@ class _FeedComposerSheetState extends State<FeedComposerSheet> {
 
   /// A mídia define o tipo; sem mídia é texto, ou dica se ligada.
   String get _tipoFinal {
-    if (_midiaSelecionada != null) return _tipoSelecionado;
+    if (_midia != null) return _tipoMidia;
     return _dica ? 'DICA' : 'TEXTO';
   }
 
   bool get _podePublicar =>
-      _conteudoCtrl.text.trim().isNotEmpty ||
-      _midiaSelecionada != null ||
+      _textoCtrl.text.trim().isNotEmpty ||
+      _midia != null ||
       (widget.post?.midiaUrl?.trim().isNotEmpty ?? false);
 
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
-    final midia = _midiaSelecionada;
+    final midia = _midia;
+    final ocupado = _salvando || _escolhendoMidia;
     // viewInsets já sobe em FxHomeSheetChrome.paddingOf — sem pad duplicado.
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(
@@ -155,12 +161,14 @@ class _FeedComposerSheetState extends State<FeedComposerSheet> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           TextField(
-            controller: _conteudoCtrl,
+            controller: _textoCtrl,
             autofocus: true,
             minLines: 4,
             maxLines: 10,
             textCapitalization: TextCapitalization.sentences,
-            inputFormatters: [LengthLimitingTextInputFormatter(feedConteudoMax)],
+            inputFormatters: [
+              LengthLimitingTextInputFormatter(feedConteudoMax),
+            ],
             onChanged: (_) => setState(() {}),
             style: FocuxHubTypography.body(color: chrome.ink),
             decoration: InputDecoration(
@@ -170,94 +178,151 @@ class _FeedComposerSheetState extends State<FeedComposerSheet> {
               isDense: true,
             ),
           ),
-          if (_comTitulo)
-            TextField(
-              controller: _tituloCtrl,
-              textCapitalization: TextCapitalization.sentences,
-              inputFormatters: [LengthLimitingTextInputFormatter(feedTituloMax)],
-              style: FocuxHubTypography.cardTitle(color: chrome.ink),
-              decoration: InputDecoration(
-                hintText: ptS.agendaTituloGrupo,
-                border: InputBorder.none,
-                filled: false,
-                isDense: true,
-              ),
-            ),
+          Text(
+            'A primeira linha vira o título.',
+            style: FocuxHubTypography.minimo(color: chrome.mute),
+          ),
           if (midia != null) ...[
+            const SizedBox(height: TokensStrip.s3),
+            _PreviaMidia(midia: midia, video: _tipoMidia == 'VIDEO'),
             const SizedBox(height: TokensStrip.s2),
             Row(
               children: [
-                Icon(
-                  _tipoSelecionado == 'VIDEO'
-                      ? FxIcons.video
-                      : FxIcons.imagem,
-                  color: primary,
-                  size: 20,
+                FxTonalButton(
+                  label: 'Trocar',
+                  icon: FxIcons.trocar,
+                  compact: true,
+                  onPressed: ocupado ? null : () => _escolherMidia(_tipoMidia),
                 ),
                 const SizedBox(width: TokensStrip.s2),
-                Expanded(
-                  child: Text(
-                    midia.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: FocuxHubTypography.bodyMuted(color: chrome.mute),
-                  ),
-                ),
-                IconButton(
-                  tooltip: ptS.landingRemover,
+                FxTonalButton(
+                  label: 'Remover',
+                  icon: FxIcons.fechar,
+                  compact: true,
                   onPressed:
-                      _salvando
-                          ? null
-                          : () => setState(() => _midiaSelecionada = null),
-                  icon: const Icon(FxIcons.fechar),
+                      ocupado ? null : () => setState(() => _midia = null),
+                ),
+              ],
+            ),
+          ] else if (!_editando) ...[
+            const SizedBox(height: TokensStrip.s3),
+            Row(
+              children: [
+                FxTonalButton(
+                  label: 'Foto',
+                  icon: FxIcons.imagem,
+                  compact: true,
+                  onPressed: ocupado ? null : () => _escolherMidia('IMAGEM'),
+                ),
+                const SizedBox(width: TokensStrip.s2),
+                FxTonalButton(
+                  label: ptS.feedVideo,
+                  icon: FxIcons.video,
+                  compact: true,
+                  onPressed: ocupado ? null : () => _escolherMidia('VIDEO'),
                 ),
               ],
             ),
           ],
-          const SizedBox(height: TokensStrip.s2),
-          Row(
-            children: [
-              if (!_editando) ...[
-              IconButton(
-                tooltip: ptS.perfilFoto,
-                onPressed:
-                    _salvando || _escolhendoMidia
-                        ? null
-                        : () => _escolherMidia('IMAGEM'),
-                icon: Icon(FxIcons.imagem, color: primary),
-              ),
-              IconButton(
-                tooltip: ptS.feedVideo,
-                onPressed:
-                    _salvando || _escolhendoMidia
-                        ? null
-                        : () => _escolherMidia('VIDEO'),
-                icon: Icon(FxIcons.video, color: primary),
-              ),
-              ],
-              IconButton(
-                tooltip: ptS.agendaTituloGrupo,
-                onPressed: () => setState(() => _comTitulo = !_comTitulo),
-                icon: Icon(FxIcons.titulo, color: primary),
-              ),
-              const Spacer(),
-              if (!_editando)
-                FilterChip(
-                  label: Text(ptS.feedDica),
-                  selected: _dica,
-                  onSelected:
-                      midia != null ? null : (v) => setState(() => _dica = v),
+          if (!_editando) ...[
+            const SizedBox(height: TokensStrip.s3),
+            FxSettingsGroup(
+              children: [
+                if (midia == null)
+                  FxSettingsTile(
+                    icon: FxIcons.ideia,
+                    label: 'Mostrar como dica',
+                    subtitle:
+                        'Aparece com o selo de dica e fica no filtro Dicas dos alunos.',
+                    value: '',
+                    accessory: Switch.adaptive(
+                      activeTrackColor: primary,
+                      value: _dica,
+                      onChanged:
+                          _salvando ? null : (v) => setState(() => _dica = v),
+                    ),
+                  ),
+                FxSettingsTile(
+                  icon: FxIcons.notificacao,
+                  label: 'Avisar os alunos',
+                  subtitle: 'Eles recebem um aviso no celular.',
+                  value: '',
+                  showDivider: false,
+                  accessory: Switch.adaptive(
+                    activeTrackColor: primary,
+                    value: _avisar,
+                    onChanged:
+                        _salvando ? null : (v) => setState(() => _avisar = v),
+                  ),
                 ),
-            ],
-          ),
-          const SizedBox(height: TokensStrip.s2),
+              ],
+            ),
+          ],
+          const SizedBox(height: TokensStrip.s3),
           FxLiquidPrimaryButton(
-            label: _editando ? ptS.save : feedPublicarTileLabel(),
+            label: _editando ? ptS.save : 'Publicar',
             loading: _salvando,
-            loadingLabel: _editando ? ptS.checkinSalvandoSerie : ptS.feedPublicando,
+            loadingLabel:
+                _editando ? ptS.checkinSalvandoSerie : ptS.feedPublicando,
             onPressed: _salvando || !_podePublicar ? null : _publicar,
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Prévia no tamanho real: foto inteira (até 280 de altura), vídeo pelo nome.
+class _PreviaMidia extends StatelessWidget {
+  const _PreviaMidia({required this.midia, required this.video});
+
+  final XFile midia;
+  final bool video;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    final primary = Theme.of(context).colorScheme.primary;
+    if (video) {
+      return Container(
+        padding: const EdgeInsets.all(TokensStrip.s3),
+        decoration: BoxDecoration(
+          color: primary.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(TokensStrip.rCard),
+        ),
+        child: Row(
+          children: [
+            Icon(FxIcons.video, color: primary, size: 22),
+            const SizedBox(width: TokensStrip.s2),
+            Expanded(
+              child: Text(
+                midia.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: FocuxHubTypography.bodyMuted(color: chrome.ink),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(TokensStrip.rCard),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxHeight: 280),
+        child: Image.file(
+          File(midia.path),
+          fit: BoxFit.contain,
+          width: double.infinity,
+          errorBuilder:
+              (_, __, ___) => Padding(
+                padding: const EdgeInsets.all(TokensStrip.s3),
+                child: Text(
+                  midia.name,
+                  style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                ),
+              ),
+        ),
       ),
     );
   }

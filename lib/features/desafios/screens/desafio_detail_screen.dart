@@ -10,30 +10,25 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/feedback_helper.dart';
-import '../../../core/widgets/fx_confirm_sheet.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
+import '../../../core/widgets/fx_grouped_action_sheet.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
+import '../widgets/desafio_linhas.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
-import '../../../core/widgets/fx_hub_header.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_strip_card.dart';
-import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../alunos/providers/alunos_provider.dart';
-import '../../alunos/widgets/aluno_form_choices.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../../../core/widgets/fx_action_chip.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../data/desafio_repository.dart';
-import '../../../l10n/pt.dart';
 import '../utils/desafio_display.dart';
 import '../../../core/theme/fx_icons.dart';
-import '../../../core/widgets/fx_selo_glifos.dart';
-import '../../evolucao/data/meta_corporal.dart';
-import '../../evolucao/widgets/conquista_selo.dart';
 
 class DesafioDetailScreen extends ConsumerStatefulWidget {
   const DesafioDetailScreen({
@@ -59,10 +54,8 @@ class _DesafioDetailScreenState extends ConsumerState<DesafioDetailScreen> {
   String? _erro;
   DateTime? _fetchedAt;
   var _encerrando = false;
-  var _secao = desafioSecaoRanking;
 
-  String get _parent =>
-      widget.forAluno ? '/aluno/desafios' : '/desafios';
+  String get _parent => widget.forAluno ? '/aluno/desafios' : '/desafios';
 
   @override
   void initState() {
@@ -73,8 +66,7 @@ class _DesafioDetailScreenState extends ConsumerState<DesafioDetailScreen> {
 
   void _leave() => safePopOrGo(context, _parent);
 
-  DesafioRepository get _repo =>
-      DesafioRepository(ref.read(apiClientProvider));
+  DesafioRepository get _repo => DesafioRepository(ref.read(apiClientProvider));
 
   Future<void> _load() async {
     setState(() {
@@ -86,7 +78,8 @@ class _DesafioDetailScreenState extends ConsumerState<DesafioDetailScreen> {
         await _repo.participar(widget.desafioId);
       }
       final found = await _repo.buscar(widget.desafioId);
-      final ranking = found.ranking ?? await _repo.leaderboard(widget.desafioId);
+      final ranking =
+          found.ranking ?? await _repo.leaderboard(widget.desafioId);
       if (!mounted) return;
       setState(() {
         _desafio = found;
@@ -103,18 +96,22 @@ class _DesafioDetailScreenState extends ConsumerState<DesafioDetailScreen> {
     }
   }
 
-  Future<void> _encerrar() async {
+  Future<void> _maisOpcoes() async {
     final desafio = _desafio;
     if (desafio == null || _encerrando) return;
-    final ok = await showFxConfirmSheet(
+    final acao = await showFxGroupedActionSheet<String>(
       context,
-      title: 'Encerrar desafio?',
-      subtitle: desafio.titulo,
-      message: 'Sai da lista ativa. O ranking deixa de pontuar.',
-      confirmLabel: 'Encerrar',
-      destructive: true,
+      titulo: desafio.titulo,
+      grupos: const [],
+      destrutiva: const FxActionItem(
+        valor: 'encerrar',
+        rotulo: 'Encerrar agora',
+        icone: FxIcons.fechar,
+      ),
+      confirmarTitulo: 'Encerrar o desafio?',
+      confirmarMensagem: 'O ranking para de contar e o desafio sai da lista.',
     );
-    if (!ok || !mounted) return;
+    if (acao != 'encerrar' || !mounted) return;
     setState(() => _encerrando = true);
     try {
       await _repo.encerrar(desafio.id);
@@ -141,10 +138,7 @@ class _DesafioDetailScreenState extends ConsumerState<DesafioDetailScreen> {
     final desafio = _desafio;
     final titulo = desafio?.titulo ?? 'Desafio';
     final freshness = FxHubFreshness.fromFetchedAt(_fetchedAt);
-    final meId =
-        widget.forAluno
-            ? ref.watch(alunoMeProvider).value?.id
-            : null;
+    final meId = widget.forAluno ? ref.watch(alunoMeProvider).value?.id : null;
 
     return fxScreenA11yScope(
       label: titulo,
@@ -168,60 +162,64 @@ class _DesafioDetailScreenState extends ConsumerState<DesafioDetailScreen> {
               actions: [
                 FxHelpIconButton(
                   tooltip: 'Como usar este desafio',
-                  onTap: () => showFxHelpSheet(
-                    context,
-                    title: 'Desafio',
-                    subtitle: 'Prazo, meta e ranking da campanha.',
-                    tips: [
-                      const FxHelpTip(
-                        'Ranking',
-                        'Soma hábitos ou treinos até a meta. Toque no aluno para abrir a ficha.',
+                  onTap:
+                      () => showFxHelpSheet(
+                        context,
+                        title: 'Desafio',
+                        subtitle:
+                            'Uma disputa com prazo: quem fizer mais sobe no ranking.',
+                        tips: [
+                          FxHelpTip(
+                            'O que conta',
+                            desafioRegraFrase(desafio?.tipo ?? 'TREINOS'),
+                          ),
+                          FxHelpTip(
+                            widget.forAluno ? 'Subir no ranking' : 'Encerrar',
+                            widget.forAluno
+                                ? 'O botão leva ao treino ou ao hábito que conta.'
+                                : 'No ⋯ do topo. O ranking para de contar.',
+                          ),
+                        ],
                       ),
-                      FxHelpTip(
-                        widget.forAluno ? 'Pontuar' : 'Encerrar',
-                        widget.forAluno
-                            ? 'O botão leva ao hábito ou ao treino que pontua.'
-                            : 'Encerrar tira a campanha da lista ativa.',
-                      ),
-                    ],
-                  ),
                 ),
+                if (!widget.forAluno && (desafio?.ativo ?? false))
+                  IconButton(
+                    tooltip: 'Mais opções',
+                    onPressed: _encerrando ? null : _maisOpcoes,
+                    icon: const Icon(FxIcons.mais),
+                  ),
               ],
             ),
-            body: _loading && desafio == null
-                ? const Padding(
-                    padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-                    child: SkeletonList(count: 5),
-                  )
-                : _erro != null && desafio == null
-                ? FxErrorState(
-                    chromeOnDark: isDark,
-                    primary: primary,
-                    title: 'Não conseguimos carregar o desafio',
-                    message: _erro!,
-                    onRetry: _load,
-                  )
-                : desafio == null
-                ? FxEmptyState(
-                    icon: FxIcons.ia,
-                    title: 'Desafio não encontrado',
-                    subtitle:
-                        'Ele pode ter sido encerrado. Volte à lista e escolha outro.',
-                    action: FxEmptyAction(label: 'Voltar', onTap: _leave),
-                  )
-                : _DesafioDetailBody(
-                    desafio: desafio,
-                    ranking: _ranking,
-                    forAluno: widget.forAluno,
-                    meId: meId,
-                    secao: _secao,
-                    encerrando: _encerrando,
-                    onSecao: (value) => setState(() => _secao = value),
-                    onRefresh: _load,
-                    onEncerrar: _encerrar,
-                    onAlunoSticky: _alunoSticky,
-                    onLeave: _leave,
-                  ),
+            body:
+                _loading && desafio == null
+                    ? const Padding(
+                      padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                      child: SkeletonList(count: 5),
+                    )
+                    : _erro != null && desafio == null
+                    ? FxErrorState(
+                      chromeOnDark: isDark,
+                      primary: primary,
+                      title: 'Não conseguimos carregar o desafio',
+                      message: _erro!,
+                      onRetry: _load,
+                    )
+                    : desafio == null
+                    ? FxEmptyState(
+                      icon: FxIcons.ia,
+                      title: 'Desafio não encontrado',
+                      subtitle:
+                          'Ele pode ter sido encerrado. Volte à lista e escolha outro.',
+                      action: FxEmptyAction(label: 'Voltar', onTap: _leave),
+                    )
+                    : _DesafioDetailBody(
+                      desafio: desafio,
+                      ranking: _ranking,
+                      forAluno: widget.forAluno,
+                      meId: meId,
+                      onRefresh: _load,
+                      onAlunoSticky: _alunoSticky,
+                    ),
           ),
         ),
       ),
@@ -235,44 +233,26 @@ class _DesafioDetailBody extends StatelessWidget {
     required this.ranking,
     required this.forAluno,
     required this.meId,
-    required this.secao,
-    required this.encerrando,
-    required this.onSecao,
     required this.onRefresh,
-    required this.onEncerrar,
     required this.onAlunoSticky,
-    required this.onLeave,
   });
 
   final Desafio desafio;
   final List<DesafioLeaderboardEntry> ranking;
   final bool forAluno;
   final int? meId;
-  final String secao;
-  final bool encerrando;
-  final ValueChanged<String> onSecao;
   final Future<void> Function() onRefresh;
-  final VoidCallback onEncerrar;
   final VoidCallback onAlunoSticky;
-  final VoidCallback onLeave;
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
     final sobre = fxPaletaSobreMarca(context, accent: primary);
     final descricao = desafio.descricao?.trim();
-    final first = ranking.isEmpty ? null : ranking.first;
-    final atingiram = desafioAtingiramMeta(
-      ranking.map((e) => e.pontos),
-      desafio.metaPontos,
-    );
-    final meuIndex = desafioMeuIndex(
-      ranking.map((e) => e.alunoId),
-      meId,
-    );
-    final meusPontos =
-        meuIndex == null ? 0 : ranking[meuIndex].pontos;
+    final meuIndex = desafioMeuIndex(ranking.map((e) => e.alunoId), meId);
+    final minhaContagem = meuIndex == null ? 0 : ranking[meuIndex].pontos;
+    final ninguemContou = ranking.every((e) => e.pontos <= 0);
 
     return Column(
       children: [
@@ -287,245 +267,99 @@ class _DesafioDetailBody extends StatelessWidget {
                   FxSettingsLayout.pageInset,
                   TokensStrip.s4,
                   FxSettingsLayout.pageInset,
-                  24,
+                  TokensStrip.s6,
                 ),
                 children: [
-                  FxHubHeader(
-                    title: desafio.titulo,
-                    subtitle: desafioDetailSubtitle(
-                      tipo: desafio.tipo,
-                      fim: desafio.fim,
-                    ),
-                  ),
-                  if (forAluno || first != null) ...[
-                    const SizedBox(height: TokensStrip.s4),
-                    FxStripCard(
-                      marca: true,
-                      accent: primary,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            forAluno ? 'Sua posição' : ptS.desafioLider,
-                            style: FocuxHubTypography.chip(sobre.mute),
+                  FxStripCard(
+                    marca: true,
+                    accent: primary,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          desafio.titulo,
+                          style: FocuxHubTypography.cardTitle(color: sobre.ink),
+                        ),
+                        const SizedBox(height: TokensStrip.s1),
+                        Text(
+                          desafioRegraDetalhe(desafio),
+                          style: FocuxHubTypography.bodyMuted(
+                            color: sobre.mute,
                           ),
-                          const SizedBox(height: 6),
+                        ),
+                        const SizedBox(height: TokensStrip.s2),
+                        Text(
+                          desafio.ativo
+                              ? desafioFaltamTitulo(desafio.fim)
+                              : 'Encerrado',
+                          style: FocuxHubTypography.rotulo(color: sobre.ink),
+                        ),
+                        if (forAluno) ...[
+                          const SizedBox(height: TokensStrip.s3),
                           Text(
-                            forAluno
-                                ? desafioMeuLugarValue(meuIndex)
-                                : first!.alunoNome,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: FocuxHubTypography.metric(
-                              color: sobre.ink,
-                              fontSize: TokensStrip.fontTitulo,
+                            desafioMeuResumo(
+                              tipo: desafio.tipo,
+                              index: meuIndex,
+                              contagem: minhaContagem,
+                              meta: desafio.metaPontos,
                             ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            forAluno
-                                ? desafioMeuLugarHint(
-                                  index: meuIndex,
-                                  pontos: meusPontos,
-                                  metaPontos: desafio.metaPontos,
-                                )
-                                : ptS.desafioPontosLider(first!.pontos),
-                            style: FocuxHubTypography.bodyMuted(
-                              color: sobre.mute,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: FocuxHubTypography.body(color: sobre.ink),
                           ),
                         ],
-                      ),
+                      ],
+                    ),
+                  ),
+                  if (descricao != null && descricao.isNotEmpty) ...[
+                    const SizedBox(height: TokensStrip.s3),
+                    Text(
+                      descricao,
+                      style: FocuxHubTypography.bodyMuted(color: chrome.mute),
                     ),
                   ],
-                  const SizedBox(height: TokensStrip.s4),
-                  OperationalMetricTile(
-                    label: 'Prazo',
-                    value: desafioDiasRestantesValue(desafio.fim),
-                    hint: desafioDiasRestantesHint(desafio.fim),
-                    color: primary,
-                    isDark: isDark,
-                  ),
+                  const SizedBox(height: TokensStrip.s5),
+                  const DashboardSectionHeader(title: 'Ranking'),
                   const SizedBox(height: TokensStrip.s2),
-                  OperationalMetricTile(
-                    label: 'Participantes',
-                    value: desafioParticipantesValue(ranking.length),
-                    hint: desafioParticipantesHint(ranking.length),
-                    color: primary,
-                    isDark: isDark,
-                  ),
-                  const SizedBox(height: TokensStrip.s2),
-                  OperationalMetricTile(
-                    label: 'Meta',
-                    value: desafioMetaAtingidaValue(
-                      atingiram: atingiram,
-                      total: ranking.length,
+                  if (ranking.isEmpty || ninguemContou)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: TokensStrip.s3),
+                      child: Text(
+                        '${desafioRegraFrase(desafio.tipo)} Quando alguém contar o primeiro, o ranking começa.',
+                        style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                      ),
                     ),
-                    hint: desafioMetaAtingidaHint(desafio.metaPontos),
-                    color: primary,
-                    isDark: isDark,
-                  ),
-                  const SizedBox(height: TokensStrip.s2),
-                  OperationalMetricTile(
-                    label: forAluno ? 'Pontos' : 'Tipo',
-                    value: forAluno
-                        ? desafioLeaderboardPoints(meusPontos)
-                        : desafioTipoLabel(desafio.tipo),
-                    hint: desafioMetaLabel(desafio.metaPontos),
-                    color: primary,
-                    isDark: isDark,
-                  ),
-                  const SizedBox(height: TokensStrip.s3),
-                  Wrap(
-                    spacing: TokensStrip.s2,
-                    runSpacing: TokensStrip.s2,
-                    children: [
-                      FxActionChip(
-                        label: 'Lista',
-                        accent: primary,
-                        isDark: isDark,
-                        onPressed: onLeave,
-                      ),
-                      if (forAluno)
-                        FxActionChip(
-                          label: 'Hoje',
-                          accent: primary,
-                          isDark: isDark,
-                          onPressed: () => context.push('/dashboard/aluno'),
-                        ),
-                      if (!forAluno &&
-                          first != null &&
-                          first.alunoId > 0)
-                        FxActionChip(
-                          label: '1º lugar',
-                          accent: primary,
-                          isDark: isDark,
-                          onPressed: () =>
-                              context.push('/alunos/${first.alunoId}'),
-                        ),
-                      if (!forAluno && desafio.grupoAulaId != null)
-                        FxActionChip(
-                          label: 'Turma',
-                          accent: primary,
-                          isDark: isDark,
-                          onPressed: () => context.push('/grupo-aulas'),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: TokensStrip.s4),
-                  AlunoSegmentedChoice(
-                    options: desafioDetalheSecoes,
-                    selected: secao,
-                    isDark: isDark,
-                    onSelect: onSecao,
-                  ),
-                  const SizedBox(height: TokensStrip.s4),
-                  if (secao == desafioSecaoCampanha)
-                    (descricao == null || descricao.isEmpty)
-                        ? (forAluno
-                            ? FxEmptyState(
-                                icon: FxIcons.ia,
-                                title: desafioCampanhaEmpty(),
-                                subtitle:
-                                    'Prazo e meta continuam nos números acima.',
-                                action: FxEmptyAction(
-                                  label: desafioStickyAlunoLabel(desafio.tipo),
-                                  onTap: onAlunoSticky,
-                                ),
-                              )
-                            : Text(
-                                desafioCampanhaEmpty(),
-                                style: FocuxHubTypography.bodyMuted(
-                                  color: fxScreenMute(context),
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ))
-                        : Text(
-                            descricao,
-                            style: FocuxHubTypography.bodyMuted(
-                              color: fxScreenMute(context),
-                              fontWeight: FontWeight.w600,
-                            ),
-                          )
-                  else if (ranking.isEmpty)
-                    FxEmptyState(
-                      icon: FxIcons.ia,
-                      title: desafioLeaderboardEmpty(),
-                      subtitle: 'Quando alguém pontuar, o lugar aparece aqui.',
-                      action: forAluno
-                          ? FxEmptyAction(
-                              label: desafioStickyAlunoLabel(desafio.tipo),
-                              onTap: onAlunoSticky,
-                            )
-                          : FxEmptyAction(
-                              label: 'Atualizar',
-                              onTap: () => onRefresh(),
-                            ),
-                    )
-                  else
-                    for (var i = 0; i < ranking.length; i++)
-                      FxSatelliteListTile(
-                        title: desafioLeaderboardTitle(
-                          nome: ranking[i].alunoNome,
-                          isSelf: forAluno &&
-                              meId != null &&
-                              ranking[i].alunoId == meId,
-                        ),
-                        subtitle: Text(desafioLugarLabel(i)),
-                        // Selo do pódio: coroa para o líder, halteres no 2º e 3º.
-                        leading: i < 3 && ranking[i].pontos > 0
-                            ? ConquistaSelo(
-                                tipo: i == 0
-                                    ? ConquistaTipo.recorde
-                                    : ConquistaTipo.meta,
-                                glifo: i == 0
-                                    ? FxSeloGlifo.coroa
-                                    : FxSeloGlifo.halteresCruzados,
-                                tamanho: 36,
-                              )
-                            : null,
-                        trailing: Text(
-                          desafioLeaderboardPoints(ranking[i].pontos),
-                          style: FocuxHubTypography.bodyMuted(
-                            color: fxScreenMute(context),
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        accent: forAluno &&
-                                meId != null &&
-                                ranking[i].alunoId == meId
-                            ? primary
-                            : null,
-                        onTap: forAluno || ranking[i].alunoId <= 0
-                            ? null
-                            : () => context.push(
-                                '/alunos/${ranking[i].alunoId}',
-                              ),
-                      ),
+                  for (var i = 0; i < ranking.length; i++)
+                    DesafioLinhaRanking(
+                      posicao: i,
+                      entrada: ranking[i],
+                      meta: desafio.metaPontos,
+                      voce:
+                          forAluno &&
+                          meId != null &&
+                          ranking[i].alunoId == meId,
+                      onTap:
+                          forAluno || ranking[i].alunoId <= 0
+                              ? null
+                              : () =>
+                                  context.push('/alunos/${ranking[i].alunoId}'),
+                    ),
                 ],
               ),
             ),
           ),
         ),
-        if (forAluno || desafio.ativo)
+        if (forAluno && desafio.ativo)
           SafeArea(
             top: false,
             child: Padding(
-              padding: EdgeInsets.fromLTRB(
+              padding: const EdgeInsets.fromLTRB(
                 FxSettingsLayout.pageInset,
                 TokensStrip.s2,
                 FxSettingsLayout.pageInset,
                 TokensStrip.s3,
               ),
               child: FxLiquidPrimaryButton(
-                label: forAluno
-                    ? desafioStickyAlunoLabel(desafio.tipo)
-                    : desafioStickyEncerrarLabel(),
-                loading: encerrando,
-                onPressed: forAluno
-                    ? onAlunoSticky
-                    : (encerrando ? null : onEncerrar),
+                label: desafioStickyAlunoLabel(desafio.tipo),
+                onPressed: onAlunoSticky,
               ),
             ),
           ),

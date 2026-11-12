@@ -20,7 +20,8 @@ void main() {
     expect(screen, contains('SkeletonList'));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('showFxHomeSheet'));
-    expect(screen, contains('showFxConfirmSheet'));
+    expect(screen, contains('showFxGroupedActionSheet'));
+    expect(screen, contains('showFeedQuemCurtiuSheet'));
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('keyboardDismissBehavior'));
@@ -31,9 +32,9 @@ void main() {
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('canCompose: false'));
     expect(screen, contains('listarPersonalPagina'));
-    expect(screen, contains('Carregar mais'));
     expect(screen, contains('FeedListChip'));
-    expect(screen, contains('FxToggleChip'));
+    expect(screen, contains('FeedFiltros'));
+    expect(screen, contains('FeedLista'));
     expect(screen, contains('FeedPostCard'));
     expect(screen, contains('_searchFocus'));
     expect(screen, contains('FxKeyboardDismissScope'));

@@ -55,6 +55,29 @@ void main() {
     expect(composer, isNot(contains('URL da mídia')));
   });
 
+  test('feed sem PopupMenuButton: "⋯" abre folha', () {
+    for (final arq in [
+      'lib/features/feed/widgets/feed_post_card.dart',
+      'lib/features/feed/widgets/feed_comments_sheet.dart',
+      'lib/features/feed/screens/feed_screen.dart',
+      'lib/features/feed/screens/feed_aluno_screen.dart',
+    ]) {
+      expect(
+        readScreenSourceBundle(arq),
+        isNot(contains('PopupMenu')),
+        reason: arq,
+      );
+    }
+  });
+
+  test('quem curtiu lê o endpoint do dono e criar manda avisar', () {
+    final repo = readScreenSourceBundle(
+      'lib/features/feed/data/feed_repository.dart',
+    );
+    expect(repo, contains("'/api/feed/\$postId/curtidas'"));
+    expect(repo, contains("'avisar': avisar"));
+  });
+
   test('feed listarPersonal/listarAluno parse Pagina, not root List', () {
     final repo = readScreenSourceBundle(
       'lib/features/feed/data/feed_repository.dart',
@@ -66,6 +89,9 @@ void main() {
     expect(repo, contains("'/api/feed'"));
     expect(repo, contains("'/api/feed/aluno'"));
     expect(repo, contains('GET /api/feed devolve Pagina'));
-    expect(repo, isNot(contains("get('/api/feed');\n    return (r.data as List)")));
+    expect(
+      repo,
+      isNot(contains("get('/api/feed');\n    return (r.data as List)")),
+    );
   });
 }

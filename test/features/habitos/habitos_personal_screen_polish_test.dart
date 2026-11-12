@@ -10,8 +10,9 @@ void main() {
       readScreenSourceBundle(
         'lib/features/habitos/screens/habitos_personal_screen.dart',
       ),
-      File('lib/features/habitos/widgets/habito_novo_sheet.dart')
-          .readAsStringSync(),
+      File(
+        'lib/features/habitos/widgets/habito_novo_sheet.dart',
+      ).readAsStringSync(),
     ].join('\n');
     expect(
       screen,
@@ -21,7 +22,6 @@ void main() {
     expect(screen, contains('FxShellScaffold'));
     expect(screen, contains('FxContentWidthLimiter'));
     expect(screen, contains('constrainWidth: false'));
-    expect(screen, contains('Como calculamos'));
     expect(screen, contains('safePopOrGo'));
     expect(screen, contains('keyboardDismissBehavior'));
     expect(screen, contains('FxHelpIconButton'));
@@ -34,7 +34,6 @@ void main() {
     expect(screen, contains('PopScope'));
     expect(screen, contains('viewInsetsOf'));
     expect(screen, contains('FxLiquidPrimaryButton'));
-    expect(screen, contains('showFxInsetPickerSheet'));
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, contains('DashboardSectionHeader'));
     expect(screen, contains('habitoDetailPath'));
@@ -46,19 +45,20 @@ void main() {
     expect(screen, isNot(contains('DropdownButton')));
     expect(screen, isNot(contains('FloatingActionButton')));
     expect(screen, contains('FxSatelliteListTile'));
-    expect(screen, contains('FxStripCard'));
-    expect(screen, contains('FxActionChip'));
-    expect(screen, contains('habitoFocusCompliance'));
-    expect(screen, contains('habitoComplianceListExcludingFocus'));
     expect(screen, contains('safeArea: false'));
-    expect(
-      screen,
-      isNot(contains('accent:\n                habitoComplianceDanger')),
-    );
     expect(screen, contains('Buscar aluno'));
     expect(screen, contains('Carregar mais'));
     expect(screen, contains('onTapOutside'));
     expect(screen, contains('FxKeyboardDismissScope.dismiss'));
     expect(screen, isNot(contains(r'showError(context, $e)')));
+    // Redesign 11/11: por aluno, regra numa frase, sem "Compliance".
+    expect(screen, contains('habitoOrdenarSemana'));
+    expect(screen, contains('Bateram a meta'));
+    expect(screen, contains('Esta semana'));
+    expect(screen, contains('Seus hábitos'));
+    expect(screen, contains('habitoMostraBusca'));
+    expect(screen, isNot(contains("'Hábitos & Compliance'")));
+    expect(screen, isNot(contains("'Compliance da semana'")));
+    expect(screen, isNot(contains('FxActionChip')));
   });
 }

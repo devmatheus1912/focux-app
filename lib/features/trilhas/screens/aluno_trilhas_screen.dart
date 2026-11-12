@@ -121,7 +121,7 @@ class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
           constrainWidth: false,
           appBar: FxShellAppBar(
             title: 'Trilhas',
-            subtitle: 'Do seu personal · $freshness',
+            subtitle: FxHubFreshness.joinCount('Do seu personal', freshness),
             onBack: () => safePopOrGo(context, '/dashboard/aluno'),
             actions: [
               FxHelpIconButton(

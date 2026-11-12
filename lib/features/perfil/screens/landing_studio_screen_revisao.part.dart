@@ -25,6 +25,8 @@ class _LandingStudioRevisaoBody extends StatelessWidget {
         96 + MediaQuery.viewInsetsOf(context).bottom,
       ),
       children: [
+        // "Sua página" (11/11): quem chegou por ela está em Interessados.
+        const _QuemChegouPelaPagina(),
         Container(
           padding: const EdgeInsets.all(TokensStrip.s3),
           decoration: fxListCardDecoration(context, accent: primary),
@@ -35,16 +37,17 @@ class _LandingStudioRevisaoBody extends StatelessWidget {
                 child: SizedBox(
                   width: 64,
                   height: 64,
-                  child: capa.isEmpty
-                      ? ColoredBox(
-                          color: primary.withValues(alpha: 0.12),
-                          child: Icon(FxIcons.site, color: primary),
-                        )
-                      : FxCachedNetworkImage(
-                          imageUrl: capa,
-                          fit: BoxFit.cover,
-                          memCacheWidth: 200,
-                        ),
+                  child:
+                      capa.isEmpty
+                          ? ColoredBox(
+                            color: primary.withValues(alpha: 0.12),
+                            child: Icon(FxIcons.site, color: primary),
+                          )
+                          : FxCachedNetworkImage(
+                            imageUrl: capa,
+                            fit: BoxFit.cover,
+                            memCacheWidth: 200,
+                          ),
                 ),
               ),
               const SizedBox(width: TokensStrip.s3),
@@ -169,58 +172,81 @@ class _LandingStudioImageSlot extends StatelessWidget {
             child: Ink(
               height: 140,
               decoration: chrome.panel(radius: TokensStrip.rMd),
-              child: uploading
-                  ? const Center(child: FxLoading(strokeWidth: 2))
-                  : hasImage
-                  ? ClipRRect(
-                      borderRadius: BorderRadius.circular(TokensStrip.rMd),
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          FxCachedNetworkImage(
-                            imageUrl: url!,
-                            fit: BoxFit.cover,
-                            memCacheWidth: 480,
-                          ),
-                          Align(
-                            alignment: Alignment.bottomCenter,
-                            child: Container(
-                              width: double.infinity,
-                              color: Colors.black54,
-                              padding: const EdgeInsets.all(TokensStrip.s2),
-                              child: const Text(
-                                'Trocar foto',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: TokensStrip.fontBodySm,
-                                  fontWeight: FontWeight.w700,
+              child:
+                  uploading
+                      ? const Center(child: FxLoading(strokeWidth: 2))
+                      : hasImage
+                      ? ClipRRect(
+                        borderRadius: BorderRadius.circular(TokensStrip.rMd),
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            FxCachedNetworkImage(
+                              imageUrl: url!,
+                              fit: BoxFit.cover,
+                              memCacheWidth: 480,
+                            ),
+                            Align(
+                              alignment: Alignment.bottomCenter,
+                              child: Container(
+                                width: double.infinity,
+                                color: Colors.black54,
+                                padding: const EdgeInsets.all(TokensStrip.s2),
+                                child: const Text(
+                                  'Trocar foto',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: TokensStrip.fontBodySm,
+                                    fontWeight: FontWeight.w700,
+                                  ),
                                 ),
                               ),
                             ),
+                          ],
+                        ),
+                      )
+                      : Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(FxIcons.adicionarImagem, color: primary),
+                          const SizedBox(height: TokensStrip.s1),
+                          Text(
+                            'Enviar',
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodySmall?.copyWith(color: chrome.mute),
                           ),
                         ],
                       ),
-                    )
-                  : Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          FxIcons.adicionarImagem,
-                          color: primary,
-                        ),
-                        const SizedBox(height: TokensStrip.s1),
-                        Text(
-                          'Enviar',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(color: chrome.mute),
-                        ),
-                      ],
-                    ),
             ),
           ),
         ),
       ],
+    );
+  }
+}
+
+/// "4 pessoas chegaram pela página nos últimos 30 dias" → Interessados.
+class _QuemChegouPelaPagina extends ConsumerWidget {
+  const _QuemChegouPelaPagina();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final leads = ref.watch(leadsHomeProvider).value?.leads;
+    if (leads == null) return const SizedBox.shrink();
+    final n = interessadosDaPagina30Dias(leads);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: TokensStrip.s3),
+      child: FxSatelliteListTile(
+        leading: Icon(
+          FxIcons.pessoa,
+          color: Theme.of(context).colorScheme.primary,
+        ),
+        title: interessadosPaginaCartao(n),
+        titleCase: false,
+        onTap: () => context.push('/leads?origem=pagina'),
+      ),
     );
   }
 }

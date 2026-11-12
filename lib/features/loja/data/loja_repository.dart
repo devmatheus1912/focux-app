@@ -1,3 +1,5 @@
+import '../../auth/providers/auth_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
 
 import '../../../core/api/api_client.dart';
@@ -96,7 +98,9 @@ class LojaRepository {
     );
     final data = response.data;
     if (data is! Map) {
-      throw const FormatException('GET /api/pacotes devolve Pagina, não lista crua.');
+      throw const FormatException(
+        'GET /api/pacotes devolve Pagina, não lista crua.',
+      );
     }
     return Pagina.fromJson(
       Map<String, dynamic>.from(data),
@@ -145,8 +149,10 @@ class LojaRepository {
 
   Future<LojaPedido> confirmar(int pedidoId) async {
     final response = await _dio.post('/api/loja/pedidos/$pedidoId/confirmar');
-    return LojaPedido.fromJson(
-      Map<String, dynamic>.from(response.data as Map),
-    );
+    return LojaPedido.fromJson(Map<String, dynamic>.from(response.data as Map));
   }
 }
+
+final lojaRepositoryProvider = Provider(
+  (ref) => LojaRepository(ref.read(apiClientProvider)),
+);

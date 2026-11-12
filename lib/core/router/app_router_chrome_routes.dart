@@ -40,10 +40,8 @@ import '../../features/financeiro/utils/financeiro_hub_display.dart';
 import '../../features/feed/screens/feed_screen.dart';
 import '../../features/feed/screens/feed_aluno_screen.dart';
 import '../../features/ia/screens/ia_chat_screen.dart';
-import '../../features/leads/screens/leads_list_screen.dart';
-import '../../features/leads/screens/leads_kanban_screen.dart';
+import '../../features/leads/screens/interessados_screen.dart';
 import '../../features/leads/screens/lead_detail_screen.dart';
-import '../../features/leads/screens/add_lead_screen.dart';
 import '../../features/leads/data/lead_repository.dart';
 import '../../features/assinatura/screens/assinatura_review_screen.dart';
 import '../../features/assinatura/screens/assinatura_success_screen.dart';
@@ -83,7 +81,6 @@ import '../../features/galeria/screens/galeria_screen.dart';
 import '../../features/planos/screens/pro_promo_screen.dart';
 import '../../features/referral/screens/referral_screen.dart';
 import '../../features/retencao/screens/churn_dashboard_screen.dart';
-import '../../features/monetizacao/screens/ofertas_upsell_screen.dart';
 import '../../features/monetizacao/screens/cancel_save_screen.dart';
 import '../../features/habitos/screens/habitos_personal_screen.dart';
 import '../../features/habitos/screens/habito_detail_screen.dart';
@@ -92,12 +89,10 @@ import '../../features/automacoes/screens/automacoes_screen.dart';
 import '../../features/desafios/data/desafio_repository.dart';
 import '../../features/desafios/screens/desafio_detail_screen.dart';
 import '../../features/desafios/screens/desafios_screen.dart';
-import '../../features/loja/screens/loja_screen.dart';
-import '../../features/pacotes/screens/pacotes_screen.dart';
+import '../../features/pacotes/screens/vendas_screen.dart';
 import '../../features/nps/screens/nps_dashboard_screen.dart';
 import '../../features/grupos/screens/grupo_aulas_personal_screen.dart';
 import '../../features/onboarding/screens/onboarding_wizard_screen.dart';
-import '../../features/captura/screens/leads_publicos_screen.dart';
 import '../../features/growth/screens/migracao_magica_screen.dart';
 import '../../features/anamnese/screens/anamnese_screen.dart';
 import '../../features/ia/screens/ia_progressao_screen.dart';
@@ -151,7 +146,7 @@ RouteBase buildChromeShellRoute() {
           ),
           GoRoute(
             path: '/kanban',
-            redirect: (context, state) => '/leads/kanban',
+            redirect: (context, state) => '/leads',
           ),
           GoRoute(
             path: '/alunos/:id',
@@ -679,21 +674,29 @@ RouteBase buildChromeShellRoute() {
           ),
           GoRoute(
             path: '/feed/aluno',
-            builder: (context, state) => const FeedAlunoScreen(),
+            builder: (context, state) => FeedAlunoScreen(
+              postId: int.tryParse(state.uri.queryParameters['post'] ?? ''),
+            ),
           ),
 
           // Leads
+          // Interessados (11/11): uma lista só; kanban e cadastro em tela
+          // cheia viraram a lista e a folha "Novo interessado".
           GoRoute(
             path: '/leads',
-            builder: (context, state) => const LeadsListScreen(),
+            builder:
+                (context, state) => InteressadosScreen(
+                  soDaPagina: state.uri.queryParameters['origem'] == 'pagina',
+                  abrirNovo: state.uri.queryParameters['novo'] == '1',
+                ),
           ),
           GoRoute(
             path: '/leads/kanban',
-            builder: (context, state) => const LeadsKanbanScreen(),
+            redirect: (context, state) => '/leads',
           ),
           GoRoute(
             path: '/leads/novo',
-            builder: (context, state) => const AddLeadScreen(),
+            redirect: (context, state) => '/leads?novo=1',
           ),
           GoRoute(
             path: '/leads/:id',
@@ -828,9 +831,10 @@ RouteBase buildChromeShellRoute() {
             path: '/retencao',
             builder: (context, state) => const ChurnDashboardScreen(),
           ),
+          // Ofertas e Loja moram em Vendas (/pacotes) desde 11/11.
           GoRoute(
             path: '/ofertas-upsell',
-            builder: (context, state) => const OfertasUpsellScreen(),
+            redirect: (context, state) => '/pacotes',
           ),
           GoRoute(
             path: '/cancel-save',
@@ -879,7 +883,7 @@ RouteBase buildChromeShellRoute() {
           ),
           GoRoute(
             path: '/loja',
-            builder: (context, state) => const LojaScreen(),
+            redirect: (context, state) => '/pacotes',
           ),
           GoRoute(
             path: '/perfil/equipe',
@@ -887,7 +891,7 @@ RouteBase buildChromeShellRoute() {
           ),
           GoRoute(
             path: '/pacotes',
-            builder: (context, state) => const PacotesScreen(),
+            builder: (context, state) => const VendasScreen(),
           ),
           GoRoute(
             path: '/ferramentas',
@@ -906,7 +910,7 @@ RouteBase buildChromeShellRoute() {
           ),
           GoRoute(
             path: '/leads-publicos',
-            builder: (context, state) => const LeadsPublicosScreen(),
+            redirect: (context, state) => '/leads?origem=pagina',
           ),
           GoRoute(
             path: '/perfil/landing-editor',
