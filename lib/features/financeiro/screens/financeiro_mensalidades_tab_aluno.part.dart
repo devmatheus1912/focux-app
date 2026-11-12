@@ -210,7 +210,7 @@ extension FinanceiroMensalidadesTabAluno on _FinanceiroMensalidadesTabState {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    financeiroMensalidadeMesPorExtenso(item.mesReferencia),
+                    financeiroMensalidadeTitulo(item),
                     style: FocuxHubTypography.cardTitle(color: chrome.ink),
                   ),
                   const SizedBox(height: 2),

@@ -608,7 +608,7 @@ class _CartaoMensalidade extends StatelessWidget {
           ),
           const SizedBox(height: TokensStrip.s1),
           Text(
-            financeiroMensalidadeMesPorExtenso(mensalidade.mesReferencia),
+            financeiroMensalidadeTitulo(mensalidade),
             style: FocuxHubTypography.cardSubtitle(color: chrome.mute),
           ),
           if (vencimento != null)

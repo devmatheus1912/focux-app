@@ -44,6 +44,9 @@ class Mensalidade {
   final String? vencimento;
   final List<MensalidadeContato>? contatos;
 
+  /// Só na cobrança avulsa de oferta aceita ("Treino 3 meses").
+  final String? descricao;
+
   Mensalidade({
     required this.id,
     required this.alunoId,
@@ -54,6 +57,7 @@ class Mensalidade {
     this.pagoEm,
     this.vencimento,
     this.contatos,
+    this.descricao,
   }) : valor = FxMoney.parse(valor);
 
   factory Mensalidade.fromJson(Map<String, dynamic> j) {
@@ -72,6 +76,7 @@ class Mensalidade {
       status: j['status']?.toString() ?? '',
       pagoEm: j['pagoEm']?.toString(),
       vencimento: j['vencimento']?.toString(),
+      descricao: j['descricao']?.toString(),
       contatos:
           raw is List
               ? raw

@@ -344,7 +344,7 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
     final overdue = item.status == 'ATRASADO';
     final aberta = item.status == 'PENDENTE' || overdue;
     return FxSatelliteListTile(
-      title: financeiroMensalidadeMesPorExtenso(item.mesReferencia),
+      title: financeiroMensalidadeTitulo(item),
       titleCase: false,
       onTap:
           () => showFinanceiroAlunoCobrancaSheet(

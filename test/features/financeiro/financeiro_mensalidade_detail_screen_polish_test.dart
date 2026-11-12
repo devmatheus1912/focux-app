@@ -33,7 +33,7 @@ void main() {
     expect(screen, contains('financeiroCobrarEscolha'));
     expect(screen, isNot(contains('Mais ações')));
     expect(screen, isNot(contains('OperationalMetricTile')));
-    expect(screen, contains('financeiroMensalidadeMesPorExtenso'));
+    expect(screen, contains('financeiroMensalidadeTitulo'));
     expect(screen, contains('FontFeature.tabularFigures'));
     expect(screen, contains('letterSpacing: 0'));
     expect(screen, contains('FxLiquidPrimaryButton'));

@@ -179,7 +179,7 @@ class _VendasScreenState extends ConsumerState<VendasScreen> {
                           ),
                           FxHelpTip(
                             'Vendas',
-                            'Pedidos da página e ofertas aceitas. A oferta aceita avisa você para lançar a cobrança.',
+                            'Pedidos da página e ofertas aceitas. Aceitar uma oferta já cria a cobrança, com vencimento em 3 dias.',
                           ),
                         ],
                       ),
@@ -367,7 +367,7 @@ class _VendasScreenState extends ConsumerState<VendasScreen> {
         FxSatelliteListTile(
           title: '${fxTitleCaseName(a.alunoNome).split(' ').first} aceitou',
           titleCase: false,
-          subtitle: Text('${a.titulo} · lançar a cobrança'),
+          subtitle: Text('${a.titulo} · cobrança criada'),
           trailing: Text(
             a.valor.format(),
             style: FocuxHubTypography.rotulo(color: chrome.ink),

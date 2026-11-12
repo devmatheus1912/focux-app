@@ -132,6 +132,13 @@ String financeiroMensalidadePagoEmLabel(String? pagoEm) {
   return '$d/$m/${parsed.year}';
 }
 
+/// Título da linha: a cobrança avulsa diz o que é; a mensal, o mês.
+String financeiroMensalidadeTitulo(Mensalidade m) {
+  final d = m.descricao?.trim();
+  if (d != null && d.isNotEmpty) return d;
+  return financeiroMensalidadeMesPorExtenso(m.mesReferencia);
+}
+
 String financeiroMensalidadeMesPorExtenso(String mesReferencia) {
   final raw = mesReferencia.trim();
   final parts = raw.split('-');
