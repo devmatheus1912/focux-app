@@ -420,7 +420,7 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
       final repo = IaRepository(ref.read(apiClientProvider));
       final textoAcao = texto?.trim() ?? '';
       final draft = await _confirmarCriarTarefa(
-        textoAcao.isEmpty ? 'Revisar aluno no Copiloto' : textoAcao,
+        textoAcao.isEmpty ? 'Revisar aluno na IA Focux' : textoAcao,
         (motivo ?? _proximaAcao?.motivo ?? '').trim(),
       );
       if (draft == null) return;

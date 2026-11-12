@@ -14,7 +14,9 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_grouped_action_sheet.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
+import '../widgets/desafio_editar_sheet.dart';
 import '../widgets/desafio_linhas.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
@@ -96,27 +98,93 @@ class _DesafioDetailScreenState extends ConsumerState<DesafioDetailScreen> {
     }
   }
 
+  /// Editar e Encerrar agora no ativo; Excluir (por último, em vermelho)
+  /// só enquanto ninguém contou. Cada ação tem a própria confirmação.
   Future<void> _maisOpcoes() async {
     final desafio = _desafio;
     if (desafio == null || _encerrando) return;
+    final acoes = desafioMenuAcoes(
+      ativo: desafio.ativo,
+      podeExcluir: desafio.podeExcluir,
+    );
+    if (acoes.isEmpty) return;
     final acao = await showFxGroupedActionSheet<String>(
       context,
       titulo: desafio.titulo,
-      grupos: const [],
-      destrutiva: const FxActionItem(
-        valor: 'encerrar',
-        rotulo: 'Encerrar agora',
-        icone: FxIcons.fechar,
-      ),
-      confirmarTitulo: 'Encerrar o desafio?',
-      confirmarMensagem: 'O ranking para de contar e o desafio sai da lista.',
+      grupos: [
+        if (desafio.ativo)
+          const FxActionGroup('Desafio', [
+            FxActionItem(
+              valor: 'editar',
+              rotulo: 'Editar',
+              icone: FxIcons.editar,
+              descricao: 'Nome, meta e data final.',
+            ),
+            FxActionItem(
+              valor: 'encerrar',
+              rotulo: 'Encerrar agora',
+              icone: FxIcons.fechar,
+              descricao: 'O ranking para de contar.',
+            ),
+          ]),
+      ],
+      destrutiva:
+          acoes.contains('excluir')
+              ? const FxActionItem(
+                valor: 'excluir',
+                rotulo: 'Excluir',
+                icone: FxIcons.excluir,
+              )
+              : null,
+      confirmar: false,
     );
-    if (acao != 'encerrar' || !mounted) return;
+    if (!mounted) return;
+    switch (acao) {
+      case 'editar':
+        final salvou = await showDesafioEditarSheet(
+          context,
+          desafio: desafio,
+          repo: _repo,
+        );
+        if (!mounted || !salvou) return;
+        FeedbackHelper.showSuccess(context, 'Desafio salvo');
+        await _load();
+      case 'encerrar':
+        final ok = await showFxConfirmSheet(
+          context,
+          title: 'Encerrar o desafio?',
+          message: 'O ranking para de contar e o desafio sai da lista.',
+          confirmLabel: 'Encerrar',
+          destructive: true,
+        );
+        if (ok) {
+          await _executar(
+            () => _repo.encerrar(desafio.id),
+            'Desafio encerrado',
+          );
+        }
+      case 'excluir':
+        final ok = await showFxConfirmSheet(
+          context,
+          title: 'Excluir ${desafio.titulo}?',
+          message:
+              'Ninguém contou ainda. O desafio some da lista dos alunos. Não dá para desfazer.',
+          confirmLabel: 'Excluir',
+          destructive: true,
+        );
+        if (ok) {
+          await _executar(() => _repo.excluir(desafio.id), 'Desafio excluído');
+        }
+    }
+  }
+
+  Future<void> _executar(Future<void> Function() acao, String sucesso) async {
+    if (!mounted) return;
     setState(() => _encerrando = true);
     try {
-      await _repo.encerrar(desafio.id);
+      await acao();
       if (!mounted) return;
-      FeedbackHelper.showSuccess(context, 'Desafio encerrado');
+      FeedbackHelper.showSuccess(context, sucesso);
       _leave();
     } catch (e) {
       if (!mounted) return;
@@ -174,15 +242,22 @@ class _DesafioDetailScreenState extends ConsumerState<DesafioDetailScreen> {
                             desafioRegraFrase(desafio?.tipo ?? 'TREINOS'),
                           ),
                           FxHelpTip(
-                            widget.forAluno ? 'Subir no ranking' : 'Encerrar',
+                            widget.forAluno
+                                ? 'Subir no ranking'
+                                : 'Editar, encerrar ou excluir',
                             widget.forAluno
                                 ? 'O botão leva ao treino ou ao hábito que conta.'
-                                : 'No ⋯ do topo. O ranking para de contar.',
+                                : 'No ⋯ do topo. Excluir só enquanto ninguém contou.',
                           ),
                         ],
                       ),
                 ),
-                if (!widget.forAluno && (desafio?.ativo ?? false))
+                if (!widget.forAluno &&
+                    desafio != null &&
+                    desafioMenuAcoes(
+                      ativo: desafio.ativo,
+                      podeExcluir: desafio.podeExcluir,
+                    ).isNotEmpty)
                   IconButton(
                     tooltip: 'Mais opções',
                     onPressed: _encerrando ? null : _maisOpcoes,

@@ -27,6 +27,38 @@ String agendaAlunoDiaLabel(DateTime inicio, DateTime fim, {DateTime? now}) {
   return '$quando · $hora';
 }
 
+/// O cartão "Próxima sessão" só com a que ainda vale (agendada ou
+/// confirmada): cancelada não pode virar "Confirmada" (bug de 12/11).
+Agendamento? agendaAlunoProximaAtiva(List<Agendamento> proximas) =>
+    proximas.where((a) => agendaStatusIsActionable(a.status)).firstOrNull;
+
+/// "Hoje", "Amanhã" ou "Sex, 27 nov" (o horário vai embaixo).
+String agendaAlunoSoDia(DateTime inicio, {DateTime? now}) {
+  final n = now ?? DateTime.now();
+  final hoje = DateTime(n.year, n.month, n.day);
+  final dia = DateTime(inicio.year, inicio.month, inicio.day);
+  final diff = dia.difference(hoje).inDays;
+  if (diff == 0) return 'Hoje';
+  if (diff == 1) return 'Amanhã';
+  return '${agendaWeekdayShort(inicio.weekday)}, ${inicio.day} ${agendaMonthShort[inicio.month]}';
+}
+
+String agendaAlunoHorario(Agendamento ag) =>
+    ag.fim.isAfter(ag.inicio)
+        ? '${agendaHm(ag.inicio)}–${agendaHm(ag.fim)}'
+        : agendaHm(ag.inicio);
+
+/// Para o aluno, "sessão" é feminino em tudo.
+String agendaAlunoStatusSessao(String status) => switch (status) {
+  'AGENDADO' => 'Agendada',
+  'CONFIRMADO' => 'Confirmada',
+  'CONCLUIDO' => 'Concluída',
+  'CANCELADO' => 'Cancelada',
+  'PRESENTE' => 'Presente',
+  'FALTA' => 'Falta',
+  _ => agendaStatusLabel(status),
+};
+
 /// Sessão nos próximos 7 dias; depois disso não vale ocupar a aba Treinos.
 DateTime? agendaProximaDaSemana(DateTime? inicio, DateTime agora) {
   if (inicio == null || inicio.isBefore(agora)) return null;
@@ -42,7 +74,9 @@ bool agendaAlunoPodeConfirmar(Agendamento ag, {DateTime? now}) =>
 
 /// Sessão passada fala do atendimento; futura, do status do horário.
 String agendaAlunoStatusLabel(Agendamento ag, {DateTime? now}) {
-  if (!agendaAlunoJaPassou(ag, now: now)) return agendaStatusLabel(ag.status);
+  if (!agendaAlunoJaPassou(ag, now: now)) {
+    return agendaAlunoStatusSessao(ag.status);
+  }
   final atendimento = ag.statusAtendimento?.trim().toUpperCase();
   switch (atendimento ?? ag.status) {
     case 'PRESENTE':
@@ -53,7 +87,7 @@ String agendaAlunoStatusLabel(Agendamento ag, {DateTime? now}) {
     case 'FALTOU':
       return 'Faltou';
     default:
-      return agendaStatusLabel(ag.status);
+      return agendaAlunoStatusSessao(ag.status);
   }
 }
 

@@ -143,16 +143,16 @@ void main() {
 
     expect(adapter.escopos, containsAll(['proximas', 'anteriores']));
     expect(find.text('Próxima sessão'), findsOneWidget);
-    expect(find.text('Anteriores'), findsOneWidget);
+    expect(find.text('Sessões anteriores'), findsOneWidget);
     expect(find.text('Amanhã · 08:30–09:30'), findsOneWidget);
     expect(find.text('Não vou conseguir ir'), findsOneWidget);
     expect(find.byType(TextField), findsNothing);
 
-    expect(find.text('Treino antigo'), findsNothing);
-    await tester.tap(find.text('Ver anteriores'));
+    expect(find.textContaining('Treino antigo'), findsNothing);
+    await tester.tap(find.text('Sessões anteriores'));
     await tester.pump();
 
-    expect(find.text('Treino antigo'), findsOneWidget);
+    expect(find.textContaining('Treino antigo'), findsOneWidget);
     expect(find.text('Compareceu'), findsOneWidget);
     expect(find.text('Confirmar presença'), findsOneWidget);
   });
@@ -166,7 +166,7 @@ void main() {
     await tester.tap(find.text('Confirmar presença'));
     await _settle(tester);
 
-    expect(find.textContaining('Confirmada'), findsOneWidget);
+    expect(find.textContaining('· Confirmada'), findsOneWidget);
     expect(find.text('Confirmar presença'), findsNothing);
     expect(adapter.escopos.length, chamadas);
   });

@@ -110,12 +110,21 @@ class IaRepository {
   static final _iaOpts = Options(receiveTimeout: const Duration(seconds: 60));
   IaRepository(ApiClient c) : _dio = c.dio;
 
-  Future<String> chat(String mensagem, {int? alunoId}) async {
+  /// [historico]: as últimas mensagens da conversa, para a IA lembrar.
+  Future<String> chat(
+    String mensagem, {
+    int? alunoId,
+    List<Map<String, String>> historico = const [],
+  }) async {
     return _withIaErrorContext(() async {
       final r = await _dio.post(
         '/api/ia/chat',
         options: _iaOpts,
-        data: {'mensagem': mensagem, if (alunoId != null) 'alunoId': alunoId},
+        data: {
+          'mensagem': mensagem,
+          if (alunoId != null) 'alunoId': alunoId,
+          if (historico.isNotEmpty) 'historico': historico,
+        },
       );
       return r.data['resposta'] as String;
     });

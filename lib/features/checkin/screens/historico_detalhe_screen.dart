@@ -214,10 +214,13 @@ class _HistoricoDetalheScreenState
                     HistoricoSecao(
                       titulo: s.historicoRecordes,
                       filhos: [
-                        for (final r in v.recordes)
+                        for (final g in historicoRecordesPorExercicio(
+                          v.recordes,
+                          nomesDaLista: [for (final e in v.exercicios) e.nome],
+                        ))
                           HistoricoInfoTile(
-                            titulo: r.exercicio,
-                            detalhe: historicoRecordeDetalhe(s, r),
+                            titulo: g.exercicio,
+                            detalhe: g.linhas.join('\n'),
                             icone: FxIcons.trofeu,
                           ),
                       ],

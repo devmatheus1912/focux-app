@@ -21,7 +21,10 @@ void main() {
     expect(screen, contains('FxKeyboardDismissScope'));
     expect(screen, contains('onTapOutside'));
     expect(screen, contains('keyboardDismissBehavior'));
-    expect(screen, contains('Cancelar'));
+    // 12/11: voltar pela seta (onBack), sem "Cancelar"; estrelas começam vazias.
+    expect(screen, contains('onBack: _cancel'));
+    expect(screen, contains('depoimentoFalta'));
+    expect(screen, contains('int _nota = 0'));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('FxStarRating'));
     expect(screen, contains('depoimentoNotaLabel'));

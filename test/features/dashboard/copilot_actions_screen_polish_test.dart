@@ -13,7 +13,10 @@ void main() {
     expect(screen, anyOf(contains('FxLoading'), contains('SkeletonLoader'), contains('SkeletonList'), contains('DashboardShimmer'), contains('Shimmer'), contains('IaCopilotInsightsLoading'), contains('_loading')));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, isNot(contains('FxSettingsGroup')));
-    expect(screen, contains('AlunoSegmentedChoice'));
+    // 12/11: sem abas; adiadas e feitas no fim da lista.
+    expect(screen, isNot(contains('AlunoSegmentedChoice')));
+    expect(screen, contains('_linhasDeOutrosStatus'));
+    expect(screen, contains('_nomeDe('));
     expect(screen, isNot(contains('showFxInsetPickerSheet')));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('Como calculamos'));

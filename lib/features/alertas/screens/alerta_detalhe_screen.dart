@@ -124,7 +124,7 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
     if (!atual.podeGerarIa) {
       await UpgradePromptSheet.show(
         context: context,
-        featureName: 'IA Copiloto',
+        featureName: 'IA Focux',
         capability: 'iaCopiloto',
       );
       return;

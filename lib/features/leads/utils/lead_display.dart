@@ -1,6 +1,7 @@
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/utils/br_phone.dart';
 import '../../../core/utils/fx_utils.dart';
+import 'interessados_display.dart';
 
 const leadOrigemValues = [
   'Instagram',
@@ -290,3 +291,16 @@ String leadLimitLabel(int count, int limite) {
   }
   return '$count/$limite leads neste plano.';
 }
+
+/// Excluir só quem não virou aluno (o aluno é outro cadastro).
+bool interessadoPodeExcluir({required String status, int? alunoId}) =>
+    alunoId == null && !interessadoVirouAluno(status);
+
+/// Confirmação do Excluir: diz o que some e que não volta.
+String interessadoExcluirTitulo(String nome) {
+  final primeiro = nome.trim().split(RegExp(r'\s+')).first;
+  return 'Excluir ${primeiro.isEmpty ? 'interessado' : primeiro}?';
+}
+
+const interessadoExcluirMensagem =
+    'Apaga o cadastro e o histórico de contatos. Não dá para desfazer.';

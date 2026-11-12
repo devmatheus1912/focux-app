@@ -50,7 +50,7 @@ class IaQuotaUpgrade {
     }
     if (features == null || !features.iaCopiloto) {
       return PlanEntitlements.lockedOffer(
-        featureName: 'IA Copiloto',
+        featureName: 'IA Focux',
         capability: 'iaCopiloto',
       );
     }
@@ -101,7 +101,7 @@ class IaQuotaUpgrade {
         context,
         title: 'Recurso do seu personal',
         message:
-            'IA Copiloto e Assinar Pro são da conta Focux do personal — '
+            'IA Focux e Assinar Pro são da conta Focux do personal — '
             'não da sua. Peça ao personal se precisar de progressão de carga.',
         actionLabel: 'Entendi',
         icon: FxIcons.info,

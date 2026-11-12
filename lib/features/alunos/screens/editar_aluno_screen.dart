@@ -381,7 +381,7 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
                       FxSettingsGroup(
                         header: 'Perfil do aluno',
                         caption:
-                            'Objetivo, gênero e consultoria alimentam prescrição e Copiloto.',
+                            'Objetivo, gênero e consultoria alimentam prescrição e IA Focux.',
                         children: [
                           AlunoInsetFormField(
                             controller: _objetivo,

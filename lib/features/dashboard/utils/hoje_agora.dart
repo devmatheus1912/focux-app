@@ -52,7 +52,8 @@ const _prefixoFicha = 'FICHA_VENCENDO_';
 const _prefixoTituloFicha = 'Renovar a ficha de ';
 const _rotaCopiloto = '/dashboard/command-center/copiloto';
 
-bool _filaRisco(FilaAcaoResumo a) => a.actionKey == _chaveRisco || a.tipo == 'RISCO';
+bool _filaRisco(FilaAcaoResumo a) =>
+    a.actionKey == _chaveRisco || a.tipo == 'RISCO';
 bool _filaCobranca(FilaAcaoResumo a) =>
     a.actionKey == _chaveCobranca || a.tipo == 'COBRANCA';
 bool _filaFicha(FilaAcaoResumo a) => a.actionKey.startsWith(_prefixoFicha);
@@ -83,8 +84,9 @@ List<HojeAgoraItem> hojeAgora({
     );
   }
 
-  final vencidas = cobrancas.where((m) => m.diasAtraso > 0).toList()
-    ..sort((a, b) => b.diasAtraso.compareTo(a.diasAtraso));
+  final vencidas =
+      cobrancas.where((m) => m.diasAtraso > 0).toList()
+        ..sort((a, b) => b.diasAtraso.compareTo(a.diasAtraso));
   for (final m in vencidas) {
     itens.add(
       HojeAgoraItem(
@@ -112,9 +114,10 @@ List<HojeAgoraItem> hojeAgora({
     itens.add(
       HojeAgoraItem(
         verbo: HojeVerbo.responder,
-        titulo: conversasSemResposta == 1
-            ? '1 conversa'
-            : '$conversasSemResposta conversas',
+        titulo:
+            conversasSemResposta == 1
+                ? '1 conversa'
+                : '$conversasSemResposta conversas',
         motivo: 'Sem resposta',
         rota: '/chat/inbox',
       ),
@@ -123,6 +126,8 @@ List<HojeAgoraItem> hojeAgora({
 
   for (final a in fila) {
     if (_filaRisco(a) || _filaCobranca(a) || _filaFicha(a)) continue;
+    // Boa notícia (evolução, recorde) não é pendência: vai para "Boas notícias".
+    if (hojeEhBoaNoticia(a)) continue;
     // "Radar Focux: Nome" repete o aluno sumido que já tem linha.
     final radar = dashboardRadarStudentName(a.titulo);
     if (radar != null && itens.any((i) => i.titulo == radar)) continue;
@@ -131,7 +136,8 @@ List<HojeAgoraItem> hojeAgora({
     itens.add(
       HojeAgoraItem(
         verbo: copiloto ? HojeVerbo.revisar : HojeVerbo.abrir,
-        verboRotulo: !copiloto && cta.isNotEmpty && cta.length <= 12 ? cta : null,
+        verboRotulo:
+            !copiloto && cta.isNotEmpty && cta.length <= 12 ? cta : null,
         titulo: a.titulo.trim().isEmpty ? 'Prioridade' : a.titulo.trim(),
         motivo: a.descricao.trim(),
         rota: copiloto ? _rotaCopiloto : _rotaDaFila(a),
@@ -150,9 +156,10 @@ String _rotaDaFila(FilaAcaoResumo a) =>
 
 String _nomeDaFicha(FilaAcaoResumo a) {
   final titulo = a.titulo.trim();
-  final nome = titulo.startsWith(_prefixoTituloFicha)
-      ? titulo.substring(_prefixoTituloFicha.length)
-      : titulo;
+  final nome =
+      titulo.startsWith(_prefixoTituloFicha)
+          ? titulo.substring(_prefixoTituloFicha.length)
+          : titulo;
   return fxTitleCaseName(nome);
 }
 
@@ -168,12 +175,102 @@ String _dinheiro(double reais) {
   return formatBrlCents(cents, showDecimals: cents % 100 != 0);
 }
 
-/// Linha abaixo do "Olá": o dia antes da hora do dado. Zero não aparece.
-String? hojeLinhaUtil({required int atendimentos, String? freshness}) {
-  final dia = switch (atendimentos) {
+/// Linha abaixo do "Olá": o dia, os atendimentos e, só depois de 5 min, o
+/// frescor ("Quarta, 12 de nov · 3 atendimentos").
+String hojeLinhaUtil({
+  required int atendimentos,
+  String? freshness,
+  DateTime? hoje,
+}) {
+  final d = hoje ?? DateTime.now();
+  const dias = [
+    'Segunda',
+    'Terça',
+    'Quarta',
+    'Quinta',
+    'Sexta',
+    'Sábado',
+    'Domingo',
+  ];
+  const meses = [
+    'jan',
+    'fev',
+    'mar',
+    'abr',
+    'mai',
+    'jun',
+    'jul',
+    'ago',
+    'set',
+    'out',
+    'nov',
+    'dez',
+  ];
+  final quando = '${dias[d.weekday - 1]}, ${d.day} de ${meses[d.month - 1]}';
+  final atend = switch (atendimentos) {
     0 => null,
     1 => ptS.hojeUmAtendimento,
     _ => ptS.hojeNAtendimentos(atendimentos),
   };
-  return [if (dia != null) dia, if (freshness != null) freshness].join(' · ');
+  return [
+    quando,
+    if (atend != null) atend,
+    if (freshness != null) freshness,
+  ].join(' · ');
+}
+
+/// Evolução e recorde: boa notícia, não pendência.
+bool hojeEhBoaNoticia(FilaAcaoResumo a) =>
+    a.severidade.trim().toUpperCase() == 'POSITIVA' ||
+    a.tipo.trim().toUpperCase() == 'EVOLUCAO';
+
+/// Uma boa notícia da Hoje: quem, o quê e a mensagem pronta do parabéns.
+class HojeBoaNoticia {
+  const HojeBoaNoticia({
+    required this.actionKey,
+    required this.titulo,
+    required this.frase,
+    required this.alunoId,
+    required this.rascunho,
+  });
+
+  final String actionKey;
+  final String titulo;
+  final String frase;
+  final int? alunoId;
+  final String rascunho;
+}
+
+/// Boas notícias dos últimos 3 dias (depois disso somem sozinhas).
+List<HojeBoaNoticia> hojeBoasNoticias(
+  List<FilaAcaoResumo> fila, {
+  DateTime? agora,
+}) {
+  final limite = (agora ?? DateTime.now()).subtract(const Duration(days: 3));
+  final out = <HojeBoaNoticia>[];
+  for (final a in fila) {
+    if (!hojeEhBoaNoticia(a)) continue;
+    if (a.status.trim().toUpperCase() != 'ABERTO' &&
+        a.status.trim().isNotEmpty) {
+      continue;
+    }
+    final quando =
+        DateTime.tryParse(a.updatedAt ?? a.createdAt ?? '')?.toLocal();
+    if (quando != null && quando.isBefore(limite)) continue;
+    final frase = a.descricao.split('\n').first.trim();
+    final exercicio = frase.contains(':') ? frase.split(':').first.trim() : '';
+    out.add(
+      HojeBoaNoticia(
+        actionKey: a.actionKey,
+        titulo: a.titulo.trim(),
+        frase: frase,
+        alunoId: a.alunoId,
+        rascunho:
+            exercicio.isEmpty
+                ? 'Vi sua evolução no treino. Parabéns, continua assim!'
+                : 'Vi seu recorde no $exercicio. Parabéns, continua assim!',
+      ),
+    );
+  }
+  return out;
 }

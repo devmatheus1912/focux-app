@@ -34,7 +34,7 @@ abstract final class IaConsentimentos {
   static const codigoAceiteAluno = 'IA_ACEITE_ALUNO';
 
   static const textoPersonal =
-      'O Copiloto envia dados de treino dos seus alunos, sem o nome deles, '
+      'A IA Focux envia dados de treino dos seus alunos, sem o nome deles, '
       'para Google Gemini ou Groq, que geram as sugestões. Nada é aplicado '
       'sem você revisar.';
 
@@ -44,7 +44,7 @@ abstract final class IaConsentimentos {
       'seu nome. Você pode mudar isso em Perfil > Privacidade.';
 
   static const textoSaude =
-      'Seu personal vê sua prontidão e os dados do dia. O Copiloto de IA dele '
+      'Seu personal vê sua prontidão e os dados do dia. O IA Focux dele '
       'também pode usar esses dados e a tendência das suas medidas, sem o seu '
       'nome e sem os valores.';
 }
@@ -67,9 +67,9 @@ bool iaJaRespondeu(Map<String, LgpdConsent> aceites, String tipo) =>
     aceites.containsKey('$tipo${IaConsentimentos.sufixoRevogado}');
 
 String iaConsentLabel(String tipo) => switch (tipo) {
-  IaConsentimentos.iaTerceiros => 'Copiloto de IA',
-  IaConsentimentos.iaCopiloto => 'Meus treinos no Copiloto',
-  IaConsentimentos.saudeIa => 'Dados de saúde no Copiloto',
+  IaConsentimentos.iaTerceiros => 'IA Focux',
+  IaConsentimentos.iaCopiloto => 'Meus treinos na IA Focux',
+  IaConsentimentos.saudeIa => 'Dados de saúde na IA Focux',
   _ => tipo,
 };
 
@@ -131,9 +131,9 @@ Future<bool> garantirAceiteCopiloto(BuildContext context, WidgetRef ref) async {
   if (!context.mounted) return false;
   final ok = await _perguntar(
     context,
-    titulo: 'Usar o Copiloto de IA?',
+    titulo: 'Usar o IA Focux?',
     texto: IaConsentimentos.textoPersonal,
-    permitir: 'Usar o Copiloto',
+    permitir: 'Usar a IA Focux',
     recusar: 'Agora não',
   );
   if (ok != true) return false;

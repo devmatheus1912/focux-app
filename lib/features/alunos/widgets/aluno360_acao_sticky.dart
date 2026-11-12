@@ -30,7 +30,7 @@ void abrirOperacaoSticky({
           alunoNome: aluno.nome,
           message: outreach,
           title: 'Mensagem sugerida',
-          subtitle: 'Copiloto · revise antes de enviar.',
+          subtitle: 'IA Focux · revise antes de enviar.',
           icon: FxIcons.ia,
         );
         return;

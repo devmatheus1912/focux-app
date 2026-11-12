@@ -181,6 +181,11 @@ class UpsellRepository {
     return OfertaUpsell.fromJson(r.data as Map<String, dynamic>);
   }
 
+  /// Só oferta nunca enviada; enviada, o servidor responde 409.
+  Future<void> excluir(int id) async {
+    await _dio.delete('/api/upsell/ofertas/$id');
+  }
+
   Future<EnvioOferta> enviar({
     required int ofertaId,
     required int alunoId,

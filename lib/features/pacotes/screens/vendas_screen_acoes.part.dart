@@ -18,37 +18,80 @@ extension _VendasAcoes on _VendasScreenState {
     await _carregar(force: true);
   }
 
+  /// Ativo: Destacar e Pausar. Pausado: Reativar. Excluir (em vermelho,
+  /// por último) só sem pedido nem oferta ligada.
   Future<void> _maisPlano(Pacote p) async {
+    final acoes = pacoteMenuAcoes(ativo: p.ativo, podeExcluir: p.podeExcluir);
     final acao = await showFxGroupedActionSheet<String>(
       context,
       titulo: p.titulo,
+      subtitulo: p.podeExcluir ? null : 'Tem vendas: pause em vez de excluir.',
       grupos: [
         FxActionGroup<String>(null, [
-          FxActionItem(
-            valor: 'destaque',
-            rotulo: p.destaque ? 'Tirar o destaque' : 'Destacar na página',
-            icone: FxIcons.estrela,
-          ),
+          if (acoes.contains('destaque'))
+            FxActionItem(
+              valor: 'destaque',
+              rotulo: p.destaque ? 'Tirar o destaque' : 'Destacar na página',
+              icone: FxIcons.estrela,
+            ),
+          if (acoes.contains('pausar'))
+            const FxActionItem(
+              valor: 'pausar',
+              rotulo: 'Pausar',
+              icone: FxIcons.pausar,
+              descricao: 'Sai da página. Volta com Reativar.',
+            ),
+          if (acoes.contains('reativar'))
+            const FxActionItem(
+              valor: 'reativar',
+              rotulo: 'Reativar',
+              icone: FxIcons.play,
+              descricao: 'Volta para a sua página.',
+            ),
         ]),
       ],
-      destrutiva: const FxActionItem(
-        valor: 'excluir',
-        rotulo: 'Tirar da página',
-        icone: FxIcons.excluir,
-      ),
-      confirmarTitulo: 'Tirar o plano da página?',
-      confirmarMensagem:
-          'Ele some da sua página. Quem já comprou não é afetado.',
+      destrutiva:
+          acoes.contains('excluir')
+              ? const FxActionItem(
+                valor: 'excluir',
+                rotulo: 'Excluir',
+                icone: FxIcons.excluir,
+              )
+              : null,
+      confirmar: false,
     );
     if (acao == null || !mounted) return;
+    if (acao == 'excluir') {
+      final ok = await showFxConfirmSheet(
+        context,
+        title: 'Excluir ${p.titulo}?',
+        message: 'O plano nunca foi vendido. Não dá para desfazer.',
+        confirmLabel: 'Excluir',
+        destructive: true,
+      );
+      if (!ok || !mounted) return;
+    }
     try {
       final repo = ref.read(pacoteRepositoryProvider);
-      if (acao == 'destaque') {
-        await repo.atualizar(p.id, destaque: !p.destaque);
-      } else {
-        await repo.desativar(p.id);
+      switch (acao) {
+        case 'destaque':
+          await repo.atualizar(p.id, destaque: !p.destaque);
+        case 'pausar':
+          await repo.desativar(p.id);
+        case 'reativar':
+          await repo.reativar(p.id);
+        case 'excluir':
+          await repo.excluir(p.id);
       }
       await _carregar(force: true);
+      if (!mounted) return;
+      final aviso = switch (acao) {
+        'pausar' => 'Plano pausado. Ele saiu da sua página.',
+        'reativar' => 'Plano de volta na sua página.',
+        'excluir' => 'Plano excluído.',
+        _ => null,
+      };
+      if (aviso != null) FeedbackHelper.showSuccess(context, aviso);
     } catch (e) {
       if (mounted) FeedbackHelper.showError(context, friendlyError(e));
     }
@@ -96,10 +139,25 @@ extension _VendasAcoes on _VendasScreenState {
     await _carregar();
   }
 
+  /// Enviar e Pausar/Reativar; Excluir só a oferta nunca enviada.
   Future<void> _maisOferta(OfertaUpsell o) async {
+    final podeExcluir = ofertaMenuAcoes(
+      ativo: o.ativo,
+      enviadas: o.enviadas,
+    ).contains('excluir');
     final acao = await showFxGroupedActionSheet<String>(
       context,
       titulo: o.titulo,
+      destrutiva:
+          podeExcluir
+              ? const FxActionItem(
+                valor: 'excluir',
+                rotulo: 'Excluir',
+                icone: FxIcons.excluir,
+              )
+              : null,
+      confirmarTitulo: 'Excluir a oferta?',
+      confirmarMensagem: 'Ela nunca foi enviada. Não dá para desfazer.',
       grupos: [
         FxActionGroup<String>(null, [
           if (o.ativo)
@@ -119,10 +177,16 @@ extension _VendasAcoes on _VendasScreenState {
     if (acao == null || !mounted) return;
     if (acao == 'enviar') return _enviarParaAluno(o);
     try {
-      await ref
-          .read(upsellRepositoryProvider)
-          .atualizar(id: o.id, ativo: !o.ativo);
+      final repo = ref.read(upsellRepositoryProvider);
+      if (acao == 'excluir') {
+        await repo.excluir(o.id);
+      } else {
+        await repo.atualizar(id: o.id, ativo: !o.ativo);
+      }
       await _carregar();
+      if (acao == 'excluir' && mounted) {
+        FeedbackHelper.showSuccess(context, 'Oferta excluída');
+      }
     } catch (e) {
       if (mounted) FeedbackHelper.showError(context, friendlyError(e));
     }

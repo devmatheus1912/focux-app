@@ -61,6 +61,8 @@ class VendasScreen extends ConsumerStatefulWidget {
 
 class _VendasScreenState extends ConsumerState<VendasScreen> {
   List<Pacote> _planos = const [];
+  List<Pacote> _pausados = const [];
+  var _mostrarPausados = false;
   List<OfertaUpsell> _ofertas = const [];
   List<OfertaAceita> _aceitas = const [];
   List<LojaPedido> _pedidos = const [];
@@ -108,6 +110,7 @@ class _VendasScreenState extends ConsumerState<VendasScreen> {
       final home = results[0]! as PacotesHomeBundle;
       setState(() {
         _planos = home.pacotes;
+        _pausados = home.pausados;
         _slug = home.perfil?.slug;
         _paginaNoAr = home.perfil?.paginaNoAr ?? true;
         _ofertas = (results[1] as List<OfertaUpsell>?) ?? _ofertas;
@@ -309,6 +312,31 @@ class _VendasScreenState extends ConsumerState<VendasScreen> {
       ),
       onTap: () => _editarPlano(null),
     ),
+    if (_pausados.isNotEmpty)
+      FxSatelliteListTile(
+        title: 'Pausados (${_pausados.length})',
+        titleCase: false,
+        muted: true,
+        trailing: Icon(
+          _mostrarPausados ? FxIcons.chevronCima : FxIcons.chevronBaixo,
+          color: chrome.mute,
+        ),
+        onTap: () => setState(() => _mostrarPausados = !_mostrarPausados),
+      ),
+    if (_mostrarPausados)
+      for (final p in _pausados)
+        FxSatelliteListTile(
+          title: p.titulo,
+          titleCase: false,
+          muted: true,
+          subtitle: Text('Fora da página · ${p.valor.format()}'),
+          trailing: IconButton(
+            tooltip: 'Mais opções do plano',
+            onPressed: () => _maisPlano(p),
+            icon: Icon(FxIcons.mais, color: chrome.mute),
+          ),
+          onTap: () => _maisPlano(p),
+        ),
   ];
 
   List<Widget> _ofertasParaAlunos(ShellPalette chrome) => [

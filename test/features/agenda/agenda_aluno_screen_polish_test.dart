@@ -24,14 +24,16 @@ void main() {
     expect(screen, contains('agendaAlunoEscopoProximas'));
     expect(screen, contains('agendaAlunoEscopoAnteriores'));
     expect(screen, contains('agendaAlunoPodeConfirmar'));
-    expect(screen, contains('agendaAlunoAdicionarCalendario'));
+    expect(screen, contains('webcal://'));
+    expect(screen, isNot(contains('agendaAlunoMaisOpcoes')));
     expect(screen, isNot(contains("'Exportar iCal'")));
     expect(screen, isNot(contains('agendaAlunoCountLabel(_loading ? 0')));
     expect(screen, contains('DashboardSectionHeader'));
     expect(screen, contains('agendaAlunoEscopoProximas'));
     expect(screen, contains('agendaAlunoEscopoAnteriores'));
     expect(screen, contains('agendaAlunoPodeConfirmar'));
-    expect(screen, contains('agendaAlunoAdicionarCalendario'));
+    expect(screen, contains('webcal://'));
+    expect(screen, isNot(contains('agendaAlunoMaisOpcoes')));
     expect(screen, isNot(contains("'Exportar iCal'")));
     expect(screen, isNot(contains('agendaAlunoCountLabel(_loading ? 0')));
     expect(screen, isNot(contains('CircularProgressIndicator')));

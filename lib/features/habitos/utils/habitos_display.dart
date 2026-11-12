@@ -78,6 +78,16 @@ bool habitoMostraBusca({required int total, required String query}) =>
 const habitoAlunoTodosId = 0;
 const habitoAlunoTodosLabel = 'Todos os alunos';
 
+/// Na folha de editar: o público não muda depois de criado.
+String habitoParaQuemTravado(int? alunoId) =>
+    alunoId == null
+        ? 'Para todos os alunos. Isso não muda depois de criado.'
+        : 'Para um aluno. Isso não muda depois de criado.';
+
+/// Itens do "⋯" do detalhe: Editar e Desativar no ativo; Reativar no desativado.
+List<String> habitoMenuAcoes({required bool ativo}) =>
+    ativo ? const ['editar', 'desativar'] : const ['reativar'];
+
 String habitoDetailPath(int id) => '/habitos/$id';
 
 String habitoAlunoDetailPath(int id) => '/aluno/habitos/$id';

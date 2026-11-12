@@ -160,7 +160,7 @@ void abrirChatAluno360(BuildContext context, WidgetRef ref, Aluno aluno) {
       alunoNome: aluno.nome,
       message: draft,
       title: 'Mensagem sugerida',
-      subtitle: 'Copiloto · revise antes de enviar.',
+      subtitle: 'IA Focux · revise antes de enviar.',
       icon: FxIcons.ia,
     );
     return;

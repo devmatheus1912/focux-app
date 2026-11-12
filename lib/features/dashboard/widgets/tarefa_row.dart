@@ -22,6 +22,7 @@ class TarefaRow extends StatelessWidget {
     required this.onConcluir,
     required this.onMais,
     this.fotoUrl,
+    this.nomeAluno,
   });
 
   final FilaAcaoResumo action;
@@ -33,110 +34,98 @@ class TarefaRow extends StatelessWidget {
   final VoidCallback onMais;
   final String? fotoUrl;
 
+  /// Nome do aluno pela lista de alunos (a tarefa só traz o id).
+  final String? nomeAluno;
+
   @override
   Widget build(BuildContext context) {
-    final nome = copilotActionsNome(action);
-    final motivo = copilotActionsMotivo(action);
+    // Título é sempre a pessoa; embaixo, o que fazer (ou quando foi feita).
+    final nome = nomeAluno ?? copilotActionsNome(action);
+    final motivo = copilotActionsMotivoParaPersonal(
+      action,
+      nomeAluno: nomeAluno,
+    );
     final prazo = copilotActionsPrazo(action.prioridade);
-    final selo = prazo.selo ?? '';
+    final selo = concluida ? copilotActionsFeitaHa(action) : (prazo.selo ?? '');
     final primary = Theme.of(context).colorScheme.primary;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Semantics(
-          button: true,
-          label: '$nome. $motivo${concluida ? '' : '. $selo'}',
-          excludeSemantics: true,
-          child: InkWell(
-            onTap: onOpen,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(
-                TokensStrip.s3,
-                TokensStrip.s2,
-                TokensStrip.s3,
-                TokensStrip.s1,
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (action.alunoId != null)
-                    AlunoAvatar(
-                      name: nome,
-                      photoUrl: fotoUrl,
-                      variant: AlunoAvatarVariant.strip,
-                    )
-                  else
-                    CircleAvatar(
-                      radius: 18,
-                      backgroundColor: primary.withValues(alpha: 0.12),
-                      child: Icon(
-                        copilotActionsIcone(action),
-                        size: 18,
-                        color: primary,
-                      ),
-                    ),
-                  const SizedBox(width: TokensStrip.s2),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          nome,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: FocuxHubTypography.cardTitle(color: ink),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          motivo,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: FocuxHubTypography.bodyMuted(color: mute),
-                        ),
-                        if (!concluida && selo.isNotEmpty) ...[
-                          const SizedBox(height: TokensStrip.s1),
-                          FxStatusPill(
-                            label: selo,
-                            tone:
-                                prazo.aviso
-                                    ? FxPillTone.warning
-                                    : FxPillTone.neutral,
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        Padding(
+    return Semantics(
+      button: true,
+      label: '$nome. $motivo. $selo',
+      excludeSemantics: true,
+      child: InkWell(
+        onTap: onOpen,
+        child: Padding(
           padding: const EdgeInsets.fromLTRB(
             TokensStrip.s3,
-            0,
+            TokensStrip.s2,
             TokensStrip.s1,
-            TokensStrip.s1,
+            TokensStrip.s2,
           ),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              if (!concluida)
+              if (action.alunoId != null)
+                AlunoAvatar(
+                  name: nome,
+                  photoUrl: fotoUrl,
+                  variant: AlunoAvatarVariant.strip,
+                )
+              else
+                CircleAvatar(
+                  radius: 18,
+                  backgroundColor: primary.withValues(alpha: 0.12),
+                  child: Icon(
+                    copilotActionsIcone(action),
+                    size: 18,
+                    color: primary,
+                  ),
+                ),
+              const SizedBox(width: TokensStrip.s2),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      nome,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: FocuxHubTypography.cardTitle(color: ink),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      motivo,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: FocuxHubTypography.bodyMuted(color: mute),
+                    ),
+                    if (selo.isNotEmpty) ...[
+                      const SizedBox(height: TokensStrip.s1),
+                      if (concluida)
+                        Text(
+                          selo,
+                          style: FocuxHubTypography.minimo(color: mute),
+                        )
+                      else
+                        FxStatusPill(
+                          label: selo,
+                          tone:
+                              prazo.aviso
+                                  ? FxPillTone.warning
+                                  : FxPillTone.neutral,
+                        ),
+                    ],
+                  ],
+                ),
+              ),
+              if (!concluida) ...[
+                const SizedBox(width: TokensStrip.s2),
                 FxTonalButton(
                   label: copilotActionsVerbo(action),
                   compact: true,
                   onPressed: onOpen,
                 ),
-              const Spacer(),
-              if (!concluida)
-                IconButton(
-                  tooltip: copilotActionsConcluirLabel(),
-                  icon: Icon(
-                    FxIcons.concluido,
-                    color: primary,
-                  ),
-                  onPressed: onConcluir,
-                ),
+              ],
               IconButton(
                 tooltip: 'Opções da tarefa',
                 icon: Icon(FxIcons.mais, color: mute),
@@ -145,7 +134,7 @@ class TarefaRow extends StatelessWidget {
             ],
           ),
         ),
-      ],
+      ),
     );
   }
 }

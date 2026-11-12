@@ -17,6 +17,7 @@ import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
@@ -29,6 +30,7 @@ import '../../auth/providers/auth_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../data/habito_repository.dart';
 import '../utils/habitos_display.dart';
+import '../widgets/habito_editar_sheet.dart';
 import '../../../core/theme/fx_icons.dart';
 
 class HabitoDetailScreen extends ConsumerStatefulWidget {
@@ -103,26 +105,79 @@ class _HabitoDetailScreenState extends ConsumerState<HabitoDetailScreen> {
   Future<void> _maisOpcoes() async {
     final habito = _habito;
     if (habito == null || _busy) return;
+    // Sem excluir: apagaria as marcações e a sequência dos alunos.
     final acao = await showFxGroupedActionSheet<String>(
       context,
       titulo: habito.titulo,
-      grupos: const [],
-      destrutiva: const FxActionItem(
-        valor: 'desativar',
-        rotulo: 'Desativar',
-        icone: FxIcons.fechar,
-      ),
-      confirmarTitulo: 'Desativar o hábito?',
-      confirmarMensagem:
-          'Os alunos param de ver e de marcar. As marcações antigas ficam.',
+      grupos: [
+        FxActionGroup('Hábito', [
+          if (habito.ativo)
+            const FxActionItem(
+              valor: 'editar',
+              rotulo: 'Editar',
+              icone: FxIcons.editar,
+              descricao: 'Nome, vezes por semana e descrição.',
+            ),
+          if (!habito.ativo)
+            const FxActionItem(
+              valor: 'reativar',
+              rotulo: 'Reativar',
+              icone: FxIcons.atualizar,
+              descricao: 'Volta para a lista dos alunos.',
+            ),
+        ]),
+      ],
+      destrutiva:
+          habito.ativo
+              ? const FxActionItem(
+                valor: 'desativar',
+                rotulo: 'Desativar',
+                icone: FxIcons.fechar,
+              )
+              : null,
+      confirmar: false,
     );
-    if (acao != 'desativar' || !mounted) return;
+    if (!mounted) return;
+    if (acao == 'editar') {
+      final salvou = await showHabitoEditarSheet(
+        context,
+        habito: habito,
+        repo: _repo,
+      );
+      if (!mounted || !salvou) return;
+      FeedbackHelper.showSuccess(context, 'Hábito salvo');
+      await _load();
+      return;
+    }
+    if (acao == 'desativar') {
+      final ok = await showFxConfirmSheet(
+        context,
+        title: 'Desativar o hábito?',
+        message:
+            'Os alunos param de ver e de marcar. As marcações antigas ficam, e dá para reativar.',
+        confirmLabel: 'Desativar',
+        destructive: true,
+      );
+      if (!ok || !mounted) return;
+    }
+    if (acao != 'desativar' && acao != 'reativar') return;
     setState(() => _busy = true);
     try {
-      await _repo.desativar(habito.id);
+      if (acao == 'desativar') {
+        await _repo.desativar(habito.id);
+      } else {
+        await _repo.reativar(habito.id);
+      }
       if (!mounted) return;
-      FeedbackHelper.showSuccess(context, 'Hábito desativado');
-      _leave();
+      FeedbackHelper.showSuccess(
+        context,
+        acao == 'desativar' ? 'Hábito desativado' : 'Hábito reativado',
+      );
+      if (acao == 'desativar') {
+        _leave();
+      } else {
+        await _load();
+      }
     } catch (e) {
       if (!mounted) return;
       FeedbackHelper.showApiFailure(context, e);
@@ -199,15 +254,15 @@ class _HabitoDetailScreenState extends ConsumerState<HabitoDetailScreen> {
                         tips: [
                           const FxHelpTip('Esta semana', habitoComoCalculamos),
                           FxHelpTip(
-                            widget.forAluno ? 'Marcar' : 'Desativar',
+                            widget.forAluno ? 'Marcar' : 'Editar ou desativar',
                             widget.forAluno
                                 ? 'O botão marca ou desmarca o dia de hoje.'
-                                : 'No ⋯ do topo. Os alunos param de ver.',
+                                : 'No ⋯ do topo. Desativado volta com Reativar.',
                           ),
                         ],
                       ),
                 ),
-                if (!widget.forAluno && (habito?.ativo ?? false))
+                if (!widget.forAluno && habito != null)
                   IconButton(
                     tooltip: 'Mais opções',
                     onPressed: _busy ? null : _maisOpcoes,

@@ -26,7 +26,6 @@ import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/depoimento_repository.dart';
 import '../utils/depoimento_display.dart';
-import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../core/theme/fx_icons.dart';
 
 class DepoimentoAlunoScreen extends ConsumerStatefulWidget {
@@ -39,14 +38,15 @@ class DepoimentoAlunoScreen extends ConsumerStatefulWidget {
 class _State extends ConsumerState<DepoimentoAlunoScreen> {
   final _formKey = GlobalKey<FormState>();
   final _textoCtrl = TextEditingController();
-  int _nota = 5;
+  // Começa sem nota: estrela já marcada puxava a nota para cima.
+  int _nota = 0;
   bool _enviando = false;
   bool _loading = true;
   String? _loadErro;
   DepoimentoModel? _enviado;
 
   bool get _isDirty =>
-      _enviado == null && (_textoCtrl.text.trim().isNotEmpty || _nota != 5);
+      _enviado == null && (_textoCtrl.text.trim().isNotEmpty || _nota != 0);
 
   bool get _canSubmit =>
       !_enviando && _textoCtrl.text.trim().length >= 10 && _nota >= 1;
@@ -152,7 +152,7 @@ class _State extends ConsumerState<DepoimentoAlunoScreen> {
     final showForm = !_loading && _loadErro == null && _enviado == null;
 
     return fxScreenA11yScope(
-      label: 'Deixar Depoimento',
+      label: 'Deixar depoimento',
       child: FxKeyboardDismissScope(
         child: FxFormPopGuard(
           dirty: _isDirty,
@@ -162,12 +162,11 @@ class _State extends ConsumerState<DepoimentoAlunoScreen> {
             constrainWidth: false,
             extendBody: true,
             appBar: FxShellAppBar(
-              title: 'Deixar Depoimento',
+              title: 'Deixar depoimento',
               subtitle: _enviado == null
                   ? 'Conte como foi sua experiência'
                   : depoimentoStatusLabel(aprovado: _enviado!.aprovado),
-              leadingWidth: 92,
-              leading: FxTonalButton(label: _enviado == null ? 'Cancelar' : 'Fechar', onPressed: _cancel, compact: true),
+              onBack: _cancel,
               actions: [
                 FxHelpIconButton(
                   tooltip: 'Como funciona',
@@ -254,13 +253,11 @@ class _State extends ConsumerState<DepoimentoAlunoScreen> {
                             FxSettingsGroup(
                               header: 'Seu depoimento',
                               caption: 'O personal lê antes de publicar.',
+                              semMoldura: true,
                               children: [
                                 Padding(
-                                  padding: const EdgeInsets.fromLTRB(
-                                    FxSettingsLayout.groupPadH,
-                                    TokensStrip.s2,
-                                    FxSettingsLayout.groupPadH,
-                                    FxSettingsLayout.groupPadV,
+                                  padding: const EdgeInsets.only(
+                                    top: TokensStrip.s2,
                                   ),
                                   child: TextFormField(
                                     controller: _textoCtrl,
@@ -272,10 +269,10 @@ class _State extends ConsumerState<DepoimentoAlunoScreen> {
                                         FxKeyboardDismissScope.dismiss(),
                                     decoration: FxInputDeco.build(
                                       context,
-                                      'Depoimento',
+                                      '',
                                       hint:
-                                          'Ex.: treinos claros, evolução nas cargas e suporte no WhatsApp…',
-                                    ).copyWith(alignLabelWithHint: true),
+                                          'Conte o que mudou para você desde que começou.',
+                                    ).copyWith(labelText: null),
                                     validator: (v) =>
                                         (v == null || v.trim().length < 10)
                                             ? 'Mínimo 10 caracteres'
@@ -284,6 +281,19 @@ class _State extends ConsumerState<DepoimentoAlunoScreen> {
                                 ),
                               ],
                             ),
+                            if (depoimentoFalta(
+                                  nota: _nota,
+                                  texto: _textoCtrl.text,
+                                )
+                                case final falta?) ...[
+                              const SizedBox(height: TokensStrip.s2),
+                              Text(
+                                falta,
+                                style: FocuxHubTypography.bodyMuted(
+                                  color: chrome.mute,
+                                ),
+                              ),
+                            ],
                           ],
                         ),
                       ),

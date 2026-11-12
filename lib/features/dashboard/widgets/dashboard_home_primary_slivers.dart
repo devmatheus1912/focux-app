@@ -19,6 +19,7 @@ import '../utils/hoje_agora.dart';
 import 'dashboard_agenda_hoje_strip.dart';
 import 'dashboard_home_header.dart';
 import 'hoje_agora_secao.dart';
+import 'hoje_boas_noticias.dart';
 import 'hoje_base_secao.dart';
 
 /// A Hoje do personal numa tela só: cabeçalho, aviso do plano, "Agora",
@@ -78,6 +79,11 @@ List<Widget> buildDashboardHomePrimarySlivers({
       SliverToBoxAdapter(child: HojeProximoPasso(passo: proximoPasso))
     else
       SliverToBoxAdapter(child: HojeAgoraSecao(itens: itens, temAluno: temAluno)),
+    SliverToBoxAdapter(
+      child: HojeBoasNoticiasSecao(
+        noticias: hojeBoasNoticias(commandCenter.filaAcoes),
+      ),
+    ),
     if (temAluno)
       SliverToBoxAdapter(
         child: onboardingIncomplete

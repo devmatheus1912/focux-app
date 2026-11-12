@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/api/pagina.dart';
 import '../../../core/brand/focux_microcopy.dart';
@@ -16,7 +17,6 @@ import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_grouped_action_sheet.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
@@ -186,24 +186,18 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen>
     }
   }
 
-  Future<void> _menu() async {
-    final s = S.of(context);
-    final escolha = await showFxGroupedActionSheet<String>(
-      context,
-      titulo: s.agendaAlunoMaisOpcoes,
-      icone: FxIcons.mais,
-      grupos: [
-        FxActionGroup<String>(null, [
-          FxActionItem(
-            valor: 'calendario',
-            rotulo: s.agendaAlunoAdicionarCalendario,
-            descricao: s.agendaAlunoCalendarioTexto,
-            icone: FxIcons.eventoConfirmado,
-          ),
-        ]),
-      ],
-    );
-    if (escolha == 'calendario' && mounted) await _copyIcalLink();
+  /// Abre o calendário do celular (webcal); se não abrir, copia o link.
+  Future<void> _abrirCalendario() async {
+    try {
+      final info =
+          await AgendaRepository(ref.read(apiClientProvider)).icalTokenAluno();
+      final url = _resolveAbsoluteApiUrl(info.url);
+      final webcal = Uri.parse(url.replaceFirst(RegExp(r'^https?://'), 'webcal://'));
+      final abriu = await launchUrl(webcal, mode: LaunchMode.externalApplication);
+      if (!abriu && mounted) await _copyIcalLink();
+    } catch (_) {
+      if (mounted) await _copyIcalLink();
+    }
   }
 
   /// Um toque: o erro se resolve pelo chat, não há como desconfirmar.
@@ -220,6 +214,7 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen>
     } catch (e) {
       if (!mounted) return;
       FeedbackHelper.showApiFailure(context, e);
+      await _load();
     }
   }
 
@@ -245,7 +240,11 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen>
       _substituir(await AgendaRepository(ref.read(apiClientProvider)).avisarNaoVou(ag.id));
       if (mounted) FeedbackHelper.showSuccess(context, s.agendaNaoVouEnviado);
     } catch (e) {
-      if (mounted) FeedbackHelper.showApiFailure(context, e);
+      // A sessão mudou no servidor (passou ou foi cancelada): mostra a agenda
+      // de agora em vez de deixar o cartão errado na tela.
+      if (!mounted) return;
+      FeedbackHelper.showApiFailure(context, e);
+      await _load();
     }
   }
 
@@ -259,7 +258,8 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen>
     final s = S.of(context);
     final chrome = ShellChrome.of(context);
     final obs = ag.observacoes?.trim() ?? '';
-    final futura = !agendaAlunoJaPassou(ag);
+    // Cancelada não tem "Não vou" nem confirmar: só o resumo.
+    final futura = !agendaAlunoJaPassou(ag) && agendaStatusIsActionable(ag.status);
     await showFxHomeSheet<void>(
       context,
       builder:
@@ -335,13 +335,6 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen>
           title: s.agendaAlunoTitulo,
           subtitle: _loading ? s.agendaAlunoCarregando : freshness,
           onBack: () => safePopOrGo(context, '/dashboard/aluno'),
-          actions: [
-            IconButton(
-              tooltip: s.agendaAlunoMaisOpcoes,
-              icon: const Icon(FxIcons.mais),
-              onPressed: _menu,
-            ),
-          ],
         ),
         body: FxContentWidthLimiter(
           child:
@@ -391,7 +384,7 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen>
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '${agendaAlunoDefaultTitle(ag.titulo)} · ${ag.naoVouEm != null ? s.agendaAvisouNaoVai : podeConfirmar ? s.agendaAlunoFaltaConfirmar : s.agendaAlunoConfirmada}',
+                  '${agendaAlunoDefaultTitle(ag.titulo)} · ${ag.naoVouEm != null ? s.agendaAvisouNaoVai : podeConfirmar ? s.agendaAlunoFaltaConfirmar : agendaAlunoStatusSessao(ag.status)}',
                   style: FocuxHubTypography.bodyMuted(color: chrome.mute),
                 ),
               ],
@@ -416,7 +409,12 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen>
   }
 
   Widget _buildList(S s, ShellPalette chrome, Color primary) {
-    final proximas = agendaAlunoProximas(_proximas.items);
+    final todas = agendaAlunoProximas(_proximas.items);
+    final cartao = agendaAlunoProximaAtiva(todas);
+    final proximas = [
+      if (cartao != null) cartao,
+      ...todas.where((a) => a.id != cartao?.id),
+    ];
     final anteriores = agendaAlunoAnteriores(_anteriores.items);
     if (proximas.isEmpty && anteriores.isEmpty) {
       return RefreshIndicator(
@@ -441,7 +439,7 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen>
     }
 
     final rows = <Widget>[
-      if (proximas.isEmpty)
+      if (cartao == null)
         Padding(
           padding: const EdgeInsets.symmetric(vertical: TokensStrip.s3),
           child: Text(
@@ -454,21 +452,24 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen>
         )
       else
         _proximaCard(s, proximas.first, chrome),
-      if (proximas.length > 1) ...[
+      if (proximas.length > (cartao == null ? 0 : 1)) ...[
         const SizedBox(height: TokensStrip.s3),
         DashboardSectionHeader(title: s.agendaAlunoProximas),
-        for (final ag in proximas.skip(1)) _tile(ag, chrome, primary),
+        for (final ag in proximas.skip(cartao == null ? 0 : 1))
+          _tile(ag, chrome, primary),
       ],
       if (_proximas.hasMore) _loadMoreTile(s, _proximas),
       if (anteriores.isNotEmpty) ...[
         const SizedBox(height: TokensStrip.s3),
-        DashboardSectionHeader(
-          title: s.agendaAlunoAnteriores,
-          actionLabel:
-              _anterioresAbertas
-                  ? s.agendaAlunoOcultarAnteriores
-                  : s.agendaAlunoVerAnteriores,
-          onAction:
+        FxSatelliteListTile(
+          title: 'Sessões anteriores',
+          titleCase: false,
+          muted: true,
+          trailing: Icon(
+            _anterioresAbertas ? FxIcons.chevronCima : FxIcons.chevronBaixo,
+            color: chrome.mute,
+          ),
+          onTap:
               () => setState(() => _anterioresAbertas = !_anterioresAbertas),
         ),
         if (_anterioresAbertas) ...[
@@ -476,6 +477,14 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen>
           if (_anteriores.hasMore) _loadMoreTile(s, _anteriores),
         ],
       ],
+      const SizedBox(height: TokensStrip.s3),
+      FxSatelliteListTile(
+        leading: Icon(FxIcons.eventoConfirmado, color: primary),
+        title: 'Ver no calendário do celular',
+        titleCase: false,
+        subtitle: const Text('Suas sessões aparecem no app de calendário.'),
+        onTap: _abrirCalendario,
+      ),
     ];
 
     return RefreshIndicator(
@@ -511,18 +520,26 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen>
               isDark: chrome.isDark,
               primary: primary,
             );
+    final status =
+        ag.naoVouEm != null && !passou
+            ? S.of(context).agendaAvisouNaoVai
+            : agendaAlunoStatusLabel(ag);
+    // "Agendada" é o normal de uma sessão futura: não precisa repetir.
+    final mostraStatus = passou || ag.naoVouEm != null || ag.status != 'AGENDADO';
     return FxSatelliteListTile(
-      title: agendaAlunoDefaultTitle(ag.titulo),
+      title: agendaAlunoSoDia(ag.inicio),
       titleCase: false,
       muted: passou,
-      subtitle: Text(agendaAlunoDiaLabel(ag.inicio, ag.fim)),
-      trailing: Text(
-        agendaAlunoStatusLabel(ag),
-        style: FocuxHubTypography.bodyMuted(
-          color: cor,
-          fontWeight: FontWeight.w700,
-        ),
+      subtitle: Text(
+        '${agendaAlunoHorario(ag)} · ${agendaAlunoDefaultTitle(ag.titulo)}',
       ),
+      trailing:
+          mostraStatus
+              ? Text(
+                status,
+                style: FocuxHubTypography.rotulo(color: cor),
+              )
+              : null,
       onTap: () => _abrirDetalhe(ag),
     );
   }

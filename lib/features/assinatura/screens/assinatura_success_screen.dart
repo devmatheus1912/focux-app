@@ -163,11 +163,11 @@ class AssinaturaSuccessScreen extends StatelessWidget {
     SubscriptionPlan.ENTERPRISE => [
       'Personalize sua landing completa no editor.',
       'Configure sua marca própria: logo e cores.',
-      'Abra o IA Copiloto para o primeiro treino assistido.',
+      'Abra o IA Focux para o primeiro treino assistido.',
     ],
     SubscriptionPlan.PRO => [
       'Configure cobrança PIX no chat com alunos.',
-      'Abra o IA Copiloto e monte o próximo treino.',
+      'Abra o IA Focux e monte o próximo treino.',
       'Revise inadimplência no financeiro.',
     ],
     _ => ['Explore o dashboard e cadastre seus alunos.'],

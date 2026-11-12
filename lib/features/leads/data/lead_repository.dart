@@ -195,6 +195,12 @@ class LeadRepository {
     await _dio.delete('/api/leads/$id');
   }
 
+  /// Apaga o cadastro e o histórico de contatos (pedido de exclusão, LGPD).
+  /// Quem virou aluno não: o servidor responde 409.
+  Future<void> excluir(int id) async {
+    await _dio.delete('/api/leads/$id/definitivo');
+  }
+
   Future<List<LeadInteracao>> listarInteracoes(int leadId) async {
     final r = await _dio.get('/api/leads/$leadId/interacoes');
     return (r.data as List)

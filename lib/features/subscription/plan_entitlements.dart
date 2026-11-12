@@ -47,7 +47,7 @@ class PlanEntitlements {
     String fallback = 'recurso',
   }) {
     const names = {
-      'IA_COPILOTO': 'IA Copiloto',
+      'IA_COPILOTO': 'IA Focux',
       'WHITE_LABEL': 'White-label',
       'LANDING_COMPLETA': 'Landing page completa',
       'HABIT_COACHING': 'Habit coaching',
@@ -370,7 +370,7 @@ class PlanEntitlements {
     if (currentPlan == SubscriptionPlan.FREE ||
         targetPlan == SubscriptionPlan.PRO) {
       return lockedOffer(
-        featureName: 'IA Copiloto',
+        featureName: 'IA Focux',
         capability: 'iaCopiloto',
         requiredPlan: SubscriptionPlan.PRO,
       );

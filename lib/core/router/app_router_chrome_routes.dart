@@ -119,7 +119,7 @@ RouteBase buildChromeShellRoute() {
             path: '/dashboard/command-center/copiloto',
             builder:
                 (context, state) => const FeatureGate(
-                  featureName: 'Copiloto IA',
+                  featureName: 'IA Focux',
                   requiredPlan: SubscriptionPlan.PRO,
                   capability: 'ia',
                   child: CopilotActionsScreen(),
@@ -604,11 +604,11 @@ RouteBase buildChromeShellRoute() {
           GoRoute(
             path: '/ia/chat',
             builder:
-                (context, state) => const FeatureGate(
-                  featureName: 'Chat com IA',
+                (context, state) => FeatureGate(
+                  featureName: 'IA Focux',
                   requiredPlan: SubscriptionPlan.PRO,
                   capability: 'ia',
-                  child: IaChatScreen(),
+                  child: IaChatScreen(conversaId: state.uri.queryParameters['c']),
                 ),
           ),
           GoRoute(

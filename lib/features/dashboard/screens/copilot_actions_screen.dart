@@ -8,7 +8,6 @@ import '../../../core/auth/sessao_provider.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
@@ -21,7 +20,6 @@ import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../alunos/providers/alunos_provider.dart';
-import '../../alunos/widgets/aluno_form_choices.dart';
 import '../../ia/providers/ia_copilot_providers.dart';
 import '../data/command_center_data.dart';
 import '../providers/dashboard_provider.dart';
@@ -34,7 +32,6 @@ import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 import 'package:focux_app/core/widgets/skeleton_loader.dart';
 import '../../../core/theme/fx_icons.dart';
 
-part 'copilot_actions_screen_widgets.part.dart';
 
 typedef IaActionsQuery = ({String status, String q});
 
@@ -117,7 +114,6 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
                     ?.itens ??
                 const <FilaAcaoResumo>[]
             : const <FilaAcaoResumo>[];
-    final feitasHoje = copilotActionsFeitasHoje(concluidas);
 
     return fxScreenA11yScope(
       label: 'Tarefas',
@@ -148,21 +144,15 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    AlunoSegmentedChoice(
-                      options: [
-                        for (final status in copilotActionsStatusValues)
-                          (
-                            value: status,
-                            label: copilotActionsStatusChoiceLabel(
-                              status,
-                              contagem,
-                            ),
-                          ),
-                      ],
-                      selected: _status,
-                      isDark: dark,
-                      onSelect: _selecionarStatus,
-                    ),
+                    // Sem abas (12/11): a tela abre nas abertas; adiadas e
+                    // feitas ficam no fim da lista e voltam por esta linha.
+                    if (!abertas)
+                      FxSatelliteListTile(
+                        leading: Icon(FxIcons.voltar, color: mute),
+                        title: 'Voltar às abertas',
+                        titleCase: false,
+                        onTap: () => _selecionarStatus(copilotActionsStatusAberto),
+                      ),
                     if (_query.isNotEmpty || _totalNaLista(contagem) > 10) ...[
                       const SizedBox(height: TokensStrip.s2),
                       TextField(
@@ -253,7 +243,12 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
                               in abertas
                                   ? copilotActionsPorGrupo(actions)
                                   : [
-                                    ('', copilotActionsOrdenadas(actions)),
+                                    (
+                                      copilotActionsStatusLabel(_status),
+                                      copilotActionsSemRepetir(
+                                        copilotActionsOrdenadas(actions),
+                                      ),
+                                    ),
                                   ]) ...[
                             if (grupo.isNotEmpty) ...[
                               const SizedBox(height: TokensStrip.s3),
@@ -270,6 +265,7 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
                                     TarefaRow(
                                       action: action,
                                       fotoUrl: _fotoDe(action.alunoId),
+                                      nomeAluno: _nomeDe(action.alunoId),
                                       concluida:
                                           _status ==
                                           copilotActionsStatusConcluido,
@@ -285,13 +281,9 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
                               ),
                             ),
                           ],
-                          if (feitasHoje.isNotEmpty) ...[
+                          if (abertas) ...[
                             const SizedBox(height: TokensStrip.s3),
-                            _FeitasHoje(
-                              acoes: feitasHoje,
-                              ink: ink,
-                              mute: mute,
-                            ),
+                            ..._linhasDeOutrosStatus(contagem, mute),
                           ],
                           const SizedBox(height: TokensStrip.s2),
                           if (hasNext)
@@ -394,7 +386,7 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
         const FxHelpTip('Como calculamos', copilotActionsComoCalculamos),
         const FxHelpTip(
           'O que aparece aqui',
-          'Tarefas salvas do Copiloto e alertas automáticos. Abrir o aluno não conclui a tarefa.',
+          'Tarefas salvas da IA Focux e alertas automáticos. Abrir o aluno não conclui a tarefa.',
         ),
         FxHelpTip('Adiar e concluir', ptS.tarefasAjudaAdiarConcluir),
       ],
@@ -409,6 +401,31 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
     ref.invalidate(iaActionsContagemProvider(_query));
     await ref.read(iaActionsProvider(_queryKey).future);
   }
+
+  String? _nomeDe(int? alunoId) {
+    final alunos = ref.watch(alunosProvider).value;
+    if (alunoId == null || alunos == null) return null;
+    for (final aluno in alunos) {
+      if (aluno.id == alunoId) return aluno.nome;
+    }
+    return null;
+  }
+
+  /// "Adiadas (2)" e "Feitas (5)" no fim das abertas.
+  List<Widget> _linhasDeOutrosStatus(IaCommandActionsContagem? c, Color mute) => [
+    for (final (status, n) in [
+      (copilotActionsStatusAdiado, c?.adiadas ?? 0),
+      (copilotActionsStatusConcluido, c?.concluidas ?? 0),
+    ])
+      if (n > 0)
+        FxSatelliteListTile(
+          title: '${copilotActionsStatusLabel(status)} ($n)',
+          titleCase: false,
+          muted: true,
+          trailing: Icon(FxIcons.chevronDireita, color: mute),
+          onTap: () => _selecionarStatus(status),
+        ),
+  ];
 
   String? _fotoDe(int? alunoId) {
     final alunos = ref.watch(alunosProvider).value;

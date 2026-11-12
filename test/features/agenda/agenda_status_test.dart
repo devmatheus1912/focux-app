@@ -136,14 +136,14 @@ void main() {
       );
       expect(
         agendaAlunoStatusLabel(_ag(inicio: passada), now: now),
-        'Agendado',
+        'Agendada',
       );
       expect(
         agendaAlunoStatusLabel(
           _ag(inicio: DateTime(2026, 11, 20, 8), status: 'CONFIRMADO'),
           now: now,
         ),
-        'Confirmado',
+        'Confirmada',
       );
     });
   });

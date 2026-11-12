@@ -32,6 +32,40 @@ String copilotoResumoLinha(CopilotoAnaliseResumo r, DateTime agora) {
 }
 
 extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
+  /// Três portas da IA Focux, sem cardápio: conversar, analisar, cargas.
+  Widget _atalhos({required bool cotaEsgotada}) => Padding(
+    padding: const EdgeInsets.fromLTRB(
+      FxSettingsLayout.pageInset,
+      0,
+      FxSettingsLayout.pageInset,
+      TokensStrip.s4,
+    ),
+    child: Wrap(
+      spacing: TokensStrip.s2,
+      runSpacing: TokensStrip.s2,
+      children: [
+        FxTonalButton(
+          label: 'Conversar',
+          icon: FxIcons.chat,
+          compact: true,
+          onPressed: () => context.push('/ia/chat'),
+        ),
+        FxTonalButton(
+          label: 'Analisar um aluno',
+          icon: FxIcons.ia,
+          compact: true,
+          onPressed: cotaEsgotada ? null : _escolherEAnalisar,
+        ),
+        FxTonalButton(
+          label: 'Ajustar cargas',
+          icon: FxIcons.subindo,
+          compact: true,
+          onPressed: cotaEsgotada ? null : _ajustarCargasDeUmAluno,
+        ),
+      ],
+    ),
+  );
+
   /// Grupos da abertura: análises recentes e o que a IA faz.
   Widget _abertura({
     required bool cotaEsgotada,
@@ -39,9 +73,8 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
   }) {
     final chrome = ShellChrome.of(context);
     final cargas = ref.watch(cargasParaRevisarProvider).value ?? 0;
+    final conversas = ref.watch(iaConversasProvider).value ?? const [];
     final agora = DateTime.now();
-    String descricao(String texto) =>
-        cotaEsgotada ? 'Seus usos de IA deste mês acabaram' : texto;
     final ordenadas = [...recentes]..sort((a, b) {
       final pa = a.concluidaEm == null && a.pendentes > 0 ? 0 : 1;
       final pb = b.concluidaEm == null && b.pendentes > 0 ? 0 : 1;
@@ -81,32 +114,9 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
             ),
             const SizedBox(height: FxSettingsLayout.groupGap),
           ],
-          Text(
-            'O que a IA faz',
-            style: FxSettingsLayout.sectionHeader(color: chrome.mute),
-          ),
-          const SizedBox(height: FxSettingsLayout.headerToGroup),
-          FxSettingsGroup(
-            children: [
-              FxSettingsTile(
-                icon: FxIcons.ia,
-                label: 'Analisar um aluno',
-                subtitle: descricao(
-                  'Vê treino, check-ins e evolução e sugere o próximo passo. ${iaCopilotoCustoAnalise()}',
-                ),
-                value: '',
-                onTap: cotaEsgotada ? null : _escolherEAnalisar,
-              ),
-              FxSettingsTile(
-                icon: FxIcons.subindo,
-                label: 'Ajustar cargas',
-                subtitle: descricao(
-                  'Sugere a carga de cada exercício pelo histórico.',
-                ),
-                value: '',
-                onTap: cotaEsgotada ? null : _ajustarCargasDeUmAluno,
-              ),
-              if (cargas > 0)
+          if (cargas > 0) ...[
+            FxSettingsGroup(
+              children: [
                 FxSettingsTile(
                   icon: FxIcons.checklist,
                   label: 'Cargas para revisar',
@@ -115,18 +125,36 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                           ? '1 sugestão esperando sua revisão.'
                           : '$cargas sugestões esperando sua revisão.',
                   value: '',
+                  showDivider: false,
                   onTap: () => context.push('/ia/progressao/aceitar'),
                 ),
-              FxSettingsTile(
-                icon: FxIcons.chat,
-                label: 'Conversar com a IA',
-                subtitle: 'Tire dúvidas de treino e prescrição.',
-                value: '',
-                showDivider: false,
-                onTap: () => context.push('/ia/chat'),
-              ),
-            ],
-          ),
+              ],
+            ),
+            const SizedBox(height: FxSettingsLayout.groupGap),
+          ],
+          if (conversas.isNotEmpty) ...[
+            Text(
+              'Conversas recentes',
+              style: FxSettingsLayout.sectionHeader(color: chrome.mute),
+            ),
+            const SizedBox(height: FxSettingsLayout.headerToGroup),
+            FxSettingsGroup(
+              children: [
+                for (final (i, c) in conversas.take(5).indexed)
+                  FxSettingsTile(
+                    icon: FxIcons.chat,
+                    label: c.titulo,
+                    subtitle: [
+                      if (c.alunoNome != null) 'Sobre ${c.alunoNome}',
+                      dataCurta(c.atualizadaEm),
+                    ].join(' · '),
+                    value: '',
+                    showDivider: i < conversas.take(5).length - 1,
+                    onTap: () => context.push('/ia/chat?c=${c.id}'),
+                  ),
+              ],
+            ),
+          ],
         ],
       ),
     );
@@ -273,14 +301,14 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
     final proxima = _proximaComAcao;
 
     return fxScreenA11yScope(
-      label: 'Copiloto',
+      label: 'IA Focux',
       child: PopScope(
         canPop: !_gerado,
         onPopInvokedWithResult: (didPop, _) {
           if (!didPop) _voltarAoInicio();
         },
         child: FeatureGate(
-          featureName: 'Copiloto IA',
+          featureName: 'IA Focux',
           requiredPlan: SubscriptionPlan.PRO,
           capability: 'iaCopiloto',
           child: FxShellScaffold(
@@ -288,9 +316,14 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
             constrainWidth: false,
             safeArea: false,
             appBar: FxShellAppBar(
-              title: 'Copiloto',
+              title: 'IA Focux',
               subtitle: _gerado ? _selectedAlunoNome : null,
-              onBack: _gerado ? _voltarAoInicio : null,
+              // Voltar sempre: sem análise aberta, volta para a Hoje (o
+              // Copiloto deixou de ser aba e travava sem seta).
+              onBack:
+                  _gerado
+                      ? _voltarAoInicio
+                      : () => safePopOrGo(context, '/dashboard/personal'),
               actions: [
                 if (_gerado)
                   IconButton(
@@ -299,7 +332,7 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                     onPressed: _abrirMenu,
                   ),
                 FxHelpIconButton(
-                  tooltip: 'Como usar o Copiloto',
+                  tooltip: 'Como usar a IA Focux',
                   onTap: () {
                     AnalyticsService.instance.track(
                       ProductEvents.iaCopilotoHelpOpened,
@@ -377,6 +410,7 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                             ),
                           )
                         else if (!_gerando) ...[
+                          _atalhos(cotaEsgotada: cotaEsgotada),
                           Semantics(
                             hint: iaCopilotoComoCalculamos,
                             child: CopilotoCardView(

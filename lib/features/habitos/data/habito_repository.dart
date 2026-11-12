@@ -190,6 +190,9 @@ class HabitoSemanaAluno {
 /// BFF `GET /api/habitos/home` — lista + compliance + planoFeatures.
 class HabitosHomeBundle {
   final List<Habito> habitos;
+
+  /// Desativados, para o subgrupo "Desativados (N)" e o Reativar.
+  final List<Habito> desativados;
   final List<ComplianceItem> compliance;
   final PlanoFeatures? planoFeatures;
   final int page;
@@ -199,6 +202,7 @@ class HabitosHomeBundle {
   const HabitosHomeBundle({
     required this.habitos,
     required this.compliance,
+    this.desativados = const [],
     this.planoFeatures,
     this.page = 0,
     this.totalCompliance = 0,
@@ -216,6 +220,10 @@ class HabitosHomeBundle {
           ((j['habitos'] as List?) ?? const [])
               .map((e) => Habito.fromJson(e as Map<String, dynamic>))
               .toList(),
+      desativados: [
+        for (final e in (j['habitosDesativados'] as List?) ?? const [])
+          if (e is Map) Habito.fromJson(Map<String, dynamic>.from(e)),
+      ],
       compliance: compliance,
       planoFeatures:
           planoRaw is Map
@@ -285,6 +293,29 @@ class HabitoRepository {
 
   Future<void> desativar(int id) async {
     throwIfQueuedOffline(await _dio.delete('/api/habitos/$id'));
+  }
+
+  /// Nome, descrição e vezes por semana (1 a 7). "Para quem" não muda.
+  Future<void> editar(
+    int id, {
+    required String titulo,
+    String? descricao,
+    required int metaSemanal,
+  }) async {
+    throwIfQueuedOffline(
+      await _dio.put(
+        '/api/habitos/$id',
+        data: {
+          'titulo': titulo,
+          'descricao': descricao ?? '',
+          'metaSemanal': metaSemanal,
+        },
+      ),
+    );
+  }
+
+  Future<void> reativar(int id) async {
+    throwIfQueuedOffline(await _dio.patch('/api/habitos/$id/reativar'));
   }
 
   /// Personal: cada aluno do hábito com feitos e meta desta semana.

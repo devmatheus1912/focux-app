@@ -47,26 +47,26 @@ void main() {
   setUp(() => GoogleFonts.config.allowRuntimeFetching = false);
 
   // Conversas virou aba (SPEC-navegacao-personal): o topo da Hoje tem
-  // Buscar · Copiloto de IA · Notificações, sem selo no Copiloto.
+  // Buscar · IA Focux · Notificações, sem selo (o Copiloto virou IA Focux em 12/11).
   testWidgets('botão do Copiloto no topo, sem selo, abre o Copiloto', (
     tester,
   ) async {
     var abriu = 0;
     await _abrir(tester, onCopiloto: () => abriu++);
-    expect(find.byTooltip('Copiloto de IA'), findsOneWidget);
+    expect(find.byTooltip('IA Focux'), findsOneWidget);
     expect(find.byTooltip('Conversas'), findsNothing);
-    await tester.tap(find.byTooltip('Copiloto de IA'));
+    await tester.tap(find.byTooltip('IA Focux'));
     expect(abriu, 1);
   });
 
   testWidgets('sem callback, o botão não existe', (tester) async {
     await _abrir(tester);
-    expect(find.byTooltip('Copiloto de IA'), findsNothing);
+    expect(find.byTooltip('IA Focux'), findsNothing);
   });
 
   testWidgets('cabe em tela estreita (360)', (tester) async {
     await _abrir(tester, onCopiloto: () {}, largura: 360);
     expect(tester.takeException(), isNull);
-    expect(find.byTooltip('Copiloto de IA'), findsOneWidget);
+    expect(find.byTooltip('IA Focux'), findsOneWidget);
   });
 }

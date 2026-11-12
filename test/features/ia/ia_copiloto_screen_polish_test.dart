@@ -51,10 +51,10 @@ void main() {
     expect(screen, contains("retryLabel:"));
     expect(screen, isNot(contains('OutlinedButton')));
     // Abre por cima (não é mais aba): o voltar do topo sai ou volta à abertura.
-    expect(screen, contains('onBack: _gerado ? _voltarAoInicio : null'));
+    // 12/11: voltar sempre (sem análise, volta para a Hoje).
+    expect(screen, contains("safePopOrGo(context, '/dashboard/personal')"));
     expect(screen, contains('constrainWidth: false'));
     expect(screen, contains('FxContentWidthLimiter'));
     expect(screen, contains('keyboardDismissBehavior'));
-    expect(screen, isNot(contains('safePopOr')));
   });
 }

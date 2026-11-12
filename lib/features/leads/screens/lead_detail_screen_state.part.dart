@@ -231,6 +231,16 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen>
             ),
         ]),
       ],
+      destrutiva:
+          interessadoPodeExcluir(status: lead.status, alunoId: lead.alunoId)
+              ? const FxActionItem(
+                valor: 'excluir',
+                rotulo: 'Excluir',
+                icone: FxIcons.excluir,
+              )
+              : null,
+      confirmarTitulo: interessadoExcluirTitulo(lead.nome),
+      confirmarMensagem: interessadoExcluirMensagem,
     );
     if (acao == null || !mounted) return;
     switch (acao) {
@@ -245,6 +255,16 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen>
         await _mudarEtapa('CANCELADO');
       case 'voltar':
         await _mudarEtapa('LEAD');
+      case 'excluir':
+        try {
+          await repoInteressados.excluir(lead.id);
+          invalidateLeadsCaches(ref);
+          if (!mounted) return;
+          FeedbackHelper.showSuccess(context, 'Interessado excluído');
+          _leave();
+        } catch (e) {
+          if (mounted) FeedbackHelper.showError(context, friendlyError(e));
+        }
     }
   }
 

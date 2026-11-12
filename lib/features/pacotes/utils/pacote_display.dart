@@ -57,3 +57,22 @@ const vendasOfertasVazio =
 
 const vendasPedidosVazio =
     'Quando alguém comprar pela sua página, aparece aqui.';
+
+/// Itens do "⋯" do plano: destaque e pausar no ativo; reativar no pausado;
+/// excluir por último, só sem pedido nem oferta ligada.
+List<String> pacoteMenuAcoes({
+  required bool ativo,
+  required bool podeExcluir,
+}) => [
+  if (ativo) 'destaque',
+  if (ativo) 'pausar',
+  if (!ativo) 'reativar',
+  if (podeExcluir) 'excluir',
+];
+
+/// Itens do "⋯" da oferta: enviar só a ativa; excluir só a nunca enviada.
+List<String> ofertaMenuAcoes({required bool ativo, required int enviadas}) => [
+  if (ativo) 'enviar',
+  'ativo',
+  if (enviadas == 0) 'excluir',
+];

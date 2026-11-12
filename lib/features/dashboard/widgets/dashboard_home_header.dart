@@ -194,7 +194,7 @@ class _HeaderChromeCluster extends StatelessWidget {
           ShellHeaderIconButton(
             icon: FxIcons.ia,
             size: size,
-            tooltip: 'Copiloto de IA',
+            tooltip: 'IA Focux',
             onTap: onCopiloto!,
           ),
           const SizedBox(width: gap),

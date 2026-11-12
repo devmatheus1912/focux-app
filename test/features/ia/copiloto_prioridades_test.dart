@@ -36,7 +36,7 @@ void main() {
   test('tarefa em linguagem do personal', () {
     final a = _acao(1);
     expect(copilotActionsNome(a), 'Hugo');
-    expect(copilotActionsMotivo(a), 'Mapa corporal pendente');
+    expect(copilotActionsMotivo(a), 'Falta medir o mapa corporal');
     expect(copilotActionsSelo(_acao(1, prioridade: 'P0')), 'Hoje');
     expect(copilotActionsSelo(a), 'Esta semana');
     expect(copilotActionsDestino(a), '/alunos/1/evolucao');

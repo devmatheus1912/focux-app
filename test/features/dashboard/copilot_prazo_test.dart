@@ -43,7 +43,7 @@ void main() {
     expect(copilotActionsPorque(_tarefa()), '1 dia parado');
     expect(
       copilotActionsPorque(_tarefa(descricao: 'Ana · mapa corporal')),
-      'Mapa corporal pendente',
+      'Falta medir o mapa corporal',
     );
   });
 }

@@ -54,6 +54,8 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
   Timer? _debounce;
   var _query = '';
   List<Habito> _habitos = [];
+  List<Habito> _desativados = [];
+  var _mostrarDesativados = false;
   List<ComplianceItem> _compliance = [];
   PlanoFeatures? _planoFromHome;
   var _page = 0;
@@ -99,6 +101,7 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
       if (!mounted) return;
       setState(() {
         _habitos = home.habitos;
+        _desativados = home.desativados;
         _compliance = home.compliance;
         _planoFromHome = home.planoFeatures;
         _page = home.page;
@@ -216,7 +219,7 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
                           FxHelpTip('Esta semana', habitoComoCalculamos),
                           FxHelpTip(
                             'Seus hábitos',
-                            'Toque no hábito para ver cada aluno. Desativar fica no ⋯.',
+                            'Toque no hábito para ver cada aluno. Editar e desativar ficam no ⋯ dele.',
                           ),
                           FxHelpTip(
                             'Novo',
@@ -286,7 +289,7 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
       onTap: () => context.push('/alunos/${c.alunoId}'),
     );
 
-    if (_habitos.isEmpty && _query.trim().isEmpty) {
+    if (_habitos.isEmpty && _desativados.isEmpty && _query.trim().isEmpty) {
       return [
         const SizedBox(height: TokensStrip.s6),
         FxEmptyState(
@@ -357,6 +360,31 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
           ),
           onTap: () => _abrirHabito(habito),
         ),
+      if (_desativados.isNotEmpty)
+        FxSatelliteListTile(
+          title: 'Desativados (${_desativados.length})',
+          titleCase: false,
+          muted: true,
+          trailing: Icon(
+            _mostrarDesativados ? FxIcons.chevronCima : FxIcons.chevronBaixo,
+            color: chrome.mute,
+          ),
+          onTap:
+              () => setState(() => _mostrarDesativados = !_mostrarDesativados),
+        ),
+      if (_mostrarDesativados)
+        for (final habito in _desativados)
+          FxSatelliteListTile(
+            title: habito.titulo,
+            muted: true,
+            subtitle: Text(
+              habitoRegra(
+                metaSemanal: habito.metaSemanal,
+                alunoId: habito.alunoId,
+              ),
+            ),
+            onTap: () => _abrirHabito(habito),
+          ),
     ];
   }
 

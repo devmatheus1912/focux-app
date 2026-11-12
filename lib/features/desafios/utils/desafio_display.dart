@@ -17,6 +17,13 @@ String desafioTipoLabel(String tipo) =>
     desafioEhTreinos(tipo) ? 'Treinos concluídos' : 'Hábitos marcados';
 
 /// "12 treinos", "1 hábito marcado".
+/// Itens do "⋯" do detalhe, na ordem: editar e encerrar só no ativo;
+/// excluir só enquanto ninguém contou.
+List<String> desafioMenuAcoes({
+  required bool ativo,
+  required bool podeExcluir,
+}) => [if (ativo) 'editar', if (ativo) 'encerrar', if (podeExcluir) 'excluir'];
+
 String desafioUnidade(String tipo, int n) {
   if (desafioEhTreinos(tipo)) return n == 1 ? '1 treino' : '$n treinos';
   return n == 1 ? '1 hábito marcado' : '$n hábitos marcados';

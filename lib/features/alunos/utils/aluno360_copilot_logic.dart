@@ -171,7 +171,7 @@ String copilotDisplayAction(Aluno aluno, String acao) {
     return 'Completar cadastro para orientar a prescrição.';
   }
   if (lower.contains('objetivo')) {
-    return 'Definir objetivo para alinhar prescrição e Copiloto.';
+    return 'Definir objetivo para alinhar prescrição e IA Focux.';
   }
   if (lower.contains('financeir') || lower.contains('inadimpl')) {
     return 'Alinhar pendência financeira antes de qualquer ajuste.';

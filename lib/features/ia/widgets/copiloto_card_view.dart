@@ -5,13 +5,11 @@ import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_action_chip.dart';
-import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../l10n/app_localizations.dart';
 import '../utils/ia_copiloto_display.dart';
-import '../../../core/theme/fx_icons.dart';
 
 /// Abertura do Copiloto: quem precisa de atenção, depois qualquer outro aluno.
 /// Um só botão principal na tela; escolher o aluno já analisa.
@@ -49,21 +47,11 @@ class CopilotoCardView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // Sem ninguém pedindo atenção: uma linha (os atalhos já estão em cima).
           if (prioridades.isEmpty)
-            FxEmptyState(
-              icon: FxIcons.ia,
-              title: s.copilotoSemPrioridadesTitulo,
-              subtitle:
-                  podeAnalisar
-                      ? '${s.copilotoRevisaoFrase} ${iaCopilotoCustoAnalise()}'
-                      : s.copilotoRevisaoFrase,
-              action:
-                  podeAnalisar
-                      ? FxEmptyAction(
-                        label: s.copilotoAnalisarUmAluno,
-                        onTap: onEscolherAluno,
-                      )
-                      : null,
+            Text(
+              s.copilotoSemPrioridadesTitulo,
+              style: FocuxHubTypography.bodyMuted(color: chrome.mute),
             )
           else ...[
             Text(

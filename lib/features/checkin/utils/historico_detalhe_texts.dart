@@ -14,10 +14,11 @@ String? historicoDetalheSubtitulo(S s, HistoricoDetalheView v) {
 }
 
 /// Comparação com a vez anterior e destaque: rodapé do cartão de números.
-List<String> historicoDetalheRodape(S s, HistoricoDetalheView v) => [
-  historicoComparacaoTexto(s, v.comparacao),
-  historicoDestaqueTexto(s, v),
-].nonNulls.toList();
+List<String> historicoDetalheRodape(S s, HistoricoDetalheView v) =>
+    [
+      historicoComparacaoTexto(s, v.comparacao),
+      historicoDestaqueTexto(s, v),
+    ].nonNulls.toList();
 
 /// Só quando há o que dizer: "Concluído" já está no subtítulo.
 String? historicoDetalheStatus(S s, HistoricoDetalheView v) {
@@ -25,16 +26,29 @@ String? historicoDetalheStatus(S s, HistoricoDetalheView v) {
   return v.semSeries ? s.historicoDetalheConcluidoSemSeries : null;
 }
 
-String historicoMesCurto(int mes) => const [
-  'jan', 'fev', 'mar', 'abr', 'mai', 'jun',
-  'jul', 'ago', 'set', 'out', 'nov', 'dez',
-][mes - 1];
+String historicoMesCurto(int mes) =>
+    const [
+      'jan',
+      'fev',
+      'mar',
+      'abr',
+      'mai',
+      'jun',
+      'jul',
+      'ago',
+      'set',
+      'out',
+      'nov',
+      'dez',
+    ][mes - 1];
 
 /// "10 × 40 kg"; sem carga, só as repetições.
 String historicoSerieTexto(S s, HistoricoSerieLinha l) {
   final carga = l.cargaKg;
   final reps = l.repeticoes?.trim();
-  if (carga == null) return reps == null || reps.isEmpty ? '-' : reps;
+  if (carga == null) {
+    return reps == null || reps.isEmpty ? s.historicoSemCargaRegistrada : reps;
+  }
   if (reps == null || reps.isEmpty) return historicoKgTexto(s, carga);
   return s.historicoSerieRepsCarga(reps, historicoKgTexto(s, carga));
 }
@@ -79,7 +93,10 @@ String historicoExercicioDetalhe(S s, HistoricoExercicioLinha l) {
   final planejadas = l.seriesPlanejadas;
   final delta = l.deltaCargaKg;
   return [
-    if (l.melhorSerie case final m?)
+    if (l.melhorSerie case final m?
+        when m.cargaKg == null && (m.repeticoes?.trim().isEmpty ?? true))
+      s.historicoFeitoSemCarga
+    else if (l.melhorSerie case final m?)
       s.historicoMelhorSerie(historicoSerieTexto(s, m))
     else if (l.cargaKg case final c?)
       historicoKgTexto(s, c),

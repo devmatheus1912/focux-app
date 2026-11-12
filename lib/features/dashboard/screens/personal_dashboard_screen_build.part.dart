@@ -143,20 +143,12 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                             brandAccent: dashboardParseBrandColor(
                               data.corPrimaria,
                             ),
-                            freshnessLabel:
-                                _homeFetchedAt == null
-                                    ? dashboardHomeClientCache.fetchedAt == null
-                                        ? null
-                                        : DashboardMicrocopy.atualizadoHa(
-                                          DateTime.now().difference(
-                                            dashboardHomeClientCache.fetchedAt!,
-                                          ),
-                                        )
-                                    : DashboardMicrocopy.atualizadoHa(
-                                      DateTime.now().difference(
-                                        _homeFetchedAt!,
-                                      ),
-                                    ),
+                            // Regra comum: nada de "Atualizado agora" nos
+                            // primeiros 5 min (FxHubFreshness.silencio).
+                            freshnessLabel: FxHubFreshness.fromFetchedAt(
+                              _homeFetchedAt ??
+                                  dashboardHomeClientCache.fetchedAt,
+                            ),
                             onQuickSearch:
                                 () => showDashboardQuickSearchSheet(
                                   context,

@@ -11,7 +11,7 @@ Future<bool> surfaceAluno360IaUpgradeIfNeeded(
   if (error is IaOperationalException && error.planUpgradeRequired) {
     await UpgradePromptSheet.show(
       context: context,
-      featureName: 'Copiloto IA',
+      featureName: 'IA Focux',
       capability: 'iaCopiloto',
       requiredPlan: error.suggestedUpgradePlan,
       upgradePlano: error.suggestedUpgradePlan,
@@ -22,7 +22,7 @@ Future<bool> surfaceAluno360IaUpgradeIfNeeded(
   return UpgradePromptSheet.showFromError(
     context,
     error,
-    fallbackFeatureName: 'Copiloto IA',
+    fallbackFeatureName: 'IA Focux',
     fallbackCapability: 'iaCopiloto',
     source: 'aluno360_ia',
   );

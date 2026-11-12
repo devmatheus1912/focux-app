@@ -49,7 +49,7 @@ void main() {
   test('inclusos trazem o valor, com número primeiro', () {
     expect(paywallInclusos(PaywallCatalog.comparisonFreeVsEnterprise).take(3), [
       'Alunos sem limite',
-      'Copiloto IA: 600 por mês',
+      'IA Focux: 600 por mês',
       'Importação por foto: 80 por mês',
     ]);
   });

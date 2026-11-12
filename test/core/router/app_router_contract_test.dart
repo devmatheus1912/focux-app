@@ -131,7 +131,7 @@ void main() {
     expect(helper, contains('void safePopOr'));
     expect(checkin, contains("safePopOrGo(context, '/checkin/treinos')"));
     // Copiloto abre por cima (não é mais aba): o voltar sai ou volta à abertura.
-    expect(copilot, contains('onBack: _gerado ? _voltarAoInicio : null'));
+    expect(copilot, contains("safePopOrGo(context, '/dashboard/personal')"));
     expect(copilot, isNot(contains('safePopOr(')));
     expect(
       chat,

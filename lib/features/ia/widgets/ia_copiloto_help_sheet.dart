@@ -7,13 +7,13 @@ import '../../../core/theme/fx_icons.dart';
 Future<void> showIaCopilotoHelpSheet(BuildContext context) {
   return showFxHelpSheet(
     context,
-    title: 'Como usar o Copiloto',
+    title: 'Como usar a IA Focux',
     subtitle: 'Sugestão da IA. Nada entra no aluno sem você revisar.',
     tips: const [
       FxHelpTip('Como calculamos', iaCopilotoComoCalculamos),
       FxHelpTip(
         'Aluno',
-        'Escolha quem entra na análise. Sem aluno, o Copiloto não gera.',
+        'Escolha quem entra na análise. Sem aluno, a IA Focux não gera.',
         icon: FxIcons.grupo,
       ),
       FxHelpTip(

@@ -50,6 +50,19 @@ class HistoricoExercicioLinha {
     }
     return melhor;
   }
+
+  HistoricoExercicioLinha comNome(String nome) => HistoricoExercicioLinha(
+    nome: nome,
+    feito: feito,
+    seriesFeitas: seriesFeitas,
+    seriesPlanejadas: seriesPlanejadas,
+    cargaKg: cargaKg,
+    deltaCargaKg: deltaCargaKg,
+    rpe: rpe,
+    dor: dor,
+    series: series,
+    orientacao: orientacao,
+  );
 }
 
 class HistoricoSerieLinha {
@@ -72,6 +85,55 @@ class HistoricoSerieLinha {
 
 typedef HistoricoRecordeLinha =
     ({String exercicio, String mensagem, double? cargaKg});
+
+/// Um cartão de recorde por exercício, com as conquistas juntas e sem
+/// repetir (a de carga vem em duas listas do servidor). O nome segue o da
+/// lista de exercícios quando bate sem diferença de maiúscula.
+List<({String exercicio, List<String> linhas})> historicoRecordesPorExercicio(
+  List<HistoricoRecordeLinha> recordes, {
+  List<String> nomesDaLista = const [],
+}) {
+  final grupos = <String, ({String exercicio, List<String> linhas})>{};
+  for (final r in recordes) {
+    final chave = r.exercicio.trim().toLowerCase();
+    final nome = nomesDaLista.firstWhere(
+      (n) => n.trim().toLowerCase() == chave,
+      orElse: () => r.exercicio.trim(),
+    );
+    final g = grupos.putIfAbsent(
+      chave,
+      () => (exercicio: nome, linhas: <String>[]),
+    );
+    final linha = r.mensagem.trim();
+    if (linha.isNotEmpty && !g.linhas.contains(linha)) g.linhas.add(linha);
+  }
+  return grupos.values.toList();
+}
+
+/// O mesmo exercício duas vezes na ficha: o segundo ganha "· 2º".
+List<HistoricoExercicioLinha> historicoNomesComOrdem(
+  List<HistoricoExercicioLinha> linhas,
+) {
+  final vistos = <String, int>{};
+  final total = <String, int>{};
+  for (final l in linhas) {
+    final k = l.nome.trim().toLowerCase();
+    total[k] = (total[k] ?? 0) + 1;
+  }
+  return [
+    for (final l in linhas)
+      if ((total[l.nome.trim().toLowerCase()] ?? 0) < 2)
+        l
+      else
+        l.comNome(
+          (() {
+            final k = l.nome.trim().toLowerCase();
+            final n = vistos[k] = (vistos[k] ?? 0) + 1;
+            return n == 1 ? l.nome : '${l.nome} · $nº';
+          })(),
+        ),
+  ];
+}
 
 class HistoricoDetalheView {
   const HistoricoDetalheView({
@@ -134,9 +196,10 @@ HistoricoDetalheView buildHistoricoDetalheView(
               orientacoes.toSet().length == 1
           ? orientacoes.first
           : null;
-  final linhas = [
-    for (final e in execucao.exercicios) _linha(e, usarOrientacao: geral == null),
-  ];
+  final linhas = historicoNomesComOrdem([
+    for (final e in execucao.exercicios)
+      _linha(e, usarOrientacao: geral == null),
+  ]);
   final seriesLocais = linhas.fold(0, (t, l) => t + l.seriesFeitas);
   final planejadasLocais = linhas.fold(
     0,
@@ -186,7 +249,10 @@ HistoricoDetalheView buildHistoricoDetalheView(
   );
 }
 
-HistoricoExercicioLinha _linha(ExecucaoExercicio e, {required bool usarOrientacao}) {
+HistoricoExercicioLinha _linha(
+  ExecucaoExercicio e, {
+  required bool usarOrientacao,
+}) {
   final feitas = e.seriesFeitas > 0 ? e.seriesFeitas : e.seriesDetalhes.length;
   final planejadas = (e.series ?? 0) > 0 ? e.series : null;
   final ultima = e.seriesDetalhes.isEmpty ? null : e.seriesDetalhes.last;

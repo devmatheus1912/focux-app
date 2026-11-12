@@ -14,6 +14,9 @@ class Pacote {
   final bool destaque;
   final bool ativo;
 
+  /// Sem pedido na loja e sem oferta ligada: dá para excluir.
+  final bool podeExcluir;
+
   Pacote({
     required this.id,
     required this.titulo,
@@ -24,6 +27,7 @@ class Pacote {
     required this.destaque,
     required this.ativo,
     this.descricao,
+    this.podeExcluir = false,
   });
 
   factory Pacote.fromJson(Map<String, dynamic> j) => Pacote(
@@ -36,6 +40,7 @@ class Pacote {
     incluiConsultoria: j['incluiConsultoria'] as bool? ?? false,
     destaque: j['destaque'] as bool? ?? false,
     ativo: j['ativo'] as bool? ?? true,
+    podeExcluir: j['podeExcluir'] as bool? ?? false,
   );
 }
 
@@ -58,6 +63,9 @@ class PacotesHomePerfil {
 
 class PacotesHomeBundle {
   final List<Pacote> pacotes;
+
+  /// Pausados: fora da página, voltam com Reativar.
+  final List<Pacote> pausados;
   final PacotesHomePerfil? perfil;
   final int page;
   final bool hasNext;
@@ -65,6 +73,7 @@ class PacotesHomeBundle {
 
   const PacotesHomeBundle({
     required this.pacotes,
+    this.pausados = const [],
     this.perfil,
     this.page = 0,
     this.hasNext = false,
@@ -78,6 +87,10 @@ class PacotesHomeBundle {
         raw.map((e) => Pacote.fromJson(e as Map<String, dynamic>)).toList();
     return PacotesHomeBundle(
       pacotes: pacotes,
+      pausados: [
+        for (final e in (j['pausados'] as List?) ?? const [])
+          if (e is Map) Pacote.fromJson(Map<String, dynamic>.from(e)),
+      ],
       perfil:
           perfilJson is Map<String, dynamic>
               ? PacotesHomePerfil.fromJson(perfilJson)
@@ -193,7 +206,20 @@ class PacoteRepository {
     return Pacote.fromJson(r.data as Map<String, dynamic>);
   }
 
+  /// Pausa: o plano sai da página e volta com [reativar].
   Future<void> desativar(int id) async {
     await _dio.delete('/api/pacotes/$id');
+  }
+
+  Future<void> reativar(int id) async {
+    await _dio.patch('/api/pacotes/$id/reativar');
+  }
+
+  /// Só plano sem pedido nem oferta ligada; com histórico, 409.
+  Future<void> excluir(int id) async {
+    await _dio.delete(
+      '/api/pacotes/$id',
+      queryParameters: {'definitivo': true},
+    );
   }
 }

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 
 import '../../../core/money/fx_money.dart';
 import '../../../core/router/safe_navigation.dart';
@@ -39,6 +41,8 @@ class HojeBaseSecao extends StatelessWidget {
         children: [
           DashboardSectionHeader(title: s.hojeSecaoBase),
           const SizedBox(height: TokensStrip.s2),
+          // Zero não aparece (mesma regra do "Agora"); "Treinaram hoje" fica:
+          // é o pulso do dia.
           FxMetricStrip(
             metricas: [
               FxMetric(
@@ -46,23 +50,32 @@ class HojeBaseSecao extends StatelessWidget {
                 rotulo: s.hojeTreinaramHoje,
                 onTap: () => openPersonalRoute(context, '/checkin'),
               ),
-              FxMetric(
-                valor: emRisco,
-                rotulo: s.hojeEmRisco,
-                alerta: true,
-                onTap: () => openPersonalRoute(
-                  context,
-                  emRisco > 0 ? '/alunos?filtro=risco' : '/alunos',
+              if (emRisco > 0)
+                FxMetric(
+                  valor: emRisco,
+                  rotulo: s.hojeEmRisco,
+                  alerta: true,
+                  onTap:
+                      () => openPersonalRoute(context, '/alunos?filtro=risco'),
                 ),
-              ),
-              FxMetric(
-                valor: fichasAVencer,
-                rotulo: s.hojeFichasAVencer,
-                alerta: true,
-                onTap: () => openPersonalRoute(context, rotaDasFichas),
-              ),
+              if (fichasAVencer > 0)
+                FxMetric(
+                  valor: fichasAVencer,
+                  rotulo: s.hojeFichasAVencer,
+                  alerta: true,
+                  onTap: () => openPersonalRoute(context, rotaDasFichas),
+                ),
             ],
           ),
+          if (emRisco == 0 && fichasAVencer == 0) ...[
+            const SizedBox(height: TokensStrip.s2),
+            Text(
+              'Ninguém em risco, nenhuma ficha vencendo.',
+              style: FocuxHubTypography.bodyMuted(
+                color: ShellChrome.of(context).mute,
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -90,7 +103,8 @@ class HojeDinheiroLinha extends StatelessWidget {
     if (!visivel) return const SizedBox.shrink();
     final s = S.of(context);
     final partes = [
-      if (recebido.isPositive) '${s.hojeRecebidoEm(mes.toLowerCase())} ${recebido.formatCompact()}',
+      if (recebido.isPositive)
+        '${s.hojeRecebidoEm(mes.toLowerCase())} ${recebido.formatCompact()}',
       if (emAtraso > 0) s.hojeEmAtraso(emAtraso),
     ];
     return Padding(

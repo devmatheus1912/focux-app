@@ -29,7 +29,7 @@ String? paywallContextMessage({
   }
   if (usage.iaNearLimit) {
     return 'Você usou ${usage.iaUsadaMes} de ${usage.limiteIaMensal} usos de IA. '
-        'Enterprise dá mais folga no Copiloto.';
+        'Enterprise dá mais folga na IA Focux.';
   }
   if (usage.plano == SubscriptionPlan.FREE) {
     return 'O Pro libera até ${PlanoAlunosLimits.pro} alunos, cobrança PIX e '

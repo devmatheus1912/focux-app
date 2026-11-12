@@ -14,6 +14,9 @@ class Desafio {
   final bool ativo;
   final List<DesafioLeaderboardEntry>? ranking;
 
+  /// Só no detalhe: ninguém contou ainda, então dá para excluir.
+  final bool podeExcluir;
+
   /// Líder e a contagem dele (lista); nulos sem contagem.
   final String? liderNome;
   final int? liderContagem;
@@ -29,6 +32,7 @@ class Desafio {
     this.grupoAulaId,
     this.ativo = true,
     this.ranking,
+    this.podeExcluir = false,
     this.liderNome,
     this.liderContagem,
   });
@@ -44,6 +48,7 @@ class Desafio {
     grupoAulaId: (j['grupoAulaId'] as num?)?.toInt(),
     ativo: j['ativo'] as bool? ?? true,
     ranking: _ranking(j['ranking']),
+    podeExcluir: j['podeExcluir'] as bool? ?? false,
     liderNome: j['liderNome'] as String?,
     liderContagem: (j['liderContagem'] as num?)?.toInt(),
   );
@@ -168,6 +173,30 @@ class DesafioRepository {
       },
     );
     return Desafio.fromJson(r.data as Map<String, dynamic>);
+  }
+
+  /// Nome, descrição, meta e data final. O tipo não muda.
+  Future<void> editar(
+    int id, {
+    required String titulo,
+    String? descricao,
+    required int metaPontos,
+    DateTime? fim,
+  }) async {
+    await _dio.put(
+      '/api/desafios/$id',
+      data: {
+        'titulo': titulo,
+        'descricao': descricao ?? '',
+        'metaPontos': metaPontos,
+        if (fim != null) 'fim': _isoDate(fim),
+      },
+    );
+  }
+
+  /// Só sem contagem; com contagem o servidor responde 409.
+  Future<void> excluir(int id) async {
+    await _dio.delete('/api/desafios/$id');
   }
 
   Future<void> encerrar(int id) async {

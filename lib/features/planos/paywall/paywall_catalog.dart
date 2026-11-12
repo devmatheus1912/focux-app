@@ -83,7 +83,7 @@ class PaywallCatalog {
       free: '—',
       paid: '✓',
     ),
-    PaywallComparisonRow(feature: 'Copiloto IA / mês', free: '—', paid: '200'),
+    PaywallComparisonRow(feature: 'IA Focux / mês', free: '—', paid: '200'),
     PaywallComparisonRow(
       feature: 'Interessados e captação',
       free: '—',
@@ -121,7 +121,7 @@ class PaywallCatalog {
       free: '—',
       paid: '✓',
     ),
-    PaywallComparisonRow(feature: 'Copiloto IA / mês', free: '—', paid: '600'),
+    PaywallComparisonRow(feature: 'IA Focux / mês', free: '—', paid: '600'),
     PaywallComparisonRow(
       feature: 'Interessados e captação',
       free: '—',
@@ -211,10 +211,10 @@ class PaywallCatalog {
     ),
     PaywallUpgradeTrigger(
       number: '03',
-      title: 'IA Copiloto bloqueado',
+      title: 'IA Focux bloqueado',
       transition: 'FREE → PRO',
       message:
-          'Sua IA está aguardando. No Pro, o Copiloto monta treinos e sugere '
+          'Sua IA está aguardando. No Pro, a IA Focux monta treinos e sugere '
           'respostas com ${PlanoIaLimits.pro} usos por mês.',
     ),
     PaywallUpgradeTrigger(
