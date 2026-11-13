@@ -13,7 +13,7 @@ void main() {
     expect(lista.where(evolucaoMedidaTemConteudo), hasLength(2));
     expect(
       evolucaoMedidaSubtitle(MedidaCorporal(id: 1, data: '2026-09-01', peso: 60)),
-      '60,0 kg',
+      '60,0 kg',
     );
     expect(
       evolucaoMedidaSubtitle(MedidaCorporal(id: 9, data: '2026-09-01')),
@@ -35,7 +35,7 @@ void main() {
     );
     expect(registros.map((r) => r.data), ['2026-11-06', '2026-11-04', '2026-10-30']);
     expect(registros.first.medida, isNull);
-    expect(evolucaoRegistroSubtitle(registros.last), '90,0 kg · Gordura 20,0% · Massa magra 10,0%');
+    expect(evolucaoRegistroSubtitle(registros.last), '90,0\u00A0kg · Gordura 20,0% · Massa magra 10,0%');
     expect(registros.last.massa?.avaliacaoId, 5);
   });
 

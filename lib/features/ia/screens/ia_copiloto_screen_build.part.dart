@@ -138,22 +138,15 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
               style: FxSettingsLayout.sectionHeader(color: chrome.mute),
             ),
             const SizedBox(height: FxSettingsLayout.headerToGroup),
-            FxSettingsGroup(
-              children: [
-                for (final (i, c) in conversas.take(5).indexed)
-                  FxSettingsTile(
-                    icon: FxIcons.chat,
-                    label: c.titulo,
-                    subtitle: [
-                      if (c.alunoNome != null) 'Sobre ${c.alunoNome}',
-                      dataCurta(c.atualizadaEm),
-                    ].join(' · '),
-                    value: '',
-                    showDivider: i < conversas.take(5).length - 1,
-                    onTap: () => context.push('/ia/chat?c=${c.id}'),
-                  ),
-              ],
-            ),
+            IaConversasGrupo(conversas: conversas.take(5).toList()),
+            if (conversas.length > 5) ...[
+              const SizedBox(height: TokensStrip.s2),
+              FxLinkRow(
+                label: ptS.iaVerTodasConversas(conversas.length),
+                icon: FxIcons.chat,
+                onTap: () => context.push('/ia/conversas'),
+              ),
+            ],
           ],
         ],
       ),

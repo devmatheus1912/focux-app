@@ -97,8 +97,8 @@ void main() {
           atual: b,
           menorEMelhor: true,
         );
-    expect(evolucaoComparativoDiferenca(m(90, 105, 'kg')), '↑ 15,0 kg');
-    expect(evolucaoComparativoDiferenca(m(70, 50, 'cm')), '↓ 20,0 cm');
+    expect(evolucaoComparativoDiferenca(m(90, 105, 'kg')), '↑ 15,0\u00A0kg');
+    expect(evolucaoComparativoDiferenca(m(70, 50, 'cm')), '↓ 20,0 cm');
     expect(evolucaoComparativoDiferenca(m(60, 60, 'cm')), '=');
     expect(evolucaoComparativoDias('2026-10-30', '2026-11-02'), 3);
     // Com horário: noite de 30/10 até manhã de 02/11 seguem 3 dias.

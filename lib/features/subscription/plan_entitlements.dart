@@ -199,8 +199,8 @@ class PlanEntitlements {
         'Hábitos diários (água, sono, passos) fazem parte do plano $planLabel — '
             'você acompanha a rotina de cada aluno entre os treinos.',
       'alunos' =>
-        'O Free inclui até 3 alunos ativos. O Pro libera até 30 e o '
-            'Enterprise não tem limite.',
+        'O Free inclui até 3 alunos ativos. O Pro libera até '
+            '${PlanoAlunosLimits.pro} e o Enterprise não tem limite.',
       'automacoes' =>
         'Automações sequenciais (onboarding, winback) exigem Enterprise.',
       'automacoesAvancadas' =>

@@ -23,7 +23,7 @@ void main() {
     );
     expect(
       msg,
-      'Você atingiu 3 alunos, o limite do seu plano. O Pro libera até 30 alunos.',
+      'Você atingiu 3 alunos, o limite do seu plano. O Pro libera até 50 alunos.',
     );
     expect(
       paywallContextMessage(
@@ -42,7 +42,7 @@ void main() {
     expect(msg, isNotNull);
     expect(msg, isNot(contains('R\$')));
     expect(msg, isNot(contains('%')));
-    expect(msg, contains('30 alunos'));
+    expect(msg, contains('50 alunos'));
   });
 
   test('recurso bloqueado cita o plano de destino', () {

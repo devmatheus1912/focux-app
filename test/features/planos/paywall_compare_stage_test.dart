@@ -73,7 +73,7 @@ void main() {
     expect(find.text('Anual · 2 meses grátis'), findsOneWidget);
 
     final headerPro = tester.getCenter(find.text('Pro').last);
-    final alunosPaid = tester.getCenter(find.text('30'));
+    final alunosPaid = tester.getCenter(find.text('50'));
     expect((headerPro.dx - alunosPaid.dx).abs(), lessThan(12));
 
     // Primeira linha com ✓ é Free e Pro (Hoje); a última é só Pro.

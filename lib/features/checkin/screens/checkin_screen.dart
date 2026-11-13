@@ -230,8 +230,13 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
     ),
   );
 
-  void _confirmarRestante(ExecucaoExercicio ee) =>
-      _atualizar((id) => _repo.confirmarRestante(id, ee.treinoExercicioId));
+  void _confirmarRestante(ExecucaoExercicio ee) {
+    // O que o aluno vê em cada série é o que grava (bug de 13/11).
+    final series = checkinSeriesRestantes(ee, atual: _rascunhos.de(ee));
+    _atualizar(
+      (id) => _repo.confirmarRestante(id, ee.treinoExercicioId, series: series),
+    );
+  }
 
   void _mexerRascunho(VoidCallback mudanca) => setState(mudanca);
 

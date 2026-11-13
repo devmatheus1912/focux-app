@@ -9,6 +9,7 @@ import '../../../l10n/pt.dart';
 import '../data/avaliacao_repository.dart';
 import '../utils/evolucao_comparativo_display.dart';
 import '../../../core/theme/fx_icons.dart';
+import '../../evolucao/widgets/evolucao_medidas_aba.dart';
 
 /// Composição corporal e, em cartão único, início e atual de cada métrica.
 class EvolucaoComparacaoLinhas extends StatelessWidget {
@@ -39,6 +40,12 @@ class EvolucaoComparacaoLinhas extends StatelessWidget {
     final dias = evolucaoComparativoDias(primeira.avaliadoEm, atual.avaliadoEm);
     final gordura = atual.percGordura;
     final massa = atual.percMassa ?? atual.massaMuscular;
+    final visiveis = metricas.where((m) => m.visivel).toList();
+    final dataAtual =
+        (atual.avaliadoEm ?? '').length >= 10 ? atual.avaliadoEm!.substring(0, 10) : '';
+    bool suspeita(EvolucaoComparativoMetrica m) =>
+        evolucaoComparativoSuspeita(m, dias) && !conferidas.contains(dataAtual);
+    final suspeitas = visiveis.where(suspeita).length;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -46,30 +53,26 @@ class EvolucaoComparacaoLinhas extends StatelessWidget {
           _Composicao(gordura: gordura, massa: massa),
           const SizedBox(height: TokensStrip.s3),
         ],
+        // Um aviso só no topo; na linha, o ícone (antes "Confira · 13 d" em
+        // cada uma, repetindo o "13 dias" do cabeçalho).
+        if (suspeitas > 0 && onConfira != null) ...[
+          EvolucaoAvisoConfira(
+            quantidade: suspeitas,
+            onTap:
+                () => onConfira!({
+                  for (final d in [primeira.avaliadoEm, atual.avaliadoEm])
+                    if (d != null && d.length >= 10) d.substring(0, 10),
+                }),
+          ),
+          const SizedBox(height: TokensStrip.s2),
+        ],
         Container(
           decoration: fxListCardDecoration(context),
           child: Column(
             children: [
-              for (final (i, m) in metricas.where((m) => m.visivel).indexed) ...[
+              for (final (i, m) in visiveis.indexed) ...[
                 if (i > 0) Divider(height: 1, color: ShellChrome.of(context).line),
-                _Linha(
-                  metrica: m,
-                  suspeita:
-                      evolucaoComparativoSuspeita(m, dias) &&
-                      !conferidas.contains(
-                        (atual.avaliadoEm ?? '').length >= 10
-                            ? atual.avaliadoEm!.substring(0, 10)
-                            : '',
-                      ),
-                  dias: dias,
-                  onConfira:
-                      onConfira == null
-                          ? null
-                          : () => onConfira!({
-                            for (final d in [primeira.avaliadoEm, atual.avaliadoEm])
-                              if (d != null && d.length >= 10) d.substring(0, 10),
-                          }),
-                ),
+                _Linha(metrica: m, suspeita: suspeita(m)),
               ],
             ],
           ),
@@ -136,7 +139,21 @@ class _Composicao extends StatelessWidget {
               ),
             ),
             const SizedBox(height: TokensStrip.s2),
-            Text(texto, style: FocuxHubTypography.bodyMuted(color: chrome.mute)),
+            // Legenda com a cor de cada parte (antes só o texto).
+            Wrap(
+              spacing: TokensStrip.s3,
+              runSpacing: TokensStrip.s1,
+              children: [
+                _Legenda(
+                  cor: primary.withValues(alpha: 0.4),
+                  texto: '${ptS.metaGordura} ${evolucaoComparativoFmtNum(gordura)}%',
+                ),
+                _Legenda(
+                  cor: primary,
+                  texto: '${ptS.metaMassa} ${evolucaoComparativoFmtNum(massa)}%',
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -144,23 +161,38 @@ class _Composicao extends StatelessWidget {
   }
 }
 
+class _Legenda extends StatelessWidget {
+  const _Legenda({required this.cor, required this.texto});
+
+  final Color cor;
+  final String texto;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Container(
+        width: 10,
+        height: 10,
+        decoration: BoxDecoration(color: cor, shape: BoxShape.circle),
+      ),
+      const SizedBox(width: TokensStrip.s1),
+      Text(
+        texto,
+        style: FocuxHubTypography.bodyMuted(color: ShellChrome.of(context).mute),
+      ),
+    ],
+  );
+}
+
 /// Nome, "90,0 → 105,0 kg" e a diferença à direita. Sem cor: subir ou descer
 /// depende do objetivo.
 class _Linha extends StatelessWidget {
-  const _Linha({
-    required this.metrica,
-    this.suspeita = false,
-    this.onConfira,
-    this.dias,
-  });
-
-  /// Dias entre os dois registros: o motivo do "Confira" ("em 9 dias").
-  final int? dias;
+  const _Linha({required this.metrica, this.suspeita = false});
 
   final EvolucaoComparativoMetrica metrica;
-  final VoidCallback? onConfira;
 
-  /// Variação fora do comum para o intervalo: marca "Confira".
+  /// Variação fora do comum para o intervalo: ícone (o aviso fica no topo).
   final bool suspeita;
 
   @override
@@ -198,8 +230,8 @@ class _Linha extends StatelessWidget {
               ),
             ),
             if (temDois)
-              // Diferença e "Confira" na mesma linha: a linha fica da altura
-              // das outras; o motivo ("em 9 dias") vem no "Confira".
+              // Diferença e o ícone de alerta na mesma linha, na altura das
+              // outras.
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -211,29 +243,8 @@ class _Linha extends StatelessWidget {
                     ).copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
                   ),
                   if (suspeita) ...[
-                    const SizedBox(width: TokensStrip.s2),
-                    InkWell(
-                      onTap: onConfira,
-                      borderRadius: BorderRadius.circular(TokensStrip.s2),
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          minHeight: onConfira == null ? 0 : 44,
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(FxIcons.alertaPequeno, size: 14, color: alerta),
-                            const SizedBox(width: 2),
-                            Text(
-                              dias == null
-                                  ? ptS.comparacaoConfira
-                                  : '${ptS.comparacaoConfira} · ${dias! <= 0 ? 'mesmo dia' : '$dias d'}',
-                              style: FocuxHubTypography.chip(alerta),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                    const SizedBox(width: TokensStrip.s1),
+                    Icon(FxIcons.alertaPequeno, size: 16, color: alerta),
                   ],
                 ],
               ),

@@ -259,6 +259,16 @@ class _MeuProgressoScreenState extends ConsumerState<MeuProgressoScreen> {
                           recordes: dados.recordes,
                           vazioSubtitulo: ptS.meuProgressoSemRecorde,
                           onAtualizar: _atualizar,
+                          // Recordes ficam na aba Força (13/11).
+                          depois: [
+                            EvolucaoConquistas(
+                              conquistas: [
+                                for (final c in conquistas)
+                                  if (c.tipo == ConquistaTipo.recorde) c,
+                              ],
+                              compartilhar: true,
+                            ),
+                          ],
                         ),
                         _ => EvolucaoMedidasAba(
                           medidas: dados.medidas,
@@ -274,13 +284,15 @@ class _MeuProgressoScreenState extends ConsumerState<MeuProgressoScreen> {
                           gordura: dados.gordura,
                           massa: dados.massa,
                           topo: [
-                            if (conquistas.isNotEmpty) ...[
-                              EvolucaoConquistas(
-                                conquistas: conquistas,
-                                compartilhar: true,
-                              ),
-                              const SizedBox(height: TokensStrip.s3),
-                            ],
+                            // Para o aluno, as conquistas do corpo celebram no
+                            // topo; os recordes ficam na aba Força.
+                            EvolucaoConquistas(
+                              conquistas: [
+                                for (final c in conquistas)
+                                  if (c.tipo != ConquistaTipo.recorde) c,
+                              ],
+                              compartilhar: true,
+                            ),
                             if (!metas.any((m) => m.aberta) && metas.any((m) => m.concluida))
                               Padding(
                                 padding: const EdgeInsets.only(

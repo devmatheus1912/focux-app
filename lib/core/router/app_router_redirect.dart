@@ -141,6 +141,7 @@ bool isPersonalOnlyLocation(String path) {
     '/ia',
     '/ia/copiloto',
     '/ia/chat',
+    '/ia/conversas',
     '/ia/checkin',
     '/ia/progressao/aceitar',
     '/alunos',

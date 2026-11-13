@@ -98,6 +98,9 @@ class IaChatStore {
     await _gravar((await listar()).where((c) => c.id != id).toList());
   }
 
+  /// "Apagar todas" (lista completa, com confirmação).
+  Future<void> apagarTodas() => _gravar(const []);
+
   Future<void> _gravar(List<IaConversa> todas) async {
     try {
       final prefs = await SharedPreferences.getInstance();

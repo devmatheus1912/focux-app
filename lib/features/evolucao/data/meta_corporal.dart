@@ -119,7 +119,16 @@ class Conquista {
     required this.data,
     required this.valor,
     this.metrica,
+    this.exercicio,
+    this.contexto,
   });
+
+  /// O salto, para o cartão de story: "+10 kg desde 11 out", "−8,0 kg em 63
+  /// dias", "90 dias mantendo 72,0 kg".
+  final String? contexto;
+
+  /// Exercício do recorde ("Ver exercício" e o texto do "Parabenizar").
+  final String? exercicio;
 
   /// Métrica da meta (`PESO`, `CINTURA`…); nula no recorde. Escolhe o glifo.
   final String? metrica;
@@ -163,9 +172,10 @@ List<PontoGrafico> serieDaMetaCorporal(
 };
 
 /// Da medida que deu o valor inicial à que concluiu a meta: quantos dias
-/// passaram (pelas datas das medidas, não da meta) e se algum passo no meio
-/// pede "Confira". Nulo quando a série não tem os dois pontos.
-({int dias, bool suspeito})? trechoDaMeta(MetaCorporal m, List<PontoGrafico> serie) {
+/// passaram (pelas datas das medidas, não da meta). Nulo quando a série não
+/// tem os dois pontos. Se o trecho teve salto, quem decide é o backend: meta com
+/// salto sem "Está certo" fica "a confirmar" e não chega aqui concluída.
+int? diasDaMeta(MetaCorporal m, List<PontoGrafico> serie) {
   final concluida = m.concluidaEm;
   if (concluida == null || serie.length < 2) return null;
   final final_ = m.valorFinal ?? m.valorAlvo;
@@ -182,11 +192,7 @@ List<PontoGrafico> serieDaMetaCorporal(
     inicio = serie.sublist(0, fim).lastIndexWhere((p) => !p.data.isAfter(criado));
     if (inicio < 0) return null;
   }
-  final suspeitos = pontosSuspeitos(serie, metaUnidade(m.metrica));
-  return (
-    dias: serie[fim].data.difference(serie[inicio].data).inDays,
-    suspeito: suspeitos.any((i) => i > inicio && i <= fim),
-  );
+  return serie[fim].data.difference(serie[inicio].data).inDays;
 }
 
 List<Conquista> conquistasDe(
@@ -201,15 +207,14 @@ List<Conquista> conquistasDe(
     final concluida = m.concluidaEm;
     if (m.concluida && concluida != null && !m.manutencao) {
       final final_ = m.valorFinal ?? m.valorAlvo;
-      final trecho = trechoDaMeta(
-        m,
-        serieDaMetaCorporal(m.metrica, medidas: medidas, gordura: gordura, massa: massa),
-      );
-      // Salto que pede "Confira" não vira conquista; a meta segue concluída.
-      if (trecho?.suspeito ?? false) continue;
+      // Meta concluída no backend = conquista, sempre (13/11): antes o app
+      // escondia o selo de meta com salto e o aluno recebia "Ver conquista".
       final dif = final_ - m.valorInicial;
       final dias =
-          trecho?.dias ??
+          diasDaMeta(
+            m,
+            serieDaMetaCorporal(m.metrica, medidas: medidas, gordura: gordura, massa: massa),
+          ) ??
           (m.criadoEm == null ? 0 : concluida.difference(m.criadoEm!).inDays);
       final unidade = metaUnidade(m.metrica);
       final valor =
@@ -221,12 +226,21 @@ List<Conquista> conquistasDe(
           metrica: m.metrica,
           titulo: valor,
           valor: valor,
-          detalhe: ptS.conquistaMetaDetalhe(
-            metaMetricaRotulo(m.metrica),
-            metaValor(m.metrica, m.valorInicial),
-            metaValor(m.metrica, final_),
-            dias,
-          ),
+          contexto: dias < 1 ? valor : ptS.conquistaContextoMeta(valor, dias),
+          // Com 0 dias, sem "no mesmo dia": parecia salto impossível.
+          detalhe:
+              dias < 1
+                  ? ptS.conquistaMetaDetalheSemDias(
+                    metaMetricaRotulo(m.metrica),
+                    metaValor(m.metrica, m.valorInicial),
+                    metaValor(m.metrica, final_),
+                  )
+                  : ptS.conquistaMetaDetalhe(
+                    metaMetricaRotulo(m.metrica),
+                    metaValor(m.metrica, m.valorInicial),
+                    metaValor(m.metrica, final_),
+                    dias,
+                  ),
           data: concluida,
         ),
       );
@@ -240,6 +254,7 @@ List<Conquista> conquistasDe(
           metrica: m.metrica,
           titulo: ptS.conquistaMantidoTitulo,
           valor: metaValor(m.metrica, m.valorAlvo),
+          contexto: ptS.conquistaContextoMantido(metaValor(m.metrica, m.valorAlvo)),
           detalhe: ptS.conquistaMantidoDetalhe(metaValor(m.metrica, m.valorAlvo)),
           data: mantida,
         ),
@@ -253,15 +268,25 @@ List<Conquista> conquistasDe(
   for (final grupo in porExercicio.values) {
     final ordem = [...grupo]..sort((a, b) => a.data.compareTo(b.data));
     double? melhor;
+    DateTime? dataDoMelhor;
     for (final r in ordem) {
       final carga = r.cargaKg;
       final data = DateTime.tryParse(r.data);
       if (carga == null || data == null) continue;
       if (melhor != null && carga > melhor) {
+        final antes = dataDoMelhor;
         lista.add(
           Conquista(
             chave: 'recorde_${r.id}',
             tipo: ConquistaTipo.recorde,
+            exercicio: r.exercicioNome,
+            contexto:
+                antes == null
+                    ? null
+                    : ptS.conquistaContextoRecorde(
+                      diferencaTexto(carga - melhor, 'kg'),
+                      dataDiaMes(antes),
+                    ),
             titulo: formatBrKg(carga),
             valor: formatBrKg(carga),
             detalhe: ptS.conquistaRecordeDetalhe(r.exercicioNome, dataCurta(data)),
@@ -269,7 +294,10 @@ List<Conquista> conquistasDe(
           ),
         );
       }
-      if (melhor == null || carga > melhor) melhor = carga;
+      if (melhor == null || carga > melhor) {
+        melhor = carga;
+        dataDoMelhor = data;
+      }
     }
   }
   lista.sort((a, b) => b.data.compareTo(a.data));

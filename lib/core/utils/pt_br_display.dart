@@ -179,6 +179,13 @@ String formatBrKg(num value, {int digits = 1}) =>
 String formatBrCm(num value, {int digits = 1}) =>
     '${formatBrDecimal(value, digits: digits)} cm';
 
+/// Número e unidade com espaço que não quebra ("80,0 cm" nunca vira
+/// "80,0 / cm" no fim da linha). Para % fica colado ("15,0%").
+String formatBrComUnidade(num value, String unidade, {int digits = 1}) =>
+    unidade == '%'
+        ? '${formatBrDecimal(value, digits: digits)}%'
+        : '${formatBrDecimal(value, digits: digits)} $unidade';
+
 /// Contagem com singular/plural PT-BR (ex.: 1 curtida / 3 curtidas).
 String ptCountLabel(int count, String singular, String plural) {
   if (count <= 0) return '0 $plural';
@@ -210,6 +217,13 @@ String dataPorExtenso(DateTime d) =>
     '${d.day} de ${_mesesPtBr[d.month - 1].toLowerCase()} de ${d.year}';
 
 String _doisDigitos(int n) => n.toString().padLeft(2, '0');
+
+/// "11 out" (dia e mês abreviado, sem ponto).
+String dataDiaMes(DateTime d) =>
+    '${d.day} ${_mesesPtBr[d.month - 1].substring(0, 3).toLowerCase()}';
+
+/// "11 nov 2026".
+String dataDiaMesAno(DateTime d) => '${dataDiaMes(d)} ${d.year}';
 
 /// "30/11".
 String dataCurta(DateTime d) => '${_doisDigitos(d.day)}/${_doisDigitos(d.month)}';

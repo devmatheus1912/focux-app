@@ -204,7 +204,10 @@ class FxGraficoLinha extends StatelessWidget {
                 sideTitles: SideTitles(
                   showTitles: true,
                   reservedSize: 26,
-                  interval: maxX <= 0 ? 1 : maxX / 3,
+                  // Marcas em dias inteiros: com poucos dias, o passo de um
+                  // terço repetia a mesma data ("11/11" quatro vezes).
+                  interval:
+                      maxX <= 0 ? 1 : math.max(1, (maxX / 3).ceilToDouble()),
                   getTitlesWidget: (valor, meta) {
                     final data = pontos.first.data.add(
                       Duration(hours: (valor * 24).round()),

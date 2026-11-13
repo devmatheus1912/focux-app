@@ -17,9 +17,12 @@ import '../data/evolucao_repository.dart';
 import '../utils/evolucao_display.dart';
 import '../utils/evolucao_series.dart';
 import '../../../core/theme/fx_icons.dart';
+import '../../../core/widgets/fx_link_row.dart';
 
-/// Aba Recordes, igual para personal e aluno.
-class EvolucaoRecordesAba extends StatelessWidget {
+/// Aba Força, igual para personal e aluno, no mesmo padrão do Corpo: o gráfico
+/// do exercício escolhido no topo, a lista embaixo (tocar escolhe) e "Ver
+/// registros" (editar e excluir ficam lá, só para o personal).
+class EvolucaoRecordesAba extends StatefulWidget {
   const EvolucaoRecordesAba({
     super.key,
     required this.recordes,
@@ -27,6 +30,8 @@ class EvolucaoRecordesAba extends StatelessWidget {
     required this.onAtualizar,
     this.onEditar,
     this.onExcluir,
+    this.depois = const [],
+    this.foco,
   });
 
   final List<RecordePessoal> recordes;
@@ -37,14 +42,43 @@ class EvolucaoRecordesAba extends StatelessWidget {
   final ValueChanged<RecordePessoal>? onEditar;
   final ValueChanged<RecordePessoal>? onExcluir;
 
+  /// Conquistas de força, depois da lista.
+  final List<Widget> depois;
+
+  /// Exercício a escolher ("Ver exercício" da conquista).
+  final String? foco;
+
+  @override
+  State<EvolucaoRecordesAba> createState() => _EvolucaoRecordesAbaState();
+}
+
+class _EvolucaoRecordesAbaState extends State<EvolucaoRecordesAba> {
+  String? _escolhido;
+
+  static String _chave(String nome) => nome.trim().toLowerCase();
+
+  @override
+  void didUpdateWidget(EvolucaoRecordesAba old) {
+    super.didUpdateWidget(old);
+    if (widget.foco != null && widget.foco != old.foco) {
+      _escolhido = _chave(widget.foco!);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.foco != null) _escolhido = _chave(widget.foco!);
+  }
+
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
-    final progresso = progressoDosRecordes(recordes);
+    final progresso = progressoDosRecordes(widget.recordes);
     final destaque = maiorProgresso(progresso);
     if (progresso.isEmpty) {
       return RefreshIndicator(
-        onRefresh: onAtualizar,
+        onRefresh: widget.onAtualizar,
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
           children: [
@@ -52,14 +86,17 @@ class EvolucaoRecordesAba extends StatelessWidget {
               key: const ValueKey('evolucao_recordes_empty'),
               icon: FxIcons.estrela,
               title: ptS.evolucaoSemRecordeTitulo,
-              subtitle: vazioSubtitulo,
+              subtitle: widget.vazioSubtitulo,
             ),
           ],
         ),
       );
     }
+    final escolhido =
+        progresso.where((p) => _chave(p.nome) == _escolhido).firstOrNull ??
+        progresso.first;
     return RefreshIndicator(
-      onRefresh: onAtualizar,
+      onRefresh: widget.onAtualizar,
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(
@@ -69,7 +106,7 @@ class EvolucaoRecordesAba extends StatelessWidget {
           96,
         ),
         children: [
-          // Com um exercício só, o destaque repetia o cartão de baixo.
+          // Com um exercício só, o destaque repetia a lista.
           if (destaque != null && progresso.length > 1) ...[
             Text(
               ptS.evolucaoMaiorProgresso,
@@ -85,12 +122,34 @@ class EvolucaoRecordesAba extends StatelessWidget {
             ),
             const SizedBox(height: TokensStrip.s3),
           ],
-          for (final p in progresso) ...[
-            _CartaoRecorde(progresso: p, onEditar: onEditar, onExcluir: onExcluir),
-            const SizedBox(height: TokensStrip.s2),
-          ],
-          // Um registro por exercício ainda não tem evolução: diz o que falta.
-          if (progresso.every((p) => p.historico.length < 2))
+          _BlocoDoExercicio(
+            progresso: escolhido,
+            onVerRegistros:
+                () => abrirRegistrosDoExercicio(
+                  context,
+                  escolhido,
+                  onEditar: widget.onEditar,
+                  onExcluir: widget.onExcluir,
+                ),
+          ),
+          const SizedBox(height: TokensStrip.s3),
+          Container(
+            decoration: fxListCardDecoration(context),
+            child: Column(
+              children: [
+                for (final (i, p) in progresso.indexed) ...[
+                  if (i > 0) Divider(height: 1, color: chrome.line),
+                  _LinhaDoExercicio(
+                    progresso: p,
+                    selecionada: identical(p, escolhido),
+                    onTap: () => setState(() => _escolhido = _chave(p.nome)),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          // Um dia por exercício ainda não tem evolução: diz o que falta.
+          if (progresso.every((p) => diasDistintos(p.historico) < 2))
             Padding(
               padding: const EdgeInsets.only(top: TokensStrip.s2),
               child: Text(
@@ -98,22 +157,168 @@ class EvolucaoRecordesAba extends StatelessWidget {
                 style: FocuxHubTypography.bodyMuted(color: chrome.mute),
               ),
             ),
+          const SizedBox(height: TokensStrip.s4),
+          ...widget.depois,
         ],
       ),
     );
   }
 }
 
-class _CartaoRecorde extends StatelessWidget {
-  const _CartaoRecorde({required this.progresso, this.onEditar, this.onExcluir});
+/// Dias diferentes com registro: dois no mesmo dia não são evolução.
+int diasDistintos(List<RecordePessoal> historico) =>
+    {for (final r in historico) r.data.length >= 10 ? r.data.substring(0, 10) : r.data}
+        .length;
+
+/// Série do exercício: a maior carga de cada dia, do mais antigo ao mais novo.
+List<PontoGrafico> serieDoExercicio(ProgressoRecorde p) => umPorDia([
+  for (final r in p.historico.reversed)
+    if (r.cargaKg != null && DateTime.tryParse(r.data) != null)
+      PontoGrafico(DateTime.parse(r.data), r.cargaKg!),
+], maior: true);
+
+class _BlocoDoExercicio extends StatelessWidget {
+  const _BlocoDoExercicio({required this.progresso, required this.onVerRegistros});
 
   final ProgressoRecorde progresso;
-  final ValueChanged<RecordePessoal>? onEditar;
-  final ValueChanged<RecordePessoal>? onExcluir;
+  final VoidCallback onVerRegistros;
 
-  Future<void> _acoes(BuildContext context, RecordePessoal r) async {
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    final pontos = serieDoExercicio(progresso);
+    final melhor = progresso.melhor;
+    return Container(
+      padding: const EdgeInsets.all(TokensStrip.s3),
+      decoration: fxListCardDecoration(context),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Expanded(
+                child: Text(
+                  progresso.nome,
+                  style: FocuxHubTypography.cardTitle(color: chrome.ink),
+                ),
+              ),
+              if (melhor.cargaKg case final kg?)
+                Text(
+                  formatBrComUnidade(kg, 'kg'),
+                  style: FocuxHubTypography.cardTitle(color: chrome.ink)
+                      .copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
+                ),
+            ],
+          ),
+          const SizedBox(height: TokensStrip.s3),
+          if (pontos.length >= evolucaoPontosParaGrafico)
+            RepaintBoundary(
+              child: FxGraficoLinha(
+                pontos: pontos,
+                unidade: 'kg',
+                altura: 160,
+                resumo: progresso.nome,
+              ),
+            )
+          else if (DateTime.tryParse(melhor.data) case final data?)
+            // Um dia só não é série: valor e data, sem gráfico.
+            Text(
+              ptS.evolucaoRegistradoEm(dataCurta(data)),
+              style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+            ),
+          const SizedBox(height: TokensStrip.s2),
+          FxLinkRow(
+            label: ptS.evolucaoVerRegistros,
+            icon: FxIcons.historico,
+            onTap: onVerRegistros,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Uma linha por exercício: melhor marca e, com 2 dias ou mais, o ganho.
+class _LinhaDoExercicio extends StatelessWidget {
+  const _LinhaDoExercicio({
+    required this.progresso,
+    required this.selecionada,
+    required this.onTap,
+  });
+
+  final ProgressoRecorde progresso;
+  final bool selecionada;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    final primary = Theme.of(context).colorScheme.primary;
+    final melhor = progresso.melhor;
+    final estimado = umRmEstimado(melhor);
+    final marca = [
+      evolucaoRecordeSubtitle(melhor),
+      if (estimado != null) ptS.evolucaoRmEstimado(formatBrComUnidade(estimado, 'kg')),
+    ].join(' · ');
+    final evoluiu = diasDistintos(progresso.historico) >= 2;
+    final ganho =
+        evoluiu
+            ? ptS.evolucaoGanhoDesdeInicio(diferencaTexto(progresso.ganhoKg, 'kg'))
+            : null;
+    return Semantics(
+      button: true,
+      selected: selecionada,
+      label: [
+        progresso.nome,
+        ptS.evolucaoMelhorMarca(marca),
+        if (ganho != null) ganho,
+      ].join(', '),
+      excludeSemantics: true,
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(TokensStrip.s3),
+          color: selecionada ? primary.withValues(alpha: 0.07) : null,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                progresso.nome,
+                style: FocuxHubTypography.cardTitle(
+                  color: selecionada ? primary : chrome.ink,
+                ),
+              ),
+              Text(
+                ptS.evolucaoMelhorMarca(marca),
+                style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+              ),
+              if (ganho != null)
+                Text(
+                  ganho,
+                  style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Registros do exercício em lista agrupada, o melhor com a etiqueta
+/// "Recorde". Editar e excluir no "⋯" (só o personal).
+Future<void> abrirRegistrosDoExercicio(
+  BuildContext context,
+  ProgressoRecorde progresso, {
+  ValueChanged<RecordePessoal>? onEditar,
+  ValueChanged<RecordePessoal>? onExcluir,
+}) {
+  Future<void> acoes(BuildContext ctx, RecordePessoal r) async {
     final escolha = await showFxGroupedActionSheet<String>(
-      context,
+      ctx,
       titulo: progresso.nome,
       grupos: [
         FxActionGroup<String>(null, [
@@ -131,8 +336,8 @@ class _CartaoRecorde extends StatelessWidget {
         ]),
       ],
     );
-    if (!context.mounted || escolha == null) return;
-    Navigator.pop(context);
+    if (!ctx.mounted || escolha == null) return;
+    Navigator.pop(ctx);
     if (escolha == 'editar') {
       onEditar?.call(r);
     } else {
@@ -140,155 +345,40 @@ class _CartaoRecorde extends StatelessWidget {
     }
   }
 
-  void _abrirHistorico(BuildContext context) {
-    final emOrdem = progresso.historico.reversed.toList();
-    final pontos = [
-      for (final r in emOrdem)
-        if (r.cargaKg != null && DateTime.tryParse(r.data) != null)
-          PontoGrafico(DateTime.parse(r.data), r.cargaKg!),
-    ];
-    showFxHomeSheet<void>(
-      context,
-      builder:
-          (ctx) => FxSheetFrame(
-            title: progresso.nome,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (pontos.length >= evolucaoPontosParaGrafico) ...[
-                  FxGraficoLinha(
-                    pontos: pontos,
-                    unidade: 'kg',
-                    altura: 160,
-                    resumo: progresso.nome,
-                  ),
-                  const SizedBox(height: TokensStrip.s3),
-                ],
-                for (final r in progresso.historico)
-                  FxSatelliteListTile(
-                    title: evolucaoRecordeSubtitle(r),
-                    titleCase: false,
-                    trailing:
-                        onEditar == null
-                            ? const SizedBox.shrink()
-                            : const Icon(FxIcons.mais),
-                    onTap: onEditar == null ? null : () => _acoes(ctx, r),
-                  ),
-              ],
-            ),
-          ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
-    final primary = Theme.of(context).colorScheme.primary;
-    final melhor = progresso.melhor;
-    final estimado = umRmEstimado(melhor);
-    final detalhe = [
-      evolucaoRecordeSubtitle(melhor),
-      if (estimado != null) ptS.evolucaoRmEstimado(formatBrKg(estimado)),
-    ].join(' · ');
-    return Semantics(
-      button: true,
-      label: '${progresso.nome}, $detalhe',
-      excludeSemantics: true,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(TokensStrip.rCard),
-        onTap: () => _abrirHistorico(context),
+  return showFxHomeSheet<void>(
+    context,
+    builder: (ctx) {
+      final chrome = ShellChrome.of(ctx);
+      return FxSheetFrame(
+        title: progresso.nome,
         child: Container(
-          padding: const EdgeInsets.all(TokensStrip.s3),
-          decoration: fxListCardDecoration(context),
+          decoration: fxListCardDecoration(ctx),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      progresso.nome,
-                      style: FocuxHubTypography.cardTitle(color: chrome.ink),
-                    ),
+              for (final (i, r) in progresso.historico.indexed) ...[
+                if (i > 0) Divider(height: 1, color: chrome.line),
+                FxSatelliteListTile(
+                  title: evolucaoRecordeSubtitle(r),
+                  titleCase: false,
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (identical(r, progresso.melhor))
+                        FxStatusPill(label: ptS.evolucaoRecordeEtiqueta),
+                      if (onEditar != null) ...[
+                        const SizedBox(width: TokensStrip.s2),
+                        Icon(FxIcons.mais, color: chrome.mute),
+                      ],
+                    ],
                   ),
-                  if (recordeNovo(melhor))
-                    FxStatusPill(label: ptS.evolucaoRecordeNovo),
-                ],
-              ),
-              const SizedBox(height: TokensStrip.s1),
-              Text(
-                detalhe,
-                style: FocuxHubTypography.bodyMuted(color: chrome.mute),
-              ),
-              if (progresso.historico.length > 1) ...[
-                const SizedBox(height: TokensStrip.s2),
-                // Dois tons: até a primeira marca (fraco) e o ganho (marca). A
-                // barra cheia de antes parecia "83% de algo".
-                _BarraDoGanho(progresso: progresso, cor: primary, trilho: chrome.line),
-                const SizedBox(height: TokensStrip.s1),
-                Text(
-                  ptS.evolucaoGanhoDesdeInicio(
-                    diferencaTexto(progresso.ganhoKg, 'kg'),
-                  ),
-                  style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                  onTap: onEditar == null ? null : () => acoes(ctx, r),
                 ),
               ],
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-
-class _BarraDoGanho extends StatelessWidget {
-  const _BarraDoGanho({required this.progresso, required this.cor, required this.trilho});
-
-  final ProgressoRecorde progresso;
-  final Color cor;
-  final Color trilho;
-
-  @override
-  Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
-    final inicio = progresso.inicio.cargaKg ?? 0;
-    final ganho = progresso.ganhoKg.clamp(0, double.infinity);
-    final estilo = FocuxHubTypography.chip(chrome.mute)
-        .copyWith(fontFeatures: const [FontFeature.tabularFigures()]);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(TokensStrip.s1),
-          child: SizedBox(
-            height: 6,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (inicio > 0)
-                  Expanded(
-                    flex: (inicio * 10).round(),
-                    child: ColoredBox(color: cor.withValues(alpha: 0.28)),
-                  ),
-                if (ganho > 0)
-                  Expanded(flex: (ganho * 10).round(), child: ColoredBox(color: cor))
-                else if (inicio <= 0)
-                  Expanded(child: ColoredBox(color: trilho)),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 2),
-        Row(
-          children: [
-            Text(formatBrKg(inicio), style: estilo),
-            const Spacer(),
-            Text(formatBrKg(progresso.melhor.cargaKg ?? 0), style: estilo),
-          ],
-        ),
-      ],
-    );
-  }
+      );
+    },
+  );
 }

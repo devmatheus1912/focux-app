@@ -30,6 +30,8 @@ import '../utils/ia_chat_display.dart';
 import '../utils/ia_texto_formatado.dart';
 import '../widgets/ia_chat_composer.dart';
 import '../widgets/ia_quota_upgrade.dart';
+import '../widgets/ia_conversas_grupo.dart';
+import '../../../l10n/pt.dart';
 
 /// Perguntas para começar (tocar envia).
 const iaChatSugestoes = [
@@ -167,6 +169,40 @@ class _IaChatScreenState extends ConsumerState<IaChatScreen> {
     }
   }
 
+  /// "⋯" da conversa: "Apagar conversa" por último e em vermelho. Apaga, volta
+  /// para a abertura da IA e mostra "Desfazer" lá.
+  Future<void> _maisAcoes() async {
+    final escolha = await showFxGroupedActionSheet<String>(
+      context,
+      titulo: ptS.iaConversaTitulo,
+      grupos: [
+        FxActionGroup<String>(null, [
+          FxActionItem(
+            valor: 'apagar',
+            rotulo: ptS.iaApagarConversa,
+            icone: FxIcons.excluir,
+            perigo: true,
+          ),
+        ]),
+      ],
+    );
+    if (escolha != 'apagar' || !mounted) return;
+    final conversa = (await ref.read(iaChatStoreProvider).listar())
+        .where((c) => c.id == _id)
+        .firstOrNull;
+    if (!mounted) return;
+    if (conversa == null) {
+      // Ainda não foi salva (nenhuma pergunta): só sai.
+      safePopOrGo(context, '/ia/copiloto');
+      return;
+    }
+    final destino = Navigator.of(context);
+    safePopOrGo(context, '/ia/copiloto');
+    if (destino.context.mounted) {
+      await apagarConversaComDesfazer(destino.context, ref, conversa);
+    }
+  }
+
   Future<void> _opcoes(IaChatMsg m) async {
     final acao = await showFxGroupedActionSheet<String>(
       context,
@@ -220,6 +256,11 @@ class _IaChatScreenState extends ConsumerState<IaChatScreen> {
           subtitle: _alunoNome == null ? 'Treino e prescrição' : 'Sobre $_alunoNome',
           onBack: () => safePopOrGo(context, '/ia/copiloto'),
           actions: [
+            IconButton(
+              tooltip: ptS.iaMaisAcoes,
+              icon: const Icon(FxIcons.mais),
+              onPressed: _maisAcoes,
+            ),
             FxHelpIconButton(
               tooltip: 'Como usar a IA Focux',
               onTap:

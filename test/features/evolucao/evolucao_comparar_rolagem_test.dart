@@ -16,7 +16,8 @@ import 'package:focux_app/l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Bug de 10/11/2026: no Comparar, rolar não recolhe o topo e a tela não arrasta.
+/// Bug de 10/11/2026: no Comparar, a tela não arrastava. Desde 13/11 o topo
+/// do personal é sempre a faixa recolhida.
 class _Adapter implements HttpClientAdapter {
   @override
   Future<ResponseBody> fetch(
@@ -114,26 +115,21 @@ void main() {
       await tester.drag(alvo, const Offset(0, -300));
       await tester.pumpAndSettle();
 
+      // 13/11: no personal o topo é sempre a faixa de 3 colunas; a tela
+      // rola e a faixa não reabre ao puxar para baixo.
       var hero = tester.widget<EvolucaoHero>(find.byType(EvolucaoHero));
-      expect(hero.recolhido, isTrue, reason: 'o topo não recolheu');
+      expect(hero.recolhido, isTrue);
+      expect(
+        tester.stateList<ScrollableState>(lista).any((s) => s.position.pixels > 0),
+        isTrue,
+        reason: 'a tela não arrastou',
+      );
 
-      // Soltou e assentou: continua recolhido (sem vai-e-volta).
-      await tester.pump(const Duration(seconds: 1));
-      hero = tester.widget<EvolucaoHero>(find.byType(EvolucaoHero));
-      expect(hero.recolhido, isTrue, reason: 'o topo reabriu sozinho');
-
-      // Puxar para baixo no topo abre de novo.
       final meio = tester.getCenter(find.byType(EvolucaoScreen));
-      await tester.dragFrom(meio, const Offset(0, 300));
-      await tester.pump();
       await tester.dragFrom(meio, const Offset(0, 300));
       await tester.pumpAndSettle();
       hero = tester.widget<EvolucaoHero>(find.byType(EvolucaoHero));
-      expect(
-        hero.recolhido,
-        isFalse,
-        reason: 'puxar para baixo não abriu o topo',
-      );
+      expect(hero.recolhido, isTrue);
     });
   }
 }

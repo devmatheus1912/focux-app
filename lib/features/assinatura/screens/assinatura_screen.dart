@@ -48,6 +48,7 @@ import '../providers/assinatura_provider.dart';
 import '../../planos/paywall/paywall_catalog.dart';
 import '../../planos/paywall/paywall_components.dart';
 import '../../planos/paywall/paywall_price.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import '../../planos/paywall/paywall_vitrine.dart';
 import '../../subscription/plan_entitlements.dart';
 import '../services/subscription_device_guard.dart';
@@ -145,6 +146,40 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
   String? _checkoutProductId;
   bool _storeAvailable = false;
   Map<String, ProductDetails> _productDetails = const {};
+
+  /// Loja e catálogo do backend com preços diferentes: avisa o Sentry (só os
+  /// IDs dos produtos, sem dado pessoal), uma vez por abertura.
+  void _avisarPrecoDivergente(List<ProductDetails> produtos) {
+    final planos = ref.read(paywallHomeProvider).value?.planos ?? const [];
+    final catalogo = <String, double>{};
+    for (final p in planos) {
+      final plano = subscriptionPlanFromApi(p.nome);
+      if (plano == SubscriptionPlan.FREE) continue;
+      catalogo[SubscriptionProducts.productIdFor(
+            plano,
+            SubscriptionBillingPeriod.monthly,
+          )] =
+          p.precoMensal;
+      if (p.precoAnual case final anual? when anual > 0) {
+        catalogo[SubscriptionProducts.productIdFor(
+              plano,
+              SubscriptionBillingPeriod.yearly,
+            )] =
+            anual;
+      }
+    }
+    final divergentes = paywallPrecosDivergentes(
+      loja: {for (final p in produtos) p.id: p.rawPrice},
+      catalogo: catalogo,
+    );
+    if (divergentes.isEmpty) return;
+    unawaited(
+      Sentry.captureMessage(
+        'Preço da loja diferente do catálogo: ${divergentes.join(', ')}',
+        level: SentryLevel.warning,
+      ),
+    );
+  }
   Map<String, ProductDetails> _trialOffers = const {};
   Map<String, ProductDetails> _referralOffers = const {};
   /// Desconto de indicado ainda não usado (só mensais).
@@ -435,6 +470,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
           _billingPeriod = SubscriptionBillingPeriod.monthly;
         }
       });
+      _avisarPrecoDivergente(response.productDetails);
     } catch (_) {
       // Sem catálogo da loja: o checkout consulta o produto de novo.
     }

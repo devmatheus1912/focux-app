@@ -30,6 +30,33 @@ void main() {
     expect(checkinSeriePrescricaoHint(s, ' '), isNull);
   });
 
+  test('confirmar o resto manda o que a tela mostra em cada série (13/11)', () {
+    // Última sessão: 1ª sem carga, 2ª com 20 kg; prescrição só com reps.
+    // A tela mostra 20 kg (maior carga anterior); antes o backend gravava vazio.
+    final ee = ExecucaoExercicio(
+      id: 1,
+      treinoExercicioId: 2,
+      exercicioNome: 'Tríceps francês',
+      series: 3,
+      repeticoes: '12',
+      seriesFeitas: 0,
+      concluido: false,
+      cargaAnteriorKg: 20,
+      seriesAnteriores: [
+        ExecucaoSerie(id: 1, numero: 1, repeticoes: '12'),
+        ExecucaoSerie(id: 2, numero: 2, cargaKg: 20, repeticoes: '12'),
+      ],
+    );
+    final restantes = checkinSeriesRestantes(
+      ee,
+      atual: const CheckinCurrentSetSeed(cargaKg: 22.5, reps: 10),
+    );
+    expect(restantes.map((s) => s.numero), [1, 2, 3]);
+    expect(restantes.first.cargaKg, 22.5);
+    expect(restantes.first.reps, 10);
+    expect(restantes.every((s) => s.cargaKg != null), isTrue);
+  });
+
   test('current set prefers last session then prescription', () {
     final previous = ExecucaoSerie(
       id: 1,

@@ -142,12 +142,15 @@ class _PerfilBodyState extends State<_PerfilBody> {
                             logoUrl: perfil.logoUrl,
                             primaryColor: primaryColor,
                             profileScore: profileScore,
-                            onTap: onPickPhoto,
+                            // O lápis é o único caminho para os dados: abre
+                            // Editar perfil (a foto se troca lá). Só trocar a
+                            // foto deixava o perfil completo sem edição (13/11).
+                            onTap: onEditPerfil,
                             loading: uploadingPhoto,
                             semanticsLabel:
                                 uploadingPhoto
                                     ? 'Enviando foto do perfil'
-                                    : 'Alterar foto do perfil',
+                                    : 'Editar perfil',
                           ),
                           const SizedBox(height: TokensStrip.s3),
                           Text(

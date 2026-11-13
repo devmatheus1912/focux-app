@@ -80,14 +80,31 @@ List<MedidaCorporal> medidasEmOrdem(Iterable<MedidaCorporal> medidas) {
   return lista;
 }
 
+/// Um ponto por dia, na ordem: o último registro do dia, ou o [maior] (força).
+/// Dois registros no mesmo dia viravam um traço vertical no gráfico.
+List<PontoGrafico> umPorDia(List<PontoGrafico> serie, {bool maior = false}) {
+  final out = <PontoGrafico>[];
+  for (final p in serie) {
+    final dia = DateTime(p.data.year, p.data.month, p.data.day);
+    final ultimo = out.lastOrNull;
+    if (ultimo != null &&
+        DateTime(ultimo.data.year, ultimo.data.month, ultimo.data.day) == dia) {
+      if (!maior || p.valor > ultimo.valor) out[out.length - 1] = p;
+    } else {
+      out.add(p);
+    }
+  }
+  return out;
+}
+
 List<PontoGrafico> serieDaMetrica(
   Iterable<MedidaCorporal> medidas,
   EvolucaoMetrica metrica,
-) => [
+) => umPorDia([
   for (final m in medidasEmOrdem(medidas))
     if (metrica.valor(m) != null && DateTime.tryParse(m.data) != null)
       PontoGrafico(DateTime.parse(m.data), metrica.valor(m)!),
-];
+]);
 
 /// Gordura vem das avaliações, em qualquer ordem.
 List<PontoGrafico> serieDeGordura(Iterable<PontoGordura> pontos) {
@@ -97,8 +114,13 @@ List<PontoGrafico> serieDeGordura(Iterable<PontoGordura> pontos) {
         PontoGrafico(DateTime.parse(p.data), p.valor),
   ];
   serie.sort((a, b) => a.data.compareTo(b.data));
-  return serie;
+  return umPorDia(serie);
 }
+
+/// A série cobre mais de [dias] dias: só então os chips de período mudam algo.
+bool serieCobreMaisQue(List<PontoGrafico> serie, int dias) =>
+    serie.length >= 2 &&
+    serie.last.data.difference(serie.first.data).inDays > dias;
 
 /// Quanto muda por semana. Nulo com poucos registros.
 double? ritmoSemanal(List<PontoGrafico> pontos) {
@@ -203,12 +225,6 @@ double? umRmEstimado(RecordePessoal r) {
   if (carga == null || reps == null || reps < 2 || reps > 12) return null;
   if (exercicioSemUmRm(r.exercicioNome, grupoMuscular: r.grupoMuscular)) return null;
   return carga * (1 + reps / 30);
-}
-
-bool recordeNovo(RecordePessoal r, {DateTime? hoje}) {
-  final data = DateTime.tryParse(r.data);
-  if (data == null) return false;
-  return (hoje ?? DateTime.now()).difference(data).inDays <= 30;
 }
 
 /// Um por exercício, com a maior carga em cima.

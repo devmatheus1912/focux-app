@@ -242,7 +242,7 @@ class _UsoLinha extends StatelessWidget {
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
     final limite = uso.limite;
-    // Uma frase, como a linha da IA: "1 aluno · sem limite", "5 de 30 alunos".
+    // Uma frase, como a linha da IA: "1 aluno · sem limite", "5 de 50 alunos".
     final valor =
         limite == null
             ? s.assinaturaAlunosSemLimite(uso.usado)

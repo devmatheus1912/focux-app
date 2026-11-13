@@ -5,6 +5,7 @@ import '../models/checkin_execucao_models.dart';
 import '../models/checkin_personal_home.dart';
 import '../models/treino_previa.dart';
 import '../utils/checkin_json.dart';
+import '../utils/checkin_serie_input.dart';
 
 export '../models/checkin_execucao_models.dart';
 
@@ -93,12 +94,24 @@ class CheckinRepository {
     );
   }
 
+  /// [series]: o que a tela mostra em cada série que falta; o backend grava isso.
   Future<ExecucaoExercicio> confirmarRestante(
     int execucaoId,
-    int treinoExercicioId,
-  ) async {
+    int treinoExercicioId, {
+    List<CheckinSerieRestante> series = const [],
+  }) async {
     final r = await _dio.post(
       '/api/checkin/$execucaoId/exercicio/$treinoExercicioId/confirmar-restante',
+      data: {
+        'series': [
+          for (final s in series)
+            {
+              'numero': s.numero,
+              if (s.cargaKg != null) 'cargaKg': s.cargaKg,
+              if (s.reps != null) 'repeticoes': '${s.reps}',
+            },
+        ],
+      },
     );
     return ExecucaoExercicio.fromJson(
       _requireJsonMap(

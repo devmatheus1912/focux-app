@@ -123,6 +123,34 @@ CheckinCurrentSetSeed checkinCurrentSetSeed({
   return const CheckinCurrentSetSeed();
 }
 
+/// Uma série que falta no "Confirmar o resto", como a tela mostra.
+typedef CheckinSerieRestante = ({int numero, double? cargaKg, int? reps});
+
+/// "Confirmar o resto": o que a tela mostra em cada série que falta, para o
+/// backend gravar exatamente isso. A série atual leva o rascunho do stepper
+/// ([atual]); a seguinte sem fonte herda a anterior, como no registro série a
+/// série.
+List<CheckinSerieRestante> checkinSeriesRestantes(
+  ExecucaoExercicio ee, {
+  CheckinCurrentSetSeed? atual,
+}) {
+  final total = ee.series;
+  if (total == null || total <= 0) return const [];
+  final out = <CheckinSerieRestante>[];
+  double? carga;
+  int? reps;
+  for (var n = ee.seriesFeitas + 1; n <= total; n++) {
+    final seed =
+        n == ee.seriesFeitas + 1 && atual != null
+            ? atual
+            : checkinCurrentSetSeed(ee: ee, numero: n);
+    carga = seed.cargaKg ?? carga;
+    reps = seed.reps ?? reps;
+    out.add((numero: n, cargaKg: carga, reps: reps));
+  }
+  return out;
+}
+
 /// Carga e reps mexidos no stepper antes de registrar, por série.
 class CheckinRascunhos {
   final Map<String, CheckinCurrentSetSeed> _porSerie = {};

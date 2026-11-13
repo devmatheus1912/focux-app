@@ -40,6 +40,7 @@ import '../../features/financeiro/utils/financeiro_hub_display.dart';
 import '../../features/feed/screens/feed_screen.dart';
 import '../../features/feed/screens/feed_aluno_screen.dart';
 import '../../features/ia/screens/ia_chat_screen.dart';
+import '../../features/ia/screens/ia_conversas_screen.dart';
 import '../../features/leads/screens/interessados_screen.dart';
 import '../../features/leads/screens/lead_detail_screen.dart';
 import '../../features/leads/data/lead_repository.dart';
@@ -609,6 +610,16 @@ RouteBase buildChromeShellRoute() {
                   requiredPlan: SubscriptionPlan.PRO,
                   capability: 'ia',
                   child: IaChatScreen(conversaId: state.uri.queryParameters['c']),
+                ),
+          ),
+          GoRoute(
+            path: '/ia/conversas',
+            builder:
+                (context, state) => const FeatureGate(
+                  featureName: 'IA Focux',
+                  requiredPlan: SubscriptionPlan.PRO,
+                  capability: 'ia',
+                  child: IaConversasScreen(),
                 ),
           ),
           GoRoute(

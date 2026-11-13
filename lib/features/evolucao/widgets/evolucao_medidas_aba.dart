@@ -17,6 +17,7 @@ import '../utils/evolucao_display.dart';
 import '../utils/evolucao_series.dart';
 import 'evolucao_historico_folha.dart';
 import '../../../core/theme/fx_icons.dart';
+import '../../../core/widgets/fx_link_row.dart';
 
 /// Aba Medidas, igual para personal e aluno. A linha abre [onAbrirMedida].
 class EvolucaoMedidasAba extends StatefulWidget {
@@ -32,7 +33,15 @@ class EvolucaoMedidasAba extends StatefulWidget {
     this.metas = const [],
     this.gordura = const [],
     this.massa = const [],
+    this.mostrarConfira = false,
+    this.foco,
   });
+
+  /// Medida a escolher ("Ver medida" da conquista), pelo código da meta.
+  final String? foco;
+
+  /// Só o personal confere: o aviso "fora do comum" e o ícone na linha.
+  final bool mostrarConfira;
 
   final List<MedidaCorporal> medidas;
   final String vazioSubtitulo;
@@ -47,7 +56,7 @@ class EvolucaoMedidasAba extends StatefulWidget {
   /// Pendências de meta, acima do gráfico.
   final List<Widget> topo;
 
-  /// Conquistas, entre as medidas e o histórico.
+  /// Conquistas, depois das medidas.
   final List<Widget> depois;
   final List<MetaCorporal> metas;
 
@@ -62,6 +71,24 @@ class EvolucaoMedidasAba extends StatefulWidget {
 class _EvolucaoMedidasAbaState extends State<EvolucaoMedidasAba> {
   EvolucaoMetrica _metrica = EvolucaoMetrica.peso;
   EvolucaoPeriodo _periodo = EvolucaoPeriodo.tudo;
+
+  void _focar(String? codigo) {
+    final m =
+        EvolucaoMetrica.values.where((e) => e.codigoMeta == codigo).firstOrNull;
+    if (m != null) _metrica = m;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _focar(widget.foco);
+  }
+
+  @override
+  void didUpdateWidget(EvolucaoMedidasAba old) {
+    super.didUpdateWidget(old);
+    if (widget.foco != old.foco) _focar(widget.foco);
+  }
 
   List<PontoGrafico> _serie(List<MedidaCorporal> medidas, EvolucaoMetrica m) =>
       m == EvolucaoMetrica.gordura
@@ -139,8 +166,22 @@ class _EvolucaoMedidasAbaState extends State<EvolucaoMedidasAba> {
     final metrica =
         disponiveis.contains(_metrica) ? _metrica : disponiveis.first;
     final todos = _serie(medidas, metrica);
-    final pontos = pontosDoPeriodo(todos, _periodo);
-    final registros = _registros;
+    final comPeriodo = serieCobreMaisQue(todos, 30);
+    final pontos =
+        comPeriodo ? pontosDoPeriodo(todos, _periodo) : todos;
+    // Saltos sem "Está certo", um aviso só no topo (antes, um selo por linha).
+    final saltos = <EvolucaoMetrica, List<PontoGrafico>>{
+      if (widget.mostrarConfira)
+        for (final m in disponiveis)
+          if (_serie(medidas, m) case final serie
+              when serie.length >= 2 &&
+                  pontosSuspeitos(
+                    serie,
+                    m.unidade,
+                    conferidas: conferidas,
+                  ).contains(serie.length - 1))
+            m: serie,
+    };
 
     return RefreshIndicator(
       onRefresh: widget.onAtualizar,
@@ -154,50 +195,105 @@ class _EvolucaoMedidasAbaState extends State<EvolucaoMedidasAba> {
         ),
         children: [
           ...widget.topo,
-          if (todos.length >= evolucaoPontosParaGrafico) ...[
-            _BlocoDaSerie(
-              conferidas: conferidas,
-              metrica: metrica,
-              pontos: pontos,
-              periodo: _periodo,
-              alvo: _metaDe(metrica)?.valorAlvo,
-              onPeriodo: (p) => setState(() => _periodo = p),
+          _BlocoDaSerie(
+            conferidas: conferidas,
+            metrica: metrica,
+            pontos: pontos,
+            periodo: comPeriodo ? _periodo : null,
+            alvo: _metaDe(metrica)?.valorAlvo,
+            onPeriodo: (p) => setState(() => _periodo = p),
+            onVerRegistros: _abrirHistorico,
+          ),
+          const SizedBox(height: TokensStrip.s3),
+          if (saltos.isNotEmpty) ...[
+            EvolucaoAvisoConfira(
+              quantidade: saltos.length,
+              onTap:
+                  () => _abrirHistorico(
+                    destaque: {
+                      for (final serie in saltos.values) ..._datasDoSalto(serie),
+                    },
+                  ),
             ),
-            const SizedBox(height: TokensStrip.s3),
+            const SizedBox(height: TokensStrip.s2),
           ],
           _ListaDeMedidas(
-            conferidas: conferidas,
             metricas: disponiveis,
             selecionada: metrica,
             serieDe: (m) => _serie(medidas, m),
             metaDe: _metaDe,
+            suspeitas: saltos.keys.toSet(),
             onSelecionar: (m) => setState(() => _metrica = m),
-            onConfira: (serie) => _abrirHistorico(destaque: _datasDoSalto(serie)),
           ),
-          // Trocar o gráfico tocando na linha não se descobre sozinho.
-          if (disponiveis.length > 1 && todos.length >= evolucaoPontosParaGrafico)
-            Padding(
-              padding: const EdgeInsets.only(top: TokensStrip.s2),
-              child: Text(
-                ptS.evolucaoToqueParaGrafico,
-                style: FocuxHubTypography.bodyMuted(
-                  color: ShellChrome.of(context).mute,
-                ),
-              ),
-            ),
           const SizedBox(height: TokensStrip.s4),
           ...widget.depois,
-          FxSatelliteListTile(
-            title: ptS.evolucaoHistoricoLinha(registros.length),
-            titleCase: false,
-            onTap: _abrirHistorico,
-          ),
         ],
       ),
     );
   }
 }
 
+/// Aviso único de "Confira" no topo da lista (personal): abre o Histórico com
+/// os registros a conferir marcados. Também usado no Comparar.
+class EvolucaoAvisoConfira extends StatelessWidget {
+  const EvolucaoAvisoConfira({
+    super.key,
+    required this.quantidade,
+    required this.onTap,
+  });
+
+  final int quantidade;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    final alerta = chrome.isDark ? EagleTokens.warnDark : EagleTokens.warn;
+    final texto = ptS.evolucaoForaDoComum(quantidade);
+    return Semantics(
+      button: true,
+      label: '$texto. ${ptS.evolucaoConferir}',
+      excludeSemantics: true,
+      child: Material(
+        color: alerta.withValues(alpha: chrome.isDark ? 0.16 : 0.10),
+        borderRadius: BorderRadius.circular(TokensStrip.rCard),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(TokensStrip.rCard),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 48),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: TokensStrip.s3,
+                vertical: TokensStrip.s2,
+              ),
+              child: Row(
+                children: [
+                  Icon(FxIcons.alertaPequeno, size: 18, color: alerta),
+                  const SizedBox(width: TokensStrip.s2),
+                  Expanded(
+                    child: Text(
+                      texto,
+                      style: FocuxHubTypography.body(color: chrome.ink),
+                    ),
+                  ),
+                  Text(
+                    ptS.evolucaoConferir,
+                    style: FocuxHubTypography.chip(alerta),
+                  ),
+                  Icon(FxIcons.chevronDireita, size: 16, color: alerta),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Gráfico da medida escolhida: nome, valor atual, gráfico (com 2 dias ou mais)
+/// e "Ver registros". Chips de período só quando a série passa de 30 dias.
 class _BlocoDaSerie extends StatelessWidget {
   const _BlocoDaSerie({
     this.conferidas = const {},
@@ -205,14 +301,18 @@ class _BlocoDaSerie extends StatelessWidget {
     required this.pontos,
     required this.periodo,
     required this.onPeriodo,
+    required this.onVerRegistros,
     this.alvo,
   });
 
   final Set<String> conferidas;
   final EvolucaoMetrica metrica;
   final List<PontoGrafico> pontos;
-  final EvolucaoPeriodo periodo;
+
+  /// Nulo: a série é curta e os chips não mudariam nada.
+  final EvolucaoPeriodo? periodo;
   final ValueChanged<EvolucaoPeriodo> onPeriodo;
+  final VoidCallback onVerRegistros;
   final double? alvo;
 
   @override
@@ -226,21 +326,43 @@ class _BlocoDaSerie extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            metrica.rotulo,
-            style: FocuxHubTypography.cardTitle(color: chrome.ink),
-          ),
-          const SizedBox(height: TokensStrip.s2),
-          FxChoiceStrip<EvolucaoPeriodo>(
-            itens: [
-              for (final p in EvolucaoPeriodo.values)
-                FxChoiceItem(value: p, label: p.rotulo),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Expanded(
+                child: Text(
+                  metrica.rotulo,
+                  style: FocuxHubTypography.cardTitle(color: chrome.ink),
+                ),
+              ),
+              if (pontos.isNotEmpty)
+                Text(
+                  formatBrComUnidade(pontos.last.valor, metrica.unidade),
+                  style: FocuxHubTypography.cardTitle(color: chrome.ink)
+                      .copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
+                ),
             ],
-            selecionado: periodo,
-            onSelecionar: onPeriodo,
           ),
+          if (periodo case final periodo?) ...[
+            const SizedBox(height: TokensStrip.s2),
+            FxChoiceStrip<EvolucaoPeriodo>(
+              itens: [
+                for (final p in EvolucaoPeriodo.values)
+                  FxChoiceItem(value: p, label: p.rotulo),
+              ],
+              selecionado: periodo,
+              onSelecionar: onPeriodo,
+            ),
+          ],
           const SizedBox(height: TokensStrip.s3),
-          if (pontos.length >= evolucaoPontosParaGrafico)
+          if (pontos.length == 1)
+            // Um dia só não é série: valor e data, sem gráfico.
+            Text(
+              ptS.evolucaoRegistradoEm(dataCurta(pontos.single.data)),
+              style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+            )
+          else if (pontos.length >= evolucaoPontosParaGrafico)
             RepaintBoundary(
               child: FxGraficoLinha(
                 pontos: pontos,
@@ -267,6 +389,12 @@ class _BlocoDaSerie extends StatelessWidget {
               style: FocuxHubTypography.bodyMuted(color: chrome.mute),
             ),
           ],
+          const SizedBox(height: TokensStrip.s2),
+          FxLinkRow(
+            label: ptS.evolucaoVerRegistros,
+            icon: FxIcons.historico,
+            onTap: onVerRegistros,
+          ),
         ],
       ),
     );
@@ -276,22 +404,22 @@ class _BlocoDaSerie extends StatelessWidget {
 /// Uma linha por medida, com divisor. Toque troca o gráfico.
 class _ListaDeMedidas extends StatelessWidget {
   const _ListaDeMedidas({
-    this.conferidas = const {},
     required this.metricas,
     required this.selecionada,
     required this.serieDe,
     required this.metaDe,
     required this.onSelecionar,
-    required this.onConfira,
+    this.suspeitas = const {},
   });
 
-  final Set<String> conferidas;
   final List<EvolucaoMetrica> metricas;
   final EvolucaoMetrica selecionada;
   final List<PontoGrafico> Function(EvolucaoMetrica) serieDe;
   final MetaCorporal? Function(EvolucaoMetrica) metaDe;
   final ValueChanged<EvolucaoMetrica> onSelecionar;
-  final ValueChanged<List<PontoGrafico>> onConfira;
+
+  /// Medidas com salto sem "Está certo": ícone de alerta ao lado do valor.
+  final Set<EvolucaoMetrica> suspeitas;
 
   @override
   Widget build(BuildContext context) {
@@ -313,15 +441,8 @@ class _ListaDeMedidas extends StatelessWidget {
               meta: metaDe(m),
               selecionada: m == selecionada,
               basePropria: series[m]!.first.data.isAfter(inicio),
-              suspeita:
-                  series[m]!.length >= 2 &&
-                  pontosSuspeitos(
-                    series[m]!,
-                    m.unidade,
-                    conferidas: conferidas,
-                  ).contains(series[m]!.length - 1),
+              suspeita: suspeitas.contains(m),
               onTap: () => onSelecionar(m),
-              onConfira: () => onConfira(series[m]!),
             ),
           ],
         ],
@@ -337,7 +458,6 @@ class _LinhaDeMetrica extends StatelessWidget {
     required this.serie,
     required this.selecionada,
     required this.onTap,
-    required this.onConfira,
     this.meta,
     this.basePropria = false,
     this.suspeita = false,
@@ -352,9 +472,8 @@ class _LinhaDeMetrica extends StatelessWidget {
   /// Começou depois das outras medidas: a base da diferença é outra data.
   final bool basePropria;
 
-  /// Última mudança fora do comum: selo "Confira", que abre o Histórico.
+  /// Última mudança fora do comum: ícone de alerta (o aviso fica no topo).
   final bool suspeita;
-  final VoidCallback onConfira;
 
   @override
   Widget build(BuildContext context) {
@@ -440,26 +559,16 @@ class _LinhaDeMetrica extends StatelessWidget {
                         style: FocuxHubTypography.cardTitle(color: chrome.ink)
                             .copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
                       ),
-                      if (suspeita)
-                        // Alvo de toque próprio: a linha troca o gráfico, o selo
-                        // abre o registro para conferir.
-                        InkWell(
-                          onTap: onConfira,
-                          borderRadius: BorderRadius.circular(TokensStrip.s2),
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(minHeight: 44, minWidth: 44),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(FxIcons.alertaPequeno, size: 14, color: alerta),
-                                const SizedBox(width: 2),
-                                Text(ptS.comparacaoConfira, style: FocuxHubTypography.chip(alerta)),
-                              ],
-                            ),
-                          ),
-                        ),
+                      // Linha na altura normal: o "Confira" é o aviso do topo.
                     ],
                   ),
+                  if (suspeita) ...[
+                    const SizedBox(width: TokensStrip.s1),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 3),
+                      child: Icon(FxIcons.alertaPequeno, size: 16, color: alerta),
+                    ),
+                  ],
                 ],
               ),
               if (meta != null) ...[

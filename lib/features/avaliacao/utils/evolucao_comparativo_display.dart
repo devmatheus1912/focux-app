@@ -2,6 +2,7 @@ import '../../../core/utils/fx_utils.dart';
 import '../data/avaliacao_repository.dart';
 import '../../alunos/utils/aluno360_medida_plausivel.dart';
 import '../../../core/utils/pt_br_display.dart';
+import '../../../l10n/pt.dart';
 
 enum EvolucaoComparativoDeltaTone { better, worse, same, missing }
 
@@ -153,17 +154,20 @@ int? evolucaoComparativoDias(String? primeira, String? atual) {
 }
 
 /// Diferença com unidade e seta neutra; "=" sem mudança. Percentual muda em
-/// pontos: 20% → 25% é "↑ 5,0 pp", não "5,0 %".
+/// pontos: 20% → 25% é "↑ 5,0 pontos", não "5,0 %" (nem "pp", que pouca gente
+/// lê).
 String evolucaoComparativoDiferenca(EvolucaoComparativoMetrica m) {
   final diferenca = m.atual! - m.primeira!;
   if (diferenca == 0) return '=';
   final seta = diferenca > 0 ? '↑' : '↓';
   final unidade = switch (m.unidade) {
     '' => '',
-    '%' => ' pp',
-    final u => ' $u',
+    '%' => '',
+    final u => '\u00A0$u',
   };
-  return '$seta ${evolucaoComparativoFmtNum(diferenca.abs())}$unidade';
+  final numero = evolucaoComparativoFmtNum(diferenca.abs());
+  if (m.unidade == '%') return '$seta ${ptS.comparacaoPontos(numero)}';
+  return '$seta $numero$unidade';
 }
 
 /// Mudança grande demais para o intervalo ([variacaoSuspeita]): a linha

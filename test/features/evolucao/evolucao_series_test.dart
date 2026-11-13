@@ -18,13 +18,31 @@ RecordePessoal _r(int id, String data, double carga, [int? reps]) =>
     );
 
 void main() {
-  test('duas medidas no mesmo dia: a última registrada é a atual', () {
+  test('duas medidas no mesmo dia: um ponto por dia, o último registrado', () {
+    // 13/11: dois pontos no mesmo dia viravam um traço vertical no gráfico.
     final pontos = serieDaMetrica([
       _m(3, '2026-10-31', 60),
       _m(2, '2026-10-31', 100),
       _m(1, '2026-10-30', 90),
     ], EvolucaoMetrica.peso);
-    expect(pontos.map((p) => p.valor), [90, 100, 60]);
+    expect(pontos.map((p) => p.valor), [90, 60]);
+  });
+
+  test('força: um ponto por dia, a maior carga do dia', () {
+    final pontos = umPorDia([
+      PontoGrafico(DateTime(2026, 11, 11, 8), 10),
+      PontoGrafico(DateTime(2026, 11, 11, 9), 20),
+      PontoGrafico(DateTime(2026, 11, 11, 10), 15),
+      PontoGrafico(DateTime(2026, 11, 12), 22.5),
+    ], maior: true);
+    expect(pontos.map((p) => p.valor), [20, 22.5]);
+  });
+
+  test('chips de período só com série de mais de 30 dias', () {
+    final curta = [PontoGrafico(DateTime(2026, 11, 1), 1), PontoGrafico(DateTime(2026, 11, 20), 2)];
+    final longa = [PontoGrafico(DateTime(2026, 9, 1), 1), PontoGrafico(DateTime(2026, 11, 20), 2)];
+    expect(serieCobreMaisQue(curta, 30), isFalse);
+    expect(serieCobreMaisQue(longa, 30), isTrue);
   });
 
   test('tendência só aparece a partir de 7 pontos', () {

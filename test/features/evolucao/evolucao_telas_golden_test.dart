@@ -104,7 +104,7 @@ void main() {
         ),
       );
       await _pronto(tester);
-      expect(find.text('↑ 15,0 kg'), findsOneWidget);
+      expect(find.text('↑ 15,0\u00A0kg'), findsOneWidget);
       expect(find.text('='), findsOneWidget);
       await expectFocuxGolden(find.byType(EvolucaoComparacaoLinhas), 'goldens/comparar_$sufixo.png');
     });
@@ -145,7 +145,7 @@ void main() {
         ),
       );
       await _pronto(tester);
-      await tester.tap(find.text('Histórico · 3 registros'));
+      await tester.tap(find.text('Ver registros'));
       await _pronto(tester);
       expect(find.text('Histórico'), findsOneWidget);
       await expectFocuxGolden(find.byType(MaterialApp), 'goldens/folha_historico_$sufixo.png');

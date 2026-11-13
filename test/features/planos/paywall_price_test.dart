@@ -118,4 +118,19 @@ void main() {
       'Confirmar upgrade',
     );
   });
+
+  test('preço da loja diferente do catálogo é apontado (13/11)', () {
+    expect(
+      paywallPrecosDivergentes(
+        loja: {'focux_pro_monthly': 59.9, 'focux_pro_yearly': 999},
+        catalogo: {
+          'focux_pro_monthly': 59.90,
+          'focux_pro_yearly': 599,
+          'focux_enterprise_monthly': 119.9,
+        },
+      ),
+      ['focux_pro_yearly'],
+    );
+  });
 }
+

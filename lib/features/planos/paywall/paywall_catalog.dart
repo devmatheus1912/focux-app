@@ -58,7 +58,11 @@ class PaywallCatalog {
 
   /// Reserva offline; o paywall usa a tabela do backend (mesmos rótulos do site).
   static const List<PaywallComparisonRow> comparisonFreeVsPro = [
-    PaywallComparisonRow(feature: 'Alunos', free: '3', paid: '30'),
+    PaywallComparisonRow(
+      feature: 'Alunos',
+      free: '3',
+      paid: '${PlanoAlunosLimits.pro}',
+    ),
     PaywallComparisonRow(
       feature: 'Hoje com o Índice Focux',
       free: '✓',
@@ -146,7 +150,11 @@ class PaywallCatalog {
 
   /// Quem já é Pro: só o que muda no Enterprise ("free" = valor do Pro).
   static const List<PaywallComparisonRow> comparisonProVsEnterprise = [
-    PaywallComparisonRow(feature: 'Alunos', free: '30', paid: '∞'),
+    PaywallComparisonRow(
+      feature: 'Alunos',
+      free: '${PlanoAlunosLimits.pro}',
+      paid: '∞',
+    ),
     PaywallComparisonRow(feature: 'IA Focux / mês', free: '200', paid: '600'),
     PaywallComparisonRow(
       feature: 'Importação por foto / mês',
@@ -242,7 +250,8 @@ class PaywallCatalog {
     ),
     PaywallUpgradeTrigger(
       number: '04',
-      title: '27 alunos ativos (não 30)',
+      title:
+          '${PlanoAlunosLimits.pro - 3} alunos ativos (não ${PlanoAlunosLimits.pro})',
       transition: 'PRO → ENTERPRISE',
       message:
           'Você está a 3 alunos do limite do Pro. Enterprise libera alunos ilimitados.',

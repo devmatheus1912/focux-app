@@ -25,16 +25,16 @@ bool evolucaoMedidaTemConteudo(MedidaCorporal medida) {
 String evolucaoMedidaSubtitle(MedidaCorporal medida) {
   final parts = <String>[];
   if (medida.peso != null) {
-    parts.add(formatBrKg(medida.peso!));
+    parts.add(formatBrComUnidade(medida.peso!, 'kg'));
   }
   if (medida.cintura != null) {
-    parts.add('Cintura ${formatBrCm(medida.cintura!)}');
+    parts.add('Cintura ${formatBrComUnidade(medida.cintura!, 'cm')}');
   }
   if (medida.quadril != null) {
-    parts.add('Quadril ${formatBrCm(medida.quadril!)}');
+    parts.add('Quadril ${formatBrComUnidade(medida.quadril!, 'cm')}');
   }
   if (medida.braco != null) {
-    parts.add('Braço ${formatBrCm(medida.braco!)}');
+    parts.add('Braço ${formatBrComUnidade(medida.braco!, 'cm')}');
   }
   if (parts.isNotEmpty) return parts.join(' · ');
   // Só chega aqui se a lista não filtrou por [evolucaoMedidaTemConteudo].

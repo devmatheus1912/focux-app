@@ -10,5 +10,5 @@ class PlanoIaLimits {
 class PlanoAlunosLimits {
   PlanoAlunosLimits._();
 
-  static const pro = 30;
+  static const pro = 50;
 }

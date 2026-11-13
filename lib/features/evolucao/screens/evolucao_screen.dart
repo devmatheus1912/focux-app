@@ -1,8 +1,8 @@
-import 'dart:math' as math;
 import '../../../core/observability/sentry_performance.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 import '../../../core/router/safe_navigation.dart';
@@ -75,7 +75,9 @@ class EvolucaoScreen extends ConsumerStatefulWidget {
 }
 
 class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
-  var _recolhido = false;
+  /// "Ver exercício" / "Ver medida" da conquista: o item a escolher na aba.
+  String? _focoForca;
+  String? _focoMedida;
 
   /// O Histórico com o registro da linha do tempo abre uma vez só.
   var _destaqueAberto = false;
@@ -290,36 +292,6 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
 
   /// Rolagem de cada aba: ao trocar, o topo segue a posição da aba nova em
   /// vez de pular entre anéis e faixa.
-  final _rolagem = <EvolucaoHubView, double>{};
-
-  /// Anéis recolhem depois de um pouco de rolagem; voltam ao topo.
-  /// Recolhe o topo ao rolar e só abre de novo quando o usuário puxa para baixo
-  /// no início da lista. Lista curta (rolagem máxima < 48) também recolhe; e a
-  /// lista que passa a caber depois de recolher não reabre sozinha.
-  Widget _aoRolar(Widget filho) => NotificationListener<ScrollNotification>(
-    onNotification: (n) {
-      if (n.metrics.axis != Axis.vertical) return false;
-      if (n is ScrollUpdateNotification) {
-        // Só a aba visível rola; guarda a posição de cada uma.
-        _rolagem[_view] = n.metrics.pixels;
-        final limite = math.min(48.0, n.metrics.maxScrollExtent);
-        final puxouParaBaixo = (n.dragDetails?.delta.dy ?? 0) > 0;
-        if (!_recolhido && n.metrics.pixels > 0 && n.metrics.pixels >= limite) {
-          setState(() => _recolhido = true);
-        } else if (_recolhido && n.metrics.pixels <= 0 && puxouParaBaixo) {
-          setState(() => _recolhido = false);
-        }
-      } else if (n is OverscrollNotification) {
-        final puxouParaBaixo = (n.dragDetails?.delta.dy ?? 0) > 0;
-        if (_recolhido && n.overscroll < 0 && puxouParaBaixo) {
-          setState(() => _recolhido = false);
-        }
-      }
-      return false;
-    },
-    child: filho,
-  );
-
   @override
   Widget build(BuildContext context) {
     final homeAsync = ref.watch(evolucaoHomeProvider(widget.alunoId));
@@ -400,11 +372,15 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                               ),
                               child: Column(
                                 children: [
+                                  // Personal: sempre a faixa de 3 colunas (o 360
+                                  // já mostra os anéis); cada coluna abre a ação.
                                   EvolucaoHero(
                                     aneis: aneis,
                                     metaNome: nomeDaMetaPrincipal(metas),
                                     onDefinirMeta: () => _definirMeta(ocupadas),
-                                    recolhido: _recolhido,
+                                    onMedidas:
+                                        () => _ajustarCiclo(aneis.cicloMedidasDias),
+                                    recolhido: true,
                                   ),
                                   const SizedBox(height: TokensStrip.s4),
                                   AlunoSegmentedChoice(
@@ -415,14 +391,13 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                                         (value) => setState(() {
                                           _view = evolucaoHubViewFromSecao(value);
                                           _abertas.add(_view);
-                                          _recolhido = (_rolagem[_view] ?? 0) > 48;
                                         }),
                                   ),
                                 ],
                               ),
                             ),
                             Expanded(
-                              child: _aoRolar(EvolucaoFadeTopo(child: IndexedStack(
+                              child: EvolucaoFadeTopo(child: IndexedStack(
                                 index: _view.index,
                                 children: [
                                   EvolucaoMedidasAba(
@@ -435,21 +410,23 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                                     onAtualizar: _atualizar,
                                     onAbrirRegistro: _abrirRegistro,
                                     podeAbrirRegistro: _podeAbrirRegistro,
+                                    mostrarConfira: true,
+                                    foco: _focoMedida,
                                     topo: [
                                       EvolucaoMetasBloco(
                                         alunoId: widget.alunoId,
                                         metas: metas,
                                       ),
                                     ],
+                                    // Cada aba termina com as conquistas dela.
                                     depois: [
-                                      if (conquistas.isNotEmpty) ...[
-                                        EvolucaoConquistas(
-                                          conquistas: conquistas,
-                                        ),
-                                        const SizedBox(
-                                          height: TokensStrip.s3,
-                                        ),
-                                      ],
+                                      EvolucaoConquistas(
+                                        conquistas: [
+                                          for (final c in conquistas)
+                                            if (c.tipo != ConquistaTipo.recorde) c,
+                                        ],
+                                        acoesDoPersonal: _acoesDaConquista(nome),
+                                      ),
                                     ],
                                   ),
                                   EvolucaoRecordesAba(
@@ -459,6 +436,16 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                                     onAtualizar: _atualizar,
                                     onEditar: (r) => _formularioRecorde(recorde: r),
                                     onExcluir: _excluirRecorde,
+                                    foco: _focoForca,
+                                    depois: [
+                                      EvolucaoConquistas(
+                                        conquistas: [
+                                          for (final c in conquistas)
+                                            if (c.tipo == ConquistaTipo.recorde) c,
+                                        ],
+                                        acoesDoPersonal: _acoesDaConquista(nome),
+                                      ),
+                                    ],
                                   ),
                                   _abertas.contains(EvolucaoHubView.fotos)
                                       ? EvolucaoFotosScreen(
@@ -483,7 +470,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                                       )
                                       : const SizedBox.shrink(),
                                 ],
-                              ))),
+                              )),
                             ),
                           ],
                         ),
@@ -504,10 +491,13 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                       TokensStrip.s3,
                     ),
                     child: FxLiquidPrimaryButton(
+                      // "Registrar carga": o personal registra a carga e o
+                      // app diz se ela é recorde ("Novo recorde" é só a
+                      // celebração).
                       label:
                           _view == EvolucaoHubView.medidas
-                              ? 'Registrar medida'
-                              : ptS.evolucaoRecordeNovoTitulo,
+                              ? ptS.evolucaoRegistrarMedida
+                              : ptS.evolucaoRegistrarCarga,
                       onPressed: _registrar,
                     ),
                   ),
@@ -654,7 +644,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
     try {
       final saved = await showFxFormSheet(
         context,
-        title: recorde == null ? ptS.evolucaoRecordeNovoTitulo : ptS.evolucaoRecordeEditarTitulo,
+        title: recorde == null ? ptS.evolucaoRegistrarCarga : ptS.evolucaoEditarCarga,
         icon: FxIcons.trofeu,
         confirmLabel: ptS.evolucaoSalvar,
         podeConfirmar: () {
@@ -729,7 +719,24 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
         );
       }
       await invalidateAluno360Providers(ref, widget.alunoId);
-      if (mounted) FeedbackHelper.showSuccess(context, ptS.evolucaoRecordeSalvo);
+      // Passou a melhor marca do exercício: é recorde; senão, só a carga.
+      final anterior = recordes
+          .where(
+            (r) =>
+                r.id != recorde?.id &&
+                r.exercicioNome.trim().toLowerCase() ==
+                    exercicio.nome.trim().toLowerCase(),
+          )
+          .map((r) => r.cargaKg ?? 0)
+          .fold<double>(0, (a, b) => a > b ? a : b);
+      if (mounted) {
+        FeedbackHelper.showSuccess(
+          context,
+          anterior > 0 && carga > anterior
+              ? ptS.evolucaoNovoRecordeSalvo(formatBrKg(carga))
+              : ptS.evolucaoCargaRegistrada,
+        );
+      }
     } catch (e) {
       if (mounted) FeedbackHelper.showError(context, friendlyError(e));
     } finally {
@@ -738,6 +745,37 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
       repsCtrl.dispose();
     }
   }
+
+  /// "Parabenizar" abre o chat com a mensagem pronta (como a Hoje); "Ver
+  /// exercício" / "Ver medida" leva à aba com o item escolhido.
+  ConquistaAcoes _acoesDaConquista(String nome) => ConquistaAcoes(
+    onParabenizar: (c) {
+      final texto = switch (c.tipo) {
+        ConquistaTipo.recorde => ptS.conquistaRascunhoRecorde(
+          c.valor,
+          c.exercicio ?? '',
+        ),
+        ConquistaTipo.meta => ptS.conquistaRascunhoMeta(
+          metaMetricaRotulo(c.metrica ?? '').toLowerCase(),
+        ),
+        ConquistaTipo.mantido => ptS.conquistaRascunhoMantido(c.valor),
+      };
+      context.push(
+        '/alunos/${widget.alunoId}/chat',
+        extra: {'nome': satelliteFirstName(nome), 'draft': texto},
+      );
+    },
+    onVer: (c) => setState(() {
+      if (c.tipo == ConquistaTipo.recorde) {
+        _view = EvolucaoHubView.recordes;
+        _focoForca = c.exercicio;
+      } else {
+        _view = EvolucaoHubView.medidas;
+        _focoMedida = c.metrica;
+      }
+      _abertas.add(_view);
+    }),
+  );
 
   Future<void> _excluirRecorde(RecordePessoal recorde) async {
     final ok = await showFxConfirmSheet(

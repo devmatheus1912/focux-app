@@ -31,9 +31,13 @@ class EvolucaoHero extends StatelessWidget {
     this.doPersonal = true,
     this.frase,
     this.onDefinirMeta,
+    this.onMedidas,
     this.recolhido = false,
     this.metaNome,
   });
+
+  /// Faixa recolhida do personal: a coluna Medidas abre o ciclo.
+  final VoidCallback? onMedidas;
 
   final EvolucaoAneis aneis;
 
@@ -73,7 +77,17 @@ class EvolucaoHero extends StatelessWidget {
                   ? Row(
                     children: [
                       for (final (i, l) in leituras.indexed)
-                        Expanded(child: _Valor(leitura: l, cor: cores[i])),
+                        Expanded(
+                          child: _Valor(
+                            leitura: l,
+                            cor: cores[i],
+                            onTap: switch (i) {
+                              1 when l.vazio => onDefinirMeta,
+                              2 => onMedidas,
+                              _ => null,
+                            },
+                          ),
+                        ),
                     ],
                   )
                   : Column(
@@ -220,15 +234,18 @@ class _Legenda extends StatelessWidget {
 
 /// Item da faixa recolhida: ponto da cor do anel e valor.
 class _Valor extends StatelessWidget {
-  const _Valor({required this.leitura, required this.cor});
+  const _Valor({required this.leitura, required this.cor, this.onTap});
 
   final LeituraDoAnel leitura;
   final Color cor;
 
+  /// Coluna que abre uma ação (definir meta, ciclo de medidas).
+  final VoidCallback? onTap;
+
   @override
   Widget build(BuildContext context) {
     final sobre = fxPaletaSobreMarca(context);
-    return Column(
+    final conteudo = Column(
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -253,6 +270,20 @@ class _Valor extends StatelessWidget {
           ),
         ),
       ],
+    );
+    if (onTap == null) return conteudo;
+    return Semantics(
+      button: true,
+      label: '${leitura.rotulo}: ${leitura.valor}',
+      excludeSemantics: true,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(TokensStrip.s2),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 44),
+          child: Center(child: conteudo),
+        ),
+      ),
     );
   }
 }

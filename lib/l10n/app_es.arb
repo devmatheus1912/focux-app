@@ -265,8 +265,6 @@
   "metaPrazoRotulo": "Prazo",
   "alunoPerfilGrupoProgresso": "Meu progresso",
   "evolucaoAnelTreinoValor": "{feitos} de {previstos} esta semana",
-  "evolucaoHistoricoLinha": "Histórico · {n} registros",
-  "@evolucaoHistoricoLinha": {"placeholders": {"n": {"type": "int"}}},
   "evolucaoHistoricoTitulo": "Histórico",
   "comparacaoUmRegistro": "{valor} · só um registro",
   "@comparacaoUmRegistro": {"placeholders": {"valor": {"type": "String"}}},

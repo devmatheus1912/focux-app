@@ -127,7 +127,7 @@ void main() {
     );
 
     test('percentual muda em pontos', () {
-      expect(evolucaoComparativoDiferenca(massa), '↑ 70,0 pp');
+      expect(evolucaoComparativoDiferenca(massa), '↑ 70,0 pontos');
     });
 
     test('variação fora do comum é marcada', () {

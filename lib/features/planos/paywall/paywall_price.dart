@@ -111,3 +111,15 @@ String paywallStickyCtaLabel({
   }
   return isUpgrade ? 'Confirmar upgrade' : 'Assinar $planName';
 }
+
+
+/// Produtos cujo preço na loja difere do catálogo do backend em mais de
+/// R$ 0,01. O personal paga o da loja; o equivalente mensal e o "economize" vêm do
+/// catálogo, então os dois precisam bater (spec de preços, 13/11).
+List<String> paywallPrecosDivergentes({
+  required Map<String, double> loja,
+  required Map<String, double> catalogo,
+}) => [
+  for (final MapEntry(key: id, value: preco) in catalogo.entries)
+    if (loja[id] case final l? when (l - preco).abs() > 0.01) id,
+];
