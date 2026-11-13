@@ -1,3 +1,4 @@
+import '../../../core/widgets/fx_action_link.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -43,6 +44,9 @@ class PaywallCompareStage extends StatelessWidget {
     this.onBillingPeriod,
     this.fillViewport = false,
     this.managementMode = false,
+    this.verTudoLabel,
+    this.onVerTudo,
+    this.verTudoAberto = false,
     this.precoPrimario,
     this.precoApoio,
   });
@@ -69,6 +73,11 @@ class PaywallCompareStage extends StatelessWidget {
   /// Plano máximo ativo: status / loja / cancelar — não vitrine de upgrade.
   final bool managementMode;
 
+  /// "Ver os 14 recursos" / "Ver menos": última linha do cartão.
+  final String? verTudoLabel;
+  final VoidCallback? onVerTudo;
+  final bool verTudoAberto;
+
   @override
   Widget build(BuildContext context) {
     final view = buildPaywallCompareView(
@@ -81,11 +90,6 @@ class PaywallCompareStage extends StatelessWidget {
     final reduced = TokensStrip.prefersReducedMotion(context);
     final duration =
         reduced ? Duration.zero : const Duration(milliseconds: 220);
-    final managingCurrent =
-        managementMode && selectedPlan == currentPlan;
-    final tag = managingCurrent
-        ? null
-        : PaywallCatalog.roiTagForPlan(selectedPlan);
 
     final card = AnimatedSwitcher(
       duration: duration,
@@ -101,7 +105,9 @@ class PaywallCompareStage extends StatelessWidget {
                 mute: mute,
                 isDark: isDark,
                 line: line,
-                roiTag: tag,
+                verTudoLabel: verTudoLabel,
+                onVerTudo: onVerTudo,
+                verTudoAberto: verTudoAberto,
                 expand: true,
               ),
             )
@@ -113,7 +119,9 @@ class PaywallCompareStage extends StatelessWidget {
               mute: mute,
               isDark: isDark,
               line: line,
-              roiTag: tag,
+              verTudoLabel: verTudoLabel,
+              onVerTudo: onVerTudo,
+              verTudoAberto: verTudoAberto,
             ),
     );
 
@@ -137,44 +145,24 @@ class PaywallCompareStage extends StatelessWidget {
           ),
         ),
         const SizedBox(height: TokensStrip.s3),
-        Row(
-          children: [
-            Expanded(
-              flex: 3,
-              child: _PlanTabs(
-                plans: plans,
-                selected: selectedPlan,
-                current: currentPlan,
-                mute: mute,
-                accent: accent,
-                onSelect: onSelectPlan,
-              ),
-            ),
-            if (view.showBillingToggle && onBillingPeriod != null) ...[
-              const SizedBox(width: TokensStrip.s2),
-              Expanded(
-                flex: 2,
-                child: _BillingTabs(
-                  period: billingPeriod,
-                  accent: accent,
-                  mute: mute,
-                  onChanged: onBillingPeriod!,
-                ),
-              ),
-            ],
-          ],
+        // Um seletor por linha (SPEC 12/11): plano em cima, período embaixo.
+        _PlanTabs(
+          plans: plans,
+          selected: selectedPlan,
+          current: currentPlan,
+          mute: mute,
+          accent: accent,
+          onSelect: onSelectPlan,
         ),
-        if (view.showBillingToggle && onBillingPeriod != null)
-          Align(
-            alignment: Alignment.centerRight,
-            child: Padding(
-              padding: const EdgeInsets.only(top: TokensStrip.s1),
-              child: Text(
-                '2 meses grátis',
-                style: FocuxHubTypography.bodyMuted(color: mute),
-              ),
-            ),
+        if (view.showBillingToggle && onBillingPeriod != null) ...[
+          const SizedBox(height: TokensStrip.s2),
+          _BillingTabs(
+            period: billingPeriod,
+            accent: accent,
+            mute: mute,
+            onChanged: onBillingPeriod!,
           ),
+        ],
         const SizedBox(height: TokensStrip.s3),
         if (fillViewport) Expanded(child: card) else card,
       ],
@@ -295,7 +283,7 @@ class _PlanTabs extends StatelessWidget {
               Expanded(
                 key: ValueKey('paywall-tab-${plan.name}'),
                 child: _TabChip(
-                  label: paywallTabLabel(plan),
+                  label: paywallTabLabelPara(plan, current),
                   semanticLabel:
                       '${paywallPrettyName(plan)}'
                       '${plan == current ? ', plano atual' : ''}',
@@ -358,7 +346,7 @@ class _BillingTabs extends StatelessWidget {
             ),
             Expanded(
               child: _TabChip(
-                label: 'Anual',
+                label: 'Anual · 2 meses grátis',
                 semanticLabel: 'Cobrança anual, 2 meses grátis',
                 selected: period == SubscriptionBillingPeriod.yearly,
                 accent: accent,
@@ -446,7 +434,9 @@ class _CompareCard extends StatelessWidget {
     required this.mute,
     required this.isDark,
     this.line,
-    this.roiTag,
+    this.verTudoLabel,
+    this.onVerTudo,
+    this.verTudoAberto = false,
     this.expand = false,
   });
 
@@ -456,7 +446,9 @@ class _CompareCard extends StatelessWidget {
   final Color mute;
   final bool isDark;
   final Color? line;
-  final String? roiTag;
+  final String? verTudoLabel;
+  final VoidCallback? onVerTudo;
+  final bool verTudoAberto;
   final bool expand;
 
   @override
@@ -469,7 +461,6 @@ class _CompareCard extends StatelessWidget {
     final selectedAccent =
         view.selected == SubscriptionPlan.FREE ? ink : accent;
     final divider = line ?? ink.withValues(alpha: isDark ? 0.12 : 0.06);
-    final tag = roiTag?.trim();
 
     final table = _CompareTable(
       view: view,
@@ -479,12 +470,15 @@ class _CompareCard extends StatelessWidget {
       divider: divider,
     );
     final footer = <Widget>[
-      if (tag != null && tag.isNotEmpty) ...[
-        const SizedBox(height: TokensStrip.s3),
-        Text(
-          tag,
-          textAlign: TextAlign.center,
-          style: FocuxHubTypography.chip(selectedAccent),
+      if (verTudoLabel != null && onVerTudo != null) ...[
+        const SizedBox(height: TokensStrip.s2),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: FxActionLink(
+            label: verTudoLabel!,
+            icon: verTudoAberto ? FxIcons.chevronCima : FxIcons.chevronBaixo,
+            onTap: onVerTudo,
+          ),
         ),
       ],
     ];

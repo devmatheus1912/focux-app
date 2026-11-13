@@ -169,6 +169,7 @@ class _HistoricoCheckinScreenState
     DateTime now,
   ) {
     final s = S.of(context);
+    final meta = ref.watch(alunoDashboardHomeProvider).value?.frequenciaDias;
     final semanas = agruparHistoricoPorSemana(
       lista.sessoes,
       now: now,
@@ -182,11 +183,12 @@ class _HistoricoCheckinScreenState
         for (final (i, semana) in semanas.indexed) ...[
           if (i > 0) const SizedBox(height: TokensStrip.s4),
           TreinosHubSecao(
-            titulo: historicoSemanaCabecalho(s, semana),
+            titulo: historicoSemanaCabecalho(s, semana, meta: meta),
             linhas: [
-              for (final r in semana.sessoes)
+              for (final (j, r) in semana.sessoes.indexed)
                 HistoricoSessaoRow(
                   recente: r,
+                  mostrarData: historicoMostraData(semana.sessoes, j),
                   onTap: () => _abrir(r.execucao),
                 ),
             ],

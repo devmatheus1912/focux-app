@@ -8,7 +8,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -282,10 +281,25 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
     final semana = habitoOrdenarSemana(_compliance);
     final temSemana = semana.pendentes.isNotEmpty || semana.bateram.isNotEmpty;
 
-    Widget linhaAluno(ComplianceItem c) => _LinhaSemana(
-      nome: habitoComplianceLabel(c.alunoNome),
-      feitos: c.checksSemana,
-      meta: c.metaSemana,
+    // Mesma linha em cartão das outras listas, com a barra visível.
+    Widget linhaAluno(ComplianceItem c) => FxSatelliteListTile(
+      title: habitoComplianceLabel(c.alunoNome),
+      titleCase: false,
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(habitoSemanaLinha(c.checksSemana, c.metaSemana)),
+          const SizedBox(height: TokensStrip.s1),
+          FxBarraProgresso(
+            fracao: habitoFracao(c.checksSemana, c.metaSemana),
+            cor:
+                c.metaSemana > 0 && c.checksSemana >= c.metaSemana
+                    ? EagleTokens.good
+                    : null,
+          ),
+        ],
+      ),
       onTap: () => context.push('/alunos/${c.alunoId}'),
     );
 
@@ -352,6 +366,7 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
       for (final habito in _habitos)
         FxSatelliteListTile(
           title: habito.titulo,
+          titleCase: false,
           subtitle: Text(
             habitoRegra(
               metaSemanal: habito.metaSemanal,
@@ -376,9 +391,11 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
         for (final habito in _desativados)
           FxSatelliteListTile(
             title: habito.titulo,
+            titleCase: false,
             muted: true,
+            leading: Icon(FxIcons.pausar, color: chrome.mute),
             subtitle: Text(
-              habitoRegra(
+              habitoDesativadoLinha(
                 metaSemanal: habito.metaSemanal,
                 alunoId: habito.alunoId,
               ),
@@ -440,68 +457,6 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
           ),
         ),
       ],
-    );
-  }
-}
-
-/// Um aluno em "Esta semana": nome, "3 de 7 esta semana" e a barra.
-class _LinhaSemana extends StatelessWidget {
-  const _LinhaSemana({
-    required this.nome,
-    required this.feitos,
-    required this.meta,
-    required this.onTap,
-  });
-
-  final String nome;
-  final int feitos;
-  final int meta;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
-    final bateu = meta > 0 && feitos >= meta;
-    return Semantics(
-      button: true,
-      label: '$nome, ${habitoSemanaLinha(feitos, meta)}',
-      excludeSemantics: true,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(TokensStrip.rCard),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            vertical: TokensStrip.s2,
-            horizontal: TokensStrip.s1,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      nome,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: FocuxHubTypography.body(color: chrome.ink),
-                    ),
-                  ),
-                  Text(
-                    habitoSemanaLinha(feitos, meta),
-                    style: FocuxHubTypography.rotulo(color: chrome.mute),
-                  ),
-                ],
-              ),
-              const SizedBox(height: TokensStrip.s1),
-              FxBarraProgresso(
-                fracao: habitoFracao(feitos, meta),
-                cor: bateu ? EagleTokens.good : null,
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

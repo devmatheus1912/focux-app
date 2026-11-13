@@ -56,20 +56,11 @@ class PaywallCatalog {
     SubscriptionPlan.ENTERPRISE => 'Sua marca. Seu crescimento.',
   };
 
-  /// Resumo factual do plano (limites reais), sem promessa de retorno.
-  static String? roiTagForPlan(SubscriptionPlan plan) => switch (plan) {
-    SubscriptionPlan.PRO =>
-      'Até ${PlanoAlunosLimits.pro} alunos, ${PlanoIaLimits.pro} usos de IA/mês e cobrança PIX',
-    SubscriptionPlan.ENTERPRISE =>
-      'Marca própria, landing completa, loja e ${PlanoIaLimits.enterprise} usos de IA/mês',
-    _ => null,
-  };
-
   /// Reserva offline; o paywall usa a tabela do backend (mesmos rótulos do site).
   static const List<PaywallComparisonRow> comparisonFreeVsPro = [
     PaywallComparisonRow(feature: 'Alunos', free: '3', paid: '30'),
     PaywallComparisonRow(
-      feature: 'Aba Hoje + Índice Focux',
+      feature: 'Hoje com o Índice Focux',
       free: '✓',
       paid: '✓',
     ),
@@ -98,7 +89,7 @@ class PaywallCatalog {
       paid: '25',
     ),
     PaywallComparisonRow(
-      feature: 'Marca própria / landing / loja',
+      feature: 'Marca própria, página e vendas',
       free: '—',
       paid: '—',
     ),
@@ -107,7 +98,7 @@ class PaywallCatalog {
   static const List<PaywallComparisonRow> comparisonFreeVsEnterprise = [
     PaywallComparisonRow(feature: 'Alunos', free: '3', paid: '∞'),
     PaywallComparisonRow(
-      feature: 'Aba Hoje + Índice Focux',
+      feature: 'Hoje com o Índice Focux',
       free: '✓',
       paid: '✓',
     ),
@@ -139,14 +130,46 @@ class PaywallCatalog {
       free: '—',
       paid: '✓',
     ),
-    PaywallComparisonRow(feature: 'Editor de landing page', free: '—', paid: '✓'),
+    PaywallComparisonRow(feature: 'Sua página de vendas', free: '—', paid: '✓'),
     PaywallComparisonRow(
-      feature: 'Loja de pacotes com PIX',
+      feature: 'Vendas de planos com PIX',
       free: '—',
       paid: '✓',
     ),
     PaywallComparisonRow(feature: 'Desafios com ranking', free: '—', paid: '✓'),
-    PaywallComparisonRow(feature: 'Automações e win-back', free: '—', paid: '✓'),
+    PaywallComparisonRow(
+      feature: 'Mensagens automáticas e reconquista',
+      free: '—',
+      paid: '✓',
+    ),
+  ];
+
+  /// Quem já é Pro: só o que muda no Enterprise ("free" = valor do Pro).
+  static const List<PaywallComparisonRow> comparisonProVsEnterprise = [
+    PaywallComparisonRow(feature: 'Alunos', free: '30', paid: '∞'),
+    PaywallComparisonRow(feature: 'IA Focux / mês', free: '200', paid: '600'),
+    PaywallComparisonRow(
+      feature: 'Importação por foto / mês',
+      free: '25',
+      paid: '80',
+    ),
+    PaywallComparisonRow(
+      feature: 'Marca própria e ocultar marca Focux',
+      free: '—',
+      paid: '✓',
+    ),
+    PaywallComparisonRow(feature: 'Sua página de vendas', free: '—', paid: '✓'),
+    PaywallComparisonRow(
+      feature: 'Vendas de planos com PIX',
+      free: '—',
+      paid: '✓',
+    ),
+    PaywallComparisonRow(feature: 'Desafios com ranking', free: '—', paid: '✓'),
+    PaywallComparisonRow(
+      feature: 'Mensagens automáticas e reconquista',
+      free: '—',
+      paid: '✓',
+    ),
   ];
 
   /// Mensagem do catálogo de gatilhos para modal in-app (não usar na vitrine Planos).

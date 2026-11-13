@@ -31,7 +31,10 @@ void main() {
     );
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, contains('checkinPorDia'));
-    expect(screen, contains('Ver todos'));
+    // SPEC 12/11: link no fim da seção, a linha abre o treino.
+    expect(screen, contains('Ver os 6 dias'));
+    expect(screen, contains('abrirCheckinDoAluno'));
+    expect(screen, isNot(contains('fxTimeAgo')));
     expect(screen, contains('keyboardDismissBehavior'));
     expect(screen, isNot(contains('FxSettingsGroupedList')));
     expect(screen, contains('FxEmptyState'));

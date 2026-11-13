@@ -23,6 +23,34 @@ Future<bool> showCheckinFinalizarIncompleto(
   );
 }
 
+enum CheckinSemSeriesEscolha { jaFiz, descartar }
+
+/// Finalizar sem nenhuma série: a sessão vazia não vira "treino parcial".
+/// Ou conta como feito sem registrar (o "Já fiz") ou some.
+Future<CheckinSemSeriesEscolha?> showCheckinSemSeries(BuildContext context) {
+  final s = S.of(context);
+  return showFxInsetPickerSheet<CheckinSemSeriesEscolha>(
+    context,
+    title: s.checkinSemSeriesTitulo,
+    subtitle: s.checkinSemSeriesTexto,
+    headerIcon: FxIcons.meta,
+    items: [
+      FxInsetPickerSheetItem(
+        value: CheckinSemSeriesEscolha.jaFiz,
+        label: s.checkinSemSeriesJaFiz,
+        subtitle: s.checkinSemSeriesJaFizSub,
+        icon: FxIcons.concluido,
+      ),
+      FxInsetPickerSheetItem(
+        value: CheckinSemSeriesEscolha.descartar,
+        label: s.checkinSemSeriesDescartar,
+        subtitle: s.checkinSemSeriesDescartarSub,
+        icon: FxIcons.excluir,
+      ),
+    ],
+  );
+}
+
 /// Sessão aberta em outro treino; `true` descarta e inicia este.
 Future<bool> showCheckinDescartarAberto(BuildContext context) {
   final s = S.of(context);
@@ -77,10 +105,7 @@ Future<int?> showCheckinFilaSheet(
               item.concluido
                   ? s.checkinFilaConcluido
                   : s.checkinFilaSeries(item.seriesFeitas, item.series ?? 0),
-          icon:
-              item.concluido
-                  ? FxIcons.concluido
-                  : FxIcons.treino,
+          icon: item.concluido ? FxIcons.concluido : FxIcons.treino,
         ),
     ],
   );

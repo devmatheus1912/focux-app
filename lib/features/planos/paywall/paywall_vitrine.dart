@@ -9,12 +9,23 @@ class PaywallVitrineSnapshot {
   const PaywallVitrineSnapshot({
     this.comparisonFreeVsPro = const [],
     this.comparisonFreeVsEnterprise = const [],
+    this.comparisonProVsEnterprise = const [],
   });
 
   final List<PaywallComparisonRow> comparisonFreeVsPro;
   final List<PaywallComparisonRow> comparisonFreeVsEnterprise;
 
-  List<PaywallComparisonRow> rowsFor(SubscriptionPlan plan) => switch (plan) {
+  /// Quem já é Pro vê só o que muda no Enterprise.
+  final List<PaywallComparisonRow> comparisonProVsEnterprise;
+
+  List<PaywallComparisonRow> rowsFor(
+    SubscriptionPlan plan, {
+    SubscriptionPlan current = SubscriptionPlan.FREE,
+  }) => switch (plan) {
+    SubscriptionPlan.ENTERPRISE when current == SubscriptionPlan.PRO =>
+      comparisonProVsEnterprise.isNotEmpty
+          ? comparisonProVsEnterprise
+          : PaywallCatalog.comparisonProVsEnterprise,
     SubscriptionPlan.ENTERPRISE =>
       comparisonFreeVsEnterprise.isNotEmpty
           ? comparisonFreeVsEnterprise
@@ -32,18 +43,23 @@ class PaywallVitrineSnapshot {
     final comparisonEnt = _parseComparisonRows(
       json['comparisonFreeVsEnterprise'],
     );
+    final comparisonProEnt = _parseComparisonRows(
+      json['comparisonProVsEnterprise'],
+    );
     if (comparisonPro.isEmpty && comparisonEnt.isEmpty) {
       return PaywallVitrineSnapshot.fromCatalog();
     }
     return PaywallVitrineSnapshot(
       comparisonFreeVsPro: comparisonPro,
       comparisonFreeVsEnterprise: comparisonEnt,
+      comparisonProVsEnterprise: comparisonProEnt,
     );
   }
 
   factory PaywallVitrineSnapshot.fromCatalog() => PaywallVitrineSnapshot(
     comparisonFreeVsPro: PaywallCatalog.comparisonFreeVsPro,
     comparisonFreeVsEnterprise: PaywallCatalog.comparisonFreeVsEnterprise,
+    comparisonProVsEnterprise: PaywallCatalog.comparisonProVsEnterprise,
   );
 
   static List<PaywallComparisonRow> _parseComparisonRows(Object? raw) {

@@ -129,7 +129,8 @@ void main() {
   });
 
   testWidgets('finalizar incompleto pede confirmação', (tester) async {
-    final repo = FakeCheckinRepo();
+    // Uma série feita: sem nenhuma, a folha é "Nenhuma série registrada".
+    final repo = FakeCheckinRepo(feitas: [1, 0]);
     await pumpCheckin(tester, repo);
 
     await escolherNoMenuMais(tester, 'Finalizar treino');
@@ -148,6 +149,20 @@ void main() {
     await tester.tap(find.text('Voltar aos treinos'));
     await pumpSheet(tester);
     expect(find.text('treinos'), findsOneWidget);
+  });
+
+  testWidgets('sem nenhuma série, finalizar oferece "Já fiz" ou descartar', (
+    tester,
+  ) async {
+    final repo = FakeCheckinRepo();
+    await pumpCheckin(tester, repo);
+
+    await escolherNoMenuMais(tester, 'Finalizar treino');
+    await pumpSheet(tester);
+    expect(find.text('Nenhuma série registrada'), findsOneWidget);
+    expect(find.text('Marcar como feito sem registrar'), findsOneWidget);
+    expect(find.text('Descartar o treino'), findsOneWidget);
+    expect(repo.concluidos, 0);
   });
 
   testWidgets('"Encerrar agora" também confirma quando falta exercício', (

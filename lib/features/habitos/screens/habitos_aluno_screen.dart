@@ -1,3 +1,4 @@
+import '../../../core/widgets/fx_barra_progresso.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -243,6 +244,7 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
                     )
                     : Column(
                       children: [
+                        if (habitoMostraBusca(total: _total, query: _query))
                         Padding(
                           padding: const EdgeInsets.fromLTRB(
                             TokensStrip.s4,
@@ -334,21 +336,32 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
                     );
                   }
                   final h = _habitos[i];
+                  // Progresso e sequência por extenso, com a barra; a
+                  // descrição fica no detalhe (SPEC 12/11).
                   return FxSatelliteListTile(
                     title: h.titulo,
-                    subtitle: Text(
-                      habitoAlunoSubtitle(
-                        descricao: h.descricao,
-                        feitosNaSemana: h.feitosNaSemana,
-                        metaSemanal: h.metaSemanal,
-                      ),
-                    ),
-                    trailing: Text(
-                      '${h.streakAtual}d',
-                      style: TextStyle(
-                        color: EagleTokens.warn,
-                        fontWeight: FontWeight.w700,
-                      ),
+                    titleCase: false,
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          habitoAlunoSubtitle(
+                            feitosNaSemana: h.feitosNaSemana,
+                            metaSemanal: h.metaSemanal,
+                            streak: h.streakAtual,
+                          ),
+                        ),
+                        const SizedBox(height: TokensStrip.s1),
+                        FxBarraProgresso(
+                          fracao: habitoFracao(h.feitosNaSemana, h.metaSemanal),
+                          cor:
+                              h.metaSemanal > 0 &&
+                                      h.feitosNaSemana >= h.metaSemanal
+                                  ? EagleTokens.good
+                                  : null,
+                        ),
+                      ],
                     ),
                     leading: Semantics(
                       label:

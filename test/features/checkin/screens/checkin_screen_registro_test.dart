@@ -387,7 +387,9 @@ void main() {
     testWidgets(
       'durante concluir, Registrar e Sair não disparam outra mutação',
       (tester) async {
-        final repo = FakeCheckinRepo()..travaConcluir = Completer<void>();
+        // Uma série feita: sem nenhuma, finalizar abre "Nenhuma série" (12/11).
+        final repo =
+            FakeCheckinRepo(feitas: [1, 0])..travaConcluir = Completer<void>();
         await pumpCheckin(tester, repo);
 
         await escolherNoMenuMais(tester, 'Finalizar treino');

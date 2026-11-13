@@ -4,7 +4,6 @@ enum _AssinaturaCtaMode {
   subscribe,
   manageStore,
   currentPlan,
-  goHome,
   blocked,
   syncing,
 }
@@ -99,8 +98,7 @@ class _AssinaturaStickyFooter extends StatelessWidget {
     final isActionable =
         mode == _AssinaturaCtaMode.subscribe ||
         mode == _AssinaturaCtaMode.syncing ||
-        mode == _AssinaturaCtaMode.manageStore ||
-        mode == _AssinaturaCtaMode.goHome;
+        mode == _AssinaturaCtaMode.manageStore;
     final onPressed =
         !enabled || loading || mode == _AssinaturaCtaMode.syncing
             ? null
@@ -108,13 +106,10 @@ class _AssinaturaStickyFooter extends StatelessWidget {
             ? onSubscribe
             : mode == _AssinaturaCtaMode.manageStore
             ? onManage
-            : mode == _AssinaturaCtaMode.goHome
-            ? onManage
             : null;
 
     IconData? icon;
-    if (mode == _AssinaturaCtaMode.manageStore ||
-        mode == _AssinaturaCtaMode.goHome) {
+    if (mode == _AssinaturaCtaMode.manageStore) {
       icon = FxIcons.inicio;
     }
 

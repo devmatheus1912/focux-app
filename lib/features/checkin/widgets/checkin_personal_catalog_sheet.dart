@@ -1,7 +1,10 @@
+import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/theme/shell_chrome.dart';
+import '../utils/checkin_personal_display.dart';
+import 'checkin_personal_abrir.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_empty_state.dart';
@@ -51,8 +54,7 @@ class _CheckinCatalogSheetState extends State<_CheckinCatalogSheet> {
   Timer? _debounce;
   late List<CheckinPersonalItem> _itens = List.of(widget.firstPage.itens);
   late int _page = widget.firstPage.page;
-  late bool _hasNext = widget.firstPage.hasNext;
-  late int _total = widget.firstPage.totalItens;
+  late bool _hasNext = widget.firstPage.hasNext;
   var _loadingMore = false;
   String _query = '';
 
@@ -70,8 +72,7 @@ class _CheckinCatalogSheetState extends State<_CheckinCatalogSheet> {
       _query = query;
       _itens = List.of(next.itens);
       _page = next.page;
-      _hasNext = next.hasNext;
-      _total = next.totalItens;
+      _hasNext = next.hasNext;
       _loadingMore = false;
     });
   }
@@ -92,8 +93,7 @@ class _CheckinCatalogSheetState extends State<_CheckinCatalogSheet> {
           ...next.itens.where((item) => seen.add(item.id)),
         ];
         _page = next.page;
-        _hasNext = next.hasNext;
-        _total = next.totalItens;
+        _hasNext = next.hasNext;
         _loadingMore = false;
       });
     } catch (_) {
@@ -104,7 +104,12 @@ class _CheckinCatalogSheetState extends State<_CheckinCatalogSheet> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primary = Theme.of(context).colorScheme.primary;
+    final mute = ShellChrome.of(context).mute;
+    // Mesmo recorte e mesmo agrupamento da tela: só os dias antes de hoje,
+    // por dia e por aluno, com a hora (SPEC 12/11).
+    final semHoje = checkinSemHoje(_itens);
+    final alunos = semHoje.map((i) => i.alunoId).toSet().length;
+    final busca = alunos > 6 || _query.isNotEmpty;
     return FxHomeSheetSurface(
       isDark: isDark,
       child: ListView(
@@ -112,58 +117,69 @@ class _CheckinCatalogSheetState extends State<_CheckinCatalogSheet> {
         children: [
           FxHomeSheetHeader(
             title: widget.title,
-            subtitle: '$_total check-ins neste recorte.',
-            leading: Icon(FxIcons.treino, size: 18, color: primary),
+            subtitle: checkinSemanaContagem(semHoje.length),
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              TokensStrip.s4,
-              0,
-              TokensStrip.s4,
-              TokensStrip.s3,
+          if (busca)
+            Padding(
+              padding: const EdgeInsets.only(bottom: TokensStrip.s3),
+              child: TextField(
+                controller: _search,
+                textInputAction: TextInputAction.search,
+                onChanged: (value) {
+                  _debounce?.cancel();
+                  _debounce = Timer(const Duration(milliseconds: 350), () {
+                    _reload(value);
+                  });
+                },
+                onSubmitted: _reload,
+                onTapOutside:
+                    (_) => FocusManager.instance.primaryFocus?.unfocus(),
+                decoration: FxInputDeco.build(context, 'Buscar aluno'),
+              ),
             ),
-            child: TextField(
-              controller: _search,
-              textInputAction: TextInputAction.search,
-              onChanged: (value) {
-                _debounce?.cancel();
-                _debounce = Timer(const Duration(milliseconds: 350), () {
-                  _reload(value);
-                });
-              },
-              onSubmitted: _reload,
-              onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
-              decoration: FxInputDeco.build(context, 'Buscar aluno'),
-            ),
-          ),
-          if (_itens.isEmpty)
+          if (semHoje.isEmpty)
             FxEmptyState(
               icon: FxIcons.grupo,
               title: 'Nenhum check-in nessa busca',
               subtitle: 'Tente outro nome ou limpe o filtro.',
             )
           else ...[
-            for (final item in _itens)
-              FxSatelliteListTile(
-                title: item.alunoNome,
-                subtitle: Text(item.treinoNome),
-                leading: AlunoAvatar(
-                  name: item.alunoNome,
-                  photoUrl: item.fotoUrl,
-                  variant: AlunoAvatarVariant.strip,
+            for (final (dia, grupos) in checkinPorDia(semHoje)) ...[
+              Padding(
+                padding: const EdgeInsets.only(
+                  top: TokensStrip.s2,
+                  bottom: TokensStrip.s1,
                 ),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  context.push('/alunos/${item.alunoId}');
-                },
+                child: Text(
+                  dia,
+                  style: FocuxHubTypography.bodyMuted(color: mute),
+                ),
               ),
+              for (final grupo in grupos)
+                FxSatelliteListTile(
+                  title: grupo.alunoNome,
+                  subtitle: Text(checkinDoAlunoLinha(grupo)),
+                  leading: AlunoAvatar(
+                    name: grupo.alunoNome,
+                    photoUrl: grupo.fotoUrl,
+                    variant: AlunoAvatarVariant.strip,
+                  ),
+                  trailing:
+                      grupo.ultimoEm == null
+                          ? null
+                          : Text(
+                            checkinHoraLinha(grupo.ultimoEm!),
+                            style: FocuxHubTypography.bodyMuted(color: mute),
+                          ),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    abrirCheckinDoAluno(context, grupo);
+                  },
+                ),
+            ],
             if (_hasNext)
               FxSatelliteListTile(
                 title: _loadingMore ? 'Carregando…' : 'Carregar mais',
-                subtitle:
-                    _loadingMore
-                        ? null
-                        : Text('Mais ${_total - _itens.length} nesta lista.'),
                 onTap: _loadingMore ? null : _carregarMais,
               ),
           ],

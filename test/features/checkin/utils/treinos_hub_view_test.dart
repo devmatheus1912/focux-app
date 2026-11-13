@@ -173,14 +173,19 @@ void main() {
   });
 
   group('treinoDuracaoReal', () {
-    test('entre 5 min e 3 h aparece', () {
+    // SPEC histórico 12/11: acima de 2 h é sessão esquecida aberta.
+    test('entre 5 min e 2 h aparece', () {
       expect(
         treinoDuracaoReal('2026-09-27T07:00:00', '2026-09-27T07:05:00'),
         const Duration(minutes: 5),
       );
       expect(
-        treinoDuracaoReal('2026-09-27T07:00:00', '2026-09-27T10:00:00'),
-        const Duration(hours: 3),
+        treinoDuracaoReal('2026-09-27T07:00:00', '2026-09-27T09:00:00'),
+        const Duration(hours: 2),
+      );
+      expect(
+        treinoDuracaoReal('2026-09-27T07:00:00', '2026-09-27T09:32:00'),
+        isNull,
       );
     });
 

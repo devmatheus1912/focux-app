@@ -367,6 +367,10 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
     if (_concluindo || _execucao == null || !await _filaLimpa() || !mounted) {
       return;
     }
+    if (checkinSemNenhumaSerie(_execucao!.exercicios)) {
+      await _finalizarSemSeries();
+      return;
+    }
     final faltam = checkinExerciciosFaltando(_execucao!.exercicios);
     if (faltam > 0 &&
         !await showCheckinFinalizarIncompleto(context, faltam: faltam)) {

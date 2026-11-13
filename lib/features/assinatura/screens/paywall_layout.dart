@@ -49,12 +49,14 @@ class _PaywallLegalConsentLine extends StatefulWidget {
   final Color mute;
   final Color primary;
   final bool isUpgrade;
+  final VoidCallback? onRestaurar;
 
   const _PaywallLegalConsentLine({
     required this.ink,
     required this.mute,
     required this.primary,
     this.isUpgrade = false,
+    this.onRestaurar,
   });
 
   @override
@@ -65,18 +67,21 @@ class _PaywallLegalConsentLine extends StatefulWidget {
 class _PaywallLegalConsentLineState extends State<_PaywallLegalConsentLine> {
   late final TapGestureRecognizer _termsTap;
   late final TapGestureRecognizer _privacyTap;
+  late final TapGestureRecognizer _restaurarTap;
 
   @override
   void initState() {
     super.initState();
     _termsTap = TapGestureRecognizer()..onTap = FocuxLegal.openTerms;
     _privacyTap = TapGestureRecognizer()..onTap = FocuxLegal.openPrivacy;
+    _restaurarTap = TapGestureRecognizer()..onTap = () => widget.onRestaurar?.call();
   }
 
   @override
   void dispose() {
     _termsTap.dispose();
     _privacyTap.dispose();
+    _restaurarTap.dispose();
     super.dispose();
   }
 
@@ -119,6 +124,14 @@ class _PaywallLegalConsentLineState extends State<_PaywallLegalConsentLine> {
             const TextSpan(text: ' e a '),
             TextSpan(text: 'Privacidade', style: link, recognizer: _privacyTap),
             const TextSpan(text: '.'),
+            if (widget.onRestaurar != null) ...[
+              const TextSpan(text: ' '),
+              TextSpan(
+                text: 'Restaurar compras',
+                style: link,
+                recognizer: _restaurarTap,
+              ),
+            ],
           ],
         ),
       ),

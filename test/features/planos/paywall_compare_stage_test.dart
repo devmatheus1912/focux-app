@@ -55,9 +55,11 @@ void main() {
     final titleCenter = tester.getCenter(find.text('Assinar Pro'));
     expect(titleCenter.dx, closeTo(viewport.width / 2, 8));
 
-    final roi = PaywallCatalog.roiTagForPlan(SubscriptionPlan.PRO);
-    expect(roi, isNotNull);
-    expect(find.text(roi!, skipOffstage: false), findsOneWidget);
+    // SPEC 12/11: a frase que repetia a tabela saiu do cartão.
+    expect(
+      find.textContaining('usos de IA/mês e cobrança', skipOffstage: false),
+      findsNothing,
+    );
 
     final freeW = tester.getSize(find.byKey(const ValueKey('paywall-tab-FREE'))).width;
     final proW = tester.getSize(find.byKey(const ValueKey('paywall-tab-PRO'))).width;
@@ -67,14 +69,14 @@ void main() {
     expect(freeW, closeTo(proW, 0.5));
     expect(proW, closeTo(entW, 0.5));
 
-    expect(find.text('Anual'), findsOneWidget);
-    expect(find.text('2 meses grátis'), findsOneWidget);
+    // Período em linha própria, com o desconto dentro do segmento.
+    expect(find.text('Anual · 2 meses grátis'), findsOneWidget);
 
     final headerPro = tester.getCenter(find.text('Pro').last);
     final alunosPaid = tester.getCenter(find.text('30'));
     expect((headerPro.dx - alunosPaid.dx).abs(), lessThan(12));
 
-    // Primeira linha com ✓ é Free e Pro (Aba Hoje); a última é só Pro.
+    // Primeira linha com ✓ é Free e Pro (Hoje); a última é só Pro.
     final checkDx = tester
         .getCenter(find.byIcon(FxIcons.check, skipOffstage: false).last)
         .dx;

@@ -36,18 +36,52 @@ void main() {
     expect(extra.selected, '—');
   });
 
-  test('aba Enterprise compara Free x Enterprise', () {
+  test('aba Enterprise compara Free x Enterprise para quem é Free', () {
     final view = buildPaywallCompareView(
       selected: SubscriptionPlan.ENTERPRISE,
-      current: SubscriptionPlan.PRO,
+      current: SubscriptionPlan.FREE,
     );
     expect(view.headline, 'Assinar Enterprise');
     expect(view.selectedColumnLabel, 'Enterprise');
+    expect(view.baselineColumnLabel, 'Free');
     expect(paywallTabLabel(SubscriptionPlan.ENTERPRISE), 'Enterprise');
 
     final pose = view.rows.firstWhere((r) => r.feature == 'Feedback em vídeo');
     expect(pose.selected, '✓');
     expect(view.rows.any((r) => r.feature.contains('✦')), isFalse);
+  });
+
+  // SPEC 12/11: quem já é Pro compara Pro x Enterprise, só o que muda.
+  test('Pro vê Pro x Enterprise e abas sem Free', () {
+    final view = buildPaywallCompareView(
+      selected: SubscriptionPlan.ENTERPRISE,
+      current: SubscriptionPlan.PRO,
+    );
+    expect(view.baselineColumnLabel, 'Pro');
+    expect(view.rows.every((r) => r.baseline != r.selected), isTrue);
+    expect(
+      paywallAbas(SubscriptionPlan.PRO, SubscriptionPlan.values),
+      [SubscriptionPlan.PRO, SubscriptionPlan.ENTERPRISE],
+    );
+    expect(
+      paywallAbas(SubscriptionPlan.FREE, SubscriptionPlan.values),
+      [SubscriptionPlan.PRO, SubscriptionPlan.ENTERPRISE],
+    );
+    expect(
+      paywallTabLabelPara(SubscriptionPlan.PRO, SubscriptionPlan.PRO),
+      'Pro · seu plano',
+    );
+    expect(
+      paywallSelecaoInicial(current: SubscriptionPlan.FREE),
+      SubscriptionPlan.PRO,
+    );
+    expect(
+      paywallSelecaoInicial(
+        current: SubscriptionPlan.PRO,
+        deepLink: SubscriptionPlan.FREE,
+      ),
+      SubscriptionPlan.PRO,
+    );
   });
 
   test('managementMode no plano atual esconde billing', () {

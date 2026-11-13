@@ -93,16 +93,26 @@ String habitoDetailPath(int id) => '/habitos/$id';
 String habitoAlunoDetailPath(int id) => '/aluno/habitos/$id';
 
 /// Lista do aluno: "Meta · 3 de 5 esta semana".
+/// "1 dia seguido" / "5 dias seguidos"; sem sequência, nada.
+String? habitoSequenciaLabel(int dias) {
+  if (dias <= 0) return null;
+  return dias == 1 ? '1 dia seguido' : '$dias dias seguidos';
+}
+
+/// Linha do hábito do aluno: só o progresso e a sequência (a descrição
+/// fica no detalhe): "1 de 7 esta semana · 1 dia seguido".
 String habitoAlunoSubtitle({
-  String? descricao,
   required int feitosNaSemana,
   required int metaSemanal,
-}) {
-  final desc = descricao?.trim();
-  final meta = habitoSemanaLinha(feitosNaSemana, metaSemanal);
-  if (desc != null && desc.isNotEmpty) return '$desc · $meta';
-  return meta;
-}
+  required int streak,
+}) => [
+  habitoSemanaLinha(feitosNaSemana, metaSemanal),
+  if (habitoSequenciaLabel(streak) case final seq?) seq,
+].join(' · ');
+
+/// Linha de hábito desativado: "Desativado · 7x por semana · Todos os alunos".
+String habitoDesativadoLinha({required int metaSemanal, int? alunoId}) =>
+    'Desativado · ${habitoRegra(metaSemanal: metaSemanal, alunoId: alunoId)}';
 
 String habitoSequenciaLinha(int streak) {
   if (streak <= 0) return '';

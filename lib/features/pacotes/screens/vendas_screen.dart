@@ -329,7 +329,8 @@ class _VendasScreenState extends ConsumerState<VendasScreen> {
           title: p.titulo,
           titleCase: false,
           muted: true,
-          subtitle: Text('Fora da página · ${p.valor.format()}'),
+          leading: Icon(FxIcons.pausar, color: chrome.mute),
+          subtitle: Text('Pausado · fora da página · ${p.valor.format()}'),
           trailing: IconButton(
             tooltip: 'Mais opções do plano',
             onPressed: () => _maisPlano(p),

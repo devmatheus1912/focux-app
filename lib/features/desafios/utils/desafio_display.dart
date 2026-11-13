@@ -67,9 +67,24 @@ String _capitalizar(String s) =>
 /// Linha da lista: "Treinos concluídos · meta 12 · faltam 18 dias".
 String desafioLinhaLista(Desafio d, {DateTime? now}) => [
   desafioTipoLabel(d.tipo),
-  'meta ${d.metaPontos}',
+  'meta ${desafioUnidade(d.tipo, d.metaPontos)}',
   desafioFaltam(d.fim, now: now),
 ].join(' · ');
+
+/// Linha do aluno na lista: "Você: 1 de 5 treinos · 1º lugar", e o líder
+/// quando não é ele ("Julio lidera com 3"). Backend antigo (sem a contagem
+/// dele): só o líder.
+String? desafioLinhaAluno(Desafio d) {
+  final n = d.minhaContagem;
+  final lider = desafioLiderLabel(d);
+  if (n == null) return lider;
+  final pos = d.minhaPosicao;
+  return [
+    'Você: $n de ${desafioUnidade(d.tipo, d.metaPontos)}',
+    if (pos != null) '$posº lugar',
+    if (pos != 1 && lider != null) lider,
+  ].join(' · ');
+}
 
 /// Cabeçalho do detalhe: "Treinos concluídos · meta 12 · até 11/12".
 String desafioRegraDetalhe(Desafio d) => [
@@ -81,12 +96,12 @@ String desafioRegraDetalhe(Desafio d) => [
 String desafioFaltamTitulo(DateTime? fim, {DateTime? now}) =>
     _capitalizar(desafioFaltam(fim, now: now));
 
-/// À direita na lista: "Julio · 7". Sem contagem, nada.
+/// Na lista: "Julio lidera com 7". Sem contagem, nada.
 String? desafioLiderLabel(Desafio d) {
   final nome = d.liderNome?.trim();
   final n = d.liderContagem;
   if (nome == null || nome.isEmpty || n == null || n <= 0) return null;
-  return '${nome.split(' ').first} · $n';
+  return '${nome.split(' ').first} lidera com $n';
 }
 
 /// "7 de 12".

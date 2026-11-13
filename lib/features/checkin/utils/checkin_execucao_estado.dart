@@ -111,6 +111,10 @@ ExecucaoTreino checkinAplicarPendentes(
 int checkinPendentesDaExecucao(List<CheckinSeriePendente> fila, int? id) =>
     id == null ? 0 : fila.where((p) => p.execucaoId == id).length;
 
+/// Nenhuma série feita em nenhum exercício: concluir viraria sessão vazia.
+bool checkinSemNenhumaSerie(List<ExecucaoExercicio> exercicios) =>
+    exercicios.isNotEmpty && exercicios.every((e) => e.seriesFeitas <= 0);
+
 int checkinExerciciosFaltando(List<ExecucaoExercicio> exercicios) =>
     exercicios.where((e) => !e.concluido).length;
 

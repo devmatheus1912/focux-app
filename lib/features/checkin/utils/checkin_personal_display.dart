@@ -26,6 +26,7 @@ class CheckinDoAluno {
     required this.treinos,
     required this.ultimoEm,
     this.parciais = 0,
+    this.itens = const [],
   });
 
   final int alunoId;
@@ -34,6 +35,9 @@ class CheckinDoAluno {
   final List<String> treinos;
   final DateTime? ultimoEm;
   final int parciais;
+
+  /// As sessões do grupo, para abrir o treino (uma ou a escolha).
+  final List<CheckinPersonalItem> itens;
 }
 
 List<CheckinDoAluno> checkinPorAluno(List<CheckinPersonalItem> itens) {
@@ -50,6 +54,7 @@ List<CheckinDoAluno> checkinPorAluno(List<CheckinPersonalItem> itens) {
         treinos: [for (final i in lista) i.treinoNome],
         ultimoEm: lista.first.iniciadoEm,
         parciais: lista.where((i) => i.parcial).length,
+        itens: List.unmodifiable(lista),
       ),
   ];
 }
@@ -60,9 +65,11 @@ String checkinDoAlunoLinha(CheckinDoAluno grupo) {
       grupo.treinos.length == 1
           ? nomes.first
           : ptS.checkinTreinos(grupo.treinos.length, nomes.join(', '));
+  // "1 parcial" no singular, com um ou com vários treinos (SPEC 12/11).
   return switch (grupo.parciais) {
     0 => linha,
     1 when grupo.treinos.length == 1 => ptS.checkinParcial(linha),
+    1 => '$linha · 1 parcial',
     final n => ptS.checkinParciais(linha, n),
   };
 }
@@ -96,6 +103,46 @@ List<(String, List<CheckinDoAluno>)> checkinPorDia(
     });
   return [for (final dia in dias) (rotulo(dia), checkinPorAluno(porDia[dia]!))];
 }
+
+/// Hora à direita dentro do grupo do dia ("18:48"); em Hoje, menos de 1 hora
+/// vira "há 5 min". O cabeçalho do dia já diz quando.
+String checkinHoraLinha(DateTime quando, {DateTime? now}) {
+  final ref = now ?? DateTime.now();
+  final local = quando.toLocal();
+  final diff = ref.difference(local);
+  final mesmoDia =
+      local.year == ref.year && local.month == ref.month && local.day == ref.day;
+  if (mesmoDia && !diff.isNegative && diff.inMinutes < 60) {
+    return diff.inMinutes <= 0 ? 'agora' : 'há ${diff.inMinutes} min';
+  }
+  final h = local.hour.toString().padLeft(2, '0');
+  final m = local.minute.toString().padLeft(2, '0');
+  return '$h:$m';
+}
+
+/// Título de Hoje: "Hoje · 3 treinos".
+String checkinHojeTitulo(int treinos) =>
+    treinos <= 0 ? 'Hoje' : 'Hoje · $treinos ${treinos == 1 ? 'treino' : 'treinos'}';
+
+/// Só os dias anteriores a hoje (a folha de "Últimos 6 dias").
+List<CheckinPersonalItem> checkinSemHoje(
+  List<CheckinPersonalItem> itens, {
+  DateTime? now,
+}) {
+  final ref = now ?? DateTime.now();
+  return [
+    for (final i in itens)
+      if (i.iniciadoEm == null ||
+          !(i.iniciadoEm!.toLocal().year == ref.year &&
+              i.iniciadoEm!.toLocal().month == ref.month &&
+              i.iniciadoEm!.toLocal().day == ref.day))
+        i,
+  ];
+}
+
+/// "5 treinos nos últimos 6 dias".
+String checkinSemanaContagem(int n) =>
+    '$n ${n == 1 ? 'treino' : 'treinos'} nos últimos 6 dias';
 
 String checkinResumoDoDia(CheckinPersonalHomeBundle home) {
   final treinos = home.checkinsHoje;

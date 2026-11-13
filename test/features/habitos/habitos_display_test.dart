@@ -63,4 +63,18 @@ void main() {
     expect(habitoSequenciaLinha(0), '');
     expect(habitoSequenciaLinha(4), '4 dias seguidos');
   });
+
+  test('sequência por extenso e linha do aluno sem descrição', () {
+    expect(habitoSequenciaLabel(0), isNull);
+    expect(habitoSequenciaLabel(1), '1 dia seguido');
+    expect(habitoSequenciaLabel(5), '5 dias seguidos');
+    expect(
+      habitoAlunoSubtitle(feitosNaSemana: 1, metaSemanal: 7, streak: 1),
+      '1 de 7 esta semana · 1 dia seguido',
+    );
+    expect(
+      habitoDesativadoLinha(metaSemanal: 7),
+      'Desativado · 7x por semana · Todos os alunos',
+    );
+  });
 }

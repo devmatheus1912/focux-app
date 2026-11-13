@@ -1,5 +1,6 @@
 import '../../../l10n/app_localizations.dart';
 import '../data/checkin_repository.dart';
+import 'historico_detalhe_texts.dart';
 import 'treinos_hub_view.dart';
 
 enum HistoricoSemanaTipo { atual, passada, anterior }
@@ -54,15 +55,34 @@ List<HistoricoSemana> agruparHistoricoPorSemana(
   ];
 }
 
-/// "Esta semana · 3 treinos"; sem contagem enquanto a semana não veio inteira.
-String historicoSemanaCabecalho(S s, HistoricoSemana semana) {
+/// "Esta semana · 6 treinos · meta de 3 batida" / "Esta semana · 2 de 3
+/// treinos". Meta é a mesma da Home (`frequenciaDias`); sem meta, só a
+/// contagem. Sem contagem enquanto a semana não veio inteira.
+String historicoSemanaCabecalho(S s, HistoricoSemana semana, {int? meta}) {
   final titulo = switch (semana.tipo) {
     HistoricoSemanaTipo.atual => s.historicoSemanaAtual,
     HistoricoSemanaTipo.passada => s.historicoSemanaPassada,
-    HistoricoSemanaTipo.anterior => s.historicoSemanaDe(semana.inicio),
+    HistoricoSemanaTipo.anterior => s.historicoSemanaDe(
+      '${semana.inicio.day} de ${historicoMesCurto(semana.inicio.month)}',
+    ),
   };
   if (!semana.completa) return titulo;
-  return '$titulo · ${s.historicoSemanaTreinos(semana.sessoes.length)}';
+  final n = semana.sessoes.length;
+  if (meta == null || meta <= 0) {
+    return '$titulo · ${s.historicoSemanaTreinos(n)}';
+  }
+  if (n >= meta) {
+    return '$titulo · ${s.historicoSemanaTreinos(n)} · ${s.historicoSemanaMetaBatida(meta)}';
+  }
+  return '$titulo · ${s.historicoSemanaNDeM(n, meta)}';
+}
+
+/// A data aparece só na primeira sessão de cada dia (lista em ordem).
+bool historicoMostraData(List<TreinoRecente> sessoes, int i) {
+  if (i == 0) return true;
+  final a = sessoes[i - 1].quando;
+  final b = sessoes[i].quando;
+  return a.year != b.year || a.month != b.month || a.day != b.day;
 }
 
 DateTime _segunda(DateTime d) =>

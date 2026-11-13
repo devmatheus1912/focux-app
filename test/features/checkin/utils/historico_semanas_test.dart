@@ -113,4 +113,34 @@ void main() {
     );
     expect(historicoSemanaCabecalho(_s, semanas[2]), isNot(contains('·')));
   });
+
+  test('meta no cabeçalho, data uma vez por dia e mês sem ponto', () {
+    final semanas = agruparHistoricoPorSemana(
+      [
+        _sessao(DateTime(2026, 9, 27, 9)),
+        _sessao(DateTime(2026, 9, 27, 8)),
+        _sessao(DateTime(2026, 9, 22, 9)),
+        _sessao(DateTime(2026, 9, 15, 9)),
+        _sessao(DateTime(2026, 9, 3, 9)),
+        _sessao(DateTime(2026, 9, 2, 9)),
+      ],
+      now: _now,
+      temMais: false,
+    );
+    expect(
+      historicoSemanaCabecalho(_s, semanas[0], meta: 4),
+      'Esta semana · 3 de 4 treinos',
+    );
+    expect(
+      historicoSemanaCabecalho(_s, semanas[0], meta: 3),
+      'Esta semana · 3 treinos · meta de 3 batida',
+    );
+    expect(
+      historicoSemanaCabecalho(_s, semanas[2]),
+      'Semana de 31 de ago · 2 treinos',
+    );
+    expect(historicoMostraData(semanas[0].sessoes, 0), isTrue);
+    expect(historicoMostraData(semanas[0].sessoes, 1), isFalse);
+    expect(historicoMostraData(semanas[0].sessoes, 2), isTrue);
+  });
 }

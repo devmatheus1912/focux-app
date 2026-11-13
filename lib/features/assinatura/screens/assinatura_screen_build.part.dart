@@ -81,7 +81,8 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
 
     if (planos != null && planos.isNotEmpty) {
       selectedPlan = subscriptionPlanFromApi(
-        _selectedPlanName ?? currentPlan.apiName,
+        _selectedPlanName ??
+            paywallSelecaoInicial(current: currentPlan).apiName,
       );
       selectedBackendPlan = planos.firstWhere(
         (plan) => subscriptionPlanFromApi(plan.nome) == selectedPlan,
@@ -95,12 +96,6 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
         ctaLabel = 'Sincronizando assinatura...';
         ctaEnabled = false;
         footnote = 'Aguarde a confirmação da loja.';
-      } else if (selectedPlan == SubscriptionPlan.FREE) {
-        ctaMode = _AssinaturaCtaMode.goHome;
-        ctaLabel = 'Continuar no FREE';
-        ctaEnabled = true;
-        footnote =
-            'Sem cartão. Você já pode usar a Home e os recursos do plano gratuito.';
       } else if (isCurrentPlan) {
         ctaMode =
             subscriptionUsesNativeStore
@@ -186,7 +181,8 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
         planos == null
             ? false
             : subscriptionPlanFromApi(
-                  _selectedPlanName ?? currentPlan.apiName,
+                  _selectedPlanName ??
+            paywallSelecaoInicial(current: currentPlan).apiName,
                 ).level >
                 currentPlan.level;
     if (planos != null &&
@@ -243,10 +239,13 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
         currentPlan != SubscriptionPlan.FREE && !paywallHasUpgradeAbove;
 
     // Plano pago aberto: gestão com uso real, sem rodapé de compra.
+    // Aberta como upgrade (`source=upgrade`), a tela fica em Planos mesmo na
+    // aba do plano atual: voltar leva de volta à Assinatura.
     final gestao =
         planos != null &&
         currentPlan != SubscriptionPlan.FREE &&
         selectedPlan == currentPlan &&
+        widget.source != 'upgrade' &&
         !_paymentBlocked;
 
     return FxShellScaffold(
@@ -297,10 +296,7 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
                                 selectedPlan,
                                 selectedBackendPlan!,
                               ),
-                          onManage:
-                              ctaMode == _AssinaturaCtaMode.goHome
-                                  ? () => context.go('/dashboard/personal')
-                                  : _openSubscriptionManagement,
+                          onManage: _openSubscriptionManagement,
                           onBillingDetails:
                               ctaMode == _AssinaturaCtaMode.manageStore
                                   ? () => _showAssinaturaTermosSheet(

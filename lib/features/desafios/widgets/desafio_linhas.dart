@@ -13,29 +13,33 @@ import '../../evolucao/widgets/conquista_selo.dart';
 import '../data/desafio_repository.dart';
 import '../utils/desafio_display.dart';
 
-/// Linha da lista de desafios (personal e aluno): título, a regra numa
-/// frase e, à direita, o líder com o número dele.
+/// Linha da lista de desafios (personal e aluno): título como foi digitado,
+/// a regra numa frase e, embaixo, o líder (personal) ou a contagem e a
+/// posição do aluno. A seta fica sempre à direita.
 class DesafioLinha extends StatelessWidget {
-  const DesafioLinha({super.key, required this.desafio, required this.onTap});
+  const DesafioLinha({
+    super.key,
+    required this.desafio,
+    required this.onTap,
+    this.forAluno = false,
+  });
 
   final Desafio desafio;
   final VoidCallback onTap;
+  final bool forAluno;
 
   @override
   Widget build(BuildContext context) {
-    final lider = desafioLiderLabel(desafio);
+    final extra =
+        forAluno ? desafioLinhaAluno(desafio) : desafioLiderLabel(desafio);
     return FxSatelliteListTile(
       title: desafio.titulo,
-      subtitle: Text(desafioLinhaLista(desafio)),
-      trailing:
-          lider == null
-              ? null
-              : Text(
-                lider,
-                style: FocuxHubTypography.rotulo(
-                  color: ShellChrome.of(context).mute,
-                ),
-              ),
+      titleCase: false,
+      subtitle: Text(
+        extra == null
+            ? desafioLinhaLista(desafio)
+            : '${desafioLinhaLista(desafio)}\n$extra',
+      ),
       onTap: onTap,
     );
   }

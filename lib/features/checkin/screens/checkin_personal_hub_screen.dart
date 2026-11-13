@@ -1,3 +1,5 @@
+import '../widgets/checkin_personal_abrir.dart';
+import '../../../core/widgets/fx_action_link.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -9,7 +11,6 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
-import '../../../core/utils/fx_utils.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
@@ -180,12 +181,14 @@ class _CheckinPersonalHubScreenState
                     TokensStrip.s6,
                   ),
                   children: [
-                    Text(
-                      checkinResumoDoDia(home),
-                      style: FocuxHubTypography.cardTitle(
-                        color: fxScreenInk(context),
+                    // Com treino hoje, o resumo vai no título de Hoje.
+                    if (home.hoje.isEmpty)
+                      Text(
+                        checkinResumoDoDia(home),
+                        style: FocuxHubTypography.cardTitle(
+                          color: fxScreenInk(context),
+                        ),
                       ),
-                    ),
                     if (home.pendentes.isNotEmpty) ...[
                       const SizedBox(height: TokensStrip.s4),
                       const DashboardSectionHeader(title: 'Faltam treinar hoje'),
@@ -199,7 +202,9 @@ class _CheckinPersonalHubScreenState
                     ],
                     if (home.hoje.isNotEmpty) ...[
                       const SizedBox(height: TokensStrip.s4),
-                      const DashboardSectionHeader(title: 'Hoje'),
+                      DashboardSectionHeader(
+                        title: checkinHojeTitulo(home.checkinsHoje),
+                      ),
                       const SizedBox(height: TokensStrip.s2),
                       for (final grupo in checkinPorAluno(home.hoje))
                         _CheckinTile(grupo: grupo),
@@ -237,22 +242,12 @@ class _CheckinSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final showAll = home.hasNext || home.totalItens > 3;
+    // Um nível de título: os dias são os subtítulos e "Ver os 6 dias" fica
+    // no fim, como link (SPEC 12/11).
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        DashboardSectionHeader(
-          title: title,
-          actionLabel: showAll ? 'Ver todos' : null,
-          onAction:
-              showAll
-                  ? () => showCheckinPersonalCatalogSheet(
-                    context,
-                    title: title,
-                    firstPage: home,
-                    repo: ref.read(checkinRepositoryProvider),
-                  )
-                  : null,
-        ),
+        DashboardSectionHeader(title: title),
         const SizedBox(height: TokensStrip.s2),
         for (final (dia, grupos) in checkinPorDia(items)) ...[
           Padding(
@@ -270,6 +265,20 @@ class _CheckinSection extends ConsumerWidget {
           ),
           for (final grupo in grupos) _CheckinTile(grupo: grupo),
         ],
+        if (showAll)
+          Align(
+            alignment: Alignment.centerLeft,
+            child: FxActionLink(
+              label: 'Ver os 6 dias',
+              onTap:
+                  () => showCheckinPersonalCatalogSheet(
+                    context,
+                    title: title,
+                    firstPage: home,
+                    repo: ref.read(checkinRepositoryProvider),
+                  ),
+            ),
+          ),
       ],
     );
   }
@@ -286,22 +295,30 @@ class _CheckinTile extends StatelessWidget {
     return FxSatelliteListTile(
       title: grupo.alunoNome,
       subtitle: Text(checkinDoAlunoLinha(grupo)),
-      leading: AlunoAvatar(
-        name: grupo.alunoNome,
-        photoUrl: grupo.fotoUrl,
-        variant: AlunoAvatarVariant.strip,
+      // O avatar abre o perfil; a linha abre o treino.
+      leading: Semantics(
+        button: true,
+        label: 'Abrir perfil de ${grupo.alunoNome}',
+        child: GestureDetector(
+          onTap: () => context.push('/alunos/${grupo.alunoId}'),
+          child: AlunoAvatar(
+            name: grupo.alunoNome,
+            photoUrl: grupo.fotoUrl,
+            variant: AlunoAvatarVariant.strip,
+          ),
+        ),
       ),
       trailing:
           ultimo == null
               ? null
               : Text(
-                fxTimeAgo(ultimo),
+                checkinHoraLinha(ultimo),
                 style: FocuxHubTypography.bodyMuted(
                   color: fxScreenMute(context),
                   fontWeight: FontWeight.w600,
                 ),
               ),
-      onTap: () => context.push('/alunos/${grupo.alunoId}'),
+      onTap: () => abrirCheckinDoAluno(context, grupo),
     );
   }
 }

@@ -23,7 +23,8 @@ void main() {
     );
     expect(
       desafioLinhaLista(d, now: hoje),
-      'Treinos concluídos · meta 12 · faltam 18 dias',
+      // Meta com unidade (SPEC 12/11).
+      'Treinos concluídos · meta 12 treinos · faltam 18 dias',
     );
   });
 
@@ -37,8 +38,44 @@ void main() {
       liderContagem: 7,
     );
     const sem = Desafio(id: 2, titulo: 'y', tipo: 'TREINOS', metaPontos: 12);
-    expect(desafioLiderLabel(com), 'Julio · 7');
+    expect(desafioLiderLabel(com), 'Julio lidera com 7');
     expect(desafioLiderLabel(sem), isNull);
+  });
+
+  test('aluno vê a própria contagem e a posição; líder só quando não é ele', () {
+    const segundo = Desafio(
+      id: 1,
+      titulo: 'x',
+      tipo: 'TREINOS',
+      metaPontos: 5,
+      liderNome: 'Julio Souza',
+      liderContagem: 3,
+      minhaContagem: 1,
+      minhaPosicao: 2,
+    );
+    const lider = Desafio(
+      id: 2,
+      titulo: 'y',
+      tipo: 'TREINOS',
+      metaPontos: 5,
+      liderNome: 'Ana',
+      liderContagem: 1,
+      minhaContagem: 1,
+      minhaPosicao: 1,
+    );
+    const zerado = Desafio(
+      id: 3,
+      titulo: 'z',
+      tipo: 'HABITOS',
+      metaPontos: 10,
+      minhaContagem: 0,
+    );
+    expect(
+      desafioLinhaAluno(segundo),
+      'Você: 1 de 5 treinos · 2º lugar · Julio lidera com 3',
+    );
+    expect(desafioLinhaAluno(lider), 'Você: 1 de 5 treinos · 1º lugar');
+    expect(desafioLinhaAluno(zerado), 'Você: 0 de 10 hábitos marcados');
   });
 
   test('prazo por extenso', () {

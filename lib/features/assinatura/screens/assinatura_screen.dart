@@ -21,7 +21,6 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/clipboard_sensitive.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
-import '../../../core/widgets/fx_action_link.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../widgets/assinatura_gestao_view.dart';
 import '../../planos/paywall/paywall_compare_logic.dart';
@@ -103,21 +102,18 @@ bool _shouldLoadEnterprisePreview(
   return selectedPlan == SubscriptionPlan.ENTERPRISE;
 }
 
-/// Plano pré-selecionado: atual por padrão; deep link só se for upgrade válido.
-/// FREE sem deep link: fica em FREE (Home first) — upgrade é escolha, não default.
+/// Plano pré-selecionado: link de upgrade válido; senão Free abre no Pro e
+/// quem paga no próprio plano (`paywallSelecaoInicial`, SPEC 12/11).
 String _resolveInitialPlanSelection({
   required SubscriptionPlan currentPlan,
   String? deepLinkPlan,
 }) {
   final deep = deepLinkPlan?.trim().toUpperCase();
-  if (deep != null && deep.isNotEmpty) {
-    final target = subscriptionPlanFromApi(deep);
-    if (currentPlan == SubscriptionPlan.FREE ||
-        target.level > currentPlan.level) {
-      return target.apiName;
-    }
-  }
-  return currentPlan.apiName;
+  return paywallSelecaoInicial(
+    current: currentPlan,
+    deepLink:
+        deep == null || deep.isEmpty ? null : subscriptionPlanFromApi(deep),
+  ).apiName;
 }
 
 class AssinaturaScreen extends ConsumerStatefulWidget {

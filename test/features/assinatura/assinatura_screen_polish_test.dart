@@ -35,15 +35,14 @@ void main() {
     expect(repo, isNot(contains('fetchVitrine')));
   });
 
-  test('FREE sem deep link inicia no plano atual (não Premium)', () {
+  // SPEC 12/11: a seleção inicial sai de uma função só (Free abre no Pro,
+  // quem paga no próprio plano); o botão segue a mesma seleção do corpo.
+  test('seleção inicial única: paywallSelecaoInicial', () {
     final screen = File(
       'lib/features/assinatura/screens/assinatura_screen.dart',
     ).readAsStringSync();
-    expect(screen, contains('return currentPlan.apiName;'));
-    expect(
-      screen,
-      isNot(contains('SubscriptionPlan.PRO.apiName')),
-    );
+    expect(screen, contains('paywallSelecaoInicial('));
+    expect(screen, isNot(contains('return currentPlan.apiName;')));
   });
 
   test('fx shell expande body quando sticky footer presente', () {
@@ -106,7 +105,8 @@ void main() {
     expect(build, contains('FxContentWidthLimiter'));
     expect(build, contains('expandHeight: false'));
     expect(build, contains('AnimatedSwitcher'));
-    expect(build, contains('Continuar no FREE'));
+    expect(build, isNot(contains('Continuar no FREE')));
+    expect(build, contains("widget.source != 'upgrade'"));
     expect(build, contains('Compras bloqueadas no aparelho'));
     expect(build, contains('managementMode'));
     expect(build, contains("title: gestao ? 'Assinatura' : 'Planos'"));

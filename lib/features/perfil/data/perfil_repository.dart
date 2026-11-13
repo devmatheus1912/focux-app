@@ -123,6 +123,9 @@ class PerfilPersonal {
   /// Loja da assinatura; nulo = acesso que não veio da loja.
   final String? iapPlatform;
 
+  /// A assinatura da loja renova sozinha; falso = cancelada (acaba na data).
+  final bool renovacaoAutomatica;
+
   PerfilPersonal({
     required this.id,
     required this.nome,
@@ -179,6 +182,7 @@ class PerfilPersonal {
     this.resumoMensal,
     this.iapAccountToken,
     this.iapPlatform,
+    this.renovacaoAutomatica = true,
   });
 
   factory PerfilPersonal.fromJson(Map<String, dynamic> json) => PerfilPersonal(
@@ -259,6 +263,7 @@ class PerfilPersonal {
             : null,
     iapAccountToken: json['iapAccountToken'] as String?,
     iapPlatform: json['iapPlatform'] as String?,
+    renovacaoAutomatica: json['renovacaoAutomatica'] as bool? ?? true,
   );
 }
 

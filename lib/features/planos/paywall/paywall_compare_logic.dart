@@ -44,6 +44,39 @@ String paywallTabLabel(SubscriptionPlan plan) => switch (plan) {
   SubscriptionPlan.ENTERPRISE => 'Enterprise',
 };
 
+/// Aba do plano: o atual de quem paga vira "Pro · seu plano".
+String paywallTabLabelPara(SubscriptionPlan plan, SubscriptionPlan current) =>
+    plan == current && current != SubscriptionPlan.FREE
+        ? '${paywallTabLabel(plan)} · seu plano'
+        : paywallTabLabel(plan);
+
+/// Abas por plano atual: Free vê Pro e Enterprise; quem paga vê o próprio
+/// plano e os de cima (sem Free: rebaixar é na loja).
+List<SubscriptionPlan> paywallAbas(
+  SubscriptionPlan current,
+  Iterable<SubscriptionPlan> disponiveis,
+) {
+  final ordenados = disponiveis.toList()..sort((a, b) => a.level.compareTo(b.level));
+  return [
+    for (final p in ordenados)
+      if (p != SubscriptionPlan.FREE && p.level >= current.level) p,
+  ];
+}
+
+/// Seleção ao abrir: link de upgrade válido; senão Free abre no Pro e quem
+/// paga abre no próprio plano.
+SubscriptionPlan paywallSelecaoInicial({
+  required SubscriptionPlan current,
+  SubscriptionPlan? deepLink,
+}) {
+  if (deepLink != null &&
+      deepLink != SubscriptionPlan.FREE &&
+      (current == SubscriptionPlan.FREE || deepLink.level > current.level)) {
+    return deepLink;
+  }
+  return current == SubscriptionPlan.FREE ? SubscriptionPlan.PRO : current;
+}
+
 String paywallPrettyName(SubscriptionPlan plan) => switch (plan) {
   SubscriptionPlan.FREE => 'FREE',
   SubscriptionPlan.PRO => 'Pro',
@@ -103,12 +136,18 @@ PaywallCompareView buildPaywallCompareView({
   List<PaywallComparisonRow>? rows,
   bool managementMode = false,
 }) {
-  const baseline = SubscriptionPlan.FREE;
+  // Quem já é Pro compara com o Pro, não com o Free.
+  final baseline =
+      current == SubscriptionPlan.PRO && selected == SubscriptionPlan.ENTERPRISE
+          ? SubscriptionPlan.PRO
+          : SubscriptionPlan.FREE;
   final showTwo = selected != SubscriptionPlan.FREE;
   final source =
       (rows != null && rows.isNotEmpty)
           ? rows
           : switch (selected) {
+            SubscriptionPlan.ENTERPRISE when baseline == SubscriptionPlan.PRO =>
+              PaywallCatalog.comparisonProVsEnterprise,
             SubscriptionPlan.ENTERPRISE =>
               PaywallCatalog.comparisonFreeVsEnterprise,
             _ => PaywallCatalog.comparisonFreeVsPro,

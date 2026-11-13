@@ -115,10 +115,14 @@ class HistoricoSessaoRow extends StatelessWidget {
     super.key,
     required this.recente,
     required this.onTap,
+    this.mostrarData = true,
   });
 
   final TreinoRecente recente;
   final VoidCallback onTap;
+
+  /// Segunda sessão do mesmo dia: coluna da data vazia, como um calendário.
+  final bool mostrarData;
 
   @override
   Widget build(BuildContext context) {
@@ -150,7 +154,9 @@ class HistoricoSessaoRow extends StatelessWidget {
               children: [
                 SizedBox(
                   width: 44,
-                  child: Column(
+                  child: !mostrarData
+                      ? null
+                      : Column(
                     children: [
                       Text(
                         '${quando.day}',

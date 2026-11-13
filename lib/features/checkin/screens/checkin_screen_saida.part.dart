@@ -25,6 +25,33 @@ extension _CheckinSaida on _CheckinScreenState {
     }
   }
 
+  /// Sem nenhuma série: "Já fiz" (conta, sem parcial) ou descartar.
+  Future<void> _finalizarSemSeries() async {
+    final escolha = await showCheckinSemSeries(context);
+    if (escolha == null || !mounted) return;
+    final id = _execucao?.id;
+    switch (escolha) {
+      case CheckinSemSeriesEscolha.jaFiz:
+        try {
+          await ref
+              .read(checkinRepositoryProvider)
+              .confirmarPlano(widget.treinoId);
+          checkinSessaoMudou(ref);
+        } catch (e) {
+          if (mounted) _erro(friendlyError(e));
+          return;
+        }
+        if (!mounted) return;
+        FeedbackHelper.showSuccess(
+          context,
+          S.of(context).checkinSemSeriesFeito,
+        );
+      case CheckinSemSeriesEscolha.descartar:
+        if (id != null && !await _descartar(id)) return;
+    }
+    if (mounted) safePopOrGo(context, '/checkin/treinos');
+  }
+
   Future<void> _sair() async {
     if (_concluindo) return;
     FxKeyboardDismissScope.dismiss();

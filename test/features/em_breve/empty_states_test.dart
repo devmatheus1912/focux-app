@@ -29,7 +29,8 @@ void main() {
     );
     expect(
       PaywallCatalog.comparisonFreeVsPro.any(
-        (r) => r.feature.toLowerCase().contains('loja'),
+        // "Loja" virou "vendas" (SPEC planos 12/11).
+        (r) => r.feature.toLowerCase().contains('vendas'),
       ),
       isTrue,
     );

@@ -38,18 +38,14 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
     }
 
     var selPlan = subscriptionPlanFromApi(
-      _selectedPlanName ?? currentPlan.apiName,
+      _selectedPlanName ??
+          paywallSelecaoInicial(current: currentPlan).apiName,
     );
-    final tabPlans =
-        sortedPlans
-            .map((p) => subscriptionPlanFromApi(p.nome))
-            // Quem está no Free não compra Free: a coluna já compara.
-            .where(
-              (p) =>
-                  p != SubscriptionPlan.FREE ||
-                  currentPlan != SubscriptionPlan.FREE,
-            )
-            .toList(growable: false);
+    // Free vê Pro e Enterprise; quem paga vê o próprio plano e os de cima.
+    final tabPlans = paywallAbas(
+      currentPlan,
+      sortedPlans.map((p) => subscriptionPlanFromApi(p.nome)),
+    );
     if (!tabPlans.contains(selPlan)) {
       selPlan = tabPlans.first;
     }
@@ -104,6 +100,9 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
         child: AssinaturaGestaoView(
           planoNome: PaywallCatalog.displayPlanName(currentPlan),
           validoAte: meFeatures?.validoAte,
+          renova:
+              daLoja &&
+              (ref.read(perfilProvider).value?.renovacaoAutomatica ?? false),
           usos: [
             if (meFeatures != null) ...[
               (
@@ -138,7 +137,13 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
               ),
           superiorNome:
               proximo == null ? null : PaywallCatalog.displayPlanName(proximo),
-          onSuperior: proximo == null ? null : () => _selectPlan(proximo),
+          // Upgrade é tela própria: voltar retorna à Assinatura (SPEC 12/11).
+          onSuperior:
+              proximo == null
+                  ? null
+                  : () => context.push(
+                    '/assinatura?plano=${proximo.apiName}&source=upgrade',
+                  ),
           onCancelar: () => context.push('/cancel-save'),
         ),
       );
@@ -178,10 +183,12 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
             );
 
     final linhas =
-        vitrine?.rowsFor(selPlan) ??
-        (selPlan == SubscriptionPlan.ENTERPRISE
-            ? PaywallCatalog.comparisonFreeVsEnterprise
-            : PaywallCatalog.comparisonFreeVsPro);
+        vitrine?.rowsFor(selPlan, current: currentPlan) ??
+        PaywallVitrineSnapshot.fromCatalog().rowsFor(
+          selPlan,
+          current: currentPlan,
+        );
+    final temMais = paywallLinhasDecisivas(linhas).length < linhas.length;
 
     return RefreshIndicator(
       onRefresh: () async {
@@ -224,6 +231,15 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
                       currentPlan: currentPlan,
                       selectedPlan: selPlan,
                       comparisonRows: _compararTudo ? linhas : paywallLinhasDecisivas(linhas),
+                      verTudoLabel:
+                          !temMais
+                              ? null
+                              : _compararTudo
+                              ? S.of(context).assinaturaVerMenos
+                              : S.of(context).assinaturaVerOsRecursos(linhas.length),
+                      verTudoAberto: _compararTudo,
+                      onVerTudo:
+                          () => setState(() => _compararTudo = !_compararTudo),
                       billingPeriod: _billingPeriod,
                       onSelectPlan: _selectPlan,
                       onBillingPeriod:
@@ -247,20 +263,6 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
                       mute: mute,
                       isDark: isDark,
                       line: line,
-                    ),
-                  if (paywallLinhasDecisivas(linhas).length < linhas.length)
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: FxActionLink(
-                        label:
-                            _compararTudo
-                                ? S.of(context).assinaturaVerMenos
-                                : S.of(context).assinaturaVerTudo,
-                        onTap:
-                            () => setState(
-                              () => _compararTudo = !_compararTudo,
-                            ),
-                      ),
                     ),
                   if (!_storeAvailable &&
                       !kIsWeb &&
@@ -288,22 +290,17 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
                     ),
                   ],
                   const SizedBox(height: TokensStrip.s4),
-                  if (subscriptionUsesNativeStore)
-                    Align(
-                      child: FxActionLink(
-                        label:
-                            _restoringPurchases
-                                ? S.of(context).assinaturaRestaurandoCompras
-                                : S.of(context).assinaturaRestaurarCompras,
-                        onTap: _restoringPurchases ? null : _restorePurchases,
-                      ),
-                    ),
-                  const SizedBox(height: TokensStrip.s1),
+                  // "Restaurar compras" é link de texto junto de Termos e
+                  // Privacidade (SPEC 12/11).
                   _PaywallLegalConsentLine(
                     ink: ink,
                     mute: mute,
                     primary: primary,
                     isUpgrade: !isAcquisition,
+                    onRestaurar:
+                        subscriptionUsesNativeStore && !_restoringPurchases
+                            ? _restorePurchases
+                            : null,
                   ),
                 ],
               ),

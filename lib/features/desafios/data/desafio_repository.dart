@@ -21,6 +21,10 @@ class Desafio {
   final String? liderNome;
   final int? liderContagem;
 
+  /// Só no /me: a contagem e a posição do aluno (posição nula sem contagem).
+  final int? minhaContagem;
+  final int? minhaPosicao;
+
   const Desafio({
     required this.id,
     required this.titulo,
@@ -35,6 +39,8 @@ class Desafio {
     this.podeExcluir = false,
     this.liderNome,
     this.liderContagem,
+    this.minhaContagem,
+    this.minhaPosicao,
   });
 
   factory Desafio.fromJson(Map<String, dynamic> j) => Desafio(
@@ -51,6 +57,8 @@ class Desafio {
     podeExcluir: j['podeExcluir'] as bool? ?? false,
     liderNome: j['liderNome'] as String?,
     liderContagem: (j['liderContagem'] as num?)?.toInt(),
+    minhaContagem: (j['minhaContagem'] as num?)?.toInt(),
+    minhaPosicao: (j['minhaPosicao'] as num?)?.toInt(),
   );
 }
 

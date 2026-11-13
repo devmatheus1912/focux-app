@@ -27,6 +27,7 @@ class AssinaturaGestaoView extends StatefulWidget {
     super.key,
     required this.planoNome,
     this.validoAte,
+    this.renova = false,
     required this.usos,
     this.iaUsada = 0,
     this.iaLimite = 0,
@@ -40,11 +41,14 @@ class AssinaturaGestaoView extends StatefulWidget {
     this.onSuperior,
   });
 
-  /// Inclusos à vista antes de "Ver tudo".
-  static const inclusosVisiveis = 4;
+  /// Inclusos à vista antes de "Ver os N".
+  static const inclusosVisiveis = 6;
 
   final String planoNome;
   final DateTime? validoAte;
+
+  /// Assinatura da loja que renova sozinha: "Renova em"; senão "Acesso até".
+  final bool renova;
   final List<AssinaturaUso> usos;
   final int iaUsada;
   final int iaLimite;
@@ -136,7 +140,9 @@ class _AssinaturaGestaoViewState extends State<AssinaturaGestaoView> {
               if (assinaturaAcessoAte(widget.validoAte) case final data?) ...[
                 const SizedBox(height: TokensStrip.s1),
                 Text(
-                  s.assinaturaAcessoAte(data),
+                  widget.renova
+                      ? s.assinaturaRenovaEm(data)
+                      : s.assinaturaAcessoAte(data),
                   style: FocuxHubTypography.bodyMuted(color: sobre.mute),
                 ),
               ],
@@ -146,12 +152,14 @@ class _AssinaturaGestaoViewState extends State<AssinaturaGestaoView> {
         const SizedBox(height: TokensStrip.s4),
         if (usos.isNotEmpty || temIa)
           grupo(s.assinaturaSeuUso, [
+            // Duas linhas no mesmo formato, com separador (SPEC 12/11).
             for (final (i, uso) in usos.indexed) ...[
-              if (i > 0) const SizedBox(height: TokensStrip.s3),
+              if (i > 0) Divider(height: TokensStrip.s5, color: chrome.line),
               _UsoLinha(uso: uso),
             ],
             if (temIa) ...[
-              if (usos.isNotEmpty) const SizedBox(height: TokensStrip.s3),
+              if (usos.isNotEmpty)
+                Divider(height: TokensStrip.s5, color: chrome.line),
               IaUsoLinha(usado: widget.iaUsada, limite: widget.iaLimite),
             ],
           ]),
@@ -179,7 +187,11 @@ class _AssinaturaGestaoViewState extends State<AssinaturaGestaoView> {
               Align(
                 alignment: Alignment.centerLeft,
                 child: FxActionLink(
-                  label: _verTudo ? s.assinaturaVerMenos : s.assinaturaVerTudo,
+                  label:
+                      _verTudo
+                          ? s.assinaturaVerMenos
+                          : s.assinaturaVerOsN(inclusos.length),
+                  icon: _verTudo ? FxIcons.chevronCima : FxIcons.chevronBaixo,
                   onTap: () => setState(() => _verTudo = !_verTudo),
                 ),
               ),
@@ -230,26 +242,17 @@ class _UsoLinha extends StatelessWidget {
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
     final limite = uso.limite;
+    // Uma frase, como a linha da IA: "1 aluno · sem limite", "5 de 30 alunos".
     final valor =
         limite == null
-            ? s.assinaturaUsoLivre(uso.usado)
-            : s.assinaturaUsoDe(uso.usado, limite);
+            ? s.assinaturaAlunosSemLimite(uso.usado)
+            : s.assinaturaAlunosDe(uso.usado, limite);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                uso.rotulo,
-                style: FocuxHubTypography.body(color: chrome.ink),
-              ),
-            ),
-            Text(
-              valor,
-              style: FocuxHubTypography.bodyMuted(color: chrome.mute),
-            ),
-          ],
+        Text(
+          valor,
+          style: FocuxHubTypography.body(color: chrome.ink),
         ),
         if (limite != null && limite > 0) ...[
           const SizedBox(height: TokensStrip.s1),

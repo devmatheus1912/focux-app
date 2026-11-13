@@ -350,6 +350,7 @@ class _DesafiosAlunoScreenState extends ConsumerState<DesafiosAlunoScreen> {
                   final desafio = _desafios[index];
                   return DesafioLinha(
                     desafio: desafio,
+                    forAluno: true,
                     onTap: () => _abrir(desafio),
                   );
                 },

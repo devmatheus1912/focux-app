@@ -11,7 +11,15 @@ void main() {
       ...PaywallCatalog.comparisonFreeVsEnterprise,
     ].map((r) => r.feature).join(' | ');
     expect(rotulos, isNot(contains('CRM')));
-    expect(rotulos, contains('Aba Hoje + Índice Focux'));
+    expect(rotulos, contains('Hoje com o Índice Focux'));
+    // SPEC 12/11: nomes do app, sem inglês nem nome velho.
+    for (final velho in ['Copiloto', 'landing', 'win-back', 'Loja de pacotes']) {
+      expect(rotulos, isNot(contains(velho)), reason: velho);
+    }
+    expect(
+      PaywallCatalog.comparisonProVsEnterprise.where((r) => r.free == r.paid),
+      isEmpty,
+    );
   });
 
   test('upgradeTriggers match reference', () {
@@ -26,29 +34,9 @@ void main() {
     );
   });
 
-  test('roi tags omit emoji prefix', () {
-    final tag = PaywallCatalog.roiTagForPlan(SubscriptionPlan.PRO);
-    expect(tag, isNotNull);
-    expect(tag!, isNot(startsWith('💰')));
-  });
-
-  test('tags do plano descrevem limites reais, sem ROI inventado', () {
-    expect(
-      PaywallCatalog.roiTagForPlan(SubscriptionPlan.PRO),
-      'Até 30 alunos, 200 usos de IA/mês e cobrança PIX',
-    );
-    expect(
-      PaywallCatalog.roiTagForPlan(SubscriptionPlan.ENTERPRISE),
-      'Marca própria, landing completa, loja e 600 usos de IA/mês',
-    );
-    expect(PaywallCatalog.roiTagForPlan(SubscriptionPlan.FREE), isNull);
-  });
-
   test('gatilhos de upgrade sem preço fixo nem estatística sem base', () {
     final textos = [
       for (final t in PaywallCatalog.upgradeTriggers) t.message,
-      PaywallCatalog.roiTagForPlan(SubscriptionPlan.PRO)!,
-      PaywallCatalog.roiTagForPlan(SubscriptionPlan.ENTERPRISE)!,
     ];
     for (final texto in textos) {
       expect(texto, isNot(contains('R\$')), reason: texto);
