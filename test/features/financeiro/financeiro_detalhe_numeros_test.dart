@@ -137,19 +137,23 @@ void main() {
       await tester.pumpWidget(
         _app(
           Scaffold(
-            body: FinanceiroNumerosMes(resumo: _resumo(), onAbrir: abertos.add),
+            body: FinanceiroNumerosMes(
+              resumo: _resumo(),
+              onAbrir: abertos.add,
+              hoje: DateTime(2026, 11, 14),
+            ),
           ),
         ),
       );
       await _settle(tester);
-      expect(find.text('Recebido'), findsOneWidget);
+      expect(find.text('Recebido em nov'), findsOneWidget);
       expect(find.text('A receber'), findsOneWidget);
       expect(find.text('Atrasado'), findsOneWidget);
       expect(find.text('R\$ 100,00'), findsOneWidget);
       expect(find.text('R\$ 250,00'), findsOneWidget);
       expect(find.text('R\$ 300,00'), findsOneWidget);
 
-      await tester.tap(find.text('Recebido'));
+      await tester.tap(find.text('Recebido em nov'));
       await tester.tap(find.text('A receber'));
       await tester.tap(find.text('Atrasado'));
       expect(abertos, [
@@ -174,7 +178,7 @@ void main() {
         ),
       );
       await _settle(tester);
-      expect(find.text('Inclui R\$ 100,00 pagos de meses anteriores'), findsOneWidget);
+      expect(find.text('Inclui R\$ 100,00 de meses anteriores'), findsOneWidget);
 
       await tester.pumpWidget(
         _app(

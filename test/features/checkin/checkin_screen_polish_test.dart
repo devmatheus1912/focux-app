@@ -207,8 +207,12 @@ void main() {
     );
     expect(card, isNot(contains('onTrocar')));
     expect(card, contains('_CheckinSetSteppers'));
-    expect(card, contains('_CheckinStepperButton'));
-    expect(card, contains('s.checkinDiminuir'));
+    // O stepper com − e + é o compartilhado (também na folha Registrar carga).
+    expect(card, contains('FxValorStepper('));
+    expect(
+      _src('lib/core/widgets/fx_valor_stepper.dart'),
+      contains('s.checkinDiminuir'),
+    );
     expect(card, contains('CheckinExerciseVideoPreview'));
     expect(card, contains('CheckinExerciseThumbnailPreview'));
     expect(card, contains('CheckinExerciseMediaPreview'));

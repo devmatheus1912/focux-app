@@ -14,6 +14,7 @@ import '../../../core/widgets/fx_number_pad_sheet.dart';
 import '../../../core/widgets/fx_set_dots.dart';
 import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/widgets/fx_valor_stepper.dart';
 import '../../../l10n/app_localizations.dart';
 import '../data/checkin_repository.dart';
 import '../../treinos/models/metodo_exercicio.dart';

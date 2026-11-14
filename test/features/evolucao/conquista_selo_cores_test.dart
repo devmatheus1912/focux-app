@@ -40,4 +40,21 @@ void main() {
     const teal = Color(0xFF0B4F5C);
     expect(conquistaSeloCores(teal), conquistaSeloCores(teal, sobreMarca: false));
   });
+
+  test('sobre a marca o metal mantém o matiz da marca (não vira prata)', () {
+    const teal = Color(0xFF0B4F5C);
+    final sobre = conquistaSeloCores(teal, sobreMarca: true);
+    final matizMarca = HSLColor.fromColor(teal).hue;
+    for (final tom in [sobre.metalClaro, sobre.metalMedio, sobre.metalEscuro]) {
+      final hsl = HSLColor.fromColor(tom);
+      expect((hsl.hue - matizMarca).abs(), lessThan(2), reason: '$tom');
+      expect(hsl.saturation, greaterThanOrEqualTo(conquistaSeloSaturacaoMinima - 0.01));
+    }
+  });
+
+  test('marca cinza continua cinza', () {
+    const cinza = Color(0xFF333333);
+    final tom = conquistaMetalTingido(cinza, 0.78);
+    expect(HSLColor.fromColor(tom).saturation, lessThan(0.05));
+  });
 }

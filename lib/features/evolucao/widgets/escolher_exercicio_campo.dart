@@ -34,7 +34,11 @@ class EscolherExercicioCampo extends StatelessWidget {
     required this.onEscolher,
     this.recentes = const [],
     this.erro,
+    this.rotulo,
   });
+
+  /// Rótulo em cima do nome, como os outros campos da folha.
+  final String? rotulo;
 
   final ExercicioEscolhido? escolhido;
 
@@ -74,11 +78,19 @@ class EscolherExercicioCampo extends StatelessWidget {
                 Icon(FxIcons.treino, color: chrome.mute),
                 const SizedBox(width: TokensStrip.s2),
                 Expanded(
-                  child: Text(
-                    nome.isEmpty ? ptS.escolherEscolherExercicio : nome,
-                    style: FocuxHubTypography.body(
-                      color: nome.isEmpty ? chrome.mute : chrome.ink,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (rotulo case final r?)
+                        Text(r, style: FocuxHubTypography.chip(chrome.mute)),
+                      Text(
+                        nome.isEmpty ? ptS.escolherEscolherExercicio : nome,
+                        style: FocuxHubTypography.body(
+                          color: nome.isEmpty ? chrome.mute : chrome.ink,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 Icon(FxIcons.chevronDireita, color: chrome.mute),

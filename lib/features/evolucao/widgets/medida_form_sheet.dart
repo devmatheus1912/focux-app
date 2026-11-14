@@ -67,7 +67,7 @@ Future<AcaoDaMedida?> escolherAcaoDaMedida(
   ],
 );
 
-class _Campos extends StatelessWidget {
+class _Campos extends StatefulWidget {
   const _Campos({
     required this.peso,
     required this.cintura,
@@ -93,6 +93,53 @@ class _Campos extends StatelessWidget {
   /// Último valor de cada campo, para o personal comparar ao digitar.
   final Map<EvolucaoMetrica, double> referencia;
 
+  @override
+  State<_Campos> createState() => _CamposState();
+}
+
+/// A massa magra acompanha a gordura (100% menos ela) enquanto a pessoa não
+/// digitar outra; soma fora de 98% a 102% mostra o erro no campo da massa.
+class _CamposState extends State<_Campos> {
+  /// A massa foi preenchida por nós (ou está vazia): segue a gordura.
+  late bool _massaAutomatica = (widget.massa?.text.trim() ?? '').isEmpty;
+  String _ultimaAutomatica = '';
+
+  @override
+  void initState() {
+    super.initState();
+    widget.gordura?.addListener(_gorduraMudou);
+    widget.massa?.addListener(_massaMudou);
+  }
+
+  @override
+  void dispose() {
+    widget.gordura?.removeListener(_gorduraMudou);
+    widget.massa?.removeListener(_massaMudou);
+    super.dispose();
+  }
+
+  void _gorduraMudou() {
+    final massa = widget.massa;
+    if (massa != null && _massaAutomatica) {
+      final g = _ler(widget.gordura!);
+      final texto =
+          g == null || g < 0 || g > 100 ? '' : formatBrDecimal(massaMagraPelaGordura(g));
+      if (massa.text != texto) {
+        _ultimaAutomatica = texto;
+        massa.text = texto;
+      }
+    }
+    setState(() {});
+  }
+
+  void _massaMudou() {
+    final massa = widget.massa!;
+    if (massa.text != _ultimaAutomatica) {
+      _massaAutomatica = massa.text.trim().isEmpty;
+    }
+    setState(() {});
+  }
+
   /// Rótulo curto; a última medida aparece como valor fantasma no campo e,
   /// por extenso, embaixo. Tudo é opcional: o aviso sai uma vez, no topo.
   Widget _campo(
@@ -101,8 +148,9 @@ class _Campos extends StatelessWidget {
     IconData icone, {
     EvolucaoMetrica? metrica,
     bool divisor = true,
+    String? erro,
   }) {
-    final ultima = metrica == null ? null : referencia[metrica];
+    final ultima = metrica == null ? null : widget.referencia[metrica];
     return AlunoInsetFormField(
       rotuloVisivel: true,
       mostrarOpcional: false,
@@ -110,11 +158,13 @@ class _Campos extends StatelessWidget {
       label: rotulo,
       hint: ultima == null ? null : formatBrDecimal(ultima),
       ajuda:
-          ultima == null
+          erro ??
+          (ultima == null
               ? null
               : ptS.evolucaoUltimaReferencia(
                 '${formatBrDecimal(ultima)} ${metrica!.unidade}',
-              ),
+              )),
+      ajudaErro: erro != null,
       icon: icone,
       keyboardType: _teclado,
       showDivider: divisor,
@@ -122,7 +172,21 @@ class _Campos extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) => Column(
+  Widget build(BuildContext context) {
+    final _Campos(
+      :peso,
+      :cintura,
+      :quadril,
+      :braco,
+      :gordura,
+      :massa,
+      :semMedida,
+    ) = widget;
+    final coerente =
+        gordura == null ||
+        massa == null ||
+        composicaoCoerente(_ler(gordura), _ler(massa));
+    return Column(
     mainAxisSize: MainAxisSize.min,
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
@@ -145,10 +209,26 @@ class _Campos extends StatelessWidget {
       if (gordura case final g?)
         _campo(g, ptS.evolucaoCampoGordura, FxIcons.pizza),
       if (massa case final m?)
-        _campo(m, ptS.evolucaoCampoMassa, FxIcons.treino, divisor: false),
+        _campo(
+          m,
+          ptS.evolucaoCampoMassa,
+          FxIcons.treino,
+          divisor: false,
+          erro: coerente ? null : ptS.evolucaoComposicaoIncoerente,
+        ),
     ],
   );
+  }
 }
+
+/// O botão Salvar só passa com gordura e massa magra coerentes.
+bool _composicaoDosCamposCoerente(
+  TextEditingController? gordura,
+  TextEditingController? massa,
+) =>
+    gordura == null ||
+    massa == null ||
+    composicaoCoerente(_ler(gordura), _ler(massa));
 
 enum _DiaDaMedida { hoje, ontem, outra }
 
@@ -241,6 +321,7 @@ Future<NovaMedida?> novaMedidaSheet(
       title: ptS.evolucaoNovaMedida,
       icon: FxIcons.balanca,
       confirmLabel: ptS.evolucaoSalvar,
+      podeConfirmar: () => _composicaoDosCamposCoerente(gordura, massa),
       child: StatefulBuilder(
         builder:
             (context, setSheet) => Column(
@@ -319,6 +400,11 @@ Future<MedidaEditada?> editarMedidaSheet(
       title: ptS.evolucaoMedidaEditar,
       icon: FxIcons.editar,
       confirmLabel: ptS.evolucaoSalvar,
+      podeConfirmar:
+          () => _composicaoDosCamposCoerente(
+            comComposicao ? gorduraCtrl : null,
+            comComposicao ? massaCtrl : null,
+          ),
       child: _Campos(
         peso: peso,
         cintura: cintura,

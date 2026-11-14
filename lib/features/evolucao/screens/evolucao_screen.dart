@@ -16,7 +16,6 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_grouped_action_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -28,7 +27,6 @@ import '../../../l10n/app_localizations.dart';
 import '../../alunos/utils/aluno360_medida_plausivel.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
 import '../../alunos/widgets/aluno_form_choices.dart';
-import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../../avaliacao/data/avaliacao_repository.dart';
 import '../../avaliacao/utils/evolucao_comparativo_display.dart';
 import '../data/evolucao_repository.dart';
@@ -46,6 +44,7 @@ import '../widgets/evolucao_metas_bloco.dart';
 import '../widgets/evolucao_medidas_aba.dart';
 import '../widgets/evolucao_recordes_aba.dart';
 import '../widgets/medida_form_sheet.dart';
+import '../widgets/registrar_carga_folha.dart';
 import '../../../l10n/pt.dart';
 import '../widgets/evolucao_help_sheet.dart';
 import '../widgets/evolucao_historico_folha.dart';
@@ -91,8 +90,6 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
     });
   }
 
-  /// Redesenha a folha do recorde quando a validação muda.
-  VoidCallback? _avisarFormulario;
   late EvolucaoHubView _view = widget.abaInicial;
 
   /// Fotos e Comparar só carregam quando abertas.
@@ -432,6 +429,8 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                                         'Marque o primeiro recorde de ${satelliteFirstName(nome)} após um check-in ou treino forte.',
                                     onAtualizar: _atualizar,
                                     onEditar: (r) => _formularioRecorde(recorde: r),
+                                    onRegistrar:
+                                        (e) => _formularioRecorde(exercicio: e),
                                     onExcluir: _excluirRecorde,
                                     depois: [
                                       EvolucaoConquistas(
@@ -616,129 +615,57 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
     }
   }
 
-  /// Novo recorde ou, com [recorde], correção de um existente.
-  Future<void> _formularioRecorde({RecordePessoal? recorde}) async {
+  /// Novo recorde ou, com [recorde], correção de um existente. [exercicio]
+  /// chega já escolhido quando a folha abre dos registros do exercício.
+  Future<void> _formularioRecorde({
+    RecordePessoal? recorde,
+    ExercicioEscolhido? exercicio,
+  }) async {
     final recordes = ref.read(evolucaoHomeProvider(widget.alunoId)).value?.recordes ?? const [];
-    final vistos = <String>{};
-    final recentes = <ExercicioEscolhido>[
-      for (final r in recordes)
-        if (vistos.add(r.exercicioNome.toLowerCase()))
-          (id: r.exercicioId, nome: r.exercicioNome),
-    ].take(5).toList();
-    ExercicioEscolhido? escolhido =
-        recorde == null ? null : (id: recorde.exercicioId, nome: recorde.exercicioNome);
-    final cargaCtrl = TextEditingController(
-      text: recorde?.cargaKg == null ? '' : formatBrDecimal(recorde!.cargaKg!),
-    );
-    final repsCtrl = TextEditingController(text: recorde?.repeticoes?.toString() ?? '');
-    // Validação dentro da folha: o erro aparece no campo e nada do que foi
-    // digitado se perde.
-    String? erroExercicio;
-    String? erroCarga;
-    double? lerCarga() =>
-        double.tryParse(cargaCtrl.text.trim().replaceAll(',', '.'));
     try {
-      final saved = await showFxFormSheet(
+      final r = await abrirRegistrarCarga(
         context,
-        title: recorde == null ? ptS.evolucaoRegistrarCarga : ptS.evolucaoEditarCarga,
-        icon: FxIcons.trofeu,
-        confirmLabel: ptS.evolucaoSalvar,
-        podeConfirmar: () {
-          final carga = lerCarga();
-          erroExercicio = escolhido == null ? ptS.evolucaoInformeExercicio : null;
-          erroCarga =
-              carga == null || carga < 0.5 || carga > 1000
-                  ? ptS.evolucaoCargaInvalida
-                  : null;
-          _avisarFormulario?.call();
-          return erroExercicio == null && erroCarga == null;
-        },
-        child: StatefulBuilder(
-          builder: (context, setSheet) {
-            _avisarFormulario = () => setSheet(() {});
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                EscolherExercicioCampo(
-                  escolhido: escolhido,
-                  recentes: recentes,
-                  erro: erroExercicio,
-                  onEscolher: (e) => setSheet(() {
-                    escolhido = e;
-                    erroExercicio = null;
-                  }),
-                ),
-                AlunoInsetFormField(
-                  rotuloVisivel: true,
-                  obrigatorio: true,
-                  controller: cargaCtrl,
-                  label: ptS.evolucaoCampoCarga,
-                  icon: FxIcons.filtros,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  ajuda: erroCarga,
-                  ajudaErro: erroCarga != null,
-                ),
-                AlunoInsetFormField(
-                  rotuloVisivel: true,
-                  controller: repsCtrl,
-                  label: ptS.evolucaoCampoReps,
-                  icon: FxIcons.repetir,
-                  keyboardType: TextInputType.number,
-                  showDivider: false,
-                ),
-              ],
-            );
-          },
-        ),
+        recordes: recordes,
+        editando: recorde,
+        exercicioInicial: exercicio,
       );
-      if (saved != true || !mounted) return;
-      final exercicio = escolhido!;
-      final carga = lerCarga()!;
+      if (r == null || !mounted) return;
       final repo = EvolucaoRepository(ref.read(apiClientProvider));
-      final reps = int.tryParse(repsCtrl.text.trim());
+      final data = r.data.toIso8601String().substring(0, 10);
       if (recorde == null) {
         await repo.adicionarRecorde(
           widget.alunoId,
-          exercicioId: exercicio.id,
-          exercicioNome: exercicio.nome,
-          carga: carga,
-          repeticoes: reps,
+          exercicioId: r.exercicio.id,
+          exercicioNome: r.exercicio.nome,
+          carga: r.carga,
+          repeticoes: r.repeticoes,
+          data: data,
         );
       } else {
         await repo.editarRecorde(
           widget.alunoId,
           recorde,
-          exercicioId: exercicio.id,
-          exercicioNome: exercicio.nome,
-          carga: carga,
-          repeticoes: reps,
+          exercicioId: r.exercicio.id,
+          exercicioNome: r.exercicio.nome,
+          carga: r.carga,
+          repeticoes: r.repeticoes,
+          data: data,
         );
       }
       await invalidateAluno360Providers(ref, widget.alunoId);
       // Passou a melhor marca do exercício: é recorde; senão, só a carga.
-      final anterior = recordes
-          .where(
-            (r) =>
-                r.id != recorde?.id &&
-                r.exercicioNome.trim().toLowerCase() ==
-                    exercicio.nome.trim().toLowerCase(),
-          )
-          .map((r) => r.cargaKg ?? 0)
-          .fold<double>(0, (a, b) => a > b ? a : b);
+      final anterior =
+          contextoDaCarga(recordes, r.exercicio.nome, ignorarId: recorde?.id).recorde;
       if (mounted) {
         FeedbackHelper.showSuccess(
           context,
-          anterior > 0 && carga > anterior
-              ? ptS.evolucaoNovoRecordeSalvo(formatBrKg(carga))
+          ganhoDeRecorde(r.carga, anterior) != null
+              ? ptS.evolucaoNovoRecordeSalvo(formatBrKg(r.carga))
               : ptS.evolucaoCargaRegistrada,
         );
       }
     } catch (e) {
       if (mounted) FeedbackHelper.showError(context, friendlyError(e));
-    } finally {
-      _avisarFormulario = null;
-      cargaCtrl.dispose();
-      repsCtrl.dispose();
     }
   }
 

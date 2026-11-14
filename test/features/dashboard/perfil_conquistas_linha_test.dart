@@ -75,6 +75,35 @@ void main() {
     );
   });
 
+  testWidgets('legenda longa quebra em duas linhas e os selos ficam na mesma altura', (
+    tester,
+  ) async {
+    final longa = Conquista(
+      chave: 'longa',
+      tipo: ConquistaTipo.recorde,
+      titulo: '20 kg',
+      detalhe: 'detalhe',
+      data: DateTime(2026, 11, 11),
+      valor: '20 kg',
+      exercicio: 'Abdominal bicicleta',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: PerfilConquistasLinha(
+            conquistas: [longa, _c(2)],
+            onAbrir: (_) {},
+            onVerTodas: () {},
+          ),
+        ),
+      ),
+    );
+    final texto = tester.widget<Text>(find.text('Abdominal bicicleta'));
+    expect(texto.maxLines, perfilSeloLegendaLinhas);
+    final selos = find.byType(ConquistaSelo);
+    expect(tester.getTopLeft(selos.at(0)).dy, tester.getTopLeft(selos.at(1)).dy);
+  });
+
   test('o item da conquista é o exercício ou a medida', () {
     expect(_c(1).item, 'Supino reto');
     expect(_c(2).item, 'Cintura');

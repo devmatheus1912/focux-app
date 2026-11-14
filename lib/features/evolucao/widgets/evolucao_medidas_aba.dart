@@ -69,9 +69,11 @@ class _EvolucaoMedidasAbaState extends State<EvolucaoMedidasAba> {
   EvolucaoPeriodo _periodo = EvolucaoPeriodo.tudo;
 
   List<PontoGrafico> _serie(List<MedidaCorporal> medidas, EvolucaoMetrica m) =>
-      m == EvolucaoMetrica.gordura
-          ? serieDeGordura(widget.gordura)
-          : serieDaMetrica(medidas, m);
+      switch (m) {
+        EvolucaoMetrica.gordura => serieDeGordura(widget.gordura),
+        EvolucaoMetrica.massa => serieDeGordura(widget.massa),
+        _ => serieDaMetrica(medidas, m),
+      };
 
   MetaCorporal? _metaDe(EvolucaoMetrica m) =>
       widget.metas.where((x) => x.aberta && x.metrica == m.codigoMeta).firstOrNull;
@@ -464,6 +466,9 @@ class _LinhaDeMetrica extends StatelessWidget {
     final detalhe =
         serie.length < 2
             ? dataCurta(serie.last.data)
+            // Foi e voltou: "sem mudança" diria que nada aconteceu.
+            : serieVoltouAoInicio(serie)
+            ? ptS.evolucaoMesmoValorDe(dataCurta(serie.first.data))
             : basePropria
             ? ptS.evolucaoDesdePrimeira(
               diferencaTexto(diferenca, metrica.unidade),

@@ -518,12 +518,15 @@ class EvolucaoRepository {
     required String exercicioNome,
     required double carga,
     int? repeticoes,
+
+    /// "aaaa-mm-dd"; nulo mantém a data do registro.
+    String? data,
   }) => _dio.put(
     '/api/alunos/$alunoId/recordes/${recorde.id}',
     data: _corpoDoRecorde(
       exercicioId: exercicioId,
       exercicioNome: exercicioNome,
-      data: recorde.data,
+      data: data ?? recorde.data,
       carga: carga,
       repeticoes: repeticoes,
     ),
@@ -543,13 +546,17 @@ class EvolucaoRepository {
     required String exercicioNome,
     required double carga,
     int? repeticoes,
+
+    /// "aaaa-mm-dd"; nulo = hoje.
+    String? data,
   }) async {
+    final dia = data ?? DateTime.now().toIso8601String().substring(0, 10);
     final r = await _dio.post(
       '/api/alunos/$alunoId/recordes',
       data: _corpoDoRecorde(
         exercicioId: exercicioId,
         exercicioNome: exercicioNome,
-        data: DateTime.now().toIso8601String().substring(0, 10),
+        data: dia,
         carga: carga,
         repeticoes: repeticoes,
       ),
@@ -564,7 +571,7 @@ class EvolucaoRepository {
       id: 0,
       exercicioId: 0,
       exercicioNome: exercicioNome,
-      data: DateTime.now().toIso8601String().substring(0, 10),
+      data: dia,
       cargaKg: carga,
       repeticoes: repeticoes,
     );

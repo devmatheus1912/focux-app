@@ -21,27 +21,44 @@ ResumoMensal _resumo({String anteriores = '0', String adiantado = '0'}) =>
 
 void main() {
   group('Financeiro: números do mês', () {
-    test('o mês vem escrito por extenso', () {
+    test('só o Recebido tem mês: "Recebido em nov"', () {
       expect(mesPtBr(DateTime(2026, 11, 14)), 'Novembro');
-      expect(mesPtBr(DateTime(2027, 1, 2)), 'Janeiro');
+      expect(financeiroRotuloRecebido(ptS, DateTime(2026, 11, 14)), 'Recebido em nov');
+      expect(financeiroRotuloRecebido(ptS, DateTime(2027, 3, 2)), 'Recebido em mar');
+    });
+
+    test('A receber lê todas as pendentes; build antigo cai no do mês', () {
+      final novo = ResumoMensal.fromJson({
+        'totalRecebido': '0',
+        'totalPrevisto': '0',
+        'totalEmAberto': '0.00',
+        'aReceber': '200.00',
+      });
+      expect(novo.totalEmAberto.cents, 20000);
+      final antigo = ResumoMensal.fromJson({
+        'totalRecebido': '0',
+        'totalPrevisto': '0',
+        'totalEmAberto': '50.00',
+      });
+      expect(antigo.totalEmAberto.cents, 5000);
     });
 
     test('nota do Recebido: anteriores, adiantado, os dois e nenhum', () {
       expect(financeiroNotaDoRecebido(ptS, _resumo()), isNull);
       expect(
         financeiroNotaDoRecebido(ptS, _resumo(anteriores: '200.00')),
-        'Inclui R\$ 200,00 pagos de meses anteriores',
+        'Inclui R\$ 200,00 de meses anteriores',
       );
       expect(
         financeiroNotaDoRecebido(ptS, _resumo(adiantado: '50.00')),
-        'Inclui R\$ 50,00 pago adiantado',
+        'Inclui R\$ 50,00 adiantados',
       );
       expect(
         financeiroNotaDoRecebido(
           ptS,
           _resumo(anteriores: '200.00', adiantado: '50.00'),
         ),
-        'Inclui R\$ 200,00 pagos de meses anteriores e R\$ 50,00 pago adiantado',
+        'Inclui R\$ 200,00 de meses anteriores e R\$ 50,00 adiantados',
       );
     });
 

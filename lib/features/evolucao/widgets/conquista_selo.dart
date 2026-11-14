@@ -31,7 +31,8 @@ typedef ConquistaSeloCores = ({
 const conquistaSeloContrasteSobreMarca = 3.0;
 
 /// [sobreMarca]: o selo fica sobre um fundo da própria marca (topo do perfil).
-/// O metal clareia para não sumir no fundo; se nem assim chega a
+/// O metal clareia em HSL, com o matiz da marca ([conquistaMetalTingido]),
+/// para não sumir no fundo; se nem assim chega a
 /// [conquistaSeloContrasteSobreMarca] (marca muito clara), volta ao padrão.
 ConquistaSeloCores conquistaSeloCores(Color marca, {bool sobreMarca = false}) {
   final miolo = Color.lerp(marca, Colors.black, 0.78)!;
@@ -47,16 +48,31 @@ ConquistaSeloCores conquistaSeloCores(Color marca, {bool sobreMarca = false}) {
 }
 
 ({Color claro, Color medio, Color escuro})? _metalSobreMarca(Color marca) {
-  final medio = Color.lerp(marca, Colors.white, 0.55)!;
+  final medio = conquistaMetalTingido(marca, 0.78);
   if (FocuxContrast.contrastRatio(medio, marca) <
       conquistaSeloContrasteSobreMarca) {
     return null;
   }
   return (
-    claro: Color.lerp(marca, Colors.white, 0.88)!,
+    claro: conquistaMetalTingido(marca, 0.92),
     medio: medio,
-    escuro: Color.lerp(marca, Colors.white, 0.15)!,
+    escuro: conquistaMetalTingido(marca, 0.62),
   );
+}
+
+/// Saturação mínima do metal sobre a marca: misturar com branco deixava a
+/// marca prateada; em HSL o matiz fica e o metal continua sendo da marca.
+const conquistaSeloSaturacaoMinima = 0.35;
+
+/// Tom do metal na [luz] (0 a 1) com o matiz da [marca]. Marca cinza (sem
+/// saturação) continua cinza: forçar saturação inventaria um matiz.
+Color conquistaMetalTingido(Color marca, double luz) {
+  final hsl = HSLColor.fromColor(marca);
+  final saturacao =
+      hsl.saturation < 0.05
+          ? hsl.saturation
+          : math.max(hsl.saturation, conquistaSeloSaturacaoMinima);
+  return hsl.withSaturation(saturacao).withLightness(luz).toColor();
 }
 
 /// Selo de conquista: hexágono de pontas arredondadas, moldura metálica na

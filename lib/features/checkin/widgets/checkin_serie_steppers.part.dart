@@ -38,7 +38,7 @@ class _CheckinSetSteppers extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
-            child: _CheckinStepper(
+            child: FxValorStepper(
               label: s.checkinStepperKg,
               // O rótulo "kg" já está acima do número: sem a unidade ele não quebra.
               value: cargaKg == null ? '—' : fxNumberPadTexto(cargaKg),
@@ -69,7 +69,7 @@ class _CheckinSetSteppers extends StatelessWidget {
             color: chrome.mute.withValues(alpha: 0.22),
           ),
           Expanded(
-            child: _CheckinStepper(
+            child: FxValorStepper(
               label: s.checkinStepperReps,
               value: reps == null ? '—' : '$reps',
               onMinus: onMinusReps,
@@ -93,181 +93,6 @@ class _CheckinSetSteppers extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _CheckinStepper extends StatelessWidget {
-  const _CheckinStepper({
-    required this.label,
-    required this.value,
-    required this.mute,
-    required this.ink,
-    required this.accent,
-    this.onMinus,
-    this.onPlus,
-    this.onEditar,
-  });
-
-  final VoidCallback? onEditar;
-  final String label;
-  final String value;
-  final Color mute;
-  final Color ink;
-  final Color accent;
-  final VoidCallback? onMinus;
-  final VoidCallback? onPlus;
-
-  @override
-  Widget build(BuildContext context) {
-    final s = S.of(context);
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          label,
-          style: FocuxHubTypography.bodyMuted(
-            color: mute,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        Semantics(
-          button: onEditar != null,
-          label: onEditar == null ? null : '$label: $value',
-          excludeSemantics: onEditar != null,
-          child: InkWell(
-            onTap: onEditar,
-            borderRadius: BorderRadius.circular(TokensStrip.rInput),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                minHeight: 64,
-                minWidth: double.infinity,
-              ),
-              child: Center(
-                // Cabe sempre numa linha: encolhe em vez de quebrar.
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    value,
-                    maxLines: 1,
-                    textAlign: TextAlign.center,
-                    style: FocuxHubTypography.cardTitle(color: ink).copyWith(
-                      fontSize: TokensStrip.fontNumeroTela,
-                      height: 1.1,
-                      fontWeight: FontWeight.w700,
-                      fontFeatures: const [FontFeature.tabularFigures()],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: TokensStrip.s1),
-        Row(
-          children: [
-            Expanded(
-              child: _CheckinStepperButton(
-                icon: FxIcons.remover,
-                tooltip: s.checkinDiminuir(label),
-                onPressed: onMinus,
-                ink: ink,
-                accent: accent,
-              ),
-            ),
-            const SizedBox(width: TokensStrip.s2),
-            Expanded(
-              child: _CheckinStepperButton(
-                icon: FxIcons.adicionar,
-                tooltip: s.checkinAumentar(label),
-                onPressed: onPlus,
-                ink: ink,
-                accent: accent,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-/// Botão − ou +. Um toque soma um passo; segurar repete a cada 120 ms.
-class _CheckinStepperButton extends StatefulWidget {
-  const _CheckinStepperButton({
-    required this.icon,
-    required this.tooltip,
-    required this.ink,
-    required this.accent,
-    this.onPressed,
-  });
-
-  final IconData icon;
-  final String tooltip;
-  final Color ink;
-  final Color accent;
-  final VoidCallback? onPressed;
-
-  @override
-  State<_CheckinStepperButton> createState() => _CheckinStepperButtonState();
-}
-
-class _CheckinStepperButtonState extends State<_CheckinStepperButton> {
-  Timer? _repete;
-
-  void _parar() {
-    _repete?.cancel();
-    _repete = null;
-  }
-
-  @override
-  void dispose() {
-    _parar();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final habilitado = widget.onPressed != null;
-    return Tooltip(
-      message: widget.tooltip,
-      child: Semantics(
-        button: true,
-        enabled: habilitado,
-        label: widget.tooltip,
-        excludeSemantics: true,
-        child: GestureDetector(
-          onLongPressStart:
-              !habilitado
-                  ? null
-                  : (_) {
-                    _parar();
-                    _repete = Timer.periodic(
-                      const Duration(milliseconds: 120),
-                      (_) {
-                        HapticFeedback.selectionClick();
-                        widget.onPressed!();
-                      },
-                    );
-                  },
-          onLongPressEnd: (_) => _parar(),
-          onLongPressCancel: _parar,
-          child: Material(
-            color: widget.accent.withValues(alpha: habilitado ? 0.10 : 0.04),
-            borderRadius: BorderRadius.circular(TokensStrip.rInput),
-            child: InkWell(
-              onTap: habilitado ? widget.onPressed : null,
-              borderRadius: BorderRadius.circular(TokensStrip.rInput),
-              child: SizedBox(
-                height: 56,
-                child: Center(
-                  child: Icon(widget.icon, color: widget.ink, size: 28),
-                ),
-              ),
-            ),
-          ),
-        ),
       ),
     );
   }

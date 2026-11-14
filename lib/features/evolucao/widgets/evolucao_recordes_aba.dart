@@ -9,13 +9,14 @@ import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_grafico_linha.dart';
 import '../../../core/widgets/fx_grouped_action_sheet.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
-import '../../../core/widgets/fx_sheet_frame.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_status_pill.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../l10n/pt.dart';
 import '../data/evolucao_repository.dart';
 import '../utils/evolucao_display.dart';
 import '../utils/evolucao_series.dart';
+import 'escolher_exercicio_campo.dart';
 import '../../../core/theme/fx_icons.dart';
 import '../../../core/widgets/fx_link_row.dart';
 
@@ -30,6 +31,7 @@ class EvolucaoRecordesAba extends StatefulWidget {
     required this.onAtualizar,
     this.onEditar,
     this.onExcluir,
+    this.onRegistrar,
     this.depois = const [],
   });
 
@@ -40,6 +42,9 @@ class EvolucaoRecordesAba extends StatefulWidget {
   /// Só para o personal.
   final ValueChanged<RecordePessoal>? onEditar;
   final ValueChanged<RecordePessoal>? onExcluir;
+
+  /// "Registrar carga" no rodapé dos registros, com o exercício escolhido.
+  final ValueChanged<ExercicioEscolhido>? onRegistrar;
 
   /// Conquistas de força, depois da lista.
   final List<Widget> depois;
@@ -112,6 +117,7 @@ class _EvolucaoRecordesAbaState extends State<EvolucaoRecordesAba> {
                   escolhido,
                   onEditar: widget.onEditar,
                   onExcluir: widget.onExcluir,
+                  onRegistrar: widget.onRegistrar,
                 ),
           ),
           const SizedBox(height: TokensStrip.s3),
@@ -290,13 +296,39 @@ class _LinhaDoExercicio extends StatelessWidget {
   }
 }
 
-/// Registros do exercício em lista agrupada, o melhor com a etiqueta
-/// "Recorde". Editar e excluir no "⋯" (só o personal).
+/// No mesmo dia vale a maior carga (o gráfico tem um ponto por dia): os
+/// outros registros do dia não entram.
+Set<int> registrosForaDoGrafico(List<RecordePessoal> historico) {
+  String dia(String d) => d.length >= 10 ? d.substring(0, 10) : d;
+  final maiorDoDia = <String, RecordePessoal>{};
+  for (final r in historico) {
+    final atual = maiorDoDia[dia(r.data)];
+    if (atual == null || (r.cargaKg ?? 0) > (atual.cargaKg ?? 0)) {
+      maiorDoDia[dia(r.data)] = r;
+    }
+  }
+  return {
+    for (final r in historico)
+      if (!identical(maiorDoDia[dia(r.data)], r)) r.id,
+  };
+}
+
+/// "20,0 kg × 10 reps", ou só a carga.
+String evolucaoCargaDoRegistro(RecordePessoal r) {
+  final carga = r.cargaKg == null ? '—' : formatBrComUnidade(r.cargaKg!, 'kg');
+  return r.repeticoes == null ? carga : ptS.evolucaoCargaXReps(carga, r.repeticoes!);
+}
+
+/// Registros do exercício no mesmo padrão do Histórico do Corpo: um cartão por
+/// mês, a data como título, carga e repetições embaixo, "Recorde" só no melhor.
+/// Para o personal, o toque abre editar/excluir e o rodapé tem "Registrar
+/// carga" com o exercício já escolhido.
 Future<void> abrirRegistrosDoExercicio(
   BuildContext context,
   ProgressoRecorde progresso, {
   ValueChanged<RecordePessoal>? onEditar,
   ValueChanged<RecordePessoal>? onExcluir,
+  ValueChanged<ExercicioEscolhido>? onRegistrar,
 }) {
   Future<void> acoes(BuildContext ctx, RecordePessoal r) async {
     final escolha = await showFxGroupedActionSheet<String>(
@@ -329,38 +361,174 @@ Future<void> abrirRegistrosDoExercicio(
 
   return showFxHomeSheet<void>(
     context,
-    builder: (ctx) {
-      final chrome = ShellChrome.of(ctx);
-      return FxSheetFrame(
-        title: progresso.nome,
-        child: Container(
-          decoration: fxListCardDecoration(ctx),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              for (final (i, r) in progresso.historico.indexed) ...[
-                if (i > 0) Divider(height: 1, color: chrome.line),
-                FxSatelliteListTile(
-                  title: evolucaoRecordeSubtitle(r),
-                  titleCase: false,
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (identical(r, progresso.melhor))
-                        FxStatusPill(label: ptS.evolucaoRecordeEtiqueta),
-                      if (onEditar != null) ...[
-                        const SizedBox(width: TokensStrip.s2),
-                        Icon(FxIcons.mais, color: chrome.mute),
-                      ],
-                    ],
+    builder:
+        (ctx) => _FolhaDeRegistros(
+          progresso: progresso,
+          onTocar: onEditar == null ? null : (r) => acoes(ctx, r),
+          onRegistrar:
+              onRegistrar == null
+                  ? null
+                  : () {
+                    Navigator.pop(ctx);
+                    final id = progresso.melhor.exercicioId;
+                    onRegistrar((id: id == 0 ? null : id, nome: progresso.nome));
+                  },
+        ),
+  );
+}
+
+class _FolhaDeRegistros extends StatelessWidget {
+  const _FolhaDeRegistros({
+    required this.progresso,
+    this.onTocar,
+    this.onRegistrar,
+  });
+
+  final ProgressoRecorde progresso;
+  final ValueChanged<RecordePessoal>? onTocar;
+  final VoidCallback? onRegistrar;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    final fora = registrosForaDoGrafico(progresso.historico);
+    final porMes = <String, List<RecordePessoal>>{};
+    for (final r in progresso.historico) {
+      final d = DateTime.tryParse(r.data);
+      porMes.putIfAbsent(d == null ? r.data : evolucaoMesAno(d), () => []).add(r);
+    }
+    final melhor = progresso.melhor.cargaKg;
+    return FxHomeSheetSurface(
+      isDark: chrome.isDark,
+      maxHeight:
+          MediaQuery.sizeOf(context).height * FxHomeSheetChrome.maxHeightFactor,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          FxHomeSheetHandle(isDark: chrome.isDark),
+          const SizedBox(height: TokensStrip.s3),
+          FxHomeSheetHeader(
+            isDark: chrome.isDark,
+            title: progresso.nome,
+            subtitle:
+                melhor == null
+                    ? null
+                    : ptS.evolucaoRegistrosResumo(
+                      progresso.historico.length,
+                      formatBrComUnidade(melhor, 'kg'),
+                    ),
+          ),
+          const SizedBox(height: TokensStrip.s2),
+          Flexible(
+            child: ListView(
+              shrinkWrap: true,
+              children: [
+                for (final MapEntry(key: mes, value: doMes) in porMes.entries) ...[
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      top: TokensStrip.s2,
+                      bottom: TokensStrip.s1,
+                    ),
+                    child: Text(mes, style: FocuxHubTypography.chip(chrome.mute)),
                   ),
-                  onTap: onEditar == null ? null : () => acoes(ctx, r),
+                  Container(
+                    decoration: fxListCardDecoration(context),
+                    clipBehavior: Clip.antiAlias,
+                    child: Column(
+                      children: [
+                        for (final (i, r) in doMes.indexed) ...[
+                          if (i > 0) Divider(height: 1, color: chrome.line),
+                          _LinhaDoRegistro(
+                            registro: r,
+                            recorde: identical(r, progresso.melhor),
+                            foraDoGrafico: fora.contains(r.id),
+                            onTap: onTocar == null ? null : () => onTocar!(r),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          if (onRegistrar != null) ...[
+            const SizedBox(height: TokensStrip.s3),
+            FxTonalButton(
+              label: ptS.evolucaoRegistrarCarga,
+              icon: FxIcons.adicionar,
+              expanded: true,
+              onPressed: onRegistrar,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _LinhaDoRegistro extends StatelessWidget {
+  const _LinhaDoRegistro({
+    required this.registro,
+    required this.recorde,
+    required this.foraDoGrafico,
+    this.onTap,
+  });
+
+  final RecordePessoal registro;
+  final bool recorde;
+  final bool foraDoGrafico;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    final d = DateTime.tryParse(registro.data);
+    final data = d == null ? registro.data : dataCurta(d);
+    final carga = evolucaoCargaDoRegistro(registro);
+    return Semantics(
+      button: onTap != null,
+      label: [
+        data,
+        carga,
+        if (recorde) ptS.evolucaoRecordeEtiqueta,
+        if (foraDoGrafico) ptS.evolucaoNaoEntraNoGrafico,
+      ].join(', '),
+      excludeSemantics: true,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(TokensStrip.s3),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(data, style: FocuxHubTypography.cardTitle(color: chrome.ink)),
+                    Text(
+                      carga,
+                      style: FocuxHubTypography.bodyMuted(color: chrome.mute)
+                          .copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
+                    ),
+                    if (foraDoGrafico)
+                      Text(
+                        ptS.evolucaoNaoEntraNoGrafico,
+                        style: FocuxHubTypography.chip(chrome.mute),
+                      ),
+                  ],
                 ),
+              ),
+              if (recorde) FxStatusPill(label: ptS.evolucaoRecordeEtiqueta),
+              if (onTap != null) ...[
+                const SizedBox(width: TokensStrip.s2),
+                Icon(FxIcons.chevronDireita, color: chrome.mute),
               ],
             ],
           ),
         ),
-      );
-    },
-  );
+      ),
+    );
+  }
 }

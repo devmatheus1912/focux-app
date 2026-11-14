@@ -287,7 +287,8 @@ class ResumoMensal {
             .toInt(),
     ticketMedio: j['ticketMedio'] ?? 0,
     acumuladoAnual: j['acumuladoAnual'] ?? 0,
-    totalEmAberto: j['totalEmAberto'] ?? 0,
+    // A receber = toda pendente (backend novo); o do mês só para build antigo.
+    totalEmAberto: j['aReceber'] ?? j['totalEmAberto'] ?? 0,
     totalAtrasado: j['totalAtrasado'] ?? 0,
     quantidadeAtrasadas: (j['quantidadeAtrasadas'] as num? ?? 0).toInt(),
     recebidoDeMesesAnteriores: j['recebidoDeMesesAnteriores'] ?? 0,

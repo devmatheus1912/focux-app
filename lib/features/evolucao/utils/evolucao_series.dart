@@ -11,7 +11,8 @@ enum EvolucaoMetrica {
   cintura('cm'),
   quadril('cm'),
   braco('cm'),
-  gordura('%');
+  gordura('%'),
+  massa('%');
 
   const EvolucaoMetrica(this.unidade);
 
@@ -23,6 +24,7 @@ enum EvolucaoMetrica {
     EvolucaoMetrica.quadril => ptS.evolucaoMetricaQuadril,
     EvolucaoMetrica.braco => ptS.evolucaoMetricaBraco,
     EvolucaoMetrica.gordura => ptS.metaGordura,
+    EvolucaoMetrica.massa => ptS.metaMassa,
   };
 
   double? valor(MedidaCorporal m) => switch (this) {
@@ -30,7 +32,7 @@ enum EvolucaoMetrica {
     EvolucaoMetrica.cintura => m.cintura,
     EvolucaoMetrica.quadril => m.quadril,
     EvolucaoMetrica.braco => m.braco,
-    EvolucaoMetrica.gordura => null,
+    EvolucaoMetrica.gordura || EvolucaoMetrica.massa => null,
   };
 
   /// Código da meta nesta medida.
@@ -40,6 +42,7 @@ enum EvolucaoMetrica {
     EvolucaoMetrica.quadril => 'QUADRIL',
     EvolucaoMetrica.braco => 'BRACO',
     EvolucaoMetrica.gordura => 'GORDURA',
+    EvolucaoMetrica.massa => 'MASSA',
   };
 }
 
@@ -161,6 +164,27 @@ List<double> tendenciaDe(List<PontoGrafico> pontos) {
 }
 
 String _sinal(double d) => d > 0 ? '+' : (d < 0 ? '−' : '');
+
+/// Gordura e massa magra vêm das avaliações, não da medida.
+bool evolucaoMetricaDaAvaliacao(EvolucaoMetrica m) =>
+    m == EvolucaoMetrica.gordura || m == EvolucaoMetrica.massa;
+
+/// Primeiro e último iguais, mas a série mudou no caminho (20% → 15% → 20%).
+bool serieVoltouAoInicio(List<PontoGrafico> serie) =>
+    serie.length >= 3 &&
+    serie.last.valor == serie.first.valor &&
+    serie.any((p) => p.valor != serie.first.valor);
+
+/// Massa magra em % é 100% menos a gordura.
+double massaMagraPelaGordura(double gordura) =>
+    ((100 - gordura) * 10).round() / 10;
+
+/// Gordura e massa magra (%) somam perto de 100%; com uma só, não há o que checar.
+bool composicaoCoerente(double? gordura, double? massa) {
+  if (gordura == null || massa == null) return true;
+  final soma = gordura + massa;
+  return soma >= 98 && soma <= 102;
+}
 
 /// "+1,5 kg" ou "=". Sem cor: subir ou descer depende do objetivo.
 String diferencaTexto(double diferenca, String unidade) {

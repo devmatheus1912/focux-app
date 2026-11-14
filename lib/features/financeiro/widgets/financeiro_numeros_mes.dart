@@ -3,16 +3,15 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/utils/pt_br_display.dart';
 import '../../../core/widgets/fx_metric_strip.dart';
 import '../../../l10n/app_localizations.dart';
 import '../data/financeiro_repository.dart';
 import '../utils/financeiro_numeros.dart';
 
-/// Os três números do mês, no topo do Financeiro: o que entrou, o que falta
-/// entrar e o que está atrasado. O mês vem escrito em cima (o "A receber" é só
-/// dele; sem isso, uma mensalidade em aberto de outro mês parecia erro). Só o
-/// atrasado ganha cor, e só quando existe. Cada um abre a lista que o explica.
+/// Os três números do topo do Financeiro: o que entrou no mês ("Recebido em
+/// nov"), o que ainda vai entrar e o que está atrasado (esses dois de todos os
+/// meses, iguais às listas que abrem). Só o atrasado ganha cor, e só quando
+/// existe. Cada um abre a lista que o explica.
 class FinanceiroNumerosMes extends StatelessWidget {
   const FinanceiroNumerosMes({
     super.key,
@@ -35,19 +34,12 @@ class FinanceiroNumerosMes extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: TokensStrip.s2),
-          child: Text(
-            mesPtBr(hoje ?? DateTime.now()),
-            style: FocuxHubTypography.rotulo(color: chrome.mute),
-          ),
-        ),
         FxMetricStrip(
           metricas: [
             FxMetric(
               valor: resumo.totalRecebido.cents,
               texto: resumo.totalRecebido.formatCobranca(),
-              rotulo: s.financeiroNumRecebido,
+              rotulo: financeiroRotuloRecebido(s, hoje ?? DateTime.now()),
               onTap: () => onAbrir(MensalidadeFiltro.pagas),
             ),
             FxMetric(
@@ -65,15 +57,6 @@ class FinanceiroNumerosMes extends StatelessWidget {
             ),
           ],
         ),
-        // Recebido e a receber são do mês; o atrasado junta todos os meses.
-        if (resumo.totalAtrasado.isPositive)
-          Padding(
-            padding: const EdgeInsets.only(top: TokensStrip.s2),
-            child: Text(
-              s.financeiroAtrasadoTodosMeses,
-              style: FocuxHubTypography.cardSubtitle(color: chrome.mute),
-            ),
-          ),
         if (nota != null)
           Padding(
             padding: const EdgeInsets.only(top: TokensStrip.s2),

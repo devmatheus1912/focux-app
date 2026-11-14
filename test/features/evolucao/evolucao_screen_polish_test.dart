@@ -33,7 +33,8 @@ void main() {
     expect(screen, contains('EvolucaoFotosScreen'));
     expect(screen, contains('EvolucaoComparativoScreen'));
     expect(screen, contains('compartilharEvolucao'));
-    expect(screen, contains('AlunoInsetFormField'));
+    // Registrar carga mora na própria folha (steppers da execução).
+    expect(screen, contains('abrirRegistrarCarga('));
     expect(screen, contains('FxErrorState'));
     expect(screen, contains('PopScope'));
     expect(screen, contains("'/alunos/\${widget.alunoId}'"));

@@ -26,8 +26,14 @@ int financeiroDiasDeAtraso({
   return diff > 0 ? diff : 0;
 }
 
+/// Rótulo do Recebido, o único número preso ao mês: "Recebido em nov".
+/// A receber e Atrasado juntam todos os meses (o que ainda vai entrar e o que
+/// venceu), iguais às listas que abrem.
+String financeiroRotuloRecebido(S s, DateTime mes) =>
+    s.financeiroNumRecebidoEm(mesPtBr(mes).substring(0, 3).toLowerCase());
+
 /// O que o "Recebido" do mês inclui além das mensalidades do próprio mês:
-/// "Inclui R$ 200,00 pagos de meses anteriores e R$ 50,00 pago adiantado".
+/// "Inclui R$ 200,00 de meses anteriores e R$ 50,00 adiantados".
 /// Nulo quando não há o que explicar. O servidor soma o recebido pela data do
 /// pagamento (`MensalidadeService.resumoMensal`), por isso as duas partes.
 String? financeiroNotaDoRecebido(S s, ResumoMensal r) {
