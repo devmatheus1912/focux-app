@@ -63,6 +63,9 @@ class _AlunoFeedbackVideoScreenState
   ({XFile arquivo, int exercicioId, String comentario})? _pendente;
   String? _erro;
 
+  /// Erro da última carga (decide entre o aviso de recurso e o erro comum).
+  Object? _erroCarga;
+
   FeedbackVideoRepository get _repo =>
       ref.read(feedbackVideoRepositoryProvider);
 
@@ -77,6 +80,7 @@ class _AlunoFeedbackVideoScreenState
       setState(() {
         _loading = true;
         _erro = null;
+        _erroCarga = null;
       });
     } else {
       if (_loadingMore || !_hasNext) return;
@@ -97,6 +101,7 @@ class _AlunoFeedbackVideoScreenState
       if (!mounted) return;
       setState(() {
         _erro = friendlyError(e);
+        _erroCarga = e;
         _loading = false;
         _loadingMore = false;
       });
@@ -267,12 +272,12 @@ class _AlunoFeedbackVideoScreenState
   void _mostrarErro(Object e) {
     FeedbackHelper.showError(
       context,
-      isPlanGateError(e)
-          ? alunoRecursoIndisponivelTexto(
-            'Feedback em vídeo',
-            alunoNomeDoPersonal(ref),
-          )
-          : friendlyError(e),
+      alunoMensagemDeErro(
+        ref,
+        e,
+        capability: 'feedbackVideo',
+        fallbackNome: 'Feedback em vídeo',
+      ),
     );
   }
 
@@ -329,6 +334,11 @@ class _AlunoFeedbackVideoScreenState
                       ? const Padding(
                         padding: EdgeInsets.all(FxSettingsLayout.pageInset),
                         child: SkeletonList(count: 4),
+                      )
+                      : alunoBarradoPeloPlano(_erroCarga)
+                      ? const AlunoRecursoIndisponivelConteudo(
+                        capability: 'feedbackVideo',
+                        fallbackNome: 'Feedback em vídeo',
                       )
                       : _erro != null
                       ? FxErrorState(

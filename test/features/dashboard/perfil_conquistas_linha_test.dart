@@ -49,6 +49,32 @@ void main() {
     expect(find.text('Ver todas (5)'), findsOneWidget);
   });
 
+  testWidgets('cada selo diz o item embaixo; o toque cobre selo e legenda', (
+    tester,
+  ) async {
+    final abertas = <String>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: PerfilConquistasLinha(
+            conquistas: [_c(1), _c(2)],
+            onAbrir: (c) => abertas.add(c.chave),
+            onVerTodas: () {},
+          ),
+        ),
+      ),
+    );
+    expect(find.text('Supino reto'), findsOneWidget);
+    expect(find.text('Cintura'), findsOneWidget);
+    await tester.tap(find.text('Cintura'));
+    expect(abertas, ['c2']);
+    // A legenda não repete na leitura de tela (o grupo já tem o resumo).
+    expect(
+      find.bySemanticsLabel('Cintura'),
+      findsNothing,
+    );
+  });
+
   test('o item da conquista é o exercício ou a medida', () {
     expect(_c(1).item, 'Supino reto');
     expect(_c(2).item, 'Cintura');

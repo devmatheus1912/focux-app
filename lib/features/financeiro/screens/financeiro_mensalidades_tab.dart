@@ -365,6 +365,12 @@ class _FinanceiroMensalidadesTabState
                 .quantidadeAtrasadas ??
             0) >
         0;
+    // "Marcar lote" só faz sentido com 2 ou mais para marcar.
+    final mostrarLote =
+        !_modoSelecao &&
+        financeiroMostrarMarcarLote(
+          _items.where((m) => financeiroStatusAberto(m.status)).length,
+        );
     // Com atraso, "Atrasadas" vem primeiro.
     final filtros = [
       if (atrasoNoMes) MensalidadeFiltro.atrasadas,
@@ -445,18 +451,37 @@ class _FinanceiroMensalidadesTabState
                   FxSettingsLayout.pageInset,
                   0,
                 ),
-                child: Wrap(
-                  spacing: TokensStrip.s2,
-                  runSpacing: TokensStrip.s2,
-                  children: [
-                    for (final f in filtros)
-                      FxToggleChip(
-                        label: mensalidadeFiltroLabel(f, S.of(context)),
-                        selected: _filtro == f,
-                        isDark: chrome.isDark,
-                        onTap: () => _trocarFiltro(f),
-                      ),
-                  ],
+                // Filtros à esquerda, como o resto da tela; rolam de lado se
+                // não couberem. "Marcar lote" é o último item da faixa.
+                child: Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        for (final f in filtros) ...[
+                          FxToggleChip(
+                            label: mensalidadeFiltroLabel(f, S.of(context)),
+                            selected: _filtro == f,
+                            isDark: chrome.isDark,
+                            onTap: () => _trocarFiltro(f),
+                          ),
+                          const SizedBox(width: TokensStrip.s2),
+                        ],
+                        if (mostrarLote)
+                          FxActionChip(
+                            label: financeiroListaToolLabel(
+                              FinanceiroListaToolId.marcarLote,
+                              modoSelecao: false,
+                              selecionados: 0,
+                            ),
+                            accent: primary,
+                            isDark: chrome.isDark,
+                            onPressed: _entrarModoLote,
+                          ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
               Expanded(
@@ -472,7 +497,8 @@ class _FinanceiroMensalidadesTabState
                         )
                         : Column(
                           children: [
-                            if (_items.isNotEmpty)
+                            // A barra do lote só existe durante a seleção.
+                            if (_items.isNotEmpty && _modoSelecao)
                               Padding(
                                 padding: const EdgeInsets.fromLTRB(
                                   FxSettingsLayout.pageInset,
@@ -482,9 +508,7 @@ class _FinanceiroMensalidadesTabState
                                 ),
                                 child: Builder(
                                   builder: (context) {
-                                    final tools = financeiroListaTools(
-                                      modoSelecao: _modoSelecao,
-                                    );
+                                    final tools = financeiroListaToolsDoLote();
                                     Future<void> runTool(
                                       FinanceiroListaToolId id,
                                     ) async {

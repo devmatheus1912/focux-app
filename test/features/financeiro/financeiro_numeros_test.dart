@@ -122,7 +122,7 @@ void main() {
       expect(novo.totalEmAberto.cents, 25000);
       expect(novo.totalAtrasado.cents, 30000);
       expect(novo.quantidadeAtrasadas, 2);
-      expect(financeiroTemRecebidoAnterior(novo), isTrue);
+      expect(novo.recebidoDeMesesAnteriores.cents, 10000);
 
       final antigo = ResumoMensal.fromJson({
         'totalRecebido': '100.00',
@@ -133,7 +133,7 @@ void main() {
       });
       expect(antigo.totalAtrasado.cents, 0);
       expect(antigo.quantidadeAtrasadas, 0);
-      expect(financeiroTemRecebidoAnterior(antigo), isFalse);
+      expect(antigo.recebidoDeMesesAnteriores.cents, 0);
     });
   });
 }

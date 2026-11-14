@@ -158,7 +158,7 @@ void main() {
   });
 
   Future<void> numeros(WidgetTester tester, {required bool dark}) async {
-    await tester.binding.setSurfaceSize(const Size(390, 220));
+    await tester.binding.setSurfaceSize(const Size(390, 250));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
       _app(

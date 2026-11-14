@@ -7,6 +7,7 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../constants/aluno_360_layout.dart';
+import 'aluno_form_choices.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/theme/fx_icons.dart';
 
@@ -15,16 +16,10 @@ class Aluno360DetailTabBar extends StatelessWidget {
   const Aluno360DetailTabBar({
     super.key,
     required this.tabController,
-    required this.primary,
-    required this.mute,
-    required this.line,
     this.tabBackdropOpaque = false,
   });
 
   final TabController tabController;
-  final Color primary;
-  final Color mute;
-  final Color line;
   final bool tabBackdropOpaque;
 
   static const _labels = ['Resumo', 'Evolução', 'Ferramentas'];
@@ -46,102 +41,26 @@ class Aluno360DetailTabBar extends StatelessWidget {
           return Semantics(
             container: true,
             label: 'Abas do perfil do aluno',
-            child: Container(
-              padding: const EdgeInsets.all(4),
+            // Mesmo seletor do Financeiro e das outras abas do app.
+            child: DecoratedBox(
               decoration: BoxDecoration(
-                color: scheme.surfaceContainerHighest.withValues(
-                  alpha: tabBackdropOpaque ? 0.92 : 0.55,
-                ),
-                borderRadius: BorderRadius.circular(TokensStrip.rMd),
-                border: Border.all(color: line.withValues(alpha: 0.45)),
+                color: tabBackdropOpaque
+                    ? scheme.surface.withValues(alpha: 0.92)
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(TokensStrip.rSm),
               ),
-              child: Row(
-                children: [
+              child: AlunoSegmentedChoice(
+                options: [
                   for (var i = 0; i < _labels.length; i++)
-                    Expanded(
-                      child: _Aluno360TabChip(
-                        label: _labels[i],
-                        selected: tabController.index == i,
-                        primary: primary,
-                        mute: mute,
-                        onTap: () {
-                          if (tabController.index != i) {
-                            HapticFeedback.selectionClick();
-                          }
-                          tabController.animateTo(i);
-                        },
-                      ),
-                    ),
+                    (value: '$i', label: _labels[i]),
                 ],
+                selected: '${tabController.index}',
+                isDark: Theme.of(context).brightness == Brightness.dark,
+                onSelect: (v) => tabController.animateTo(int.parse(v)),
               ),
             ),
           );
         },
-      ),
-    );
-  }
-}
-
-class _Aluno360TabChip extends StatelessWidget {
-  const _Aluno360TabChip({
-    required this.label,
-    required this.selected,
-    required this.primary,
-    required this.mute,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool selected;
-  final Color primary;
-  final Color mute;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      selected: selected,
-      label: label,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(TokensStrip.rMd - 2),
-          onTap: onTap,
-          focusColor: primary.withValues(alpha: 0.14),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 220),
-            curve: Curves.easeOutCubic,
-            padding: const EdgeInsets.symmetric(vertical: 9),
-            decoration: BoxDecoration(
-              color: selected ? primary : Colors.transparent,
-              borderRadius: BorderRadius.circular(TokensStrip.rMd - 2),
-              boxShadow:
-                  selected
-                      ? [
-                        BoxShadow(
-                          color: primary.withValues(alpha: 0.28),
-                          blurRadius: 10,
-                          offset: const Offset(0, 3),
-                        ),
-                      ]
-                      : null,
-            ),
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                label,
-                maxLines: 1,
-                textAlign: TextAlign.center,
-                style: Aluno360Layout.tabSelectedLabelStyle().copyWith(
-                  color: selected ? Colors.white : mute,
-                  fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
-                  fontSize: TokensStrip.fontBodySm,
-                ),
-              ),
-            ),
-          ),
-        ),
       ),
     );
   }
@@ -423,9 +342,6 @@ class Aluno360CompositeHeaderDelegate extends SliverPersistentHeaderDelegate {
                     height: Aluno360Layout.tabBarHeight,
                     child: Aluno360DetailTabBar(
                       tabController: tabController,
-                      primary: primary,
-                      mute: mute,
-                      line: line,
                       tabBackdropOpaque: tabBackdropOpaque,
                     ),
                   ),

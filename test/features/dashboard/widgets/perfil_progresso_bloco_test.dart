@@ -61,14 +61,17 @@ void main() {
       _medida(2, '2026-11-02', 105),
     ]);
     expect(find.text('Meu progresso'), findsOneWidget);
-    expect(find.text('Peso: 105,0 kg · +15,0 kg desde 30/10'), findsOneWidget);
+    // Linha de lista: "Peso" no título, o valor no subtítulo.
+    expect(find.text('Peso'), findsOneWidget);
+    expect(find.text('105,0 kg · +15,0 kg desde 30/10'), findsOneWidget);
+    expect(find.text('Registrar medida'), findsOneWidget);
     expect(find.text('Peso atual'), findsNothing);
   });
 
   testWidgets('sem medida, o card abre o progresso', (tester) async {
     await _abrir(tester, const []);
-    expect(find.text('Peso: Sem medida'), findsOneWidget);
-    await tester.tap(find.text('Peso: Sem medida'));
+    expect(find.text('Sem medida'), findsOneWidget);
+    await tester.tap(find.text('Sem medida'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
     expect(find.text('PROGRESSO'), findsOneWidget);

@@ -25,6 +25,7 @@ import '../../features/trilhas/screens/aluno_trilhas_screen.dart';
 import '../../features/feedback/screens/aluno_feedback_video_screen.dart';
 import '../../features/subscription/models/subscription_plan.dart';
 import '../widgets/feature_gate.dart';
+import 'app_router_gates.dart';
 import '../widgets/fx_route_chrome.dart';
 import 'fx_lazy_shell_container.dart';
 import '../../features/dashboard/screens/meu_progresso_screen.dart';
@@ -98,7 +99,9 @@ List<RouteBase> buildAlunoRoutes({
         path: '/aluno/habitos',
         builder:
             (context, state) =>
-                const FxRouteChrome(child: HabitosAlunoScreen()),
+                FxRouteChrome(
+                  child: AppRouterGates.habitos(const HabitosAlunoScreen()),
+                ),
       ),
       GoRoute(
         path: '/aluno/habitos/:id',
@@ -108,10 +111,12 @@ List<RouteBase> buildAlunoRoutes({
         builder: (context, state) {
           final extra = state.extra;
           return FxRouteChrome(
-            child: HabitoDetailScreen(
-              habitoId: intPathParam(state, 'id')!,
-              habito: extra is Habito ? extra : null,
-              forAluno: true,
+            child: AppRouterGates.habitos(
+              HabitoDetailScreen(
+                habitoId: intPathParam(state, 'id')!,
+                habito: extra is Habito ? extra : null,
+                forAluno: true,
+              ),
             ),
           );
         },
@@ -120,7 +125,9 @@ List<RouteBase> buildAlunoRoutes({
         path: '/aluno/desafios',
         builder:
             (context, state) =>
-                const FxRouteChrome(child: DesafiosAlunoScreen()),
+                FxRouteChrome(
+                  child: AppRouterGates.desafios(const DesafiosAlunoScreen()),
+                ),
       ),
       GoRoute(
         path: '/aluno/desafios/:id',
@@ -130,10 +137,12 @@ List<RouteBase> buildAlunoRoutes({
         builder: (context, state) {
           final extra = state.extra;
           return FxRouteChrome(
-            child: DesafioDetailScreen(
-              desafioId: intPathParam(state, 'id')!,
-              desafio: extra is Desafio ? extra : null,
-              forAluno: true,
+            child: AppRouterGates.desafios(
+              DesafioDetailScreen(
+                desafioId: intPathParam(state, 'id')!,
+                desafio: extra is Desafio ? extra : null,
+                forAluno: true,
+              ),
             ),
           );
         },

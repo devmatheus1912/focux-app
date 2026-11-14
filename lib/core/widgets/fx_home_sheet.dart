@@ -29,7 +29,8 @@ abstract final class FxHomeSheetChrome {
 
   /// Scrim mais fechado — sheet não “vaza” a tela de baixo (print Mais ferramentas).
   static Color barrier([bool isDark = false]) =>
-      heroScrim(isDark ? 0.62 : 0.42);
+      // A folha flutua com margem: o véu precisa apagar o que fica embaixo.
+      heroScrim(isDark ? 0.62 : 0.55);
 
   static void dismissAndPop<T extends Object?>(BuildContext context, [T? result]) {
     FxKeyboardDismissScope.dismiss();

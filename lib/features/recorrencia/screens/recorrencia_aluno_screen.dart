@@ -8,6 +8,7 @@ import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../dashboard/widgets/aluno_recurso_indisponivel.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
@@ -40,6 +41,9 @@ class _RecorrenciaAlunoScreenState
   bool _loading = true;
   bool _mutando = false;
   String? _erro;
+
+  /// Erro da última carga (decide entre o aviso de recurso e o erro comum).
+  Object? _erroCarga;
   DateTime? _fetchedAt;
 
   @override
@@ -52,6 +56,7 @@ class _RecorrenciaAlunoScreenState
     setState(() {
       _loading = true;
       _erro = null;
+      _erroCarga = null;
     });
     try {
       final a =
@@ -68,6 +73,7 @@ class _RecorrenciaAlunoScreenState
         setState(() {
           _loading = false;
           _erro = friendlyError(e);
+          _erroCarga = e;
         });
       }
     }
@@ -83,7 +89,7 @@ class _RecorrenciaAlunoScreenState
       }
     } catch (e) {
       if (!mounted) return;
-      FeedbackHelper.showError(context, friendlyError(e));
+      FeedbackHelper.showError(context, _mensagemDeErro(e));
     }
   }
 
@@ -109,7 +115,7 @@ class _RecorrenciaAlunoScreenState
       FeedbackHelper.showSuccess(context, 'Pagamento automático pausado.');
     } catch (e) {
       if (!mounted) return;
-      FeedbackHelper.showError(context, friendlyError(e));
+      FeedbackHelper.showError(context, _mensagemDeErro(e));
     } finally {
       if (mounted) setState(() => _mutando = false);
     }
@@ -138,7 +144,7 @@ class _RecorrenciaAlunoScreenState
       FeedbackHelper.showSuccess(context, 'Pagamento automático retomado.');
     } catch (e) {
       if (!mounted) return;
-      FeedbackHelper.showError(context, friendlyError(e));
+      FeedbackHelper.showError(context, _mensagemDeErro(e));
     } finally {
       if (mounted) setState(() => _mutando = false);
     }
@@ -198,6 +204,13 @@ class _RecorrenciaAlunoScreenState
     );
   }
 
+  String _mensagemDeErro(Object e) => alunoMensagemDeErro(
+    ref,
+    e,
+    capability: 'recorrencia',
+    fallbackNome: 'Pagamento automático',
+  );
+
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
@@ -237,6 +250,11 @@ class _RecorrenciaAlunoScreenState
                 ? const Padding(
                   padding: EdgeInsets.all(FxSettingsLayout.pageInset),
                   child: SkeletonList(count: 4),
+                )
+                : alunoBarradoPeloPlano(_erroCarga)
+                ? const AlunoRecursoIndisponivelConteudo(
+                  capability: 'recorrencia',
+                  fallbackNome: 'Pagamento automático',
                 )
                 : _erro != null
                 ? FxErrorState(

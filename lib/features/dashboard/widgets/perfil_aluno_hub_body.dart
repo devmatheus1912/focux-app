@@ -237,6 +237,9 @@ class _TreinaCom extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
+              // Abre o chat: o ícone diz isso (a seta sugeria o perfil dele).
+              Icon(FxIcons.chatPequeno, size: 14, color: sobre.mute),
+              const SizedBox(width: TokensStrip.s1),
               Flexible(
                 child: Text(
                   s.alunoPerfilTreinaCom(personal),
@@ -246,8 +249,6 @@ class _TreinaCom extends StatelessWidget {
                   style: FocuxHubTypography.bodyMuted(color: sobre.mute),
                 ),
               ),
-              const SizedBox(width: TokensStrip.s1),
-              Icon(FxIcons.chevronDireitaPequeno, size: 14, color: sobre.mute),
             ],
           ),
         ),

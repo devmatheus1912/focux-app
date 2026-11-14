@@ -14,7 +14,6 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../dashboard/widgets/aluno_recurso_indisponivel.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
-import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
@@ -26,7 +25,6 @@ import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/auth/providers/auth_provider.dart';
-import '../../../features/subscription/models/subscription_plan.dart';
 import '../data/habito_repository.dart';
 import '../utils/habitos_display.dart';
 import '../../../core/theme/fx_icons.dart';
@@ -55,8 +53,8 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
   var _loading = true;
   String? _error;
 
-  /// A API barrou pelo plano do personal com a tela aberta.
-  bool _semRecurso = false;
+  /// Erro da última carga (decide entre o aviso de recurso e o erro comum).
+  Object? _erroCarga;
   DateTime? _fetchedAt;
 
   @override
@@ -93,7 +91,7 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
     setState(() {
       _loading = true;
       _error = null;
-      _semRecurso = false;
+      _erroCarga = null;
     });
     try {
       final pagina = await ref.read(_repoProvider).meusHabitosPagina(q: _query);
@@ -110,7 +108,7 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
       if (!mounted) return;
       setState(() {
         _loading = false;
-        _semRecurso = isPlanGateError(e);
+        _erroCarga = e;
         _error = friendlyError(e);
       });
     }
@@ -188,105 +186,100 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
 
     return fxScreenA11yScope(
       label: 'Meus hábitos',
-      child: FeatureGate(
-        featureName: 'Habit Coaching',
-        requiredPlan: SubscriptionPlan.PRO,
-        capability: 'habitCoaching',
-        child: PopScope(
-          canPop: false,
-          onPopInvokedWithResult: (didPop, _) {
-            if (didPop) return;
-            if (keyboardOpen || _searchFocus.hasFocus) {
-              FxKeyboardDismissScope.dismiss();
-              return;
-            }
-            safePopOrGo(context, '/dashboard/aluno');
-          },
-          child: FxShellScaffold(
-            useMesh: true,
-            constrainWidth: false,
-            appBar: FxShellAppBar(
-              title: 'Meus hábitos',
-              subtitle: FxHubFreshness.joinCount(
-                habitoCountLabel(_loading ? 0 : _total),
-                _loading ? null : freshnessLabel,
-              ),
-              onBack: () {
-                FxKeyboardDismissScope.dismiss();
-                safePopOrGo(context, '/dashboard/aluno');
-              },
-              actions: [
-                FxHelpIconButton(
-                  tooltip: 'Como usar os hábitos',
-                  onTap:
-                      () => showFxHelpSheet(
-                        context,
-                        title: 'Hábitos',
-                        subtitle: 'Metas diárias que seu personal cadastrou.',
-                        tips: const [
-                          FxHelpTip('Como calculamos', habitoComoCalculamos),
-                          FxHelpTip(
-                            'Marcar',
-                            'O checkbox marca o check de hoje. Toque no hábito abre o detalhe.',
-                          ),
-                        ],
-                      ),
-                ),
-              ],
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          if (keyboardOpen || _searchFocus.hasFocus) {
+            FxKeyboardDismissScope.dismiss();
+            return;
+          }
+          safePopOrGo(context, '/dashboard/aluno');
+        },
+        child: FxShellScaffold(
+          useMesh: true,
+          constrainWidth: false,
+          appBar: FxShellAppBar(
+            title: 'Meus hábitos',
+            subtitle: FxHubFreshness.joinCount(
+              habitoCountLabel(_loading ? 0 : _total),
+              _loading ? null : freshnessLabel,
             ),
-            body:
-                _loading
-                    ? const Padding(
-                      padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-                      child: SkeletonList(count: 5),
-                    )
-                    : _semRecurso
-                    ? const AlunoRecursoIndisponivelConteudo(
-                      capability: 'habitCoaching',
-                      fallbackNome: 'Hábitos',
-                    )
-                    : _error != null
-                    ? FxErrorState(
-                      chromeOnDark: chrome.isDark,
-                      primary: scheme.primary,
-                      title: FocuxMicrocopy.naoFoiPossivelCarregar,
-                      message: _error!,
-                      onRetry: _carregar,
-                    )
-                    : Column(
-                      children: [
-                        if (habitoMostraBusca(total: _total, query: _query))
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(
-                            TokensStrip.s4,
-                            TokensStrip.s2,
-                            TokensStrip.s4,
-                            TokensStrip.s2,
-                          ),
-                          child: TextField(
-                            controller: _searchCtrl,
-                            focusNode: _searchFocus,
-                            textInputAction: TextInputAction.search,
-                            onChanged: _onQueryChanged,
-                            onTapOutside:
-                                (_) => FxKeyboardDismissScope.dismiss(),
-                            decoration: InputDecoration(
-                              hintText: 'Buscar hábito',
-                              prefixIcon: const Icon(FxIcons.buscar),
-                              border: FxInputDeco.outlineBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: FxContentWidthLimiter(
-                            child: _buildList(searching),
-                          ),
+            onBack: () {
+              FxKeyboardDismissScope.dismiss();
+              safePopOrGo(context, '/dashboard/aluno');
+            },
+            actions: [
+              FxHelpIconButton(
+                tooltip: 'Como usar os hábitos',
+                onTap:
+                    () => showFxHelpSheet(
+                      context,
+                      title: 'Hábitos',
+                      subtitle: 'Metas diárias que seu personal cadastrou.',
+                      tips: const [
+                        FxHelpTip('Como calculamos', habitoComoCalculamos),
+                        FxHelpTip(
+                          'Marcar',
+                          'O checkbox marca o check de hoje. Toque no hábito abre o detalhe.',
                         ),
                       ],
                     ),
+              ),
+            ],
           ),
+          body:
+              _loading
+                  ? const Padding(
+                    padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                    child: SkeletonList(count: 5),
+                  )
+                  : alunoBarradoPeloPlano(_erroCarga)
+                  ? const AlunoRecursoIndisponivelConteudo(
+                    capability: 'habitCoaching',
+                    fallbackNome: 'Hábitos',
+                  )
+                  : _error != null
+                  ? FxErrorState(
+                    chromeOnDark: chrome.isDark,
+                    primary: scheme.primary,
+                    title: FocuxMicrocopy.naoFoiPossivelCarregar,
+                    message: _error!,
+                    onRetry: _carregar,
+                  )
+                  : Column(
+                    children: [
+                      if (habitoMostraBusca(total: _total, query: _query))
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          TokensStrip.s4,
+                          TokensStrip.s2,
+                          TokensStrip.s4,
+                          TokensStrip.s2,
+                        ),
+                        child: TextField(
+                          controller: _searchCtrl,
+                          focusNode: _searchFocus,
+                          textInputAction: TextInputAction.search,
+                          onChanged: _onQueryChanged,
+                          onTapOutside:
+                              (_) => FxKeyboardDismissScope.dismiss(),
+                          decoration: InputDecoration(
+                            hintText: 'Buscar hábito',
+                            prefixIcon: const Icon(FxIcons.buscar),
+                            border: FxInputDeco.outlineBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: FxContentWidthLimiter(
+                          child: _buildList(searching),
+                        ),
+                      ),
+                    ],
+                  ),
         ),
       ),
     );

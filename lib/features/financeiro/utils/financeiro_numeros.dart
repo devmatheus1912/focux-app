@@ -26,9 +26,19 @@ int financeiroDiasDeAtraso({
   return diff > 0 ? diff : 0;
 }
 
-/// "R$ 100,00 de meses anteriores" só existe quando há o que explicar.
-bool financeiroTemRecebidoAnterior(ResumoMensal r) =>
-    r.recebidoDeMesesAnteriores.cents > 0;
+/// O que o "Recebido" do mês inclui além das mensalidades do próprio mês:
+/// "Inclui R$ 200,00 pagos de meses anteriores e R$ 50,00 pago adiantado".
+/// Nulo quando não há o que explicar. O servidor soma o recebido pela data do
+/// pagamento (`MensalidadeService.resumoMensal`), por isso as duas partes.
+String? financeiroNotaDoRecebido(S s, ResumoMensal r) {
+  final partes = [
+    if (r.recebidoDeMesesAnteriores.cents > 0)
+      s.financeiroIncluiAnteriores(r.recebidoDeMesesAnteriores.formatCobranca()),
+    if (r.recebidoAdiantado.cents > 0)
+      s.financeiroIncluiAdiantado(r.recebidoAdiantado.formatCobranca()),
+  ];
+  return partes.isEmpty ? null : s.financeiroRecebidoInclui(partes.join(' e '));
+}
 
 /// Selo de estado da mensalidade: o que aconteceu, não o código do status.
 ({String texto, FxPillTone tom}) financeiroSelo(

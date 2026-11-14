@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/focux_contrast.dart';
 import '../../../core/utils/motion_preferences.dart';
 import '../../../core/widgets/fx_selo_glifos.dart';
 import '../data/meta_corporal.dart';
@@ -26,15 +27,35 @@ typedef ConquistaSeloCores = ({
   Color glifo,
 });
 
-ConquistaSeloCores conquistaSeloCores(Color marca) {
+/// Contraste mínimo do metal contra a marca quando o selo fica sobre ela.
+const conquistaSeloContrasteSobreMarca = 3.0;
+
+/// [sobreMarca]: o selo fica sobre um fundo da própria marca (topo do perfil).
+/// O metal clareia para não sumir no fundo; se nem assim chega a
+/// [conquistaSeloContrasteSobreMarca] (marca muito clara), volta ao padrão.
+ConquistaSeloCores conquistaSeloCores(Color marca, {bool sobreMarca = false}) {
   final miolo = Color.lerp(marca, Colors.black, 0.78)!;
+  final claro = sobreMarca ? _metalSobreMarca(marca) : null;
   return (
-    metalClaro: Color.lerp(marca, Colors.white, 0.7)!,
-    metalMedio: Color.lerp(marca, Colors.white, 0.25)!,
-    metalEscuro: Color.lerp(marca, Colors.black, 0.45)!,
+    metalClaro: claro?.claro ?? Color.lerp(marca, Colors.white, 0.7)!,
+    metalMedio: claro?.medio ?? Color.lerp(marca, Colors.white, 0.25)!,
+    metalEscuro: claro?.escuro ?? Color.lerp(marca, Colors.black, 0.45)!,
     miolo: miolo,
     mioloLuz: Color.lerp(miolo, marca, 0.35)!,
     glifo: Color.lerp(marca, Colors.white, 0.82)!,
+  );
+}
+
+({Color claro, Color medio, Color escuro})? _metalSobreMarca(Color marca) {
+  final medio = Color.lerp(marca, Colors.white, 0.55)!;
+  if (FocuxContrast.contrastRatio(medio, marca) <
+      conquistaSeloContrasteSobreMarca) {
+    return null;
+  }
+  return (
+    claro: Color.lerp(marca, Colors.white, 0.88)!,
+    medio: medio,
+    escuro: Color.lerp(marca, Colors.white, 0.15)!,
   );
 }
 
@@ -50,6 +71,7 @@ class ConquistaSelo extends StatelessWidget {
     this.progresso = 1,
     this.glifoOpacidade = 1,
     this.marca,
+    this.sobreMarca = false,
   });
 
   final ConquistaTipo tipo;
@@ -65,6 +87,9 @@ class ConquistaSelo extends StatelessWidget {
   /// Cor da marca; sem ela, a primária do tema.
   final Color? marca;
 
+  /// O fundo atrás do selo é a própria marca (ver [conquistaSeloCores]).
+  final bool sobreMarca;
+
   @override
   Widget build(BuildContext context) {
     final cor = marca ?? Theme.of(context).colorScheme.primary;
@@ -73,7 +98,7 @@ class ConquistaSelo extends StatelessWidget {
         dimension: tamanho,
         child: CustomPaint(
           painter: _PintorDoSelo(
-            cores: conquistaSeloCores(cor),
+            cores: conquistaSeloCores(cor, sobreMarca: sobreMarca),
             glifo: glifo,
             dupla: tipo == ConquistaTipo.mantido,
             progresso: progresso.clamp(0.0, 1.0),

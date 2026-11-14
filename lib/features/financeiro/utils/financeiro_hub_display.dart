@@ -35,20 +35,18 @@ String financeiroHubSubtitle({String? freshness}) {
 /// Ferramentas da lista — sticky é Nova; resto sob Mais / chip.
 enum FinanceiroListaToolId { marcarLote, cancelarLote }
 
+/// "Marcar lote" aparece na faixa dos filtros só com 2 ou mais mensalidades
+/// em aberto na lista (com uma, a baixa única resolve).
+bool financeiroMostrarMarcarLote(int emAberto) => emAberto >= 2;
+
+/// Barra do lote, que só existe durante a seleção: confirmar no chip,
+/// cancelar em "Mais". Fora dela, "Marcar lote" mora na faixa dos filtros
+/// ([financeiroMostrarMarcarLote]) e no toque longo da linha.
 ({FinanceiroListaToolId? foldChip, List<FinanceiroListaToolId> mais})
-financeiroListaTools({required bool modoSelecao}) {
-  if (modoSelecao) {
-    return (
-      foldChip: FinanceiroListaToolId.marcarLote,
-      mais: const [FinanceiroListaToolId.cancelarLote],
-    );
-  }
-  // Idle: o lote também abre por long-press na linha.
-  return (
-    foldChip: FinanceiroListaToolId.marcarLote,
-    mais: const <FinanceiroListaToolId>[],
-  );
-}
+financeiroListaToolsDoLote() => (
+  foldChip: FinanceiroListaToolId.marcarLote,
+  mais: const [FinanceiroListaToolId.cancelarLote],
+);
 
 String financeiroListaToolLabel(
   FinanceiroListaToolId id, {

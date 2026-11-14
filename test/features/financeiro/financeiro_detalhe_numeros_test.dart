@@ -159,7 +159,7 @@ void main() {
       ]);
     });
 
-    testWidgets('"de meses anteriores" só aparece quando há valor', (
+    testWidgets('"meses anteriores" só aparece quando há valor', (
       tester,
     ) async {
       telaAlta(tester);
@@ -174,7 +174,7 @@ void main() {
         ),
       );
       await _settle(tester);
-      expect(find.text('R\$ 100,00 de meses anteriores'), findsOneWidget);
+      expect(find.text('Inclui R\$ 100,00 pagos de meses anteriores'), findsOneWidget);
 
       await tester.pumpWidget(
         _app(

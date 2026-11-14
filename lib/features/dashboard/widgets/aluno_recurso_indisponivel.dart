@@ -8,6 +8,7 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_icons.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_link_row.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -15,9 +16,12 @@ import '../../planos/data/plano_recurso_textos.dart';
 import '../providers/dashboard_provider.dart';
 
 /// Primeiro nome do personal do aluno logado; nulo sem a Hoje carregada.
-String? alunoNomeDoPersonal(WidgetRef ref) {
-  final nome =
-      ref.watch(alunoDashboardHomeProvider).value?.personalBrand.nomePersonal.trim();
+/// Em `build` use o padrão ([ouvir] = true); em callbacks, `ouvir: false`.
+String? alunoNomeDoPersonal(WidgetRef ref, {bool ouvir = true}) {
+  final home = ouvir
+      ? ref.watch(alunoDashboardHomeProvider)
+      : ref.read(alunoDashboardHomeProvider);
+  final nome = home.value?.personalBrand.nomePersonal.trim();
   if (nome == null || nome.isEmpty) return null;
   return nome.split(' ').first;
 }
@@ -25,6 +29,27 @@ String? alunoNomeDoPersonal(WidgetRef ref) {
 /// Texto curto para ação do aluno barrada pelo plano do personal (toast).
 String alunoRecursoIndisponivelTexto(String recurso, String? personal) =>
     '$recurso não está disponível. Fale com ${personal ?? 'seu personal'}.';
+
+/// A regra única das telas do aluno: a API barrou pelo plano do personal?
+/// Se sim, a carga mostra [AlunoRecursoIndisponivelConteudo] e a ação mostra
+/// [alunoMensagemDeErro]; nunca o erro genérico.
+bool alunoBarradoPeloPlano(Object? erro) =>
+    erro != null && isPlanGateError(erro);
+
+/// Mensagem de erro de uma ação do aluno (toast): recurso indisponível
+/// quando o plano barrou, o erro amigável nos outros casos.
+String alunoMensagemDeErro(
+  WidgetRef ref,
+  Object erro, {
+  required String? capability,
+  required String fallbackNome,
+}) {
+  if (!alunoBarradoPeloPlano(erro)) return friendlyError(erro);
+  return alunoRecursoIndisponivelTexto(
+    PlanoRecursoTextos.nome(capability, fallback: fallbackNome),
+    alunoNomeDoPersonal(ref, ouvir: false),
+  );
+}
 
 /// Aluno numa ferramenta que o plano do personal não libera (tela inteira,
 /// usada pelo `FeatureGate`).

@@ -101,6 +101,7 @@ import '../../features/chat/screens/chat_screen.dart';
 import '../../features/perfil/screens/wallet_screen.dart';
 import '../../features/subscription/models/subscription_plan.dart';
 import '../widgets/feature_gate.dart';
+import 'app_router_gates.dart';
 import '../widgets/fx_route_chrome.dart';
 import '../observability/sentry_performance.dart';
 import 'app_router_redirect.dart';
@@ -862,9 +863,11 @@ RouteBase buildChromeShellRoute() {
                     intPathParam(state, 'id') == null ? '/habitos' : null,
             builder: (context, state) {
               final extra = state.extra;
-              return HabitoDetailScreen(
-                habitoId: intPathParam(state, 'id')!,
-                habito: extra is Habito ? extra : null,
+              return AppRouterGates.habitos(
+                HabitoDetailScreen(
+                  habitoId: intPathParam(state, 'id')!,
+                  habito: extra is Habito ? extra : null,
+                ),
               );
             },
           ),
@@ -886,9 +889,11 @@ RouteBase buildChromeShellRoute() {
                     intPathParam(state, 'id') == null ? '/desafios' : null,
             builder: (context, state) {
               final extra = state.extra;
-              return DesafioDetailScreen(
-                desafioId: intPathParam(state, 'id')!,
-                desafio: extra is Desafio ? extra : null,
+              return AppRouterGates.desafios(
+                DesafioDetailScreen(
+                  desafioId: intPathParam(state, 'id')!,
+                  desafio: extra is Desafio ? extra : null,
+                ),
               );
             },
           ),

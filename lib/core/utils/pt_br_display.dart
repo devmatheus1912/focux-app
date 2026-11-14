@@ -208,6 +208,9 @@ const _mesesPtBr = [
   'Dezembro',
 ];
 
+/// Nome do mês em português, com maiúscula (ex.: Novembro).
+String mesPtBr(DateTime date) => _mesesPtBr[date.month - 1];
+
 /// Rótulo de mês/ano em português (ex.: Maio 2026).
 String monthYearLabelPtBr(DateTime date) =>
     '${_mesesPtBr[date.month - 1]} ${date.year}';

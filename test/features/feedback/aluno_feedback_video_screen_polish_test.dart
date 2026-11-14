@@ -12,7 +12,9 @@ void main() {
     expect(screen, contains('FxShellScaffold'));
     expect(screen, contains('FxContentWidthLimiter'));
     expect(screen, contains('friendlyError'));
-    expect(screen, contains('isPlanGateError'));
+    // Erro de plano pela regra única do aluno.
+    expect(screen, contains('alunoBarradoPeloPlano'));
+    expect(screen, contains('alunoMensagemDeErro'));
     expect(screen, contains('FxEmptyState'));
     expect(screen, contains('SkeletonList'));
     expect(screen, contains('RefreshIndicator'));

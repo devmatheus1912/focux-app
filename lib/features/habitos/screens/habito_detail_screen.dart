@@ -14,7 +14,6 @@ import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
-import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
@@ -27,7 +26,6 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../../subscription/models/subscription_plan.dart';
 import '../data/habito_repository.dart';
 import '../utils/habitos_display.dart';
 import '../widgets/habito_editar_sheet.dart';
@@ -222,85 +220,80 @@ class _HabitoDetailScreenState extends ConsumerState<HabitoDetailScreen> {
 
     return fxScreenA11yScope(
       label: titulo,
-      child: FeatureGate(
-        featureName: 'Habit Coaching',
-        requiredPlan: SubscriptionPlan.PRO,
-        capability: 'habitCoaching',
-        child: PopScope(
-          canPop: false,
-          onPopInvokedWithResult: (didPop, _) {
-            if (didPop) return;
-            _leave();
-          },
-          child: FxShellScaffold(
-            useMesh: true,
-            constrainWidth: false,
-            appBar: FxShellAppBar(
-              title: 'Hábito',
-              subtitle:
-                  habito == null
-                      ? null
-                      : FxHubFreshness.fromFetchedAt(_fetchedAt),
-              onBack: _leave,
-              actions: [
-                FxHelpIconButton(
-                  tooltip: 'Como usar este hábito',
-                  onTap:
-                      () => showFxHelpSheet(
-                        context,
-                        title: 'Hábito',
-                        subtitle:
-                            'Quantas vezes por semana e quem está em dia.',
-                        tips: [
-                          const FxHelpTip('Esta semana', habitoComoCalculamos),
-                          FxHelpTip(
-                            widget.forAluno ? 'Marcar' : 'Editar ou desativar',
-                            widget.forAluno
-                                ? 'O botão marca ou desmarca o dia de hoje.'
-                                : 'No ⋯ do topo. Desativado volta com Reativar.',
-                          ),
-                        ],
-                      ),
-                ),
-                if (!widget.forAluno && habito != null)
-                  IconButton(
-                    tooltip: 'Mais opções',
-                    onPressed: _busy ? null : _maisOpcoes,
-                    icon: const Icon(FxIcons.mais),
-                  ),
-              ],
-            ),
-            body:
-                _loading && habito == null
-                    ? const Padding(
-                      padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-                      child: SkeletonList(count: 5),
-                    )
-                    : _erro != null && habito == null
-                    ? FxErrorState(
-                      chromeOnDark: isDark,
-                      primary: primary,
-                      title: FocuxMicrocopy.naoFoiPossivelCarregar,
-                      message: _erro!,
-                      onRetry: _load,
-                    )
-                    : habito == null
-                    ? FxEmptyState(
-                      icon: FxIcons.concluido,
-                      title: 'Hábito não encontrado',
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          _leave();
+        },
+        child: FxShellScaffold(
+          useMesh: true,
+          constrainWidth: false,
+          appBar: FxShellAppBar(
+            title: 'Hábito',
+            subtitle:
+                habito == null
+                    ? null
+                    : FxHubFreshness.fromFetchedAt(_fetchedAt),
+            onBack: _leave,
+            actions: [
+              FxHelpIconButton(
+                tooltip: 'Como usar este hábito',
+                onTap:
+                    () => showFxHelpSheet(
+                      context,
+                      title: 'Hábito',
                       subtitle:
-                          'Ele pode ter sido desativado. Volte à lista e escolha outro.',
-                      action: FxEmptyAction(label: 'Voltar', onTap: _leave),
-                    )
-                    : _HabitoDetailBody(
-                      habito: habito,
-                      forAluno: widget.forAluno,
-                      busy: _busy,
-                      semana: _semana,
-                      onRefresh: _load,
-                      onMarcar: _toggleHoje,
+                          'Quantas vezes por semana e quem está em dia.',
+                      tips: [
+                        const FxHelpTip('Esta semana', habitoComoCalculamos),
+                        FxHelpTip(
+                          widget.forAluno ? 'Marcar' : 'Editar ou desativar',
+                          widget.forAluno
+                              ? 'O botão marca ou desmarca o dia de hoje.'
+                              : 'No ⋯ do topo. Desativado volta com Reativar.',
+                        ),
+                      ],
                     ),
+              ),
+              if (!widget.forAluno && habito != null)
+                IconButton(
+                  tooltip: 'Mais opções',
+                  onPressed: _busy ? null : _maisOpcoes,
+                  icon: const Icon(FxIcons.mais),
+                ),
+            ],
           ),
+          body:
+              _loading && habito == null
+                  ? const Padding(
+                    padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                    child: SkeletonList(count: 5),
+                  )
+                  : _erro != null && habito == null
+                  ? FxErrorState(
+                    chromeOnDark: isDark,
+                    primary: primary,
+                    title: FocuxMicrocopy.naoFoiPossivelCarregar,
+                    message: _erro!,
+                    onRetry: _load,
+                  )
+                  : habito == null
+                  ? FxEmptyState(
+                    icon: FxIcons.concluido,
+                    title: 'Hábito não encontrado',
+                    subtitle:
+                        'Ele pode ter sido desativado. Volte à lista e escolha outro.',
+                    action: FxEmptyAction(label: 'Voltar', onTap: _leave),
+                  )
+                  : _HabitoDetailBody(
+                    habito: habito,
+                    forAluno: widget.forAluno,
+                    busy: _busy,
+                    semana: _semana,
+                    onRefresh: _load,
+                    onMarcar: _toggleHoje,
+                  ),
         ),
       ),
     );

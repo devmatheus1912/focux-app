@@ -152,14 +152,6 @@ abstract final class Aluno360Layout {
     );
   }
 
-  /// Tab bar selected label (Operação · Evolução · Ferramentas).
-  static TextStyle tabSelectedLabelStyle() {
-    return FocuxHubTypography.bodyMuted(
-      color: TokensStrip.textPrimary,
-      fontWeight: FontWeight.w600,
-    ).copyWith(letterSpacing: -0.1);
-  }
-
   /// Compact secondary actions in empty states.
   static TextStyle secondaryActionLabelStyle() {
     return FocuxHubTypography.bodyMuted(

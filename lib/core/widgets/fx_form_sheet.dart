@@ -26,7 +26,7 @@ Future<bool> showFxFormSheet(
   required Widget child,
   required String confirmLabel,
   String? subtitle,
-  IconData icon = FxIcons.editar,
+  IconData? icon = FxIcons.editar,
   String cancelLabel = FocuxMicrocopy.cancelar,
   bool destructive = false,
   bool Function()? podeConfirmar,
@@ -120,7 +120,8 @@ class _FxFormSheet extends StatelessWidget {
 
   final String title;
   final String? subtitle;
-  final IconData icon;
+  /// Nulo: título sem ícone (a folha já tem o puxador e o X).
+  final IconData? icon;
   final String confirmLabel;
   final String cancelLabel;
   final bool destructive;
@@ -150,7 +151,7 @@ class _FxFormSheet extends StatelessWidget {
             isDark: isDark,
             title: title,
             subtitle: subtitle,
-            leading: Icon(icon, color: accent, size: 18),
+            leading: icon == null ? null : Icon(icon, color: accent, size: 18),
           ),
           SizedBox(height: TokensStrip.s4),
           Flexible(

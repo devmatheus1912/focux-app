@@ -11,8 +11,12 @@ import '../../evolucao/widgets/conquista_selo.dart';
 /// Quantos selos o topo do perfil mostra; o resto fica no Meu progresso.
 const perfilConquistasMax = 3;
 
+/// Largura de cada selo com a legenda (o item: "Cintura", "Supino").
+const perfilSeloLegendaLargura = 64.0;
+
 /// Conquistas no topo do perfil do aluno: até [perfilConquistasMax] selos, as
-/// mais recentes primeiro, e o link para o Meu progresso. Sem conquista, nada.
+/// mais recentes primeiro, cada um com o item embaixo, e o link para o Meu
+/// progresso. Sem conquista, nada.
 class PerfilConquistasLinha extends StatelessWidget {
   const PerfilConquistasLinha({
     super.key,
@@ -53,13 +57,32 @@ class PerfilConquistasLinha extends StatelessWidget {
                     padding: const EdgeInsets.only(right: TokensStrip.s2),
                     child: ExcludeSemantics(
                       child: InkWell(
-                        customBorder: const CircleBorder(),
+                        borderRadius: BorderRadius.circular(TokensStrip.rSm),
                         onTap: () => onAbrir(c),
-                        child: ConquistaSelo(
-                          tipo: c.tipo,
-                          glifo: conquistaGlifo(c),
-                          tamanho: 48,
-                          marca: marca,
+                        child: SizedBox(
+                          width: perfilSeloLegendaLargura,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ConquistaSelo(
+                                tipo: c.tipo,
+                                glifo: conquistaGlifo(c),
+                                tamanho: 48,
+                                marca: marca,
+                                sobreMarca: true,
+                              ),
+                              const SizedBox(height: TokensStrip.s1),
+                              Text(
+                                c.item,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
+                                style: FocuxHubTypography.minimo(
+                                  color: sobre.mute,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),

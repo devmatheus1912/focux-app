@@ -6,6 +6,7 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/utils/pt_br_display.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
@@ -14,6 +15,7 @@ import '../../../core/widgets/fx_quick_chips.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../l10n/pt.dart';
+import '../../alunos/widgets/aluno_form_choices.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../data/evolucao_repository.dart';
@@ -54,6 +56,27 @@ String? metaLeituraDoAlvo(String metrica, double atual, double? alvo) {
   return alvo < atual ? ptS.metaReduzir(diferenca) : ptS.metaAumentar(diferenca);
 }
 
+/// Prazo de uma meta que já tem data: fica como opção até o personal trocar.
+const metaPrazoAtual = -1;
+
+/// Opções do prazo: sem prazo, 30, 60 e 90 dias; com prazo já salvo, "Até
+/// dd/mm" na frente.
+List<int> metaPrazoOpcoes(int selecionado) => [
+  if (selecionado == metaPrazoAtual) metaPrazoAtual,
+  0,
+  30,
+  60,
+  90,
+];
+
+String metaPrazoRotulo(int dias, {DateTime? prazoAtual}) => switch (dias) {
+  metaPrazoAtual => ptS.metaPrazoAte(
+    prazoAtual == null ? '' : dataCurta(prazoAtual),
+  ),
+  0 => ptS.metaPrazoSem,
+  _ => ptS.metaPrazoDias('$dias'),
+};
+
 Future<bool> abrirFormularioDeMeta(
   BuildContext context,
   WidgetRef ref, {
@@ -76,7 +99,7 @@ Future<bool> abrirFormularioDeMeta(
   final observacao = TextEditingController(text: meta?.observacao ?? '');
   DateTime? prazo = meta?.prazo == null ? null : DateTime.tryParse(meta!.prazo!);
   // Prazo de meta existente segue valendo até o personal trocar.
-  var prazoDias = prazo == null ? 0 : -1;
+  var prazoDias = prazo == null ? 0 : metaPrazoAtual;
   final home = ref.read(evolucaoHomeProvider(alunoId)).value;
   String? erroAlvo;
   ({double valor, String data})? atual() => metaLeituraAtual(metrica, home);
@@ -89,7 +112,7 @@ Future<bool> abrirFormularioDeMeta(
     final ok = await showFxFormSheet(
       context,
       title: meta == null ? ptS.metaDefinir : ptS.metaEditar,
-      icon: FxIcons.meta,
+      icon: null,
       confirmLabel: ptS.evolucaoSalvar,
       podeConfirmar: () {
         final valor = _numero(alvo.text);
@@ -161,7 +184,10 @@ Future<bool> abrirFormularioDeMeta(
                 obrigatorio: true,
                 controller: alvo,
                 label: ptS.metaAlvoCampo(metaUnidade(metrica)),
-                icon: FxIcons.meta,
+                // Exemplo a partir do valor atual; sem medida, sem exemplo.
+                hint: leitura == null
+                    ? null
+                    : ptS.metaAlvoExemplo(formatBrDecimal(leitura.valor)),
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
@@ -182,24 +208,32 @@ Future<bool> abrirFormularioDeMeta(
               const SizedBox(height: TokensStrip.s3),
               Text(ptS.metaPrazoRotulo, style: FocuxHubTypography.chip(chrome.mute)),
               const SizedBox(height: TokensStrip.s1),
-              FxQuickChips<int>(
-                itens: const [0, 30, 60, 90],
-                selecionado: prazoDias,
-                rotuloDe:
-                    (d) => d == 0 ? ptS.metaPrazoSem : ptS.metaPrazoDias('$d'),
-                onSelecionar:
-                    (d) => setSheet(() {
-                      prazoDias = d;
-                      prazo =
-                          d == 0 ? null : DateTime.now().add(Duration(days: d));
-                    }),
+              // Os prazos numa linha só (seletor de partes, como as abas).
+              AlunoSegmentedChoice(
+                options: [
+                  for (final d in metaPrazoOpcoes(prazoDias))
+                    (
+                      value: '$d',
+                      label: metaPrazoRotulo(d, prazoAtual: prazo),
+                    ),
+                ],
+                selected: '$prazoDias',
+                isDark: chrome.isDark,
+                onSelect: (v) => setSheet(() {
+                  final d = int.parse(v);
+                  if (d == metaPrazoAtual) return;
+                  prazoDias = d;
+                  prazo = d == 0 ? null : DateTime.now().add(Duration(days: d));
+                }),
               ),
               const SizedBox(height: TokensStrip.s2),
               AlunoInsetFormField(
                 rotuloVisivel: true,
                 controller: observacao,
                 label: ptS.metaObservacaoCampo,
-                icon: FxIcons.notas,
+                hint: ptS.metaObservacaoExemplo,
+                // O motivo só aparece na Evolução do personal.
+                ajuda: ptS.metaObservacaoAjuda,
                 showDivider: false,
               ),
             ],

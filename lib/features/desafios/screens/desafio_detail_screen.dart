@@ -8,7 +8,6 @@ import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
-import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
@@ -27,7 +26,6 @@ import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../../subscription/models/subscription_plan.dart';
 import '../data/desafio_repository.dart';
 import '../utils/desafio_display.dart';
 import '../../../core/theme/fx_icons.dart';
@@ -210,92 +208,87 @@ class _DesafioDetailScreenState extends ConsumerState<DesafioDetailScreen> {
 
     return fxScreenA11yScope(
       label: titulo,
-      child: FeatureGate(
-        featureName: 'Desafios',
-        requiredPlan: SubscriptionPlan.ENTERPRISE,
-        capability: 'comunidadeGrupos',
-        child: PopScope(
-          canPop: false,
-          onPopInvokedWithResult: (didPop, _) {
-            if (didPop) return;
-            _leave();
-          },
-          child: FxShellScaffold(
-            useMesh: true,
-            constrainWidth: false,
-            appBar: FxShellAppBar(
-              title: 'Desafio',
-              subtitle: freshness,
-              onBack: _leave,
-              actions: [
-                FxHelpIconButton(
-                  tooltip: 'Como usar este desafio',
-                  onTap:
-                      () => showFxHelpSheet(
-                        context,
-                        title: 'Desafio',
-                        subtitle:
-                            'Uma disputa com prazo: quem fizer mais sobe no ranking.',
-                        tips: [
-                          FxHelpTip(
-                            'O que conta',
-                            desafioRegraFrase(desafio?.tipo ?? 'TREINOS'),
-                          ),
-                          FxHelpTip(
-                            widget.forAluno
-                                ? 'Subir no ranking'
-                                : 'Editar, encerrar ou excluir',
-                            widget.forAluno
-                                ? 'O botão leva ao treino ou ao hábito que conta.'
-                                : 'No ⋯ do topo. Excluir só enquanto ninguém contou.',
-                          ),
-                        ],
-                      ),
-                ),
-                if (!widget.forAluno &&
-                    desafio != null &&
-                    desafioMenuAcoes(
-                      ativo: desafio.ativo,
-                      podeExcluir: desafio.podeExcluir,
-                    ).isNotEmpty)
-                  IconButton(
-                    tooltip: 'Mais opções',
-                    onPressed: _encerrando ? null : _maisOpcoes,
-                    icon: const Icon(FxIcons.mais),
-                  ),
-              ],
-            ),
-            body:
-                _loading && desafio == null
-                    ? const Padding(
-                      padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-                      child: SkeletonList(count: 5),
-                    )
-                    : _erro != null && desafio == null
-                    ? FxErrorState(
-                      chromeOnDark: isDark,
-                      primary: primary,
-                      title: 'Não conseguimos carregar o desafio',
-                      message: _erro!,
-                      onRetry: _load,
-                    )
-                    : desafio == null
-                    ? FxEmptyState(
-                      icon: FxIcons.ia,
-                      title: 'Desafio não encontrado',
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          _leave();
+        },
+        child: FxShellScaffold(
+          useMesh: true,
+          constrainWidth: false,
+          appBar: FxShellAppBar(
+            title: 'Desafio',
+            subtitle: freshness,
+            onBack: _leave,
+            actions: [
+              FxHelpIconButton(
+                tooltip: 'Como usar este desafio',
+                onTap:
+                    () => showFxHelpSheet(
+                      context,
+                      title: 'Desafio',
                       subtitle:
-                          'Ele pode ter sido encerrado. Volte à lista e escolha outro.',
-                      action: FxEmptyAction(label: 'Voltar', onTap: _leave),
-                    )
-                    : _DesafioDetailBody(
-                      desafio: desafio,
-                      ranking: _ranking,
-                      forAluno: widget.forAluno,
-                      meId: meId,
-                      onRefresh: _load,
-                      onAlunoSticky: _alunoSticky,
+                          'Uma disputa com prazo: quem fizer mais sobe no ranking.',
+                      tips: [
+                        FxHelpTip(
+                          'O que conta',
+                          desafioRegraFrase(desafio?.tipo ?? 'TREINOS'),
+                        ),
+                        FxHelpTip(
+                          widget.forAluno
+                              ? 'Subir no ranking'
+                              : 'Editar, encerrar ou excluir',
+                          widget.forAluno
+                              ? 'O botão leva ao treino ou ao hábito que conta.'
+                              : 'No ⋯ do topo. Excluir só enquanto ninguém contou.',
+                        ),
+                      ],
                     ),
+              ),
+              if (!widget.forAluno &&
+                  desafio != null &&
+                  desafioMenuAcoes(
+                    ativo: desafio.ativo,
+                    podeExcluir: desafio.podeExcluir,
+                  ).isNotEmpty)
+                IconButton(
+                  tooltip: 'Mais opções',
+                  onPressed: _encerrando ? null : _maisOpcoes,
+                  icon: const Icon(FxIcons.mais),
+                ),
+            ],
           ),
+          body:
+              _loading && desafio == null
+                  ? const Padding(
+                    padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                    child: SkeletonList(count: 5),
+                  )
+                  : _erro != null && desafio == null
+                  ? FxErrorState(
+                    chromeOnDark: isDark,
+                    primary: primary,
+                    title: 'Não conseguimos carregar o desafio',
+                    message: _erro!,
+                    onRetry: _load,
+                  )
+                  : desafio == null
+                  ? FxEmptyState(
+                    icon: FxIcons.ia,
+                    title: 'Desafio não encontrado',
+                    subtitle:
+                        'Ele pode ter sido encerrado. Volte à lista e escolha outro.',
+                    action: FxEmptyAction(label: 'Voltar', onTap: _leave),
+                  )
+                  : _DesafioDetailBody(
+                    desafio: desafio,
+                    ranking: _ranking,
+                    forAluno: widget.forAluno,
+                    meId: meId,
+                    onRefresh: _load,
+                    onAlunoSticky: _alunoSticky,
+                  ),
         ),
       ),
     );

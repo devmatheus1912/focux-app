@@ -15,7 +15,8 @@ void main() {
     expect(screen, contains('canPop: false'));
     expect(screen, contains('ListView.builder'));
     expect(screen, contains('desafioAlunoDetailPath'));
-    expect(screen, contains('FeatureGate'));
+    // O gate fica na rota (AppRouterGates), nunca dentro da tela.
+    expect(screen, isNot(contains('FeatureGate(')));
     // COMUNIDADE_GRUPOS é a capability de desafios (+ grupos); não há flag separada.
     expect(screen, contains('comunidadeGrupos'));
     expect(screen, contains('FxEmptyState'));

@@ -25,11 +25,7 @@ void main() {
   });
 
   test('lista sem "Atualizar atrasos" e menu do detalhe', () {
-    final idle = financeiroListaTools(modoSelecao: false);
-    expect(idle.foldChip, FinanceiroListaToolId.marcarLote);
-    expect(idle.mais, isEmpty);
-
-    final lote = financeiroListaTools(modoSelecao: true);
+    final lote = financeiroListaToolsDoLote();
     expect(lote.foldChip, FinanceiroListaToolId.marcarLote);
     expect(lote.mais, [FinanceiroListaToolId.cancelarLote]);
 

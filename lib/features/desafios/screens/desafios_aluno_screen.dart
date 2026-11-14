@@ -12,7 +12,6 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../dashboard/widgets/aluno_recurso_indisponivel.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
-import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
@@ -25,7 +24,6 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_toggle_chip.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../../subscription/models/subscription_plan.dart';
 import '../data/desafio_repository.dart';
 import '../utils/desafio_display.dart';
 import '../widgets/desafio_linhas.dart';
@@ -55,8 +53,8 @@ class _DesafiosAlunoScreenState extends ConsumerState<DesafiosAlunoScreen> {
   var _loading = true;
   String? _error;
 
-  /// A API barrou pelo plano do personal com a tela aberta.
-  bool _semRecurso = false;
+  /// Erro da última carga (decide entre o aviso de recurso e o erro comum).
+  Object? _erroCarga;
   DateTime? _fetchedAt;
 
   @override
@@ -96,7 +94,7 @@ class _DesafiosAlunoScreenState extends ConsumerState<DesafiosAlunoScreen> {
     setState(() {
       _loading = true;
       _error = null;
-      _semRecurso = false;
+      _erroCarga = null;
     });
     try {
       final pagina = await ref
@@ -115,7 +113,7 @@ class _DesafiosAlunoScreenState extends ConsumerState<DesafiosAlunoScreen> {
       if (!mounted) return;
       setState(() {
         _loading = false;
-        _semRecurso = isPlanGateError(e);
+        _erroCarga = e;
         _error = friendlyError(e);
       });
     }
@@ -165,140 +163,133 @@ class _DesafiosAlunoScreenState extends ConsumerState<DesafiosAlunoScreen> {
 
     return fxScreenA11yScope(
       label: 'Desafios',
-      child: FeatureGate(
-        // Plano: COMUNIDADE_GRUPOS cobre desafios + grupos (não há flag
-        // separada de "desafios" em PlanoCapability / plan_entitlements).
-        featureName: 'Desafios',
-        requiredPlan: SubscriptionPlan.ENTERPRISE,
-        capability: 'comunidadeGrupos',
-        child: PopScope(
-          canPop: false,
-          onPopInvokedWithResult: (didPop, _) {
-            if (didPop) return;
-            if (keyboardOpen || _searchFocus.hasFocus) {
-              FxKeyboardDismissScope.dismiss();
-              return;
-            }
-            safePopOrGo(context, '/dashboard/aluno');
-          },
-          child: FxShellScaffold(
-            useMesh: true,
-            constrainWidth: false,
-            appBar: FxShellAppBar(
-              title: 'Desafios',
-              subtitle: FxHubFreshness.joinCount(
-                desafioCountLabel(_loading ? 0 : _total),
-                _loading ? null : freshness,
-              ),
-              onBack: () {
-                FxKeyboardDismissScope.dismiss();
-                safePopOrGo(context, '/dashboard/aluno');
-              },
-              actions: [
-                FxHelpIconButton(
-                  tooltip: 'Como usar desafios',
-                  onTap:
-                      () => showFxHelpSheet(
-                        context,
-                        title: 'Desafios',
-                        subtitle:
-                            'Disputas com prazo: quem fizer mais sobe no ranking.',
-                        tips: const [
-                          FxHelpTip(
-                            'Lista',
-                            'Busque e filtre por tipo. Toque abre o desafio.',
-                          ),
-                          FxHelpTip(
-                            'Pontuar',
-                            'No detalhe você vê meta, prazo e o ranking.',
-                          ),
-                        ],
-                      ),
-                ),
-              ],
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          if (keyboardOpen || _searchFocus.hasFocus) {
+            FxKeyboardDismissScope.dismiss();
+            return;
+          }
+          safePopOrGo(context, '/dashboard/aluno');
+        },
+        child: FxShellScaffold(
+          useMesh: true,
+          constrainWidth: false,
+          appBar: FxShellAppBar(
+            title: 'Desafios',
+            subtitle: FxHubFreshness.joinCount(
+              desafioCountLabel(_loading ? 0 : _total),
+              _loading ? null : freshness,
             ),
-            body:
-                _loading
-                    ? const Padding(
-                      padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-                      child: SkeletonList(count: 5),
-                    )
-                    : _semRecurso
-                    ? const AlunoRecursoIndisponivelConteudo(
-                      capability: 'comunidadeGrupos',
-                      fallbackNome: 'Desafios',
-                    )
-                    : _error != null
-                    ? FxErrorState(
-                      chromeOnDark: chrome.isDark,
-                      primary: scheme.primary,
-                      title: FocuxMicrocopy.naoFoiPossivelCarregar,
-                      message: _error!,
-                      onRetry: _load,
-                    )
-                    : Column(
-                      children: [
-                        if (desafioMostraFiltros(
-                          total: _total,
-                          filtrando: searching,
-                        )) ...[
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(
-                              TokensStrip.s4,
-                              TokensStrip.s2,
-                              TokensStrip.s4,
-                              TokensStrip.s2,
-                            ),
-                            child: TextField(
-                              controller: _searchCtrl,
-                              focusNode: _searchFocus,
-                              textInputAction: TextInputAction.search,
-                              onChanged: _onQueryChanged,
-                              onTapOutside:
-                                  (_) => FxKeyboardDismissScope.dismiss(),
-                              decoration: InputDecoration(
-                                hintText: 'Buscar desafio',
-                                prefixIcon: const Icon(FxIcons.buscar),
-                                border: FxInputDeco.outlineBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(
-                              TokensStrip.s4,
-                              0,
-                              TokensStrip.s4,
-                              TokensStrip.s2,
-                            ),
-                            child: Wrap(
-                              spacing: TokensStrip.s2,
-                              runSpacing: TokensStrip.s2,
-                              children: [
-                                for (final filtro in DesafioTipoFiltro.values)
-                                  FxToggleChip(
-                                    label: desafioFiltroLabel(filtro),
-                                    selected: _filtro == filtro,
-                                    isDark: chrome.isDark,
-                                    onTap: () {
-                                      if (_filtro == filtro) return;
-                                      setState(() => _filtro = filtro);
-                                      _load();
-                                    },
-                                  ),
-                              ],
-                            ),
-                          ),
-                        ],
-                        Expanded(
-                          child: FxContentWidthLimiter(
-                            child: _buildList(searching),
-                          ),
+            onBack: () {
+              FxKeyboardDismissScope.dismiss();
+              safePopOrGo(context, '/dashboard/aluno');
+            },
+            actions: [
+              FxHelpIconButton(
+                tooltip: 'Como usar desafios',
+                onTap:
+                    () => showFxHelpSheet(
+                      context,
+                      title: 'Desafios',
+                      subtitle:
+                          'Disputas com prazo: quem fizer mais sobe no ranking.',
+                      tips: const [
+                        FxHelpTip(
+                          'Lista',
+                          'Busque e filtre por tipo. Toque abre o desafio.',
+                        ),
+                        FxHelpTip(
+                          'Pontuar',
+                          'No detalhe você vê meta, prazo e o ranking.',
                         ),
                       ],
                     ),
+              ),
+            ],
           ),
+          body:
+              _loading
+                  ? const Padding(
+                    padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                    child: SkeletonList(count: 5),
+                  )
+                  : alunoBarradoPeloPlano(_erroCarga)
+                  ? const AlunoRecursoIndisponivelConteudo(
+                    capability: 'comunidadeGrupos',
+                    fallbackNome: 'Desafios',
+                  )
+                  : _error != null
+                  ? FxErrorState(
+                    chromeOnDark: chrome.isDark,
+                    primary: scheme.primary,
+                    title: FocuxMicrocopy.naoFoiPossivelCarregar,
+                    message: _error!,
+                    onRetry: _load,
+                  )
+                  : Column(
+                    children: [
+                      if (desafioMostraFiltros(
+                        total: _total,
+                        filtrando: searching,
+                      )) ...[
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            TokensStrip.s4,
+                            TokensStrip.s2,
+                            TokensStrip.s4,
+                            TokensStrip.s2,
+                          ),
+                          child: TextField(
+                            controller: _searchCtrl,
+                            focusNode: _searchFocus,
+                            textInputAction: TextInputAction.search,
+                            onChanged: _onQueryChanged,
+                            onTapOutside:
+                                (_) => FxKeyboardDismissScope.dismiss(),
+                            decoration: InputDecoration(
+                              hintText: 'Buscar desafio',
+                              prefixIcon: const Icon(FxIcons.buscar),
+                              border: FxInputDeco.outlineBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            TokensStrip.s4,
+                            0,
+                            TokensStrip.s4,
+                            TokensStrip.s2,
+                          ),
+                          child: Wrap(
+                            spacing: TokensStrip.s2,
+                            runSpacing: TokensStrip.s2,
+                            children: [
+                              for (final filtro in DesafioTipoFiltro.values)
+                                FxToggleChip(
+                                  label: desafioFiltroLabel(filtro),
+                                  selected: _filtro == filtro,
+                                  isDark: chrome.isDark,
+                                  onTap: () {
+                                    if (_filtro == filtro) return;
+                                    setState(() => _filtro = filtro);
+                                    _load();
+                                  },
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
+                      Expanded(
+                        child: FxContentWidthLimiter(
+                          child: _buildList(searching),
+                        ),
+                      ),
+                    ],
+                  ),
         ),
       ),
     );

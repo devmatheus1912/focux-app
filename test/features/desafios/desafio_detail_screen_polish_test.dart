@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/screen_source_bundle.dart';
@@ -21,8 +23,12 @@ void main() {
         contains('TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom'),
       ),
     );
-    expect(screen, contains('FeatureGate'));
-    expect(screen, contains('comunidadeGrupos'));
+    // O gate fica na rota (AppRouterGates), nunca dentro da tela.
+    expect(screen, isNot(contains('FeatureGate(')));
+    expect(
+      File('lib/core/router/app_router_gates.dart').readAsStringSync(),
+      contains('comunidadeGrupos'),
+    );
     expect(screen, contains('desafioStickyAlunoLabel'));
     expect(screen, contains('participar'));
     expect(screen, contains('encerrar'));

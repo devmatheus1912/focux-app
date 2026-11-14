@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/theme/focux_hub_typography.dart';
-import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
-import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/pt_br_display.dart';
 import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../l10n/pt.dart';
 import '../../evolucao/data/evolucao_repository.dart';
@@ -25,8 +22,8 @@ String perfilPesoLinha(S s, List<MedidaCorporal> medidas) {
   return '$atual · ${s.perfilPesoDesde(dif, dataCurta(pesos.first.data))}';
 }
 
-/// Peso atual e "Registrar medida". A semana e a meta ficam na Hoje e no Meu
-/// progresso; aqui não se repetem (os mini-anéis saíram em 14/11).
+/// Peso atual e "Registrar medida", como linhas da lista (o mesmo padrão do
+/// grupo Conta). A semana e a meta ficam na Hoje e no Meu progresso.
 class PerfilProgressoBloco extends StatelessWidget {
   const PerfilProgressoBloco({super.key, required this.medidas});
 
@@ -36,48 +33,26 @@ class PerfilProgressoBloco extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = S.of(context);
     final chrome = ShellChrome.of(context);
-    final peso = '${ptS.evolucaoMetricaPeso}: ${perfilPesoLinha(s, medidas)}';
     return FxSettingsGroup(
       header: s.alunoPerfilGrupoProgresso,
       children: [
-        Padding(
-          padding: const EdgeInsets.all(FxSettingsLayout.groupPadH),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Semantics(
-                button: true,
-                label: '${s.meuProgressoTitulo}. $peso',
-                excludeSemantics: true,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(TokensStrip.rSm),
-                  onTap: () => context.push('/aluno/progresso'),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: TokensStrip.s2),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            peso,
-                            style: FocuxHubTypography.body(color: chrome.ink),
-                          ),
-                        ),
-                        Icon(FxIcons.chevronDireita, color: chrome.mute),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: TokensStrip.s3),
-              FxTonalButton(
-                label: s.alunoPerfilRegistrarMedida,
-                icon: FxIcons.grafico,
-                expanded: true,
-                onPressed:
-                    () => context.push('/aluno/perfil/editar?acao=medida'),
-              ),
-            ],
-          ),
+        FxSettingsTile(
+          icon: FxIcons.grafico,
+          label: ptS.evolucaoMetricaPeso,
+          subtitle: perfilPesoLinha(s, medidas),
+          value: '',
+          mute: chrome.mute,
+          line: chrome.line,
+          onTap: () => context.push('/aluno/progresso'),
+        ),
+        FxSettingsTile(
+          icon: FxIcons.fitaMetrica,
+          label: s.alunoPerfilRegistrarMedida,
+          value: '',
+          mute: chrome.mute,
+          line: chrome.line,
+          showDivider: false,
+          onTap: () => context.push('/aluno/perfil/editar?acao=medida'),
         ),
       ],
     );

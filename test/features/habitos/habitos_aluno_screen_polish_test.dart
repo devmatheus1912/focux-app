@@ -23,7 +23,8 @@ void main() {
     expect(screen, contains('canPop: false'));
     expect(screen, contains('safePopOrGo'));
     expect(screen, contains("safePopOrGo(context, '/dashboard/aluno')"));
-    expect(screen, contains('FeatureGate'));
+    // O gate fica na rota (AppRouterGates), nunca dentro da tela.
+    expect(screen, isNot(contains('FeatureGate(')));
     expect(screen, contains('habitCoaching'));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('showFxHelpSheet'));

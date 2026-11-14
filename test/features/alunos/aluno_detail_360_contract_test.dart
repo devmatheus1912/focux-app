@@ -371,7 +371,8 @@ void main() {
       File('lib/core/utils/motion_preferences.dart').readAsStringSync(),
       contains('fxMotionDurationMs'),
     );
-    expect(layoutSource, contains('tabSelectedLabelStyle'));
+    // Abas do 360 usam o AlunoSegmentedChoice (14/11): o estilo próprio saiu.
+    expect(layoutSource, isNot(contains('tabSelectedLabelStyle')));
     expect(layoutSource, contains('secondaryActionLabelStyle'));
     expect(layoutSource, contains('FxSettingsLayout.groupRadius'));
     expect(screen, isNot(contains('syncFromAluno')));
