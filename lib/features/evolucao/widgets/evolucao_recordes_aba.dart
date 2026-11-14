@@ -31,7 +31,6 @@ class EvolucaoRecordesAba extends StatefulWidget {
     this.onEditar,
     this.onExcluir,
     this.depois = const [],
-    this.foco,
   });
 
   final List<RecordePessoal> recordes;
@@ -45,9 +44,6 @@ class EvolucaoRecordesAba extends StatefulWidget {
   /// Conquistas de força, depois da lista.
   final List<Widget> depois;
 
-  /// Exercício a escolher ("Ver exercício" da conquista).
-  final String? foco;
-
   @override
   State<EvolucaoRecordesAba> createState() => _EvolucaoRecordesAbaState();
 }
@@ -56,20 +52,6 @@ class _EvolucaoRecordesAbaState extends State<EvolucaoRecordesAba> {
   String? _escolhido;
 
   static String _chave(String nome) => nome.trim().toLowerCase();
-
-  @override
-  void didUpdateWidget(EvolucaoRecordesAba old) {
-    super.didUpdateWidget(old);
-    if (widget.foco != null && widget.foco != old.foco) {
-      _escolhido = _chave(widget.foco!);
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.foco != null) _escolhido = _chave(widget.foco!);
-  }
 
   @override
   Widget build(BuildContext context) {

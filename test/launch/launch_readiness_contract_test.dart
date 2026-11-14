@@ -15,7 +15,6 @@ void main() {
     'chat': '/chat/inbox',
     'ia': '/ia/copiloto',
     'leads': '/leads',
-    'captura': '/leads-publicos',
     'convites': '/convites',
     'perfil': '/perfil',
     'planos': '/planos',

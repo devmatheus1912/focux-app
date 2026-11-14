@@ -64,6 +64,7 @@ class SetupOnboardingWidget extends ConsumerWidget {
         if (data.ativacaoCompleta()) {
           return SetupSugestaoStrip(
             data: data,
+            perdidosEmUso: plano?.recursosEmUsoBloqueados ?? const [],
             podeCobrar: plano?.recurso(PlanoRecursoKeys.carteira).liberado ?? false,
             temLanding: plano?.recurso(PlanoRecursoKeys.landing).liberado ?? false,
           );
@@ -113,11 +114,15 @@ class SetupSugestaoStrip extends ConsumerStatefulWidget {
     required this.data,
     required this.podeCobrar,
     required this.temLanding,
+    this.perdidosEmUso = const [],
   });
 
   final OnboardingStatusData data;
   final bool podeCobrar;
   final bool temLanding;
+
+  /// Recursos que o plano deixou de liberar e os alunos usavam.
+  final List<String> perdidosEmUso;
 
   @override
   ConsumerState<SetupSugestaoStrip> createState() => _SetupSugestaoStripState();
@@ -154,6 +159,7 @@ class _SetupSugestaoStripState extends ConsumerState<SetupSugestaoStrip> {
       widget.data,
       podeCobrar: widget.podeCobrar,
       temLanding: widget.temLanding,
+      perdidosEmUso: widget.perdidosEmUso,
       dispensadas: dispensadas,
     );
     if (sugestao == null) return const SizedBox.shrink();

@@ -45,6 +45,12 @@ class Aluno360TimelineCard extends StatelessWidget {
     Color color;
     String kind;
     switch (tipo) {
+      case 'RADAR' when e.oportunidade:
+        // Aluno em dia: sugestão de conversa, não alerta (14/11).
+        icon = FxIcons.ideia;
+        color = TokensStrip.textSecondary;
+        kind = 'Sugestão';
+        break;
       case 'RADAR':
         icon = FxIcons.radar;
         color = EagleTokens.warn;

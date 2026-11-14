@@ -115,7 +115,7 @@ class ConquistaCartao extends StatelessWidget {
                     _Poster(texto: c.valor, cor: tinta),
                     const SizedBox(height: TokensStrip.s2),
                     Text(
-                      _oQue(c),
+                      c.item,
                       textAlign: TextAlign.center,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -141,12 +141,27 @@ class ConquistaCartao extends StatelessWidget {
                         ),
                       ),
                     ],
-                  ] else
+                  ] else ...[
+                    // Sem o número: o tipo em destaque e o item embaixo, em
+                    // duas linhas (sem "no"/"na", que errava o gênero).
                     Text(
-                      ptS.conquistaFeitoSemNumero(c.tipoRotulo, _oQue(c)),
+                      c.tipoRotulo,
                       textAlign: TextAlign.center,
+                      maxLines: 2,
                       style: FocuxHubTypography.destaque(color: tinta),
                     ),
+                    // Sem exercício nem medida, o item seria o próprio tipo.
+                    if (c.item != c.tipoRotulo) ...[
+                      const SizedBox(height: TokensStrip.s2),
+                      Text(
+                        c.item,
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: FocuxHubTypography.sectionTitle(context, color: tinta),
+                      ),
+                    ],
+                  ],
                   const Spacer(),
                   _Assinatura(
                     marca: marca,
@@ -168,11 +183,6 @@ class ConquistaCartao extends StatelessWidget {
       ),
     );
   }
-
-  /// O exercício do recorde ou a medida da meta.
-  static String _oQue(Conquista c) =>
-      c.exercicio ??
-      (c.metrica == null ? c.tipoRotulo : metaMetricaRotulo(c.metrica!));
 }
 
 /// Cor da marca em degradê com o hexágono do selo enorme e vazado ao fundo,

@@ -8,7 +8,7 @@ import 'package:focux_app/features/avaliacao/data/avaliacao_repository.dart';
 import 'package:focux_app/features/avaliacao/widgets/evolucao_comparacao_linhas.dart';
 import 'package:focux_app/features/evolucao/data/evolucao_repository.dart';
 import 'package:focux_app/features/evolucao/utils/evolucao_series.dart';
-import 'package:focux_app/features/evolucao/widgets/evolucao_hero.dart';
+import 'package:focux_app/features/evolucao/widgets/evolucao_resumo.dart';
 import 'package:focux_app/features/evolucao/widgets/evolucao_medidas_aba.dart';
 import 'package:focux_app/features/exercicios/widgets/add_exercicio_filters_sheet.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
@@ -113,14 +113,13 @@ void main() {
       tela(tester, const Size(390, 160));
       await tester.pumpWidget(
         _tela(
-          EvolucaoMiniAneis(
+          EvolucaoResumoPersonal(
             aneis: const EvolucaoAneis(
               treinoFeitos: 1,
               treinoPrevistos: 5,
               metaProgresso: 50,
               ultimaMedida: '2026-11-02',
             ),
-            doPersonal: false,
             onTap: () {},
             pesoLinha: '105,0 kg · +15,0 kg',
           ),
@@ -128,7 +127,7 @@ void main() {
         ),
       );
       await _pronto(tester);
-      await expectFocuxGolden(find.byType(EvolucaoMiniAneis), 'goldens/card_progresso_$sufixo.png');
+      await expectFocuxGolden(find.byType(EvolucaoResumoPersonal), 'goldens/card_progresso_$sufixo.png');
     });
 
     testWidgets('folha de histórico ($sufixo)', (tester) async {

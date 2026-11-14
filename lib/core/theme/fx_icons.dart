@@ -170,6 +170,7 @@ abstract final class FxIcons {
   static const IconData loja = IconData(0xe470, fontFamily: _light); // storefront
   static const IconData mais = IconData(0xe1fe, fontFamily: _light); // dotsThree
   static const IconData maisVertical = IconData(0xe208, fontFamily: _light); // dotsThreeVertical
+  static const IconData medalha = IconData(0xe320, fontFamily: _light); // medal
   static const IconData megafone = IconData(0xe324, fontFamily: _light); // megaphone
   static const IconData mente = IconData(0xe74e, fontFamily: _light); // brain
   static const IconData meta = IconData(0xe244, fontFamily: _light); // flag

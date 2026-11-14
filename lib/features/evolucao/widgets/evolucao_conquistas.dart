@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -12,6 +13,7 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_sheet_frame.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
@@ -24,13 +26,11 @@ import '../../../core/widgets/fx_link_row.dart';
 
 /// Ações do personal na folha da conquista.
 class ConquistaAcoes {
-  const ConquistaAcoes({required this.onParabenizar, required this.onVer});
+  const ConquistaAcoes({required this.onParabenizar});
 
-  /// Abre o chat do aluno com a mensagem pronta.
+  /// Abre o chat do aluno com a mensagem pronta. A folha termina aqui: a
+  /// conquista já mora na aba do item (Corpo: metas; Força: recordes).
   final ValueChanged<Conquista> onParabenizar;
-
-  /// "Ver exercício" (recorde) ou "Ver medida" (meta): a aba com o item.
-  final ValueChanged<Conquista> onVer;
 }
 
 /// Faixa "Conquistas". Selo só existe depois do feito: sem selo bloqueado.
@@ -239,17 +239,6 @@ class _FolhaConquistaState extends ConsumerState<_FolhaConquista> {
                     acoes.onParabenizar(c);
                   },
                 ),
-                const SizedBox(height: TokensStrip.s2),
-                FxLinkRow(
-                  label:
-                      c.tipo == ConquistaTipo.recorde
-                          ? ptS.conquistaVerExercicio
-                          : ptS.conquistaVerMedida,
-                  onTap: () {
-                    Navigator.pop(context);
-                    acoes.onVer(c);
-                  },
-                ),
               ],
             ],
           ),
@@ -262,9 +251,17 @@ class _FolhaConquistaState extends ConsumerState<_FolhaConquista> {
       nome: brand?.appDisplayName ?? brand?.nomePersonal,
     );
     final aluno = ref.watch(alunoMeProvider).value?.nome.trim().split(' ').first;
-    final alturaPrevia = (MediaQuery.sizeOf(context).height * 0.5).clamp(320.0, 460.0);
+    // Prévia menor e "Compartilhar" no rodapé fixo: o botão nunca fica abaixo
+    // da dobra (14/11, telas de 667 pt).
+    final alturaPrevia = math.max(280.0, MediaQuery.sizeOf(context).height * 0.4);
     return FxSheetFrame(
       title: ptS.conquistaTitulo,
+      footer: FxLiquidPrimaryButton(
+        label: ptS.conquistaCompartilhar,
+        icon: FxIcons.compartilhar,
+        loading: _enviando,
+        onPressed: _enviando ? null : _compartilhar,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
@@ -331,13 +328,6 @@ class _FolhaConquistaState extends ConsumerState<_FolhaConquista> {
                 ),
               ],
             ),
-          ),
-          const SizedBox(height: TokensStrip.s2),
-          FxTonalButton(
-            label: ptS.conquistaCompartilhar,
-            icon: FxIcons.compartilhar,
-            expanded: true,
-            onPressed: _enviando ? null : _compartilhar,
           ),
         ],
       ),

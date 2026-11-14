@@ -39,7 +39,6 @@ import '../widgets/perfil_public_link_sheet.dart';
 import '../widgets/perfil_loading_scaffold.dart';
 import '../widgets/perfil_error_scaffold.dart';
 import 'package:focux_app/core/widgets/fx_action_row.dart';
-import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/fx_settings_group.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
@@ -52,7 +51,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/media/escolher_foto_de_perfil.dart';
 import '../../../core/widgets/fx_strip_card.dart';
-import '../../alunos/widgets/aluno_avatar.dart';
+import '../widgets/perfil_topo_marca.dart';
 import '../../../core/theme/fx_icons.dart';
 
 part 'perfil_screen_widgets_a.part.dart';

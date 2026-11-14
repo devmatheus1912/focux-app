@@ -2,8 +2,9 @@
 class Aluno360EvolucaoInteligenteLogic {
   Aluno360EvolucaoInteligenteLogic._();
 
-  /// Soft-cap de leitura: % WoW absurdo (baseline pequena) vira texto.
-  static const int tendenciaPctSoftCap = 200;
+  /// Acima disto (semana contra a anterior, base pequena), o número vira
+  /// "Mais que dobrou".
+  static const int tendenciaPctDobrou = 100;
 
   /// Returns sparkline data; duplicates a single non-zero week so the chart renders.
   static List<double> resolveVolumeSparklineData(List<double> volumePorSemana) {

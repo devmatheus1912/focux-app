@@ -72,13 +72,32 @@ class SetupSugestao {
   final String rota;
 }
 
+/// "Hábitos", "Hábitos e Desafios", "Hábitos, Desafios e Financeiro".
+String juntarNomes(List<String> nomes) => switch (nomes.length) {
+  0 => '',
+  1 => nomes.first,
+  _ =>
+    '${nomes.sublist(0, nomes.length - 1).join(', ')} e ${nomes.last}',
+};
+
 SetupSugestao? setupProximaSugestao(
   OnboardingStatusData data, {
   required bool podeCobrar,
   required bool temLanding,
+  List<String> perdidosEmUso = const [],
   Set<String> dispensadas = const {},
 }) {
   final sugestoes = [
+    // Caiu de plano e os alunos usavam algo: vem antes de tudo. O id leva os
+    // nomes, então uma perda nova volta a aparecer mesmo depois de dispensar.
+    if (perdidosEmUso.isNotEmpty)
+      SetupSugestao(
+        id: 'perda-plano:${perdidosEmUso.join(',')}',
+        title:
+            'Seus alunos usam ${juntarNomes(perdidosEmUso)} e deixam de ver. '
+            'Ver planos',
+        rota: '/assinatura',
+      ),
     if (podeCobrar && !data.pagamentoConfigurado)
       const SetupSugestao(
         id: 'pagamento',

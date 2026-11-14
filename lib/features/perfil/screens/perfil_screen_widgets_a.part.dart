@@ -132,51 +132,28 @@ class _PerfilBodyState extends State<_PerfilBody> {
                         FxSettingsLayout.pageInset,
                         0,
                       ),
-                      child: FxStripCard(
-                        marca: true,
+                      child: PerfilTopoMarca(
+                        nome: perfil.nome,
+                        fotoUrl: perfil.logoUrl,
                         accent: primaryColor,
-                        child: Column(
-                        children: [
-                          _Avatar(
-                            nome: perfil.nome,
-                            logoUrl: perfil.logoUrl,
-                            primaryColor: primaryColor,
-                            profileScore: profileScore,
-                            // O lápis é o único caminho para os dados: abre
-                            // Editar perfil (a foto se troca lá). Só trocar a
-                            // foto deixava o perfil completo sem edição (13/11).
-                            onTap: onEditPerfil,
-                            loading: uploadingPhoto,
-                            semanticsLabel:
-                                uploadingPhoto
-                                    ? 'Enviando foto do perfil'
-                                    : 'Editar perfil',
-                          ),
-                          const SizedBox(height: TokensStrip.s3),
-                          Text(
-                            perfil.nome,
-                            textAlign: TextAlign.center,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: FxSettingsLayout.profileName(
-                              context,
-                              color: sobre.ink,
-                            ),
-                          ),
+                        // O lápis é o único caminho para os dados: abre
+                        // Editar perfil (a foto se troca lá).
+                        onEditar: onEditPerfil,
+                        carregando: uploadingPhoto,
+                        editarSemantica:
+                            uploadingPhoto
+                                ? 'Enviando foto do perfil'
+                                : 'Editar perfil. Perfil $profileScore por cento completo.',
+                        linhas: [
                           if (perfil.slogan != null &&
-                              perfil.slogan!.trim().isNotEmpty) ...[
-                            const SizedBox(height: TokensStrip.s1),
+                              perfil.slogan!.trim().isNotEmpty)
                             Text(
-                              formatBrandSloganForDisplay(
-                                perfil.slogan!.trim(),
-                              ),
+                              formatBrandSloganForDisplay(perfil.slogan!.trim()),
                               textAlign: TextAlign.center,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                               style: FxSettingsLayout.subhead(color: sobre.mute),
                             ),
-                          ],
-                          const SizedBox(height: TokensStrip.s1),
                           Text(
                             _buildSubtitle(perfil),
                             textAlign: TextAlign.center,
@@ -184,9 +161,7 @@ class _PerfilBodyState extends State<_PerfilBody> {
                             overflow: TextOverflow.ellipsis,
                             style: FxSettingsLayout.subhead(color: sobre.mute),
                           ),
-
                         ],
-                      ),
                       ),
                     ),
                   ),

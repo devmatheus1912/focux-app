@@ -13,7 +13,6 @@ void main() {
     'chat',
     'ia',
     'leads',
-    'captura',
     'convites',
     'perfil',
     'planos',

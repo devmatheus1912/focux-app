@@ -13,8 +13,13 @@ void main() {
       'lib/features/perfil/widgets/perfil_conta_seguranca_section.dart',
     ).readAsStringSync();
 
-    expect(screen, contains('Semantics('));
-    expect(screen, contains('semanticsLabel:'));
+    // O topo (foto, nome) é o PerfilTopoMarca, com a semântica dele.
+    expect(screen, contains('PerfilTopoMarca('));
+    expect(
+      File('lib/features/perfil/widgets/perfil_topo_marca.dart').readAsStringSync(),
+      contains('Semantics('),
+    );
+    expect(screen, contains('editarSemantica:'));
     expect(screen, contains('_PerfilVitrineTiles'));
     expect(screen, contains('_PerfilAcessoAlunos'));
     expect(screen, isNot(contains("label: 'Link público'")));
@@ -28,7 +33,10 @@ void main() {
     expect(screen, isNot(contains('_BrandPreview')));
     expect(screen, isNot(contains('PerfilProfessionalSummary')));
     expect(screen, isNot(contains('ref.watch(dashboardProvider)')));
-    expect(screen, contains('FxSettingsLayout.profileName'));
+    expect(
+      File('lib/features/perfil/widgets/perfil_topo_marca.dart').readAsStringSync(),
+      contains('FxSettingsLayout.profileName'),
+    );
     expect(screen, contains('FxSettingsGroup'));
     expect(screen, contains('FxSettingsTile'));
     expect(screen, contains('PerfilAppearanceSection'));

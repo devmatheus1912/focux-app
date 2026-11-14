@@ -76,8 +76,6 @@ class EvolucaoScreen extends ConsumerStatefulWidget {
 
 class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
   /// "Ver exercício" / "Ver medida" da conquista: o item a escolher na aba.
-  String? _focoForca;
-  String? _focoMedida;
 
   /// O Histórico com o registro da linha do tempo abre uma vez só.
   var _destaqueAberto = false;
@@ -411,7 +409,6 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                                     onAbrirRegistro: _abrirRegistro,
                                     podeAbrirRegistro: _podeAbrirRegistro,
                                     mostrarConfira: true,
-                                    foco: _focoMedida,
                                     topo: [
                                       EvolucaoMetasBloco(
                                         alunoId: widget.alunoId,
@@ -436,7 +433,6 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                                     onAtualizar: _atualizar,
                                     onEditar: (r) => _formularioRecorde(recorde: r),
                                     onExcluir: _excluirRecorde,
-                                    foco: _focoForca,
                                     depois: [
                                       EvolucaoConquistas(
                                         conquistas: [
@@ -765,16 +761,6 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
         extra: {'nome': satelliteFirstName(nome), 'draft': texto},
       );
     },
-    onVer: (c) => setState(() {
-      if (c.tipo == ConquistaTipo.recorde) {
-        _view = EvolucaoHubView.recordes;
-        _focoForca = c.exercicio;
-      } else {
-        _view = EvolucaoHubView.medidas;
-        _focoMedida = c.metrica;
-      }
-      _abertas.add(_view);
-    }),
   );
 
   Future<void> _excluirRecorde(RecordePessoal recorde) async {

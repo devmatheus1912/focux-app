@@ -19,10 +19,14 @@ void main() {
     expect(Aluno360EvolucaoInteligenteCard.tendenciaTexto(ev(pct: -12)), 'Estável · -12%');
   });
 
-  test('% absurdo de base pequena fica só com o sinal', () {
+  test('acima de +100% vira "Mais que dobrou"', () {
     expect(
       Aluno360EvolucaoInteligenteCard.tendenciaTexto(ev(pct: 596, sinal: 'SUBINDO')),
-      'Em alta',
+      'Mais que dobrou',
+    );
+    expect(
+      Aluno360EvolucaoInteligenteCard.tendenciaTexto(ev(pct: 100, sinal: 'SUBINDO')),
+      'Em alta · +100%',
     );
     expect(Aluno360EvolucaoInteligenteCard.tendenciaTexto(ev()), 'Estável');
   });

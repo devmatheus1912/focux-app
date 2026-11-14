@@ -3,13 +3,11 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_aneis_concentricos.dart';
-import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/utils/motion_preferences.dart';
 import '../../../l10n/pt.dart';
 import '../data/evolucao_repository.dart';
 import '../utils/evolucao_aneis.dart';
-import '../../../core/theme/fx_icons.dart';
 
 List<AnelConcentrico> _aneisDe(
   List<LeituraDoAnel> leituras,
@@ -282,126 +280,6 @@ class _Valor extends StatelessWidget {
         child: ConstrainedBox(
           constraints: const BoxConstraints(minHeight: 44),
           child: Center(child: conteudo),
-        ),
-      ),
-    );
-  }
-}
-
-/// Mini-anel: o mesmo resumo no Hoje do aluno, no 360 e no Relatório.
-class EvolucaoMiniAneis extends StatelessWidget {
-  const EvolucaoMiniAneis({
-    super.key,
-    required this.aneis,
-    required this.doPersonal,
-    this.onTap,
-    this.pesoLinha,
-    this.pesoRotulo,
-    this.metaNome,
-    this.semMoldura = false,
-    this.resumoDoAluno = false,
-  });
-
-  /// Dentro de um grupo que já é cartão (Perfil): sem a moldura própria.
-  final bool semMoldura;
-
-  /// Perfil do aluno: a semana de treino vira a frase principal, sem rótulo,
-  /// e a meta vazia ("Sem meta") some em vez de virar dado.
-  final bool resumoDoAluno;
-
-  final EvolucaoAneis aneis;
-  final bool doPersonal;
-  final VoidCallback? onTap;
-
-  /// Medida da meta do anel ([nomeDaMetaPrincipal]): "Meta · Braço: 25%".
-  final String? metaNome;
-
-  /// Perfil e 360: a quarta linha, com o peso.
-  final String? pesoLinha;
-  final String? pesoRotulo;
-
-  @override
-  Widget build(BuildContext context) {
-    final chrome = fxListCardDecoration(context);
-    final scheme = Theme.of(context).colorScheme;
-    final leituras = leiturasDosAneis(
-      aneis,
-      doPersonal: doPersonal,
-      metaNome: metaNome,
-    );
-    final cores = fxCoresDeAnel(scheme.surface, marca: scheme.primary);
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(TokensStrip.rCard),
-        onTap: onTap,
-        child: Container(
-          padding: EdgeInsets.all(semMoldura ? 0 : TokensStrip.s3),
-          decoration: semMoldura ? null : chrome,
-          child: Row(
-            children: [
-              FxAneisConcentricos(
-                tamanho: 56,
-                aneis: _aneisDe(leituras, cores),
-                resumo: _resumo(leituras),
-              ),
-              const SizedBox(width: TokensStrip.s3),
-              Expanded(
-                child: ExcludeSemantics(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      for (final (i, l) in leituras.indexed)
-                        if (resumoDoAluno && i == 0)
-                          Padding(
-                            padding: const EdgeInsets.only(
-                              bottom: TokensStrip.s1,
-                            ),
-                            child: Text(
-                              aneis.treinoPrevistos == null
-                                  ? '${l.rotulo}: ${l.valor}'
-                                  : ptS.evolucaoAnelTreinoFrase(
-                                    '${aneis.treinoFeitos}',
-                                    '${aneis.treinoPrevistos}',
-                                  ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: FocuxHubTypography.cardTitle(
-                                color: scheme.onSurface,
-                              ),
-                            ),
-                          )
-                        else if (!(resumoDoAluno &&
-                            l.rotulo == ptS.evolucaoAnelMeta &&
-                            l.vazio))
-                          Text(
-                            '${l.rotulo}: ${l.valor}',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: FocuxHubTypography.bodyMuted(
-                              color:
-                                  resumoDoAluno
-                                      ? scheme.onSurfaceVariant
-                                      : scheme.onSurface,
-                            ),
-                          ),
-                      if (pesoLinha case final peso?)
-                        Text(
-                          '${pesoRotulo ?? ptS.evolucaoMetricaPeso}: $peso',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: FocuxHubTypography.bodyMuted(
-                            color: scheme.onSurface,
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-              if (onTap != null)
-                Icon(FxIcons.chevronDireita, color: scheme.onSurfaceVariant),
-            ],
-          ),
         ),
       ),
     );

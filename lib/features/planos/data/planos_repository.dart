@@ -146,6 +146,10 @@ class PlanoFeatures {
   /// `recursos` do backend. Vazio em backend antigo → matriz [PlanoRecursoKeys.matrix].
   final Map<String, PlanoRecurso> recursos;
 
+  /// Recursos que o plano não libera e que os alunos ainda usam ("Hábitos",
+  /// "Desafios"): o personal caiu de plano. A Hoje avisa.
+  final List<String> recursosEmUsoBloqueados;
+
   const PlanoFeatures({
     required this.plano,
     this.planoNomeOriginal,
@@ -177,6 +181,7 @@ class PlanoFeatures {
     this.limiteMigracaoFotoMensal,
     this.migracaoFotosUsadasMes = 0,
     this.recursos = const {},
+    this.recursosEmUsoBloqueados = const [],
   });
 
   /// Servidor vence; sem a chave, cai na matriz de produto pelo tier.
@@ -249,6 +254,10 @@ class PlanoFeatures {
       migracaoFotosUsadasMes:
           (j['migracaoFotosUsadasMes'] as num?)?.toInt() ?? 0,
       recursos: _parseRecursos(j['recursos']),
+      recursosEmUsoBloqueados: [
+        for (final n in (j['recursosEmUsoBloqueados'] as List?) ?? const [])
+          if (n is String && n.trim().isNotEmpty) n.trim(),
+      ],
     ).normalizeForTier();
   }
 
@@ -376,6 +385,7 @@ class PlanoFeatures {
       limiteMigracaoFotoMensal: limiteMigracaoFotoMensal,
       migracaoFotosUsadasMes: migracaoFotosUsadasMes,
       recursos: recursos,
+      recursosEmUsoBloqueados: recursosEmUsoBloqueados,
     );
   }
 
@@ -411,6 +421,8 @@ class PlanoFeatures {
     },
     if (recursos.isNotEmpty)
       'recursos': {for (final e in recursos.entries) e.key: e.value.toJson()},
+    if (recursosEmUsoBloqueados.isNotEmpty)
+      'recursosEmUsoBloqueados': recursosEmUsoBloqueados,
   };
 
   PlanoFeatures copyWithOperationalState({
@@ -448,6 +460,7 @@ class PlanoFeatures {
       limiteMigracaoFotoMensal: limiteMigracaoFotoMensal,
       migracaoFotosUsadasMes: migracaoFotosUsadasMes,
       recursos: recursos,
+      recursosEmUsoBloqueados: recursosEmUsoBloqueados,
     );
   }
 

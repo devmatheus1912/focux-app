@@ -72,13 +72,9 @@ class FxSettingsTile extends StatelessWidget {
             : highlight
             ? brand
             : chrome.ink;
-    final inkMuted = locked ? ink.withValues(alpha: 0.55) : ink;
-    final iconColor =
-        danger
-            ? EagleTokens.bad
-            : locked
-            ? brand.withValues(alpha: 0.55)
-            : brand;
+    // Linha trancada continua tocável (abre a venda): cor normal, e só a
+    // etiqueta do plano marca o bloqueio (14/11; o cinza lia como desligado).
+    final iconColor = danger ? EagleTokens.bad : brand;
     final detail = subtitle?.trim();
     final hasSubtitle = detail != null && detail.isNotEmpty;
     final spoken = semanticsLabel ?? (hasSubtitle ? '$label. $detail' : label);
@@ -86,7 +82,7 @@ class FxSettingsTile extends StatelessWidget {
         danger
             ? '$spoken. Ação destrutiva'
             : locked
-            ? '$spoken trancado. Plano ${upgradeTierLabel ?? 'upgrade'}'
+            ? '$spoken, no plano ${upgradeTierLabel ?? 'Pro'}'
             : (value.isEmpty ? spoken : '$spoken. $value');
     final interactive = onTap != null;
     // Linha com interruptor (accessory) não leva seta: ela não abre tela.
@@ -165,7 +161,7 @@ class FxSettingsTile extends StatelessWidget {
                                 maxLines: hasSubtitle ? 1 : 2,
                                 overflow: TextOverflow.ellipsis,
                                 style: FxSettingsLayout.rowLabel(
-                                  color: inkMuted,
+                                  color: ink,
                                 ),
                               ),
                               if (hasSubtitle) ...[

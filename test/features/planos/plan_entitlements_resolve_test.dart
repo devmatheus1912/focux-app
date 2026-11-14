@@ -120,7 +120,7 @@ void main() {
         featureName: 'Hábitos',
         capability: 'habitCoaching',
       ).body,
-      contains('Hábitos diários'),
+      'Hábitos faz parte do plano Pro.',
     );
   });
 

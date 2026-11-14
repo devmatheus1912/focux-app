@@ -4,7 +4,7 @@ import 'package:flutter/widgets.dart';
 
 import '../theme/fx_icons.dart';
 
-/// Glifos do selo de conquista (kit de 13). Os que existem no Phosphor saem
+/// Glifos do selo de conquista. Os que existem no Phosphor saem
 /// do [FxIcons]; os outros são traço desenhado na grade de 24, no mesmo peso
 /// do Phosphor Light (1,5), pontas e cantos arredondados. Só existem dentro do
 /// selo: ícone solto continua sendo [FxIcons].
@@ -22,6 +22,12 @@ enum FxSeloGlifo {
   brilhos,
   barra,
   grafico,
+
+  /// Meta batida (o tipo da conquista, não a medida).
+  medalha,
+
+  /// Meta mantida.
+  verificado,
 }
 
 /// Ícone do Phosphor para o glifo, quando há.
@@ -32,6 +38,8 @@ IconData? fxSeloGlifoPhosphor(FxSeloGlifo g) => switch (g) {
   FxSeloGlifo.brilhos => FxIcons.ia,
   FxSeloGlifo.barra => FxIcons.treino,
   FxSeloGlifo.grafico => FxIcons.grafico,
+  FxSeloGlifo.medalha => FxIcons.medalha,
+  FxSeloGlifo.verificado => FxIcons.verificado,
   _ => null,
 };
 
@@ -130,6 +138,8 @@ void fxPintarSeloGlifo(Canvas canvas, FxSeloGlifo glifo, Rect area, Color cor) {
     case FxSeloGlifo.brilhos:
     case FxSeloGlifo.barra:
     case FxSeloGlifo.grafico:
+    case FxSeloGlifo.medalha:
+    case FxSeloGlifo.verificado:
       break; // Phosphor, desenhados acima.
   }
   canvas.drawPath(path, pincel);

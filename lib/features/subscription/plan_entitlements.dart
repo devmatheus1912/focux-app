@@ -1,11 +1,8 @@
-import 'package:flutter/material.dart';
-
-import '../growth/utils/migracao_foto_limits.dart';
 import '../ia/utils/ia_cota.dart';
 import '../planos/data/plano_recurso.dart';
+import '../planos/data/plano_recurso_textos.dart';
 import '../subscription/models/subscription_plan.dart';
 import '../subscription/utils/plano_ia_limits.dart';
-import '../../core/theme/fx_icons.dart';
 
 /// Copy e plano-alvo para paywalls contextuais (fonte única no app).
 class PlanEntitlements {
@@ -45,27 +42,10 @@ class PlanEntitlements {
   static String featureNameFromBackendFeature(
     String? feature, {
     String fallback = 'recurso',
-  }) {
-    const names = {
-      'IA_COPILOTO': 'IA Focux',
-      'WHITE_LABEL': 'Marca própria',
-      'LANDING_COMPLETA': 'Sua página de vendas',
-      'HABIT_COACHING': 'Hábitos',
-      'COMUNIDADE_PRIVADA': 'Comunidade privada',
-      'AUTOMACOES': 'Automações',
-      'AUTOMACOES_AVANCADAS': 'Automações avançadas',
-      'COMUNIDADE_GRUPOS': 'Desafios e grupos',
-      'EQUIPE_RBAC': 'Equipe / RBAC',
-      'LOJA_DIGITAL': 'Vendas de planos',
-      'FEEDBACK_VIDEO': 'Feedback em vídeo',
-      'FINANCEIRO': 'Financeiro',
-      'RELATORIOS': 'Relatórios',
-      'AGENDA': 'Agenda',
-      'LEADS': 'Leads',
-      'NFSE': 'Nota fiscal',
-    };
-    return names[feature?.trim().toUpperCase()] ?? fallback;
-  }
+  }) => PlanoRecursoTextos.nome(
+    capabilityFromBackendFeature(feature),
+    fallback: fallback,
+  );
 
   /// Infere capability a partir do rótulo exibido no paywall ou deep link `feature=`.
   static String? capabilityFromFeatureLabel(String label) {
@@ -144,84 +124,27 @@ class PlanEntitlements {
     SubscriptionPlan? requiredPlan,
     SubscriptionPlan? upgradePlano,
   }) {
-    final rawCapability = capability;
-    capability = PlanoRecursoKeys.toCopyCapability(capability);
     // `upgradePlano` do servidor é a fonte da verdade quando veio no erro.
-    // Sem ele, o mapa local de capability continua valendo — é o caminho das
-    // telas que gateiam antes de chamar a API.
+    // Sem ele, a matriz local vale (telas que bloqueiam antes da API).
     final plan = upgradePlano ??
         targetPlan(
-          capability: rawCapability,
+          capability: capability,
           fallback: requiredPlan ?? SubscriptionPlan.PRO,
         );
     final planLabel = plan == SubscriptionPlan.FREE ? 'Pro' : displayPlanName(plan);
-
-    final headline = switch (capability) {
-      'financeiro' => 'Cobre seus alunos sem correr atrás',
-      'iaCopiloto' => 'Saiba o que fazer com cada aluno',
-      'landingCompleta' =>
-        'Sua página de vendas, com depoimentos, perguntas e interessados',
-      'whiteLabel' => 'Sua marca em cada touchpoint',
-      'relatorios' => 'Relatórios que mostram onde está o dinheiro',
-      'migracaoFoto' => 'Importe alunos por foto ou print',
-      'agenda' => 'Agenda completa para sua operação',
-      'habitCoaching' => 'Hábitos diários para o aluno não sumir',
-      'alunos' => 'Você chegou ao limite de alunos do plano',
-      'automacoes' => 'Automações sequenciais para escalar',
-      'automacoesAvancadas' => 'Automações avançadas com ramificações',
-      'comunidadeGrupos' => 'Desafios e grupos com ranking',
-      'lojaDigital' => 'Venda seus planos com PIX',
-      'feedbackVideo' => 'Corrija a execução pelo vídeo do aluno',
-      'leads' => 'Interessados para virar alunos',
-      _ => 'Desbloqueie $featureName',
-    };
-
-    final body = switch (capability) {
-      'financeiro' =>
-        'Mensalidades, inadimplência e resumo financeiro fazem parte do plano $planLabel. '
-            'Você vê quem atrasou e cobra pelo chat ou por PIX sem sair do app.',
-      'iaCopiloto' =>
-        'Análises e próximos passos com IA no plano $planLabel '
-            '(${PlanoIaLimits.pro} usos de IA por mês). '
-            'Enterprise: ${PlanoIaLimits.enterprise}/mês.',
-      'migracaoFoto' =>
-        'Importar alunos por foto/print (OCR gratuito) está no $planLabel '
-            '— ${MigracaoFotoLimits.pro}/mês. Enterprise: ${MigracaoFotoLimits.enterprise}/mês.',
-      'landingCompleta' =>
-        'Depoimentos ilimitados, galeria, FAQ e formulário Meta exigem Enterprise.',
-      'whiteLabel' =>
-        'Cores, logo e identidade visual premium exigem Enterprise — '
-            'sua marca em cada tela do app, não um visual genérico.',
-      'relatorios' =>
-        'Analytics de aderência e visão global do negócio estão no $planLabel.',
-      'agenda' => 'Agenda completa para sua operação',
-      'habitCoaching' =>
-        'Hábitos diários (água, sono, passos) fazem parte do plano $planLabel — '
-            'você acompanha a rotina de cada aluno entre os treinos.',
-      'alunos' =>
-        'O Free inclui até 3 alunos ativos. O Pro libera até '
-            '${PlanoAlunosLimits.pro} e o Enterprise não tem limite.',
-      'automacoes' =>
-        'Automações sequenciais (onboarding, winback) exigem Enterprise.',
-      'automacoesAvancadas' =>
-        'Ramificações e automações avançadas exigem Enterprise.',
-      'comunidadeGrupos' =>
-        'Desafios com ranking e grupos exigem Enterprise ou superior.',
-      'lojaDigital' =>
-        'Venda pacotes de treino e acompanhamento com cobrança PIX no Enterprise.',
-      'feedbackVideo' =>
-        'O aluno envia o vídeo do exercício e você responde com a correção. '
-            'Faz parte do plano $planLabel.',
-      'leads' =>
-        'O CRM de leads faz parte do plano $planLabel: funil, follow-up '
-            'e conversão sem sair do app.',
-      _ =>
-        '"$featureName" faz parte do plano $planLabel. Faça upgrade em um passo.',
-    };
-
+    final texto = PlanoRecursoTextos.de(capability);
+    final nome = texto?.nome ?? featureName;
+    final ia =
+        PlanoRecursoKeys.fromCapability(capability) == PlanoRecursoKeys.ia;
     return LockedOffer(
-      headline: headline,
-      body: body,
+      headline: texto?.frase ?? nome,
+      // Só a folha de cota da IA mostra o corpo.
+      body:
+          ia
+              ? 'Análises e próximos passos com IA no plano $planLabel '
+                  '(${PlanoIaLimits.pro} usos de IA por mês). '
+                  'Enterprise: ${PlanoIaLimits.enterprise}/mês.'
+              : '$nome faz parte do plano $planLabel.',
       ctaLabel: switch (plan) {
         SubscriptionPlan.ENTERPRISE => 'Ver plano Enterprise',
         _ => 'Assinar Pro',
@@ -230,135 +153,10 @@ class PlanEntitlements {
     );
   }
 
-  /// 3 benefícios de venda por capability — sheet/FeatureGate.
-  static List<UpgradeSalesBenefit> salesBenefits({
-    String? capability,
-    required String featureName,
-    required SubscriptionPlan plan,
-  }) {
-    final planLabel = displayPlanName(plan);
-    return switch (PlanoRecursoKeys.toCopyCapability(capability)) {
-      'iaCopiloto' => const [
-        UpgradeSalesBenefit(
-          icon: FxIcons.raio,
-          label: 'Prioridade do dia sob medida',
-          detail: 'O que fazer agora com cada aluno',
-        ),
-        UpgradeSalesBenefit(
-          icon: FxIcons.mente,
-          label: 'Contexto operacional completo',
-          detail: 'Treinos, check-ins, risco e aderência',
-        ),
-        UpgradeSalesBenefit(
-          icon: FxIcons.concluido,
-          label: 'Da sugestão à ação em um toque',
-          detail: 'Tarefa ou mensagem prontas',
-        ),
-      ],
-      'financeiro' => const [
-        UpgradeSalesBenefit(
-          icon: FxIcons.pagamento,
-          label: 'Cobrança PIX no fluxo',
-          detail: 'Menos inadimplência, menos cobrança manual',
-        ),
-        UpgradeSalesBenefit(
-          icon: FxIcons.recibo,
-          label: 'Mensalidades sob controle',
-          detail: 'Vencidos, a receber e histórico',
-        ),
-        UpgradeSalesBenefit(
-          icon: FxIcons.insights,
-          label: 'Resumo financeiro claro',
-          detail: 'Saiba onde está o dinheiro da operação',
-        ),
-      ],
-      'landingCompleta' => const [
-        UpgradeSalesBenefit(
-          icon: FxIcons.site,
-          label: 'Landing que vende 24h',
-          detail: 'Depoimentos, galeria, FAQ e captura',
-        ),
-        UpgradeSalesBenefit(
-          icon: FxIcons.megafone,
-          label: 'Leads no funil',
-          detail: 'Formulário Meta e link público',
-        ),
-        UpgradeSalesBenefit(
-          icon: FxIcons.pincel,
-          label: 'Sua marca no ar',
-          detail: 'Página com a cara do seu negócio',
-        ),
-      ],
-      'leads' => const [
-        UpgradeSalesBenefit(
-          icon: FxIcons.grupo,
-          label: 'CRM completo',
-          detail: 'Pipeline completo de prospects',
-        ),
-        UpgradeSalesBenefit(
-          icon: FxIcons.subindo,
-          label: 'Funil sob controle',
-          detail: 'Status, follow-up e conversão',
-        ),
-        UpgradeSalesBenefit(
-          icon: FxIcons.notificacaoTocando,
-          label: 'Não perde lead frio',
-          detail: 'Lembretes e próximos passos',
-        ),
-      ],
-      'lojaDigital' => const [
-        UpgradeSalesBenefit(
-          icon: FxIcons.loja,
-          label: 'Vitrine digital',
-          detail: 'Programas e pacotes no seu link',
-        ),
-        UpgradeSalesBenefit(
-          icon: FxIcons.pagamento,
-          label: 'Checkout PIX',
-          detail: 'Cliente paga sem atrito',
-        ),
-        UpgradeSalesBenefit(
-          icon: FxIcons.estoque,
-          label: 'Catálogo organizado',
-          detail: 'Nome, preço e o que está incluso',
-        ),
-      ],
-      'feedbackVideo' => const [
-        UpgradeSalesBenefit(
-          icon: FxIcons.video,
-          label: 'Vídeo do exercício',
-          detail: 'O aluno grava e envia pelo app',
-        ),
-        UpgradeSalesBenefit(
-          icon: FxIcons.avaliacao,
-          label: 'Sua correção por escrito',
-          detail: 'Fica salva junto do vídeo',
-        ),
-        UpgradeSalesBenefit(
-          icon: FxIcons.escola,
-          label: 'Aluno aprende mais rápido',
-          detail: 'Correção clara entre as aulas',
-        ),
-      ],
-      _ => [
-        UpgradeSalesBenefit(
-          icon: FxIcons.cadeadoAberto,
-          label: 'Acesso a $featureName',
-          detail: 'Liberado no plano $planLabel',
-        ),
-        UpgradeSalesBenefit(
-          icon: FxIcons.velocidade,
-          label: 'Operação mais rápida',
-          detail: 'Menos planilha, mais alunos atendidos',
-        ),
-        UpgradeSalesBenefit(
-          icon: FxIcons.premium,
-          label: 'Upgrade em um passo',
-          detail: 'Compare planos e assine no app',
-        ),
-      ],
-    };
-  }
+  /// Os 3 benefícios do recurso ([PlanoRecursoTextos]); vazio para
+  /// capability desconhecida (o contrato de testes não deixa chegar aqui).
+  static List<String> salesBenefits(String? capability) =>
+      PlanoRecursoTextos.de(capability)?.beneficios ?? const [];
 
   static LockedOffer iaQuotaUpgradeOffer({
     required SubscriptionPlan currentPlan,
@@ -494,19 +292,6 @@ class LockedOffer {
     required this.ctaLabel,
     this.targetPlan,
   });
-}
-
-/// Benefício de venda no sheet/tela de upgrade.
-class UpgradeSalesBenefit {
-  const UpgradeSalesBenefit({
-    required this.icon,
-    required this.label,
-    required this.detail,
-  });
-
-  final IconData icon;
-  final String label;
-  final String detail;
 }
 
 /// Métricas de uso vindas de `/api/planos/me`.

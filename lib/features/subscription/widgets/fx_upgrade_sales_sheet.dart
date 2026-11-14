@@ -14,6 +14,7 @@ import '../../planos/paywall/trial_eligibility_provider.dart';
 import '../../planos/providers/plano_features_provider.dart';
 import '../models/subscription_plan.dart';
 import '../plan_entitlements.dart';
+import '../../planos/data/plano_recurso_textos.dart';
 import '../services/upgrade_prompt_cooldown.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../core/theme/fx_icons.dart';
@@ -28,10 +29,15 @@ class FxUpgradeSalesPanel extends ConsumerWidget {
     required this.plan,
     required this.onCta,
     required this.onVerPlanos,
+    this.recurso,
   });
 
   final LockedOffer offer;
-  final List<UpgradeSalesBenefit> benefits;
+  final List<String> benefits;
+
+  /// Tela inteira: cadeado e nome do recurso acima da frase (a folha já tem
+  /// os dois no cabeçalho).
+  final String? recurso;
   final SubscriptionPlan plan;
   final VoidCallback onCta;
   final VoidCallback onVerPlanos;
@@ -58,6 +64,16 @@ class FxUpgradeSalesPanel extends ConsumerWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (recurso case final recurso?) ...[
+          Row(
+            children: [
+              Icon(FxIcons.cadeado, color: primary, size: 16),
+              const SizedBox(width: TokensStrip.s1),
+              Text(recurso, style: FocuxHubTypography.rotulo(color: chrome.mute)),
+            ],
+          ),
+          const SizedBox(height: TokensStrip.s2),
+        ],
         Text(
           offer.headline,
           style: FocuxHubTypography.pageTitle(context, color: chrome.ink),
@@ -81,7 +97,7 @@ class FxUpgradeSalesPanel extends ConsumerWidget {
                 const SizedBox(width: TokensStrip.s2),
                 Expanded(
                   child: Text(
-                    b.label,
+                    b,
                     style: FocuxHubTypography.body(color: chrome.ink),
                   ),
                 ),
@@ -156,11 +172,8 @@ abstract final class FxUpgradeSalesSheet {
       upgradePlano: upgradePlano,
     );
     final plan = offer.targetPlan ?? SubscriptionPlan.PRO;
-    final benefits = PlanEntitlements.salesBenefits(
-      capability: capability,
-      featureName: featureName,
-      plan: plan,
-    );
+    final benefits = PlanEntitlements.salesBenefits(capability);
+    final nome = PlanoRecursoTextos.nome(capability, fallback: featureName);
     await showFxHomeSheet<void>(
       context,
       builder: (ctx) {
@@ -172,7 +185,7 @@ abstract final class FxUpgradeSalesSheet {
             color: Theme.of(ctx).colorScheme.primary,
             size: 20,
           ),
-          title: featureName,
+          title: nome,
           child: FxUpgradeSalesPanel(
             offer: offer,
             benefits: benefits,
@@ -196,7 +209,7 @@ abstract final class FxUpgradeSalesSheet {
                       ? '&capability=${Uri.encodeComponent(capability)}'
                       : '';
               context.push(
-                '/assinatura?plano=${plan.apiName}&source=$source&feature=${Uri.encodeComponent(featureName)}$capQuery',
+                '/assinatura?plano=${plan.apiName}&source=$source&feature=${Uri.encodeComponent(nome)}$capQuery',
               );
             },
             onVerPlanos: () {

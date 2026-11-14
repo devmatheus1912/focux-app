@@ -535,7 +535,7 @@ void main() {
       ).readAsStringSync(),
       allOf(
         contains('DashboardSectionHeader'),
-        contains('EvolucaoMiniAneis'),
+        contains('EvolucaoResumoPersonal'),
       ),
     );
     expect(

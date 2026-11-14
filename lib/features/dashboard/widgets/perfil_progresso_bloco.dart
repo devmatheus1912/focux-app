@@ -1,6 +1,4 @@
-import '../../evolucao/utils/evolucao_aneis.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/focux_hub_typography.dart';
@@ -11,10 +9,9 @@ import '../../../core/utils/pt_br_display.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../l10n/pt.dart';
 import '../../evolucao/data/evolucao_repository.dart';
-import '../../evolucao/providers/evolucao_home_provider.dart';
 import '../../evolucao/utils/evolucao_series.dart';
-import '../../evolucao/widgets/evolucao_hero.dart';
 import '../../../core/theme/fx_icons.dart';
 
 /// "105,0 kg · +15,0 kg desde 12/03"; sem medida, o texto de vazio.
@@ -28,21 +25,18 @@ String perfilPesoLinha(S s, List<MedidaCorporal> medidas) {
   return '$atual · ${s.perfilPesoDesde(dif, dataCurta(pesos.first.data))}';
 }
 
-/// Resumo com os anéis, igual ao do personal. Abre Meu progresso em todo estado.
-class PerfilProgressoBloco extends ConsumerWidget {
+/// Peso atual e "Registrar medida". A semana e a meta ficam na Hoje e no Meu
+/// progresso; aqui não se repetem (os mini-anéis saíram em 14/11).
+class PerfilProgressoBloco extends StatelessWidget {
   const PerfilProgressoBloco({super.key, required this.medidas});
 
   final List<MedidaCorporal> medidas;
 
-  void _abrirProgresso(BuildContext context) =>
-      context.push('/aluno/progresso');
-
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final s = S.of(context);
     final chrome = ShellChrome.of(context);
-    final evolucao = ref.watch(minhaEvolucaoProvider);
-    final peso = perfilPesoLinha(s, medidas);
+    final peso = '${ptS.evolucaoMetricaPeso}: ${perfilPesoLinha(s, medidas)}';
     return FxSettingsGroup(
       header: s.alunoPerfilGrupoProgresso,
       children: [
@@ -51,34 +45,29 @@ class PerfilProgressoBloco extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (evolucao.value case final dados?)
-                EvolucaoMiniAneis(
-                  semMoldura: true,
-                  resumoDoAluno: true,
-                  aneis: dados.aneis,
-                  metaNome: nomeDaMetaPrincipal(dados.metas),
-                  doPersonal: false,
-                  onTap: () => _abrirProgresso(context),
-                  pesoLinha: peso,
-                )
-              else if (evolucao.isLoading)
-                const SizedBox(height: 88)
-              else
-                Semantics(
-                  button: true,
-                  label: s.meuProgressoTitulo,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(TokensStrip.rSm),
-                    onTap: () => _abrirProgresso(context),
-                    child: Padding(
-                      padding: const EdgeInsets.all(TokensStrip.s3),
-                      child: Text(
-                        peso,
-                        style: FocuxHubTypography.body(color: chrome.ink),
-                      ),
+              Semantics(
+                button: true,
+                label: '${s.meuProgressoTitulo}. $peso',
+                excludeSemantics: true,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(TokensStrip.rSm),
+                  onTap: () => context.push('/aluno/progresso'),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: TokensStrip.s2),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            peso,
+                            style: FocuxHubTypography.body(color: chrome.ink),
+                          ),
+                        ),
+                        Icon(FxIcons.chevronDireita, color: chrome.mute),
+                      ],
                     ),
                   ),
                 ),
+              ),
               const SizedBox(height: TokensStrip.s3),
               FxTonalButton(
                 label: s.alunoPerfilRegistrarMedida,

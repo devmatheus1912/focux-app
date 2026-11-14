@@ -100,7 +100,7 @@ void main() {
     );
 
     expect(find.byType(FxPlanLockBadge), findsOneWidget);
-    expect(find.text('ENTERPRISE'), findsOneWidget);
+    expect(find.text('Enterprise'), findsOneWidget);
 
     await tester.tap(find.text('Abrir recurso'));
     await tester.pumpAndSettle();

@@ -133,7 +133,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.text('Você chegou ao limite de alunos do plano'),
+      find.text('Você chegou ao limite de alunos'),
       findsOneWidget,
     );
     expect(find.text('Ver todos os planos'), findsOneWidget);

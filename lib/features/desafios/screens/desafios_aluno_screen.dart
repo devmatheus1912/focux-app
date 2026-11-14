@@ -10,6 +10,7 @@ import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../dashboard/widgets/aluno_recurso_indisponivel.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/feedback_helper.dart';
@@ -53,6 +54,9 @@ class _DesafiosAlunoScreenState extends ConsumerState<DesafiosAlunoScreen> {
   var _loadingMore = false;
   var _loading = true;
   String? _error;
+
+  /// A API barrou pelo plano do personal com a tela aberta.
+  bool _semRecurso = false;
   DateTime? _fetchedAt;
 
   @override
@@ -92,6 +96,7 @@ class _DesafiosAlunoScreenState extends ConsumerState<DesafiosAlunoScreen> {
     setState(() {
       _loading = true;
       _error = null;
+      _semRecurso = false;
     });
     try {
       final pagina = await ref
@@ -110,6 +115,7 @@ class _DesafiosAlunoScreenState extends ConsumerState<DesafiosAlunoScreen> {
       if (!mounted) return;
       setState(() {
         _loading = false;
+        _semRecurso = isPlanGateError(e);
         _error = friendlyError(e);
       });
     }
@@ -216,6 +222,11 @@ class _DesafiosAlunoScreenState extends ConsumerState<DesafiosAlunoScreen> {
                     ? const Padding(
                       padding: EdgeInsets.all(FxSettingsLayout.pageInset),
                       child: SkeletonList(count: 5),
+                    )
+                    : _semRecurso
+                    ? const AlunoRecursoIndisponivelConteudo(
+                      capability: 'comunidadeGrupos',
+                      fallbackNome: 'Desafios',
                     )
                     : _error != null
                     ? FxErrorState(

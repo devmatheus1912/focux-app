@@ -173,8 +173,6 @@ void main() {
   });
 
   test('residual back controls keep safe fallbacks', () {
-    final featureGate =
-        File('lib/core/widgets/feature_gate.dart').readAsStringSync();
     final alunosList = readScreenSourceBundle(
       'lib/features/alunos/screens/alunos_list_screen.dart',
     );
@@ -200,7 +198,9 @@ void main() {
         ).readAsStringSync();
 
     expect(
-      featureGate,
+      File(
+        'lib/features/dashboard/widgets/aluno_recurso_indisponivel.dart',
+      ).readAsStringSync(),
       contains('safePopOr(context, () => goToRoleHome(context, ref))'),
     );
     expect(alunosList, contains("safePopOrGo(context, '/dashboard/personal')"));

@@ -49,7 +49,7 @@ import '../../checkin/widgets/treinos_hub_rows.dart' show TreinosSessaoAbertaAvi
 import '../../evolucao/providers/evolucao_home_provider.dart';
 import '../../grupos/providers/grupo_aula_providers.dart';
 import '../../grupos/widgets/aluno_proxima_aula_linha.dart';
-import '../../evolucao/widgets/evolucao_hero.dart';
+import '../../evolucao/widgets/evolucao_resumo.dart';
 import '../../../core/widgets/fx_status_pill.dart';
 import '../../treinos/models/rotina_fila.dart';
 import '../../treinos/utils/ficha_vigencia.dart';
@@ -443,10 +443,9 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
       if (ref.watch(minhaEvolucaoProvider).value case final evolucao?)
         (
           TokensStrip.s3,
-          EvolucaoMiniAneis(
+          EvolucaoResumoAluno(
             aneis: evolucao.aneis,
             metaNome: nomeDaMetaPrincipal(evolucao.metas),
-            doPersonal: false,
             onTap: () => context.push('/aluno/progresso'),
           ),
         ),

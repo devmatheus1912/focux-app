@@ -1,0 +1,80 @@
+import 'dart:io';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/features/dashboard/widgets/perfil_conquistas_linha.dart';
+import 'package:focux_app/features/evolucao/data/meta_corporal.dart';
+import 'package:focux_app/features/evolucao/widgets/conquista_selo.dart';
+
+Conquista _c(int i) => Conquista(
+  chave: 'c$i',
+  tipo: i.isEven ? ConquistaTipo.meta : ConquistaTipo.recorde,
+  titulo: '+$i kg',
+  detalhe: 'detalhe',
+  data: DateTime(2026, 11, 14 - i),
+  valor: '+$i kg',
+  metrica: i.isEven ? 'CINTURA' : null,
+  exercicio: i.isEven ? null : 'Supino reto',
+);
+
+Future<void> _montar(WidgetTester tester, int n) => tester.pumpWidget(
+  MaterialApp(
+    home: Scaffold(
+      body: PerfilConquistasLinha(
+        conquistas: [for (var i = 0; i < n; i++) _c(i)],
+        onAbrir: (_) {},
+        onVerTodas: () {},
+      ),
+    ),
+  ),
+);
+
+void main() {
+  testWidgets('sem conquista, nada', (tester) async {
+    await _montar(tester, 0);
+    expect(find.byType(ConquistaSelo), findsNothing);
+    expect(find.text('Meu progresso'), findsNothing);
+  });
+
+  testWidgets('até 3: todos os selos e "Meu progresso"', (tester) async {
+    await _montar(tester, 2);
+    expect(find.byType(ConquistaSelo), findsNWidgets(2));
+    expect(find.text('Meu progresso'), findsOneWidget);
+    expect(find.textContaining('Ver todas'), findsNothing);
+  });
+
+  testWidgets('mais de 3: só 3 selos e "Ver todas (N)"', (tester) async {
+    await _montar(tester, 5);
+    expect(find.byType(ConquistaSelo), findsNWidgets(3));
+    expect(find.text('Ver todas (5)'), findsOneWidget);
+  });
+
+  test('o item da conquista é o exercício ou a medida', () {
+    expect(_c(1).item, 'Supino reto');
+    expect(_c(2).item, 'Cintura');
+  });
+
+  test('mini-anéis saíram do app', () {
+    for (final f in Directory('lib').listSync(recursive: true)) {
+      if (f is File && f.path.endsWith('.dart')) {
+        expect(
+          f.readAsStringSync().contains('EvolucaoMiniAneis'),
+          isFalse,
+          reason: f.path,
+        );
+      }
+    }
+  });
+
+  test('folha do personal termina em Parabenizar; cartão sem "no/na"', () {
+    final folha = File(
+      'lib/features/evolucao/widgets/evolucao_conquistas.dart',
+    ).readAsStringSync();
+    expect(folha, isNot(contains('conquistaVer')));
+    expect(folha, isNot(contains('onVer')));
+    final cartao = File(
+      'lib/features/evolucao/widgets/conquista_cartao.dart',
+    ).readAsStringSync();
+    expect(cartao, isNot(contains('conquistaFeitoSemNumero')));
+  });
+}

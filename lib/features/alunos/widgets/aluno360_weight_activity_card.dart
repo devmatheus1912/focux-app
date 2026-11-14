@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 
 import '../../evolucao/providers/evolucao_home_provider.dart';
 import '../../evolucao/utils/evolucao_series.dart';
-import '../../evolucao/widgets/evolucao_hero.dart';
+import '../../evolucao/data/meta_corporal.dart';
+import '../../evolucao/widgets/evolucao_metas_bloco.dart';
+import '../../evolucao/widgets/evolucao_resumo.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -60,11 +62,11 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
           DashboardSectionHeader(title: S.of(context).corpoTitulo),
           const SizedBox(height: TokensStrip.s3),
           if (ref.watch(evolucaoHomeProvider(alunoId)).value case final evolucao?)
-            EvolucaoMiniAneis(
+            EvolucaoResumoPersonal(
               aneis: evolucao.aneis,
               metaNome: nomeDaMetaPrincipal(evolucao.metas),
-              doPersonal: true,
               onTap: () => _openEvolucao(context),
+              onDefinirMeta: () => _definirMeta(context, ref, evolucao.metas),
               pesoLinha: peso == null
                   ? S.of(context).aluno360SemMedida
                   : suspeito
@@ -97,6 +99,23 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _definirMeta(
+    BuildContext context,
+    WidgetRef ref,
+    List<MetaCorporal> metas,
+  ) async {
+    final salvou = await abrirFormularioDeMeta(
+      context,
+      ref,
+      alunoId: alunoId,
+      ocupadas: {
+        for (final m in metas)
+          if (m.aberta) m.metrica,
+      },
+    );
+    if (salvou) await invalidateAluno360Providers(ref, alunoId);
   }
 
   static String _pesoComDiferenca(double atual, List<double> historico) {

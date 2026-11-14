@@ -127,10 +127,10 @@ class Conquista {
   /// dias", "90 dias mantendo 72,0 kg".
   final String? contexto;
 
-  /// Exercício do recorde ("Ver exercício" e o texto do "Parabenizar").
+  /// Exercício do recorde (o texto do "Parabenizar").
   final String? exercicio;
 
-  /// Métrica da meta (`PESO`, `CINTURA`…); nula no recorde. Escolhe o glifo.
+  /// Métrica da meta (`PESO`, `CINTURA`…); nula no recorde.
   final String? metrica;
 
   /// O número da conquista (embaixo do selo) ("−8,0 kg", "60,0 kg", "82,0 kg").
@@ -151,6 +151,10 @@ class Conquista {
     ConquistaTipo.mantido => ptS.conquistaTipoMantido,
     ConquistaTipo.recorde => ptS.conquistaTipoRecorde,
   };
+
+  /// O exercício do recorde ou a medida da meta ("Supino reto", "Cintura").
+  String get item =>
+      exercicio ?? (metrica == null ? tipoRotulo : metaMetricaRotulo(metrica!));
 }
 
 

@@ -34,11 +34,7 @@ class EvolucaoMedidasAba extends StatefulWidget {
     this.gordura = const [],
     this.massa = const [],
     this.mostrarConfira = false,
-    this.foco,
   });
-
-  /// Medida a escolher ("Ver medida" da conquista), pelo código da meta.
-  final String? foco;
 
   /// Só o personal confere: o aviso "fora do comum" e o ícone na linha.
   final bool mostrarConfira;
@@ -71,24 +67,6 @@ class EvolucaoMedidasAba extends StatefulWidget {
 class _EvolucaoMedidasAbaState extends State<EvolucaoMedidasAba> {
   EvolucaoMetrica _metrica = EvolucaoMetrica.peso;
   EvolucaoPeriodo _periodo = EvolucaoPeriodo.tudo;
-
-  void _focar(String? codigo) {
-    final m =
-        EvolucaoMetrica.values.where((e) => e.codigoMeta == codigo).firstOrNull;
-    if (m != null) _metrica = m;
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _focar(widget.foco);
-  }
-
-  @override
-  void didUpdateWidget(EvolucaoMedidasAba old) {
-    super.didUpdateWidget(old);
-    if (widget.foco != old.foco) _focar(widget.foco);
-  }
 
   List<PontoGrafico> _serie(List<MedidaCorporal> medidas, EvolucaoMetrica m) =>
       m == EvolucaoMetrica.gordura

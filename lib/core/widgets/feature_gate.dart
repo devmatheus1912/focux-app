@@ -10,14 +10,13 @@ import '../../features/planos/providers/plano_features_provider.dart';
 import '../../features/planos/data/planos_repository.dart';
 import '../../features/subscription/plan_entitlements.dart';
 import '../../features/subscription/widgets/fx_upgrade_sales_sheet.dart';
+import '../../features/dashboard/widgets/aluno_recurso_indisponivel.dart';
+import '../../features/planos/data/plano_recurso_textos.dart';
 import '../analytics/analytics_service.dart';
-import '../router/role_home.dart';
-import '../router/safe_navigation.dart';
 import '../theme/design_tokens.dart';
 import '../theme/tokens_strip.dart';
 import '../utils/friendly_error.dart';
 import 'feedback_helper.dart';
-import 'fx_empty_state.dart';
 import 'fx_motion.dart';
 import 'fx_shell_scaffold.dart';
 import 'skeleton_loader.dart';
@@ -266,65 +265,57 @@ class _LockedScreenState extends ConsumerState<_LockedScreen> {
       requiredPlan: widget.requiredPlan,
     );
     final plan = offer.targetPlan ?? widget.requiredPlan;
-    final benefits = PlanEntitlements.salesBenefits(
-      capability: widget.capability,
-      featureName: widget.featureName,
-      plan: plan,
+    final nome = PlanoRecursoTextos.nome(
+      widget.capability,
+      fallback: widget.featureName,
     );
     // Em aba do shell não há para onde voltar.
     final empilhada = GoRouter.of(context).canPop();
 
     return FxShellScaffold(
       useMesh: true,
-      appBar:
-          empilhada
-              ? AppBar(
-                backgroundColor: Colors.transparent,
-                elevation: 0,
-                leading: BackButton(onPressed: () => context.pop()),
-              )
-              : null,
+      appBar: FxShellAppBar(
+        title: nome,
+        showBack: empilhada,
+        onBack: () => context.pop(),
+      ),
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(
             TokensStrip.s4,
-            TokensStrip.s2,
-            TokensStrip.s4,
             TokensStrip.s3,
+            TokensStrip.s4,
+            TokensStrip.s4,
           ),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(
-                child: Center(
-                  child: SingleChildScrollView(
-                  child: FxUpgradeSalesPanel(
-                    offer: offer,
-                    benefits: benefits,
-                    plan: plan,
-                    onCta: () {
-                      AnalyticsService.instance.track(
-                        ProductEvents.paywallCtaTapped,
-                        props: {
-                          'source': 'feature_gate',
-                          'plan_id': plan.apiName,
-                          if (widget.capability != null)
-                            'capability': widget.capability!,
-                        },
-                      );
-                      final cap = widget.capability;
-                      final capQuery =
-                          cap != null && cap.isNotEmpty
-                              ? '&capability=${Uri.encodeComponent(cap)}'
-                              : '';
-                      context.push(
-                        '/assinatura?plano=${plan.apiName}&source=feature_gate&feature=${Uri.encodeComponent(widget.featureName)}$capQuery',
-                      );
+              FxUpgradeSalesPanel(
+                offer: offer,
+                benefits: PlanEntitlements.salesBenefits(widget.capability),
+                plan: plan,
+                recurso: nome,
+                onCta: () {
+                  AnalyticsService.instance.track(
+                    ProductEvents.paywallCtaTapped,
+                    props: {
+                      'source': 'feature_gate',
+                      'plan_id': plan.apiName,
+                      if (widget.capability != null)
+                        'capability': widget.capability!,
                     },
-                    onVerPlanos:
-                        () => context.push('/assinatura?source=feature_gate'),
-                  ),
-                  ),
-                ),
+                  );
+                  final cap = widget.capability;
+                  final capQuery =
+                      cap != null && cap.isNotEmpty
+                          ? '&capability=${Uri.encodeComponent(cap)}'
+                          : '';
+                  context.push(
+                    '/assinatura?plano=${plan.apiName}&source=feature_gate&feature=${Uri.encodeComponent(nome)}$capQuery',
+                  );
+                },
+                onVerPlanos:
+                    () => context.push('/assinatura?source=feature_gate'),
               ),
               if (fromAtivacao) ...[
                 const SizedBox(height: TokensStrip.s2),
@@ -340,29 +331,10 @@ class _LockedScreenState extends ConsumerState<_LockedScreen> {
     );
   }
 
-  Widget _alunoLocked(BuildContext context) {
-    return FxShellScaffold(
-      useMesh: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: BackButton(
-          onPressed: () => safePopOr(context, () => goToRoleHome(context, ref)),
-        ),
-      ),
-      body: FxEmptyState(
-        icon: FxIcons.cadeado,
-        title: 'Indisponível no momento',
-        subtitle:
-            'Seu personal ainda não liberou ${widget.featureName.toLowerCase()} '
-            'no plano dele. Fale com ele se precisar.',
-        action: FxEmptyAction(
-          label: 'Voltar',
-          onTap: () => safePopOr(context, () => goToRoleHome(context, ref)),
-        ),
-      ),
-    );
-  }
+  Widget _alunoLocked(BuildContext context) => AlunoRecursoIndisponivel(
+    capability: widget.capability,
+    fallbackNome: widget.featureName,
+  );
 
   Future<void> _pularAtivacao(BuildContext context) async {
     setState(() => _skipping = true);

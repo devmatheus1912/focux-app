@@ -6,7 +6,6 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/fx_cached_network_image.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
@@ -20,6 +19,13 @@ import '../utils/aluno_delete_account.dart';
 import '../utils/aluno_perfil_completion.dart';
 import 'perfil_aluno_completar_card.dart';
 import 'perfil_progresso_bloco.dart';
+import 'perfil_conquistas_linha.dart';
+import '../../evolucao/data/meta_corporal.dart';
+import '../../evolucao/providers/evolucao_home_provider.dart';
+import '../../evolucao/widgets/evolucao_conquistas.dart';
+import '../../perfil/widgets/perfil_topo_marca.dart';
+import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/widgets/fx_strip_card.dart';
 import '../../perfil/widgets/perfil_appearance_section.dart';
 import '../../perfil/widgets/perfil_sobre_grupo.dart';
 import '../../../core/theme/fx_icons.dart';
@@ -49,7 +55,6 @@ class PerfilAlunoHubBody extends ConsumerWidget {
     final score = home.completionPercent ?? alunoPerfilCompletionScore(aluno);
     final photo = aluno.fotoUrl?.trim();
     final hasPhoto = photo != null && photo.isNotEmpty;
-    final raio = FxSettingsLayout.avatarSize / 2;
     void editar() => context.push('/aluno/perfil/editar');
 
     return RefreshIndicator(
@@ -66,104 +71,20 @@ class PerfilAlunoHubBody extends ConsumerWidget {
         children: [
           FxStaggerItem(
             index: 0,
-            child: Column(
-              children: [
-                Semantics(
-                  button: true,
-                  label: s.alunoPerfilEditar,
-                  child: InkWell(
-                    customBorder: const CircleBorder(),
-                    onTap: editar,
-                    child: Container(
-                      padding: const EdgeInsets.all(3),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: chrome.brand, width: 2),
-                      ),
-                      child: CircleAvatar(
-                        radius: raio,
-                        backgroundImage:
-                            hasPhoto
-                                ? fxCachedNetworkImageProvider(
-                                  photo,
-                                  maxWidth:
-                                      (FxSettingsLayout.avatarSize * 3).round(),
-                                )
-                                : null,
-                        backgroundColor: BrandPalette.soft(
-                          primary,
-                          dark: chrome.isDark,
-                        ),
-                        child:
-                            hasPhoto
-                                ? null
-                                : Text(
-                                  aluno.nome.isNotEmpty
-                                      ? aluno.nome[0].toUpperCase()
-                                      : 'A',
-                                  style: FxSettingsLayout.avatarInitials(
-                                    color: chrome.ink,
-                                  ),
-                                ),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: TokensStrip.s3),
-                Text(
-                  aluno.nome,
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: FxSettingsLayout.profileName(
-                    context,
-                    color: chrome.ink,
-                  ),
-                ),
-                // Com quem treina; o e-mail fica em Editar cadastro.
-                if (personal != null && personal.isNotEmpty) ...[
-                  const SizedBox(height: TokensStrip.s1),
-                  // Toque abre a conversa com o personal (aba Chat).
-                  Semantics(
-                    button: true,
-                    label: s.alunoPerfilConversarCom(personal),
-                    excludeSemantics: true,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(TokensStrip.rSm),
-                      onTap: () => context.go('/chat/aluno'),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: TokensStrip.s2,
-                          vertical: TokensStrip.s1,
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Flexible(
-                              child: Text(
-                                s.alunoPerfilTreinaCom(personal),
-                                textAlign: TextAlign.center,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: perfilAlunoSubtituloStyle(chrome),
-                              ),
-                            ),
-                            const SizedBox(width: TokensStrip.s1),
-                            Icon(
-                              FxIcons.chevronDireitaPequeno,
-                              size: 14,
-                              color: chrome.mute,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-                const SizedBox(height: TokensStrip.s4),
+            child: PerfilTopoMarca(
+              nome: aluno.nome,
+              fotoUrl: hasPhoto ? photo : null,
+              onEditar: editar,
+              editarSemantica: s.alunoPerfilEditar,
+              linhas: [
+                // Com quem treina; o toque abre a conversa (aba Chat).
+                if (personal != null && personal.isNotEmpty)
+                  _TreinaCom(personal: personal),
               ],
+              rodape: _conquistas(context, ref),
             ),
           ),
+          const SizedBox(height: FxSettingsLayout.groupGap),
           if (score < 100) ...[
             FxStaggerItem(
               index: 1,
@@ -267,6 +188,69 @@ class PerfilAlunoHubBody extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Conquistas do topo; nula sem conquista (o cartão não ganha a linha).
+Widget? _conquistas(BuildContext context, WidgetRef ref) {
+  final dados = ref.watch(minhaEvolucaoProvider).value;
+  if (dados == null) return null;
+  final conquistas = conquistasDe(
+    dados.metas,
+    dados.recordes,
+    medidas: dados.medidas,
+    gordura: dados.gordura,
+    massa: dados.massa,
+  );
+  if (conquistas.isEmpty) return null;
+  return PerfilConquistasLinha(
+    conquistas: conquistas,
+    onAbrir: (c) => mostrarConquista(context, c, compartilhar: true),
+    onVerTodas: () => context.push('/aluno/progresso'),
+  );
+}
+
+/// "Treina com {personal}" sobre o cartão de marca; o toque abre o chat.
+class _TreinaCom extends StatelessWidget {
+  const _TreinaCom({required this.personal});
+
+  final String personal;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = S.of(context);
+    final sobre = fxPaletaSobreMarca(context);
+    return Semantics(
+      button: true,
+      label: s.alunoPerfilConversarCom(personal),
+      excludeSemantics: true,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(TokensStrip.rSm),
+        onTap: () => context.go('/chat/aluno'),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: TokensStrip.s2,
+            vertical: TokensStrip.s1,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(
+                child: Text(
+                  s.alunoPerfilTreinaCom(personal),
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: FocuxHubTypography.bodyMuted(color: sobre.mute),
+                ),
+              ),
+              const SizedBox(width: TokensStrip.s1),
+              Icon(FxIcons.chevronDireitaPequeno, size: 14, color: sobre.mute),
+            ],
+          ),
+        ),
       ),
     );
   }

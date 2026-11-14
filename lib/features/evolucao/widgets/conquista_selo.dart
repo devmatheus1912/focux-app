@@ -1,37 +1,42 @@
 import 'dart:math' as math;
-import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/brand_palette.dart';
 import '../../../core/utils/motion_preferences.dart';
 import '../../../core/widgets/fx_selo_glifos.dart';
 import '../data/meta_corporal.dart';
 
-/// Glifo de cada conquista (SPEC-selo-conquista). Meta pela métrica;
-/// recorde, troféu.
-FxSeloGlifo conquistaGlifo(Conquista c) {
-  if (c.tipo == ConquistaTipo.recorde) return FxSeloGlifo.trofeu;
-  return switch ((c.metrica ?? '').toUpperCase()) {
-    'PESO' => FxSeloGlifo.balanca,
-    'CINTURA' || 'QUADRIL' => FxSeloGlifo.fitaMetrica,
-    'BRACO' => FxSeloGlifo.biceps,
-    'GORDURA' => FxSeloGlifo.tronco,
-    'MASSA' => FxSeloGlifo.anilhas,
-    _ => FxSeloGlifo.trofeu,
-  };
-}
+/// O selo diz o tipo da conquista (a medida está no texto): medalha para meta
+/// batida, selo de check para meta mantida, troféu para recorde. Só Phosphor
+/// (os desenhos à mão por medida liam como medidor e quebravam o traço).
+FxSeloGlifo conquistaGlifo(Conquista c) => switch (c.tipo) {
+  ConquistaTipo.meta => FxSeloGlifo.medalha,
+  ConquistaTipo.mantido => FxSeloGlifo.verificado,
+  ConquistaTipo.recorde => FxSeloGlifo.trofeu,
+};
 
-/// Cores do selo saídas da cor da marca (nunca fixas): moldura em degradê,
-/// miolo escuro nos dois temas e glifo claro com brilho.
-({Color molduraTopo, Color molduraBase, Color miolo, Color glifo}) conquistaSeloCores(
-  Color marca,
-) => (
-  molduraTopo: Color.lerp(marca, Colors.white, 0.45)!,
-  molduraBase: BrandPalette.deep(marca),
-  miolo: Color.lerp(marca, Colors.black, 0.78)!,
-  glifo: Color.lerp(marca, Colors.white, 0.6)!,
-);
+/// Cores do selo saídas da cor da marca (nunca fixas): metal da moldura em
+/// três tons, miolo escuro nos dois temas e glifo claro.
+typedef ConquistaSeloCores = ({
+  Color metalClaro,
+  Color metalMedio,
+  Color metalEscuro,
+  Color miolo,
+  Color mioloLuz,
+  Color glifo,
+});
+
+ConquistaSeloCores conquistaSeloCores(Color marca) {
+  final miolo = Color.lerp(marca, Colors.black, 0.78)!;
+  return (
+    metalClaro: Color.lerp(marca, Colors.white, 0.7)!,
+    metalMedio: Color.lerp(marca, Colors.white, 0.25)!,
+    metalEscuro: Color.lerp(marca, Colors.black, 0.45)!,
+    miolo: miolo,
+    mioloLuz: Color.lerp(miolo, marca, 0.35)!,
+    glifo: Color.lerp(marca, Colors.white, 0.82)!,
+  );
+}
 
 /// Selo de conquista: hexágono de pontas arredondadas, moldura metálica na
 /// cor da marca, miolo escuro e o glifo aceso. Meta mantida ganha moldura
@@ -145,6 +150,9 @@ Path seloHexagono(Offset centro, double raio, {double arredondado = 0.18}) {
   return path..close();
 }
 
+/// Selo de metal: sombra no chão, moldura em faixas de luz, chanfro claro em
+/// cima, miolo afundado e o glifo em leve relevo. Abaixo de [_semDetalheAbaixo]
+/// px a sombra interna e o chanfro saem (viram sujeira no tamanho da lista).
 class _PintorDoSelo extends CustomPainter {
   _PintorDoSelo({
     required this.cores,
@@ -154,7 +162,9 @@ class _PintorDoSelo extends CustomPainter {
     required this.glifoOpacidade,
   });
 
-  final ({Color molduraTopo, Color molduraBase, Color miolo, Color glifo}) cores;
+  static const _semDetalheAbaixo = 48.0;
+
+  final ConquistaSeloCores cores;
   final FxSeloGlifo glifo;
   final bool dupla;
   final double progresso;
@@ -163,68 +173,125 @@ class _PintorDoSelo extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final centro = size.center(Offset.zero);
-    final raio = size.shortestSide / 2;
-    final moldura = math.max(1.5, raio * 0.13);
-    final externo = seloHexagono(centro, raio - moldura / 2);
-    final rect = Offset.zero & size;
-    final degrade = LinearGradient(
-      begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
-      colors: [cores.molduraTopo, cores.molduraBase],
-    ).createShader(rect);
+    final raio = size.shortestSide / 2 * 0.94;
+    final moldura = math.max(2.0, raio * 0.16);
+    final rect = Rect.fromCircle(center: centro, radius: raio);
+    final detalhe = size.shortestSide >= _semDetalheAbaixo;
+    final externo = seloHexagono(centro, raio);
+    final interno = seloHexagono(centro, raio - moldura);
 
-    // Miolo escuro (aparece com a moldura).
-    canvas.drawPath(
-      seloHexagono(centro, raio - moldura),
-      Paint()..color = cores.miolo.withValues(alpha: progresso),
-    );
-
-    // Moldura: desenhada até [progresso] do contorno.
-    final pincel =
-        Paint()
-          ..shader = degrade
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = moldura
-          ..strokeJoin = StrokeJoin.round
-          ..strokeCap = StrokeCap.round;
-    for (final m in externo.computeMetrics()) {
-      canvas.drawPath(m.extractPath(0, m.length * progresso), pincel);
-    }
-    if (dupla && progresso >= 1) {
-      canvas.drawPath(
-        seloHexagono(centro, raio - moldura * 2.2),
-        Paint()
-          ..color = cores.molduraTopo.withValues(alpha: 0.7)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = math.max(1, moldura * 0.35),
+    if (progresso > 0) {
+      canvas.saveLayer(
+        Offset.zero & size,
+        Paint()..color = Colors.black.withValues(alpha: progresso),
       );
+      _corpo(canvas, centro, raio, moldura, rect, externo, interno, detalhe);
+      canvas.restore();
     }
-    // Brilho curto no canto de cima (o "metal").
-    if (progresso >= 1) {
-      final brilho =
+
+    // Chanfro: luz na borda de cima, desenhada até [progresso] do contorno.
+    if (detalhe) {
+      final chanfro =
           Paint()
-            ..color = Colors.white.withValues(alpha: 0.55)
             ..style = PaintingStyle.stroke
-            ..strokeWidth = moldura * 0.35
-            ..strokeCap = StrokeCap.round;
-      final a = centro + Offset(-raio * 0.42, -raio * 0.62);
-      final b = centro + Offset(-raio * 0.12, -raio * 0.8);
-      canvas.drawLine(a, b, brilho);
+            ..strokeWidth = math.max(0.8, raio * 0.025)
+            ..shader = LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.white.withValues(alpha: 0.7),
+                Colors.white.withValues(alpha: 0),
+              ],
+            ).createShader(rect);
+      for (final m in seloHexagono(centro, raio - 0.6).computeMetrics()) {
+        canvas.drawPath(m.extractPath(0, m.length * progresso), chanfro);
+      }
     }
 
     if (glifoOpacidade <= 0) return;
     final lado = raio * 0.95;
     final area = Rect.fromCenter(center: centro, width: lado, height: lado);
-    final cor = cores.glifo.withValues(alpha: glifoOpacidade);
-    // Brilho do glifo: o mesmo desenho, desfocado, por baixo.
-    final sigma = math.max(1.0, raio * 0.06);
-    canvas.saveLayer(
-      rect,
-      Paint()..imageFilter = ui.ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
+    // Relevo: o mesmo glifo escuro um pouco abaixo, por baixo do claro.
+    fxPintarSeloGlifo(
+      canvas,
+      glifo,
+      area.shift(Offset(0, raio * 0.03)),
+      Colors.black.withValues(alpha: 0.5 * glifoOpacidade),
     );
-    fxPintarSeloGlifo(canvas, glifo, area, cor.withValues(alpha: 0.6 * glifoOpacidade));
-    canvas.restore();
-    fxPintarSeloGlifo(canvas, glifo, area, cor);
+    fxPintarSeloGlifo(
+      canvas,
+      glifo,
+      area,
+      cores.glifo.withValues(alpha: glifoOpacidade),
+    );
+  }
+
+  void _corpo(
+    Canvas canvas,
+    Offset centro,
+    double raio,
+    double moldura,
+    Rect rect,
+    Path externo,
+    Path interno,
+    bool detalhe,
+  ) {
+    // Sombra no chão.
+    canvas.drawPath(
+      seloHexagono(centro + Offset(0, raio * 0.08), raio),
+      Paint()
+        ..color = Colors.black.withValues(alpha: 0.28)
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, raio * 0.08),
+    );
+    // Moldura: metal em faixas, luz em cima à esquerda.
+    canvas.drawPath(
+      externo,
+      Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            cores.metalClaro,
+            cores.metalMedio,
+            cores.metalEscuro,
+            cores.metalMedio,
+            cores.metalEscuro,
+          ],
+          stops: const [0, 0.3, 0.55, 0.72, 1],
+        ).createShader(rect),
+    );
+    // Miolo afundado.
+    canvas.drawPath(
+      interno,
+      Paint()
+        ..shader = RadialGradient(
+          center: const Alignment(0, -0.3),
+          radius: 0.9,
+          colors: [cores.mioloLuz, cores.miolo],
+        ).createShader(rect),
+    );
+    if (detalhe) {
+      canvas.save();
+      canvas.clipPath(interno);
+      canvas.drawPath(
+        seloHexagono(centro + Offset(0, raio * 0.06), raio - moldura),
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = raio * 0.12
+          ..color = Colors.black.withValues(alpha: 0.45)
+          ..maskFilter = MaskFilter.blur(BlurStyle.normal, raio * 0.05),
+      );
+      canvas.restore();
+    }
+    if (dupla) {
+      canvas.drawPath(
+        seloHexagono(centro, raio - moldura * 1.9),
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = math.max(1, moldura * 0.3)
+          ..color = cores.metalClaro.withValues(alpha: 0.6),
+      );
+    }
   }
 
   @override
@@ -235,4 +302,3 @@ class _PintorDoSelo extends CustomPainter {
       old.progresso != progresso ||
       old.glifoOpacidade != glifoOpacidade;
 }
-

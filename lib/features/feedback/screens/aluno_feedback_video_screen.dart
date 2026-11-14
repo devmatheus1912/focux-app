@@ -11,6 +11,7 @@ import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../dashboard/widgets/aluno_recurso_indisponivel.dart';
 import '../../../core/utils/safe_external_launch.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
@@ -267,7 +268,10 @@ class _AlunoFeedbackVideoScreenState
     FeedbackHelper.showError(
       context,
       isPlanGateError(e)
-          ? 'Seu personal ainda não liberou o feedback em vídeo.'
+          ? alunoRecursoIndisponivelTexto(
+            'Feedback em vídeo',
+            alunoNomeDoPersonal(ref),
+          )
           : friendlyError(e),
     );
   }

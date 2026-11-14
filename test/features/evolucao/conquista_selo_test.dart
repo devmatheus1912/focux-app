@@ -20,13 +20,15 @@ Conquista _c(ConquistaTipo tipo, {String? metrica}) => Conquista(
 
 void main() {
   test('glifo de cada conquista', () {
-    expect(conquistaGlifo(_c(ConquistaTipo.meta, metrica: 'PESO')), FxSeloGlifo.balanca);
-    expect(conquistaGlifo(_c(ConquistaTipo.meta, metrica: 'CINTURA')), FxSeloGlifo.fitaMetrica);
-    expect(conquistaGlifo(_c(ConquistaTipo.meta, metrica: 'QUADRIL')), FxSeloGlifo.fitaMetrica);
-    expect(conquistaGlifo(_c(ConquistaTipo.meta, metrica: 'BRACO')), FxSeloGlifo.biceps);
-    expect(conquistaGlifo(_c(ConquistaTipo.meta, metrica: 'GORDURA')), FxSeloGlifo.tronco);
-    expect(conquistaGlifo(_c(ConquistaTipo.mantido, metrica: 'MASSA')), FxSeloGlifo.anilhas);
+    // O selo diz o tipo; a medida fica no texto.
+    for (final m in ['PESO', 'CINTURA', 'BRACO', 'GORDURA']) {
+      expect(conquistaGlifo(_c(ConquistaTipo.meta, metrica: m)), FxSeloGlifo.medalha);
+    }
+    expect(conquistaGlifo(_c(ConquistaTipo.mantido, metrica: 'MASSA')), FxSeloGlifo.verificado);
     expect(conquistaGlifo(_c(ConquistaTipo.recorde)), FxSeloGlifo.trofeu);
+    for (final g in [FxSeloGlifo.medalha, FxSeloGlifo.verificado, FxSeloGlifo.trofeu]) {
+      expect(fxSeloGlifoPhosphor(g), isNotNull, reason: 'conquista só usa Phosphor');
+    }
   });
 
   test('selo sem imagem: desenhado em código', () {
@@ -40,7 +42,7 @@ void main() {
     }
   });
 
-  testWidgets('os 13 glifos desenham sem erro', (tester) async {
+  testWidgets('todos os glifos desenham sem erro', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Wrap(
@@ -52,7 +54,7 @@ void main() {
       ),
     );
     expect(tester.takeException(), isNull);
-    expect(find.byType(ConquistaSelo), findsNWidgets(13));
+    expect(find.byType(ConquistaSelo), findsNWidgets(FxSeloGlifo.values.length));
   });
 
   testWidgets('story: nada de texto nas áreas que o Instagram cobre', (

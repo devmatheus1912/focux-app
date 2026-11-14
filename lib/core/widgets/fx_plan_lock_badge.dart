@@ -8,6 +8,13 @@ import '../theme/fx_icons.dart';
 ///
 /// Substitui `value` + `FxIcons.cadeado` soltos na linha inset, evitando
 /// truncar subtítulo em tiles de upgrade.
+/// "PRO"/"pro"/"" → "Pro"; "ENTERPRISE" → "Enterprise".
+String _rotulo(String tier) {
+  final t = tier.trim();
+  if (t.isEmpty) return 'Pro';
+  return t[0].toUpperCase() + t.substring(1).toLowerCase();
+}
+
 class FxPlanLockBadge extends StatelessWidget {
   const FxPlanLockBadge({
     super.key,
@@ -27,7 +34,7 @@ class FxPlanLockBadge extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = color.withValues(alpha: isDark ? 0.16 : 0.10);
     final border = color.withValues(alpha: isDark ? 0.30 : 0.24);
-    final label = tier.trim().isEmpty ? 'Pro' : tier.trim();
+    final label = _rotulo(tier);
 
     return Semantics(
       label: 'Recurso do plano $label',
@@ -50,8 +57,9 @@ class FxPlanLockBadge extends StatelessWidget {
               color: color,
             ),
             const SizedBox(width: 4),
+            // "Pro", como no resto do app (era "PRO").
             Text(
-              label.toUpperCase(),
+              label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(

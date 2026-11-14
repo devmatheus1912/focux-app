@@ -238,6 +238,11 @@ class Timeline360Event {
   final String deepLink;
   final String prioridade;
 
+  /// Só no radar: `RISCO` ("Alerta") ou `OPORTUNIDADE` ("Sugestão").
+  final String? natureza;
+
+  bool get oportunidade => natureza == 'OPORTUNIDADE';
+
   const Timeline360Event({
     required this.tipo,
     required this.titulo,
@@ -246,6 +251,7 @@ class Timeline360Event {
     required this.ocorridoEm,
     required this.deepLink,
     required this.prioridade,
+    this.natureza,
   });
 
   factory Timeline360Event.fromJson(Map<String, dynamic> json) =>
@@ -257,6 +263,7 @@ class Timeline360Event {
         ocorridoEm: json['ocorridoEm'] as String? ?? '',
         deepLink: json['deepLink'] as String? ?? '',
         prioridade: json['prioridade'] as String? ?? 'P2',
+        natureza: json['natureza'] as String?,
       );
 }
 

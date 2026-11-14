@@ -12,7 +12,6 @@ void main() {
       'lib/features/checkin/data/checkin_repository.dart': '/api/checkin',
       'lib/features/chat/data/chat_repository.dart': '/api/chat',
       'lib/features/convites/data/convite_repository.dart': '/api/convites',
-      'lib/features/captura/data/captura_repository.dart': '/api/captura',
       'lib/features/financeiro/data/financeiro_repository.dart':
           '/api/financeiro',
       'lib/features/onboarding/data/onboarding_repository.dart':

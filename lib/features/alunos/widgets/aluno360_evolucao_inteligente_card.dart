@@ -80,13 +80,13 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
     );
   }
 
-  /// "Estável · +3%"; % absurdo (base pequena) fica só com o sinal.
+  /// "Estável · +3%"; acima de +100% (base pequena) vira "Mais que dobrou".
   static String tendenciaTexto(EvolucaoInteligente ev) {
     final sinal = sinalLabel(ev.sinal);
     final pct = ev.tendenciaVolumePct;
-    if (pct == null ||
-        pct.abs() > Aluno360EvolucaoInteligenteLogic.tendenciaPctSoftCap) {
-      return sinal;
+    if (pct == null) return sinal;
+    if (pct > Aluno360EvolucaoInteligenteLogic.tendenciaPctDobrou) {
+      return 'Mais que dobrou';
     }
     return '$sinal · ${pct > 0 ? '+' : ''}$pct%';
   }
@@ -400,10 +400,12 @@ class _VolumeSparklineRow extends StatelessWidget {
             ),
             Row(
               children: [
-                Text(
-                  formatAlunoVolumeKg(data.first),
-                  style: FocuxHubTypography.bodyMuted(color: mute),
-                ),
+                // Semana sem volume no início: sem rótulo (era um "—" solto).
+                if (data.first > 0)
+                  Text(
+                    formatAlunoVolumeKg(data.first),
+                    style: FocuxHubTypography.bodyMuted(color: mute),
+                  ),
                 const Spacer(),
                 Text(
                   formatAlunoVolumeKg(data.last),

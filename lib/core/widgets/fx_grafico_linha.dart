@@ -50,7 +50,9 @@ class FxGraficoLinha extends StatelessWidget {
       '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}';
 
   /// Eixo Y com passo redondo (1, 2, 2,5 ou 5 × 10ⁿ) e limites múltiplos
-  /// dele: as marcas saem 40, 50, 60 em vez de 37, 56, 75.
+  /// dele: as marcas saem 40, 50, 60 em vez de 37, 56, 75. Tenta 2 e 3
+  /// intervalos e fica com a escala mais justa (empate: menos marcas). As
+  /// pontas sempre ganham rótulo, então o eixo cobre o menor e o maior valor.
   @visibleForTesting
   static ({double min, double max, double passo}) eixoY(
     double menor,
@@ -64,18 +66,25 @@ class FxGraficoLinha extends StatelessWidget {
     final margem = (maior - menor) * 0.08;
     final baixo = menor - margem;
     final alto = maior + margem;
-    final bruto = (alto - baixo) / 3;
-    final base = math.pow(10, (math.log(bruto) / math.ln10).floor()).toDouble();
-    final passo = [
-      1,
-      2,
-      2.5,
-      5,
-      10,
-    ].map((m) => m * base).firstWhere((p) => p >= bruto);
-    final min = (baixo / passo).floor() * passo;
-    final max = (alto / passo).ceil() * passo;
-    return (min: min, max: max, passo: passo);
+    ({double min, double max, double passo})? melhor;
+    for (final intervalos in const [2, 3]) {
+      final bruto = (alto - baixo) / intervalos;
+      final base =
+          math.pow(10, (math.log(bruto) / math.ln10).floor()).toDouble();
+      final passo = [
+        1,
+        2,
+        2.5,
+        5,
+        10,
+      ].map((m) => m * base).firstWhere((p) => p >= bruto);
+      final min = (baixo / passo).floor() * passo;
+      final max = (alto / passo).ceil() * passo;
+      if (melhor == null || max - min < melhor.max - melhor.min) {
+        melhor = (min: min, max: max, passo: passo);
+      }
+    }
+    return melhor!;
   }
 
   double _x(int i) =>
@@ -100,10 +109,6 @@ class FxGraficoLinha extends StatelessWidget {
     final temTendencia = tendencia.length == pontos.length;
     final estiloEixo = FocuxHubTypography.chip(chrome.mute);
     final alerta = chrome.isDark ? EagleTokens.warnDark : EagleTokens.warn;
-    // Com menos de duas marcas no meio, as pontas também ganham rótulo: um
-    // "100" sozinho não diz a escala.
-    final marcasNoMeio = ((maxY - minY) / eixo.passo).round() - 1;
-    final rotularPontas = marcasNoMeio < 2;
 
     final registros = LineChartBarData(
       spots: [
@@ -191,13 +196,10 @@ class FxGraficoLinha extends StatelessWidget {
                   reservedSize: 40,
                   interval: eixo.passo,
                   getTitlesWidget:
-                      (valor, meta) =>
-                          !rotularPontas && (valor == meta.min || valor == meta.max)
-                              ? const SizedBox.shrink()
-                              : Text(
-                                formatBrDecimal(valor, digits: casasDoEixo),
-                                style: estiloEixo,
-                              ),
+                      (valor, _) => Text(
+                        formatBrDecimal(valor, digits: casasDoEixo),
+                        style: estiloEixo,
+                      ),
                 ),
               ),
               bottomTitles: AxisTitles(

@@ -2697,8 +2697,6 @@
   "evolucaoMelhorMarca": "Melhor: {marca}",
   "@evolucaoMelhorMarca": {"placeholders": {"marca": {"type": "String"}}},
   "conquistaParabenizar": "Parabenizar",
-  "conquistaVerExercicio": "Ver exercício",
-  "conquistaVerMedida": "Ver medida",
   "conquistaRascunhoRecorde": "Parabéns pelo recorde de {valor} no {exercicio}! 💪",
   "@conquistaRascunhoRecorde": {"placeholders": {"valor": {"type": "String"}, "exercicio": {"type": "String"}}},
   "conquistaRascunhoMeta": "Parabéns, você bateu a meta de {metrica}! 🎉",
@@ -2717,8 +2715,6 @@
   "@conquistaContextoMantido": {"placeholders": {"valor": {"type": "String"}}},
   "conquistaTreinaCom": "{aluno} treina com",
   "@conquistaTreinaCom": {"placeholders": {"aluno": {"type": "String"}}},
-  "conquistaFeitoSemNumero": "{tipo} no {item}",
-  "@conquistaFeitoSemNumero": {"placeholders": {"tipo": {"type": "String"}, "item": {"type": "String"}}},
   "conquistaFundoCor": "Cor",
   "conquistaFundoFoto": "Minha foto",
   "conquistaMostrarNumero": "Mostrar o número",
@@ -2788,5 +2784,9 @@
   "assinaturaAlunosSemLimite": "{n, plural, =1{1 aluno · sem limite} other{{n} alunos · sem limite}}",
   "@assinaturaAlunosSemLimite": {"placeholders": {"n": {"type": "int"}}},
   "assinaturaAlunosDe": "{n} de {limite} alunos",
-  "@assinaturaAlunosDe": {"placeholders": {"n": {"type": "int"}, "limite": {"type": "int"}}}
+  "@assinaturaAlunosDe": {"placeholders": {"n": {"type": "int"}, "limite": {"type": "int"}}},
+  "perfilConquistasVerTodas": "Ver todas ({n})",
+  "@perfilConquistasVerTodas": {"placeholders": {"n": {"type": "int"}}},
+  "perfilConquistasResumo": "{n, plural, =1{1 conquista} other{{n} conquistas}}. Mais recente: {tipo} em {item}",
+  "@perfilConquistasResumo": {"placeholders": {"n": {"type": "int"}, "tipo": {"type": "String"}, "item": {"type": "String"}}}
 }
