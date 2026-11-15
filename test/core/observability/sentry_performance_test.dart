@@ -52,14 +52,17 @@ void main() {
 
   setUp(() async {
     sent = null;
-    await _initSentry(configure: (o) {
-      o.transport = _CapturingTransport();
-      o.beforeSendTransaction = (tx, _) => sent = stripRouteArguments(tx);
-    });
+    await _initSentry(
+      configure: (o) {
+        o.transport = _CapturingTransport();
+        o.beforeSendTransaction = (tx, _) => sent = stripRouteArguments(tx);
+      },
+    );
     adapter = _CaptureAdapter();
-    dio = Dio(BaseOptions(baseUrl: Env.apiUrl))
-      ..httpClientAdapter = adapter
-      ..interceptors.add(SentryHttpSpanInterceptor());
+    dio =
+        Dio(BaseOptions(baseUrl: Env.apiUrl))
+          ..httpClientAdapter = adapter
+          ..interceptors.add(SentryHttpSpanInterceptor());
   });
 
   tearDown(() => Sentry.close());
@@ -83,18 +86,38 @@ void main() {
     expect(adapter.requests.single.headers, isNot(contains('sentry-trace')));
   });
 
-  test('com transação propaga só para o host da API, sem query no span',
-      () async {
+  test(
+    'com transação propaga só para o host da API, sem query no span',
+    () async {
+      final tx = Sentry.startTransaction('t', 'ui.load', bindToScope: true);
+
+      await dio.get('/api/x?q=texto');
+      await dio.get('https://outro.example.com/arquivo');
+      await tx.finish();
+
+      final api = adapter.requests[0].headers;
+      expect(api['sentry-trace'], startsWith(tx.context.traceId.toString()));
+      expect(adapter.requests[1].headers, isNot(contains('sentry-trace')));
+      final spans = sent!.spans.map((s) => s.context.description).toList();
+      expect(spans, contains('GET /api/x'));
+    },
+  );
+
+  test('token de ativação e de convite não vão ao Sentry no span', () async {
     final tx = Sentry.startTransaction('t', 'ui.load', bindToScope: true);
 
-    await dio.get('/api/x?q=texto');
-    await dio.get('https://outro.example.com/arquivo');
+    await dio.get('/api/auth/aluno/ativacao/TOKENFICTICIO0123456789abcdef');
+    await dio.post(
+      '/api/auth/aluno/ativacao/TOKENFICTICIO0123456789abcdef/codigo-email',
+    );
+    await dio.get('/api/convites/validar/TOKENFICTICIO0123456789abcdef');
     await tx.finish();
 
-    final api = adapter.requests[0].headers;
-    expect(api['sentry-trace'], startsWith(tx.context.traceId.toString()));
-    expect(adapter.requests[1].headers, isNot(contains('sentry-trace')));
     final spans = sent!.spans.map((s) => s.context.description).toList();
-    expect(spans, contains('GET /api/x'));
+    expect(spans, [
+      'GET /api/auth/aluno/ativacao/{token}',
+      'POST /api/auth/aluno/ativacao/{token}/codigo-email',
+      'GET /api/convites/validar/{token}',
+    ]);
   });
 }

@@ -56,6 +56,17 @@ SentryTransaction stripRouteArguments(SentryTransaction tx) {
   return tx;
 }
 
+/// Segmentos de caminho que levam token portador (ativação do aluno, convite).
+final _tokenNoCaminho = RegExp(r'(/ativacao/|/convites/validar/)[^/?#]+');
+
+/// Caminho que vai para a descrição do span: sem query e sem token, que é
+/// credencial e não pode chegar ao Sentry (o backend já usa `{token}`).
+@visibleForTesting
+String caminhoSemToken(String path) => path
+    .split('?')
+    .first
+    .replaceAllMapped(_tokenNoCaminho, (m) => '${m[1]}{token}');
+
 /// Um observer por Navigator (raiz, shells e cada branch).
 List<NavigatorObserver> sentryNavObservers() => [
   SentryNavigatorObserver(
@@ -72,7 +83,7 @@ class SentryHttpSpanInterceptor extends Interceptor {
     if (parent != null) {
       final span = parent.startChild(
         'http.client',
-        description: '${options.method} ${options.path.split('?').first}',
+        description: '${options.method} ${caminhoSemToken(options.path)}',
       );
       options.extra[_kSpanExtra] = span;
       if (options.uri.host == Uri.parse(Env.apiUrl).host) {
