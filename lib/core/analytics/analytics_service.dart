@@ -5,6 +5,7 @@ import 'package:amplitude_flutter/autocapture/attribution.dart';
 import 'package:amplitude_flutter/autocapture/autocapture.dart';
 import 'package:amplitude_flutter/configuration.dart';
 import 'package:amplitude_flutter/events/base_event.dart';
+import 'package:amplitude_flutter/events/identify.dart';
 import 'package:amplitude_flutter/tracking_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -37,12 +38,17 @@ class AnalyticsService {
   /// Liga [track] ao `POST /api/analytics/evento` sem segundo funil.
   AnalyticsFunnelPoster? funnelPoster;
 
-  bool _userIdSet = false;
+  /// Quem está identificado agora ("personal:12"); nulo deslogado.
+  String? _userId;
+
+  @visibleForTesting
+  String? get usuarioAtual => _userId;
 
   Amplitude? _amplitude;
 
-  /// Sem `AMPLITUDE_API_KEY` no build não faz nada. Identidade só por
-  /// device id anônimo; sem IP, cidade, localização nem advertising id.
+  /// Sem `AMPLITUDE_API_KEY` no build não faz nada. Sem IP, cidade,
+  /// localização nem advertising id. Quem é a pessoa vem de [setUser]: só o id
+  /// interno do token e o papel, nunca nome ou e-mail.
   Future<void> initAmplitude() async {
     final apiKey = Env.amplitudeApiKey.trim();
     if (apiKey.isEmpty || kIsWeb || _amplitude != null) return;
@@ -71,9 +77,25 @@ class AnalyticsService {
     }
   }
 
+  /// Identifica a pessoa no Amplitude e no Crashlytics: [id] é o `sub` do
+  /// token ("personal:12", "aluno:34"), [role] vira a propriedade `role` do
+  /// usuário. Assim o mesmo personal em dois aparelhos conta como um só e os
+  /// gráficos separam personal de aluno. Repetir com o mesmo id não faz nada.
   Future<void> setUser({required String id, String? role, String? plan}) async {
-    if (_userIdSet) return;
-    _userIdSet = true;
+    if (_userId == id) return;
+    _userId = id;
+    final amplitude = _amplitude;
+    if (amplitude != null) {
+      try {
+        await amplitude.setUserId(id);
+        final quem = Identify();
+        if (role != null) quem.set('role', role);
+        if (plan != null) quem.set('plan', plan);
+        await amplitude.identify(quem);
+      } catch (e) {
+        if (kDebugMode) debugPrint('[Analytics] Amplitude setUser failed: $e');
+      }
+    }
     if (!_crashlyticsReady) return;
     try {
       await FirebaseCrashlytics.instance.setUserIdentifier(id);
@@ -86,6 +108,22 @@ class AnalyticsService {
     } catch (e) {
       if (kDebugMode) debugPrint('[Analytics] setUser failed: $e');
     }
+  }
+
+  /// Saiu da conta: o próximo login (outra pessoa no mesmo aparelho) não
+  /// herda o id nem o histórico desta.
+  Future<void> esquecerUsuario() async {
+    if (_userId == null) return;
+    _userId = null;
+    try {
+      await _amplitude?.reset();
+    } catch (e) {
+      if (kDebugMode) debugPrint('[Analytics] Amplitude reset failed: $e');
+    }
+    if (!_crashlyticsReady) return;
+    try {
+      await FirebaseCrashlytics.instance.setUserIdentifier('');
+    } catch (_) {}
   }
 
   /// Evento de produto: CTA, conversão, churn, etc. Mantenha nomes em
@@ -321,6 +359,11 @@ class ProductEvents {
   static const habitoCreated = 'habito_created';
   static const desafioCreated = 'desafio_created';
   static const checkinHubViewed = 'checkin_hub_viewed';
+
+  /// Aluno terminou um treino (`modo`: "registrado" com séries, "ja_fiz" sem
+  /// séries). É a métrica de uso de verdade: retenção do aluno e alunos
+  /// treinando por semana.
+  static const treinoConcluido = 'treino_concluido';
   static const checkinHubTtv = 'checkin_hub_ttv';
   static const checkinHubHelpOpened = 'checkin_hub_help_opened';
   static const checkinHubRefreshed = 'checkin_hub_refreshed';

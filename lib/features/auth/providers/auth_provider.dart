@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/account/login_social_memo.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/auth/jwt_session_identity.dart';
 import '../../../core/auth/session_invalidator.dart';
 import '../../../core/state/fx_value_notifier.dart';
 import '../../../core/storage/secure_storage.dart';
@@ -45,8 +46,27 @@ class AuthNotifier extends Notifier<AuthStatus> {
         _handleSessionInvalidated,
       ),
     );
+    // Toda entrada e saída passa pelo estado: o analytics acompanha daqui.
+    listenSelf((_, novo) {
+      if (novo == AuthStatus.authenticated) {
+        _identificarNoAnalytics();
+      } else if (novo == AuthStatus.unauthenticated) {
+        AnalyticsService.instance.esquecerUsuario();
+      }
+    });
     Future.microtask(_checkToken);
     return AuthStatus.unknown;
+  }
+
+  /// O id é o `sub` do token salvo; o papel, o desta sessão.
+  Future<void> _identificarNoAnalytics() async {
+    final token = await SecureStorage.getToken();
+    final id = token == null ? null : JwtSessionIdentity.subject(token);
+    if (id == null) return;
+    await AnalyticsService.instance.setUser(
+      id: id,
+      role: _currentRole == UserRole.aluno ? 'aluno' : 'personal',
+    );
   }
 
   void _handleSessionInvalidated() {

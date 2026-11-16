@@ -36,6 +36,7 @@ extension _CheckinSaida on _CheckinScreenState {
           await ref
               .read(checkinRepositoryProvider)
               .confirmarPlano(widget.treinoId);
+          checkinTreinoConcluido(modo: 'ja_fiz');
           checkinSessaoMudou(ref);
         } catch (e) {
           if (mounted) _erro(friendlyError(e));

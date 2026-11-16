@@ -22,6 +22,22 @@ abstract final class JwtSessionIdentity {
     }
   }
 
+  /// O `sub` do token ("personal:12", "aluno:34"): id interno, sem nome nem
+  /// e-mail. Nulo com token ilegível.
+  static String? subject(String jwt) {
+    final parts = jwt.split('.');
+    if (parts.length < 2) return null;
+    try {
+      final map = jsonDecode(
+        utf8.decode(base64Url.decode(base64Url.normalize(parts[1])), allowMalformed: true),
+      );
+      final sub = map is Map ? map['sub'] : null;
+      return sub is String && sub.isNotEmpty ? sub : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// Token novo de outra conta (ou ilegível): o cache local da anterior não pode vazar.
   static bool isDifferentAccount(String? previous, String next) {
     if (previous == null || previous.isEmpty) return false;

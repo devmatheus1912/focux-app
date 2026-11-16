@@ -26,6 +26,7 @@ import '../utils/treino_previa_view.dart';
 import '../widgets/checkin_resumo_view.dart';
 import '../widgets/treino_previa_widgets.dart';
 import '../../../core/theme/fx_icons.dart';
+import '../utils/checkin_sessao.dart';
 
 /// Prescrição antes de treinar. Só o botão Iniciar abre sessão; ao iniciar a
 /// tela fecha com `true` e quem abriu leva à execução.
@@ -66,6 +67,7 @@ class _TreinoPreviaScreenState extends ConsumerState<TreinoPreviaScreen> {
     setState(() => _registrando = true);
     try {
       await ref.read(checkinRepositoryProvider).confirmarPlano(widget.treinoId);
+      checkinTreinoConcluido(modo: 'ja_fiz');
       checkinSessaoMudou(ref);
       if (!mounted) return;
       await showCheckinResumo(

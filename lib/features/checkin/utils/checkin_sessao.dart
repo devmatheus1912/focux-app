@@ -1,3 +1,4 @@
+import '../../../core/analytics/analytics_service.dart';
 import '../data/checkin_repository.dart';
 import '../data/checkin_series_pendentes.dart';
 import 'checkin_execucao_estado.dart';
@@ -90,6 +91,7 @@ class CheckinSessao {
         concluida = await repo.detalhe(execucaoId);
       } catch (_) {}
     }
+    if (concluida != null) checkinTreinoConcluido(modo: 'registrado');
     SessaoEvolucaoDto? evolucao;
     try {
       evolucao = await repo.evolucaoSessao(execucaoId);
@@ -102,4 +104,12 @@ class CheckinSessao {
     await repo.descartar(execucaoId);
     await fila.removerDaExecucao(execucaoId);
   }
+}
+
+/// Treino terminado vai para o Amplitude ([ProductEvents.treinoConcluido]).
+void checkinTreinoConcluido({required String modo}) {
+  AnalyticsService.instance.track(
+    ProductEvents.treinoConcluido,
+    props: {'modo': modo},
+  );
 }
