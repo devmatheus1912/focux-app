@@ -44,7 +44,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v7.0.1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Select Xcode
         run: |
@@ -65,7 +65,7 @@ jobs:
           xcodebuild -version
 
       - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
         with:
           flutter-version: '3.47.x'
           channel: stable
@@ -149,7 +149,8 @@ jobs:
           pod install --repo-update
 
       - name: Install Fastlane
-        run: gem install fastlane --no-document
+        # Versão fixa: o fastlane recebe a chave da App Store Connect.
+        run: gem install fastlane -v 2.241.2 --no-document
 
       - name: Sync signing (ASC API → cert + profile)
         env:
@@ -242,7 +243,7 @@ jobs:
             --export-options-plist=ios/ExportOptions.ci.plist
 
       - name: Upload IPA artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: focux-ios-ipa
           path: build/ios/ipa/*.ipa
@@ -250,7 +251,7 @@ jobs:
           retention-days: 14
 
       - name: Upload dSYM (if present)
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: focux-ios-dsym
           path: build/ios/archive/Runner.xcarchive/dSYMs
@@ -272,7 +273,8 @@ jobs:
             echo "::warning::dSYMs não encontrados no archive."
             exit 0
           fi
-          curl -sL https://sentry.io/get-cli/ | SENTRY_CLI_VERSION=2.39.1 bash
+          # Pacote do npm com versão fixa, em vez de script remoto sem verificação.
+          npm install --global @sentry/cli@2.39.1
           sentry-cli debug-files upload \
             --org focux-personal --project flutter \
             build/ios/archive/Runner.xcarchive/dSYMs
@@ -322,5 +324,7 @@ jobs:
       - name: Cleanup keychain
         if: always()
         run: |
+          # Chave da App Store Connect não fica no runner depois do job.
+          rm -rf "$RUNNER_TEMP/asc_keys" "$HOME/.appstoreconnect/private_keys" 2>/dev/null || true
           security delete-keychain "$HOME/Library/Keychains/${MATCH_KEYCHAIN_NAME}-db" 2>/dev/null || true
           security delete-keychain "$HOME/Library/Keychains/${MATCH_KEYCHAIN_NAME}.keychain-db" 2>/dev/null || true

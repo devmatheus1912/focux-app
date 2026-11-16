@@ -85,6 +85,8 @@ void main() {
     // HomeWidget + FCM: defer pós-primeiro-frame (ver FocuxApp._bootstrapDeferredServices).
     // JWT/role: aquecer Keychain cedo — Dio/redirect batem RAM cache.
     if (!kIsWeb) {
+      // Antes de qualquer leitura do token: reinstalação não herda a sessão.
+      await SecureStorage.limparSessaoDeInstalacaoAnterior();
       unawaited(SecureStorage.warmSessionCache());
     }
 
@@ -171,14 +173,18 @@ void main() {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    FxTonalButton(label: 'Voltar', onPressed: () {
+                    FxTonalButton(
+                      label: 'Voltar',
+                      onPressed: () {
                         final router = GoRouter.maybeOf(context);
                         if (router != null && router.canPop()) {
                           router.pop();
                           return;
                         }
                         safePopOrGo(context, '/dashboard/personal');
-                      }, compact: true),
+                      },
+                      compact: true,
+                    ),
                   ],
                 ),
               ),
@@ -191,7 +197,10 @@ void main() {
     applyLegacyPasswordResetRedirect(AppRouter.router);
     runApp(
       // Retry fica no ApiClient (fxNoRetry); retry do provider dobraria 4xx.
-      ProviderScope(retry: (_, _) => null, child: SentryWidget(child: const FocuxApp())),
+      ProviderScope(
+        retry: (_, _) => null,
+        child: SentryWidget(child: const FocuxApp()),
+      ),
     );
   }, reportUncaughtZoneError);
 }
@@ -387,10 +396,15 @@ class _FocuxAppState extends ConsumerState<FocuxApp>
       if (role == 'PERSONAL') {
         perfil = await ref.read(perfilProvider.future);
       } else {
-        final r = await ref.read(apiClientProvider).dio.get(
-          '/api/personal/perfil',
-          options: Options(extra: {'fxNoRetry': true, 'fxNoInvalidate': true}),
-        );
+        final r = await ref
+            .read(apiClientProvider)
+            .dio
+            .get(
+              '/api/personal/perfil',
+              options: Options(
+                extra: {'fxNoRetry': true, 'fxNoInvalidate': true},
+              ),
+            );
         perfil = PerfilPersonal.fromJson(r.data as Map<String, dynamic>);
       }
       if (!mounted) return;

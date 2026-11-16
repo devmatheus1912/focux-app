@@ -80,6 +80,24 @@ class SecureStorage {
   static int nativeKeychainReads = 0;
 
   /// Prefetch Keychain → RAM (token/role/refresh/requires) em paralelo ao boot.
+  static const _keyInstalacaoMarcada = 'focux_instalacao_marcada';
+
+  /// O Keychain do iOS sobrevive à desinstalação; as preferências não. Sem a
+  /// marca nas preferências, esta é a primeira abertura depois de instalar:
+  /// a sessão que sobrou da instalação anterior é apagada (reinstalar não
+  /// pode entrar logado na conta de antes). Rodar antes de ler o token.
+  static Future<void> limparSessaoDeInstalacaoAnterior() async {
+    if (kIsWeb) return;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      if (prefs.getBool(_keyInstalacaoMarcada) ?? false) return;
+      await clearAll();
+      await prefs.setBool(_keyInstalacaoMarcada, true);
+    } catch (_) {
+      // Preferências fora: segue com a sessão como está (não trava a abertura).
+    }
+  }
+
   static Future<void> warmSessionCache() async {
     if (kIsWeb) return;
     await Future.wait<void>([
