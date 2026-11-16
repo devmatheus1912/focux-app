@@ -30,6 +30,22 @@ void main() {
     expect(pubspec, matches(RegExp(r'intercom_flutter:\s*\^9\.')));
     expect(service, contains('setUserJwt'));
     expect(service, contains('setUserJwtProvider'));
+    // Push do suporte (15/11): o token vai ao Intercom (APNs no iOS, FCM no
+    // Android) e o push dele chega pelo firebase_messaging, que repassa.
+    expect(service, contains('sendTokenToIntercom'));
+    expect(service, contains('getAPNSToken'));
+    expect(service, contains('handlePush'));
+    final fcm = File('lib/core/fcm/fcm_service.dart').readAsStringSync();
+    expect(fcm, contains('IntercomService.ehPushDoIntercom'));
+    expect(fcm, contains('IntercomService.enviarTokenPush'));
+    expect(
+      manifest,
+      matches(
+        RegExp(
+          r'IntercomFcmMessengerService"\s+tools:node="remove"',
+        ),
+      ),
+    );
     expect(
       manifest,
       contains('io.intercom.android.sdk.fcm.IntercomFcmMessengerService'),

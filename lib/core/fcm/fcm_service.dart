@@ -8,11 +8,18 @@ import '../api/api_client.dart';
 import '../api/offline_sync_service.dart';
 import '../router/app_router.dart';
 import '../storage/secure_storage.dart';
+import '../support/intercom_service.dart';
 import '../widgets/feedback_helper.dart';
 import 'fcm_tap_route.dart';
 
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // Resposta do suporte com o app fechado (Android): o Intercom mostra.
+  if (defaultTargetPlatform == TargetPlatform.android &&
+      await IntercomService.ehPushDoIntercom(message.data)) {
+    await IntercomService.mostrarPush(message.data);
+    return;
+  }
   if (message.data['type'] == 'plan_sync') {
     // Sem ProviderContainer em background: invalidação ocorre no próximo open
     // ou via tap (onMessageOpenedApp). Handler registrado só em foreground.
@@ -32,8 +39,14 @@ class FcmService {
 
     // Listeners e mensagem inicial antes de qualquer await que possa falhar:
     // getToken lança sem APNs/rede e o toque que abriu o app se perderia.
-    FirebaseMessaging.onMessage.listen((message) {
+    FirebaseMessaging.onMessage.listen((message) async {
       if (kDebugMode) debugPrint('[FCM] foreground: ${message.messageId}');
+      if (await IntercomService.ehPushDoIntercom(message.data)) {
+        if (defaultTargetPlatform == TargetPlatform.android) {
+          await IntercomService.mostrarPush(message.data);
+        }
+        return;
+      }
       unawaited(_dispatchPlanSync(message.data));
       _avisarEmPrimeiroPlano(message);
     });
@@ -58,12 +71,14 @@ class FcmService {
       if (kDebugMode) debugPrint('[FCM] presentation options error: $e');
     }
 
-    messaging.onTokenRefresh.listen(
-      (newToken) => _registrarToken(newToken, apiClient),
-    );
+    messaging.onTokenRefresh.listen((newToken) {
+      unawaited(_registrarToken(newToken, apiClient));
+      unawaited(IntercomService.enviarTokenPush(tokenFcm: newToken));
+    });
     try {
       final token = await messaging.getToken();
       if (token != null) await _registrarToken(token, apiClient);
+      unawaited(IntercomService.enviarTokenPush(tokenFcm: token));
     } catch (e) {
       // Sem APNs ainda ou offline: onTokenRefresh entrega depois.
       if (kDebugMode) debugPrint('[FCM] getToken error: $e');
@@ -104,6 +119,11 @@ class FcmService {
   static Future<void> _handleNotificationTapAsync(RemoteMessage message) async {
     try {
       final data = message.data;
+      // Toque na resposta do suporte: abre a conversa no Intercom.
+      if (await IntercomService.ehPushDoIntercom(data)) {
+        await IntercomService.openMessenger();
+        return;
+      }
       if (data['type'] == 'plan_sync') {
         await _dispatchPlanSync(data);
       }

@@ -89,15 +89,13 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT"/>
             </intent-filter>
         </service>
-        <!-- Intercom FCM: exported=false obrigatório para Android 12+ -->
+        <!-- Push do Intercom: chega pelo firebase_messaging do app, que é o
+             único serviço de MESSAGING_EVENT; o Dart repassa ao Intercom
+             (IntercomService.mostrarPush). O serviço próprio do Intercom fica
+             fora: dois serviços com a mesma ação, o Android entrega a um só. -->
         <service
             android:name="io.intercom.android.sdk.fcm.IntercomFcmMessengerService"
-            android:exported="false"
-            tools:node="merge">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
-            </intent-filter>
-        </service>
+            tools:node="remove"/>
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@drawable/ic_stat_focux"/>

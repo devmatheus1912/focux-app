@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intercom_flutter/intercom_flutter.dart';
 
@@ -48,6 +49,47 @@ class IntercomService {
       name: name,
       customAttributes: {'papel': papel},
     );
+    // O aparelho passa a ser desta pessoa: a resposta do suporte chega por push.
+    await enviarTokenPush();
+  }
+
+  /// Entrega ao Intercom o token de push do aparelho: APNs no iOS, FCM no
+  /// Android (o Intercom manda direto, sem passar pelo backend). Falha é
+  /// silenciosa: sem token, a resposta aparece ao abrir o suporte.
+  static Future<void> enviarTokenPush({String? tokenFcm}) async {
+    if (kIsWeb) return;
+    try {
+      final messaging = FirebaseMessaging.instance;
+      final token =
+          defaultTargetPlatform == TargetPlatform.iOS
+              ? await messaging.getAPNSToken()
+              : (tokenFcm ?? await messaging.getToken());
+      if (token == null || token.isEmpty) return;
+      await Intercom.instance.sendTokenToIntercom(token);
+    } catch (e) {
+      if (kDebugMode) debugPrint('[Intercom] token de push: $e');
+    }
+  }
+
+  /// A notificação veio do Intercom (resposta do suporte)?
+  static Future<bool> ehPushDoIntercom(Map<String, dynamic> data) async {
+    if (kIsWeb || data.isEmpty) return false;
+    try {
+      return await Intercom.instance.isIntercomPush(data);
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Android: o Intercom monta a notificação do push dele (chega pelo
+  /// Firebase do app, que é quem recebe as mensagens).
+  static Future<void> mostrarPush(Map<String, dynamic> data) async {
+    if (kIsWeb) return;
+    try {
+      await Intercom.instance.handlePush(data);
+    } catch (e) {
+      if (kDebugMode) debugPrint('[Intercom] push: $e');
+    }
   }
 
   /// Chama no logout do app.
