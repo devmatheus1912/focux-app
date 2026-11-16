@@ -314,6 +314,8 @@ class ApiClient {
     if (_isAuthPath(options.path)) return false;
     if (options.path == '/api/suporte/analisar-erro') return false;
     if (OfflineSyncService.isSensitivePath(options.path)) return false;
+    // Upload não volta da fila: o corpo é guardado em JSON e o arquivo se perdia.
+    if (options.data is FormData) return false;
 
     final method = options.method.toUpperCase();
     return method == 'POST' || method == 'PUT' || method == 'DELETE';

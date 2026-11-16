@@ -59,6 +59,22 @@ void main() {
     );
   });
 
+  // A fila guarda o corpo em JSON: o arquivo de um upload se perdia e a fila
+  // reenviava um POST vazio para sempre (Sentry JAVA-SPRING-BOOT-V, 16/11).
+  test('upload (FormData) não entra na fila offline', () async {
+    final upload = RequestOptions(
+      path: '/api/exercicios/5569/video',
+      method: 'POST',
+      data: FormData.fromMap({
+        'file': MultipartFile.fromBytes([1, 2, 3], filename: 'v.mp4'),
+      }),
+    );
+
+    expect(ApiClient.canQueueOfflineMutationForTest(upload), isFalse);
+    expect(await OfflineSyncService.enqueueRequest(upload), isFalse);
+    expect(await OfflineSyncService.getPendingCount(), 0);
+  });
+
   test('enqueueRequest refuses sensitive paths and does not persist them',
       () async {
     final queued = await OfflineSyncService.enqueueRequest(

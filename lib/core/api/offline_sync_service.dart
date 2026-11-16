@@ -76,7 +76,8 @@ class OfflineSyncService {
   /// acknowledge the write as "queued" (HTTP 202) must check this — otherwise
   /// a sensitive path looks successful and is never retried.
   static Future<bool> enqueueRequest(RequestOptions options) async {
-    if (isSensitivePath(options.path)) {
+    // Upload sem o arquivo vira POST vazio repetido para sempre: não enfileira.
+    if (isSensitivePath(options.path) || options.data is FormData) {
       return false;
     }
     final prefs = await _open();
