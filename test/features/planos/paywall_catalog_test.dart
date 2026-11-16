@@ -66,7 +66,7 @@ void main() {
     );
     expect(
       PaywallCatalog.modalMessageFor(capability: 'iaCopiloto'),
-      contains('IA está aguardando'),
+      contains('analisa cada aluno'),
     );
     expect(
       PaywallCatalog.modalMessageFor(
@@ -81,7 +81,8 @@ void main() {
     );
     expect(
       PaywallCatalog.modalMessageFor(capability: 'landingCompleta'),
-      contains('landing'),
+      // "landing" virou "página de vendas" (15/11).
+      contains('página de vendas'),
     );
     expect(PaywallCatalog.modalMessageFor(capability: 'agenda'), isNull);
   });

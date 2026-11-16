@@ -197,7 +197,7 @@ void main() {
 
   testWidgets('sugestão do copiloto aparece como uma linha', (tester) async {
     await _abrir(tester, _hugo());
-    expect(find.text('Sugestão do copiloto'), findsOneWidget);
+    expect(find.text('Sugestão da IA Focux'), findsOneWidget);
     expect(find.text('Completar mapa corporal'), findsOneWidget);
   });
 

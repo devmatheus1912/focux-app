@@ -245,8 +245,8 @@ class PaywallCatalog {
       title: 'IA Focux bloqueado',
       transition: 'FREE → PRO',
       message:
-          'Sua IA está aguardando. No Pro, a IA Focux monta treinos e sugere '
-          'respostas com ${PlanoIaLimits.pro} usos por mês.',
+          'No Pro, a IA Focux analisa cada aluno e sugere o próximo passo, '
+          'com ${PlanoIaLimits.pro} usos por mês.',
     ),
     PaywallUpgradeTrigger(
       number: '04',
@@ -268,21 +268,22 @@ class PaywallCatalog {
       title: '110+ interações de IA no mês',
       transition: 'PRO → ENTERPRISE',
       message:
-          'Você está chegando no limite de IA. Enterprise dá 600/mês + landing e loja.',
+          'Você está chegando no limite de IA. No Enterprise são '
+          '${PlanoIaLimits.enterprise} usos por mês, com a sua página de vendas.',
     ),
     PaywallUpgradeTrigger(
       number: '07',
-      title: 'Acessa landing page (padrão Focux)',
+      title: 'Acessa a página de vendas',
       transition: 'PRO → ENTERPRISE',
       message:
-          'Sua landing está no padrão Focux. No Enterprise você libera depoimentos, galeria e FAQ.',
+          'No Enterprise, sua página de vendas ganha depoimentos, fotos e perguntas, e vende seus planos com PIX.',
     ),
     PaywallUpgradeTrigger(
       number: '08',
       title: 'Tráfego pago / anúncio no Meta',
       transition: 'PRO → ENTERPRISE',
       message:
-          'Investe em tráfego mas manda para página genérica? Landing que converte lead 24h/dia.',
+          'Investe em anúncio? No Enterprise, sua página de vendas recebe interessados a qualquer hora.',
     ),
   ];
 }

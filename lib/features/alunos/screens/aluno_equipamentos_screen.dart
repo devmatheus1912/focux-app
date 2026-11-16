@@ -104,7 +104,7 @@ class _AlunoEquipamentosScreenState
       tips: const [
         FxHelpTip(
           'Qualquer ou só o que tem',
-          'Com "Só o que o aluno tem", as substituições do copiloto usam só o que estiver marcado.',
+          'Com "Só o que o aluno tem", as substituições da IA Focux usam só o que estiver marcado.',
           icon: FxIcons.treino,
         ),
         FxHelpTip(
