@@ -828,11 +828,30 @@ class _VideoPlayerState extends State<_VideoPlayer> {
     }
     final controller = _ctrl;
     if (controller == null) return const SizedBox.shrink();
-    // Play sobre o próprio vídeo (toque em qualquer ponto alterna).
+    // Play sobre o próprio vídeo (toque em qualquer ponto alterna). Proporção
+    // do vídeo com teto de altura: gravado em pé não passa da tela.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final caixa = fxVideoCaixa(
+          largura: constraints.maxWidth,
+          alturaTela: MediaQuery.sizeOf(context).height,
+          aspectRatio: controller.value.aspectRatio,
+        );
+        return Center(
+          child: SizedBox(
+            width: caixa.width,
+            height: caixa.height,
+            child: _videoTocavel(controller),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _videoTocavel(VideoPlayerController controller) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
-      child: AspectRatio(
-        aspectRatio: controller.value.aspectRatio,
+      child: SizedBox.expand(
         child: ValueListenableBuilder<VideoPlayerValue>(
           valueListenable: controller,
           builder: (context, value, _) {

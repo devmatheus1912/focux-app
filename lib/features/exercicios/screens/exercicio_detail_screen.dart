@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../core/widgets/fx_video_rede.dart' show cloudinaryH264VideoUrl;
+import '../../../core/widgets/fx_video_rede.dart'
+    show cloudinaryH264VideoUrl, fxVideoCaixa;
 import 'package:go_router/go_router.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/analytics/analytics_service.dart';

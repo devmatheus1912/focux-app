@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
@@ -22,8 +24,28 @@ String cloudinaryH264VideoUrl(String rawUrl) {
   return url.replaceFirst(marker, '${marker}f_mp4,vc_h264/');
 }
 
-/// Vídeo de rede em 16:9, dentro da tela: carregando, tocar/pausar com um
-/// toque e, se não carregar, "Abrir fora do app" ([onAbrirFora]).
+/// Quanto da altura da tela um vídeo pode ocupar. Vídeo deitado (16:9) já
+/// cabe na largura; vídeo em pé (gravado no celular) cresce até aqui.
+const double fxVideoMaxFracaoTela = 0.5;
+
+/// Caixa de um vídeo com a proporção dele: largura disponível, teto de
+/// altura ([fxVideoMaxFracaoTela] da tela e [alturaMax] do pai). Vídeo em pé
+/// não encolhe numa caixa 16:9 nem passa da tela; sem proporção, 16:9.
+Size fxVideoCaixa({
+  required double largura,
+  required double alturaTela,
+  required double aspectRatio,
+  double alturaMax = double.infinity,
+}) {
+  final proporcao = aspectRatio > 0 ? aspectRatio : 16 / 9;
+  final teto = math.min(alturaTela * fxVideoMaxFracaoTela, alturaMax);
+  final altura = math.min(largura / proporcao, teto);
+  return Size(math.min(largura, altura * proporcao), altura);
+}
+
+/// Vídeo de rede na proporção dele ([fxVideoCaixa]), dentro da tela:
+/// carregando, tocar/pausar com um toque e, se não carregar, "Abrir fora do
+/// app" ([onAbrirFora]).
 class FxVideoRede extends StatefulWidget {
   const FxVideoRede({
     super.key,
@@ -115,11 +137,37 @@ class _FxVideoRedeState extends State<FxVideoRede> {
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final c = _controller;
     final tocando = c?.value.isPlaying ?? false;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final caixa = fxVideoCaixa(
+          largura: constraints.maxWidth,
+          alturaTela: MediaQuery.sizeOf(context).height,
+          aspectRatio: _ready && c != null ? c.value.aspectRatio : 16 / 9,
+          alturaMax: constraints.maxHeight,
+        );
+        return Center(
+          child: SizedBox(
+            key: const ValueKey('fx-video-caixa'),
+            width: caixa.width,
+            height: caixa.height,
+            child: _caixa(context, isDark, mute, c, tocando),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _caixa(
+    BuildContext context,
+    bool isDark,
+    Color mute,
+    VideoPlayerController? c,
+    bool tocando,
+  ) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(TokensStrip.rCard),
       clipBehavior: Clip.hardEdge,
-      child: AspectRatio(
-        aspectRatio: 16 / 9,
+      child: SizedBox.expand(
         child: ColoredBox(
           color: isDark ? TokensStrip.cinematicSurface : TokensStrip.cardBg,
           child:
