@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 /// Integra com o app Saúde (iOS) e o Health Connect (Android).
 ///
-/// Lê: passos, FC (média e em repouso), HRV, energia ativa e sono.
+/// Lê: passos, FC (média e em repouso), energia ativa, sono e, só no iPhone, HRV.
 /// Data is cached locally and optionally sent to the backend.
 class HealthService {
   HealthService._();
@@ -26,11 +26,10 @@ class HealthService {
     // SLEEP_ASLEEP sozinho é só o "dormindo, sem fase" e chega vazio.
     ...tiposDeSonoDormido,
     HealthDataType.RESTING_HEART_RATE,
-    // O mesmo conceito tem tipos diferentes por plataforma.
+    // HRV só no iPhone (SDNN). No Android o Google Play recusou o RMSSD por
+    // escopo mínimo (17/11/2026): a nota funciona com sono e FC em repouso.
     if (defaultTargetPlatform == TargetPlatform.iOS)
-      HealthDataType.HEART_RATE_VARIABILITY_SDNN
-    else
-      HealthDataType.HEART_RATE_VARIABILITY_RMSSD,
+      HealthDataType.HEART_RATE_VARIABILITY_SDNN,
   ];
 
   static final _permissions = _types.map((_) => HealthDataAccess.READ).toList();
@@ -191,7 +190,6 @@ class HealthService {
           restingCount++;
           break;
         case HealthDataType.HEART_RATE_VARIABILITY_SDNN:
-        case HealthDataType.HEART_RATE_VARIABILITY_RMSSD:
           hrvTotal += value;
           hrvCount++;
           break;
