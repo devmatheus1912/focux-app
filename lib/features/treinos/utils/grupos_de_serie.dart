@@ -1,3 +1,4 @@
+import 'prescricao_atalhos.dart';
 import 'prescricao_serie.dart';
 
 /// Papel de uma série. Só Válida e Back-off contam em volume e parcial.
@@ -132,6 +133,14 @@ List<SeriePrescrita> desagruparSeries(List<GrupoDeSeries> grupos) {
 
 /// Grupo novo com valores sugeridos. Back-off: 2 séries (ou menos, se as
 /// válidas forem menos), mesmas reps, 80% da carga arredondada para 0,5 kg.
+/// Repetições de um toque por papel do grupo; o resto vai pelo "Outro".
+/// Back-off usa os atalhos das válidas do bloco.
+List<String> atalhosDoGrupo(String papel, String bloco) => switch (papel) {
+  PapelDaSerie.aquecimento => const ['15', '12', '10', '8'],
+  PapelDaSerie.ajuste => const ['5', '3', '2', '1'],
+  _ => atalhosRepeticoes(bloco),
+};
+
 GrupoDeSeries grupoSugerido(
   String papel, {
   required int seriesValidas,
@@ -142,13 +151,13 @@ GrupoDeSeries grupoSugerido(
   PapelDaSerie.aquecimento => const GrupoDeSeries(
     papel: PapelDaSerie.aquecimento,
     series: 2,
-    repeticoes: '10-15',
+    repeticoes: '12',
     descansoSegundos: 60,
   ),
   PapelDaSerie.ajuste => const GrupoDeSeries(
     papel: PapelDaSerie.ajuste,
     series: 1,
-    repeticoes: '4-6',
+    repeticoes: '3',
     descansoSegundos: 90,
   ),
   _ => GrupoDeSeries(

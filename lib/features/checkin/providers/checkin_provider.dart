@@ -6,6 +6,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/utils/aluno360_client_cache.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../../evolucao/utils/evolucao_home_client_cache.dart';
+import '../data/checkin_offline.dart';
 import '../data/checkin_repository.dart';
 import '../utils/checkin_series_fila.dart';
 import '../models/checkin_personal_home.dart';
@@ -54,3 +55,9 @@ final checkinPersonalHomeProvider = FutureProvider<CheckinPersonalHomeBundle>((
   ref.watch(sessaoProvider);
   return ref.read(checkinRepositoryProvider).personalHome();
 });
+
+/// Pacote da semana no aparelho e, no Wi-Fi, vídeos do próximo treino
+/// (SPEC-checkin-offline). A aba Treinos chama ao abrir.
+final guardarParaSemInternetProvider = Provider<Future<void> Function()>(
+  (ref) => () => guardarParaSemInternet(ref.read(checkinRepositoryProvider)),
+);

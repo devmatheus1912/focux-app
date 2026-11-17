@@ -22,24 +22,18 @@ void main() {
     expect(screen, contains('fxScreenA11yScope'));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, contains('friendlyError'));
-    expect(screen, contains('_loading'));
     expect(screen, contains('CheckinPreparandoView'));
     expect(screen, contains('CheckinIniciarErroView'));
     expect(screen, contains('showFxExecutionLeaveSheet'));
     expect(screen, contains('FxExecutionKeepAwake'));
     expect(screen, contains('FxExecutionPopGuard'));
-    expect(screen, contains('_sair'));
-    expect(screen, contains('_abrirFila'));
     expect(screen, contains('onTrocar:'));
-    expect(screen, contains('_currentExercise'));
     expect(screen, contains('useMesh: false'));
     expect(screen, contains('scaffoldBackgroundColor'));
     expect(screen, contains('ColoredBox'));
     expect(screen, contains('showCheckinSerieDetalhe'));
     expect(screen, contains('CheckinRascunhos'));
     expect(screen, contains('CheckinRestFocusView'));
-    expect(screen, contains('_registrarSerieRapida'));
-    expect(screen, contains('_abrirMais'));
     expect(screen, contains('selectedId:'));
     expect(screen, isNot(contains('ListView(')));
     expect(screen, isNot(contains('SkeletonList')));
@@ -105,6 +99,26 @@ void main() {
     }
   });
 
+  // Auditoria de arquitetura 16/11/2026 (A2/A5): a tela fala só com a
+  // sessão (CheckinSessao); nomes privados da tela não são contrato.
+  test('tela da execução passa pela sessão, não pelo repositório', () {
+    final partes = [
+      for (final f in Directory('lib/features/checkin/screens').listSync())
+        if (f is File && f.path.replaceAll(r'\', '/').contains('/checkin_screen'))
+          f.readAsStringSync(),
+    ].join('\n');
+    expect(partes, isNot(contains('_repo.')));
+    expect(partes, isNot(contains('checkinRegistrarSerie(')));
+    expect(partes, isNot(contains('checkinEnvioPelo(')));
+    final sessao = _src('lib/features/checkin/utils/checkin_sessao.dart');
+    for (final comando in [
+      'iniciar(', 'sincronizar(', 'registrarSerie(', 'desfazerSerie(',
+      'confirmarRestante(', 'concluir(', 'descartar(', 'jaFiz(',
+    ]) {
+      expect(sessao, contains(comando));
+    }
+  });
+
   test('fila offline, finalizar e descanso vivem fora do layout', () {
     final screen = _src(screenPath);
     expect(screen, contains('checkinFilaSyncProvider'));
@@ -117,7 +131,6 @@ void main() {
       File('lib/main.dart').readAsStringSync(),
       contains('CheckinFilaSyncScope('),
     );
-    expect(screen, contains('_filaLimpa'));
     expect(screen, contains('checkinExerciciosFaltando'));
     expect(screen, contains('showCheckinFinalizarIncompleto'));
     expect(screen, contains('CheckinDescansoRelogio'));

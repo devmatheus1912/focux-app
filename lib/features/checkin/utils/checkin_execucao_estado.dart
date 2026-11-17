@@ -84,6 +84,7 @@ ExecucaoTreino checkinComExercicio(
     evolucoesCarga: treino.evolucoesCarga,
     evolucoesPerformance: treino.evolucoesPerformance,
     exerciciosCount: treino.exerciciosCount,
+    origem: treino.origem,
     exercicios: [
       for (final e in treino.exercicios) e.id == atualizado.id ? atualizado : e,
     ],

@@ -1,7 +1,7 @@
 import '../data/aluno_repository.dart';
 import 'aluno_status.dart';
 
-enum Aluno360MenuAcao { editar, criarTarefa, reenviarLink, status, excluir }
+enum Aluno360MenuAcao { treinarAgora, editar, criarTarefa, reenviarLink, status, excluir }
 
 /// Em qual grupo da folha do ⋮ a linha aparece.
 enum Aluno360MenuGrupo { cadastro, acesso, perigo }
@@ -17,6 +17,7 @@ class Aluno360MenuItem {
       acao == Aluno360MenuAcao.excluir || novoStatus == AlunoStatus.bloqueado;
 
   Aluno360MenuGrupo get grupo => switch (acao) {
+    Aluno360MenuAcao.treinarAgora ||
     Aluno360MenuAcao.editar ||
     Aluno360MenuAcao.criarTarefa => Aluno360MenuGrupo.cadastro,
     Aluno360MenuAcao.reenviarLink => Aluno360MenuGrupo.acesso,
@@ -41,6 +42,8 @@ class Aluno360MenuItem {
 List<Aluno360MenuItem> aluno360MenuItens(Aluno aluno) {
   final status = alunoStatusAcoesDisponiveis(aluno.status);
   return [
+    // Modo presencial: o personal conduz o treino no aparelho dele.
+    const Aluno360MenuItem(Aluno360MenuAcao.treinarAgora),
     const Aluno360MenuItem(Aluno360MenuAcao.editar),
     const Aluno360MenuItem(Aluno360MenuAcao.criarTarefa),
     const Aluno360MenuItem(Aluno360MenuAcao.reenviarLink),

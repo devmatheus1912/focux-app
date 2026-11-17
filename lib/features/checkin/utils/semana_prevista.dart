@@ -31,15 +31,8 @@ Map<int, String> nomesPrevistosDaSemana({
 
 /// Posição na fila logo depois do último treino concluído (0 sem histórico).
 int _depoisDoUltimo(List<RotinaItem> fila, List<ExecucaoTreino> historico) {
-  (int, DateTime)? ultimo;
-  for (final item in historico) {
-    if (normalizeTreinoStatus(item.status) != treinoStatusConcluido) continue;
-    final raw = item.concluidoEm ?? item.iniciadoEm;
-    final quando = raw == null ? null : DateTime.tryParse(raw)?.toLocal();
-    if (quando == null) continue;
-    if (ultimo == null || quando.isAfter(ultimo.$2)) ultimo = (item.treinoId, quando);
-  }
+  final ultimo = ultimoTreinoConcluido(historico);
   if (ultimo == null) return 0;
-  final idx = fila.indexWhere((item) => item.treinoId == ultimo!.$1);
+  final idx = fila.indexWhere((item) => item.treinoId == ultimo.$1.treinoId);
   return idx < 0 ? 0 : idx + 1;
 }

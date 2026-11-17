@@ -1,6 +1,8 @@
 import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
+import '../media/fx_economia_de_dados.dart';
+import '../../features/checkin/data/checkin_offline.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -72,6 +74,8 @@ class SessionInvalidator {
         LocalCache.clearAll,
         OfflineSyncService.clearQueue,
         CheckinSeriesPendentesStore.limpar,
+        CheckinSessoesLocaisStore.limpar,
+        _clearVideoCache,
         _clearSessionPrefs,
         MigracaoMagicaDraftCache.clear,
         AnamneseRascunhoStore.limpar,
@@ -94,6 +98,12 @@ class SessionInvalidator {
     PaintingBinding.instance.imageCache.clearLiveImages();
     if (!limparCacheDeImagensEmDisco) return;
     await DefaultCacheManager().emptyCache();
+  }
+
+  /// Vídeos de exercício guardados para economizar dados (mesma regra das imagens).
+  static Future<void> _clearVideoCache() async {
+    if (!limparCacheDeImagensEmDisco) return;
+    await FxEconomiaDeDados.limpar();
   }
 
   /// Só testes: o gerenciador de cache em disco precisa de plugin nativo (path_provider).

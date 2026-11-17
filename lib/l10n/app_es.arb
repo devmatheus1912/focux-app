@@ -95,7 +95,6 @@
   "referralRewardHeadline": "{dias} días extra en tu plan por cada recomendado que se suscriba",
   "referralDiscountLine": "Quien se registre con tu código obtiene {pct}% de descuento en el primer cobro",
   "referralCampaignInactive": "Campaña pausada. Tu código sigue funcionando en el registro, pero las nuevas recomendaciones no generan recompensa por ahora.",
-  "referralCampaignInactiveShort": "Campaña pausada",
   "referralCopyInvite": "Copiar invitación",
   "referralCopyLinkOnly": "Solo el enlace",
   "referralInviteCopied": "Invitación copiada. Sale del portapapeles en 1 min.",

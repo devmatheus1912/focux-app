@@ -8,6 +8,8 @@ import '../utils/checkin_json.dart';
 import '../utils/checkin_serie_input.dart';
 
 export '../models/checkin_execucao_models.dart';
+export 'checkin_rotas_api.dart';
+import 'checkin_rotas_api.dart';
 
 Map<String, dynamic> _requireJsonMap(dynamic data, String endpoint) =>
     checkinRequireEntityJson(data, endpoint);
@@ -15,7 +17,16 @@ Map<String, dynamic> _requireJsonMap(dynamic data, String endpoint) =>
 class CheckinRepository {
   final Dio _dio;
 
-  CheckinRepository(ApiClient client) : _dio = client.dio;
+  /// Aluno no app ou personal no presencial; os caminhos saem dele.
+  final CanalDoCheckin canal;
+
+  CheckinRepository(ApiClient client, {this.canal = const CanalDoAluno()}) : _dio = client.dio;
+
+  CheckinRepository._(this._dio, this.canal);
+
+  /// O mesmo repositório falando por outro canal.
+  CheckinRepository comCanal(CanalDoCheckin outro) =>
+      outro == canal ? this : CheckinRepository._(_dio, outro);
 
   Future<TreinoPrevia> previa(int treinoId) async {
     final r = await _dio.get('/api/checkin/treinos/$treinoId/previa');
@@ -25,10 +36,7 @@ class CheckinRepository {
   }
 
   Future<ExecucaoTreino> iniciar(int treinoId) async {
-    final r = await _dio.post(
-      '/api/checkin/iniciar',
-      data: {'treinoId': treinoId},
-    );
+    final r = await _dio.post(canal.iniciar(), data: canal.corpoDoTreino(treinoId));
     return ExecucaoTreino.fromJson(
       _requireJsonMap(r.data, 'POST /api/checkin/iniciar'),
     );
@@ -43,7 +51,7 @@ class CheckinRepository {
     bool? dor,
   }) async {
     final r = await _dio.put(
-      '/api/checkin/$execucaoId/exercicio/$treinoExercicioId',
+      canal.exercicio(execucaoId, treinoExercicioId),
       data: {
         'seriesFeitas': seriesFeitas,
         if (feedback != null) 'feedback': feedback,
@@ -68,14 +76,9 @@ class CheckinRepository {
     String? feedback,
     int? rpe,
     bool? dor,
-    int? presencialAlunoId,
   }) async {
-    final path =
-        presencialAlunoId != null
-            ? '/api/checkin/personal/$execucaoId/exercicio/$treinoExercicioId/series'
-            : '/api/checkin/$execucaoId/exercicio/$treinoExercicioId/series';
     final r = await _dio.post(
-      path,
+      canal.serie(execucaoId, treinoExercicioId),
       data: {
         'numero': numero,
         if (cargaKg != null) 'cargaKg': cargaKg,
@@ -101,7 +104,7 @@ class CheckinRepository {
     List<CheckinSerieRestante> series = const [],
   }) async {
     final r = await _dio.post(
-      '/api/checkin/$execucaoId/exercicio/$treinoExercicioId/confirmar-restante',
+      canal.confirmarRestante(execucaoId, treinoExercicioId),
       data: {
         'series': [
           for (final s in series)
@@ -122,31 +125,27 @@ class CheckinRepository {
   }
 
   Future<ExecucaoTreino> confirmarPlano(int treinoId) async {
-    final r = await _dio.post(
-      '/api/checkin/confirmar-plano',
-      data: {'treinoId': treinoId},
-    );
+    final r = await _dio.post(canal.confirmarPlano(), data: canal.corpoDoTreino(treinoId));
     return ExecucaoTreino.fromJson(
       _requireJsonMap(r.data, 'POST /api/checkin/confirmar-plano'),
     );
   }
 
   Future<ExecucaoTreino> descartar(int execucaoId) async {
-    final r = await _dio.put('/api/checkin/$execucaoId/descartar');
+    final r = await _dio.put(canal.descartar(execucaoId));
     return ExecucaoTreino.fromJson(
       _requireJsonMap(r.data, 'PUT /api/checkin/{id}/descartar'),
     );
   }
 
-  Future<ExecucaoTreino> concluir(
-    int execucaoId, {
-    int? presencialAlunoId,
-  }) async {
-    final path =
-        presencialAlunoId != null
-            ? '/api/checkin/personal/$execucaoId/concluir'
-            : '/api/checkin/$execucaoId/concluir';
-    final r = await _dio.put(path);
+  /// [concluidoEm]: o treino acabou sem internet (manda a hora do aparelho).
+  Future<ExecucaoTreino> concluir(int execucaoId, {DateTime? concluidoEm}) async {
+    final r = await _dio.put(
+      canal.concluir(execucaoId),
+      data: concluidoEm == null
+          ? null
+          : {'concluidoEm': concluidoEm.toLocal().toIso8601String().split('.').first},
+    );
     return ExecucaoTreino.fromJson(
       _requireJsonMap(r.data, 'PUT checkin concluir'),
     );
@@ -154,9 +153,7 @@ class CheckinRepository {
 
   /// [doPersonal]: leitura da sessão de um aluno da carteira (linha do tempo).
   Future<ExecucaoTreino> detalhe(int execucaoId, {bool doPersonal = false}) async {
-    final r = await _dio.get(
-      doPersonal ? '/api/checkin/personal/$execucaoId' : '/api/checkin/$execucaoId',
-    );
+    final r = await _dio.get(_leitura(doPersonal).detalhe(execucaoId));
     return ExecucaoTreino.fromJson(
       _requireJsonMap(r.data, 'GET /api/checkin/{id}'),
     );
@@ -166,11 +163,7 @@ class CheckinRepository {
     int execucaoId, {
     bool doPersonal = false,
   }) async {
-    final r = await _dio.get(
-      doPersonal
-          ? '/api/checkin/personal/$execucaoId/evolucao-sessao'
-          : '/api/checkin/$execucaoId/evolucao-sessao',
-    );
+    final r = await _dio.get(_leitura(doPersonal).evolucao(execucaoId));
     return SessaoEvolucaoDto.fromJson(
       _requireJsonMap(r.data, 'GET /api/checkin/{id}/evolucao-sessao'),
     );
@@ -198,6 +191,24 @@ class CheckinRepository {
       );
     }
     return parseExecucaoTreinoPagina(Map<String, dynamic>.from(data));
+  }
+
+  /// Leitura de sessão: o personal lê pelo canal dele (o aluno do presencial
+  /// não importa para o caminho de leitura).
+  CanalDoCheckin _leitura(bool doPersonal) =>
+      doPersonal && canal is CanalDoAluno ? const CanalPresencial(0) : canal;
+
+  /// Os treinos da semana com tudo para a execução sem internet (JSON cru: o
+  /// app guarda como veio).
+  Future<Map<String, dynamic>> pacoteDaSemana() async {
+    final r = await _dio.get('/api/checkin/pacote-da-semana');
+    return _requireJsonMap(r.data, 'GET /api/checkin/pacote-da-semana');
+  }
+
+  /// Sessão feita sem internet, enviada de uma vez (idempotente por clienteId).
+  Future<ExecucaoTreino> sessaoOffline(Map<String, dynamic> corpo) async {
+    final r = await _dio.post('/api/checkin/sessoes-offline', data: corpo);
+    return ExecucaoTreino.fromJson(_requireJsonMap(r.data, 'POST /api/checkin/sessoes-offline'));
   }
 
   static const personalHomePageSize = 20;

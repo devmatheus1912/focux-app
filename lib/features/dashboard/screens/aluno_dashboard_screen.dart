@@ -42,7 +42,7 @@ import '../widgets/aluno_home_skeleton.dart';
 import '../widgets/aluno_proximos_passos.dart';
 import '../widgets/aluno_today_focus_card.dart';
 import '../../checkin/widgets/checkin_resumo_view.dart' show checkinResumoAberto;
-import '../../checkin/utils/treinos_hub_view.dart' show sessaoAntigaAberta;
+import '../../checkin/utils/treinos_hub_view.dart' show sessaoAntigaAberta, checkinExecutarPath;
 import '../../checkin/widgets/ficha_vigencia_aluno.dart';
 import '../../checkin/widgets/treinos_hoje_acao.dart' show descartarSessaoAberta;
 import '../../checkin/widgets/treinos_hub_rows.dart' show TreinosSessaoAbertaAviso;
@@ -413,10 +413,7 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
           onAction: () {
             if (action.mode == AlunoTodayMode.workoutDone &&
                 action.proximoTreinoId != null) {
-              context.push(
-                '/checkin/executar',
-                extra: action.proximoTreinoId,
-              );
+              context.push(checkinExecutarPath(action.proximoTreinoId!));
               return;
             }
             _openToday(action);
@@ -432,7 +429,7 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
           TokensStrip.s3,
           TreinosSessaoAbertaAviso(
             nome: aberta.treinoNome,
-            onContinuar: () => context.push('/checkin/executar', extra: aberta.treinoId),
+            onContinuar: () => context.push(checkinExecutarPath(aberta.treinoId)),
             onDescartar: () async {
               if (await descartarSessaoAberta(context, ref, aberta) && mounted) {
                 invalidateAlunoDashboardHome(ref);

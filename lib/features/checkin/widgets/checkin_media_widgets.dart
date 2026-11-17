@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
+import '../../../core/media/fx_economia_de_dados.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_cached_network_image.dart';
@@ -10,6 +12,7 @@ import 'package:focux_app/core/widgets/fx_loading.dart';
 import '../../../l10n/app_localizations.dart';
 import '../utils/checkin_execucao_display.dart';
 import '../utils/checkin_video_badge.dart';
+import 'checkin_video_sob_pedido.dart';
 import '../../../core/theme/fx_icons.dart';
 
 /// Preferred preview height for thumbnails / loading, capped by screen.
@@ -184,6 +187,9 @@ class _CheckinExerciseVideoPreviewState
   bool _playing = false;
   int _loadGeneration = 0;
 
+  /// Dado móvel com economia ligada: o vídeo espera o aluno pedir.
+  bool _esperandoPedido = false;
+
   @override
   void initState() {
     super.initState();
@@ -207,7 +213,7 @@ class _CheckinExerciseVideoPreviewState
     await controller.dispose();
   }
 
-  Future<void> _load(String url) async {
+  Future<void> _load(String url, {bool pedido = false}) async {
     final generation = ++_loadGeneration;
     // Drop any published controller before starting a new load.
     final previous = _controller;
@@ -219,10 +225,23 @@ class _CheckinExerciseVideoPreviewState
       _ready = false;
       _failed = false;
       _playing = false;
+      _esperandoPedido = false;
     });
 
+    // Economia de dados: do aparelho quando já foi visto; da rede só no Wi-Fi
+    // ou quando o aluno pede (SPEC-checkin-offline 3.3).
+    final arquivo = await FxEconomiaDeDados.noAparelho(url);
+    if (!mounted || generation != _loadGeneration) return;
+    if (arquivo == null && !pedido && !await FxEconomiaDeDados.podeTocarSozinho()) {
+      if (mounted && generation == _loadGeneration) setState(() => _esperandoPedido = true);
+      return;
+    }
+    if (arquivo == null) unawaited(FxEconomiaDeDados.cache.downloadFile(url).then((_) {}, onError: (_) {}));
+
     // Keep the controller local until ready so cancel/error always owns cleanup.
-    final controller = VideoPlayerController.networkUrl(Uri.parse(url));
+    final controller = arquivo != null
+        ? VideoPlayerController.file(arquivo)
+        : VideoPlayerController.networkUrl(Uri.parse(url));
     controller.addListener(_onVideoTick);
 
     try {
@@ -288,6 +307,13 @@ class _CheckinExerciseVideoPreviewState
   Widget build(BuildContext context) {
     if (_failed) {
       return CheckinVideoFallback(brand: widget.brand, dark: widget.dark);
+    }
+    if (_esperandoPedido) {
+      return CheckinVideoSobPedido(
+        brand: widget.brand,
+        dark: widget.dark,
+        onVer: () => _load(widget.url, pedido: true),
+      );
     }
     final controller = _controller;
     if (!_ready || controller == null) {
@@ -432,46 +458,6 @@ class _CheckinMediaBadge extends StatelessWidget {
             style: const TextStyle(
               color: Colors.white,
               fontSize: TokensStrip.fontMinimo,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class CheckinVideoFallback extends StatelessWidget {
-  final Color brand;
-  final bool dark;
-
-  const CheckinVideoFallback({
-    super.key,
-    required this.brand,
-    required this.dark,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 118,
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: dark ? EagleTokens.darkCardHi : TokensStrip.borderDefault,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: brand.withValues(alpha: 0.26)),
-      ),
-      alignment: Alignment.center,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(FxIcons.playCirculo, color: brand, size: 34),
-          const SizedBox(height: 6),
-          Text(
-            S.of(context).checkinMidiaVideoPersonal,
-            style: TextStyle(
-              color: brand,
-              fontSize: TokensStrip.fontRotulo,
               fontWeight: FontWeight.w700,
             ),
           ),

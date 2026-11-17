@@ -1,5 +1,7 @@
 import '../../exercicios/data/exercicio_taxonomy_labels.dart';
 import '../data/treino_repository.dart';
+import '../models/metodo_exercicio.dart';
+import '../utils/grupos_de_serie.dart';
 import '../utils/prescricao_serie.dart';
 import '../../../core/utils/pt_br_display.dart';
 
@@ -33,9 +35,25 @@ int treinoDetailSeriesCount(List<TreinoExercicioItem> items) =>
 int treinoDetailGroupCount(List<TreinoExercicioItem> items) =>
     items.map(treinoDetailGroupLabel).toSet().length;
 
-/// Prescrição numa linha — o que o personal precisa escanear.
+/// Prescrição numa linha — o que o personal precisa escanear. Termina no
+/// método ("Drop-set na última", "Pirâmide ↓", "Pico 2 s"): sem ele o personal
+/// não via se a técnica tinha sido salva.
 String treinoDetailExerciseLine(TreinoExercicioItem te) {
+  final base = _linhaDaPrescricao(te);
+  final metodo = resumoDoMetodo(te);
+  return metodo.isEmpty ? base : '$base · $metodo';
+}
+
+String _linhaDaPrescricao(TreinoExercicioItem te) {
   if (te.seriesLinhas.isNotEmpty) {
+    final validas = te.seriesLinhas.where((l) => l.papel == PapelDaSerie.valida).toList();
+    final soValidas = validas.length == te.seriesLinhas.length;
+    // Pirâmide só de válidas: "4 séries · 15 → 9 · 60 s".
+    if (te.metodo.piramide && soValidas && validas.length > 1 &&
+        validas.first.repeticoes != validas.last.repeticoes) {
+      return '${validas.length} séries · ${validas.first.repeticoes} → '
+          '${validas.last.repeticoes} · ${te.descansoSegundos ?? 75} s';
+    }
     return resumoSeries(
       te.seriesLinhas,
       descansoSegundos: te.descansoSegundos ?? 75,
@@ -48,8 +66,25 @@ String treinoDetailExerciseLine(TreinoExercicioItem te) {
   if (te.tipoSerie == 'SUPERSET') {
     final grupo = te.grupoSuperset;
     parts.add(grupo == null ? 'SS' : 'SS$grupo');
-  } else if (te.tipoSerie == 'DROPSET') {
-    parts.add('drop');
   }
   return parts.join(' · ');
+}
+
+/// "Pirâmide ↑ · Drop-set na última", "Pico 2 s", "Rest-pause em 2 séries".
+String resumoDoMetodo(TreinoExercicioItem te) {
+  final m = te.metodo;
+  final partes = <String>[
+    if (m.piramide) rotuloDaProgressao(m.progressao),
+    if (m.tecnica != Tecnica.normal) rotuloCurtoDaTecnica(m.tecnica, m) + _ondeVale(te),
+  ];
+  return partes.join(' · ');
+}
+
+String _ondeVale(TreinoExercicioItem te) {
+  final validas = te.seriesLinhas.where((l) => l.papel == PapelDaSerie.valida).toList();
+  if (validas.length < 2) return '';
+  final marcadas = [for (var i = 0; i < validas.length; i++) if (validas[i].tecnica != null) i];
+  if (marcadas.isEmpty || marcadas.length == validas.length) return '';
+  if (marcadas.length == 1 && marcadas.single == validas.length - 1) return ' na última';
+  return marcadas.length == 1 ? ' em 1 série' : ' em ${marcadas.length} séries';
 }

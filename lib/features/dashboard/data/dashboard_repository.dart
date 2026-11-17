@@ -1,3 +1,6 @@
+import '../../../core/cache/offline_cache.dart';
+import '../../../core/api/transient_error.dart';
+import 'dart:async';
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/api/api_etag_store.dart';
@@ -306,10 +309,25 @@ class DashboardRepository {
 
   /// `null` = HTTP 304 com body no ClientCache — caller reusa cache.
   /// 304 órfão (sem body): limpa ETag, retry 1× sem If-None-Match, devolve 200.
+  /// Sem internet, a Hoje e a aba Treinos do aluno saem da última Home
+  /// guardada (SPEC-checkin-offline): o treino abre na academia sem sinal.
+  static const alunoHomeOfflineKey = 'aluno_home_offline';
+
   Future<AlunoDashboardHomeBundle?> getAlunoHome() async {
     alunoDashboardHomeClientCache.hasBody;
-    final response = await _dio.get(alunoDashboardHomeClientCache.etagPath);
+    final Response<dynamic> response;
+    try {
+      response = await _dio.get(alunoDashboardHomeClientCache.etagPath);
+    } catch (e) {
+      if (!isTransientApiError(e)) rethrow;
+      final salva = await OfflineCache.get<dynamic>(alunoHomeOfflineKey, ttl: const Duration(days: 7));
+      if (salva == null) rethrow;
+      return _parseAlunoHome(salva);
+    }
     if (response.statusCode != 304) {
+      if (response.data is Map) {
+        unawaited(OfflineCache.put(alunoHomeOfflineKey, response.data, ttl: const Duration(days: 7)).catchError((_) {}));
+      }
       return _parseAlunoHome(response.data);
     }
     if (alunoDashboardHomeClientCache.hasBody) return null;

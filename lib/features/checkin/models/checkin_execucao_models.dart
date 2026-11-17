@@ -35,10 +35,7 @@ class ExecucaoExercicio {
   final bool? dorAnterior;
   final List<ExecucaoSerie> seriesDetalhes;
   final List<ExecucaoSerie> seriesAnteriores;
-  final String? proximaSeriePapel;
 
-  /// Descanso depois da última série feita (o do grupo dela); nulo = o do exercício.
-  final int? descansoAposSerie;
 
   /// Todas as séries prescritas, com papel (grupos de série).
   final List<SeriePrescrita> seriesPrescritas;
@@ -75,8 +72,6 @@ class ExecucaoExercicio {
     this.dorAnterior,
     this.seriesDetalhes = const [],
     this.seriesAnteriores = const [],
-    this.proximaSeriePapel,
-    this.descansoAposSerie,
     this.seriesPrescritas = const [],
     this.proximaCargaKg,
     this.proximaRepeticoes,
@@ -124,8 +119,6 @@ class ExecucaoExercicio {
             checkinJsonMapList(
               j['seriesAnteriores'],
             ).map(ExecucaoSerie.fromJson).toList(),
-        proximaSeriePapel: checkinJsonString(j['proximaSeriePapel']),
-        descansoAposSerie: checkinJsonInt(j['descansoAposSerie']),
         seriesPrescritas: [
           for (final l in (j['seriesPrescritas'] as List?) ?? const [])
             if (checkinJsonMap(l) case final m?) SeriePrescrita.fromJson(m),
@@ -206,8 +199,6 @@ class ExecucaoExercicio {
     dorAnterior: dorAnterior,
     seriesDetalhes: seriesDetalhes ?? this.seriesDetalhes,
     seriesAnteriores: seriesAnteriores,
-    proximaSeriePapel: proximaSeriePapel,
-    descansoAposSerie: descansoAposSerie,
     seriesPrescritas: seriesPrescritas,
     proximaCargaKg: proximaCargaKg,
     proximaRepeticoes: proximaRepeticoes,
@@ -289,6 +280,11 @@ class ExecucaoTreino {
   final int? seriesFeitas;
   final int? seriesPlanejadas;
 
+  /// Nulo = o aluno no app; PRESENCIAL = conduzida pelo personal.
+  final String? origem;
+
+  bool get presencial => origem == 'PRESENCIAL';
+
   ExecucaoTreino({
     this.id,
     required this.treinoId,
@@ -306,6 +302,7 @@ class ExecucaoTreino {
     this.parcial = false,
     this.seriesFeitas,
     this.seriesPlanejadas,
+    this.origem,
   });
 
   int get totalExercicios => exerciciosCount ?? exercicios.length;
@@ -336,6 +333,7 @@ class ExecucaoTreino {
     parcial: j['parcial'] == true,
     seriesFeitas: checkinJsonInt(j['seriesFeitas']),
     seriesPlanejadas: checkinJsonInt(j['seriesPlanejadas']),
+    origem: checkinJsonString(j['origem']),
   );
 
   /// Item slim do BFF `historicoResumo` (sem séries/mídia/evoluções).
@@ -373,6 +371,7 @@ class ExecucaoTreino {
     'parcial': parcial,
     'seriesFeitas': seriesFeitas,
     'seriesPlanejadas': seriesPlanejadas,
+    if (origem != null) 'origem': origem,
   };
 }
 

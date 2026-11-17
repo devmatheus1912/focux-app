@@ -33,9 +33,8 @@ extension _CheckinSaida on _CheckinScreenState {
     switch (escolha) {
       case CheckinSemSeriesEscolha.jaFiz:
         try {
-          await ref
-              .read(checkinRepositoryProvider)
-              .confirmarPlano(widget.treinoId);
+          // Sem internet vira uma sessão local concluída (sobe depois).
+          await _sessao.jaFiz(widget.treinoId);
           checkinTreinoConcluido(modo: 'ja_fiz');
           checkinSessaoMudou(ref);
         } catch (e) {
@@ -50,7 +49,7 @@ extension _CheckinSaida on _CheckinScreenState {
       case CheckinSemSeriesEscolha.descartar:
         if (id != null && !await _descartar(id)) return;
     }
-    if (mounted) safePopOrGo(context, '/checkin/treinos');
+    if (mounted) safePopOrGo(context, _voltarPara);
   }
 
   Future<void> _sair() async {
@@ -74,6 +73,6 @@ extension _CheckinSaida on _CheckinScreenState {
       case FxExecutionLeaveChoice.continuarDepois:
         break;
     }
-    if (mounted) safePopOrGo(context, '/checkin/treinos');
+    if (mounted) safePopOrGo(context, _voltarPara);
   }
 }

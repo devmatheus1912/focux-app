@@ -60,7 +60,7 @@ ExecucaoTreino? proximoTreinoParaHoje({
     }
   }
 
-  final lastDone = _ultimoConcluido(historico)?.$1;
+  final lastDone = ultimoTreinoConcluido(historico)?.$1;
   if (lastDone == null) return startable.first;
 
   final ids = treinos.map((t) => t.treinoId).toList(growable: false);
@@ -79,7 +79,7 @@ ExecucaoTreino? treinoConcluidoHoje(
   List<ExecucaoTreino> historico, {
   DateTime? now,
 }) {
-  final ultimo = _ultimoConcluido(historico);
+  final ultimo = ultimoTreinoConcluido(historico);
   if (ultimo == null) return null;
   final clock = now ?? DateTime.now();
   final (execucao, dt) = ultimo;
@@ -88,7 +88,10 @@ ExecucaoTreino? treinoConcluidoHoje(
   return mesmoDia ? execucao : null;
 }
 
-(ExecucaoTreino, DateTime)? _ultimoConcluido(List<ExecucaoTreino> historico) {
+/// Último treino concluído do histórico e quando (concluído, ou iniciado se
+/// o servidor não mandou a conclusão), na hora local. Única regra de "último
+/// treino" do app: próximo da rotina, semana prevista e "feito hoje".
+(ExecucaoTreino, DateTime)? ultimoTreinoConcluido(List<ExecucaoTreino> historico) {
   (ExecucaoTreino, DateTime)? ultimo;
   for (final h in historico) {
     final dt = _concluidoEmLocal(h);

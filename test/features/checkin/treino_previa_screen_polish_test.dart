@@ -16,7 +16,7 @@ void main() {
     expect(screen, contains('treinoPreviaSituacao('));
     expect(screen, contains('treinoPreviaMostraJaFiz(situacao)'));
     expect(screen, contains("safePopOrGo(context, '/checkin/treinos')"));
-    expect(screen, contains("context.pushReplacement('/checkin/executar'"));
+    expect(screen, contains('context.pushReplacement(checkinExecutarPath('));
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('FxEmptyState'));
     expect(screen, contains('FxErrorState'));

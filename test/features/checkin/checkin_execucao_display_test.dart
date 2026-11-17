@@ -1,5 +1,6 @@
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/features/checkin/utils/serie_de_agora.dart';
 import 'package:focux_app/features/checkin/models/checkin_execucao_models.dart';
 import 'package:focux_app/features/checkin/utils/checkin_execucao_display.dart';
 import 'package:focux_app/l10n/app_localizations_pt.dart';
@@ -103,13 +104,6 @@ void main() {
   test('checkinCargaLabel usa vírgula BR', () {
     expect(checkinCargaLabel(80), '80 kg');
     expect(checkinCargaLabel(7.5), '7,5 kg');
-    expect(checkinRegistrarLabel(s, first: true), 'Registrar série');
-    expect(checkinRegistrarLabel(s, first: false), 'Próxima série');
-    expect(checkinRegistrarLabel(s, first: true, atual: 1, total: 4), 'Registrar série 1 de 4');
-    expect(
-      checkinLinhaDaSerie(s, atual: 1, total: 4, repeticoes: '8-12', descansoSegundos: 75),
-      'Série 1 de 4 · 8-12 reps · 75 s',
-    );
     expect(checkinRestCountdownLabel(45), '0:45');
     expect(checkinRestCountdownLabel(69), '1:09');
     expect(
@@ -158,21 +152,24 @@ void main() {
     );
   });
 
-  group('ultimaVezDoExercicio', () {
+  group('ultimaVezDaSerie', () {
     ExecucaoSerie serie(int n, double? kg, String? reps) =>
         ExecucaoSerie(id: n, numero: n, cargaKg: kg, repeticoes: reps, dor: false);
+    ExecucaoExercicio ee(List<ExecucaoSerie> anteriores, {int feitas = 5}) => ExecucaoExercicio(
+      id: 1, treinoExercicioId: 1, exercicioNome: 'Supino', seriesFeitas: feitas,
+      concluido: false, seriesAnteriores: anteriores);
 
-    test('pega a última série (maior número), com carga e reps', () {
-      final u = ultimaVezDoExercicio([serie(1, 10, '12'), serie(3, 12.5, '8'), serie(2, 12.5, '10')]);
+    test('sem a mesma série na sessão passada, pega a última (maior número)', () {
+      final u = ultimaVezDaSerie(ee([serie(1, 10, '12'), serie(3, 12.5, '8'), serie(2, 12.5, '10')]));
       expect(u?.cargaKg, 12.5);
       expect(u?.reps, 8);
     });
 
     test('sem carga fica só reps; sem nada, nulo', () {
-      expect(ultimaVezDoExercicio([serie(1, null, '15')])?.cargaKg, isNull);
-      expect(ultimaVezDoExercicio([serie(1, null, '15')])?.reps, 15);
-      expect(ultimaVezDoExercicio([serie(1, null, null)]), isNull);
-      expect(ultimaVezDoExercicio(const []), isNull);
+      expect(ultimaVezDaSerie(ee([serie(1, null, '15')]))?.cargaKg, isNull);
+      expect(ultimaVezDaSerie(ee([serie(1, null, '15')]))?.reps, 15);
+      expect(ultimaVezDaSerie(ee([serie(1, null, null)])), isNull);
+      expect(ultimaVezDaSerie(ee(const [])), isNull);
     });
   });
 }

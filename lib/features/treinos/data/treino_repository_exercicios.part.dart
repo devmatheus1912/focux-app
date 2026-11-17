@@ -118,6 +118,9 @@ extension TreinoRepositoryExercicios on TreinoRepository {
     int? tecnicaReducaoPct,
     int? tecnicaPausaS,
     int? tecnicaMiniSeries,
+    String? progressao,
+    int? tecnicaSegundos,
+    int? tecnicaParciais,
   }) async {
     final response = await _dio.patch(
       '/api/treinos/$treinoId/exercicios/$itemId',
@@ -133,6 +136,9 @@ extension TreinoRepositoryExercicios on TreinoRepository {
         if (tecnicaReducaoPct != null) 'tecnicaReducaoPct': tecnicaReducaoPct,
         if (tecnicaPausaS != null) 'tecnicaPausaS': tecnicaPausaS,
         if (tecnicaMiniSeries != null) 'tecnicaMiniSeries': tecnicaMiniSeries,
+        if (progressao != null) 'progressao': progressao,
+        if (tecnicaSegundos != null) 'tecnicaSegundos': tecnicaSegundos,
+        if (tecnicaParciais != null) 'tecnicaParciais': tecnicaParciais,
       },
     );
     return Treino.fromJson(response.data as Map<String, dynamic>);

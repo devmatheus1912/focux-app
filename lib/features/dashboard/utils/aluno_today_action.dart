@@ -4,6 +4,7 @@ import '../../checkin/utils/rotina_decisao.dart';
 import '../../checkin/utils/treino_ficha_status.dart';
 import '../../treinos/models/rotina_fila.dart';
 import '../../treinos/utils/treino_atribuicao_prazo.dart';
+import '../../checkin/utils/treinos_hub_view.dart' show checkinExecutarPath;
 
 /// Ação principal (P0) do card "Hoje" do aluno, em ordem de prioridade.
 /// Mensalidade atrasada não bloqueia treino: é aviso ([AlunoHomeAviso]), não modo.
@@ -113,7 +114,7 @@ AlunoTodayAction resolveAlunoTodayAction({
         normalizeTreinoStatus(proximo.status) == treinoStatusEmAndamento;
     return AlunoTodayAction(
       mode: AlunoTodayMode.workoutReady,
-      route: '/checkin/executar',
+      route: checkinExecutarPath(proximo.treinoId),
       routeExtra: proximo.treinoId,
       treinoNome: proximo.treinoNome,
       exerciseCount: proximo.totalExercicios,
@@ -179,7 +180,7 @@ AlunoTodayAction acaoDaDecisao(RotinaDecisao decisao, {bool comeback = false}) {
   return switch (decisao.momento) {
     RotinaMomento.continuar => AlunoTodayAction(
       mode: AlunoTodayMode.workoutReady,
-      route: '/checkin/executar',
+      route: checkinExecutarPath(foco.treinoId),
       routeExtra: foco.treinoId,
       treinoNome: foco.treinoNome,
       exerciseCount: foco.totalExercicios,
@@ -199,7 +200,7 @@ AlunoTodayAction acaoDaDecisao(RotinaDecisao decisao, {bool comeback = false}) {
     ),
     RotinaMomento.agora => AlunoTodayAction(
       mode: AlunoTodayMode.workoutReady,
-      route: '/checkin/executar',
+      route: checkinExecutarPath(foco.treinoId),
       routeExtra: foco.treinoId,
       treinoNome: foco.treinoNome,
       exerciseCount: foco.totalExercicios,
@@ -211,7 +212,7 @@ AlunoTodayAction acaoDaDecisao(RotinaDecisao decisao, {bool comeback = false}) {
     ),
     RotinaMomento.descansoDia => AlunoTodayAction(
       mode: AlunoTodayMode.descansoHoje,
-      route: '/checkin/executar',
+      route: checkinExecutarPath(foco.treinoId),
       routeExtra: foco.treinoId,
       treinoNome: foco.treinoNome,
       proximoTreinoId: foco.treinoId,

@@ -34,6 +34,7 @@ extension _CheckinDesfazer on _CheckinScreenState {
     setState(() => _rpeEscolhido = rpe);
     final serie = CheckinSeriePendente(
       execucaoId: base.execucaoId,
+      presencialAlunoId: base.presencialAlunoId,
       treinoExercicioId: base.treinoExercicioId,
       numero: base.numero,
       cargaKg: base.cargaKg,
@@ -43,10 +44,8 @@ extension _CheckinDesfazer on _CheckinScreenState {
       dor: base.dor,
     );
     _ultimaEnvio = serie;
-    final r = await checkinRegistrarSerie(
-      serie: serie,
-      store: _CheckinScreenState._fila,
-      enviar: checkinEnvioPelo(_repo),
+    final r = await _sessao.registrarSerie(
+      serie,
       sessaoAtiva: ref.read(checkinSessaoAtivaProvider),
     );
     if (!mounted) return;

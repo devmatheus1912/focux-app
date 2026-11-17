@@ -1,3 +1,4 @@
+import '../../treinos/models/metodo_exercicio.dart';
 import '../../treinos/utils/prescricao_serie.dart';
 import '../utils/checkin_json.dart';
 
@@ -41,7 +42,25 @@ class TreinoPreviaExercicio {
     this.temVideo = false,
     this.videoEmBreve = false,
     this.seriesPrescritas = const [],
+    this.videoUrl,
+    this.videoSource,
+    this.licenseStatus,
+    this.errosComuns,
+    this.contraindicacoes,
+    this.substitutos,
+    this.rpeAlvo,
+    this.metodo = MetodoExercicio.normal,
   });
+
+  /// Para a execução abrir sem internet (pacote da semana).
+  final String? videoUrl;
+  final String? videoSource;
+  final String? licenseStatus;
+  final String? errosComuns;
+  final String? contraindicacoes;
+  final String? substitutos;
+  final int? rpeAlvo;
+  final MetodoExercicio metodo;
 
   final int treinoExercicioId;
   final String exercicioNome;
@@ -78,5 +97,13 @@ class TreinoPreviaExercicio {
           for (final l in (j['seriesPrescritas'] as List?) ?? const [])
             if (checkinJsonMap(l) case final m?) SeriePrescrita.fromJson(m),
         ],
+        videoUrl: checkinJsonString(j['videoUrl']),
+        videoSource: checkinJsonString(j['videoSource']),
+        licenseStatus: checkinJsonString(j['licenseStatus']),
+        errosComuns: checkinJsonString(j['errosComuns']),
+        contraindicacoes: checkinJsonString(j['contraindicacoes']),
+        substitutos: checkinJsonString(j['substitutos']),
+        rpeAlvo: checkinJsonInt(j['rpeAlvo']),
+        metodo: MetodoExercicio.fromJson(checkinJsonMap(j['metodo'])),
       );
 }

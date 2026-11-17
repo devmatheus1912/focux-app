@@ -16,7 +16,7 @@ Future<void> _restaurarPrescricoes(
       cargaKg: o.cargaKg,
       rpeAlvo: o.rpeAlvo,
       observacoes: o.observacoes ?? '',
-      tipoSerie: tecnicaParaApi(o.metodo.tecnica),
+      tipoSerie: tipoSerieParaApi(o.metodo.tecnica, o.metodo.progressao),
     );
     if (o.seriesLinhas.isNotEmpty) {
       await repo.salvarSeries(
@@ -50,7 +50,7 @@ Future<void> _aplicarPresetNoExercicio(
     cargaKg: e.cargaKg,
     rpeAlvo: e.rpeAlvo,
     observacoes: e.observacoes ?? '',
-    tipoSerie: tecnicaParaApi(e.metodo.tecnica),
+    tipoSerie: tipoSerieParaApi(e.metodo.tecnica, e.metodo.progressao),
   );
   await repo.salvarSeries(
     treinoId,

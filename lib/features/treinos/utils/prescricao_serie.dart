@@ -6,6 +6,7 @@ class SeriePrescrita {
     this.cargaKg,
     this.papel = 'VALIDA',
     this.descansoSegundos,
+    this.tecnica,
   });
 
   final int numero;
@@ -16,6 +17,10 @@ class SeriePrescrita {
   /// Descanso depois desta série; nulo = o do exercício.
   final int? descansoSegundos;
 
+  /// Técnica que vale nesta série (DROPSET, PICO…), já resolvida pelo
+  /// backend (PlanoDaSerie); nula = nenhuma. Só válida tem.
+  final String? tecnica;
+
   bool get aquecimento => papel == 'AQUECIMENTO';
 
   SeriePrescrita copyWith({
@@ -23,12 +28,15 @@ class SeriePrescrita {
     double? cargaKg,
     String? papel,
     bool limparCarga = false,
+    String? tecnica,
+    bool limparTecnica = false,
   }) => SeriePrescrita(
     numero: numero,
     repeticoes: repeticoes ?? this.repeticoes,
     cargaKg: limparCarga ? null : (cargaKg ?? this.cargaKg),
     papel: papel ?? this.papel,
     descansoSegundos: descansoSegundos,
+    tecnica: limparTecnica ? null : (tecnica ?? this.tecnica),
   );
 
   factory SeriePrescrita.fromJson(Map<String, dynamic> json) => SeriePrescrita(
@@ -37,6 +45,7 @@ class SeriePrescrita {
     cargaKg: (json['cargaKg'] as num?)?.toDouble(),
     papel: (json['papel'] as String? ?? 'VALIDA').toUpperCase(),
     descansoSegundos: (json['descansoSegundos'] as num?)?.toInt(),
+    tecnica: json['tecnica'] as String?,
   );
 
   Map<String, dynamic> toJson() => {
@@ -45,6 +54,7 @@ class SeriePrescrita {
     if (cargaKg != null) 'cargaKg': cargaKg,
     'papel': papel,
     if (descansoSegundos != null) 'descansoSegundos': descansoSegundos,
+    if (tecnica != null) 'tecnica': tecnica,
   };
 }
 
@@ -83,6 +93,7 @@ extension SeriePrescritaNumero on SeriePrescrita {
     cargaKg: cargaKg,
     papel: papel,
     descansoSegundos: descansoSegundos,
+    tecnica: tecnica,
   );
 }
 

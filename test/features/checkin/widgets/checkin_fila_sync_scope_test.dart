@@ -30,6 +30,12 @@ class _FakeRepo implements CheckinRepository {
   int envios = 0;
 
   @override
+  CanalDoCheckin get canal => const CanalDoAluno();
+
+  @override
+  CheckinRepository comCanal(CanalDoCheckin outro) => this;
+
+  @override
   Future<ExecucaoExercicio> registrarSerie(
     int execucaoId,
     int treinoExercicioId, {
@@ -39,7 +45,6 @@ class _FakeRepo implements CheckinRepository {
     String? feedback,
     int? rpe,
     bool? dor,
-    int? presencialAlunoId,
   }) async {
     envios++;
     final req = RequestOptions(path: '/series');

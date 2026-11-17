@@ -1,3 +1,5 @@
+import '../../../core/navigation/fx_abertura_unica.dart';
+import '../providers/checkin_provider.dart';
 import '../../../core/observability/sentry_performance.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
@@ -36,7 +38,17 @@ class MeusTreinosScreen extends ConsumerStatefulWidget {
 class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
   ({AlunoDashboardHomeBundle home, TreinosHubView view})? _memo;
   Timer? _virada;
-  var _abrindo = false;
+  final _abertura = FxAberturaUnica();
+
+  @override
+  void initState() {
+    super.initState();
+    // Pacote da semana no aparelho (treino sem internet) e, no Wi-Fi, os
+    // vídeos do próximo treino (SPEC-checkin-offline).
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => unawaited(ref.read(guardarParaSemInternetProvider)()),
+    );
+  }
 
   @override
   void dispose() {
@@ -69,32 +81,19 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
     return view;
   }
 
-  /// Execução e prévia mudam a sessão: ao voltar, relê o agregado.
-  Future<void> _executar(ExecucaoTreino treino) async {
-    if (_abrindo) return;
-    _abrindo = true;
-    await context.push('/checkin/executar', extra: treino.treinoId);
-    _abrindo = false;
-    if (mounted) invalidateAlunoDashboardHome(ref);
+  /// Execução e prévia mudam a sessão; ao voltar, o `AtualizaAoVoltarScope`
+  /// relê a aba (o retorno do `push` pode nunca chegar).
+  Future<void> _abrir(String rota, {Object? extra}) async {
+    _abertura.abrir(() => context.push<Object?>(rota, extra: extra));
   }
 
-  /// A prévia abre a execução no lugar dela; ao concluir, o aluno volta ao
-  /// hub, não à prévia do treino que acabou de fazer.
-  Future<void> _abrirPrevia(ExecucaoTreino treino) async {
-    if (_abrindo) return;
-    _abrindo = true;
-    await context.push<bool>(treinoPreviaPath(treino.treinoId));
-    _abrindo = false;
-    if (mounted) invalidateAlunoDashboardHome(ref);
-  }
+  Future<void> _executar(ExecucaoTreino t) => _abrir(checkinExecutarPath(t.treinoId));
 
-  void _abrirFicha(ExecucaoTreino treino) {
-    if (isTreinoAguardandoLiberacao(treino)) {
-      showTreinoPreparacaoSheet(context, treinoNome: treino.treinoNome);
-      return;
-    }
-    _abrirPrevia(treino);
-  }
+  Future<void> _abrirPrevia(ExecucaoTreino t) => _abrir(treinoPreviaPath(t.treinoId));
+
+  void _abrirFicha(ExecucaoTreino treino) => isTreinoAguardandoLiberacao(treino)
+      ? showTreinoPreparacaoSheet(context, ref, treinoNome: treino.treinoNome)
+      : _abrirPrevia(treino);
 
   Future<void> _descartar(ExecucaoTreino aberta, {ExecucaoTreino? depois}) async {
     final ok = await descartarSessaoAberta(context, ref, aberta, depois: depois);

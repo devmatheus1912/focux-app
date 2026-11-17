@@ -34,6 +34,7 @@ import '../widgets/aluno360_detail_evolucao_tab.dart';
 import '../widgets/aluno360_detail_ferramentas_tab.dart';
 import '../widgets/aluno360_resumo_tab.dart';
 import '../widgets/aluno_detail_hero_card.dart';
+import '../../checkin/widgets/treinar_com_aluno_folha.dart';
 import '../widgets/aluno_detail_loading_skeleton.dart';
 import '../../evolucao/providers/evolucao_home_provider.dart'
     show prefetchEvolucaoHome;

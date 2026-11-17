@@ -1,3 +1,4 @@
+import '../data/checkin_offline.dart';
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -24,10 +25,15 @@ class CheckinFilaSync {
       _emVoo ??= _rodada().whenComplete(() => _emVoo = null);
 
   Future<CheckinFilaResultado> _rodada() async {
+    final repo = _ref.read(checkinRepositoryProvider);
     final r = await checkinEnviarFila(
       store: store,
-      enviar: checkinEnvioPelo(_ref.read(checkinRepositoryProvider)),
+      enviar: checkinEnvioPelo(repo),
     );
+    // Treinos feitos sem internet sobem inteiros, com a hora do aparelho.
+    try {
+      await sincronizarSessoesLocais(repo: repo, fila: store);
+    } catch (_) {}
     if (!_rodadas.isClosed) _rodadas.add(r);
     return r;
   }

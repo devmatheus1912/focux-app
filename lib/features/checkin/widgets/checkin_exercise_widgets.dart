@@ -1,4 +1,3 @@
-import '../../treinos/utils/grupos_de_serie.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -19,6 +18,8 @@ import '../../../l10n/app_localizations.dart';
 import '../data/checkin_repository.dart';
 import '../../treinos/models/metodo_exercicio.dart';
 import '../utils/checkin_execucao_display.dart';
+import '../utils/checkin_serie_textos.dart';
+import '../utils/serie_de_agora.dart';
 import '../utils/checkin_execucao_estado.dart';
 import '../utils/checkin_exercise_tips.dart';
 import 'checkin_media_widgets.dart';
@@ -26,6 +27,7 @@ import '../../../core/widgets/fx_video_em_breve.dart';
 import '../../../core/theme/fx_icons.dart';
 
 part 'checkin_serie_steppers.part.dart';
+part 'checkin_serie_cabecalho.part.dart';
 
 /// Exercício atual em três zonas, sem rolagem no caso comum: nome e série sobre
 /// o fundo, mídia no meio e, na base, o único cartão da tela (carga e reps).
@@ -91,6 +93,7 @@ class CheckinSerieCard extends StatelessWidget {
     final emBreve = checkinVideoEmBreve(ee);
     final done = !checkinPodeRegistrar(ee);
 
+    final sa = serieDeAgora(ee);
     final topo = _topo(context, brand: brand);
     final base =
         done
@@ -112,12 +115,15 @@ class CheckinSerieCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  // A série de agora fica onde o aluno registra (SPEC-execucao-serie-atual).
+                  _CabecalhoDaSerie(sa: sa, metodo: ee.metodo, brand: brand),
+                  const SizedBox(height: TokensStrip.s2),
                   if (_chipUltimaVez(context) case final chip?) ...[
                     Align(alignment: Alignment.centerLeft, child: chip),
                     const SizedBox(height: TokensStrip.s2),
                   ],
                   _CheckinSetSteppers(
-                    cargaKg: draftCargaKg ?? ee.proximaCargaKg ?? ee.cargaKg,
+                    cargaKg: draftCargaKg ?? sa.cargaSugerida,
                     reps: draftReps,
                     onPlusCarga: onPlusCarga,
                     onMinusCarga: onMinusCarga,
@@ -179,15 +185,6 @@ class CheckinSerieCard extends StatelessWidget {
                         ? _midia(context, brand: brand, dark: chrome.isDark)
                         : _soDicas(context),
               ),
-              if (proximoNome != null && c.maxHeight >= alturaMinimaDepois) ...[
-                const SizedBox(height: TokensStrip.s2),
-                Text(
-                  checkinTextoDepois(s, ee, proximoNome!),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: FocuxHubTypography.bodyMuted(color: chrome.mute),
-                ),
-              ],
               const SizedBox(height: TokensStrip.s3),
               base,
             ],
@@ -301,40 +298,13 @@ class CheckinSerieCard extends StatelessWidget {
     );
   }
 
-  /// Topo sobre o fundo da tela: nome, a série de agora e as bolinhas.
+  /// Topo sobre o fundo da tela: nome, bolinhas e o que vem depois. A série
+  /// de agora fica no cabeçalho do cartão, junto de onde o aluno registra.
   Widget _topo(BuildContext context, {required Color brand}) {
     final s = S.of(context);
     final chrome = ShellChrome.of(context);
     final dots = _dots(ee);
-    final numero = ee.seriesFeitas + 1;
-    final grupo = checkinPosicaoNoGrupo(ee.seriesPrescritas, numero);
-    final daSerie = ee.seriesPrescritas
-        .where((l) => l.numero == numero)
-        .firstOrNull;
-    final linha = [
-      // Com grupos: "Aquecimento 1 de 2 · 12 reps · 45 s"; o total da sessão
-      // fica na barra de progresso.
-      if (grupo != null)
-        [
-          checkinRotuloDoGrupo(grupo),
-          '${daSerie?.repeticoes ?? ee.repeticoes ?? ''} reps',
-          if ((daSerie?.descansoSegundos ?? ee.descansoSegundos) case final d?
-              when d > 0)
-            '$d s',
-        ].where((t) => !t.startsWith(' ')).join(' · ')
-      else
-        checkinLinhaDaSerie(
-          s,
-          atual: numero,
-          total: ee.series,
-          repeticoes: ee.proximaRepeticoes ?? ee.repeticoes,
-          descansoSegundos: ee.descansoSegundos,
-        ),
-      // O método prescrito: "Bi-set", "Drop-set", "Pirâmide"…
-      if (ee.metodo.combinado) rotuloDoCombinado(ee.metodo.grupoRotulo, 2),
-      if (ee.metodo.tecnica != Tecnica.normal) rotuloDaTecnica(ee.metodo.tecnica),
-    ].where((t) => t.isNotEmpty).join(' · ');
-
+    final depois = proximoNome == null ? null : checkinTextoDepois(s, ee, proximoNome!);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -345,12 +315,17 @@ class CheckinSerieCard extends StatelessWidget {
           style: FocuxHubTypography.cardTitle(color: chrome.ink)
               .copyWith(fontSize: TokensStrip.fontTitulo, height: 1.2),
         ),
-        const SizedBox(height: TokensStrip.s1),
-        Text(linha, style: FocuxHubTypography.bodyMuted(color: chrome.mute)),
         if (dots.isNotEmpty) ...[
           const SizedBox(height: TokensStrip.s2),
           FxSetDots(series: dots, accent: brand),
         ],
+        if (depois != null)
+          Text(
+            depois,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+          ),
       ],
     );
   }
@@ -358,7 +333,7 @@ class CheckinSerieCard extends StatelessWidget {
   /// "Última vez · 40 kg × 10" preenche carga e reps de uma vez.
   Widget? _chipUltimaVez(BuildContext context) {
     final s = S.of(context);
-    final ultima = ultimaVezDoExercicio(ee.seriesAnteriores);
+    final ultima = ultimaVezDaSerie(ee);
     if (ultima == null) return null;
     return FxTonalButton(
       label: s.checkinUltimaVezChip(_resumoUltimaVez(s, ultima)),
@@ -421,18 +396,22 @@ class CheckinSerieCard extends StatelessWidget {
       return null;
     }
 
-    // Aquecimento e ajuste: bolinha menor e vazada (não contam).
-    bool leve(int n) => ee.seriesPrescritas.any(
-      (l) => l.numero == n && !PapelDaSerie.conta(l.papel),
-    );
+    // Rótulo por grupo (A, 1..n, B); aquecimento e ajuste vazados (não contam);
+    // ponto embaixo da série com técnica.
     return [
       for (var n = 1; n <= total; n++)
-        FxSetDot(
-          numero: n,
-          feita: n <= ee.seriesFeitas,
-          detalhe: n <= ee.seriesFeitas ? _detalhe(feita(n)) : null,
-          aquecimento: leve(n),
-        ),
+        if (serieDeAgora(ee, numero: n) case final sa)
+          FxSetDot(
+            numero: n,
+            feita: n <= ee.seriesFeitas,
+            detalhe: n <= ee.seriesFeitas ? _detalhe(feita(n)) : null,
+            aquecimento: !sa.conta,
+            rotulo: sa.rotuloDaBolinha,
+            marca: sa.temTecnica,
+            nome: sa.temTecnica
+                ? '${sa.rotulo.split(' de ').first}, ${rotuloDaTecnica(sa.tecnica).toLowerCase()}'
+                : sa.rotulo.split(' de ').first,
+          ),
     ];
   }
 
@@ -442,7 +421,7 @@ class CheckinSerieCard extends StatelessWidget {
     final cargaCurta = carga?.replaceAll(' kg', '');
     final reps = d.repeticoes?.trim();
     final temReps = reps != null && reps.isNotEmpty;
-    if (cargaCurta != null && temReps) return '$cargaCurta×$reps';
+    if (cargaCurta != null && temReps) return '$cargaCurta kg · $reps';
     return cargaCurta ?? (temReps ? '$reps reps' : null);
   }
 

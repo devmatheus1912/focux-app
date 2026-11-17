@@ -55,7 +55,7 @@ void main() {
         treinos: [_treino(7, 'Treino A')],
       );
       expect(a.mode, AlunoTodayMode.workoutReady);
-      expect(a.route, '/checkin/executar');
+      expect(Uri.parse(a.route).path, '/checkin/executar');
     });
 
     test('treino pronto vira o P0 mesmo sem foto de perfil', () {
@@ -64,7 +64,7 @@ void main() {
         treinos: [_treino(7, 'Treino A', exercicios: 3)],
       );
       expect(a.mode, AlunoTodayMode.workoutReady);
-      expect(a.route, '/checkin/executar');
+      expect(Uri.parse(a.route).path, '/checkin/executar');
       expect(a.routeExtra, 7);
       expect(a.treinoNome, 'Treino A');
       expect(a.exerciseCount, 3);

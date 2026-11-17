@@ -3,13 +3,26 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/alunos/providers/aluno_detail_providers.dart';
 import '../../features/alunos/providers/alunos_provider.dart';
+import '../../features/checkin/providers/historico_provider.dart';
 import '../../features/dashboard/providers/dashboard_provider.dart';
 import '../api/mutacao_recente.dart';
 import 'app_router.dart';
 
 /// Tela que resume dados e precisa buscar de novo ao voltar para ela.
-enum TelaResumo { homePersonal, homeAluno, alunos, aluno }
+/// Política única de "voltou, atualiza": as telas não invalidam na mão depois
+/// de um `push` (o retorno pode nunca chegar, ver `FxAberturaUnica`).
+enum TelaResumo {
+  homePersonal,
+  homeAluno,
+  alunos,
+  aluno,
+  treinosAluno,
+  historicoAluno,
+  sessaoAluno,
+}
 
+/// [alunoId] é o id da rota: o aluno em [TelaResumo.aluno] e a sessão em
+/// [TelaResumo.sessaoAluno].
 ({TelaResumo tela, int? alunoId})? telaResumoDaRota(String caminho) {
   if (caminho == '/dashboard/personal') {
     return (tela: TelaResumo.homePersonal, alunoId: null);
@@ -18,9 +31,19 @@ enum TelaResumo { homePersonal, homeAluno, alunos, aluno }
     return (tela: TelaResumo.homeAluno, alunoId: null);
   }
   if (caminho == '/alunos') return (tela: TelaResumo.alunos, alunoId: null);
+  if (caminho == '/checkin/treinos') {
+    return (tela: TelaResumo.treinosAluno, alunoId: null);
+  }
+  if (caminho == '/checkin/historico') {
+    return (tela: TelaResumo.historicoAluno, alunoId: null);
+  }
   final aluno = RegExp(r'^/alunos/(\d+)$').firstMatch(caminho);
   if (aluno != null) {
     return (tela: TelaResumo.aluno, alunoId: int.parse(aluno.group(1)!));
+  }
+  final sessao = RegExp(r'^/checkin/historico/(\d+)$').firstMatch(caminho);
+  if (sessao != null) {
+    return (tela: TelaResumo.sessaoAluno, alunoId: int.parse(sessao.group(1)!));
   }
   return null;
 }
@@ -111,6 +134,16 @@ class _AtualizaAoVoltarScopeState extends ConsumerState<AtualizaAoVoltarScope>
         invalidateAlunosCaches(ref);
       case TelaResumo.aluno:
         invalidateAluno360Providers(ref, alvo.alunoId!);
+      case TelaResumo.treinosAluno:
+        invalidateAlunoDashboardHome(ref);
+      case TelaResumo.historicoAluno:
+        ref.invalidate(historicoListaProvider);
+      case TelaResumo.sessaoAluno:
+        invalidateAlunoDashboardHome(ref);
+        ref
+          ..invalidate(historicoListaProvider)
+          ..invalidate(historicoDetalheProvider(alvo.alunoId!))
+          ..invalidate(historicoEvolucaoProvider(alvo.alunoId!));
     }
   }
 

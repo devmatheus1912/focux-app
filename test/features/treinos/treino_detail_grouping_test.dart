@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/features/treinos/models/metodo_exercicio.dart';
 import 'package:focux_app/core/utils/pt_br_display.dart';
 import 'package:focux_app/features/exercicios/data/enums.dart';
 import 'package:focux_app/features/exercicios/data/exercicio_repository.dart';
@@ -95,9 +96,10 @@ void main() {
           descansoSegundos: 45,
           ordem: 2,
           tipoSerie: 'DROPSET',
+          metodo: const MetodoExercicio(tecnica: Tecnica.dropset),
         ),
       ),
-      '3 × 12 · 45 s · drop',
+      '3 × 12 · 45 s · Drop-set',
     );
   });
 }

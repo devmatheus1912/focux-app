@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/features/checkin/data/checkin_offline.dart';
 import 'package:focux_app/features/checkin/data/checkin_series_pendentes.dart';
 import 'package:focux_app/features/checkin/widgets/checkin_execucao_estados.dart';
 import 'package:focux_app/features/checkin/widgets/checkin_media_widgets.dart';
@@ -414,7 +415,9 @@ void main() {
       },
     );
 
-    testWidgets('timeout mostra erro e o 2º toque conclui', (tester) async {
+    // Sem rede no concluir (SPEC-checkin-offline): o fim do treino aparece e
+    // a hora fica guardada para mandar quando a rede voltar.
+    testWidgets('timeout guarda o concluir e mostra o fim do treino', (tester) async {
       final repo =
           FakeCheckinRepo(feitas: [3, 3])
             ..erroConcluir = DioException(
@@ -425,16 +428,9 @@ void main() {
 
       await escolherNoMenuMais(tester, 'Finalizar treino');
       await pumpSheet(tester);
-      expect(find.text('Conexão lenta. Verifique sua internet.'), findsOneWidget);
-      expect(find.text('Treino concluído'), findsNothing);
-
-      repo
-        ..erroConcluir = null
-        ..concluirSemEvolucao = true;
-      await escolherNoMenuMais(tester, 'Finalizar treino');
-      await pumpSheet(tester);
-      expect(repo.concluidos, 2);
       expect(find.text('Treino concluído'), findsOneWidget);
+      expect(repo.concluidos, 1);
+      expect((await tester.runAsync(() => const CheckinSessoesLocaisStore().concluirPendentes()))!.keys, [1]);
     });
   });
 

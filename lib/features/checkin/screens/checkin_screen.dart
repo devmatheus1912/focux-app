@@ -22,6 +22,8 @@ import '../data/checkin_series_pendentes.dart';
 import '../providers/checkin_provider.dart';
 import '../services/checkin_descanso_alerta.dart';
 import '../utils/execucao_metodos.dart';
+import '../utils/checkin_serie_textos.dart';
+import '../utils/serie_de_agora.dart';
 import '../widgets/checkin_metodo_folha.dart';
 import '../services/checkin_fila_sync.dart';
 import '../utils/checkin_descanso_relogio.dart';
@@ -45,15 +47,22 @@ import '../widgets/checkin_sessao_aberta_state.dart';
 import '../widgets/checkin_timer_widgets.dart';
 import '../../../core/theme/fx_icons.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
+import '../utils/treinos_hub_view.dart' show checkinExecutarPath;
 
 part 'checkin_screen_carga.part.dart';
 part 'checkin_screen_corpo.part.dart';
 part 'checkin_screen_desfazer.part.dart';
 part 'checkin_screen_saida.part.dart';
+part 'checkin_screen_presencial.part.dart';
+part 'checkin_screen_foco.part.dart';
 
 class CheckinScreen extends ConsumerStatefulWidget {
   final int treinoId;
-  const CheckinScreen({super.key, required this.treinoId});
+
+  /// Modo presencial: o personal conduz o treino deste aluno (canal do personal).
+  final int? presencialAlunoId;
+  final String? alunoNome;
+  const CheckinScreen({super.key, required this.treinoId, this.presencialAlunoId, this.alunoNome});
 
   @override
   ConsumerState<CheckinScreen> createState() => _CheckinScreenState();
@@ -126,7 +135,8 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
 
   DateTime _agora() => ref.read(checkinRelogioProvider)();
 
-  CheckinRepository get _repo => ref.read(checkinRepositoryProvider);
+  CheckinRepository get _repo =>
+      ref.read(checkinRepositoryProvider).comCanal(canalDe(widget.presencialAlunoId));
 
   CheckinSessao get _sessao => CheckinSessao(
     repo: _repo,
@@ -219,22 +229,14 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
     }
   }
 
-  void _desfazer(ExecucaoExercicio ee) => _atualizar(
-    (id) => _repo.marcarExercicio(
-      id,
-      ee.treinoExercicioId,
-      ee.seriesFeitas - 1,
-      feedback: ee.feedback,
-      rpe: ee.rpe,
-      dor: ee.dor,
-    ),
-  );
+  void _desfazer(ExecucaoExercicio ee) =>
+      _atualizar((id) => _sessao.desfazerSerie(id, ee));
 
   void _confirmarRestante(ExecucaoExercicio ee) {
     // O que o aluno vê em cada série é o que grava (bug de 13/11).
     final series = checkinSeriesRestantes(ee, atual: _rascunhos.de(ee));
     _atualizar(
-      (id) => _repo.confirmarRestante(id, ee.treinoExercicioId, series: series),
+      (id) => _sessao.confirmarRestante(id, ee, series),
     );
   }
 
@@ -254,6 +256,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
       CheckinSeriePendente(
         execucaoId: id,
         treinoExercicioId: ee.treinoExercicioId,
+        presencialAlunoId: widget.presencialAlunoId,
         numero: _proximoNumero(ee),
         cargaKg: draft.cargaKg,
         repeticoes: draft.reps == null ? null : '${draft.reps}',
@@ -277,6 +280,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
       CheckinSeriePendente(
         execucaoId: id,
         treinoExercicioId: ee.treinoExercicioId,
+        presencialAlunoId: widget.presencialAlunoId,
         numero: numero,
         cargaKg: payload.cargaKg,
         repeticoes: payload.repeticoes,
@@ -294,10 +298,8 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
     CheckinSeriePendente serie,
   ) async {
     setState(() => _registrando = true);
-    final r = await checkinRegistrarSerie(
-      serie: serie,
-      store: _fila,
-      enviar: checkinEnvioPelo(_repo),
+    final r = await _sessao.registrarSerie(
+      serie,
       sessaoAtiva: ref.read(checkinSessaoAtivaProvider),
     );
     if (!mounted) return;
@@ -327,7 +329,8 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
     _anotarUltimaSerie(ee, serie);
     if (serie.numero > ee.seriesFeitas) {
       // Drop-set e rest-pause: os passos vêm logo depois, sem descanso cheio.
-      final passos = passosDoMetodo(ee.metodo, cargaDaSerie: serie.cargaKg);
+      final feita = serieDeAgora(depois, numero: serie.numero);
+      final passos = passosDoMetodo(ee.metodo, tecnica: feita.tecnica, cargaDaSerie: serie.cargaKg);
       if (passos.isNotEmpty) await mostrarPassosDoMetodo(context, passos);
       if (!mounted) return;
       // Combinado: a volta passa pelos exercícios do grupo e só descansa no último.
@@ -335,7 +338,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
       if (passo.focoId != null) setState(() => _focoTreinoExercicioId = passo.focoId);
       // Descanso do grupo da série que acabou (aquecimento curto, válida longa).
       if (passo.descansar) {
-        _iniciarDescanso(depois.descansoAposSerie ?? depois.descansoSegundos ?? 60);
+        _iniciarDescanso(feita.descanso ?? 60);
       }
     }
   }
@@ -424,41 +427,16 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
       // Mesmo caminho do Concluir (fecha a execução) e o detalhe abre por cima:
       // o pushReplacement direto da execução travou o app no iPhone (FLUTTER-4).
       final router = GoRouter.of(context);
-      safePopOrGo(context, '/checkin/treinos');
+      safePopOrGo(context, _voltarPara);
       if (acao == CheckinResumoAcao.detalhes) {
         await Future<void>.delayed(Duration.zero);
-        router.push(historicoDetalhePath(id));
+        router.push(_detalheDaSessao(id));
       }
     } catch (e) {
       if (mounted) _erro(friendlyError(e));
     } finally {
       if (mounted) setState(() => _concluindo = false);
     }
-  }
-
-  void _applyUpdated(ExecucaoExercicio updated) {
-    if (_execucao == null) return;
-    setState(() {
-      _execucao = checkinComExercicio(_execucao!, updated);
-      if (updated.concluido &&
-          updated.treinoExercicioId == _focoTreinoExercicioId) {
-        _focoTreinoExercicioId = null;
-      }
-    });
-  }
-
-  Future<void> _abrirFila(List<ExecucaoExercicio> exercicios) async {
-    final currentId = _currentExercise(exercicios).treinoExercicioId;
-    final picked = await showCheckinFilaSheet(
-      context,
-      exercicios: exercicios,
-      selectedId: currentId,
-    );
-    if (picked == null || !mounted || picked == currentId) return;
-    setState(() {
-      _descanso.parar();
-      _focoTreinoExercicioId = picked;
-    });
   }
 
   @override
@@ -474,7 +452,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
             onContinuar: _continuarSessaoAberta,
             onDescartar:
                 sessaoAberta.execucaoId == null ? null : _descartarSessaoAberta,
-            onVoltar: () => safePopOrGo(context, '/checkin/treinos'),
+            onVoltar: () => safePopOrGo(context, _voltarPara),
           ),
         ),
       );
@@ -485,7 +463,9 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
         body: CheckinIniciarErroView(
           mensagem: erro,
           onRetry: _iniciar,
-          onVoltar: () => safePopOrGo(context, '/checkin/treinos'),
+          onVoltar: _presencial
+              ? () => safePopOrGo(context, _voltarPara)
+              : () => safePopOrGo(context, '/checkin/treinos'),
         ),
       );
     }

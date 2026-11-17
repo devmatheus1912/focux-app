@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import '../../../core/navigation/fx_abertura_unica.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show ProviderListenable;
@@ -51,7 +52,7 @@ class HistoricoDetalheScreen extends ConsumerStatefulWidget {
 
 class _HistoricoDetalheScreenState
     extends ConsumerState<HistoricoDetalheScreen> {
-  var _abrindo = false;
+  final _abertura = FxAberturaUnica();
 
   void _voltar() => widget.doPersonal
       ? safePopOrGo(context, '/alunos/${widget.alunoIdDoPersonal}')
@@ -62,30 +63,16 @@ class _HistoricoDetalheScreenState
           ? historicoDetalhePersonalProvider(widget.execucaoId)
           : historicoDetalheProvider(widget.execucaoId);
 
-  /// Treinar ou "Já fiz" na prévia mudam a Home e a lista.
-  void _recarregarDependentes() {
-    invalidateAlunoDashboardHome(ref);
-    ref.invalidate(historicoListaProvider);
+  // Treinar de novo e continuar mudam a Home, a lista e esta sessão: ao
+  // voltar, o `AtualizaAoVoltarScope` relê (o retorno pode nunca chegar).
+  void _treinarDeNovo(int treinoId) {
+    _abertura.abrir(() => context.push<bool>(treinoPreviaPath(treinoId)));
   }
 
-  Future<void> _treinarDeNovo(int treinoId) async {
-    if (_abrindo) return;
-    _abrindo = true;
-    // A prévia abre a execução no lugar dela (ver meus_treinos_screen).
-    await context.push<bool>(treinoPreviaPath(treinoId));
-    _abrindo = false;
-    if (mounted) _recarregarDependentes();
-  }
-
-  Future<void> _continuar(int treinoId) async {
-    if (_abrindo) return;
-    _abrindo = true;
-    await context.push('/checkin/executar', extra: treinoId);
-    _abrindo = false;
-    if (!mounted) return;
-    _recarregarDependentes();
-    ref.invalidate(historicoDetalheProvider(widget.execucaoId));
-    ref.invalidate(historicoEvolucaoProvider(widget.execucaoId));
+  void _continuar(int treinoId) {
+    _abertura.abrir(
+      () => context.push<Object?>(checkinExecutarPath(treinoId)),
+    );
   }
 
   Future<void> _refresh() async {

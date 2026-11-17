@@ -32,10 +32,14 @@ double cargaDaQueda(double inicial, int n, int reducaoPct, {double passo = 0.5})
 /// Os passos que vêm logo depois da série, sem descanso cheio entre eles.
 /// Drop-set: uma queda por passo, com a carga já reduzida.
 /// Rest-pause: uma pausa curta e uma mini-série por passo.
+/// Parciais: um passo. Técnicas de tempo não têm passo (a instrução vem antes).
+/// [tecnica] é a da série que acabou ([SerieDeAgora.tecnica]): aquecimento,
+/// back-off e válida sem marca não abrem a folha.
 List<({String titulo, String apoio, int? pausaS})> passosDoMetodo(
   MetodoExercicio metodo, {
+  Tecnica? tecnica,
   double? cargaDaSerie,
-}) => switch (metodo.tecnica) {
+}) => switch (tecnica ?? metodo.tecnica) {
   Tecnica.dropset => [
     for (var n = 1; n <= (metodo.quedas ?? 2); n++)
       (
@@ -53,6 +57,13 @@ List<({String titulo, String apoio, int? pausaS})> passosDoMetodo(
         apoio: 'Mesma carga, o máximo de repetições.',
         pausaS: metodo.pausaS ?? 15,
       ),
+  ],
+  Tecnica.parciais => [
+    (
+      titulo: 'Mais ${metodo.parciais ?? 8} parciais',
+      apoio: 'Sem soltar: meia amplitude, até a falha.',
+      pausaS: null,
+    ),
   ],
   _ => const [],
 };

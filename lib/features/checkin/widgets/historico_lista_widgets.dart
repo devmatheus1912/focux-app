@@ -131,6 +131,7 @@ class HistoricoSessaoRow extends StatelessWidget {
     final nome = recente.execucao.treinoNome;
     final detalhe = treinosRecenteDetalhe(s, recente);
     final parcial = recente.execucao.parcial;
+    final presencial = recente.execucao.presencial;
     final quando = recente.quando;
     return Semantics(
       button: true,
@@ -139,6 +140,7 @@ class HistoricoSessaoRow extends StatelessWidget {
         nome,
         detalhe,
         if (parcial) s.historicoParcial,
+        if (presencial) s.historicoPresencial,
       ].join(', '),
       excludeSemantics: true,
       child: InkWell(
@@ -194,6 +196,11 @@ class HistoricoSessaoRow extends StatelessWidget {
                 if (parcial) ...[
                   const SizedBox(width: TokensStrip.s2),
                   FxStatusPill(label: s.historicoParcial, tone: FxPillTone.warning),
+                ],
+                // Conduzida pelo personal (modo presencial).
+                if (presencial) ...[
+                  const SizedBox(width: TokensStrip.s2),
+                  FxStatusPill(label: s.historicoPresencial, tone: FxPillTone.neutral),
                 ],
                 const SizedBox(width: TokensStrip.s1),
                 Icon(

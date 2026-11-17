@@ -14,6 +14,9 @@ class CheckinSeriePendente {
   final int? rpe;
   final bool dor;
 
+  /// Série do modo presencial: sobe pelo canal do personal ([canalDe]).
+  final int? presencialAlunoId;
+
   const CheckinSeriePendente({
     required this.execucaoId,
     required this.treinoExercicioId,
@@ -23,6 +26,7 @@ class CheckinSeriePendente {
     this.feedback,
     this.rpe,
     this.dor = false,
+    this.presencialAlunoId,
   });
 
   bool mesmaSerie(CheckinSeriePendente o) =>
@@ -39,6 +43,7 @@ class CheckinSeriePendente {
     'feedback': feedback,
     'rpe': rpe,
     'dor': dor,
+    if (presencialAlunoId != null) 'presencialAlunoId': presencialAlunoId,
   };
 
   static CheckinSeriePendente? fromJson(Object? raw) {
@@ -60,6 +65,7 @@ class CheckinSeriePendente {
       feedback: raw['feedback'] as String?,
       rpe: rpe is int ? rpe : null,
       dor: raw['dor'] == true,
+      presencialAlunoId: raw['presencialAlunoId'] is int ? raw['presencialAlunoId'] as int : null,
     );
   }
 }

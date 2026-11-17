@@ -1,6 +1,3 @@
-import '../../treinos/utils/grupos_de_serie.dart';
-import '../../treinos/utils/prescricao_serie.dart';
-import '../models/checkin_execucao_models.dart';
 import 'package:flutter/painting.dart';
 
 import '../../../core/theme/tokens_strip.dart';
@@ -109,30 +106,7 @@ String checkinEvolucaoTipoLabel(S s, String tipo) => switch (tipo) {
   _ => s.checkinEvolucaoCarga,
 };
 
-/// Com o total conhecido o botão diz qual série é; sem ele, o rótulo curto.
-String checkinRegistrarLabel(
-  S s, {
-  required bool first,
-  int? atual,
-  int? total,
-}) => atual != null && total != null && total > 0 && atual <= total
-    ? s.checkinRegistrarSerieN(atual, total)
-    : first
-    ? s.checkinRegistrarSerie
-    : s.checkinProximaSerie;
 
-/// "Série 1 de 4 · 8-12 reps · 75 s": a linha do exercício na execução.
-String checkinLinhaDaSerie(
-  S s, {
-  required int atual,
-  int? total,
-  String? repeticoes,
-  int? descansoSegundos,
-}) => [
-  if (total != null && total > 0) s.checkinSerieDe(atual.clamp(1, total), total),
-  if (repeticoes != null && repeticoes.trim().isNotEmpty) '${repeticoes.trim()} reps',
-  if (descansoSegundos != null && descansoSegundos > 0) '$descansoSegundos s',
-].join(' · ');
 
 String checkinConfirmarRestanteLabel(
   S s, {
@@ -196,55 +170,4 @@ String checkinRestSemanticsLabel(
   final ctx = contextLine?.trim();
   if (ctx == null || ctx.isEmpty) return s.checkinDescansoTempo(time);
   return s.checkinDescansoTempoCom(time, ctx);
-}
-
-/// Carga e reps da **última** série registrada na sessão anterior deste exercício
-/// (a de maior número). Nula quando não há nada útil para repetir.
-({double? cargaKg, int? reps})? ultimaVezDoExercicio(List<ExecucaoSerie> anteriores) {
-  if (anteriores.isEmpty) return null;
-  final ultima = anteriores.reduce((a, b) => b.numero > a.numero ? b : a);
-  final reps = int.tryParse(ultima.repeticoes?.trim() ?? '');
-  final carga = (ultima.cargaKg ?? 0) > 0 ? ultima.cargaKg : null;
-  if (carga == null && reps == null) return null;
-  return (cargaKg: carga, reps: reps);
-}
-
-
-/// Onde a série [numero] está no grupo dela: (papel, posição, total do papel).
-/// Nulo quando o exercício não tem grupos (só válidas): vale "Série n de m".
-({String papel, int posicao, int total})? checkinPosicaoNoGrupo(
-  List<SeriePrescrita> linhas,
-  int numero,
-) {
-  if (linhas.isEmpty) return null;
-  if (linhas.every((l) => l.papel == PapelDaSerie.valida)) return null;
-  final ordenadas = [...linhas]..sort((a, b) => a.numero.compareTo(b.numero));
-  final atual = ordenadas.where((l) => l.numero == numero).firstOrNull;
-  if (atual == null) return null;
-  final doPapel = ordenadas.where((l) => l.papel == atual.papel).toList();
-  return (
-    papel: atual.papel,
-    posicao: doPapel.indexOf(atual) + 1,
-    total: doPapel.length,
-  );
-}
-
-/// "Aquecimento 1 de 2", "Válida 2 de 3", "Back-off 1 de 2".
-String checkinRotuloDoGrupo(({String papel, int posicao, int total}) g) =>
-    '${PapelDaSerie.rotulo(g.papel)} ${g.posicao} de ${g.total}';
-
-
-/// "Depois": a próxima série do mesmo exercício quando ainda há grupo pela
-/// frente ("Depois: Válida 1 de 3 · 12-15"); senão o próximo exercício, com
-/// "(2ª vez)" quando ele tem o mesmo nome do atual.
-String checkinTextoDepois(S s, ExecucaoExercicio ee, String proximoNome) {
-  final proxima = ee.seriesFeitas + 2;
-  final grupo = checkinPosicaoNoGrupo(ee.seriesPrescritas, proxima);
-  final linha = ee.seriesPrescritas.where((l) => l.numero == proxima).firstOrNull;
-  if (grupo != null && linha != null) {
-    return s.checkinDepois('${checkinRotuloDoGrupo(grupo)} · ${linha.repeticoes}');
-  }
-  final mesmoNome =
-      proximoNome.trim().toLowerCase() == ee.exercicioNome.trim().toLowerCase();
-  return s.checkinDepois(mesmoNome ? '$proximoNome (2ª vez)' : proximoNome);
 }

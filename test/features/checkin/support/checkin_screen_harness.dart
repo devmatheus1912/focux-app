@@ -47,6 +47,30 @@ class FakeCheckinRepo implements CheckinRepository {
   final int? rpeAlvo;
   bool offline = false;
 
+  /// Sem internet também no iniciar (abre do pacote da semana).
+  bool iniciarOffline = false;
+  final sessoesOffline = <Map<String, dynamic>>[];
+
+  @override
+  CanalDoCheckin get canal => const CanalDoAluno();
+
+  @override
+  CheckinRepository comCanal(CanalDoCheckin outro) => this;
+
+  @override
+  Future<ExecucaoTreino> sessaoOffline(Map<String, dynamic> corpo) async {
+    if (offline) {
+      throw DioException(
+        requestOptions: RequestOptions(path: '/sessoes-offline'),
+        type: DioExceptionType.connectionError,
+      );
+    }
+    sessoesOffline.add(corpo);
+    return ExecucaoTreino.fromJson({
+      'id': 99, 'treinoId': corpo['treinoId'], 'treinoNome': 'Treino A', 'status': 'CONCLUIDO', 'exercicios': const [],
+    });
+  }
+
   /// Lançado por `registrarSerie` enquanto não for nulo.
   Object? erroSerie;
 
@@ -68,7 +92,17 @@ class FakeCheckinRepo implements CheckinRepository {
   final Map<int, int> _feitasPorTe = {};
 
   @override
-  Future<ExecucaoTreino> iniciar(int treinoId) async =>
+  Future<ExecucaoTreino> iniciar(int treinoId) async {
+    if (iniciarOffline) {
+      throw DioException(
+        requestOptions: RequestOptions(path: '/iniciar'),
+        type: DioExceptionType.connectionError,
+      );
+    }
+    return _iniciado(treinoId);
+  }
+
+  ExecucaoTreino _iniciado(int treinoId) =>
       ExecucaoTreino.fromJson({
         'id': 1,
         'treinoId': treinoId,
@@ -93,7 +127,6 @@ class FakeCheckinRepo implements CheckinRepository {
     String? feedback,
     int? rpe,
     bool? dor,
-    int? presencialAlunoId,
   }) async {
     registros++;
     cargas.add(cargaKg);
@@ -122,9 +155,15 @@ class FakeCheckinRepo implements CheckinRepository {
   @override
   Future<ExecucaoTreino> concluir(
     int execucaoId, {
-    int? presencialAlunoId,
+    DateTime? concluidoEm,
   }) async {
     concluidos++;
+    if (offline) {
+      throw DioException(
+        requestOptions: RequestOptions(path: '/concluir'),
+        type: DioExceptionType.connectionError,
+      );
+    }
     await travaConcluir?.future;
     final erro = erroConcluir;
     if (erro != null) throw erro;

@@ -8,8 +8,9 @@ typedef CheckinEnvioSerie =
     Future<ExecucaoExercicio> Function(CheckinSeriePendente serie);
 
 /// Mesmo envio para a série nova e para a reenviada pela fila.
+/// Cada série sobe pelo canal em que foi feita (aluno ou presencial).
 CheckinEnvioSerie checkinEnvioPelo(CheckinRepository repo) =>
-    (p) => repo.registrarSerie(
+    (p) => repo.comCanal(canalDe(p.presencialAlunoId)).registrarSerie(
       p.execucaoId,
       p.treinoExercicioId,
       numero: p.numero,
@@ -55,6 +56,12 @@ Future<CheckinRegistro> checkinRegistrarSerie({
   required CheckinEnvioSerie enviar,
   required CheckinSessaoAtiva sessaoAtiva,
 }) async {
+  // Sessão local (sem internet desde o começo): a série fica no aparelho e
+  // sobe junto com a sessão (checkin_offline.dart).
+  if (serie.execucaoId < 0) {
+    await store.adicionar(serie);
+    return CheckinRegistroNaFila(await store.ler());
+  }
   try {
     return CheckinRegistroSalvo(await enviar(serie));
   } catch (e) {
@@ -102,6 +109,7 @@ Future<CheckinFilaResultado> checkinEnviarFila({
   final enviadas = <({int execucaoId, ExecucaoExercicio exercicio})>[];
   var rejeitadas = 0;
   for (final serie in fila) {
+    if (serie.execucaoId < 0) continue; // sobe com a sessão local
     try {
       final exercicio = await enviar(serie);
       await store.remover(serie);

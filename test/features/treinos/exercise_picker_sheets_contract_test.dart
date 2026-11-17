@@ -27,7 +27,9 @@ void main() {
     expect(filters, contains('FxInsetPickerOption.list'));
     expect(filters, contains('edgeToEdgeRows: true'));
     expect(filters, isNot(contains('_FilterPickerTile')));
-    expect(prescription, contains('showFxInsetPickerSheet'));
+    // As folhas do "Outro" moram num arquivo só, usado pelas válidas e pelos grupos.
+    expect(File('lib/features/treinos/widgets/prescricao_pickers.dart').readAsStringSync(),
+        contains('showFxInsetPickerSheet'));
     expect(prescription, contains('FxSettingsTile'));
     expect(prescription, contains('FxSettingsGroup'));
     expect(prescription, isNot(contains('prescriptionGroupHeader')));

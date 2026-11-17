@@ -115,7 +115,7 @@ void main() {
 
   test('os itens saem agrupados: link sempre presente, perigo por último', () {
     final itens = aluno360MenuItens(_aluno());
-    expect(itens.first.acao, Aluno360MenuAcao.editar);
+    expect(itens.first.acao, Aluno360MenuAcao.treinarAgora);
     expect(itens.last.acao, Aluno360MenuAcao.excluir);
     expect(
       itens.where((i) => i.acao == Aluno360MenuAcao.reenviarLink),

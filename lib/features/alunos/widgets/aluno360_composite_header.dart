@@ -78,8 +78,12 @@ class Aluno360HeaderToolbar extends StatelessWidget {
     this.onChat,
     this.onHelp,
     this.onMenu,
+    this.onTreinar,
     this.actionsEnabled = true,
   });
+
+  /// Modo presencial no topo (aluno presencial ou híbrido).
+  final VoidCallback? onTreinar;
 
   final String displayName;
   final bool showTitle;
@@ -147,6 +151,13 @@ class Aluno360HeaderToolbar extends StatelessWidget {
           )
         else
           const Spacer(),
+        if (onTreinar != null && actionsEnabled)
+          _AcaoDoTopo(
+            tooltip: 'Treinar agora',
+            icone: FxIcons.treino,
+            ink: ink,
+            onPressed: onTreinar!,
+          ),
         if (onChat != null && actionsEnabled)
           _AcaoDoTopo(
             tooltip: s.aluno360ChatTooltip,
@@ -224,9 +235,11 @@ class Aluno360CompositeHeaderDelegate extends SliverPersistentHeaderDelegate {
     this.onChat,
     this.onHelp,
     this.onMenu,
+    this.onTreinar,
     this.actionsEnabled = true,
   });
 
+  final VoidCallback? onTreinar;
   final double topInset;
   final double heroBodyHeight;
   final Widget heroChild;
@@ -303,6 +316,7 @@ class Aluno360CompositeHeaderDelegate extends SliverPersistentHeaderDelegate {
                     onChat: onChat,
                     onHelp: onHelp,
                     onMenu: onMenu,
+                    onTreinar: onTreinar,
                     actionsEnabled: actionsEnabled,
                   ),
                 ),
@@ -370,6 +384,7 @@ class Aluno360CompositeHeaderDelegate extends SliverPersistentHeaderDelegate {
         actionsEnabled != oldDelegate.actionsEnabled ||
         onHelp != oldDelegate.onHelp ||
         onChat != oldDelegate.onChat ||
+        (onTreinar == null) != (oldDelegate.onTreinar == null) ||
         (onMenu == null) != (oldDelegate.onMenu == null);
   }
 }

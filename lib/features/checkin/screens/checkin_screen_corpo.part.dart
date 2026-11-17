@@ -39,7 +39,7 @@ extension _CheckinCorpo on _CheckinScreenState {
       safePopOrGo(context, '/checkin/treinos');
       return;
     }
-    context.pushReplacement('/checkin/executar', extra: treinoId);
+    context.pushReplacement(checkinExecutarPath(treinoId));
   }
 
   Widget _executionShell({required Widget body, bool guard = false}) {
@@ -82,7 +82,7 @@ extension _CheckinCorpo on _CheckinScreenState {
     return Column(
       children: [
         CheckinWorkoutHeader(
-          treinoNome: _execucao?.treinoNome ?? s.checkinTreinoFallback,
+          treinoNome: _tituloDoTreino(_execucao?.treinoNome ?? s.checkinTreinoFallback),
           contextLine:
               _descanso.ativo
                   ? s.checkinDescanso
@@ -112,7 +112,7 @@ extension _CheckinCorpo on _CheckinScreenState {
                     onAjustar: _ajustarDescanso,
                     rpeAlvo: current?.rpeAlvo,
                     rpeEscolhido: _rpeEscolhido,
-                    onRpe: _ultimaEnvio == null ? null : _anotarRpe,
+                    onRpe: _ultimaEnvio == null || _presencial ? null : _anotarRpe,
                     serieAvaliada: _ultimaSerie?.numero,
                   )
                   : _cardOuVazio(s, exercicios, current, currentIndex),
@@ -149,13 +149,10 @@ extension _CheckinCorpo on _CheckinScreenState {
     );
     return switch (rodape) {
       CheckinRodape.nenhum => null,
+      // Sessão conduzida pelo personal: no app do aluno, só leitura.
+      _ when _somenteLeitura => null,
       CheckinRodape.registrar => CheckinRodapeBar(
-        label: checkinRegistrarLabel(
-          s,
-          first: current!.seriesFeitas <= 0,
-          atual: current.seriesFeitas + 1,
-          total: current.series,
-        ),
+        label: checkinBotaoDaSerie(s, serieDeAgora(current!)),
         loading: _registrando || _concluindo,
         loadingLabel:
             _concluindo ? s.checkinFinalizando : s.checkinSalvandoSerie,

@@ -8,7 +8,6 @@ import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_input_deco.dart';
-import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -19,6 +18,7 @@ import '../utils/prescription_volume_stepper.dart';
 import '../../../core/widgets/fx_quick_chips.dart';
 import '../utils/workout_prescription_display.dart';
 import 'prescription_editor_copy.dart';
+import 'prescricao_pickers.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
 
 import '../../../core/theme/shell_chrome.dart';

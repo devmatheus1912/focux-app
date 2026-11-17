@@ -21,6 +21,11 @@ Future<Aluno360MenuItem?> showAluno360MenuSheet(
 
   FxActionItem<Aluno360MenuItem> linha(Aluno360MenuItem i) {
     final (icone, rotulo, descricao) = switch (i.acao) {
+      Aluno360MenuAcao.treinarAgora => (
+        FxIcons.treino,
+        s.aluno360MenuTreinarAgora,
+        s.aluno360MenuTreinarAgoraSub,
+      ),
       Aluno360MenuAcao.editar => (
         FxIcons.editar,
         s.aluno360MenuEditar,

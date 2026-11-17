@@ -70,9 +70,15 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
     await _onMenu(item, aluno);
   }
 
+  /// Modo presencial: escolhe o treino e abre a execução conduzida pelo personal.
+  Future<void> _treinarAgora(Aluno aluno) =>
+      treinarComAluno(context, ref, alunoId: alunoId, nome: fxTitleCaseName(aluno.nome));
+
   /// Ações do ⋮: cada item chama o fluxo que já existia, com sua confirmação.
   Future<void> _onMenu(Aluno360MenuItem item, Aluno aluno) async {
     switch (item.acao) {
+      case Aluno360MenuAcao.treinarAgora:
+        await _treinarAgora(aluno);
       case Aluno360MenuAcao.editar:
         final updated = await context.push<bool>(
           '/alunos/$alunoId/editar',
@@ -377,6 +383,11 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                                     () =>
                                         abrirChatAluno360(context, ref, aluno),
                                 onMenu: () => _abrirMenu(aluno),
+                                // Presencial e híbrido: no topo; online: no ⋮.
+                                onTreinar: const {'PRESENCIAL', 'HIBRIDO'}
+                                        .contains(aluno.tipoConsultoria?.toUpperCase())
+                                    ? () => _treinarAgora(aluno)
+                                    : null,
                               ),
                             ),
                             SliverToBoxAdapter(

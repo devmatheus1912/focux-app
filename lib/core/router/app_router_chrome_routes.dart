@@ -203,6 +203,23 @@ RouteBase buildChromeShellRoute() {
                   dataDestaque: state.uri.queryParameters['data'],
                 ),
           ),
+          // Modo presencial: o personal conduz o treino do aluno (SPEC-modo-presencial).
+          GoRoute(
+            path: '/alunos/:id/treinar',
+            redirect:
+                (context, state) =>
+                    intPathParam(state, 'id') == null
+                        ? '/alunos'
+                        : int.tryParse(state.uri.queryParameters['treinoId'] ?? '') == null
+                        ? '/alunos/${intPathParam(state, 'id')}'
+                        : null,
+            builder:
+                (context, state) => CheckinScreen(
+                  treinoId: int.parse(state.uri.queryParameters['treinoId']!),
+                  presencialAlunoId: intPathParam(state, 'id'),
+                  alunoNome: state.extra is String ? state.extra as String : null,
+                ),
+          ),
           GoRoute(
             path: '/alunos/:id/sessoes/:execucaoId',
             redirect:

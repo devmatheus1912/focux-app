@@ -57,7 +57,9 @@ void main() {
     expect(restantes.every((s) => s.cargaKg != null), isTrue);
   });
 
-  test('current set prefers last session then prescription', () {
+  // A meta manda (SPEC-execucao-serie-atual): carga prescrita vale; a sessão
+  // passada só preenche a carga quando a meta não tem. Reps vêm da meta.
+  test('a meta manda; a sessão passada só preenche a carga que falta', () {
     final previous = ExecucaoSerie(
       id: 1,
       numero: 1,
@@ -76,8 +78,19 @@ void main() {
       seriesAnteriores: [previous],
     );
     final seed = checkinCurrentSetSeed(ee: ee, numero: 1);
-    expect(seed.cargaKg, 80);
-    expect(seed.reps, 9);
+    expect(seed.cargaKg, 20);
+    expect(seed.reps, 8);
+    final semCarga = ExecucaoExercicio(
+      id: 1,
+      treinoExercicioId: 2,
+      exercicioNome: 'Supino',
+      series: 3,
+      repeticoes: '8-12',
+      seriesFeitas: 0,
+      concluido: false,
+      seriesAnteriores: [previous],
+    );
+    expect(checkinCurrentSetSeed(ee: semCarga, numero: 1).cargaKg, 80);
   });
 
   test('digitar carga e reps define o rascunho e respeita os limites', () {

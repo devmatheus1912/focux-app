@@ -28,6 +28,12 @@ void main() {
     expect(telaResumoDaRota('/alunos/42')?.alunoId, 42);
     expect(telaResumoDaRota('/alunos/42/evolucao'), isNull);
     expect(telaResumoDaRota('/treinos'), isNull);
+    expect(telaResumoDaRota('/checkin/treinos')?.tela, TelaResumo.treinosAluno);
+    expect(telaResumoDaRota('/checkin/historico')?.tela, TelaResumo.historicoAluno);
+    final sessao = telaResumoDaRota('/checkin/historico/7');
+    expect(sessao?.tela, TelaResumo.sessaoAluno);
+    expect(sessao?.alunoId, 7);
+    expect(telaResumoDaRota('/checkin/executar'), isNull);
   });
 
   test('atualiza se algo mudou ou passou da idade', () {

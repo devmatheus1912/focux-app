@@ -117,16 +117,9 @@ RotinaDecisao _agora({
 }
 
 int _indiceDoUltimo(List<RotinaItem> itens, List<ExecucaoTreino> historico) {
-  (int, DateTime)? ultimo;
-  for (final item in historico) {
-    if (normalizeTreinoStatus(item.status) != treinoStatusConcluido) continue;
-    final raw = item.concluidoEm ?? item.iniciadoEm;
-    final quando = raw == null ? null : DateTime.tryParse(raw)?.toLocal();
-    if (quando == null) continue;
-    if (ultimo == null || quando.isAfter(ultimo.$2)) ultimo = (item.treinoId, quando);
-  }
+  final ultimo = ultimoTreinoConcluido(historico);
   if (ultimo == null) return -1;
-  return _indice(itens, ultimo.$1) ?? -1;
+  return _indice(itens, ultimo.$1.treinoId) ?? -1;
 }
 
 ExecucaoTreino? _proximoTreino(

@@ -60,13 +60,23 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
     _seriesCtrl = TextEditingController(
       text: '${temLinhas ? validas.length.clamp(1, 20) : item.series}',
     );
+    // Pirâmide: o campo mostra a faixa de partida (o topo de reps), não a 1ª
+    // linha gerada; senão reabrir e salvar a decrescente encolhia a pirâmide.
+    final piramide = item.metodo.piramide && validas.length > 1
+        ? baseDaPiramide([for (final v in validas) (reps: v.repeticoes, carga: v.cargaKg)])
+        : null;
     _repCtrl = TextEditingController(
-      text: validas.isNotEmpty ? validas.first.repeticoes : item.repeticoes,
+      text: piramide?.repsBase ??
+          (validas.isNotEmpty ? validas.first.repeticoes : item.repeticoes),
     );
     _descansoCtrl = TextEditingController(
       text: '${item.descansoSegundos ?? 60}',
     );
-    final carga = validas.isNotEmpty ? validas.first.cargaKg : item.cargaKg;
+    final carga = piramide != null
+        ? piramide.carga
+        : validas.isNotEmpty
+        ? validas.first.cargaKg
+        : item.cargaKg;
     _cargaCtrl = TextEditingController(
       text: carga != null && carga > 0 ? formatBrDecimal(carga) : '',
     );
@@ -75,7 +85,14 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
     );
     _obsCtrl = TextEditingController(text: item.observacoes ?? '');
     _tipoSerie = tecnicaParaApi(item.metodo.tecnica);
-    _parametros = ParametrosDoMetodo.de(item.metodo);
+    _parametros = ParametrosDoMetodo.de(
+      item.metodo,
+      validas: validas.length,
+      marcadas: [
+        for (var i = 0; i < validas.length; i++)
+          if (validas[i].tecnica != null) i + 1,
+      ],
+    );
     _presetId = matchWorkoutBuilderPresetId(
       series: item.series,
       repeticoes: item.repeticoes,
@@ -132,6 +149,7 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
       return;
     }
     setState(() => _saving = true);
+    final tecnica = tecnicaDe(_tipoSerie);
     try {
       await widget.repo.atualizarExercicioPrescricao(
         widget.treinoId,
@@ -142,11 +160,14 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
         cargaKg: double.tryParse(_cargaCtrl.text.replaceAll(',', '.')),
         rpeAlvo: int.tryParse(_rpeAlvoCtrl.text.trim()),
         observacoes: _obsCtrl.text,
-        tipoSerie: _tipoSerie,
-        tecnicaQuedas: _tipoSerie == 'DROPSET' ? _parametros.quedas : null,
-        tecnicaReducaoPct: _tipoSerie == 'DROPSET' ? _parametros.reducaoPct : null,
-        tecnicaPausaS: _tipoSerie == 'RESTPAUSE' ? _parametros.pausaS : null,
-        tecnicaMiniSeries: _tipoSerie == 'RESTPAUSE' ? _parametros.miniSeries : null,
+        tipoSerie: tipoSerieParaApi(tecnica, _parametros.progressao),
+        progressao: progressaoParaApi(_parametros.progressao),
+        tecnicaQuedas: tecnica == Tecnica.dropset ? _parametros.quedas : null,
+        tecnicaReducaoPct: tecnica == Tecnica.dropset ? _parametros.reducaoPct : null,
+        tecnicaPausaS: tecnica == Tecnica.restpause ? _parametros.pausaS : null,
+        tecnicaMiniSeries: tecnica == Tecnica.restpause ? _parametros.miniSeries : null,
+        tecnicaSegundos: tecnicaDeTempo(tecnica) ? _parametros.segundos : null,
+        tecnicaParciais: tecnica == Tecnica.parciais ? _parametros.parciais : null,
       );
       final carga = double.tryParse(_cargaCtrl.text.replaceAll(',', '.'));
       final reps = _repCtrl.text.trim();
@@ -155,7 +176,7 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
           .toList();
       final quantidadeValidas = series.clamp(1, 20).toInt();
       // Pirâmide: cada série com a sua meta (reps e carga mudam a cada série).
-      final piramide = _tipoSerie == 'PIRAMIDE'
+      final piramide = _parametros.progressao != Progressao.fixa
           ? linhasDaPiramide(
               series: quantidadeValidas,
               crescente: _parametros.piramideCrescente,
@@ -163,6 +184,8 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
               carga: carga,
             )
           : null;
+      // Técnica só nas válidas escolhidas (padrão: drop na última, pico em todas).
+      final comTecnica = _parametros.validasComTecnica(tecnica, quantidadeValidas);
       final validas = [
         for (var i = 0; i < quantidadeValidas; i++)
           SeriePrescrita(
@@ -170,6 +193,7 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
             repeticoes: piramide?[i].reps ??
                 (reps.isEmpty ? (i < validasAtuais.length ? validasAtuais[i].repeticoes : '8-12') : reps),
             cargaKg: piramide?[i].carga ?? carga ?? (i < validasAtuais.length ? validasAtuais[i].cargaKg : null),
+            tecnica: comTecnica.contains(i + 1) ? tecnicaParaApi(tecnica) : null,
           ),
       ];
       // Ordem da execução: aquecimento/ajuste, válidas, back-off.
@@ -208,7 +232,7 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
         props: {
           'id': widget.treinoId,
           'itemId': widget.item.id,
-          'tipoSerie': _tipoSerie,
+          'tipoSerie': tipoSerieParaApi(tecnica, _parametros.progressao),
         },
       );
       if (mounted) {
@@ -245,7 +269,7 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
       cargaKg: outro.cargaKg,
       rpeAlvo: outro.rpeAlvo,
       observacoes: outro.observacoes ?? '',
-      tipoSerie: tecnicaParaApi(outro.metodo.tecnica),
+      tipoSerie: tipoSerieParaApi(outro.metodo.tecnica, outro.metodo.progressao),
     );
     GrupoDeSeries semCarga(GrupoDeSeries g) => g.copyWith(limparCarga: true);
     await widget.repo.salvarSeries(
@@ -304,6 +328,7 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
       ],
       validasKey: _validasKey,
       gruposDeSerie: GruposDeSerieEditor(
+        bloco: widget.item.bloco,
         onVerValidas: () {
           final alvo = _validasKey.currentContext;
           if (alvo == null) return;

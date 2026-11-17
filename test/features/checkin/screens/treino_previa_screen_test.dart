@@ -258,7 +258,7 @@ Future<void> _pump(
       ),
       GoRoute(
         path: '/checkin/executar',
-        builder: (context, state) => Text('executar ${state.extra}'),
+        builder: (context, state) => Text('executar ${state.uri.queryParameters['treinoId']}'),
       ),
     ],
   );

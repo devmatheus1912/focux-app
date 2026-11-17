@@ -162,7 +162,7 @@ void main() {
 
     test('editar e criar tarefa abrem o menu', () {
       final acoes = aluno360MenuItens(_aluno()).map((i) => i.acao).toList();
-      expect(acoes.take(2), [Aluno360MenuAcao.editar, Aluno360MenuAcao.criarTarefa]);
+      expect(acoes.take(3), [Aluno360MenuAcao.treinarAgora, Aluno360MenuAcao.editar, Aluno360MenuAcao.criarTarefa]);
     });
   });
 

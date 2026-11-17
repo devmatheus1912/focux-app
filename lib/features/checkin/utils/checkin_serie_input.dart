@@ -4,7 +4,8 @@
 /// The student logs the actual reps performed (integer count).
 library;
 
-import '../../treinos/utils/grupos_de_serie.dart';
+import 'serie_de_agora.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../l10n/app_localizations.dart';
@@ -57,70 +58,14 @@ class CheckinCurrentSetSeed {
   final int? reps;
 }
 
-/// Last session matching set → prescription → previous set this session.
+/// O que os campos sugerem para a série [numero]: vem da [SerieDeAgora]
+/// (a meta manda; a sessão passada só preenche a carga de quem conta).
 CheckinCurrentSetSeed checkinCurrentSetSeed({
   required ExecucaoExercicio ee,
   required int numero,
 }) {
-  ExecucaoSerie? byNumero(List<ExecucaoSerie> series, int n) {
-    for (final s in series) {
-      if (s.numero == n) return s;
-    }
-    return null;
-  }
-
-  // A última sessão só vale quando o desenho das séries é o mesmo (a série de
-  // mesmo número tem o mesmo papel). Aquecimento e ajuste nunca herdam carga
-  // de válida: com grupos novos, a prescrição da série vale.
-  final linhas = ee.seriesPrescritas;
-  final papel = linhas.where((l) => l.numero == numero).firstOrNull?.papel;
-  final mesmoDesenho =
-      linhas.isEmpty || ee.seriesAnteriores.length == linhas.length;
-  final previous = mesmoDesenho ? byNumero(ee.seriesAnteriores, numero) : null;
-  if (papel != null && !PapelDaSerie.conta(papel) && !mesmoDesenho) {
-    final reps = int.tryParse(
-      checkinFirstRepsToken(ee.proximaRepeticoes ?? ee.repeticoes) ?? '',
-    );
-    return CheckinCurrentSetSeed(cargaKg: ee.proximaCargaKg, reps: reps);
-  }
-  if (previous != null &&
-      (previous.cargaKg != null ||
-          (previous.repeticoes != null &&
-              previous.repeticoes!.trim().isNotEmpty &&
-              !checkinIsPrescriptionRange(previous.repeticoes)))) {
-    return CheckinCurrentSetSeed(
-      cargaKg: previous.cargaKg ?? ee.cargaKg ?? ee.cargaAnteriorKg,
-      reps: int.tryParse(checkinFirstRepsToken(previous.repeticoes) ?? ''),
-    );
-  }
-  // A prescrição da própria série (V205) vale mais que a do exercício: é o que
-  // o cartão já mostra, então registrar grava o que o aluno está vendo.
-  final prescReps = int.tryParse(
-    checkinFirstRepsToken(ee.proximaRepeticoes ?? ee.repeticoes) ?? '',
-  );
-  final seedCarga = ee.proximaCargaKg ?? ee.cargaKg ?? ee.cargaAnteriorKg;
-  if (seedCarga != null || prescReps != null) {
-    return CheckinCurrentSetSeed(cargaKg: seedCarga, reps: prescReps);
-  }
-  if (ee.seriesDetalhes.isNotEmpty) {
-    final last = ee.seriesDetalhes.last;
-    return CheckinCurrentSetSeed(
-      cargaKg: last.cargaKg,
-      reps:
-          int.tryParse(checkinFirstRepsToken(last.repeticoes) ?? '') ??
-          prescReps,
-    );
-  }
-  if (numero > 1) {
-    final prior = byNumero(ee.seriesDetalhes, numero - 1);
-    if (prior != null) {
-      return CheckinCurrentSetSeed(
-        cargaKg: prior.cargaKg,
-        reps: int.tryParse(checkinFirstRepsToken(prior.repeticoes) ?? ''),
-      );
-    }
-  }
-  return const CheckinCurrentSetSeed();
+  final sa = serieDeAgora(ee, numero: numero);
+  return CheckinCurrentSetSeed(cargaKg: sa.cargaSugerida, reps: sa.repsSugeridas);
 }
 
 /// Uma série que falta no "Confirmar o resto", como a tela mostra.

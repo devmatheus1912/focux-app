@@ -10,7 +10,11 @@ import '../../../core/widgets/fx_action_link.dart';
 import '../../../core/widgets/fx_quick_chips.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../../../core/widgets/fx_number_pad_sheet.dart';
 import '../utils/grupos_de_serie.dart';
+import '../utils/prescricao_atalhos.dart';
+import 'prescricao_pickers.dart';
+import 'prescription_editor_copy.dart';
 
 /// Grupos de séries do exercício (aquecimento, ajuste e back-off) em volta das
 /// válidas, que ficam nos controles da folha. Um grupo por linha; tocar abre o
@@ -26,7 +30,11 @@ class GruposDeSerieEditor extends StatefulWidget {
     required this.onChanged,
     this.enabled = true,
     this.onVerValidas,
+    this.bloco = 'TRABALHO',
   });
+
+  /// Bloco do exercício: dá os atalhos de reps do back-off e do descanso.
+  final String bloco;
 
   /// Toque em "Válidas": leva aos controles das válidas, no topo da folha.
   final VoidCallback? onVerValidas;
@@ -109,6 +117,7 @@ class _GruposDeSerieEditorState extends State<GruposDeSerieEditor> {
     final chrome = ShellChrome.of(context);
     Widget linha(bool lado, int i, GrupoDeSeries g) => _LinhaDoGrupo(
       grupo: g,
+      bloco: widget.bloco,
       aberto: _aberto == (lado, i),
       enabled: widget.enabled,
       onAbrir: () => setState(
@@ -198,6 +207,7 @@ class _GruposDeSerieEditorState extends State<GruposDeSerieEditor> {
 class _LinhaDoGrupo extends StatelessWidget {
   const _LinhaDoGrupo({
     required this.grupo,
+    required this.bloco,
     required this.aberto,
     required this.enabled,
     required this.onAbrir,
@@ -212,19 +222,46 @@ class _LinhaDoGrupo extends StatelessWidget {
   final VoidCallback? onDescer;
 
   final GrupoDeSeries grupo;
+  final String bloco;
   final bool aberto;
   final bool enabled;
   final VoidCallback onAbrir;
   final ValueChanged<GrupoDeSeries> onMudar;
   final VoidCallback onRemover;
 
-  static const _reps = ['15-20', '10-15', '8-12', '6-10', '4-6', '1-3'];
-  static const _descansos = [30, 45, 60, 90, 120, 150];
+  Future<void> _outrasReps(BuildContext context, List<String> atalhos) async {
+    final texto = await escolherRepeticoes(context, atual: grupo.repeticoes, atalhos: atalhos);
+    if (texto != null) onMudar(grupo.copyWith(repeticoes: texto));
+  }
+
+  Future<void> _outroDescanso(BuildContext context) async {
+    final s = await escolherDescanso(context, atual: grupo.descansoSegundos ?? 60);
+    if (s != null) onMudar(grupo.copyWith(descansoSegundos: s));
+  }
+
+  /// Carga digitada (halter de 7 kg, 1 kg a mais): o − / + anda de 2,5.
+  Future<void> _digitarCarga(BuildContext context) async {
+    final r = await showFxNumberPadSheet(
+      context,
+      titulo: 'Carga',
+      confirmarLabel: 'Aplicar',
+      sufixo: 'kg',
+      inicial: grupo.cargaKg,
+      maximo: 500,
+      alternativaLabel: 'Sem carga',
+    );
+    if (r == null) return;
+    final v = r.valor;
+    onMudar(r.alternativa || v == null || v <= 0
+        ? grupo.copyWith(limparCarga: true)
+        : grupo.copyWith(cargaKg: v));
+  }
 
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
     final g = grupo;
+    final atalhos = atalhosDoGrupo(g.papel, bloco);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -290,11 +327,14 @@ class _LinhaDoGrupo extends StatelessWidget {
                 Text('Repetições', style: FocuxHubTypography.bodyMuted(color: chrome.mute)),
                 const SizedBox(height: TokensStrip.s1),
                 FxQuickChips<String>(
-                  itens: {..._reps, g.repeticoes}.toList(),
+                  itens: atalhos,
                   selecionado: g.repeticoes,
+                  outroSelecionado: !atalhos.contains(g.repeticoes),
+                  outroRotulo: atalhos.contains(g.repeticoes) ? 'Outro' : g.repeticoes,
                   onSelecionar: (v) {
                     if (enabled) onMudar(g.copyWith(repeticoes: v));
                   },
+                  onOutro: enabled ? () => _outrasReps(context, atalhos) : null,
                 ),
                 const SizedBox(height: TokensStrip.s2),
                 Row(
@@ -317,9 +357,22 @@ class _LinhaDoGrupo extends StatelessWidget {
                           : null,
                       icon: const Icon(FxIcons.remover),
                     ),
-                    Text(
-                      g.cargaKg == null ? '—' : '${_kg(g.cargaKg!)} kg',
-                      style: FocuxHubTypography.cardTitle(color: chrome.ink),
+                    Semantics(
+                      button: true,
+                      label: 'Digitar a carga',
+                      child: InkWell(
+                        onTap: enabled ? () => _digitarCarga(context) : null,
+                        borderRadius: BorderRadius.circular(TokensStrip.rSm),
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(minWidth: 56, minHeight: 44),
+                          child: Center(
+                            child: Text(
+                              g.cargaKg == null ? '—' : '${_kg(g.cargaKg!)} kg',
+                              style: FocuxHubTypography.cardTitle(color: chrome.ink),
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
                     IconButton(
                       tooltip: 'Mais 2,5 kg',
@@ -333,15 +386,16 @@ class _LinhaDoGrupo extends StatelessWidget {
                 Text('Descanso', style: FocuxHubTypography.bodyMuted(color: chrome.mute)),
                 const SizedBox(height: TokensStrip.s1),
                 FxQuickChips<int>(
-                  itens: {
-                    ..._descansos,
-                    if (g.descansoSegundos != null) g.descansoSegundos!,
-                  }.toList()..sort(),
+                  itens: g.descansoSegundos == null
+                      ? atalhosDescansoSeg(bloco)
+                      : descansoComValorNoLugar(bloco, g.descansoSegundos!),
                   selecionado: g.descansoSegundos,
                   rotuloDe: (v) => '$v s',
+                  outroRotulo: 'Outro',
                   onSelecionar: (v) {
                     if (enabled) onMudar(g.copyWith(descansoSegundos: v));
                   },
+                  onOutro: enabled ? () => _outroDescanso(context) : null,
                 ),
                 const SizedBox(height: TokensStrip.s1),
                 if (onSubir != null || onDescer != null)

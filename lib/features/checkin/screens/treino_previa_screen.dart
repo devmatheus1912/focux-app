@@ -27,6 +27,7 @@ import '../widgets/checkin_resumo_view.dart';
 import '../widgets/treino_previa_widgets.dart';
 import '../../../core/theme/fx_icons.dart';
 import '../utils/checkin_sessao.dart';
+import '../utils/treinos_hub_view.dart' show checkinExecutarPath;
 
 /// Prescrição antes de treinar. Só o botão Iniciar abre sessão; ao iniciar a
 /// tela fecha com `true` e quem abriu leva à execução.
@@ -49,7 +50,7 @@ class _TreinoPreviaScreenState extends ConsumerState<TreinoPreviaScreen> {
   /// abriu a prévia. A trava do FLUTTER-4/5 era o `GoRouterState.of` da tela
   /// que sai (ver `estadoDaRota`), não este caminho.
   void _iniciar() {
-    context.pushReplacement('/checkin/executar', extra: widget.treinoId);
+    context.pushReplacement(checkinExecutarPath(widget.treinoId));
   }
 
   Future<void> _jaFiz() async {

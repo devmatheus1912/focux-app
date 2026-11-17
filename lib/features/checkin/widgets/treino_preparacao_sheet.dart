@@ -1,18 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../core/router/safe_navigation.dart';
+import '../../chat/providers/chat_rascunho_provider.dart';
 
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/theme/fx_icons.dart';
 
-/// Ficha atribuída sem exercícios: explica por que ainda não dá para iniciar.
+/// Ficha atribuída sem exercícios: explica por que ainda não dá para iniciar
+/// (sem isso o aluno lê como "não abriu") e deixa avisar o personal.
 Future<void> showTreinoPreparacaoSheet(
-  BuildContext context, {
+  BuildContext context,
+  WidgetRef ref, {
   required String treinoNome,
 }) {
+  // "Avisar meu personal": abre o chat com a mensagem pronta.
+  void onAvisar() {
+    ref.read(chatAlunoRascunhoProvider.notifier).value =
+        S.of(context).treinosPreparacaoMensagem(treinoNome);
+    openAlunoRoute(context, '/chat/aluno');
+  }
+
   final s = S.of(context);
   final isDark = Theme.of(context).brightness == Brightness.dark;
   final primary = Theme.of(context).colorScheme.primary;
@@ -56,6 +70,15 @@ Future<void> showTreinoPreparacaoSheet(
               FxLiquidPrimaryButton(
                 label: s.treinosPreparacaoSheetCta,
                 onPressed: () => Navigator.of(sheetContext).pop(),
+              ),
+              const SizedBox(height: TokensStrip.s2),
+              FxTonalButton(
+                label: s.treinosPreparacaoAvisar,
+                icon: FxIcons.chat,
+                onPressed: () {
+                  Navigator.of(sheetContext).pop();
+                  onAvisar();
+                },
               ),
             ],
           ),

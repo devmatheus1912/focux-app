@@ -95,7 +95,6 @@
   "referralRewardHeadline": "{dias} extra days on your plan for each referral who subscribes",
   "referralDiscountLine": "Anyone who signs up with your code gets {pct}% off the first charge",
   "referralCampaignInactive": "Campaign paused. Your code still works at sign-up, but new referrals don't earn rewards right now.",
-  "referralCampaignInactiveShort": "Campaign paused",
   "referralCopyInvite": "Copy invite",
   "referralCopyLinkOnly": "Link only",
   "referralInviteCopied": "Invite copied. It leaves the clipboard in 1 min.",

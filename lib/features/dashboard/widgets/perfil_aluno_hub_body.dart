@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import 'economia_de_dados_tile.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -112,6 +114,8 @@ class PerfilAlunoHubBody extends ConsumerWidget {
                   line: chrome.line,
                   onTap: editar,
                 ),
+                // Vídeo não toca sozinho no dado móvel (SPEC-checkin-offline).
+                const EconomiaDeDadosTile(),
                 FxSettingsTile(
                   icon: FxIcons.conferir,
                   label: s.alunoPerfilConsentimentos,

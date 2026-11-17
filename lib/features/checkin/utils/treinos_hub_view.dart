@@ -88,6 +88,10 @@ class TreinosHubView {
 const treinosHubUltimosMax = 3;
 
 String treinoPreviaPath(int treinoId) => '/checkin/treino/$treinoId';
+
+/// Único formato de rota da execução: o treino vai na query (sobrevive a
+/// push, deep link e notificação). `treinoIdFromState` ainda aceita `extra`.
+String checkinExecutarPath(int treinoId) => '/checkin/executar?treinoId=$treinoId';
 const _duracaoMin = Duration(minutes: 5);
 // Acima de 2 h a sessão ficou aberta esquecida: não é duração de treino.
 const _duracaoMax = Duration(hours: 2);
