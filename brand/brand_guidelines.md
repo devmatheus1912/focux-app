@@ -96,11 +96,14 @@ O logo é composto por:
 |---|---|---|
 | Fundo claro | `brand/Logo-oficial-ParaFundoClaro.png` → `assets/images/logo_oficial_fundo_claro.png` | Fundos brancos ou `#F4F6F8` |
 | Fundo escuro | `brand/Logo-oficial-ParaFundoEscuro.png` → `assets/images/logo_oficial_fundo_escuro.png` | Fundos `#0B0E14`, `#121820` ou petróleo profundo |
+| **Vetor — fundo claro** | `brand/focux-logo-fundo-claro.svg` | Impressão, materiais grandes, apresentações |
+| **Vetor — fundo escuro** | `brand/focux-logo-fundo-escuro.svg` | Idem, sobre fundo escuro |
+| **Vetor — símbolo** | `brand/focux-simbolo.svg` (petróleo) · `brand/focux-simbolo-branco.svg` | Avatar, carimbo, bordado, onde o logo completo não cabe |
 | Splash | `assets/images/logo_splash*.png` (cópia da variante escura) | Splash nativo sobre `#0B0E14` |
 | Ícone / launcher | `assets/images/logo_icon_*.png` (cópia da variante clara) | Ícone do app sobre fundo branco |
 | Site | `client/public/focux-logo.png`, `focux-logo-light.png`, `favicon.png`, `email-logo.png` | Site, favicon e e-mails |
 
-No app, o widget `FocuxOfficialLogo` escolhe a versão pelo brilho do tema (`light` → fundo claro; `dark` / `AuthShell forceDark` → fundo escuro). Os arquivos são a fonte da verdade: **não alterar pixels** e não redesenhar.
+No app, o widget `FocuxOfficialLogo` escolhe a versão pelo brilho do tema (`light` → fundo claro; `dark` / `AuthShell forceDark` → fundo escuro). Os arquivos são a fonte da verdade: **não alterar pixels** e não redesenhar. Para impressão e tamanhos grandes, use os SVGs.
 
 ### Cores do logo
 
@@ -495,4 +498,4 @@ Mudanças de cor, logo ou tipografia são **decisão de produto** dos sócios. F
 2. ~~`brand/styleguide.txt` incompleto~~ **Resolvido:** virou resumo técnico com ponteiro para este guia.
 3. **Petróleo do logo (`#016B7E`) ≠ primário de UI (`#0B4F5C`).** É aceitável, mas precisa ser intencional. Não recolorir o logo nem usar `#016B7E` em interface.
 4. **`#6B7280` sobre `#F4F6F8` dá 4,46:1**, logo abaixo de AA. Em texto pequeno, preferir `#4B5563`.
-5. **Não há logo vetorial (SVG/PDF) no repositório**, só PNG 1254 px. Para impressão e materiais grandes, vale produzir o vetor a partir do original.
+5. ~~Sem logo vetorial~~ **Resolvido:** SVGs em `brand/` (logo claro, logo escuro e símbolo), vetorizados a partir dos PNGs oficiais. Se a agência/designer original tiver o arquivo-fonte (AI/Figma), ele continua sendo a referência máxima.
