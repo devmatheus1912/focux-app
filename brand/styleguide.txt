@@ -24,7 +24,8 @@ App e site ainda usam o logo anterior até a troca dos arquivos
 Primary (CTA e logo):  #0B4F5C
 Hover / ink:           #083D47
 Mid (links/H2):        #0A6B7A
-Glow (logo no escuro): #3D9AAD
+Glow (UI no escuro):   #3D9AAD
+Petróleo logo escuro:  #0E93A8   (FOCU no escuro: #E8EDF2)
 Soft tint:             #D5E8EC
 Softer wash:           #EBF4F6
 

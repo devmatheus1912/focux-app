@@ -1,6 +1,6 @@
 # Focux Personal — Brand Guidelines
 
-> Versão 1.1 · novembro de 2026 · documento interno e confidencial. Novidade da 1.1: logo v2 e kit completo em `kit/`.
+> Versão 1.2 · novembro de 2026 · documento interno e confidencial. Novidades: logo v2 e kit completo em `kit/` (1.1); petróleo do logo no escuro `#0E93A8` e escala tipográfica do site (1.2).
 > Versão visual: [`brand_guidelines.html`](brand_guidelines.html) (abre no navegador, sem dependências).
 
 Este guia junta num lugar só o que hoje está espalhado pelo código do app (`lib/core/theme/`), pelo site (`client/src/index.css`, `design-system/`) e por `brand/styleguide.txt`. Quando o guia e o código discordarem, **o código em produção vence** e este arquivo deve ser corrigido.
@@ -117,10 +117,10 @@ O **símbolo pequeno** é o mesmo braço com traço mais grosso, celular preench
 
 | Parte | Fundo claro | Fundo escuro |
 |---|---|---|
-| Símbolo, "X", "PERSONAL" e fios | `#0B4F5C` (primário da marca) | `#3D9AAD` (glow) |
-| "FOCU" | `#1A1A2E` (ink) | `#FFFFFF` |
+| Símbolo, "X", "PERSONAL" e fios | `#0B4F5C` (primário da marca) | `#0E93A8` (petróleo para fundo escuro) |
+| "FOCU" | `#1A1A2E` (ink) | `#E8EDF2` (branco suave) |
 
-Logo e app usam **o mesmo petróleo**. No fundo escuro o `#0B4F5C` some (contraste 2,1:1), por isso toda a parte petróleo vira `#3D9AAD` (5,9:1), o mesmo acento do app no tema escuro.
+Logo e app usam **o mesmo petróleo**. No fundo escuro, o mesmo código `#0B4F5C` some (contraste 2,1:1) e parece um azul apagado. Por isso a parte petróleo vira `#0E93A8`: o mesmo tom (matiz 188°), mais saturado e mais claro, com 5,3:1. Consistência de marca é a pessoa perceber a mesma cor, não usar o mesmo código. O "FOCU" usa o branco suave `#E8EDF2`, porque o branco puro briga com o petróleo e o deixa com cara de desbotado.
 
 ### Área de proteção
 
@@ -142,7 +142,7 @@ Abaixo do mínimo, "PERSONAL" deixa de ser legível: use o horizontal ou só o s
 - Esticar, achatar ou girar o logo.
 - Trocar as cores, ou deixar o "X" da mesma cor do "FOCU".
 - Usar a versão clara sobre fundo escuro (o "FOCU" some), ou o contrário.
-- Usar `#0B4F5C` no logo sobre fundo escuro: use a versão escura (`#3D9AAD`).
+- Usar `#0B4F5C` no logo sobre fundo escuro: use a versão escura (`#0E93A8`).
 - Usar o símbolo pequeno em tamanho grande, ou o símbolo normal abaixo de 48 px.
 - Colocar o logo sobre foto movimentada sem uma camada sólida por trás.
 - Adicionar sombra, contorno, brilho, gradiente ou efeito 3D.
@@ -167,6 +167,7 @@ A marca é **azul petróleo** com neutros frios e um escuro **cinematográfico**
 | Soft | `#D5E8EC` | `brandSoft` | `--fx-soft` / `soft` | Chip selecionado, fundos de destaque |
 | Softer | `#EBF4F6` | `brandSofter` | — | Tooltip, lavagem leve |
 | Deep | `#051F26` | `brandDeep` | `--fx-deep` / `deep` | Mesh e gradientes profundos |
+| Petróleo escuro (logo) | `#0E93A8` | — | — | **Só o logo** sobre fundo escuro. Na interface, o acento no escuro continua `#3D9AAD` |
 
 ### 4.2 Neutros — tema claro
 
@@ -251,10 +252,22 @@ Regras: só esses tamanhos existem (contrato de tipografia em `FocuxHubTypograph
 
 ### Site
 
-| Papel | Fonte |
-|---|---|
-| Interface e títulos | **Plus Jakarta Sans** |
-| Dados, números técnicos | **JetBrains Mono** |
+Plus Jakarta Sans na interface e nos títulos, e JetBrains Mono em dados. Os títulos são fluidos (`clamp()`): crescem com a largura da tela entre o mínimo e o máximo.
+
+| Papel | Tamanho / peso / entrelinha / tracking | Classe | Exemplo |
+|---|---|---|---|
+| Display (hero) | 51–70 px / 600 / 1.02 / −0.04em | `clamp(3.2rem, 5.5vw, 4.4rem)` | Sistema operacional para personal trainer. |
+| Título de seção | 30–51 px / 600 / 1.08 / −0.035em | `clamp(1.9rem, 4.5vw, 3.2rem)` | Cobrança sem constrangimento. |
+| Título de bloco | 26–39 px / 600 / 1.05 / −0.045em | `clamp(1.65rem, 2.8vw, 2.45rem)` | O aluno sabe o que fazer hoje. |
+| Título de card | 20 px / 600 / 1.25 | `text-xl` | Execução com vídeo no bolso. |
+| Corpo destaque | 18 px / 400 / 1.55 | `text-lg` | Quem treinou, quem pagou e quem sumiu… |
+| Corpo | 15–16 px / 400 / 1.6 | `text-base` / `text-[15px]` | O aluno paga por QR ou copia e cola. |
+| Secundário | 13–14 px / 400 / 1.5 | `text-sm` / `text-[13px]` | Cobrado pela App Store ou Google Play |
+| Rótulo | 12 px / 600 / +0.08em, caixa alta | `text-xs uppercase` | PLANO MAIS ESCOLHIDO |
+| Mínimo | 11 px / 500, opacidade ≥ 70% | `text-[11px]` | Preço de referência |
+| Dado (mono) | 13 px / 500, tabular | `font-mono` | R$ 59,90 · 30 dias · 92% |
+
+Para ver cada tamanho renderizado com a frase de exemplo, abra a versão HTML do guia.
 
 Títulos com peso 600, `tracking-tight` e `text-wrap: balance`. Texto secundário com opacidade mínima de 70% e tamanho mínimo de 11 px.
 
@@ -446,12 +459,13 @@ No plano Enterprise o personal aplica logo, paleta e nome dentro do Focux e pode
 | `#E8EDF2` | `#0B0E14` | 16,40 | AAA |
 | `#9AA8B3` | `#0B0E14` | 7,93 | AAA |
 | `#3D9AAD` | `#0B0E14` | 5,91 | AA |
+| `#0E93A8` (logo no escuro) | `#0B0E14` | 5,30 | AA |
 | `#3D9AAD` | `#FFFFFF` | 3,27 | Só texto grande e ícones |
 | `#6B7280` | `#F4F6F8` | 4,46 | Abaixo de AA; usar ≥ 14 px bold ou trocar por `#4B5563` |
 | `#C73A3A` | `#FFFFFF` | 5,13 | AA |
 | `#1B8C54` | `#FFFFFF` | 4,26 | Só texto grande e ícones |
 | `#B5760A` | `#FFFFFF` | 3,78 | Só texto grande e ícones |
-| `#0B4F5C` | `#0B0E14` | 2,10 | **Não usar** (petróleo some no escuro; use `#3D9AAD`) |
+| `#0B4F5C` | `#0B0E14` | 2,10 | **Não usar** (petróleo some no escuro: na UI use `#3D9AAD`, no logo `#0E93A8`) |
 
 ### Regras
 
