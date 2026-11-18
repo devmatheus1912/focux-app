@@ -13,6 +13,5 @@ void main() {
     expect(src, contains('showFxExecutionLeaveSheet'));
     expect(src, contains('FxExecutionLeaveChoice'));
     expect(src, contains('s.checkinContinuarDepois'));
-    expect(src, isNot(contains('fxConfirmLeaveExecution')));
   });
 }

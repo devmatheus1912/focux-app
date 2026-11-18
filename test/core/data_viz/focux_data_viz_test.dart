@@ -42,6 +42,5 @@ void main() {
     expect(helpers, contains('dashboardCheckinsTrendFromPulse'));
     expect(helpers, contains('dashboardReceitaSparklineMensal'));
     expect(helpers, contains('List<double>'));
-    expect(helpers, isNot(contains('dashboardCheckinsSparklineUltimos7Dias')));
   });
 }

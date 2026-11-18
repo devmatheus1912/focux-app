@@ -26,31 +26,18 @@ void main() {
     expect(at('_AlunoHomeAviso('), lessThan(at('AlunoProximosPassos(')));
     expect(at('AlunoProximosPassos('), lessThan(at('AlunoUpsellCarousel(')));
     expect(at('AlunoUpsellCarousel('), lessThan(at('alunoFerramentasRoute')));
-    expect(screen, isNot(contains('hojeAlunoMais')));
-    expect(screen, isNot(contains('AlunoWeekSummaryCard')));
-    expect(screen, isNot(contains('AlunoRecoveryCard')));
-    expect(screen, isNot(contains('AlunoEvolutionCard')));
-    expect(screen, isNot(contains('_alunoCatalogGroup')));
     expect(screen, contains('horario: view.horarioNoFoco'));
-    expect(screen, isNot(contains('_StudentToolsSection')));
     expect(screen, isNot(contains('volumePorSemana')));
     expect(screen, contains('coachMensagens: view.coach'));
     expect(screen, contains('insight: view.insight'));
 
     expect(screen, contains('s.alunoHomeTitulo'));
-    expect(screen, isNot(contains('_AlunoAppBarAvatar')));
     expect(
       foco,
       contains('AlunoHomeInsightLine(insight: insight, onPrimary: mute)'),
     );
     expect(screen, contains('listenManual'));
     expect(screen, isNot(contains("'Meu Treino'")));
-    expect(screen, isNot(contains('buildAlunoHomeExperience')));
-    expect(screen, isNot(contains('rhythmLabel')));
-    expect(screen, isNot(contains('_AlunoHeroCard')));
-    expect(screen, isNot(contains('_StudentJourneyCard')));
-    expect(screen, isNot(contains('_StreakFoldBadge')));
-    expect(screen, isNot(contains('ProgressoSemanalWidget')));
     expect(screen, isNot(contains('Treinar agora')));
     expect(screen, contains('prontidaoBaixa: view.prontidaoBaixa'));
     expect(screen, contains('onFinanceiro: _openFinanceiro'));

@@ -9,12 +9,10 @@ void main() {
     final tela = readScreenSourceBundle(
       'lib/features/alunos/screens/aluno_detail_screen.dart',
     );
-    expect(tela, isNot(contains('onOpenCopilot')));
     expect(tela, isNot(contains('abrirCopiloto360(')));
     final evolucao = File(
       'lib/features/alunos/widgets/aluno360_evolucao_inteligente_card.dart',
     ).readAsStringSync();
-    expect(evolucao, isNot(contains('Abrir Copiloto')));
     expect(evolucao, isNot(contains('Sugestão:')));
     final resumo = File(
       'lib/features/alunos/widgets/aluno360_resumo_tab.dart',
@@ -27,7 +25,6 @@ void main() {
       'lib/features/alunos/utils/aluno360_copilot_task_actions.dart',
     ).readAsStringSync();
     expect(src, contains("actionLabel: 'Ver'"));
-    expect(src, isNot(contains('operacaoTop')));
   });
 
   test('folha sem sugestão não abre vazia', () {

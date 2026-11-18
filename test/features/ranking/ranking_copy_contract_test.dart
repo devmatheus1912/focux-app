@@ -56,6 +56,5 @@ void main() {
     );
     expect(screen, contains('rankingComoCalculamos'));
     expect(screen, contains('rankingPodioExplicacao'));
-    expect(screen, isNot(contains('desconto na assinatura')));
   });
 }

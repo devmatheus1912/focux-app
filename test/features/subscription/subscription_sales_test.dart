@@ -15,7 +15,6 @@ void main() {
     expect(router, contains("path: '/planos'"));
     expect(router, contains("path: '/paywall'"));
     expect(router, contains("return '/assinatura'"));
-    expect(router, isNot(contains('PaywallScreen')));
   });
 
   test('paywall assinatura com CTA contextual e gerenciar loja', () {

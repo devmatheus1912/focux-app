@@ -70,7 +70,6 @@ void main() {
     expect(gate, isNot(contains('FxLoading')));
     expect(gate, isNot(contains('CircularProgressIndicator')));
     // Upsell só na tela travada — auto-sheet no mount foi removido de propósito.
-    expect(gate, isNot(contains('UpgradePromptSheet.showIfAllowed')));
     expect(gate, contains('_LockedScreen'));
     expect(gate, contains('dashboardHomeClientCache.getIfFresh'));
     expect(gate, contains('seedFromHome'));

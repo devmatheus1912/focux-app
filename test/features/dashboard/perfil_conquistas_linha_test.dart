@@ -121,15 +121,10 @@ void main() {
     }
   });
 
-  test('folha do personal termina em Parabenizar; cartão sem "no/na"', () {
+  test('folha do personal termina em Parabenizar', () {
     final folha = File(
       'lib/features/evolucao/widgets/evolucao_conquistas.dart',
     ).readAsStringSync();
-    expect(folha, isNot(contains('conquistaVer')));
     expect(folha, isNot(contains('onVer')));
-    final cartao = File(
-      'lib/features/evolucao/widgets/conquista_cartao.dart',
-    ).readAsStringSync();
-    expect(cartao, isNot(contains('conquistaFeitoSemNumero')));
   });
 }

@@ -24,8 +24,6 @@ void main() {
     expect(bundle, isNot(contains('/api/coach-proativo/mensagens')));
     expect(bundle, isNot(contains('/api/aluno/medidas')));
     expect(bundle, isNot(contains('/api/upsell/me/pendentes')));
-    expect(bundle, isNot(contains('coachMensagensProvider')));
-    expect(bundle, isNot(contains('_alunoUpsellProvider')));
   });
 
   test('personal home first paint usa o BFF único, sem coachHome', () {

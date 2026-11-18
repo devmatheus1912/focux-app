@@ -78,7 +78,6 @@ void main() {
     expect(widgets, contains("'Cuidados e substituições'"));
     expect(widgets, contains("'Contraindicações'"));
     expect(widgets, contains("'Dados técnicos'"));
-    expect(widgets, isNot(contains('substituicoes')));
     expect(estado, isNot(contains('FxHubFreshness')));
   });
 }

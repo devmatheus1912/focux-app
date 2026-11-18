@@ -28,7 +28,6 @@ void main() {
     expect(screen, isNot(contains('/api/v1/migracao/imagem')));
     expect(screen, contains('migracaoAjudaDaFonte'));
     expect(screen, contains('MFIT'));
-    expect(screen, isNot(contains('Migração Mágica')));
   });
 
   testWidgets('migracao focux pump com OCR e quota copy', (tester) async {

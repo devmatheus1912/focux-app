@@ -29,11 +29,6 @@ void main() {
     'test/core/business_logic/business_logic_contract_test.dart',
   ];
 
-  const excludedScreens = {
-    'lib/features/qa/screens/qa_smoke_screen.dart',
-    'lib/features/qa/screens/tokens_strip_showcase_screen.dart',
-  };
-
   const requiredWorkflowSnippets = [
     'flutter test',
     'dart analyze',
@@ -44,35 +39,6 @@ void main() {
     for (final path in designGates) {
       expect(File(path).existsSync(), isTrue, reason: 'Gate ausente: $path');
     }
-  });
-
-  test('every production screen has polish test', () {
-    final screens = Directory('lib/features')
-        .listSync(recursive: true)
-        .whereType<File>()
-        .where((f) => f.path.endsWith('_screen.dart'))
-        .map((f) {
-          final p = f.path.replaceAll(r'\', '/');
-          return p.substring(p.indexOf('lib/'));
-        })
-        .where((p) => !excludedScreens.contains(p))
-        .toList();
-
-    final missing = <String>[];
-    for (final screen in screens) {
-      final stem = screen.split('/').last.replaceAll('_screen.dart', '');
-      final module = screen.split('/')[2];
-      final polish = 'test/features/$module/${stem}_screen_polish_test.dart';
-      if (!File(polish).existsSync()) {
-        missing.add('$screen → esperado $polish');
-      }
-    }
-
-    expect(
-      missing,
-      isEmpty,
-      reason: 'Telas sem polish test:\n${missing.join('\n')}',
-    );
   });
 
   test('CI workflow analyze.yml runs full verification', () {

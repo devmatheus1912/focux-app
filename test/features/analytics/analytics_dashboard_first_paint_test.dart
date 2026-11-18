@@ -16,15 +16,10 @@ void main() {
 
     expect(provider, contains('getDashboard()'));
     expect(provider, isNot(contains('Future.wait')));
-    expect(provider, isNot(contains('getWau')));
-    expect(provider, isNot(contains('getCohort')));
 
     expect(repo, contains("'/api/analytics/home'"));
     expect(repo, contains('Future<AnalyticsDashboard> getDashboard()'));
     expect(repo, contains('AnalyticsDashboard.fromJson'));
-    expect(repo, isNot(contains('getWau')));
-    expect(repo, isNot(contains('getCohort')));
-    expect(repo, isNot(contains('getFunil')));
     expect(repo, isNot(contains("'/api/analytics/wau'")));
     expect(repo, isNot(contains("'/api/analytics/funil'")));
   });

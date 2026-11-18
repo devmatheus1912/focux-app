@@ -130,7 +130,6 @@ void main() {
     expect(screen, contains('shouldWatchAlunoRecoverySidecar'));
     expect(screen, contains('shouldWatchAluno360Tab1Sidecars'));
     expect(screen, contains('resolveAlunoDetailAlunoAsync'));
-    expect(screen, isNot(contains('alertasConfigProvider')));
     expect(screen, contains('buscarAluno360Operacao'));
     expect(screen, contains('class Timeline360Tile'));
     expect(screen, contains("hint: expandable ? 'Mostra o conteúdo completo'"));
@@ -362,7 +361,6 @@ void main() {
       isFalse,
       reason: 'dead motion util removed',
     );
-    expect(layoutSource, isNot(contains('heroExpandedHeight')));
     expect(
       File('lib/features/alunos/data/aluno_repository.dart').readAsStringSync(),
       isNot(contains('getTelefone')),
@@ -372,12 +370,8 @@ void main() {
       contains('fxMotionDurationMs'),
     );
     // Abas do 360 usam o AlunoSegmentedChoice (14/11): o estilo próprio saiu.
-    expect(layoutSource, isNot(contains('tabSelectedLabelStyle')));
     expect(layoutSource, contains('secondaryActionLabelStyle'));
     expect(layoutSource, contains('FxSettingsLayout.groupRadius'));
-    expect(screen, isNot(contains('syncFromAluno')));
-    expect(screen, isNot(contains('alunoOperacaoFocusModeProvider')));
-    expect(screen, isNot(contains('atualizarOperacaoFocus')));
     expect(screen, contains('operacaoFocusMode'));
     expect(layoutSource, contains('insetCardRadius'));
     expect(

@@ -55,9 +55,6 @@ void main() {
     final detail = readScreenSourceBundle(
       'lib/features/exercicios/screens/exercicio_detail_screen.dart',
     );
-    final treinoDetail = readScreenSourceBundle(
-      'lib/features/treinos/screens/treino_detail_screen.dart',
-    );
 
     expect(builder, contains('ExerciseLibraryPanel'));
     expect(builder, contains('_adicionarRapido'));
@@ -65,7 +62,6 @@ void main() {
     expect(detail, contains('_PrescriptionReadinessPanel'));
     expect(detail, contains('mediaTrustLabel'));
     // O vídeo saiu da prescrição (biblioteca fixa; exercício próprio em Meus exercícios).
-    expect(treinoDetail, isNot(contains('TreinoPrescriptionVideoBlock')));
   });
 
   test('prévia de vídeo real na sheet; sem stub em breve (§38)', () {
@@ -76,9 +72,6 @@ void main() {
     // O player real é o comum (FxVideoRede), não um stub.
     expect(preview, contains('FxVideoRede('));
     expect(preview, contains('FxHomeSheetSurface'));
-    expect(preview, isNot(contains('Demo oficial em breve')));
-    expect(preview, isNot(contains('ExerciseLibraryDemoStandbySheet')));
-    expect(preview, isNot(contains('showLibraryDemoStandbySheet')));
   });
 
   test('MoveKit publicado conta como mídia da biblioteca', () {

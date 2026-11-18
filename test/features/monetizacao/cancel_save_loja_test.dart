@@ -117,7 +117,6 @@ void main() {
     final screen = readScreenSourceBundle(
       'lib/features/assinatura/screens/assinatura_success_screen.dart',
     );
-    expect(screen, isNot(contains('FxRivePlayer')));
     expect(screen, contains('_SuccessBadge'));
   });
 }

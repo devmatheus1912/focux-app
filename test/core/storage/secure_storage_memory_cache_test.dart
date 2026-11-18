@@ -15,11 +15,4 @@ void main() {
     expect(await SecureStorage.getRole(), 'PERSONAL');
     expect(await SecureStorage.getRequiresPasswordChange(), isFalse);
   });
-
-  test('debugResetMemoryCache limpa o prime', () async {
-    SecureStorage.debugPrimeNativeCache(token: 'x', role: 'ALUNO');
-    SecureStorage.debugResetMemoryCache();
-    // Após reset, flags unloaded — não assertamos Keychain real aqui.
-    expect(true, isTrue);
-  });
 }

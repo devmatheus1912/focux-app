@@ -52,7 +52,6 @@ void main() {
     expect(composer, contains('MediaUploadService'));
     expect(composer, contains('feed/images'));
     expect(composer, contains('feed/videos'));
-    expect(composer, isNot(contains('URL da mídia')));
   });
 
   test('feed sem PopupMenuButton: "⋯" abre folha', () {

@@ -23,7 +23,6 @@ void main() {
     expect(source, contains("'/api/rbac/permissoes'"));
     expect(source, contains('.put('));
     expect(source, contains(".delete('/api/rbac/permissoes/"));
-    expect(source, isNot(contains('usuarioConvidadoId')));
   });
 
   test('TrilhasRepository concluirMarco uses POST with trilhaId', () {

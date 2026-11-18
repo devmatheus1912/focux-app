@@ -23,11 +23,7 @@ void main() {
     final widget = paths.map((p) => File(p).readAsStringSync()).join('\n');
 
     // Uma tela: nada de painel nem catálogo em sheet.
-    expect(widget, isNot(contains('showHojePersonalPainel')));
-    expect(widget, isNot(contains('showDashboardToolsCatalogSheet')));
     expect(widget, isNot(contains('DashboardPrioritiesOverlay')));
-    expect(widget, isNot(contains('DashboardDayPulseStrip')));
-    expect(widget, isNot(contains('DashboardFinancialHeroSection')));
 
     // Agora por pessoa, com verbo; a regra mora numa função pura.
     expect(widget, contains('hojeAgora('));

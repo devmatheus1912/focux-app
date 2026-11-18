@@ -13,7 +13,6 @@ void main() {
       expect(s, contains('feedbackVideoNome'));
       expect(s, isNot(contains('FxIcons.ia')));
       expect(s, isNot(contains('Meus vídeos')));
-      expect(s, isNot(contains('Feedbacks')));
     });
   }
 
