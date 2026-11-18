@@ -2,6 +2,9 @@ FOCUX PERSONAL - BRAND STYLEGUIDE (RESUMO)
 
 >>> Guia completo e oficial: brand/brand_guidelines.md
 >>> Versão visual: brand/brand_guidelines.html
+
+SLOGAN:    Quem treinou, quem pagou e quem sumiu.
+DESCRITOR: App de gestão para personal trainer
 Este arquivo é só um resumo técnico. Em caso de conflito, vale o brand_guidelines.md.
 
 1. LOGO v2 (novembro de 2026) — brand/kit/

@@ -1,6 +1,6 @@
 # Focux Personal — Brand Guidelines
 
-> Versão 1.3 · novembro de 2026 · documento interno e confidencial. Novidades: logo v2 e kit em `kit/` (1.1); logo no escuro `#0E93A8` e escala tipográfica do site (1.2); chão escuro petróleo `#0A1A1F` e regra de fundos sem brilhos (1.3).
+> Versão 1.4 · novembro de 2026 · documento interno e confidencial. Novidades: logo v2 e kit em `kit/` (1.1); logo no escuro `#0E93A8` e escala tipográfica do site (1.2); chão escuro petróleo `#0A1A1F` e regra de fundos sem brilhos (1.3); slogan oficial "Quem treinou, quem pagou e quem sumiu." (1.4).
 > Versão visual: [`brand_guidelines.html`](brand_guidelines.html) (abre no navegador, sem dependências).
 
 Este guia junta num lugar só o que hoje está espalhado pelo código do app (`lib/core/theme/`), pelo site (`client/src/index.css`, `design-system/`) e por `brand/styleguide.txt`. Quando o guia e o código discordarem, **o código em produção vence** e este arquivo deve ser corrigido.
@@ -44,13 +44,25 @@ Este guia junta num lugar só o que hoje está espalhado pelo código do app (`l
 | **Studio** | Operação organizada e marca própria diante do aluno |
 | **Aluno** (usuário secundário) | Saber o que treinar hoje, registrar a execução e falar com o personal |
 
-### Promessa
+### Slogan oficial
 
-> Quem treinou, quem pagou e quem sumiu aparecem numa tela só.
+> **Quem treinou, quem pagou e quem sumiu.**
+
+É a dor do personal dita do jeito dele: retenção, cobrança e frequência numa frase só. Pesquisa de 18/11/2026: nenhum concorrente usa essa frase, nem algo parecido. Os concorrentes falam de ferramenta ("tudo em um só lugar", "fácil, prático") ou de crescimento ("triplicar alunos"); a Focux fala de retenção e cobrança.
+
+| Camada | Texto | Onde |
+|---|---|---|
+| **Slogan** | Quem treinou, quem pagou e quem sumiu. | Hero do site, bio do Instagram, anúncios, apresentações. No site, "quem sumiu" vai na cor de destaque |
+| **Descritor** | App de gestão para personal trainer | Título do site, Google, texto de compartilhamento, logo abaixo do slogan |
+| **Subtítulo da App Store** (máx. 30) | Gestão para personal trainer | Lojas de aplicativo |
+
+Bio do Instagram de referência: *Quem treinou, quem pagou e quem sumiu.* / *App de gestão para personal trainer: alunos, treinos e cobrança com PIX.*
+
+O slogan antigo, "Sistema operacional para personal trainer", está aposentado.
 
 ### Posicionamento
 
-- **Categoria:** sistema operacional para personal trainer.
+- **Categoria:** app de gestão para personal trainer.
 - **Inimigo:** o improviso. WhatsApp, planilha, print e cobrança constrangedora.
 - **Valor real:** retenção, tempo recuperado, cobrança organizada (PIX) e marca própria. Treino bonito é consequência, não o argumento principal.
 - **Prova:** capturas reais do app, números reais da oferta, nunca depoimento inventado.
@@ -269,7 +281,7 @@ Plus Jakarta Sans na interface e nos títulos, e JetBrains Mono em dados. Os tí
 
 | Papel | Tamanho / peso / entrelinha / tracking | Classe | Exemplo |
 |---|---|---|---|
-| Display (hero) | 51–70 px / 600 / 1.02 / −0.04em | `clamp(3.2rem, 5.5vw, 4.4rem)` | Sistema operacional para personal trainer. |
+| Display (hero) | 51–70 px / 600 / 1.02 / −0.04em | `clamp(3.2rem, 5.5vw, 4.4rem)` | Quem treinou, quem pagou e quem sumiu. |
 | Título de seção | 30–51 px / 600 / 1.08 / −0.035em | `clamp(1.9rem, 4.5vw, 3.2rem)` | Cobrança sem constrangimento. |
 | Título de bloco | 26–39 px / 600 / 1.05 / −0.045em | `clamp(1.65rem, 2.8vw, 2.45rem)` | O aluno sabe o que fazer hoje. |
 | Título de card | 20 px / 600 / 1.25 | `text-xl` | Execução com vídeo no bolso. |
@@ -406,7 +418,7 @@ Regras:
 
 ### Palavras proibidas ou evitadas
 
-"sistema operacional" fora do slogan oficial, "destrói", "moderno", "escale", "revolucionário", "disruptivo", "o futuro do fitness", "game changer", "potencialize", depoimentos e números inventados.
+"sistema operacional" (slogan antigo, aposentado), "tudo em um só lugar", "destrói", "moderno", "escale", "revolucionário", "disruptivo", "o futuro do fitness", "game changer", "potencialize", depoimentos e números inventados.
 
 ### Regras de escrita
 
@@ -422,7 +434,7 @@ Regras:
 
 | Termo | Significado | Grafia |
 |---|---|---|
-| Hoje | Tela inicial do personal com o que pede ação | Sempre com inicial maiúscula |
+| Hoje | Tela inicial do personal com o que pede ação | Sempre com inicial maiúscula. Nunca "Comando" ou "Centro de Comando": esse nome não existe no app |
 | Índice Focux | Indicador de saúde da operação na tela Hoje | — |
 | IA Focux | A inteligência artificial do app | Nunca "o robô" ou "o ChatGPT" |
 | Aluno | Cliente do personal | Não "cliente" nem "usuário" no app |
