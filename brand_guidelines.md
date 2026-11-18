@@ -491,8 +491,8 @@ Mudanças de cor, logo ou tipografia são **decisão de produto** dos sócios. F
 
 ## 17. Pendências encontradas na auditoria
 
-1. **`focux-website/design-system/focux-personal/MASTER.md` está desatualizado:** cita Outfit como fonte (o site usa Plus Jakarta Sans) e CTA por WhatsApp/acesso antecipado (o CTA atual é baixar o app). Sugestão: apontar o MASTER para este guia.
-2. **`brand/styleguide.txt`** cobre só logos e cores; pode ser substituído por este arquivo.
+1. ~~`MASTER.md` do site desatualizado~~ **Resolvido:** fonte e CTA corrigidos e apontando para este guia.
+2. ~~`brand/styleguide.txt` incompleto~~ **Resolvido:** virou resumo técnico com ponteiro para este guia.
 3. **Petróleo do logo (`#016B7E`) ≠ primário de UI (`#0B4F5C`).** É aceitável, mas precisa ser intencional. Não recolorir o logo nem usar `#016B7E` em interface.
 4. **`#6B7280` sobre `#F4F6F8` dá 4,46:1**, logo abaixo de AA. Em texto pequeno, preferir `#4B5563`.
 5. **Não há logo vetorial (SVG/PDF) no repositório**, só PNG 1254 px. Para impressão e materiais grandes, vale produzir o vetor a partir do original.

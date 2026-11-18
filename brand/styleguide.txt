@@ -1,4 +1,9 @@
-FOCUX PERSONAL - BRAND STYLEGUIDE
+FOCUX PERSONAL - BRAND STYLEGUIDE (RESUMO)
+
+>>> Guia completo e oficial: brand_guidelines.md (raiz do repositório)
+>>> Versão visual: brand/brand_guidelines.html
+Este arquivo é só um resumo técnico de logos e cores; em caso de conflito,
+vale o brand_guidelines.md.
 
 1. LOGOS OFICIAIS (não alterar pixels)
 ────────────────────────────────────────────────────────────
