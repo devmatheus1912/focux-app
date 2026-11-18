@@ -29,5 +29,8 @@ Petróleo logo escuro:  #0E93A8   (FOCU no escuro: #E8EDF2)
 Soft tint:             #D5E8EC
 Softer wash:           #EBF4F6
 
-Fundo cinematic:       #0B0E14
+Chão escuro:           #0A1A1F   (superfície #10262C, borda #1B3A42)
+Regra de fundo:        sólido; no máximo UMA luz fixa por seção; sem mesh,
+                       brilhos sobrepostos, pulso ou órbitas
+(App ainda usa #0B0E14 + brilhos até a migração.)
 Texto Ink ("FOCU"):    #1A1A2E

@@ -8,14 +8,14 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: capa cinematic de largura total + coluna editorial com índice fixo à esquerda no desktop. */
+/* Layout: capa em chão petróleo de largura total + coluna editorial com índice fixo à esquerda no desktop. */
 :root {
   --petrol: #0B4F5C;
   --petrol-ink: #083D47;
   --petrol-mid: #0A6B7A;
   --glow: #3D9AAD;
   --soft: #D5E8EC;
-  --cinematic: #0B0E14;
+  --cinematic: #0A1A1F;
 
   --bg: #F4F6F8;
   --card: #FFFFFF;
@@ -37,14 +37,14 @@
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0B0E14; --card: #121820; --card-hi: #1A2330; --fg: #E8EDF2; --fg-2: #9AA8B3; --line: #1E2830;
+    --bg: #0A1A1F; --card: #10262C; --card-hi: #14313A; --fg: #E8EDF2; --fg-2: #9AA8B3; --line: #1B3A42;
     --accent: #3D9AAD; --accent-text: #3D9AAD; --accent-soft: rgba(61,154,173,.12);
     --good: #6FE296; --good-bg: rgba(111,226,150,.08); --warn: #E2B46F; --warn-bg: rgba(226,180,111,.11); --bad: #FF8B8B; --bad-bg: rgba(255,139,139,.11);
     --shadow: none; color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #0B0E14; --card: #121820; --card-hi: #1A2330; --fg: #E8EDF2; --fg-2: #9AA8B3; --line: #1E2830;
+  --bg: #0A1A1F; --card: #10262C; --card-hi: #14313A; --fg: #E8EDF2; --fg-2: #9AA8B3; --line: #1B3A42;
   --accent: #3D9AAD; --accent-text: #3D9AAD; --accent-soft: rgba(61,154,173,.12);
   --good: #6FE296; --good-bg: rgba(111,226,150,.08); --warn: #E2B46F; --warn-bg: rgba(226,180,111,.11); --bad: #FF8B8B; --bad-bg: rgba(255,139,139,.11);
   --shadow: none; color-scheme: dark;
@@ -66,9 +66,9 @@ code, .mono { font-family: var(--f-mono); font-size: .86em; }
 /* ---------- Capa ---------- */
 .cover {
   background:
-    radial-gradient(120% 90% at 85% 10%, rgba(61,154,173,.28), transparent 55%),
-    radial-gradient(90% 70% at 10% 100%, #0A2A32, transparent 60%),
-    linear-gradient(160deg, #0B0E14 0%, #0A2A32 55%, #121820 100%);
+    /* uma única luz fixa, atrás do logo; sem manchas */
+    radial-gradient(60% 75% at 78% 50%, rgba(61,154,173,.16), transparent 66%),
+    #0A1A1F;
   color: #E8EDF2;
 }
 .cover-in {
@@ -158,8 +158,8 @@ td.num { font-variant-numeric: tabular-nums; font-family: var(--f-mono); font-si
 .logo-tile .tag { position: absolute; left: 12px; bottom: 10px; font: 500 11px/1 var(--f-mono); letter-spacing: .04em; }
 .on-light { background: #F4F6F8; } .on-light .tag { color: #4B5563; }
 .on-white { background: #FFFFFF; } .on-white .tag { color: #4B5563; }
-.on-dark { background: #0B0E14; } .on-dark .tag { color: #9AA8B3; }
-.on-deep { background: linear-gradient(160deg, #0B0E14, #0A2A32); } .on-deep .tag { color: #9AA8B3; }
+.on-dark { background: #0A1A1F; } .on-dark .tag { color: #9AA8B3; }
+.on-deep { background: #10262C; } .on-deep .tag { color: #9AA8B3; }
 .clear-demo { position: relative; background: #FFFFFF; border: 1px solid var(--line); border-radius: 14px; padding: 28px; display: grid; place-items: center; }
 .clear-demo .zone { position: relative; padding: 34px; outline: 1.5px dashed #3D9AAD; outline-offset: 0; background: repeating-linear-gradient(45deg, rgba(61,154,173,.08) 0 6px, transparent 6px 12px); }
 .clear-demo .zone > div { background: #fff; }
@@ -222,7 +222,7 @@ td.num { font-variant-numeric: tabular-nums; font-family: var(--f-mono); font-si
 .btn.primary.hover { background: #083D47; }
 .btn.ghost { background: transparent; color: var(--accent-text); border: 1.5px solid var(--accent); }
 .chipx { padding: 8px 14px; border-radius: 999px; font: 600 12px/1 var(--f-body); background: var(--soft); color: #083D47; }
-.glass-demo { border-radius: 16px; padding: 22px; min-height: 160px; background: radial-gradient(80% 90% at 80% 0%, rgba(61,154,173,.5), transparent 60%), linear-gradient(160deg, #0B0E14, #0A2A32 60%, #121820); display: grid; align-items: end; }
+.glass-demo { border-radius: 16px; padding: 14px; min-height: 160px; background: repeating-linear-gradient(180deg, #10262C 0 22px, #0A1A1F 22px 40px); display: grid; align-items: end; }
 .glass-demo .g { background: rgba(255,255,255,.09); border: 1px solid rgba(255,255,255,.14); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); border-radius: 14px; padding: 14px 16px; color: #E8EDF2; font-size: 14px; }
 .glass-demo .g b { display: block; font-size: 22px; font-variant-numeric: tabular-nums; }
 
@@ -290,7 +290,7 @@ footer { border-top: 1px solid var(--line); padding-top: 22px; color: var(--fg-2
 <header class="cover">
   <div class="cover-in">
     <div>
-      <div class="cover-meta"><span>Brand guidelines</span><span>v1.1 · logo v2</span><span>Nov 2026</span><span>Confidencial</span></div>
+      <div class="cover-meta"><span>Brand guidelines</span><span>v1.3</span><span>Nov 2026</span><span>Confidencial</span></div>
       <h1>A marca <em>Focux Personal</em>, do logo à última vírgula.</h1>
       <p class="lead">Logo, cores, tipografia, voz e regras de uso do app, do site e de qualquer material que leve o nome Focux. Tudo aqui saiu do código em produção.</p>
       <div class="theme-toggle" role="group" aria-label="Tema da página">
@@ -392,8 +392,8 @@ footer { border-top: 1px solid var(--line); padding-top: 22px; color: var(--fg-2
       <div class="grid g4">
         <div class="logo-tile on-white"><img id="logo-src-l" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MzAuMjYgODI0IiB3aWR0aD0iODMwLjI2IiBoZWlnaHQ9IjgyNCIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsbGVkYnk9InQiPjx0aXRsZSBpZD0idCI+Rm9jdXggUGVyc29uYWw8L3RpdGxlPjxwYXRoIGZpbGw9IiMwQjRGNUMiIGZpbGwtcnVsZT0iZXZlbm9kZCIgZD0iTTQ2MS4zNiA1MjkuMzVDNDIxLjM5IDUyNC4xOCAzOTIuMTEgNTE4Ljg4IDM3My43MyA1MTMuNUMzNzIuNjIgNTEzLjE3IDM2OC43NiA1MTIuMDcgMzY1LjE3IDUxMS4wNEMzNTkuNTEgNTA5LjQzIDM1NS40NyA1MDguMDMgMzQ0Ljk1IDUwNC4wMUMzMjguNDIgNDk3LjcgMzA2LjI4IDQ4NSAyOTUuMjMgNDc1LjQ4QzI5My44NSA0NzQuMjkgMjkxLjM3IDQ3Mi4yMiAyODkuNzIgNDcwLjg4QzI4NS44OCA0NjcuNzcgMjc2LjY3IDQ1OC42OCAyNzQuMDggNDU1LjQ1QzI3Mi45OCA0NTQuMDggMjcxLjIgNDUxLjk4IDI3MC4xMSA0NTAuNzhDMjY2LjIxIDQ0Ni40NiAyNTYuODIgNDMyLjU5IDI1NC41MSA0MjcuNzRDMjQ3LjQ5IDQxMi45NyAyNDUuNyA0MDguMjggMjQ3LjA4IDQwOC4yOEMyNDcuNTYgNDA4LjI4IDI1MC43OCA0MTEuNzEgMjUzLjgxIDQxNS40NEMyNTkuMjcgNDIyLjE3IDI3My42OCA0MzYuNjUgMjgwLjA3IDQ0MS44M0MyODIuMTMgNDQzLjQ5IDI4NC44OCA0NDUuNzUgMjg2LjIgNDQ2LjgzQzI5OC4yNyA0NTYuODIgMzE1Ljk1IDQ2OC4wMSAzMzIuMzIgNDc2LjAzQzM1Mi4yNSA0ODUuNzkgMzU1LjE4IDQ4NS43MSAzNDYuNDYgNDc1LjY3QzMzNS4xMSA0NjIuNiAzMjMuNTEgNDQ1LjkyIDMyNC44NCA0NDQuNThDMzI1LjMzIDQ0NC4xIDMyNi4xMyA0NDQuNjEgMzMwLjc3IDQ0OC4zM0MzNDMuMTMgNDU4LjI0IDM1NC4wNSA0NjUuOTEgMzY0LjcgNDcyLjE1QzM3NS40OCA0NzguNDYgMzc3Ljc0IDQ3OS42OSAzODUuNCA0ODMuMzZDNDA1LjgyIDQ5My4xNSA0MjkuODUgNTAwLjcyIDQ0Ny45MSA1MDMuMDZDNDU2LjA5IDUwNC4xMiA0NTUuMzcgNTA0LjU3IDQ2OS4xNCA0ODkuODdDNDcyLjQgNDg2LjM5IDQ3Ni41NCA0ODEuOTkgNDc4LjM1IDQ4MC4wOEM0ODAuMTUgNDc4LjE3IDQ4Mi40NiA0NzUuNTYgNDgzLjQ3IDQ3NC4yOEM0ODQuNDkgNDcyLjk5IDQ4Ni44IDQ3MC4xOSA0ODguNjIgNDY4LjA1QzQ5My44IDQ2MS45NSA1MDIuMyA0NTAuMyA1MDYuNTcgNDQzLjQ2QzUxNS4yNSA0MjkuNTMgNTE4LjY4IDQyMy4wNyA1MjMuNyA0MTEuMjRDNTI4LjIzIDQwMC41NCA1MjguODMgMzk4LjQgNTI3LjQ5IDM5Ny42OEM1MjYuMjUgMzk3LjAyIDUyNS40NSAzOTcuNjQgNTIxLjM2IDQwMi40NkM1MTEuNjcgNDEzLjg2IDQ5MS45IDQyNy41NCA0OTMuNzcgNDIxLjU0QzQ5NC4wMSA0MjAuNzggNDk4LjU3IDQxMi43NSA0OTkuODEgNDEwLjkyQzUwMi4yOCA0MDcuMjYgNTEyLjUzIDM4OC4zMyA1MTMuODUgMzg0Ljk4QzUxNC4zNyAzODMuNjcgNTE1LjIzIDM4MS44MiA1MTUuNzYgMzgwLjg4QzUxOS4zOCAzNzQuNDMgNTMwLjEyIDM0Ni42NiA1MzQuMTggMzMzLjI1QzUzOC4xIDMyMC4zMSA1NDEuNzcgMzA2LjM0IDU0My41NSAyOTcuNjFDNTQ4Ljg1IDI3MS41OSA1NTMuNjYgMjQxLjU0IDU1My42NiAyMzQuNTRDNTUzLjY2IDIzMC42OCA1NTMuMjkgMjI5LjE3IDU1MC43IDIyMi42MkM1NDMuOTcgMjA1LjYxIDU0NC42OCAxOTMuNjYgNTUzLjI2IDE3OS40MkM1NTcuNjMgMTcyLjE3IDU1Ny43NCAxNjkuNDMgNTUzLjk1IDE2MS45OUM1NTIuNzQgMTU5LjYxIDU1MS4xNSAxNTkuODMgNTQ4LjI4IDE2Mi43N0M1NDEuNDQgMTY5Ljc3IDUzMy43NSAxNzIuNDkgNTI2LjQ5IDE3MC40OEM1MjIuMDcgMTY5LjI1IDUyMi4yNCAxNjcuODUgNTI3LjU3IDE2MS42N0M1MzAuOTEgMTU3Ljc5IDUzMi4zMSAxNTYuMDYgNTM0LjIxIDE1My40N0M1MzUuMjEgMTUyLjEgNTM3LjMgMTQ5LjQ0IDUzOC44NSAxNDcuNTZDNTQwLjQxIDE0NS42NyA1NDIuNDggMTQzLjEzIDU0My40NiAxNDEuOUM1NDkuMzcgMTM0LjUgNTU1Ljc1IDEzMy45MSA1NjQuNzggMTM5LjkyQzU3My44MSAxNDUuOTMgNTc2LjM3IDE0OS4zNyA1NzcuNDQgMTU2LjkyQzU3Ny43MSAxNTguNzkgNTc4LjM1IDE2My4xOSA1NzguODcgMTY2LjdDNTgxLjIgMTgyLjQgNTgxLjcgMTg1Ljk1IDU4Mi40NCAxOTIuMzlDNTg0LjY5IDIxMS44NCA1ODQuNDYgMjE3LjcxIDU4MC45MiAyMzAuOThDNTc5LjQxIDIzNi42NCA1NzguMzcgMjQxLjcgNTc3LjE2IDI0OS4zNkM1NzQuNTkgMjY1LjUzIDU3NC4yNiAyNjguMjcgNTcyLjgxIDI4NC42OUM1NzIuNTYgMjg3LjUxIDU3Mi4yMSAyOTEuMzcgNTcyLjA0IDI5My4yNUM1NzEuODcgMjk1LjEzIDU3MS41OSAyOTguODUgNTcxLjQxIDMwMS41QzU3MS4yMyAzMDQuMTUgNTcwLjk1IDMwNy45NCA1NzAuNzggMzA5LjlDNTcwLjYyIDMxMS44NyA1NzAuMzQgMzE1LjY2IDU3MC4xNyAzMTguMzFDNTY5LjQzIDMyOS41IDU2OS4xNiAzMzIuODggNTY4LjQzIDM0MC40MUM1NjMuMjYgMzkzLjYzIDU1MC4yNCA0MzUuNTcgNTI4LjYyIDQ2OC42N0M1MjcuMjIgNDcwLjgxIDUyNS4xNiA0NzMuOTYgNTI0LjA1IDQ3NS42OEM1MjEuODEgNDc5LjExIDUxMy45MSA0ODkuODIgNTA4LjA5IDQ5Ny4zMUM1MDAuMDkgNTA3LjYgNDk1LjUgNTEzLjkyIDQ5Mi45NiA1MTguMTZDNDg1LjgxIDUzMC4wOSA0ODAuNzkgNTMxLjg3IDQ2MS4zNiA1MjkuMzVaTTQyOC4yNiA0MTkuNzFDNDI4LjA3IDQxOS40OCA0MjcuMzQgNDE3LjE5IDQyNi42NCA0MTQuNjRDNDIyLjU0IDM5OS42NSA0MjEuMzIgMzk2LjA4IDQxNy41MSAzODcuNzdDNDE0LjkzIDM4Mi4xNCA0MTAuODMgMzc0LjUgNDA4Ljk3IDM3MS44NkM0MDguMTggMzcwLjc0IDQwNi41IDM2OC4yOSA0MDUuMjMgMzY2LjQxQzQwMy45NiAzNjQuNTIgNDAyLjI3IDM2Mi4yMyA0MDEuNDggMzYxLjMxQzQwMC42OCAzNjAuMzggMzk5LjQyIDM1OC44NiAzOTguNjcgMzU3LjkxQzM5NC41NCAzNTIuNzEgMzg1LjIgMzQ0LjUxIDM3OC43MSAzNDAuMzdDMzU3LjI1IDMyNi43IDMzNC4xNiAzMjIuMSAzMDMuMTggMzI1LjM0QzI5Ny4zNSAzMjUuOTUgMjk2LjYzIDMyNS42MyAyOTguOTkgMzIzLjVDMzA0LjUgMzE4LjUzIDMxOC45NCAzMTEuNyAzMjcuNzYgMzA5LjkxQzMzMS44MSAzMDkuMDggMzMxLjggMzA2LjgyIDMyNy43MyAzMDAuMzVDMzI2Ljg4IDI5OS4wMSAzMjUuMzUgMjk2LjUxIDMyNC4zMyAyOTQuNzhDMzEyLjE3IDI3NC4zOSAyOTIuMDkgMjU3LjM2IDI2Mi44MSAyNDIuNjFDMjU0LjY1IDIzOC41IDI1NC4zNyAyMzguMTMgMjU5LjQ5IDIzOC4xOEMyNzUuMSAyMzguMzEgMzAxLjAyIDI0Ny4wMiAzMTYuMDggMjU3LjE5QzMyOC4xIDI2NS4zMSAzMzkuMzEgMjc2LjgyIDM0NC4zNyAyODYuMjJDMzQ1LjE2IDI4Ny42OSAzNDYuNDcgMjkwLjAxIDM0Ny4yOCAyOTEuMzhDMzQ4Ljc0IDI5My44NSAzNTEuODkgMzAwLjYyIDM1My4xOCAzMDQuMDVDMzU0LjAxIDMwNi4yOSAzNTUuMTUgMzA3LjI3IDM1Ny40NiAzMDcuNzNDMzcyLjY0IDMxMC43NSAzODIuMTcgMzEzLjgyIDM5MS42MyAzMTguNzZDNDA3LjExIDMyNi44NSA0MTYuODIgMzM2LjY2IDQyNS4wNCAzNTIuNTVDNDI4LjY0IDM1OS41MSA0MjkuMTYgMzU5LjU4IDQzMi42OSAzNTMuNThDNDM2LjUgMzQ3LjEyIDQ0My4zOCAzMzkuMzIgNDQ5LjY5IDMzNC4zQzQ1NS40NyAzMjkuNyA0NjIuOTUgMzIzLjYxIDQ2Ni45IDMyMC4yNkM0OTAuOSAyOTkuOTUgNTA1LjcyIDI2OS4yNCA1MDYuNCAyMzguNDJDNTA2LjU0IDIzMi4zMyA1MDYuNzIgMjMyLjQ3IDQ5Ny43MyAyMzEuNjFDNDk1LjAyIDIzMS4zNSA0OTEuMzggMjMxLjAxIDQ4OS42MyAyMzAuODRDNDc2LjY5IDIyOS42MSA0NzEuMzQgMjI1Ljc5IDQ2OC4yNCAyMTUuNTVDNDY3LjI2IDIxMi4zMyA0NjcuMTEgMjEyLjE4IDQ2Mi4yMSAyMDkuNjRDNDQ4LjMxIDIwMi40NSA0NDMuNzcgMTk0LjIzIDQ0OS4zNiAxODYuNDJDNDUxLjAyIDE4NC4xIDQ1MS4wMyAxODMuMDYgNDQ5LjQgMTgwLjM2QzQ0Ni44NCAxNzYuMTEgNDQ2LjY5IDE3My42MSA0NDguNzggMTY5LjU4QzQ1MC4zMiAxNjYuNTkgNDUwLjM0IDE2NS41NiA0NDguOTEgMTYzLjI0QzQ0NS41MSAxNTcuNzMgNDQ2LjkgMTUyLjM4IDQ1Mi41NyAxNDkuMTJDNDU1Ljc3IDE0Ny4yOCA0NTUuNTggMTQ2LjA5IDQ1MS40IDE0MS43OUM0NDUuODkgMTM2LjE1IDQ0NS4wNyAxMzEuNTkgNDQ4Ljg0IDEyNy42NUM0NTEuNTMgMTI0Ljg1IDQ1Mi4zMiAxMjUuMjMgNDU2LjA3IDEzMS4xMUM0NjQuMiAxNDMuODUgNDY2LjM4IDE0Ni45MiA0NjkuMjggMTQ5Ljc1QzQ3Ny41MyAxNTcuNzggNDgwLjM2IDE2NC4yOSA0NzcuNjMgMTY4LjkzQzQ3NC44MSAxNzMuNzMgNDcxLjMgMTcyLjcxIDQ2Mi43MiAxNjQuNjFDNDU5LjM0IDE2MS40MiA0NTcuNTIgMTYwLjg3IDQ1Ny4yMSAxNjIuOTVDNDU2LjkzIDE2NC44OCA0NjEuNDEgMTY5LjQ1IDQ2OS45MiAxNzUuOUM0NzkuMTkgMTgyLjkyIDQ4Mi40NiAxODcuOTUgNDgxIDE5Mi45NkM0NzkuODUgMTk2LjkzIDQ3Ni40OCAxOTguNjIgNDczLjIxIDE5Ni44N0M0NzIuMDMgMTk2LjI0IDQ2NS4wOSAxOTEuMiA0NTkuNDMgMTg2Ljg2QzQ1Ni44NiAxODQuODkgNDU0LjcxIDE4Ni43NiA0NTYuNjEgMTg5LjMxQzQ1Ny43NiAxOTAuODUgNDY1LjU1IDE5Ni45OSA0NzEgMjAwLjY0QzQ3NS4xMyAyMDMuNDEgNDc1Ljg5IDIwNC42MyA0NzcuMjIgMjEwLjZDNDc5LjE5IDIxOS40IDQ4MS4zIDIyMS4wMiA0OTIuOCAyMjIuNTdDNDk2LjA2IDIyMy4wMSA1MDAuNjggMjIzLjY0IDUwMy4wOCAyMjMuOTlDNTA1LjQ3IDIyNC4zMyA1MTAuMjkgMjI0Ljk1IDUxMy43OCAyMjUuMzdDNTIyLjggMjI2LjQ3IDUyMy43IDIyNy40MiA1MTguMjcgMjMwLjE2QzUxNS40MSAyMzEuNiA1MTUuNTggMjMxLjAxIDUxNS4xNiAyNDEuMjNDNTE0LjM1IDI2MC42NSA1MTIuODggMjY4Ljg2IDUwNy42NyAyODIuODJDNTAxLjM3IDI5OS43NCA0OTMuMjQgMzExLjQ0IDQ3NC4xMyAzMzEuMDdDNDU3LjMzIDM0OC4zMiA0NDcuOCAzNjEuMDIgNDQwLjE4IDM3Ni4zQzQzNC45NyAzODYuNzUgNDM0LjM3IDM4OC45OCA0MzEuMzEgNDA5LjE2QzQyOS43NiA0MTkuNDEgNDI5LjMxIDQyMC45NyA0MjguMjYgNDE5LjcxWk00NjkuNTYgMTM0LjI1QzQ2Ny44MyAxMzIuNjYgNDY1LjIgMTMwLjMxIDQ2My43MyAxMjkuMDFDNDU4Ljg4IDEyNC43NSA0NTcuNjUgMTIyLjkgNDU3LjY1IDExOS44NUM0NTcuNjUgMTE1LjA5IDQ2MS42MyAxMTIuMTQgNDY2LjIgMTEzLjUxQzQ2OC44NyAxMTQuMzEgNDY5Ljg3IDExMy4wOSA0NjguNDggMTEwLjc0QzQ2Ny4zNSAxMDguOCA0NjcuMzYgMTA4LjY1IDQ2OS40NSA5NC4wMUM0NzEuMiA4MS43NCA0NzIuNTMgNzEuOTggNDczLjY5IDYyLjg4QzQ3NC45OCA1Mi43NCA0NzYuMTIgNDkuMjUgNDc5LjI4IDQ1LjhDNDg1LjE1IDM5LjM4IDQ5MC4yOCAzOC44NSA1MTQuNiA0Mi4xN0M1MTYuOTkgNDIuNDkgNTIwLjI4IDQyLjkyIDUyMS45MSA0My4xMkM1MjMuNTQgNDMuMzIgNTI2LjgzIDQzLjc0IDUyOS4yMyA0NC4wNUM1MzEuNjIgNDQuMzcgNTM1LjA2IDQ0Ljc4IDUzNi44NSA0NC45OEM1NjAuODEgNDcuNjIgNTY0LjcyIDUyLjU2IDU2MS41MyA3Ni4xMUM1NjAuNjMgODIuNzYgNTYwLjA1IDg3LjMgNTU5LjI3IDkzLjg2QzU1OS4xMSA5NS4xNCA1NTguNjkgOTguNDMgNTU4LjM0IDEwMS4xN0M1NTcuOTggMTAzLjkxIDU1Ny40OCAxMDcuOTcgNTU3LjIzIDExMC4yQzU1Ni45OCAxMTIuNDMgNTU2LjY0IDExNS4xNiA1NTYuNDggMTE2LjI3QzU1Ni4zMSAxMTcuMzggNTU1Ljg4IDEyMC41NCA1NTUuNTIgMTIzLjI4QzU1NC4yNiAxMzIuNzIgNTU0LjM5IDEzMi40OCA1NTAuMTEgMTMzLjIyQzU0NS45MiAxMzMuOTUgNTQ1LjI0IDEzMy4yOCA1NDUuODQgMTI4Ljk5QzU0Ni4wMSAxMjcuNzMgNTQ2LjMxIDEyNS4zIDU0Ni41IDEyMy41OUM1NDYuNjkgMTIxLjg3IDU0Ni45OCAxMTkuNTYgNTQ3LjEzIDExOC40NUM1NDcuNDEgMTE2LjM2IDU0Ny41OSAxMTQuOTggNTQ4LjcgMTA2LjMxQzU0OS4wNiAxMDMuNDggNTQ5Ljc2IDk4LjMgNTUwLjI0IDk0Ljc5QzU1MS4xOCA4OC4wNiA1NTEuMjMgODcuNjMgNTUyLjc2IDc1LjMzQzU1NC43MiA1OS42IDU1My4yOCA1Ni4xOCA1NDQuMTQgNTQuOEM1MzguNDcgNTMuOTQgNTIxLjIzIDUxLjcyIDUxMS4zMyA1MC41OEM1MDguNSA1MC4yNSA1MDQuNDQgNDkuNzcgNTAyLjMgNDkuNTJDNDg3Ljk5IDQ3Ljg0IDQ4NC42NiA0OS41MSA0ODMuNDcgNTguOTlDNDgzLjE5IDYxLjEzIDQ4Mi41NyA2NS42MSA0ODIuMDcgNjguOTVDNDgwLjM4IDgwLjI5IDQ3OC40MSA5NC40NyA0NzcuNyAxMDAuMzlDNDc2LjMzIDExMS44IDQ3NS40NiAxMTUuNDYgNDczLjgzIDExNi43MUM0NzIuNDUgMTE3Ljc2IDQ3Mi40MiAxMTguNDkgNDczLjY1IDEyMC45M0M0NzUuNzcgMTI1LjEzIDQ3Ni40MiAxMzAuOTQgNDc1LjIyIDEzNS4wMkM0NzQuMzcgMTM3LjkxIDQ3My40MyAxMzcuNzggNDY5LjU2IDEzNC4yNVpNNDk0LjcgNjguMzJDNDkzLjMxIDY3LjkgNDkxLjUyIDY1Ljk3IDQ5MS4wOCA2NC40QzQ4OS4zNiA1OC4yNyA0OTYuNDYgNTQuMDEgNTAwLjk0IDU4LjQ4QzUwNS41NiA2My4xIDUwMS4wNCA3MC4yMSA0OTQuNyA2OC4zMloiLz48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSg0MCA2MTApIj48cGF0aCBmaWxsPSIjMUExQTJFIiBmaWxsLXJ1bGU9Im5vbnplcm8iIGQ9Ik0wIDk4TDAgMzBBMzAgMzAgMCAwIDEgMzAgMEwxMjQgMEEyIDIgMCAwIDEgMTI2IDJMMTI2IDE4QTIgMiAwIDAgMSAxMjQgMjBMMzIgMjBBMTIgMTIgMCAwIDAgMjAgMzJMMjAgNDRMMTA0IDQ0QTIgMiAwIDAgMSAxMDYgNDZMMTA2IDYyQTIgMiAwIDAgMSAxMDQgNjRMMjAgNjRMMjAgOThBMiAyIDAgMCAxIDE4IDEwMEwyIDEwMEEyIDIgMCAwIDEgMCA5OFpNMTU0IDcwTDE1NCAzMEEzMCAzMCAwIDAgMSAxODQgMEwyNjAgMEEzMCAzMCAwIDAgMSAyOTAgMzBMMjkwIDcwQTMwIDMwIDAgMCAxIDI2MCAxMDBMMTg0IDEwMEEzMCAzMCAwIDAgMSAxNTQgNzBaTTE3NCAzMkwxNzQgNjhBMTIgMTIgMCAwIDAgMTg2IDgwTDI1OCA4MEExMiAxMiAwIDAgMCAyNzAgNjhMMjcwIDMyQTEyIDEyIDAgMCAwIDI1OCAyMEwxODYgMjBBMTIgMTIgMCAwIDAgMTc0IDMyWk00NDQgMkw0NDQgMThBMiAyIDAgMCAxIDQ0MiAyMEwzNTcgMjBBMTIgMTIgMCAwIDAgMzQ1IDMyTDM0NSA2OEExMiAxMiAwIDAgMCAzNTcgODBMNDQyIDgwQTIgMiAwIDAgMSA0NDQgODJMNDQ0IDk4QTIgMiAwIDAgMSA0NDIgMTAwTDM1NSAxMDBBMzAgMzAgMCAwIDEgMzI1IDcwTDMyNSAzMEEzMCAzMCAwIDAgMSAzNTUgMEw0NDIgMEEyIDIgMCAwIDEgNDQ0IDJaTTQ3MSA3MEw0NzEgMkEyIDIgMCAwIDEgNDczIDBMNDg5IDBBMiAyIDAgMCAxIDQ5MSAyTDQ5MSA2OEExMiAxMiAwIDAgMCA1MDMgODBMNTU4IDgwQTEyIDEyIDAgMCAwIDU3MCA2OEw1NzAgMkEyIDIgMCAwIDEgNTcyIDBMNTg4IDBBMiAyIDAgMCAxIDU5MCAyTDU5MCA3MEEzMCAzMCAwIDAgMSA1NjAgMTAwTDUwMSAxMDBBMzAgMzAgMCAwIDEgNDcxIDcwWiIvPjxwYXRoIGZpbGw9IiMwQjRGNUMiIGZpbGwtcnVsZT0ibm9uemVybyIgZD0iTTcxOS4xMiA5OS4xMkw2MjUuMTIgNS4xMkEzIDMgMCAwIDEgNjI3LjI0IDBMNjQ5LjAyIDBBMyAzIDAgMCAxIDY1MS4xNCAwLjg4TDc0NS4xNCA5NC44OEEzIDMgMCAwIDEgNzQzLjAyIDEwMEw3MjEuMjQgMTAwQTMgMyAwIDAgMSA3MTkuMTIgOTkuMTJaTTYyNS4xMiA5NC44OEw3MTkuMTIgMC44OEEzIDMgMCAwIDEgNzIxLjI0IDBMNzQzLjAyIDBBMyAzIDAgMCAxIDc0NS4xNCA1LjEyTDY1MS4xNCA5OS4xMkEzIDMgMCAwIDEgNjQ5LjAyIDEwMEw2MjcuMjQgMTAwQTMgMyAwIDAgMSA2MjUuMTIgOTQuODhaIi8+PC9nPjxwYXRoIGZpbGw9IiMwQjRGNUMiIGZpbGwtcnVsZT0ibm9uemVybyIgZD0iTTE3OC43MiA3ODRWNzUwSDE5Mi4xNFExOTYuMDEgNzUwIDE5OC43MyA3NTEuNDdRMjAxLjQ1IDc1Mi45NCAyMDIuODkgNzU1LjU0UTIwNC4zMiA3NTguMTMgMjA0LjMyIDc2MS41MlEyMDQuMzIgNzY0LjkxIDIwMi44NiA3NjcuNVEyMDEuNCA3NzAuMDkgMTk4LjY0IDc3MS41M1ExOTUuODcgNzcyLjk4IDE5MS45NiA3NzIuOThIMTgzLjQxVjc2Ny4yMkgxOTAuNzlRMTkyLjg3IDc2Ny4yMiAxOTQuMjIgNzY2LjQ5UTE5NS41NyA3NjUuNzcgMTk2LjI1IDc2NC40OFExOTYuOTIgNzYzLjIgMTk2LjkyIDc2MS41MlExOTYuOTIgNzU5LjgzIDE5Ni4yNSA3NTguNTZRMTk1LjU3IDc1Ny4yOSAxOTQuMjEgNzU2LjU4UTE5Mi44NSA3NTUuODggMTkwLjc2IDc1NS44OEgxODUuOTFWNzg0Wk0yNDEuMzEgNzg0Vjc1MEgyNjQuMjJWNzU1LjkzSDI0OC40OVY3NjQuMDNIMjYzLjA0Vjc2OS45NkgyNDguNDlWNzc4LjA3SDI2NC4yOFY3ODRaTTMwMi4yNCA3ODRWNzUwSDMxNS42NlEzMTkuNTEgNzUwIDMyMi4yNCA3NTEuMzdRMzI0Ljk3IDc1Mi43NCAzMjYuNDEgNzU1LjI0UTMyNy44NCA3NTcuNzQgMzI3Ljg0IDc2MS4xMVEzMjcuODQgNzY0LjQ5IDMyNi4zOCA3NjYuOTNRMzI0LjkyIDc2OS4zNiAzMjIuMTYgNzcwLjY1UTMxOS4zOSA3NzEuOTUgMzE1LjQ3IDc3MS45NUgzMDYuNDlWNzY2LjE3SDMxNC4zMVEzMTYuMzcgNzY2LjE3IDMxNy43MyA3NjUuNjFRMzE5LjA5IDc2NS4wNCAzMTkuNzcgNzYzLjkxUTMyMC40NCA3NjIuNzggMzIwLjQ0IDc2MS4xMVEzMjAuNDQgNzU5LjQxIDMxOS43NyA3NTguMjVRMzE5LjA5IDc1Ny4wOSAzMTcuNzIgNzU2LjQ4UTMxNi4zNSA3NTUuODggMzE0LjI4IDc1NS44OEgzMDkuNDNWNzg0Wk0zMjAuNiA3NjguNTMgMzI5LjA1IDc4NEgzMjEuMTJMMzEyLjg1IDc2OC41M1pNMzgzLjY3IDc1OS43OFEzODMuNDcgNzU3Ljc3IDM4MS45NiA3NTYuNjZRMzgwLjQ1IDc1NS41NCAzNzcuODYgNzU1LjU0UTM3Ni4xIDc1NS41NCAzNzQuODggNzU2LjAzUTM3My42NyA3NTYuNTIgMzczLjAzIDc1Ny4zOVEzNzIuMzkgNzU4LjI1IDM3Mi4zOSA3NTkuMzVRMzcyLjM2IDc2MC4yNiAzNzIuNzggNzYwLjk0UTM3My4yMSA3NjEuNjIgMzczLjk2IDc2Mi4xMVEzNzQuNyA3NjIuNiAzNzUuNjggNzYyLjk2UTM3Ni42NiA3NjMuMzEgMzc3Ljc3IDc2My41NkwzODAuODMgNzY0LjI5UTM4My4wNSA3NjQuNzkgMzg0LjkxIDc2NS42MlEzODYuNzcgNzY2LjQ1IDM4OC4xMyA3NjcuNjZRMzg5LjQ5IDc2OC44OCAzOTAuMjUgNzcwLjUyUTM5MS4wMSA3NzIuMTYgMzkxLjAyIDc3NC4yOVEzOTEuMDEgNzc3LjQxIDM4OS40NCA3NzkuNjlRMzg3Ljg3IDc4MS45NyAzODQuOTIgNzgzLjIzUTM4MS45NyA3ODQuNDggMzc3LjgyIDc4NC40OFEzNzMuNzEgNzg0LjQ4IDM3MC42NiA3ODMuMjJRMzY3LjYxIDc4MS45NiAzNjUuOTEgNzc5LjQ4UTM2NC4yMSA3NzYuOTkgMzY0LjEzIDc3My4zM0gzNzEuMDhRMzcxLjIgNzc1LjA0IDM3Mi4wNyA3NzYuMTdRMzcyLjk0IDc3Ny4zMSAzNzQuNDEgNzc3Ljg4UTM3NS44OCA3NzguNDYgMzc3Ljc0IDc3OC40NlEzNzkuNTcgNzc4LjQ2IDM4MC45MiA3NzcuOTJRMzgyLjI3IDc3Ny4zOSAzODMuMDIgNzc2LjQ1UTM4My43NyA3NzUuNSAzODMuNzcgNzc0LjI3UTM4My43NyA3NzMuMTMgMzgzLjA5IDc3Mi4zNVEzODIuNDIgNzcxLjU3IDM4MS4xNCA3NzEuMDJRMzc5Ljg1IDc3MC40NyAzNzcuOTkgNzcwLjAyTDM3NC4yOSA3NjkuMDlRMzY5Ljk5IDc2OC4wNSAzNjcuNSA3NjUuODJRMzY1LjAxIDc2My42IDM2NS4wMiA3NTkuODNRMzY1LjAxIDc1Ni43NCAzNjYuNjggNzU0LjQzUTM2OC4zNCA3NTIuMTIgMzcxLjI3IDc1MC44M1EzNzQuMTkgNzQ5LjU0IDM3Ny45MSA3NDkuNTRRMzgxLjY5IDc0OS41NCAzODQuNTIgNzUwLjgzUTM4Ny4zNSA3NTIuMTIgMzg4LjkzIDc1NC40M1EzOTAuNTEgNzU2Ljc0IDM5MC41NiA3NTkuNzhaTTQ1OS4zOCA3NjdRNDU5LjM4IDc3Mi41NiA0NTcuMjggNzc2LjQ2UTQ1NS4xOCA3ODAuMzYgNDUxLjU3IDc4Mi40MVE0NDcuOTYgNzg0LjQ2IDQ0My40NiA3ODQuNDZRNDM4LjkzIDc4NC40NiA0MzUuMzIgNzgyLjQxUTQzMS43MiA3ODAuMzUgNDI5LjYzIDc3Ni40NVE0MjcuNTQgNzcyLjU0IDQyNy41NCA3NjdRNDI3LjU0IDc2MS40NCA0MjkuNjMgNzU3LjU0UTQzMS43MiA3NTMuNjQgNDM1LjMyIDc1MS41OVE0MzguOTMgNzQ5LjU0IDQ0My40NiA3NDkuNTRRNDQ3Ljk2IDc0OS41NCA0NTEuNTcgNzUxLjU5UTQ1NS4xOCA3NTMuNjQgNDU3LjI4IDc1Ny41NFE0NTkuMzggNzYxLjQ0IDQ1OS4zOCA3NjdaTTQ1Mi4wOSA3NjdRNDUyLjA5IDc2My40IDQ1MS4wMiA3NjAuOTJRNDQ5Ljk1IDc1OC40NSA0NDguMDEgNzU3LjE3UTQ0Ni4wNyA3NTUuODkgNDQzLjQ2IDc1NS44OVE0NDAuODUgNzU1Ljg5IDQzOC45MSA3NTcuMTdRNDM2Ljk3IDc1OC40NSA0MzUuOSA3NjAuOTJRNDM0LjgzIDc2My40IDQzNC44MyA3NjdRNDM0LjgzIDc3MC42IDQzNS45IDc3My4wOFE0MzYuOTcgNzc1LjU1IDQzOC45MSA3NzYuODNRNDQwLjg1IDc3OC4xMSA0NDMuNDYgNzc4LjExUTQ0Ni4wNyA3NzguMTEgNDQ4LjAxIDc3Ni44M1E0NDkuOTUgNzc1LjU1IDQ1MS4wMiA3NzMuMDhRNDUyLjA5IDc3MC42IDQ1Mi4wOSA3NjdaTTUyNS40MyA3NTBWNzg0SDUxOS4yMkw1MDQuNDMgNzYyLjZINTA0LjE4Vjc4NEg0OTYuOTlWNzUwSDUwMy4zTDUxNy45OCA3NzEuMzhINTE4LjI4Vjc1MFpNNTY5LjUyIDc4NEg1NjEuODJMNTczLjU1IDc1MEg1ODIuODJMNTk0LjU0IDc4NEg1ODYuODNMNTc4LjMyIDc1Ny43N0g1NzguMDVaTTU2OS4wNCA3NzAuNjRINTg3LjIzVjc3Ni4yNUg1NjkuMDRaTTYzMC45MiA3ODRWNzUwSDYzOC4xMVY3NzguMDdINjUyLjY5Vjc4NFoiLz48cGF0aCBmaWxsPSIjMEI0RjVDIiBmaWxsLXJ1bGU9Im5vbnplcm8iIGQ9Ik00MCA3NjdMNDAgNzY3QTMgMyAwIDAgMSA0MyA3NjRMMTQyLjE3IDc2NEEzIDMgMCAwIDEgMTQ1LjE3IDc2N0wxNDUuMTcgNzY3QTMgMyAwIDAgMSAxNDIuMTcgNzcwTDQzIDc3MEEzIDMgMCAwIDEgNDAgNzY3Wk02ODUuMSA3NjdMNjg1LjEgNzY3QTMgMyAwIDAgMSA2ODguMSA3NjRMNzg3LjI2IDc2NEEzIDMgMCAwIDEgNzkwLjI2IDc2N0w3OTAuMjYgNzY3QTMgMyAwIDAgMSA3ODcuMjYgNzcwTDY4OC4xIDc3MEEzIDMgMCAwIDEgNjg1LjEgNzY3WiIvPjwvc3ZnPgo=" alt="Logo sobre branco"><span class="tag">Fundo claro · #FFFFFF</span></div>
         <div class="logo-tile on-light"><img data-logo="l" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="Logo sobre paper"><span class="tag">Fundo claro · #F4F6F8</span></div>
-        <div class="logo-tile on-dark"><img data-logo="d" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="Logo sobre cinematic"><span class="tag">Fundo escuro · #0B0E14</span></div>
-        <div class="logo-tile on-deep"><img data-logo="d" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="Logo sobre mesh escuro"><span class="tag">Fundo escuro · mesh</span></div>
+        <div class="logo-tile on-dark"><img data-logo="d" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="Logo sobre o chão escuro"><span class="tag">Chão escuro · #0A1A1F</span></div>
+        <div class="logo-tile on-deep"><img data-logo="d" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="Logo sobre a superfície escura"><span class="tag">Superfície · #10262C</span></div>
       </div>
       <div class="grid g2">
         <div class="sub">
@@ -444,7 +444,7 @@ footer { border-top: 1px solid var(--line); padding-top: 22px; color: var(--fg-2
         <h3>Usos incorretos</h3>
         <div class="grid g4 dont">
           <div><div class="tile"><img data-logo="l" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="" style="transform:scaleX(1.45)"></div><p>Esticar ou achatar</p></div>
-          <div><div class="tile" style="background:#0B0E14"><img data-logo="l" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt=""></div><p>Versão clara sobre fundo escuro</p></div>
+          <div><div class="tile" style="background:#0A1A1F"><img data-logo="l" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt=""></div><p>Versão clara sobre fundo escuro</p></div>
           <div><div class="tile"><img data-logo="l" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="" style="filter:hue-rotate(150deg) saturate(2)"></div><p>Trocar as cores</p></div>
           <div><div class="tile"><img data-logo="l" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="" style="transform:rotate(-14deg);filter:drop-shadow(0 6px 6px rgba(0,0,0,.5))"></div><p>Girar ou aplicar sombra</p></div>
         </div>
@@ -456,7 +456,7 @@ footer { border-top: 1px solid var(--line); padding-top: 22px; color: var(--fg-2
     <section id="cores">
       <header>
         <span class="eyebrow">04 · Cores</span>
-        <h2>Azul petróleo, neutros frios e o escuro cinematográfico</h2>
+        <h2>Azul petróleo, neutros frios e o chão petróleo</h2>
         <p>Toque em uma cor para copiar o hex. Os mesmos tokens existem no app (<code>EagleTokens</code>) e no site (<code>--fx-*</code>).</p>
       </header>
       <div class="sub">
@@ -468,7 +468,7 @@ footer { border-top: 1px solid var(--line); padding-top: 22px; color: var(--fg-2
         <div class="swatches" id="sw-light"></div>
       </div>
       <div class="sub">
-        <h3>Neutros · tema escuro (cinematic)</h3>
+        <h3>Tema escuro · chão petróleo</h3>
         <div class="swatches" id="sw-dark"></div>
       </div>
       <div class="grid g2">
@@ -489,12 +489,12 @@ footer { border-top: 1px solid var(--line); padding-top: 22px; color: var(--fg-2
             <div style="flex:10;background:#0B4F5C;color:#fff;padding:0 6px">10%</div>
           </div>
           <p class="muted small">Neutros na maior parte, tinta no texto e petróleo nas ações e em um destaque por tela. O petróleo funciona por escassez.</p>
-          <h3>Gradientes</h3>
+          <h3>Fundos e luz</h3>
           <div class="grid g2">
-            <div class="grad" style="background:linear-gradient(135deg,#0B0E14,#0A2A32,#121820);color:#C9D3DB">Hero mesh escuro<br>#0B0E14 → #0A2A32 → #121820</div>
-            <div class="grad" style="background:linear-gradient(135deg,#E4EFF1,#F4F6F8,#EDF2F4);color:#1A1A2E">Mesh claro<br>#E4EFF1 → #F4F6F8 → #EDF2F4</div>
+            <div class="grad" style="background:#0A1A1F;color:#C9D3DB">Chão sólido<br>#0A1A1F</div>
+            <div class="grad" style="background:radial-gradient(70% 70% at 50% 75%,rgba(61,154,173,.2),transparent 68%),#0A1A1F;color:#C9D3DB">Uma luz fixa<br>só onde tem função (hero)</div>
           </div>
-          <p class="muted small">Brilho só como sombra interna em #3D9AAD a 35%. Nunca neon externo.</p>
+          <p class="muted small">Fundo sólido; no máximo uma luz fixa por seção. Nada de manchas de brilho sobrepostas, degradê animado, halo pulsando, órbitas ou borda neon.</p>
         </div>
       </div>
     </section>
@@ -626,10 +626,10 @@ footer { border-top: 1px solid var(--line); padding-top: 22px; color: var(--fg-2
       <div class="grid g2">
         <div class="box" style="box-shadow:var(--shadow)">
           <h3>Sombra de card</h3>
-          <p class="muted small"><code>0 2px 8px rgba(0,0,0,.07)</code> no claro. No escuro a elevação vem da superfície (#121820 → #1A2330), não de sombra preta.</p>
+          <p class="muted small"><code>0 2px 8px rgba(0,0,0,.07)</code> no claro. No escuro a elevação vem de um tom fixo mais claro (chão #0A1A1F → superfície #10262C), nunca de sombra preta ou mancha de luz.</p>
         </div>
         <div class="glass-demo">
-          <div class="g">Entrou no mês<b>R$ 8.420</b><span class="small" style="color:#9AA8B3">Liquid Glass · fill 9% · borda 14% · blur 22</span></div>
+          <div class="g">Barra flutuante sobre a lista<b>Vidro com função</b><span class="small" style="color:#9AA8B3">fill 9% · borda 14% · blur 22 · nunca como decoração</span></div>
         </div>
       </div>
     </section>
@@ -792,12 +792,12 @@ footer { border-top: 1px solid var(--line); padding-top: 22px; color: var(--fg-2
         <tbody>
           <tr><td>Ícone do app</td><td class="num">#0B4F5C</td><td><code>png/ios/</code> · <code>png/android/</code></td><td>Braço branco, sem texto</td></tr>
           <tr><td>Notificação Android</td><td>Transparente</td><td><code>png/android-notificacao/</code></td><td>Silhueta branca</td></tr>
-          <tr><td>Splash</td><td class="num">#0B0E14</td><td>Símbolo ou empilhado escuro</td><td>Centralizado</td></tr>
+          <tr><td>Splash</td><td class="num">#0A1A1F</td><td>Símbolo ou empilhado escuro</td><td>Centralizado, fundo sólido</td></tr>
           <tr><td>Site · cabeçalho</td><td class="num">#F4F6F8</td><td><code>svg/focux-logo-horizontal.svg</code></td><td>Hero e cards invertidos: versão escura</td></tr>
           <tr><td>Favicon</td><td>—</td><td><code>png/favicon/favicon.ico</code></td><td>Símbolo pequeno</td></tr>
           <tr><td>E-mail</td><td>Branco</td><td><code>png/logos/logo-horizontal-1600.png</code></td><td>Uma ação por e-mail</td></tr>
           <tr><td>Redes · avatar</td><td class="num">#0B4F5C</td><td>Ícone do app</td><td>Aguenta recorte redondo</td></tr>
-          <tr><td>Apresentação</td><td>#0B0E14 capa · #F4F6F8 conteúdo</td><td>Empilhado escuro / claro</td><td>Petróleo só em destaques</td></tr>
+          <tr><td>Apresentação</td><td>#0A1A1F capa · #F4F6F8 conteúdo</td><td>Empilhado escuro / claro</td><td>Petróleo só em destaques</td></tr>
           <tr><td>Uniforme / impresso</td><td>Branco, preto ou grafite</td><td><code>svg/uma-cor/</code></td><td>Mínimo de 25 mm</td></tr>
         </tbody>
       </table></div>
@@ -849,6 +849,8 @@ footer { border-top: 1px solid var(--line); padding-top: 22px; color: var(--fg-2
         <li><div><b>Logo vetorial · resolvido.</b> <span class="muted">Kit completo do logo v2 em <code>brand/kit/</code> (SVG e PNG).</span></div></li>
         <li><div><b>Trocar os arquivos em uso pelo logo v2.</b> <span class="muted">App (assets e ícones nativos), site (client/public), favicon, e-mail e redes. A cargo dos sócios.</span></div></li>
         <li><div><b>Busca de marca no INPI.</b> <span class="muted">E busca reversa de imagem antes do lançamento.</span></div></li>
+        <li><div><b>Fundo escuro do site · resolvido.</b> <span class="muted">Chão petróleo #0A1A1F, uma luz fixa no hero, sem pulso, órbitas ou degradê animado (site e páginas legais).</span></div></li>
+        <li><div><b>Migrar o fundo escuro do app.</b> <span class="muted">Trocar #0B0E14 e os três brilhos de cinematic_mesh_background.dart pelo chão petróleo. A cargo dos sócios.</span></div></li>
       </ol>
     </section>
 
@@ -867,11 +869,11 @@ footer { border-top: 1px solid var(--line); padding-top: 22px; color: var(--fg-2
     ["Primary", "#0B4F5C", "CTA, seleção, foco", "#fff"],
     ["Ink / hover", "#083D47", "Hover do CTA, H2 no claro", "#fff"],
     ["Mid", "#0A6B7A", "Links, títulos de seção", "#fff"],
-    ["Glow", "#3D9AAD", "Acento no escuro", "#0B0E14"],
+    ["Glow", "#3D9AAD", "Acento da UI no escuro", "#0A1A1F"],
     ["Soft", "#D5E8EC", "Chip selecionado", "#083D47"],
     ["Softer", "#EBF4F6", "Tooltip, lavagem", "#083D47"],
-    ["Deep", "#051F26", "Mesh e gradientes", "#9AA8B3"],
-    ["Petróleo escuro", "#0E93A8", "Logo sobre fundo escuro", "#0B0E14"]
+    ["Deep", "#051F26", "Tom mais profundo", "#9AA8B3"],
+    ["Petróleo escuro", "#0E93A8", "Logo sobre fundo escuro", "#0A1A1F"]
   ];
   var light = [
     ["Paper", "#F4F6F8", "Fundo de página", "#1A1A2E"],
@@ -884,12 +886,11 @@ footer { border-top: 1px solid var(--line); padding-top: 22px; color: var(--fg-2
     ["Line", "#E5E7EB", "Bordas", "#1A1A2E"]
   ];
   var dark = [
-    ["Cinematic", "#0B0E14", "Fundo, splash, hero", "#9AA8B3"],
-    ["Surface", "#121820", "Cartões", "#9AA8B3"],
-    ["Elevated", "#1A2330", "Sheets, elevado", "#9AA8B3"],
-    ["Line", "#1E2830", "Bordas", "#9AA8B3"],
-    ["Text", "#E8EDF2", "Texto principal", "#0B0E14"],
-    ["Text mute", "#9AA8B3", "Secundário", "#0B0E14"]
+    ["Chão escuro", "#0A1A1F", "Fundo escuro, splash, hero", "#9AA8B3"],
+    ["Superfície", "#10262C", "Cartões no escuro", "#9AA8B3"],
+    ["Borda", "#1B3A42", "Bordas e divisores", "#9AA8B3"],
+    ["Text", "#E8EDF2", "Texto principal", "#0A1A1F"],
+    ["Text mute", "#9AA8B3", "Secundário", "#0A1A1F"]
   ];
   function render(id, list) {
     var el = document.getElementById(id);
@@ -918,11 +919,11 @@ footer { border-top: 1px solid var(--line); padding-top: 22px; color: var(--fg-2
   }
   function ratio(a, b) { var x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); }
   var pairs = [
-    ["#0E93A8", "#0B0E14"],
+    ["#0E93A8", "#0A1A1F"], ["#0E93A8", "#10262C"],
     ["#FFFFFF", "#0B4F5C"], ["#0B4F5C", "#F4F6F8"], ["#0A6B7A", "#FFFFFF"], ["#1A1A2E", "#F4F6F8"],
-    ["#E8EDF2", "#0B0E14"], ["#9AA8B3", "#0B0E14"], ["#3D9AAD", "#0B0E14"], ["#3D9AAD", "#FFFFFF"],
+    ["#E8EDF2", "#0A1A1F"], ["#E8EDF2", "#10262C"], ["#9AA8B3", "#0A1A1F"], ["#3D9AAD", "#0A1A1F"], ["#3D9AAD", "#FFFFFF"],
     ["#4B5563", "#F4F6F8"], ["#6B7280", "#F4F6F8"], ["#C73A3A", "#FFFFFF"], ["#1B8C54", "#FFFFFF"],
-    ["#B5760A", "#FFFFFF"], ["#0B4F5C", "#0B0E14"]
+    ["#B5760A", "#FFFFFF"], ["#0B4F5C", "#0A1A1F"]
   ];
   var tb = document.getElementById("contrast");
   pairs.forEach(function (p) {

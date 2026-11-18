@@ -1,6 +1,6 @@
 # Focux Personal — Brand Guidelines
 
-> Versão 1.2 · novembro de 2026 · documento interno e confidencial. Novidades: logo v2 e kit completo em `kit/` (1.1); petróleo do logo no escuro `#0E93A8` e escala tipográfica do site (1.2).
+> Versão 1.3 · novembro de 2026 · documento interno e confidencial. Novidades: logo v2 e kit em `kit/` (1.1); logo no escuro `#0E93A8` e escala tipográfica do site (1.2); chão escuro petróleo `#0A1A1F` e regra de fundos sem brilhos (1.3).
 > Versão visual: [`brand_guidelines.html`](brand_guidelines.html) (abre no navegador, sem dependências).
 
 Este guia junta num lugar só o que hoje está espalhado pelo código do app (`lib/core/theme/`), pelo site (`client/src/index.css`, `design-system/`) e por `brand/styleguide.txt`. Quando o guia e o código discordarem, **o código em produção vence** e este arquivo deve ser corrigido.
@@ -101,7 +101,7 @@ O logo tem três partes:
 | Versão | Arquivo | Usar em |
 |---|---|---|
 | Empilhado, fundo claro | `svg/focux-logo-empilhado.svg` | Versão principal: capas, apresentações, impressos |
-| Empilhado, fundo escuro | `svg/focux-logo-empilhado-escuro.svg` | Fundos `#0B0E14`, `#121820` ou petróleo profundo |
+| Empilhado, fundo escuro | `svg/focux-logo-empilhado-escuro.svg` | Chão escuro `#0A1A1F` (em tamanho pequeno, evite a superfície `#10262C`: o petróleo do logo cai para 4,3:1) |
 | Horizontal, fundo claro | `svg/focux-logo-horizontal.svg` | Cabeçalho do site, e-mail, rodapé de PDF, barras |
 | Horizontal, fundo escuro | `svg/focux-logo-horizontal-escuro.svg` | Idem, sobre fundo escuro |
 | Símbolo | `svg/focux-simbolo.svg` · `svg/focux-simbolo-escuro.svg` | Avatar de rede social, selo, onde o texto não cabe |
@@ -166,7 +166,7 @@ A marca é **azul petróleo** com neutros frios e um escuro **cinematográfico**
 | Glow / accent | `#3D9AAD` | `brandAccent` | `--fx-glow` / `glow` | Acento no escuro, brilho interno |
 | Soft | `#D5E8EC` | `brandSoft` | `--fx-soft` / `soft` | Chip selecionado, fundos de destaque |
 | Softer | `#EBF4F6` | `brandSofter` | — | Tooltip, lavagem leve |
-| Deep | `#051F26` | `brandDeep` | `--fx-deep` / `deep` | Mesh e gradientes profundos |
+| Deep | `#051F26` | `brandDeep` | `--fx-deep` / `deep` | Tom mais profundo: ícones e avatares sobre claro |
 | Petróleo escuro (logo) | `#0E93A8` | — | — | **Só o logo** sobre fundo escuro. Na interface, o acento no escuro continua `#3D9AAD` |
 
 ### 4.2 Neutros — tema claro
@@ -183,16 +183,21 @@ A marca é **azul petróleo** com neutros frios e um escuro **cinematográfico**
 | Line | `#E5E7EB` | Bordas e divisores |
 | Line soft | `#ECF0F2` | Divisores leves |
 
-### 4.3 Neutros — tema escuro (cinematic)
+### 4.3 Tema escuro: chão petróleo
 
-| Token | Hex | Uso |
-|---|---|---|
-| Cinematic bg | `#0B0E14` | Fundo escuro, splash, hero do site |
-| Surface | `#121820` | Cartões |
-| Elevated | `#1A2330` | Cartão elevado, sheets |
-| Line | `#1E2830` | Bordas |
-| Text | `#E8EDF2` | Texto principal |
-| Text mute | `#9AA8B3` | Texto secundário |
+O escuro da marca é um **petróleo bem escuro e sólido**, não um quase preto com brilhos. A marca está na cor do chão, igual na tela toda.
+
+| Token | Hex | Site (`index.css`) | Uso |
+|---|---|---|---|
+| Chão escuro | `#0A1A1F` | `--fx-cinematic` / `bg-night` | Fundo escuro: hero, cartões invertidos, rodapé, páginas legais, splash |
+| Superfície | `#10262C` | `--fx-cinematic-surface` | Cartões sobre o chão |
+| Borda | `#1B3A42` | — | Bordas e divisores no escuro |
+| Text | `#E8EDF2` | — | Texto principal |
+| Text mute | `#9AA8B3` | — | Texto secundário |
+
+Elevação no escuro: cada nível é **um tom fixo** mais claro (chão → superfície), nunca uma mancha de luz. Assim o mesmo cartão tem a mesma cor em qualquer ponto da tela.
+
+> **App:** o tema escuro do app ainda usa o fundo anterior (`#0B0E14` + `#121820` + `#1A2330`, com degradê e brilhos em `cinematic_mesh_background.dart`). A migração para o chão petróleo está na seção 17.
 
 ### 4.4 Semânticas
 
@@ -215,18 +220,26 @@ Verde, âmbar e vermelho **não são cores de marca**: só comunicam estado. Nun
 
 | Fatia | Cor |
 |---|---|
-| ~70% | Neutros (paper/card no claro, cinematic/surface no escuro) |
+| ~70% | Neutros (paper/card no claro, chão/superfície petróleo no escuro) |
 | ~20% | Ink / texto |
 | ~10% | Azul petróleo (ações, seleção, um destaque por tela) |
 
 O petróleo funciona por escassez. Uma tela com tudo em petróleo perde a hierarquia.
 
-### 4.6 Gradientes
+### 4.6 Fundos, gradientes e luz
 
-- **Hero mesh escuro** (auth, splash, hero do site): `#0B0E14 → #0A2A32 → #121820`.
-- **Mesh claro:** `#E4EFF1 → #F4F6F8 → #EDF2F4`.
-- **Card de marca:** a primária sólida, levemente escurecida, variando só a luminosidade (no máximo 6%). Sem segunda cor e sem brilho.
-- Brilho ("circuit glow") só como sombra interna com `#3D9AAD` a 35%. **Nunca neon externo.**
+Regra: **fundo sólido**. Atmosfera, quando existir, é **uma única luz fixa** com função, nunca manchas sobrepostas.
+
+| Pode | Não pode |
+|---|---|
+| Chão sólido `#0A1A1F` (escuro) ou paper `#F4F6F8` (claro) | Várias manchas de brilho translúcidas sobrepostas ("mesh") |
+| **Uma** luz fixa por seção, ligada ao conteúdo (hero do site: `#3D9AAD` a 20% atrás dos celulares) | Degradê animado sem parar, halo pulsando, anéis ou ícones em órbita |
+| Degradê linear suave entre dois tons do chão (cartões invertidos: `#10262C → #0A1A1F`) | Brilho, neon ou borda luminosa como decoração |
+| Card de marca: a primária sólida, variando só a luminosidade (no máximo 6%) | Camada preta por cima para "consertar" o contraste de um fundo carregado |
+
+Por quê: várias camadas translúcidas sobre o escuro viram uma névoa esverdeada e suja, a elevação dos cartões fica inconsistente e o visual cai no padrão genérico "quase preto + acento neon + bordas brilhando". Diagnóstico completo na auditoria de 18/11/2026 (skill impeccable).
+
+> **App:** ainda usa o degradê `#0D2830 → #0B0E14` com três brilhos e o mesh claro `#E4EFF1 → #F4F6F8 → #EDF2F4`. Migração pendente (seção 17).
 
 ---
 
@@ -325,9 +338,9 @@ Site: container com gutter de 20 px (mobile), 32 px (≥ 640 px), 48 px (≥ 102
 - **Card escuro:** elevação por superfície (`#121820` → `#1A2330`), não por sombra preta.
 - **Profundidade colorida** (destaques raros): sombra na cor do elemento, 40% e 16% de opacidade.
 
-### Liquid Glass
+### Vidro (blur)
 
-Superfícies de vidro no escuro: preenchimento branco 9%, borda branca 14%, blur de 16 / 22 / 28. Use em barras e cartões flutuantes sobre mesh, não em listas inteiras.
+Só onde tem função: uma barra que flutua sobre conteúdo que rola (barra de navegação, cabeçalho fixo), para manter o contexto visível por baixo. Preenchimento branco 9%, borda branca 14%, blur de 16 a 28. **Nunca como decoração** de cartões ou listas.
 
 ---
 
@@ -456,16 +469,20 @@ No plano Enterprise o personal aplica logo, paleta e nome dentro do Focux e pode
 | `#0B4F5C` | `#F4F6F8` | 8,48 | AAA |
 | `#0A6B7A` | `#FFFFFF` | 6,18 | AA |
 | `#1A1A2E` | `#F4F6F8` | 15,75 | AAA |
-| `#E8EDF2` | `#0B0E14` | 16,40 | AAA |
-| `#9AA8B3` | `#0B0E14` | 7,93 | AAA |
-| `#3D9AAD` | `#0B0E14` | 5,91 | AA |
-| `#0E93A8` (logo no escuro) | `#0B0E14` | 5,30 | AA |
+| `#E8EDF2` | `#0A1A1F` (chão) | 15,10 | AAA |
+| `#E8EDF2` | `#10262C` (superfície) | 13,35 | AAA |
+| `#9AA8B3` | `#0A1A1F` | 7,31 | AAA |
+| `#9AA8B3` | `#10262C` | 6,46 | AA |
+| `#3D9AAD` | `#0A1A1F` | 5,44 | AA |
+| `#3D9AAD` | `#10262C` | 4,81 | AA |
+| `#0E93A8` (logo no escuro) | `#0A1A1F` | 4,88 | AA |
+| `#0E93A8` (logo no escuro) | `#10262C` | 4,31 | Só texto grande e ícones |
 | `#3D9AAD` | `#FFFFFF` | 3,27 | Só texto grande e ícones |
 | `#6B7280` | `#F4F6F8` | 4,46 | Abaixo de AA; usar ≥ 14 px bold ou trocar por `#4B5563` |
 | `#C73A3A` | `#FFFFFF` | 5,13 | AA |
 | `#1B8C54` | `#FFFFFF` | 4,26 | Só texto grande e ícones |
 | `#B5760A` | `#FFFFFF` | 3,78 | Só texto grande e ícones |
-| `#0B4F5C` | `#0B0E14` | 2,10 | **Não usar** (petróleo some no escuro: na UI use `#3D9AAD`, no logo `#0E93A8`) |
+| `#0B4F5C` | `#0A1A1F` | 1,94 | **Não usar** (petróleo some no escuro: na UI use `#3D9AAD`, no logo `#0E93A8`) |
 
 ### Regras
 
@@ -484,12 +501,12 @@ No plano Enterprise o personal aplica logo, paleta e nome dentro do Focux e pode
 |---|---|---|---|
 | Ícone do app (iOS/Android) | `#0B4F5C` | `png/ios/`, `png/android/` | Braço branco; sem texto |
 | Notificação Android | Transparente | `png/android-notificacao/` | Silhueta branca |
-| Splash | `#0B0E14` | `svg/focux-simbolo-escuro.svg` ou empilhado escuro | Centralizado |
+| Splash | `#0A1A1F` | `svg/focux-simbolo-escuro.svg` ou empilhado escuro | Centralizado, fundo sólido |
 | Site: cabeçalho | `#F4F6F8` | `svg/focux-logo-horizontal.svg` | Hero e cartões invertidos usam a versão escura |
 | Favicon | — | `png/favicon/favicon.ico` + PNGs | Símbolo pequeno |
 | E-mail transacional | Branco | `png/logos/logo-horizontal-1600.png` | Uma ação por e-mail |
 | Redes sociais (avatar) | `#0B4F5C` | Ícone do app ou símbolo branco | Funciona em recorte redondo |
-| Apresentação | `#0B0E14` capa · `#F4F6F8` conteúdo | Empilhado escuro / claro | Petróleo só em destaques |
+| Apresentação | `#0A1A1F` capa · `#F4F6F8` conteúdo | Empilhado escuro / claro | Petróleo só em destaques; fundo sólido |
 | Uniforme / bordado / impresso | Branco, preto ou grafite | `svg/uma-cor/` | Mínimo de 25 mm (empilhado) |
 
 ---
@@ -534,3 +551,5 @@ Mudanças de cor, logo ou tipografia são **decisão de produto** dos sócios. F
 5. ~~Sem logo vetorial~~ **Resolvido no logo v2:** kit completo em SVG e PNG em `kit/`.
 6. **Trocar os arquivos em uso pelo logo v2** (a cargo dos sócios): `assets/images/` e ícones nativos do app, `client/public/` do site, favicon, e-mail e redes sociais. Até a troca, app e site continuam com o logo anterior.
 7. **Busca de marca no INPI** e busca reversa de imagem antes do lançamento.
+8. ~~Fundo escuro do site com manchas de brilho e efeitos animados~~ **Resolvido em 18/11/2026:** chão petróleo `#0A1A1F`, uma luz fixa no hero, sem pulso, órbitas ou degradê animado (site e páginas legais).
+9. **Migrar o fundo escuro do app** para o chão petróleo (a cargo dos sócios): `EagleTokens.darkBg/darkCard/darkCardHi/darkLine` e `cinematic_mesh_background.dart` (remover os três brilhos). Até lá, app e site têm fundos escuros diferentes.
