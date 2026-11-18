@@ -1,6 +1,6 @@
 # Focux Personal — Brand Guidelines
 
-> Versão 1.0 · novembro de 2026 · documento interno e confidencial.
+> Versão 1.1 · novembro de 2026 · documento interno e confidencial. Novidade da 1.1: logo v2 e kit completo em `kit/`.
 > Versão visual: [`brand_guidelines.html`](brand_guidelines.html) (abre no navegador, sem dependências).
 
 Este guia junta num lugar só o que hoje está espalhado pelo código do app (`lib/core/theme/`), pelo site (`client/src/index.css`, `design-system/`) e por `brand/styleguide.txt`. Quando o guia e o código discordarem, **o código em produção vence** e este arquivo deve ser corrigido.
@@ -82,36 +82,45 @@ Este guia junta num lugar só o que hoje está espalhado pelo código do app (`l
 
 ## 3. Logo
 
+> **Logo v2 (novembro de 2026).** Evolução do logo original: mesmo braço, mesma composição e mesma ideia, com desenho limpo, texto reconstruído e cor unificada com o app. Os arquivos estão em [`kit/`](kit/). O logo anterior ficou em [`legado/`](legado/) só como referência.
+
 ### Construção
 
-O logo é composto por:
+O logo tem três partes:
 
-1. **Símbolo** — um braço flexionado (bíceps) segurando um smartphone. Traduz a proposta: o treino e a gestão do personal na mão, pelo app.
-2. **Wordmark** — "FOCU" em grafite e o **"X" em azul petróleo**, em sans geométrica de cantos arredondados.
-3. **Assinatura** — "PERSONAL" em azul petróleo, caixa alta, com espaçamento largo e um fio horizontal de cada lado.
+1. **Símbolo:** um braço flexionado (bíceps) segurando um smartphone. É o treino e a gestão do personal na mão, pelo app. Curvas redesenhadas a partir do original, com metade dos segmentos.
+2. **Wordmark "FOCUX":** letras geométricas desenhadas sob medida, não digitadas em fonte. Regras de construção, com altura das maiúsculas = 100:
+   - traço de 20 em todas as letras, e de 21,4 nas diagonais do X (diagonais parecem mais finas e recebem compensação óptica);
+   - canto externo com raio de 30 e canto interno com raio de 12;
+   - X com diagonais a 45° exatos;
+   - espaços entre letras ajustados no olho: F→O 28 · O→C 35 · C→U 27 · U→X 30.
+3. **Assinatura "PERSONAL":** Inter Bold, a mesma fonte do app, convertida em formas, com espaçamento largo e um fio de cada lado. A Inter é livre (licença OFL), então não há restrição de licença.
 
-### Versões oficiais
+### Arquivos (`brand/kit/`)
 
 | Versão | Arquivo | Usar em |
 |---|---|---|
-| Fundo claro | `brand/Logo-oficial-ParaFundoClaro.png` → `assets/images/logo_oficial_fundo_claro.png` | Fundos brancos ou `#F4F6F8` |
-| Fundo escuro | `brand/Logo-oficial-ParaFundoEscuro.png` → `assets/images/logo_oficial_fundo_escuro.png` | Fundos `#0B0E14`, `#121820` ou petróleo profundo |
-| **Vetor — fundo claro** | `brand/focux-logo-fundo-claro.svg` | Impressão, materiais grandes, apresentações |
-| **Vetor — fundo escuro** | `brand/focux-logo-fundo-escuro.svg` | Idem, sobre fundo escuro |
-| **Vetor — símbolo** | `brand/focux-simbolo.svg` (petróleo) · `brand/focux-simbolo-branco.svg` | Avatar, carimbo, bordado, onde o logo completo não cabe |
-| Splash | `assets/images/logo_splash*.png` (cópia da variante escura) | Splash nativo sobre `#0B0E14` |
-| Ícone / launcher | `assets/images/logo_icon_*.png` (cópia da variante clara) | Ícone do app sobre fundo branco |
-| Site | `client/public/focux-logo.png`, `focux-logo-light.png`, `favicon.png`, `email-logo.png` | Site, favicon e e-mails |
+| Empilhado, fundo claro | `svg/focux-logo-empilhado.svg` | Versão principal: capas, apresentações, impressos |
+| Empilhado, fundo escuro | `svg/focux-logo-empilhado-escuro.svg` | Fundos `#0B0E14`, `#121820` ou petróleo profundo |
+| Horizontal, fundo claro | `svg/focux-logo-horizontal.svg` | Cabeçalho do site, e-mail, rodapé de PDF, barras |
+| Horizontal, fundo escuro | `svg/focux-logo-horizontal-escuro.svg` | Idem, sobre fundo escuro |
+| Símbolo | `svg/focux-simbolo.svg` · `svg/focux-simbolo-escuro.svg` | Avatar de rede social, selo, onde o texto não cabe |
+| Símbolo pequeno | `svg/focux-simbolo-pequeno.svg` · `svg/focux-simbolo-pequeno-escuro.svg` | **Só até 48 px**: favicon, listas, ícones pequenos |
+| Ícone do app | `svg/focux-icone-app.svg` | Braço branco sobre `#0B4F5C`, quadrado cheio (a loja aplica o arredondamento) |
+| Uma cor | `svg/uma-cor/*` (preto e branco) | Carimbo, bordado, laser, documentos P&B, sobre foto |
+| Notificação Android | `svg/uma-cor/focux-icone-notificacao.svg` | Silhueta branca exigida pelo Android |
+| PNGs prontos | `png/ios/`, `png/android/`, `png/android-notificacao/`, `png/favicon/` (com `favicon.ico`), `png/logos/` | Lojas, launcher, site |
 
-No app, o widget `FocuxOfficialLogo` escolhe a versão pelo brilho do tema (`light` → fundo claro; `dark` / `AuthShell forceDark` → fundo escuro). Os arquivos são a fonte da verdade: **não alterar pixels** e não redesenhar. Para impressão e tamanhos grandes, use os SVGs.
+O **símbolo pequeno** é o mesmo braço com traço mais grosso, celular preenchido e dedos unidos, para não virar borrão em tamanho pequeno. Acima de 48 px use sempre o símbolo normal.
 
 ### Cores do logo
 
-| Parte | Cor no arquivo | Observação |
+| Parte | Fundo claro | Fundo escuro |
 |---|---|---|
-| Símbolo, "X", "PERSONAL" | `#016B7E` (petróleo do logo) | Um pouco mais luminoso que o primário de interface `#0B4F5C`. Não "corrigir" o logo para o primário. |
-| "FOCU" (fundo claro) | `#252A2E` (grafite) | — |
-| "FOCU" (fundo escuro) | `#FDFDFD` (branco) | — |
+| Símbolo, "X", "PERSONAL" e fios | `#0B4F5C` (primário da marca) | `#3D9AAD` (glow) |
+| "FOCU" | `#1A1A2E` (ink) | `#FFFFFF` |
+
+Logo e app usam **o mesmo petróleo**. No fundo escuro o `#0B4F5C` some (contraste 2,1:1), por isso toda a parte petróleo vira `#3D9AAD` (5,9:1), o mesmo acento do app no tema escuro.
 
 ### Área de proteção
 
@@ -121,21 +130,25 @@ Mantenha ao redor do logo um espaço livre igual à **altura do "X" do wordmark*
 
 | Versão | Digital | Impresso |
 |---|---|---|
-| Logo completo (símbolo + wordmark) | 96 px de largura | 25 mm |
-| Só o símbolo (ícone) | 24 px | 8 mm |
+| Empilhado | 96 px de largura | 25 mm |
+| Horizontal | 140 px de largura | 35 mm |
+| Símbolo | 48 px de altura (abaixo disso, use o pequeno) | 12 mm |
+| Símbolo pequeno | 16 px | 5 mm |
 
-Abaixo do mínimo, a assinatura "PERSONAL" deixa de ser legível: use só o símbolo.
+Abaixo do mínimo, "PERSONAL" deixa de ser legível: use o horizontal ou só o símbolo.
 
 ### Usos incorretos
 
 - Esticar, achatar ou girar o logo.
-- Trocar as cores do wordmark ou deixar o "X" da mesma cor do "FOCU".
-- Aplicar a versão de fundo claro sobre fundo escuro (o "FOCU" grafite some), ou o contrário.
+- Trocar as cores, ou deixar o "X" da mesma cor do "FOCU".
+- Usar a versão clara sobre fundo escuro (o "FOCU" some), ou o contrário.
+- Usar `#0B4F5C` no logo sobre fundo escuro: use a versão escura (`#3D9AAD`).
+- Usar o símbolo pequeno em tamanho grande, ou o símbolo normal abaixo de 48 px.
 - Colocar o logo sobre foto movimentada sem uma camada sólida por trás.
 - Adicionar sombra, contorno, brilho, gradiente ou efeito 3D.
 - Separar o símbolo do wordmark e reposicionar livremente.
-- Recriar o wordmark com outra fonte.
-- Usar o logo antigo ciano (`#13C2C2` / `#1EC8C8`), já aposentado.
+- Digitar "FOCUX" em qualquer fonte. O wordmark só existe como desenho.
+- Usar o logo anterior (`legado/`, petróleo `#016B7E`) ou o antigo ciano (`#13C2C2` / `#1EC8C8`) em material novo.
 
 ---
 
@@ -244,6 +257,10 @@ Regras: só esses tamanhos existem (contrato de tipografia em `FocuxHubTypograph
 | Dados, números técnicos | **JetBrains Mono** |
 
 Títulos com peso 600, `tracking-tight` e `text-wrap: balance`. Texto secundário com opacidade mínima de 70% e tamanho mínimo de 11 px.
+
+### Logo
+
+O wordmark "FOCUX" é desenho próprio (ver seção 3) e "PERSONAL" usa Inter Bold. Nunca recrie o logo digitando texto.
 
 ### Materiais avulsos (apresentações, posts, PDFs)
 
@@ -449,15 +466,17 @@ No plano Enterprise o personal aplica logo, paleta e nome dentro do Focux e pode
 
 ## 14. Aplicações
 
-| Peça | Fundo | Logo | Observação |
+| Peça | Fundo | Arquivo | Observação |
 |---|---|---|---|
-| Ícone do app | Branco | Símbolo, versão clara | Sem texto |
-| Splash | `#0B0E14` | Versão escura | Centralizado |
-| Site | `#F4F6F8` (hero e cartões invertidos em `#0B0E14`) | Conforme o fundo | Só tema claro |
-| E-mail transacional | Branco | `email-logo.png` | Uma ação por e-mail |
-| Redes sociais | Paper, cinematic ou petróleo profundo | Conforme o fundo | Captura real do app como imagem principal |
-| Apresentação | `#0B0E14` (capa) e `#F4F6F8` (conteúdo) | Conforme o fundo | Petróleo só em destaques |
-| Uniforme / impresso | Branco, preto ou grafite | Versão de contraste | Tamanho mínimo de 25 mm |
+| Ícone do app (iOS/Android) | `#0B4F5C` | `png/ios/`, `png/android/` | Braço branco; sem texto |
+| Notificação Android | Transparente | `png/android-notificacao/` | Silhueta branca |
+| Splash | `#0B0E14` | `svg/focux-simbolo-escuro.svg` ou empilhado escuro | Centralizado |
+| Site: cabeçalho | `#F4F6F8` | `svg/focux-logo-horizontal.svg` | Hero e cartões invertidos usam a versão escura |
+| Favicon | — | `png/favicon/favicon.ico` + PNGs | Símbolo pequeno |
+| E-mail transacional | Branco | `png/logos/logo-horizontal-1600.png` | Uma ação por e-mail |
+| Redes sociais (avatar) | `#0B4F5C` | Ícone do app ou símbolo branco | Funciona em recorte redondo |
+| Apresentação | `#0B0E14` capa · `#F4F6F8` conteúdo | Empilhado escuro / claro | Petróleo só em destaques |
+| Uniforme / bordado / impresso | Branco, preto ou grafite | `svg/uma-cor/` | Mínimo de 25 mm (empilhado) |
 
 ---
 
@@ -483,7 +502,7 @@ No plano Enterprise o personal aplica logo, paleta e nome dentro do Focux e pode
 | Tipografia do app | `focux-app/lib/core/theme/focux_hub_typography.dart` |
 | Ícones | `focux-app/lib/core/theme/fx_icons.dart` |
 | White-label | `focux-app/lib/core/theme/brand_palette.dart` |
-| Logos | `focux-app/brand/` (cópia do Google Drive "Focux Personal") |
+| Logos e ícones | `focux-app/brand/kit/` (logo v2) · anterior em `brand/legado/` |
 | Tokens do site | `focux-website/client/src/index.css` |
 | Oferta e planos | `focux-website/client/src/lib/data.ts` |
 | Copy do site | `focux-website/client/src/lib/landing.ts` + Humanizer |
@@ -494,8 +513,10 @@ Mudanças de cor, logo ou tipografia são **decisão de produto** dos sócios. F
 
 ## 17. Pendências encontradas na auditoria
 
-1. ~~`MASTER.md` do site desatualizado~~ **Resolvido:** fonte e CTA corrigidos e apontando para este guia.
+1. ~~`MASTER.md` do site desatualizado~~ **Resolvido:** fonte e CTA corrigidos, e aponta para este guia.
 2. ~~`brand/styleguide.txt` incompleto~~ **Resolvido:** virou resumo técnico com ponteiro para este guia.
-3. **Petróleo do logo (`#016B7E`) ≠ primário de UI (`#0B4F5C`).** É aceitável, mas precisa ser intencional. Não recolorir o logo nem usar `#016B7E` em interface.
-4. **`#6B7280` sobre `#F4F6F8` dá 4,46:1**, logo abaixo de AA. Em texto pequeno, preferir `#4B5563`.
-5. ~~Sem logo vetorial~~ **Resolvido:** SVGs em `brand/` (logo claro, logo escuro e símbolo), vetorizados a partir dos PNGs oficiais. Se a agência/designer original tiver o arquivo-fonte (AI/Figma), ele continua sendo a referência máxima.
+3. ~~Petróleo do logo (`#016B7E`) diferente do primário de UI (`#0B4F5C`)~~ **Resolvido no logo v2:** um petróleo só, `#0B4F5C`.
+4. **`#6B7280` sobre `#F4F6F8` dá 4,46:1**, logo abaixo de AA. Em texto pequeno, prefira `#4B5563`.
+5. ~~Sem logo vetorial~~ **Resolvido no logo v2:** kit completo em SVG e PNG em `kit/`.
+6. **Trocar os arquivos em uso pelo logo v2** (a cargo dos sócios): `assets/images/` e ícones nativos do app, `client/public/` do site, favicon, e-mail e redes sociais. Até a troca, app e site continuam com o logo anterior.
+7. **Busca de marca no INPI** e busca reversa de imagem antes do lançamento.

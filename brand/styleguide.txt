@@ -2,34 +2,31 @@ FOCUX PERSONAL - BRAND STYLEGUIDE (RESUMO)
 
 >>> Guia completo e oficial: brand/brand_guidelines.md
 >>> Versão visual: brand/brand_guidelines.html
-Este arquivo é só um resumo técnico de logos e cores; em caso de conflito,
-vale o brand_guidelines.md.
+Este arquivo é só um resumo técnico. Em caso de conflito, vale o brand_guidelines.md.
 
-1. LOGOS OFICIAIS (não alterar pixels)
+1. LOGO v2 (novembro de 2026) — brand/kit/
 ────────────────────────────────────────────────────────────
-Fonte: Google Drive "Focux Personal"
-  - Logo-oficial-ParaFundoClaro.png  → assets/images/logo_oficial_fundo_claro.png
-  - Logo-oficial-ParaFundoEscuro.png → assets/images/logo_oficial_fundo_escuro.png
+svg/focux-logo-empilhado.svg            fundo claro (principal)
+svg/focux-logo-empilhado-escuro.svg     fundo escuro
+svg/focux-logo-horizontal(-escuro).svg  cabeçalhos, e-mail, PDF
+svg/focux-simbolo(-escuro).svg          só o braço
+svg/focux-simbolo-pequeno(-escuro).svg  só até 48 px (favicon etc.)
+svg/focux-icone-app.svg                 braço branco sobre #0B4F5C
+svg/uma-cor/                            preto, branco, notificação Android
+png/ios, png/android, png/android-notificacao, png/favicon, png/logos
 
-Uso no app: FocuxOfficialLogo escolhe pela brightness do Theme
-  - light → fundo_claro
-  - dark / AuthShell forceDark → fundo_escuro
+Logo anterior (PNG, petróleo #016B7E): brand/legado/ — só referência.
+App e site ainda usam o logo anterior até a troca dos arquivos
+(assets/images/, ícones nativos, client/public/ do site).
 
-Cópias de referência em brand/ (mesmos bytes do Drive).
-
-2. CORES — azul petróleo (plataforma)
+2. CORES — azul petróleo (plataforma e logo)
 ────────────────────────────────────────────────────────────
-Primary (CTA):     #0B4F5C
-Hover / ink:       #083D47
-Mid (links/H2):    #0A6B7A
-Glow / secondary:  #3D9AAD
-Soft tint:         #D5E8EC
-Softer wash:       #EBF4F6
+Primary (CTA e logo):  #0B4F5C
+Hover / ink:           #083D47
+Mid (links/H2):        #0A6B7A
+Glow (logo no escuro): #3D9AAD
+Soft tint:             #D5E8EC
+Softer wash:           #EBF4F6
 
-Fundo cinematic:   #0B0E14
-Texto Ink:         #1A1A2E
-
-3. SPLASH / LAUNCHER
-────────────────────────────────────────────────────────────
-Splash nativo (fundo #0B0E14): logo_splash*.png = cópia da variante escuro
-Launcher / adaptive (fundo branco): logo_icon_*.png = cópia da variante claro
+Fundo cinematic:       #0B0E14
+Texto Ink ("FOCU"):    #1A1A2E
