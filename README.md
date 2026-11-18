@@ -76,6 +76,10 @@ flutter test
 
 CI (`.github/workflows/`): analyze, testes e varredura de secrets (gitleaks).
 
+## Marca
+
+Guia de marca oficial (logo, cores, tipografia, voz e tom): [`brand/brand_guidelines.md`](brand/brand_guidelines.md) · versão visual em [`brand/brand_guidelines.html`](brand/brand_guidelines.html).
+
 ## Segurança — nunca versionar
 
 `.env*` · keystores (`*.jks`, `*.keystore`, `*.p12`, `*.pem`) · `key.properties` · `google-services.json` / `GoogleService-Info.plist` reais · service accounts · `e2e/.auth/` · dumps e screenshots de QA com PII · chaves Apple (`AuthKey_*.p8`, perfis de provisionamento)

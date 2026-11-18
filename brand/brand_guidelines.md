@@ -1,7 +1,7 @@
 # Focux Personal — Brand Guidelines
 
 > Versão 1.0 · novembro de 2026 · documento interno e confidencial.
-> Versão visual: [`brand/brand_guidelines.html`](brand/brand_guidelines.html) (abre no navegador, sem dependências).
+> Versão visual: [`brand_guidelines.html`](brand_guidelines.html) (abre no navegador, sem dependências).
 
 Este guia junta num lugar só o que hoje está espalhado pelo código do app (`lib/core/theme/`), pelo site (`client/src/index.css`, `design-system/`) e por `brand/styleguide.txt`. Quando o guia e o código discordarem, **o código em produção vence** e este arquivo deve ser corrigido.
 
