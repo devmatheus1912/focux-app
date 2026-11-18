@@ -19,7 +19,7 @@ void main() {
           message: 'Missing client id / URL scheme',
         ),
       ),
-      contains('não está configurado'),
+      'Não deu para entrar com Google. Atualize o app ou use e-mail e senha.',
     );
   });
 

@@ -7,21 +7,11 @@ void main() {
     final login = File(
       'lib/features/auth/screens/login_screen.dart',
     ).readAsStringSync();
-    final errorMessages = File(
-      'lib/features/auth/utils/auth_error_messages.dart',
-    ).readAsStringSync();
-
     expect(login, contains('AuthOperationalNotice'));
     expect(login, contains('_googleStatusTitle'));
     expect(login, contains('_googleStatusAction'));
     expect(login, contains('GOOGLE_WEB_CLIENT_ID'));
     expect(login, contains('Gerar o build com GOOGLE_WEB_CLIENT_ID'));
-    expect(
-      errorMessages,
-      contains(
-        'Google ainda não está configurado neste ambiente. Use e-mail e senha por enquanto.',
-      ),
-    );
   });
 
   test('password recovery surfaces SMTP action from environment status', () {

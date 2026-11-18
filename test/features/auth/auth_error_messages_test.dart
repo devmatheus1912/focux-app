@@ -182,6 +182,29 @@ void main() {
     );
   });
 
+  test('mapGoogleSignInError não mostra texto técnico ao usuário', () {
+    const esperado = 'Não deu para entrar com Google. Use e-mail e senha.';
+    final erros = <Object>[
+      PlatformException(
+        code: 'sign_in_failed',
+        message: 'com.google.android.gms.common.api.ApiException: 10: ',
+      ),
+      PlatformException(code: 'sign_in_failed', details: 'DEVELOPER_ERROR'),
+      StateError('idToken nulo'),
+      DioException(
+        requestOptions: RequestOptions(path: '/api/auth/google'),
+        response: Response(
+          requestOptions: RequestOptions(path: '/api/auth/google'),
+          statusCode: 503,
+        ),
+        type: DioExceptionType.badResponse,
+      ),
+    ];
+    for (final erro in erros) {
+      expect(mapGoogleSignInError(erro), esperado);
+    }
+  });
+
   test('mapAppleSignInError humaniza 503 / 401 / 400 e nunca 4xx como offline', () {
     expect(
       mapAppleSignInError(

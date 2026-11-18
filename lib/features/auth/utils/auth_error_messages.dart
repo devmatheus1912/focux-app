@@ -9,6 +9,8 @@ const _tlsCopy =
 const _unavailableCopy = 'Servidor indisponível, tente novamente';
 const _rateLimitCopy = 'Muitas tentativas. Aguarde e tente de novo.';
 const _loginCredenciaisCopy = 'E-mail ou senha inválidos';
+const _googleIndisponivelCopy =
+    'Não deu para entrar com Google. Use e-mail e senha.';
 const senhaProvisoriaExpiradaCodigo = 'SENHA_PROVISORIA_EXPIRADA';
 const senhaProvisoriaExpiradaCopy =
     'Essa senha provisória expirou. Peça uma nova ao seu personal.';
@@ -342,7 +344,7 @@ String mapGoogleSignInError(Object error) {
       return _backendMessage(error) ?? 'Recurso não encontrado.';
     }
     if (statusCode == 503) {
-      return 'Google ainda não está configurado neste ambiente. Use e-mail e senha por enquanto.';
+      return _googleIndisponivelCopy;
     }
     if (statusCode == 400) {
       return _backendMessage(error) ??
@@ -370,13 +372,14 @@ String mapGoogleSignInError(Object error) {
         detail.contains('clientid') ||
         detail.contains('url scheme') ||
         detail.contains('gidconfiguration')) {
-      return 'Google Sign-In não está configurado neste build. '
+      return 'Não deu para entrar com Google. '
           'Atualize o app ou use e-mail e senha.';
     }
     if (code == 'sign_in_failed' &&
         (detail.contains('10') || detail.contains('developer_error'))) {
-      return 'Google Sign-In não está liberado para este APK de release. '
-          'No Firebase, cadastre o SHA-1 do keystore de release do app.';
+      // DEVELOPER_ERROR (10): SHA-1 da assinatura fora do Firebase. O usuário
+      // não resolve; ver "Login com Google no Android" no PROJECT-MAP.
+      return _googleIndisponivelCopy;
     }
     if (code == 'sign_in_canceled' || code == 'sign_in_cancelled') {
       return 'Login com Google cancelado.';
@@ -386,7 +389,7 @@ String mapGoogleSignInError(Object error) {
     }
   }
   if (error is StateError) {
-    return 'Google não retornou o token de acesso. Verifique a configuração do app.';
+    return _googleIndisponivelCopy;
   }
   return 'Não foi possível entrar com Google agora.';
 }
