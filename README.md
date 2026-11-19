@@ -1,61 +1,129 @@
-# Focux Personal — App
+# Focux Personal · App
 
-Cliente Flutter (Android, iOS e web) para personal trainers e alunos. Conecta-se à API do repositório **privado** `focux-backend`.
+> **Quem treinou, quem pagou e quem sumiu.**
+> App de gestão para personal trainer: o personal opera a assessoria (alunos, treinos, agenda, cobrança com PIX, IA e marca própria) e o aluno treina, faz check-in e fala com o personal, no mesmo app.
 
 > **Repositório privado.** Código proprietário: cópia, execução em produção, modificação e distribuição **proibidas** sem autorização por escrito. Ver [LICENSE](LICENSE).
 
-## Perfis
+---
 
-| Perfil | Uso |
-|--------|-----|
-| **Personal** | Operação do negócio, alunos, treinos, agenda, financeiro, IA e crescimento |
-| **Aluno** | Treinos, check-in, evolução, saúde, chat e notificações |
+## Sumário
 
-Autenticação JWT, rotas por papel (GoRouter) e design system próprio. Catálogo de rotas (fonte da verdade): `lib/core/router/` — não duplicar inventário aqui.
+- [Estado em produção](#estado-em-produção)
+- [Visão geral](#visão-geral)
+- [Ecossistema](#ecossistema)
+- [Stack](#stack)
+- [Estrutura do repositório](#estrutura-do-repositório)
+- [Primeiros passos](#primeiros-passos)
+- [Qualidade e testes](#qualidade-e-testes)
+- [CI e release](#ci-e-release)
+- [Fluxo de trabalho](#fluxo-de-trabalho)
+- [Marca e design](#marca-e-design)
+- [Segurança](#segurança)
+- [Licença](#licença)
 
-## Estado do projeto
+---
+
+## Estado em produção
+
+*Atualizado em 19/11/2026.*
 
 | | |
 |---|---|
-| Versão / build | Ver `pubspec.yaml` (fonte da verdade) |
-| Branch principal | `main` |
-| Site | [focuxpersonal.com](https://focuxpersonal.com) |
-| Estágio | Pré-produção / App Store em preparação |
+| **Status** | Em produção, publicado nas duas lojas |
+| **App Store** | [Focux Personal](https://apps.apple.com/br/app/focux-personal/id6807799166) |
+| **Google Play** | [Focux Personal](https://play.google.com/store/apps/details?id=com.focux.focux_app&hl=pt_BR) |
+| **Versão** | `1.2.5+241` (fonte da verdade: `pubspec.yaml`) |
+| **Plataformas** | iOS e Android. O target web é compilado para os testes E2E |
+| **Idioma** | Somente português do Brasil |
+| **Assinaturas** | Free, Pro e Enterprise, pela App Store e pelo Google Play (compra no app) |
+| **Site** | [focuxpersonal.com](https://focuxpersonal.com) |
+| **Branch de produção** | `main` |
+
+---
+
+## Visão geral
+
+Dois perfis no mesmo app, com rotas separadas por papel:
+
+| Perfil | O que faz no app |
+|---|---|
+| **Personal** | Tela Hoje (o que pede ação), alunos e Aluno 360, fichas e biblioteca de exercícios, agenda, financeiro com PIX, IA Focux, captação, relatórios e marca própria |
+| **Aluno** | Treino do dia com vídeo, check-in com carga e RPE (funciona sem rede), evolução, saúde (Apple Health / Health Connect), chat e notificações |
+
+**Marca própria (Enterprise):** o personal aplica logo, paleta e um de três estilos (Clássico, Minimalista, Cinematográfico) dentro do app do aluno. Não existe app separado nas lojas.
+
+---
 
 ## Ecossistema
 
 | Repositório | Visibilidade | Papel |
-|-------------|--------------|--------|
-| `focux-app` | Privado | Este cliente |
-| `focux-backend` | **Privado** | API REST, WebSocket e regras de negócio |
-| Site | Externo | [focuxpersonal.com](https://focuxpersonal.com) |
+|---|---|---|
+| **`focux-app`** | Privado | Este cliente Flutter |
+| `focux-backend` | Privado | API REST, WebSocket e regras de negócio |
+| `focux-website` | Privado | Site institucional [focuxpersonal.com](https://focuxpersonal.com) |
 
-Não documente aqui infra, URLs internas, credenciais ou detalhes do backend privado.
+Não documente aqui infraestrutura, URLs internas, credenciais ou detalhes do backend privado.
 
-## Stack (resumo)
+---
 
-Flutter · Riverpod · GoRouter · Dio · secure storage · STOMP · Firebase (FCM/Crashlytics) · IAP · Health · l10n (só PT-BR)
+## Stack
 
-## Desenvolvimento local
+| Camada | Tecnologia |
+|---|---|
+| Framework | Flutter (SDK `>=3.47`, Dart `^3.7.2`) |
+| Estado | Riverpod |
+| Navegação | GoRouter (catálogo de rotas em `lib/core/router/`) |
+| Rede | Dio, STOMP (tempo real) |
+| Autenticação | JWT, secure storage, Google Sign-In, Sign in with Apple |
+| Notificações e erros | Firebase (FCM, Crashlytics), Sentry |
+| Compras | In-App Purchase (StoreKit e Google Play Billing) |
+| Saúde | `health` (Apple Health / Health Connect) |
+| Design system | Tokens próprios em `lib/core/theme/`, tipografia Inter, ícones Phosphor (`FxIcons`) |
+| Idioma | l10n, só PT-BR |
+
+---
+
+## Estrutura do repositório
+
+```text
+lib/
+  core/           # infraestrutura compartilhada: api, auth, router, theme, design system, storage…
+  features/       # um diretório por domínio (alunos, treinos, checkin, financeiro, ia, agenda…)
+  l10n/           # textos (PT-BR)
+  main.dart
+test/             # testes unitários e de widget
+integration_test/ # testes de integração
+e2e/              # suíte Playwright sobre o build web (ver e2e/README.md)
+brand/            # guia de marca e kit do logo (ver Marca e design)
+assets/           # fontes, imagens e sons empacotados
+android/ ios/ web/
+tools/            # scripts de release e utilitários
+```
+
+---
+
+## Primeiros passos
 
 ### Pré-requisitos
 
-Flutter SDK (compatível com `pubspec.yaml`) · Android Studio ou Xcode · backend acessível só no **seu** ambiente autorizado
+- Flutter SDK compatível com `pubspec.yaml`
+- Xcode (iOS) e/ou Android Studio (Android)
+- Backend acessível **no seu** ambiente autorizado
 
-### Setup
+### Configuração
 
 ```bash
 flutter pub get
-cp .env.local.example .env.local
-# Edite .env.local localmente — nunca commite
+cp .env.local.example .env.local                      # edite localmente, nunca commite
 
 cp android/app/google-services.json.example android/app/google-services.json
 cp ios/Runner/GoogleService-Info.plist.example ios/Runner/GoogleService-Info.plist
 cp android/gradle.properties.example android/gradle.properties   # se necessário
-cp android/key.properties.example android/key.properties         # só release local
+cp android/key.properties.example android/key.properties         # só para release local
 ```
 
-Templates e chaves de runtime: `lib/core/config/env.dart` e arquivos `*.example` versionados.
+As chaves de runtime ficam em `lib/core/config/env.dart` e nos arquivos `*.example` versionados.
 
 ### Rodar
 
@@ -65,29 +133,74 @@ flutter run \
   --dart-define=PUBLIC_WEB_URL=https://your-frontend.example.com
 ```
 
-Use **sempre** placeholders ou hosts do seu ambiente de dev. Nunca cole tokens, API keys ou senhas reais em issues, PRs ou README.
+Use **sempre** placeholders ou hosts do seu ambiente de desenvolvimento. Nunca cole tokens, chaves de API ou senhas em issues, PRs ou neste README.
 
-### Qualidade
+---
+
+## Qualidade e testes
 
 ```bash
-dart analyze --fatal-warnings --fatal-infos
-flutter test
+dart analyze --fatal-warnings --fatal-infos   # análise estática sem tolerância
+flutter test                                   # unitários e de widget
+flutter test integration_test                  # integração
 ```
 
-CI (`.github/workflows/`): analyze, testes e varredura de secrets (gitleaks).
+E2E (Playwright sobre o build web): instruções em [`e2e/README.md`](e2e/README.md).
 
-## Marca
+---
 
-Guia de marca oficial (logo, cores, tipografia, voz e tom): [`brand/brand_guidelines.md`](brand/brand_guidelines.md) · versão visual em [`brand/brand_guidelines.html`](brand/brand_guidelines.html).
+## CI e release
 
-## Segurança — nunca versionar
+| Workflow | Quando roda | O que faz |
+|---|---|---|
+| `analyze.yml` | push, PR | `dart analyze` sem tolerância a avisos e busca de arquivos Dart órfãos |
+| `e2e.yml` | push | Build web e suíte Playwright no Chrome |
+| `security.yml` | push, PR | Varredura de secrets (gitleaks) |
+| `semgrep.yml` | push, PR | Análise estática de segurança (Semgrep) |
+| `codeql.yml` | agendado | CodeQL sobre o JavaScript da suíte E2E |
+| `ios-release.yml` | tag `v*` | Build do IPA em macOS |
 
-`.env*` · keystores (`*.jks`, `*.keystore`, `*.p12`, `*.pem`) · `key.properties` · `google-services.json` / `GoogleService-Info.plist` reais · service accounts · `e2e/.auth/` · dumps e screenshots de QA com PII · chaves Apple (`AuthKey_*.p8`, perfis de provisionamento)
+Os testes (`flutter test`) não rodam no CI hoje: rode localmente antes do merge.
 
-Se encontrar secret no histórico: trate como comprometido, revogue no provedor e avise o mantenedor — não force-push sem alinhamento.
+**Release:** a versão sobe em `pubspec.yaml`. O iOS sai pela tag `v*` (ou por `tools/release/build-ios.sh`) e o Android, pelo build assinado enviado ao Google Play.
 
-**Vulnerabilidades:** não abra issue pública. E-mail: **contato@focuxpersonal.com** (relato responsável).
+---
+
+## Fluxo de trabalho
+
+1. **Branch nova** para toda mudança (`feat/…`, `fix/…`). Nunca commitar direto em `main`.
+2. **Testes verdes** na branch antes de qualquer merge.
+3. **Merge em `main`** só com autorização explícita; PR é o caminho preferido.
+4. **Build de produção** só a partir de `main` atualizada e com testes passando.
+
+Hotfix crítico e mudanças só de documentação podem ir direto para `main`, com confirmação. `push --force` em `main` é proibido.
+
+---
+
+## Marca e design
+
+| | |
+|---|---|
+| Guia de marca | [`brand/brand_guidelines.md`](brand/brand_guidelines.md) · versão visual em [`brand/brand_guidelines.html`](brand/brand_guidelines.html) |
+| Kit do logo v2 | [`brand/kit/`](brand/kit/): SVG e PNG (empilhado, horizontal, símbolo, ícones de iOS e Android, notificação, favicon) |
+| Logo anterior | [`brand/legado/`](brand/legado/), só como referência |
+
+**Pendências de marca no app** (detalhes na seção 17 do guia):
+- trocar `assets/images/` e os ícones nativos pelo logo v2;
+- migrar o fundo escuro (`#0B0E14` com brilhos) para o chão derivado da marca.
+
+---
+
+## Segurança
+
+**Nunca versionar:** `.env*` · keystores (`*.jks`, `*.keystore`, `*.p12`, `*.pem`) · `key.properties` · `google-services.json` e `GoogleService-Info.plist` reais · service accounts · `e2e/.auth/` · dumps e capturas de QA com dados pessoais · chaves Apple (`AuthKey_*.p8`, perfis de provisionamento).
+
+Secret encontrado no histórico: trate como comprometido, revogue no provedor e avise o mantenedor. Não faça force-push sem alinhamento.
+
+**Vulnerabilidades:** não abra issue pública. Relato responsável para **contato@focuxpersonal.com**.
+
+---
 
 ## Licença
 
-[LICENSE](LICENSE) — MATHEUS OLIVEIRA DOS SANTOS DESENVOLVIMENTO DE SOFTWARE LTDA. Todos os direitos reservados.
+[LICENSE](LICENSE) · MATHEUS OLIVEIRA DOS SANTOS DESENVOLVIMENTO DE SOFTWARE LTDA. Todos os direitos reservados.
