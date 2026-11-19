@@ -18,6 +18,7 @@
 - [Qualidade e testes](#qualidade-e-testes)
 - [CI e release](#ci-e-release)
 - [Fluxo de trabalho](#fluxo-de-trabalho)
+- [Documentação](#documentação)
 - [Marca e design](#marca-e-design)
 - [Segurança](#segurança)
 - [Licença](#licença)
@@ -96,9 +97,10 @@ test/             # testes unitários e de widget
 integration_test/ # testes de integração
 e2e/              # suíte Playwright sobre o build web (ver e2e/README.md)
 brand/            # guia de marca e kit do logo (ver Marca e design)
+docs/             # arquitetura, design system, produto e release
 assets/           # fontes, imagens e sons empacotados
 android/ ios/ web/
-tools/            # scripts de release e utilitários
+tool/             # verificação local, scripts de release e utilitários
 ```
 
 ---
@@ -158,22 +160,37 @@ E2E (Playwright sobre o build web): instruções em [`e2e/README.md`](e2e/README
 | `security.yml` | push, PR | Varredura de secrets (gitleaks) |
 | `semgrep.yml` | push, PR | Análise estática de segurança (Semgrep) |
 | `codeql.yml` | agendado | CodeQL sobre o JavaScript da suíte E2E |
-| `ios-release.yml` | tag `v*` | Build do IPA em macOS |
+| `ios-release.yml` | manual ou tag `v*` | Build do IPA em macOS e envio opcional ao TestFlight, com símbolos para o Sentry |
 
 Os testes (`flutter test`) não rodam no CI hoje: rode localmente antes do merge.
 
-**Release:** a versão sobe em `pubspec.yaml`. O iOS sai pela tag `v*` (ou por `tools/release/build-ios.sh`) e o Android, pelo build assinado enviado ao Google Play.
+**Release:** a versão sobe em `pubspec.yaml`. O iOS sai pelo `ios-release.yml` a partir da `main` e o Android, pelo app bundle assinado enviado ao Google Play. Passo a passo em [`docs/RELEASE.md`](docs/RELEASE.md).
 
 ---
 
 ## Fluxo de trabalho
 
-1. **Branch nova** para toda mudança (`feat/…`, `fix/…`). Nunca commitar direto em `main`.
-2. **Testes verdes** na branch antes de qualquer merge.
-3. **Merge em `main`** só com autorização explícita; PR é o caminho preferido.
-4. **Build de produção** só a partir de `main` atualizada e com testes passando.
+1. Todo trabalho entra na `develop`, onde o CI roda.
+2. No lançamento, a `develop` é mesclada na `main`, que guarda só o que está nas lojas.
+3. Bug em produção: `hotfix/<nome>` a partir da `main`, de volta na `main` e na `develop`.
 
-Hotfix crítico e mudanças só de documentação podem ir direto para `main`, com confirmação. `push --force` em `main` é proibido.
+Detalhes, checklist e padrão de commit em [`CONTRIBUTING.md`](CONTRIBUTING.md).
+
+---
+
+## Documentação
+
+| Documento | Conteúdo |
+|---|---|
+| [`docs/PRODUTO.md`](docs/PRODUTO.md) | O que é o produto, para quem, planos e princípios |
+| [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md) | Estrutura, navegação, dados, privacidade e testes de contrato |
+| [`docs/DESIGN-SYSTEM.md`](docs/DESIGN-SYSTEM.md) | Tipografia, ícones, cor e componentes do app |
+| [`docs/RELEASE.md`](docs/RELEASE.md) | Versão, TestFlight, Google Play e hotfix |
+| [`brand/brand_guidelines.md`](brand/brand_guidelines.md) | Guia de marca |
+| [`CONTRIBUTING.md`](CONTRIBUTING.md) | Branches, checklist e padrão de commit |
+| [`SECURITY.md`](SECURITY.md) | Como relatar vulnerabilidade e o que nunca entra no Git |
+| [`CHANGELOG.md`](CHANGELOG.md) | O que mudou em cada versão |
+| [`e2e/README.md`](e2e/README.md) | Testes E2E |
 
 ---
 
@@ -182,6 +199,7 @@ Hotfix crítico e mudanças só de documentação podem ir direto para `main`, c
 | | |
 |---|---|
 | Guia de marca | [`brand/brand_guidelines.md`](brand/brand_guidelines.md) · versão visual em [`brand/brand_guidelines.html`](brand/brand_guidelines.html) |
+| Design system do app | [`docs/DESIGN-SYSTEM.md`](docs/DESIGN-SYSTEM.md) |
 | Kit do logo v2 | [`brand/kit/`](brand/kit/): SVG e PNG (empilhado, horizontal, símbolo, ícones de iOS e Android, notificação, favicon) |
 | Logo anterior | [`brand/legado/`](brand/legado/), só como referência |
 
@@ -197,7 +215,7 @@ Hotfix crítico e mudanças só de documentação podem ir direto para `main`, c
 
 Secret encontrado no histórico: trate como comprometido, revogue no provedor e avise o mantenedor. Não faça force-push sem alinhamento.
 
-**Vulnerabilidades:** não abra issue pública. Relato responsável para **contato@focuxpersonal.com**.
+**Vulnerabilidades:** não abra issue. Relato privado para **contato@focuxpersonal.com**, conforme a [política de segurança](SECURITY.md).
 
 ---
 

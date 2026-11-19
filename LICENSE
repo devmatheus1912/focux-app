@@ -15,34 +15,30 @@ O Software é protegido pela Lei nº 9.609/1998 (Lei do Software), pela Lei
 nº 9.610/1998 (Lei de Direitos Autorais) e pela Lei nº 9.279/1996 (Lei da
 Propriedade Industrial).
 
-2. REPOSITÓRIO PÚBLICO NÃO É LICENÇA ABERTA
+2. REPOSITÓRIO PRIVADO
 
-Este repositório é público apenas para transparência e consulta. A
-disponibilidade do código não concede nenhuma licença de uso, cópia,
-modificação ou distribuição, exceto o mínimo exigido pelos Termos de Serviço
-do GitHub (visualizar o repositório e criar um fork dentro da plataforma
-GitHub).
+Este repositório é privado e destina-se apenas a colaboradores e sistemas
+autorizados pela Titular. O acesso via GitHub ou outro provedor não concede
+licença de uso, cópia, modificação ou distribuição a terceiros.
 
 3. O QUE É PERMITIDO
 
-a) Ler e consultar o código-fonte pelo GitHub.
-b) Criar fork dentro do GitHub, sem uso fora do escopo do item 2.
-c) Reportar falhas de segurança de forma responsável pelo e-mail
+a) Acesso, leitura e alteração apenas dentro do escopo autorizado pela Titular
+   (emprego, contrato ou permissão expressa).
+b) Reportar falhas de segurança de forma responsável pelo e-mail
    contato@focuxpersonal.com.
 
 4. O QUE É PROIBIDO SEM AUTORIZAÇÃO PRÉVIA E POR ESCRITO DA TITULAR
 
-a) Copiar, reproduzir ou baixar o Software para uso próprio ou de terceiros.
-b) Compilar, executar em produção, publicar em lojas de aplicativos ou
-   disponibilizar o Software, no todo ou em parte.
-c) Modificar, adaptar, traduzir ou criar obras derivadas.
-d) Distribuir, sublicenciar, vender, alugar ou ceder o Software.
-e) Usar o Software, ou partes dele, em produto ou serviço concorrente ou
-   comercial.
-f) Usar as marcas, logotipos ou a identidade visual Focux.
-g) Usar o Software para treinar, ajustar ou avaliar modelos de inteligência
-   artificial ou aprendizado de máquina.
-h) Remover ou alterar avisos de direitos autorais ou desta licença.
+a) Copiar, reproduzir ou extrair o Software para fora do ambiente autorizado.
+b) Publicar, vazar ou tornar o código ou trechos dele acessíveis ao público.
+c) Compilar, executar em produção, publicar em lojas de aplicativos ou
+   disponibilizar o Software sem controle da Titular.
+d) Modificar para criar produto concorrente ou sublicenciar a terceiros.
+e) Distribuir, vender, alugar ou ceder o Software.
+f) Usar marcas ou identidade visual Focux fora do permitido.
+g) Usar o Software para treinar ou avaliar modelos de IA/ML.
+h) Remover avisos de direitos autorais ou desta licença.
 
 5. COMPONENTES DE TERCEIROS
 
@@ -60,7 +56,7 @@ modificação, distribuição e sublicenciamento.
 
 7. AUSÊNCIA DE GARANTIA
 
-O Software é disponibilizado para consulta "no estado em que se encontra",
+O Software é disponibilizado "no estado em que se encontra",
 sem garantia de qualquer tipo. A Titular não se responsabiliza por danos
 decorrentes do uso não autorizado do Software.
 
