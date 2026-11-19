@@ -1,0 +1,16 @@
+name: Melhoria
+description: Uma ideia ou ajuste para o produto.
+labels: ["melhoria"]
+body:
+  - type: textarea
+    id: problema
+    attributes:
+      label: Qual problema resolve
+      description: Quem é afetado (personal, aluno, equipe) e o que atrapalha hoje.
+    validations:
+      required: true
+  - type: textarea
+    id: proposta
+    attributes:
+      label: Proposta
+      description: O que deveria mudar. Feature nova passa por spec aprovada antes do código.

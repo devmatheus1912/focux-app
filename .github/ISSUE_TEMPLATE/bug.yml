@@ -1,0 +1,33 @@
+name: Bug
+description: Algo não funciona como deveria.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: "Não cole token, senha, e-mail ou dado de aluno. Falha de segurança vai por e-mail (ver SECURITY.md)."
+  - type: textarea
+    id: oque
+    attributes:
+      label: O que acontece
+      description: O que você viu e o que esperava ver.
+    validations:
+      required: true
+  - type: textarea
+    id: passos
+    attributes:
+      label: Como reproduzir
+      placeholder: "1. Abrir...
+2. Tocar em...
+3. Ver..."
+    validations:
+      required: true
+  - type: input
+    id: onde
+    attributes:
+      label: Onde
+      description: "Tela, rota ou fluxo, versão e aparelho quando fizer diferença."
+  - type: input
+    id: sentry
+    attributes:
+      label: Link do Sentry
+      description: Se houver.

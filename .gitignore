@@ -88,9 +88,6 @@ focux_app.iml
 .cursor/*
 !.cursor/skills/
 !.cursor/skills/**
-!.cursor/rules/
-!.cursor/rules/**
-.cursor/rules/graphify.mdc
 !.cursor/agents/
 !.cursor/agents/**
 
@@ -107,7 +104,7 @@ scripts/
 
 # One-shot migration artifacts
 migrate_out.txt
-tools/migrate_tokens_strip*
+tool/migrate_tokens_strip*
 
 /AUDIT.md
 
@@ -159,7 +156,9 @@ fastlane/Preview.html
 
 # Cursor IDE
 .ua/
-docs/
+# docs/: só a documentação oficial (*.md) entra no Git
+docs/*
+!docs/*.md
 
 # Intercom keys
 lib/core/support/intercom_config.dart

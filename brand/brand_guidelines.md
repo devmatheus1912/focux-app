@@ -3,7 +3,7 @@
 > Versão 1.4 · novembro de 2026 · documento interno e confidencial. Novidades: logo v2 e kit em `kit/` (1.1); logo no escuro `#0E93A8` e escala tipográfica do site (1.2); chão escuro petróleo `#0A1A1F` e regra de fundos sem brilhos (1.3); slogan oficial "Quem treinou, quem pagou e quem sumiu." (1.4).
 > Versão visual: [`brand_guidelines.html`](brand_guidelines.html) (abre no navegador, sem dependências).
 
-Este guia junta num lugar só o que hoje está espalhado pelo código do app (`lib/core/theme/`), pelo site (`client/src/index.css`, `design-system/`) e por `brand/styleguide.txt`. Quando o guia e o código discordarem, **o código em produção vence** e este arquivo deve ser corrigido.
+Este guia junta num lugar só o que hoje está espalhado pelo código do app (`lib/core/theme/`), pelo design system do app (`docs/DESIGN-SYSTEM.md`) e pelo site (`client/src/index.css`, `docs/DESIGN-SYSTEM.md` do `focux-website`). Quando o guia e o código discordarem, **o código em produção vence** e este arquivo deve ser corrigido.
 
 ---
 
@@ -556,8 +556,8 @@ Mudanças de cor, logo ou tipografia são **decisão de produto** dos sócios. F
 
 ## 17. Pendências encontradas na auditoria
 
-1. ~~`MASTER.md` do site desatualizado~~ **Resolvido:** fonte e CTA corrigidos, e aponta para este guia.
-2. ~~`brand/styleguide.txt` incompleto~~ **Resolvido:** virou resumo técnico com ponteiro para este guia.
+1. ~~Regras de design do site desatualizadas~~ **Resolvido:** fonte e CTA corrigidos; viraram `docs/DESIGN-SYSTEM.md` do site e apontam para este guia.
+2. ~~`brand/styleguide.txt` incompleto~~ **Resolvido:** o resumo saiu do repositório em 19/11/2026; este guia é a única referência.
 3. ~~Petróleo do logo (`#016B7E`) diferente do primário de UI (`#0B4F5C`)~~ **Resolvido no logo v2:** um petróleo só, `#0B4F5C`.
 4. **`#6B7280` sobre `#F4F6F8` dá 4,46:1**, logo abaixo de AA. Em texto pequeno, prefira `#4B5563`.
 5. ~~Sem logo vetorial~~ **Resolvido no logo v2:** kit completo em SVG e PNG em `kit/`.

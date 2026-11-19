@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Vulnerabilidade de segurança
+    url: mailto:contato@focuxpersonal.com
+    about: Não abra issue para falha de segurança. Escreva para este e-mail (ver SECURITY.md).
