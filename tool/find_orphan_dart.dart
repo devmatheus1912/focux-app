@@ -4,7 +4,7 @@ import 'dart:io';
 // Lista arquivos .dart em lib/ que ninguém importa (nem lib/, nem test/).
 // Resolve import/export/part de verdade (relativo + package:), então o
 // resultado é acionável — não é heurística de substring.
-// Uso: dart run tools/find_orphan_dart.dart
+// Uso: dart run tool/find_orphan_dart.dart
 
 const _entryPoints = {'lib/main.dart'};
 

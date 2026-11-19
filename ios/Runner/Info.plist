@@ -93,8 +93,8 @@
 			<string>remote-notification</string>
 		</array>
 		<!-- Google Sign-In: GIDClientID + URL scheme = OAuth client iOS (nunca Web).
-		     Release: tools/ios/patch_google_signin_from_env.sh (GOOGLE_IOS_CLIENT_ID).
-		     Local: GoogleService-Info.plist + tools/ios/sync_google_signin_url_scheme.sh -->
+		     Release: tool/ios/patch_google_signin_from_env.sh (GOOGLE_IOS_CLIENT_ID).
+		     Local: GoogleService-Info.plist + tool/ios/sync_google_signin_url_scheme.sh -->
 		<!-- Deep link / URL scheme -->
 		<key>CFBundleURLTypes</key>
 		<array>

@@ -15,7 +15,7 @@ void main() {
       expect(File(path).existsSync(), isTrue, reason: 'Fonte ausente: $path');
     }
 
-    final orphan = File('tools/find_orphan_dart.dart').readAsStringSync();
+    final orphan = File('tool/find_orphan_dart.dart').readAsStringSync();
     expect(orphan, contains('find_orphan_dart'));
   });
 

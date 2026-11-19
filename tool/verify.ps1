@@ -2,4 +2,4 @@
 $ErrorActionPreference = "Stop"
 dart analyze --fatal-warnings --fatal-infos
 flutter test
-dart run tools/find_orphan_dart.dart
+dart run tool/find_orphan_dart.dart

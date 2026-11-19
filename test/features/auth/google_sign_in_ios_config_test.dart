@@ -30,7 +30,7 @@ void main() {
     expect(plist, isNot(contains('<key>GIDClientID</key>')));
     expect(plist, isNot(contains(webClient)));
     expect(
-      File('tools/ios/patch_google_signin_from_env.sh').readAsStringSync(),
+      File('tool/ios/patch_google_signin_from_env.sh').readAsStringSync(),
       contains('GOOGLE_IOS_CLIENT_ID'),
     );
   });

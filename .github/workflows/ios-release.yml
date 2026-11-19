@@ -125,8 +125,8 @@ jobs:
             exit 0
           fi
           echo -n "$GOOGLE_SERVICE_INFO_PLIST_BASE64" | base64 --decode > ios/Runner/GoogleService-Info.plist
-          chmod +x tools/ios/sync_google_signin_url_scheme.sh || true
-          tools/ios/sync_google_signin_url_scheme.sh || true
+          chmod +x tool/ios/sync_google_signin_url_scheme.sh || true
+          tool/ios/sync_google_signin_url_scheme.sh || true
 
       - name: Write Meta.xcconfig (optional)
         env:
@@ -208,7 +208,7 @@ jobs:
             echo "::error::Secret GOOGLE_IOS_CLIENT_ID obrigatório (OAuth client iOS — não use o client Web)."
             exit 1
           fi
-          bash tools/ios/patch_google_signin_from_env.sh
+          bash tool/ios/patch_google_signin_from_env.sh
 
           API_URL="${API_URL:-$API_URL_DEFAULT}"
           PUBLIC_WEB_URL="${PUBLIC_WEB_URL:-$PUBLIC_WEB_URL_DEFAULT}"

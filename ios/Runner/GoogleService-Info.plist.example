@@ -7,7 +7,7 @@
   1) Firebase/Google Cloud: OAuth client tipo iOS com Bundle ID com.focux.focuxApp
   2) CLIENT_ID e REVERSED_CLIENT_ID deste plist batem com esse client
   3) Info.plist tem GIDClientID = CLIENT_ID e URL scheme = REVERSED_CLIENT_ID
-     (rode tools/ios/sync_google_signin_url_scheme.sh no build)
+     (rode tool/ios/sync_google_signin_url_scheme.sh no build)
   4) Backend valida idToken com o Web client (GOOGLE_WEB_CLIENT_ID)
 
   Sem este arquivo o app sobe; FCM/Crashlytics ficam off no iOS. Sign-In ainda

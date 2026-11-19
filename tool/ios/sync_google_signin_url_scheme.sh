@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Garante que Info.plist tenha o REVERSED_CLIENT_ID do GoogleService-Info.plist.
-# Uso: tools/ios/sync_google_signin_url_scheme.sh
+# Uso: tool/ios/sync_google_signin_url_scheme.sh
 # Ideal como Run Script no Xcode (antes de Compile Sources) ou no build-ios.sh.
 set -euo pipefail
 

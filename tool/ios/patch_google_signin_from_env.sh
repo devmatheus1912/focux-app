@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Alinha GIDClientID + URL scheme do Google Sign-In ao OAuth client iOS (nunca Web).
-# Uso: GOOGLE_IOS_CLIENT_ID=... tools/ios/patch_google_signin_from_env.sh
+# Uso: GOOGLE_IOS_CLIENT_ID=... tool/ios/patch_google_signin_from_env.sh
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"

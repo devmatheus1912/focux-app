@@ -9,7 +9,7 @@ abstract final class FocuxRefactoring {
 
   static const List<String> coreSources = [
     'lib/core/refactoring/focux_refactoring.dart',
-    'tools/find_orphan_dart.dart',
+    'tool/find_orphan_dart.dart',
     'test/support/screen_source_bundle.dart',
     'test/core/business_logic/business_logic_contract_test.dart',
   ];
