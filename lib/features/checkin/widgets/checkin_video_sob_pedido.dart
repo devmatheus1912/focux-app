@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/fx_icons.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../core/theme/chao_da_marca.dart';
 
 /// Dado móvel com "Economizar dados móveis": o vídeo só baixa quando o aluno
 /// toca em "Ver vídeo".
@@ -21,7 +21,7 @@ class CheckinVideoSobPedido extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: dark ? EagleTokens.darkCardHi : TokensStrip.borderDefault,
+        color: dark ? context.tons.superficieAlta : TokensStrip.borderDefault,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: brand.withValues(alpha: 0.22)),
       ),
@@ -52,7 +52,7 @@ class CheckinVideoFallback extends StatelessWidget {
       height: 118,
       width: double.infinity,
       decoration: BoxDecoration(
-        color: dark ? EagleTokens.darkCardHi : TokensStrip.borderDefault,
+        color: dark ? context.tons.superficieAlta : TokensStrip.borderDefault,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: brand.withValues(alpha: 0.26)),
       ),

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/motion_preferences.dart';
+import '../../../core/theme/chao_da_marca.dart';
 
 class DashboardShimmerLoading extends StatelessWidget {
   const DashboardShimmerLoading({super.key, required this.themeDark});
@@ -13,9 +13,9 @@ class DashboardShimmerLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final base = themeDark ? EagleTokens.darkCard : TokensStrip.borderDefault;
+    final base = themeDark ? context.tons.superficie : TokensStrip.borderDefault;
     final highlight =
-        themeDark ? EagleTokens.darkCardHi : TokensStrip.borderDefault;
+        themeDark ? context.tons.superficieAlta : TokensStrip.borderDefault;
 
     Widget bone(double w, double h, {double radius = 12}) => Container(
       width: w,

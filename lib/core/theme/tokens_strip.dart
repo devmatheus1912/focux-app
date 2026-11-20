@@ -35,8 +35,14 @@ abstract class TokensStrip {
 
   /// Todos os tamanhos da escala (contrato de tipografia).
   static const escala = <double>[
-    fontDestaque, fontTitulo, fontSecao, fontBody, fontBodySm, fontRotulo,
-    fontMinimo, fontNumeroTela,
+    fontDestaque,
+    fontTitulo,
+    fontSecao,
+    fontBody,
+    fontBodySm,
+    fontRotulo,
+    fontMinimo,
+    fontNumeroTela,
   ];
 
   static const double fontH1 = fontDestaque;
@@ -49,24 +55,25 @@ abstract class TokensStrip {
   static const double leadingBody = 1.45;
 
   static TextStyle h1({required Color color, String? fontFamily}) => TextStyle(
-        fontFamily: fontFamily,
-        fontSize: fontH1,
-        fontWeight: weightH1,
-        color: color,
-        letterSpacing: trackingH1,
-        height: 1.15,
-      );
+    fontFamily: fontFamily,
+    fontSize: fontH1,
+    fontWeight: weightH1,
+    color: color,
+    letterSpacing: trackingH1,
+    height: 1.15,
+  );
 
   static TextStyle h2({Color? color, String? fontFamily}) => TextStyle(
-        fontFamily: fontFamily,
-        fontSize: fontH2,
-        fontWeight: weightH2,
-        color: color ?? textH2,
-        letterSpacing: trackingH2,
-        height: 1.2,
-      );
+    fontFamily: fontFamily,
+    fontSize: fontH2,
+    fontWeight: weightH2,
+    color: color ?? textH2,
+    letterSpacing: trackingH2,
+    height: 1.2,
+  );
 
-  static TextStyle body({required Color color, String? fontFamily}) => TextStyle(
+  static TextStyle body({required Color color, String? fontFamily}) =>
+      TextStyle(
         fontFamily: fontFamily,
         fontSize: fontBody,
         fontWeight: weightBody,
@@ -75,22 +82,19 @@ abstract class TokensStrip {
       );
 
   static TextStyle bodyMuted({Color? color, String? fontFamily}) => TextStyle(
-        fontFamily: fontFamily,
-        fontSize: fontBodySm,
-        fontWeight: weightBody,
-        color: color ?? textSecondary,
-        height: leadingBody,
-      );
+    fontFamily: fontFamily,
+    fontSize: fontBodySm,
+    fontWeight: weightBody,
+    color: color ?? textSecondary,
+    height: leadingBody,
+  );
 
   // ── Azul petróleo premium (aliases) ──────────────────────────────────
-  static const Color neonTeal = Color(0xFF0A6B7A);
   static const Color neonGlow = Color(0xFF3D9AAD);
-  static const Color neonDeep = primaryHover;
 
   // ── Escuro: chão petróleo (guia de marca, seção 4.3) ─────────────────
   static const Color cinematicBg = Color(0xFF0A1A1F);
   static const Color cinematicSurface = Color(0xFF10262C);
-  static const Color cinematicElevated = Color(0xFF16323A);
 
   // ── Claro: paper sólido (guia de marca, seção 4.6) ──────────────────
   static const Color paper = Color(0xFFF4F6F8);
@@ -122,7 +126,6 @@ abstract class TokensStrip {
   // ── Blur ─────────────────────────────────────────────────────────────
   static const double blurLight = 16;
   static const double blurMedium = 22;
-  static const double blurHeavy = 28;
 
   /// Default card shadow — 0 2px 8px rgba(0,0,0,0.07)
   static List<BoxShadow> cardShadow({bool dark = false}) {
@@ -130,19 +133,12 @@ abstract class TokensStrip {
       return elevation(4, dark: true);
     }
     return const [
-      BoxShadow(
-        color: Color(0x12000000),
-        blurRadius: 8,
-        offset: Offset(0, 2),
-      ),
+      BoxShadow(color: Color(0x12000000), blurRadius: 8, offset: Offset(0, 2)),
     ];
   }
 
   /// Colored glow shadows — TOKENS STRIP “Shadow depth” spec.
-  static List<BoxShadow> coloredDepthGlow(
-    Color color, {
-    double strength = 1,
-  }) {
+  static List<BoxShadow> coloredDepthGlow(Color color, {double strength = 1}) {
     final s = strength.clamp(0.0, 1.5);
     return [
       BoxShadow(
@@ -318,9 +314,15 @@ abstract class TokensStrip {
     ];
   }
 
-  static Color glassFill({required bool dark, double opacity = 1}) {
+  /// Vidro dos cards. No escuro, passe a [superficie] do tema
+  /// (`context.tons.superficie`): petróleo na marca Focux, grafite na própria.
+  static Color glassFill({
+    required bool dark,
+    double opacity = 1,
+    Color superficie = cinematicSurface,
+  }) {
     if (dark) {
-      return cinematicSurface.withValues(alpha: 0.72 * opacity);
+      return superficie.withValues(alpha: 0.72 * opacity);
     }
     return Colors.white.withValues(alpha: 0.78 * opacity);
   }
@@ -340,9 +342,10 @@ abstract class TokensStrip {
     Color? accent,
     int elevationLevel = 8,
     bool innerHighlight = true,
+    Color superficie = cinematicSurface,
   }) {
     return BoxDecoration(
-      color: glassFill(dark: dark),
+      color: glassFill(dark: dark, superficie: superficie),
       borderRadius: BorderRadius.circular(radius),
       border: Border.all(
         color: glassBorder(dark: dark, accent: accent),
@@ -363,7 +366,8 @@ abstract class TokensStrip {
 
   static LinearGradient primaryButtonGradient(Color primary) {
     final hsl = HSLColor.fromColor(primary);
-    final end = hsl.withLightness((hsl.lightness * 0.88).clamp(0.0, 1.0)).toColor();
+    final end =
+        hsl.withLightness((hsl.lightness * 0.88).clamp(0.0, 1.0)).toColor();
     return LinearGradient(
       colors: [primary, end],
       begin: Alignment.topLeft,

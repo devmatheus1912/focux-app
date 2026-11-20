@@ -12,6 +12,7 @@ import '../../../core/widgets/fx_motion.dart';
 import '../../../l10n/app_localizations.dart';
 import '../data/moderacao_repository.dart';
 import '../../../core/theme/fx_icons.dart';
+import '../../../core/theme/chao_da_marca.dart';
 
 /// Abre o fluxo de denúncia e envia para a moderação Focux.
 /// Retorna `true` se a denúncia foi enviada.
@@ -100,8 +101,8 @@ class _DenunciarSheetState extends State<_DenunciarSheet> {
     final brand = BrandPalette.softened(Theme.of(context).colorScheme.primary);
     final ink = dark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = dark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final line = dark ? EagleTokens.darkLine : TokensStrip.borderDefault;
-    final cardBg = dark ? EagleTokens.darkCard : TokensStrip.cardBg;
+    final line = dark ? context.tons.linha : TokensStrip.borderDefault;
+    final cardBg = dark ? context.tons.superficie : TokensStrip.cardBg;
 
     return FxHomeSheetScaffold(
       isDark: dark,

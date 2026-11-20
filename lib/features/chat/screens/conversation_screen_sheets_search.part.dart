@@ -68,7 +68,7 @@ extension ConversationScreenSheetsSearch on _ConversationScreenState {
                         filled: true,
                         fillColor:
                             isDark
-                                ? EagleTokens.darkCardHi
+                                ? context.tons.superficieAlta
                                 : TokensStrip.cardBg,
                         border: FxInputDeco.outlineBorder(
                           borderRadius: BorderRadius.circular(18),
@@ -119,7 +119,7 @@ extension ConversationScreenSheetsSearch on _ConversationScreenState {
                                       decoration: BoxDecoration(
                                         color:
                                             isDark
-                                                ? EagleTokens.darkCardHi
+                                                ? context.tons.superficieAlta
                                                 : primarySoft,
                                         borderRadius: BorderRadius.circular(14),
                                       ),

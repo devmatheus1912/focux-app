@@ -70,7 +70,7 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                           decoration: BoxDecoration(
                             color:
                                 isDark
-                                    ? EagleTokens.darkCard
+                                    ? context.tons.superficie
                                     : Colors.white.withValues(alpha: 0.86),
                             borderRadius: BorderRadius.circular(
                               AlunosLayout.searchBarRadius,
@@ -80,7 +80,7 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                                   focused
                                       ? primary.withValues(alpha: 0.32)
                                       : (isDark
-                                          ? EagleTokens.darkLine
+                                          ? context.tons.linha
                                           : TokensStrip.borderDefault),
                               width: focused ? 1.2 : 1,
                             ),

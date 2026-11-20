@@ -15,6 +15,7 @@ import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../core/theme/fx_icons.dart';
+import '../../../core/theme/chao_da_marca.dart';
 
 enum _AcaoComentario { apagar, denunciar, bloquear }
 
@@ -216,7 +217,7 @@ class _FeedCommentsSheetState extends State<FeedCommentsSheet> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final line = isDark ? context.tons.linha : EagleTokens.line;
     return FxHomeSheetSurface(
       isDark: isDark,
       expand: true,
@@ -301,7 +302,7 @@ class _FeedCommentsSheetState extends State<FeedCommentsSheet> {
                                   decoration: BoxDecoration(
                                     color:
                                         isDark
-                                            ? EagleTokens.darkBg
+                                            ? context.tons.chao
                                             : EagleTokens.paper,
                                     borderRadius: BorderRadius.circular(18),
                                     border: Border.all(color: line),
@@ -360,7 +361,7 @@ class _FeedCommentsSheetState extends State<FeedCommentsSheet> {
                         hintStyle: TextStyle(color: mute),
                         filled: true,
                         fillColor:
-                            isDark ? EagleTokens.darkBg : EagleTokens.paper,
+                            isDark ? context.tons.chao : EagleTokens.paper,
                         border: FxInputDeco.outlineBorder(
                           borderRadius: BorderRadius.circular(18),
                           borderSide: BorderSide(color: line),

@@ -12,6 +12,7 @@ import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/chat_repository.dart';
 import '../../../core/theme/fx_icons.dart';
+import '../../../core/theme/chao_da_marca.dart';
 
 enum ConversationMediaType { photo, video, audio }
 
@@ -207,14 +208,14 @@ class ConversationMediaFilterChip extends StatelessWidget {
             color:
                 selected
                     ? primary
-                    : (isDark ? EagleTokens.darkCardHi : TokensStrip.cardBg),
+                    : (isDark ? context.tons.superficieAlta : TokensStrip.cardBg),
             borderRadius: BorderRadius.circular(999),
             border: Border.all(
               color:
                   selected
                       ? primary
                       : (isDark
-                          ? EagleTokens.darkLine
+                          ? context.tons.linha
                           : TokensStrip.borderDefault),
             ),
           ),

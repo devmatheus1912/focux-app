@@ -351,7 +351,11 @@ class AppTheme {
 
       // ── Navigation Bar: Liquid Glass dock ───────────────────────────
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: TokensStrip.glassFill(dark: dark, opacity: 0.88),
+        backgroundColor: TokensStrip.glassFill(
+          dark: dark,
+          opacity: 0.88,
+          superficie: tons.superficie,
+        ),
         indicatorColor: dark ? tons.superficieAlta : primarySoft,
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {

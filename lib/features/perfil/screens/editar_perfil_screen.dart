@@ -9,7 +9,6 @@ import '../../../core/analytics/analytics_service.dart';
 import '../../../core/api/media_upload_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -36,6 +35,7 @@ import '../providers/perfil_provider.dart';
 import '../widgets/editar_perfil_help_sheet.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../core/theme/fx_icons.dart';
+import '../../../core/theme/chao_da_marca.dart';
 
 part 'editar_perfil_screen_widgets.part.dart';
 

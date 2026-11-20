@@ -174,7 +174,17 @@ class FcmService {
     }
   }
 
-  static Future<void> _registrarToken(String token, ApiClient apiClient) async {
+  /// Registro do mesmo token já em andamento (abertura, permissão e login
+  /// chamam juntos): quem chega depois espera o mesmo pedido.
+  static final _registrando = <String, Future<void>>{};
+
+  static Future<void> _registrarToken(String token, ApiClient apiClient) =>
+      _registrando[token] ??= _enviarToken(
+        token,
+        apiClient,
+      ).whenComplete(() => _registrando.remove(token));
+
+  static Future<void> _enviarToken(String token, ApiClient apiClient) async {
     try {
       final jwtToken = await SecureStorage.getToken();
       if (jwtToken == null) return;

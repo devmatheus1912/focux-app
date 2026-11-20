@@ -580,7 +580,10 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
                           end: Alignment.bottomRight,
                           colors:
                               isDark
-                                  ? [EagleTokens.darkCardHi, EagleTokens.darkBg]
+                                  ? [
+                                    ShellChrome.of(context).tons.superficieAlta,
+                                    ShellChrome.of(context).tons.chao,
+                                  ]
                                   : [EagleTokens.brandSofter, EagleTokens.card],
                         ),
                         borderRadius: BorderRadius.circular(24),

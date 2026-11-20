@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/focux_hub_typography.dart';
+import '../theme/chao_da_marca.dart';
 import '../theme/tokens_strip.dart';
 import 'fx_shell_scaffold.dart';
 import '../theme/fx_icons.dart';
@@ -11,6 +12,7 @@ enum OperationalMetricEmphasis { normal, alert, muted }
 BoxDecoration operationalMetricDecoration({
   required Color accent,
   required bool isDark,
+  required Color superficie,
   double radius = TokensStrip.rCard,
   OperationalMetricEmphasis emphasis = OperationalMetricEmphasis.normal,
 }) {
@@ -20,7 +22,7 @@ BoxDecoration operationalMetricDecoration({
           ? accent.withValues(alpha: isDark ? 0.46 : 0.38)
           : TokensStrip.glassBorder(dark: isDark);
   return BoxDecoration(
-    color: TokensStrip.glassFill(dark: isDark),
+    color: TokensStrip.glassFill(dark: isDark, superficie: superficie),
     borderRadius: BorderRadius.circular(radius),
     border: Border.all(color: border),
   );
@@ -75,6 +77,7 @@ class OperationalMetricTile extends StatelessWidget {
       decoration: operationalMetricDecoration(
         accent: color,
         isDark: isDark,
+        superficie: context.tons.superficie,
         emphasis: emphasis,
       ),
       child: Column(

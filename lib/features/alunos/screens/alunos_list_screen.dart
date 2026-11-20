@@ -57,6 +57,7 @@ import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../core/theme/fx_icons.dart';
 
 import '../../../core/router/estado_da_rota.dart';
+import '../../../core/theme/chao_da_marca.dart';
 export '../constants/alunos_list_filters.dart';
 
 part 'alunos_list_screen_state.part.dart';

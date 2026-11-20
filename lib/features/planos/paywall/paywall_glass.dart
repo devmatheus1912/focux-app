@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/theme/chao_da_marca.dart';
 import '../../../core/widgets/fx_glass_surface.dart';
 import '../../subscription/models/subscription_plan.dart';
 import 'paywall_catalog.dart';
@@ -53,6 +54,7 @@ class PaywallGlassCard extends StatelessWidget {
               radius: radius,
               accent: accent,
               elevationLevel: elevationLevel,
+              superficie: context.tons.superficie,
             ),
             child: child,
           )

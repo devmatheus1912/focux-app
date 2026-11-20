@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../../core/media/fx_economia_de_dados.dart';
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_cached_network_image.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
@@ -14,6 +13,7 @@ import '../utils/checkin_execucao_display.dart';
 import '../utils/checkin_video_badge.dart';
 import 'checkin_video_sob_pedido.dart';
 import '../../../core/theme/fx_icons.dart';
+import '../../../core/theme/chao_da_marca.dart';
 
 /// Preferred preview height for thumbnails / loading, capped by screen.
 const double checkinMediaPreviewHeight = 228;
@@ -66,7 +66,7 @@ class CheckinExerciseThumbnailPreview extends StatelessWidget {
                 (_, __, ___) => Container(
                   height: 120,
                   color:
-                      dark ? EagleTokens.darkCardHi : TokensStrip.borderDefault,
+                      dark ? context.tons.superficieAlta : TokensStrip.borderDefault,
                   alignment: Alignment.center,
                   child: Icon(FxIcons.playCirculo, color: brand),
                 ),
@@ -125,7 +125,7 @@ class CheckinExerciseMediaPreview extends StatelessWidget {
                 (_, __, ___) => Container(
                   height: 120,
                   color:
-                      dark ? EagleTokens.darkCardHi : TokensStrip.borderDefault,
+                      dark ? context.tons.superficieAlta : TokensStrip.borderDefault,
                   alignment: Alignment.center,
                   child: Icon(FxIcons.playCirculo, color: brand),
                 ),
@@ -322,7 +322,7 @@ class _CheckinExerciseVideoPreviewState
         width: double.infinity,
         decoration: BoxDecoration(
           color:
-              widget.dark ? EagleTokens.darkCardHi : TokensStrip.borderDefault,
+              widget.dark ? context.tons.superficieAlta : TokensStrip.borderDefault,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(color: widget.brand.withValues(alpha: 0.22)),
         ),

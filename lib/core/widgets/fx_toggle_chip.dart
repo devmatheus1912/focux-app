@@ -6,6 +6,7 @@ import '../theme/design_tokens.dart';
 import '../theme/focux_hub_typography.dart';
 import '../theme/tokens_strip.dart';
 import '../theme/fx_icons.dart';
+import '../theme/chao_da_marca.dart';
 
 /// Chip toggle inset — paridade Perfil (picker bar / filtros).
 class FxToggleChip extends StatelessWidget {
@@ -35,7 +36,7 @@ class FxToggleChip extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final action = BrandPalette.sectionAction(primary, dark: isDark);
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
+    final line = isDark ? context.tons.linha : TokensStrip.borderDefault;
     final fg = filledWhenSelected && selected ? Colors.white : (selected ? action : ink);
 
     return Semantics(
@@ -66,7 +67,7 @@ class FxToggleChip extends StatelessWidget {
                       : selected
                       ? action.withValues(alpha: isDark ? 0.22 : 0.12)
                       : (isDark
-                          ? EagleTokens.darkCardHi
+                          ? context.tons.superficieAlta
                           : TokensStrip.cardBg),
               borderRadius: BorderRadius.circular(TokensStrip.rSm),
               border: Border.all(

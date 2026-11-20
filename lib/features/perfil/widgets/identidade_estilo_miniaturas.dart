@@ -3,13 +3,13 @@ import 'package:flutter/services.dart';
 
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/brand_style.dart';
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../utils/identidade_visual_display.dart';
 import '../../../core/theme/fx_icons.dart';
+import '../../../core/theme/chao_da_marca.dart';
 
 /// Três miniaturas do card principal, uma por estilo: o personal vê a
 /// diferença em vez de ler uma descrição. A escolhida ganha contorno e marca.
@@ -242,7 +242,7 @@ class _MiniCard extends CustomPainter {
     } else if (estilo == BrandStyle.classico) {
       canvas.drawRRect(
         r,
-        Paint()..color = dark ? EagleTokens.darkCard : Colors.white,
+        Paint()..color = dark ? tonsEscurosDa(primaria).superficie : Colors.white,
       );
       canvas.drawRRect(
         r,

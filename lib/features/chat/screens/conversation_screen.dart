@@ -64,6 +64,7 @@ import '../widgets/conversation_outgoing_status.dart';
 import 'package:focux_app/core/widgets/fx_grouped_action_sheet.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 import '../../../core/theme/fx_icons.dart';
+import '../../../core/theme/chao_da_marca.dart';
 part 'conversation_screen_messaging.part.dart';
 part 'conversation_screen_outbox.part.dart';
 part 'conversation_screen_sheets_actions.part.dart';

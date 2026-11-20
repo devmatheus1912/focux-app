@@ -2,12 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../core/theme/fx_icons.dart';
+import '../../../core/theme/chao_da_marca.dart';
 
 /// Faixa "Adicionado · Desfazer" logo depois de adicionar um exercício.
 /// Some sozinha em [duracao]; o botão remove o item recém-criado.
@@ -58,7 +58,7 @@ class _AddUndoBarState extends State<AddUndoBar> {
           TokensStrip.s1,
         ),
         decoration: BoxDecoration(
-          color: chrome.isDark ? EagleTokens.darkCardHi : Colors.white,
+          color: chrome.isDark ? context.tons.superficieAlta : Colors.white,
           borderRadius: BorderRadius.circular(TokensStrip.rSm),
           border: Border.all(color: chrome.lineStrong),
         ),

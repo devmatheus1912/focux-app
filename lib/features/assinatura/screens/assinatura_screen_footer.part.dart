@@ -27,6 +27,7 @@ class _AssinaturaStickyGlassBar extends StatelessWidget {
         color: TokensStrip.glassFill(
           dark: isDark,
           opacity: isDark ? 0.86 : 0.91,
+          superficie: context.tons.superficie,
         ),
         gradient: LinearGradient(
           begin: Alignment.topCenter,

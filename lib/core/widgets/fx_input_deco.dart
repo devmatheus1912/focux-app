@@ -4,6 +4,7 @@ import '../theme/design_tokens.dart';
 import '../theme/focux_hub_typography.dart';
 import '../theme/fx_settings_layout.dart';
 import '../theme/tokens_strip.dart';
+import '../theme/chao_da_marca.dart';
 
 /// Premium input decoration factory — TOKENS STRIP Liquid Glass.
 class FxInputDeco {
@@ -36,7 +37,7 @@ class FxInputDeco {
     final primary = Theme.of(context).colorScheme.primary;
     final fillColor =
         isDark
-            ? EagleTokens.darkCardHi.withValues(alpha: 0.88)
+            ? context.tons.superficieAlta.withValues(alpha: 0.88)
             : Colors.white.withValues(alpha: 0.92);
     final borderColor = TokensStrip.glassBorder(dark: isDark, accent: primary);
 

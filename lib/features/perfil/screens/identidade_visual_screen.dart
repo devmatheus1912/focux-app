@@ -44,6 +44,7 @@ import '../widgets/identidade_capa_tile.dart';
 import '../widgets/identidade_paletas_grade.dart';
 import '../widgets/identidade_estilo_miniaturas.dart';
 import '../../../core/theme/fx_icons.dart';
+import '../../../core/theme/chao_da_marca.dart';
 
 part 'identidade_visual_screen_actions.part.dart';
 part 'identidade_visual_screen_widgets.part.dart';

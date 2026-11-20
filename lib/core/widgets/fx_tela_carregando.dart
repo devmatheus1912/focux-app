@@ -4,6 +4,7 @@ import '../theme/brand_palette.dart';
 import '../theme/shell_chrome.dart';
 import '../theme/tokens_strip.dart';
 import 'fx_loading.dart';
+import '../theme/chao_da_marca.dart';
 
 /// Carregamento de tela cheia sobre fundo liso (mesmo do login, sem grade nem
 /// malha): o chão petróleo `#0A1A1F` no escuro e o tom base da malha no claro. Para telas que
@@ -19,7 +20,7 @@ class FxTelaCarregando extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final brand = chrome.isDark ? BrandPalette.accent(primary) : primary;
     return ColoredBox(
-      color: chrome.isDark ? TokensStrip.cinematicBg : TokensStrip.paper,
+      color: chrome.isDark ? context.tons.chao : TokensStrip.paper,
       child: SizedBox.expand(
         child: Semantics(
           liveRegion: true,

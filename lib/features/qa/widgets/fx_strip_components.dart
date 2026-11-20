@@ -7,6 +7,7 @@ import '../../../core/theme/focux_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/theme/fx_icons.dart';
+import '../../../core/theme/chao_da_marca.dart';
 
 /// TOKENS STRIP v1.0.0 — secondary pill button (white + teal border).
 class FxSecondaryButton extends StatelessWidget {
@@ -638,7 +639,7 @@ class FxStripCard extends StatelessWidget {
     final primary = accent ?? Theme.of(context).colorScheme.primary;
 
     final decoration = BoxDecoration(
-      color: isDark ? TokensStrip.cinematicSurface : TokensStrip.cardBg,
+      color: isDark ? context.tons.superficie : TokensStrip.cardBg,
       borderRadius: BorderRadius.circular(radius),
       border: Border.all(
         color:

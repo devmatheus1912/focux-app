@@ -45,6 +45,7 @@ class ShellPalette {
     if (isDark) {
       return TokensStrip.glassPanel(
         dark: true,
+        superficie: tons.superficie,
         radius: radius,
         accent: accent,
         elevationLevel: elevationLevel,
@@ -95,6 +96,7 @@ class ShellPalette {
     if (isDark) {
       return TokensStrip.glassPanel(
         dark: true,
+        superficie: tons.superficie,
         radius: radius,
         elevationLevel: 4,
         accent: brand,
@@ -215,7 +217,7 @@ class ShellHeaderIconButton extends StatelessWidget {
                       border: Border.all(
                         color:
                             chrome.isDark
-                                ? TokensStrip.cinematicSurface
+                                ? context.tons.superficie
                                 : TokensStrip.cardBg,
                         width: compact ? 1.25 : 1.5,
                       ),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/theme/focux_hub_typography.dart';
 import '../../../../core/theme/tokens_strip.dart';
+import '../../../../core/theme/chao_da_marca.dart';
 
 class ExercisePickerChip extends StatelessWidget {
   const ExercisePickerChip({
@@ -25,7 +26,7 @@ class ExercisePickerChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
+    final line = isDark ? context.tons.linha : TokensStrip.borderDefault;
 
     return Semantics(
       button: true,
@@ -45,7 +46,7 @@ class ExercisePickerChip extends StatelessWidget {
               color:
                   selected
                       ? primary.withValues(alpha: isDark ? 0.22 : 0.12)
-                      : (isDark ? EagleTokens.darkCardHi : TokensStrip.cardBg),
+                      : (isDark ? context.tons.superficieAlta : TokensStrip.cardBg),
               borderRadius: BorderRadius.circular(TokensStrip.rSm),
               border: Border.all(
                 color: selected ? primary : line.withValues(alpha: 0.55),

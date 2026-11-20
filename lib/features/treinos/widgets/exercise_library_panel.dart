@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import '../../../core/widgets/fx_choice_strip.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
@@ -39,6 +38,7 @@ import 'exercise_group_chips.dart';
 import 'exercise_library_row.dart';
 import '../utils/exercise_search_terms.dart';
 import '../../../core/theme/fx_icons.dart';
+import '../../../core/theme/chao_da_marca.dart';
 
 typedef ExerciseLibraryPageLoader =
     Future<ExercicioPickerPage> Function({
@@ -878,7 +878,7 @@ class _LetraFixa extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
         decoration: BoxDecoration(
-          color: isDark ? EagleTokens.darkCardHi : Colors.white,
+          color: isDark ? context.tons.superficieAlta : Colors.white,
           borderRadius: BorderRadius.circular(99),
           border: Border.all(color: primary.withValues(alpha: 0.5)),
         ),

@@ -150,8 +150,8 @@ class PaywallLoadingSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final base = isDark ? EagleTokens.darkCard : EagleTokens.lineSoft;
-    final highlight = isDark ? EagleTokens.darkCardHi : EagleTokens.line;
+    final base = isDark ? context.tons.superficie : EagleTokens.lineSoft;
+    final highlight = isDark ? context.tons.superficieAlta : EagleTokens.line;
     return Shimmer.fromColors(
       baseColor: base,
       highlightColor: highlight,

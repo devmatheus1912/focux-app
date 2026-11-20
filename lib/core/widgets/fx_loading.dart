@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../theme/design_tokens.dart';
 import '../theme/tokens_strip.dart';
 import '../utils/motion_preferences.dart';
+import '../theme/chao_da_marca.dart';
 
 /// Premium loading indicator — sized, subtle, and consistent.
 /// Drop-in replacement for the banned `Center(child: CircularProgressIndicator())`.
@@ -32,9 +32,9 @@ class FxLoading extends StatelessWidget {
     bool showHeader = true,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final base = isDark ? EagleTokens.darkCard : TokensStrip.borderDefault;
+    final base = isDark ? context.tons.superficie : TokensStrip.borderDefault;
     final highlight =
-        isDark ? EagleTokens.darkCardHi : TokensStrip.borderDefault;
+        isDark ? context.tons.superficieAlta : TokensStrip.borderDefault;
 
     Widget bone(double w, double h, {double radius = 12}) => Container(
       width: w,

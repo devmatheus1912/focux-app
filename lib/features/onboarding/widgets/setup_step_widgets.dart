@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/theme/chao_da_marca.dart';
 
 /// Normaliza rotas do wizard para deep-links consistentes no app.
 String normalizeSetupActionRoute(String route) {
@@ -40,8 +40,8 @@ class SetupWizardSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final base = isDark ? EagleTokens.darkCard : TokensStrip.borderDefault;
-    final highlight = isDark ? EagleTokens.darkCardHi : TokensStrip.pageBg;
+    final base = isDark ? context.tons.superficie : TokensStrip.borderDefault;
+    final highlight = isDark ? context.tons.superficieAlta : TokensStrip.pageBg;
 
     return Shimmer.fromColors(
       baseColor: base,

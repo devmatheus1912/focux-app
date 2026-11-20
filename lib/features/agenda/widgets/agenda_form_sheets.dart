@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -11,6 +10,7 @@ import '../../alunos/data/aluno_contact_utils.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../../alunos/widgets/aluno_avatar.dart';
 import '../../../core/theme/fx_icons.dart';
+import '../../../core/theme/chao_da_marca.dart';
 
 class AgendaAlunoSheet extends StatefulWidget {
   final List<Aluno> alunos;
@@ -86,7 +86,7 @@ class _AgendaAlunoSheetState extends State<AgendaAlunoSheet> {
                   filled: true,
                   fillColor:
                       chrome.isDark
-                          ? EagleTokens.darkCardHi
+                          ? context.tons.superficieAlta
                           : TokensStrip.pageBg,
                   border: FxInputDeco.outlineBorder(
                     borderRadius: BorderRadius.circular(16),

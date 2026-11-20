@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/tokens_strip.dart';
+import '../theme/chao_da_marca.dart';
 import 'fx_motion.dart';
 
 /// Realistic liquid-glass surface with optional blur and interactive glow.
@@ -35,6 +36,7 @@ class FxGlassSurface extends StatelessWidget {
       radius: radius,
       accent: accent,
       elevationLevel: elevationLevel,
+      superficie: context.tons.superficie,
     );
 
     Widget surface = Container(

@@ -4,7 +4,7 @@ Mudanças do app publicadas nas lojas, da mais nova para a mais antiga. O format
 
 ## Não lançado (`develop`)
 
-## 1.2.6+248 · 20/11/2026
+## 1.2.6+249 · 20/11/2026
 
 ### Adicionado
 - Perfil > Notificações (personal e aluno): estado do celular, o que avisar por tipo, som do fim do descanso e notificação de teste. No iOS, "Ajustes de notificação do Focux" abre a tela; no Android, um canal por tipo.
@@ -14,7 +14,7 @@ Mudanças do app publicadas nas lojas, da mais nova para a mais antiga. O format
 - Lançar mensalidade sem chave PIX avisa antes, com "Cadastrar chave" e "Lançar mesmo assim".
 
 ### Alterado
-- Escuro na cor da marca: com marca própria, o fundo, os cards e as bordas do modo escuro usam a matiz da cor do personal com o mesmo brilho do petróleo do Focux (com a cor Focux nada muda). A prévia da tela Marca, o aviso de contraste e o dock deixam de usar o fundo antigo (`#14161A`/`#F6F4FA`) e mostram o mesmo chão do app. Build 248.
+- Modo escuro com marca própria: fundo, cards e bordas em grafite neutro, com a cor do personal no card principal, nos botões e nos ícones (a marca Focux segue no petróleo). Substitui o fundo tingido na cor da marca do build 248, que deixava cards de duas cores. A prévia da tela Marca, o aviso de contraste e o dock mostram o mesmo fundo do app; saíram 59 tokens de cor sem uso. Build 249.
 - Perfil > Notificações: saiu o botão "Enviar notificação de teste" (serviu para validar o push no TestFlight). Build 247.
 - Nome embaixo do ícone no iPhone: "Focux" (como no Android). "Focux Personal" não cabia e o iOS apertava as letras até sumir o espaço; nas lojas segue "Focux: App de Personal Trainer".
 - Aba Exercícios: Meus · Biblioteca · Favoritos, a mesma linha da biblioteca do "Adicionar exercício", busca com chips de grupo e equipamento, "⋯" em folha (Assistir, vídeo, Editar, Duplicar, Excluir com o efeito) e topo que conta exercícios.
@@ -31,6 +31,7 @@ Mudanças do app publicadas nas lojas, da mais nova para a mais antiga. O format
 - Build do iOS: `userNotificationCenter(_:openSettingsFor:)` do `AppDelegate` passa a ser `override` (o `FlutterAppDelegate` atual já o implementa e o Xcode recusava o build).
 - Push no iOS: cada chamada ao Firebase no registro do token tem limite de 20 s (o `getToken` ficava sem resposta e o registro travava sem erro) e o `GoogleService-Info.plist` do CI foi trocado pelo atual do Firebase. Build 243. No 244, "Enviar notificação de teste" registra o aparelho antes e, sem token, diz o motivo e a etapa em que o registro parou.
 - **Firebase no iOS nunca inicializava:** o `GoogleService-Info.plist` que o CI grava em `ios/Runner/` não estava no target do Xcode, então não entrava no app e o `Firebase.initializeApp()` falhava em silêncio (sem push e sem Crashlytics no iPhone). Agora o plist está no `project.pbxproj`, o CI exige o secret e falha do Firebase vai ao Sentry. Build 245.
+- Registro do token do push: pedidos simultâneos do mesmo aparelho (abertura, permissão e login) viram um só.
 - Push volta a registrar o aparelho. Android: `google-services.json` com a chave de API atual (a da 1.2.5 tinha expirado na rotação). iOS: o token do FCM só é pedido depois que o token APNs chega (até 10 s). Falha no registro vai ao Sentry como aviso, sem o token.
 
 ### Marca

@@ -8,6 +8,7 @@ import '../theme/design_tokens.dart';
 import '../theme/focux_hub_typography.dart';
 import '../theme/fx_settings_layout.dart';
 import '../theme/tokens_strip.dart';
+import '../theme/chao_da_marca.dart';
 import '../../l10n/app_localizations.dart';
 import '../theme/fx_icons.dart';
 
@@ -159,6 +160,7 @@ class FxDock extends StatelessWidget {
     final surface = TokensStrip.glassFill(
       dark: isDark,
       opacity: isDark ? (cinematicChrome ? 0.88 : 0.92) : 0.94,
+      superficie: context.tons.superficie,
     );
     final border = TokensStrip.glassBorder(
       dark: isDark,

@@ -95,7 +95,7 @@ class _PerfilPhotoEditor extends StatelessWidget {
         nome.trim().isNotEmpty ? nome.trim()[0].toUpperCase() : '?';
     final radius = FxSettingsLayout.avatarSize / 2;
     final onPrimary = Theme.of(context).colorScheme.onPrimary;
-    final surface = isDark ? EagleTokens.darkBg : TokensStrip.pageBg;
+    final surface = isDark ? context.tons.chao : TokensStrip.pageBg;
 
     return Semantics(
       button: true,

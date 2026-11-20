@@ -63,6 +63,7 @@ import '../../../core/theme/fx_icons.dart';
 import '../../../l10n/pt.dart';
 import '../widgets/ia_conversas_grupo.dart';
 import '../../../core/widgets/fx_link_row.dart';
+import '../../../core/theme/chao_da_marca.dart';
 part 'ia_copiloto_screen_actions.part.dart';
 part 'ia_copiloto_screen_apply.part.dart';
 part 'ia_copiloto_screen_state.part.dart';

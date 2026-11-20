@@ -6,6 +6,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/theme/chao_da_marca.dart';
 
 /// Seção de escolha dentro de [FxSettingsGroup] — cadastro/edição de aluno.
 class AlunoChoiceSection extends StatelessWidget {
@@ -25,7 +26,7 @@ class AlunoChoiceSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
+    final line = isDark ? context.tons.linha : TokensStrip.borderDefault;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -73,7 +74,7 @@ class AlunoSegmentedChoice extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final action = BrandPalette.sectionAction(primary, dark: isDark);
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
+    final line = isDark ? context.tons.linha : TokensStrip.borderDefault;
 
     return Container(
       clipBehavior: Clip.antiAlias,

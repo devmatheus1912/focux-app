@@ -9,6 +9,7 @@ import '../theme/fx_icons.dart';
 import '../theme/tokens_strip.dart';
 import 'fx_loading.dart';
 import 'fx_tonal_button.dart';
+import '../theme/chao_da_marca.dart';
 
 /// Cloudinary entrega H.264 (o iPhone não toca todo codec de upload).
 String cloudinaryH264VideoUrl(String rawUrl) {
@@ -169,7 +170,7 @@ class _FxVideoRedeState extends State<FxVideoRede> {
       clipBehavior: Clip.hardEdge,
       child: SizedBox.expand(
         child: ColoredBox(
-          color: isDark ? TokensStrip.cinematicSurface : TokensStrip.cardBg,
+          color: isDark ? context.tons.superficie : TokensStrip.cardBg,
           child:
               _failed
                   ? Center(

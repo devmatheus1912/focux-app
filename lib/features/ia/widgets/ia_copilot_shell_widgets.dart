@@ -7,6 +7,7 @@ import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/utils/pt_br_display.dart';
 import '../../../core/theme/fx_icons.dart';
+import '../../../core/theme/chao_da_marca.dart';
 
 /// Chip sticky S1 após gerar — paridade [DashboardPrioritiesOverlay].
 /// Overlay flutuante (não barra `bottomNavigationBar` / S3–S5).
@@ -30,7 +31,7 @@ class IaCopilotResultActionBar extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final proxima = onProxima;
     return Material(
-      color: isDark ? EagleTokens.darkBg : TokensStrip.pageBg,
+      color: isDark ? context.tons.chao : TokensStrip.pageBg,
       child: Padding(
         padding: EdgeInsets.fromLTRB(
           TokensStrip.s4,

@@ -10,6 +10,7 @@ import '../theme/design_tokens.dart';
 import '../utils/friendly_error.dart';
 import '../theme/fx_icons.dart';
 import '../theme/tokens_strip.dart';
+import '../theme/chao_da_marca.dart';
 
 /// Premium snackbar feedback — uses design tokens, tinted fills,
 /// and haptic feedback for every state.
@@ -210,7 +211,7 @@ reserveBottom > 0;
     final messenger = ScaffoldMessenger.maybeOf(context);
     if (messenger == null) return;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final snackFill = isDark ? EagleTokens.darkCardHi : EagleTokens.ink;
+    final snackFill = isDark ? context.tons.superficieAlta : EagleTokens.ink;
     final margin = _snackMargin(
       context,
       reserveBottom: reserveBottom,

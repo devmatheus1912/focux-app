@@ -21,10 +21,10 @@ class _PaletteThemePreview extends StatelessWidget {
   Widget build(BuildContext context) {
     final accent = palette.chromeFor(dark: dark);
     final onAccent = CuratedBrandPalette.readableOn(accent);
-    final surface = dark ? EagleTokens.darkCard : EagleTokens.card;
+    final surface = dark ? context.tons.superficie : EagleTokens.card;
     final ink = dark ? EagleTokens.darkInk : EagleTokens.ink;
     final mute = dark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = dark ? EagleTokens.darkLine : EagleTokens.line;
+    final line = dark ? context.tons.linha : EagleTokens.line;
     final label =
         dark ? identidadeDarkPreviewLabel() : identidadeLightPreviewLabel();
     final displayName = name.isNotEmpty ? name : 'Seu app Focux';

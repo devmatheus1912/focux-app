@@ -5,8 +5,8 @@ import '../theme/chao_da_marca.dart';
 import '../theme/tokens_strip.dart';
 
 /// Chão das páginas: cor sólida, sem brilhos nem degradê (guia de marca,
-/// seção 4.6). Claro = paper `#F4F6F8`; escuro = o petróleo `#0A1A1F` na matiz
-/// da marca do personal (mesmo brilho; com a cor do Focux, o petróleo exato).
+/// seção 4.6). Claro = paper `#F4F6F8`; escuro = petróleo `#0A1A1F` na marca
+/// Focux e grafite `#0E1113` na marca própria do personal ([TonsEscuros]).
 ///
 /// O estilo Cinematográfico ainda tinge o chão, sólido, com a primária.
 class FxChao extends StatelessWidget {
@@ -22,14 +22,14 @@ class FxChao extends StatelessWidget {
     final marca = BrandTint.maybeOf(context);
     final tinta = marca != null && marca.estilo.tingeFundo ? marca.primaria : null;
     if (claro) return _tingir(TokensStrip.paper, tinta, escuro: false);
-    // O tema da marca já montou o escuro na matiz dela (extensão do tema).
+    // O tema da marca já escolheu petróleo ou grafite (extensão do tema).
     final tema = theme.extension<TonsEscuros>();
     final chao = tema?.chao ?? tonsEscurosDa(marca?.primaria).chao;
     return _tingir(chao, tinta, escuro: true);
   }
 
-  /// Cor do chão sem contexto. [primaria] dá a matiz do escuro; [tinta] é a
-  /// primária da marca Cinematográfica.
+  /// Cor do chão sem contexto. [primaria] decide petróleo ou grafite; [tinta]
+  /// é a primária da marca Cinematográfica.
   static Color corPara({required bool escuro, Color? primaria, Color? tinta}) {
     final base = escuro ? tonsEscurosDa(primaria).chao : TokensStrip.paper;
     return _tingir(base, tinta, escuro: escuro);

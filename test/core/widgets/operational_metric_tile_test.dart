@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/core/theme/chao_da_marca.dart';
 import 'package:focux_app/core/theme/tokens_strip.dart';
 import 'package:focux_app/core/widgets/operational_metric_tile.dart';
 
@@ -12,6 +13,7 @@ void main() {
       final deco = operationalMetricDecoration(
         accent: red,
         isDark: false,
+        superficie: TonsEscuros.focux.superficie,
         emphasis: emphasis,
       );
       expect(deco.color, TokensStrip.glassFill(dark: false));

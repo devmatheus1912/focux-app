@@ -10,8 +10,6 @@ export 'app_typography.dart';
 abstract class EagleTokens {
   // ── Brand (TOKENS STRIP #0B4F5C — azul petróleo) ───────────────────
   static const Color brand = Color(0xFF0B4F5C);
-  static const Color brandInk = Color(0xFF083D47);
-  static const Color brandSecondary = Color(0xFF0A6B7A);
   static const Color brandSoft = Color(0xFFD5E8EC);
   static const Color brandSofter = Color(0xFFEBF4F6);
   static const Color brandDeep = Color(0xFF051F26);
@@ -19,7 +17,6 @@ abstract class EagleTokens {
 
   // ── Neutral Light ───────────────────────────────────────────────────
   static const Color ink = Color(0xFF1A1A2E);
-  static const Color inkSoft = Color(0xFF2E3840);
   static const Color inkMute = Color(0xFF6B7280);
   static const Color line = Color(0xFFE5E7EB);
   static const Color lineSoft = Color(0xFFECF0F2);
@@ -61,11 +58,8 @@ abstract class EagleTokens {
   static Color semanticBadSoft({bool isDark = false}) =>
       isDark ? badDark.withValues(alpha: 0.11) : badSoft;
 
-  /// Hubs S+ — lista, hero, chat, IA (evita `Color(0x…)` espalhado).
-  static const Color inkSlate = Color(0xFF475569);
   static const Color inkGray = Color(0xFF4B5563);
   static const Color inkSlateMuted = Color(0xFF9AA8B4);
-  static const Color warnAccent = Color(0xFFFFB77A);
   static const Color warnAccentSoft = Color(0xFFFFB088);
   static const Color warnDeep = Color(0xFF8A4B00);
   static const Color warnDeepDark = Color(0xFF7A5A00);
@@ -73,62 +67,30 @@ abstract class EagleTokens {
   static const Color warnSurfaceDarkAlt = Color(0xFF2E2618);
   static const Color goodAccent = Color(0xFF9CF0C0);
   static const Color goodSurfaceDark = Color(0xFF1A2E24);
-  static const Color riskCoral = Color(0xFFDC6B6B);
   static const Color riskCoralLight = Color(0xFFFFB4B4);
   static const Color warmPeach = Color(0xFFFFD59A);
   static const Color warmPeachSoft = Color(0xFFE2C48A);
   static const Color dangerBrown = Color(0xFF7C2D12);
   static const Color whatsapp = Color(0xFF25D366);
-  static const Color chatRead = Color(0xFF60A5FA);
   static const Color moneyGreen = Color(0xFF0E9F6E);
   static const Color copilotSuccess = Color(0xFF2BB673);
-  static const Color iaError = Color(0xFFE25656);
-  static const Color slate400 = Color(0xFF94A3B8);
-  static const Color priorityLow = Color(0xFF64748B);
-  static const Color cardSurfaceDark = Color(0xFF1A2228);
-  static const Color paperSubtle = Color(0xFFF8FAFC);
-  static const Color lineNeutral = Color(0xFFE5E7EB);
-  static const Color lineNeutralDark = Color(0xFF374151);
   static const Color avatarMint = Color(0xFF5EEAD4);
   static const Color avatarSky = Color(0xFF7DD3FC);
   static const Color avatarPink = Color(0xFFF9A8D4);
   static const Color avatarLavender = Color(0xFFC4B5FD);
   static const Color avatarOrange = Color(0xFFFDBA74);
-  static const Color riskDeep = Color(0xFF7F1D1D);
-  static const Color riskDeeper = Color(0xFF450A0A);
-  static const Color warmPaper = Color(0xFFFFF4E8);
-  static const Color inkWarmDark = Color(0xFF1A1208);
-  static const Color inkDeep = Color(0xFF081012);
   static const Color authErrorSoft = Color(0xFFFFB6B6);
   static const Color authSuccessSoft = Color(0xFF8FE3B3);
   static const Color authErrorBorder = Color(0xFFFF8B8B);
-  static const Color tierEnterprise = Color(0xFF0A4A54);
-  static const Color tierEnterpriseInk = Color(0xFF083D47);
   static const Color tierEnterpriseProInk = Color(0xFF0A6B7A);
-  static const Color chromeNeutralDark = Color(0xFF5C6B78);
-  static const Color brightGreen = Color(0xFF4ADE80);
   static const Color goldStar = Color(0xFFF59E0B);
-  static const Color purpleAccent = Color(0xFF6D28D9);
-  static const Color rankingGoldBorder = Color(0xFFFFE58A);
   static const Color cinematicBg = darkBg;
   static const Color cinematicBgHi = darkCard;
-  static const Color checkinTimerDark = Color(0xFF0F1A3C);
   static const Color macroProtein = Color(0xFFEF4444);
   static const Color macroCarb = Color(0xFFEAB308);
   static const Color macroFat = Color(0xFFF9A825);
-  static const Color macroProteinLight = Color(0xFFF87171);
-  static const Color surfaceGray = Color(0xFFF3F4F6);
-  static const Color iconGray = Color(0xFF717171);
-  static const Color buscaTreino = Color(0xFF22C55E);
-  static const Color landingWarnBg = Color(0xFFFFF4D6);
-  static const Color landingWarnTitle = Color(0xFF7A5200);
-  static const Color landingWarnBody = Color(0xFF9A6700);
-  static const Color landingWarnIcon = Color(0xFFE6A800);
-  static const Color paywallUsageWarn = Color(0xFFE85D5D);
   static const Color planUsageWarn = Color(0xFFFFD28A);
-  static const Color suporteError = Color(0xFFB91C1C);
   static const Color shadowSoft = Color(0x33000000);
-  static const Color gamificationOverlay = Color(0x0AFFFFFF);
   static const Color opsNotice = Color(0xFFFFB020);
   static const Color strengthWeak = Color(0xFFFF7A7A);
   static const Color strengthMid = Color(0xFFFFC857);
@@ -136,23 +98,12 @@ abstract class EagleTokens {
 
   // Special
   static const Color gold = Color(0xFFE5B84C);
-  static const Color goldSoft = Color(0xFFFFF8E6);
 
-  /// Ouro escurecido para texto sobre fundo claro (contraste AA no premium).
-  static const Color goldInk = Color(0xFF9A6B12);
   static const Color purple = Color(0xFF6B46C1);
-
-  /// Tinta escura para CTA sólido branco sobre o chão (AA em light e dark).
-  static const Color inkOnLightCta = Color(0xFF0B1524);
-
-  /// Preenchimento neutro de card em light (par do [darkCardHi]).
-  static const Color lightCardHi = Color(0xFFEEF2F5);
 
   // ── Glass / Liquid Glass Surfaces ───────────────────────────────────
   static const Color glassFill = Color(0x18FFFFFF);
   static const Color glassBorder = Color(0x24FFFFFF);
-  static const Color glassInnerHighlight = Color(0x12FFFFFF);
-  static const Color metalMid = Color(0xFF8B9AAB);
 
   /// Circuit glow — use with BoxShadow internal/tinted, never outer neon.
   /// Apply as: brandAccent.withValues(alpha: 0.35)
@@ -166,16 +117,6 @@ abstract class EagleTokens {
   static const Color warning = warn;
   static const Color success = good;
   static const Color textSecondary = inkMute;
-  static const Color textSecondaryDark = darkInkMute;
-
-  static const Color backgroundLight = paper;
-  static const Color backgroundDark = darkBg;
-  static const Color surfaceLight = card;
-  static const Color surfaceDark = darkCard;
-  static const Color textPrimaryLight = ink;
-  static const Color textPrimaryDark = darkInk;
-  static const Color outlineLight = line;
-  static const Color outlineDark = darkLine;
 
   // ── Radius ──────────────────────────────────────────────────────────
   static const double radiusXs = 8;
@@ -183,9 +124,6 @@ abstract class EagleTokens {
   static const double radiusMd = 16;
   static const double radiusLg = 20;
   static const double radiusXl = 24;
-  static const double radius2xl = 32;
-  static const double radius3xl = 40;
-  static const double radiusPill = 999;
 
   /// Generates a hero gradient from any dynamic primary color.
   /// Used by white-label to derive gradients from the personal's custom color.

@@ -29,8 +29,8 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
         final primary = Theme.of(ctx).colorScheme.primary;
         final ink = dark ? EagleTokens.darkInk : TokensStrip.textPrimary;
         final mute = dark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-        final line = dark ? EagleTokens.darkLine : TokensStrip.borderDefault;
-        final cardBg = dark ? EagleTokens.darkCard : TokensStrip.cardBg;
+        final line = dark ? context.tons.linha : TokensStrip.borderDefault;
+        final cardBg = dark ? context.tons.superficie : TokensStrip.cardBg;
         var query = '';
 
         return StatefulBuilder(

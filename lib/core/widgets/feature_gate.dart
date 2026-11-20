@@ -23,6 +23,7 @@ import 'skeleton_loader.dart';
 import '../theme/fx_icons.dart';
 
 import '../router/estado_da_rota.dart';
+import '../theme/chao_da_marca.dart';
 class FeatureGate extends ConsumerWidget {
   final SubscriptionPlan requiredPlan;
   final Widget child;
@@ -179,7 +180,7 @@ class _PlanSyncBannerShell extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               decoration: BoxDecoration(
-                color: EagleTokens.cinematicBgHi.withValues(alpha: 0.94),
+                color: context.tons.superficie.withValues(alpha: 0.94),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
                   color: EagleTokens.opsNotice.withValues(alpha: 0.28),

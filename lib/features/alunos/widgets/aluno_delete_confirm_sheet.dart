@@ -10,6 +10,7 @@ import '../../../core/widgets/fx_input_deco.dart';
 import '../data/aluno_repository.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../core/theme/fx_icons.dart';
+import '../../../core/theme/chao_da_marca.dart';
 
 class AlunoDeleteConfirmSheet extends StatefulWidget {
   const AlunoDeleteConfirmSheet({
@@ -46,7 +47,7 @@ class _AlunoDeleteConfirmSheetState extends State<AlunoDeleteConfirmSheet> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
+    final line = isDark ? context.tons.linha : TokensStrip.borderDefault;
     final displayName = fxTitleCaseName(widget.aluno.nome);
 
     return FxHomeSheetSurface(

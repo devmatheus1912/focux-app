@@ -79,7 +79,7 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
     final mute =
         widget.isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final line =
-        widget.isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
+        widget.isDark ? context.tons.linha : TokensStrip.borderDefault;
     final ink = fxScreenInk(context);
     final maxHeight =
         MediaQuery.sizeOf(context).height *

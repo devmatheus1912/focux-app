@@ -402,7 +402,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                             border: Border.all(
                               color:
                                   isDark
-                                      ? EagleTokens.darkLine
+                                      ? context.tons.linha
                                       : brand.withValues(alpha: 0.18),
                             ),
                           ),

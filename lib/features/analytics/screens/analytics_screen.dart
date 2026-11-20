@@ -28,6 +28,7 @@ import '../utils/analytics_display.dart';
 import '../../../core/utils/pt_br_display.dart';
 import '../../../core/widgets/fx_action_chip.dart';
 import '../../../core/theme/fx_icons.dart';
+import '../../../core/theme/chao_da_marca.dart';
 
 part 'analytics_screen_widgets.part.dart';
 

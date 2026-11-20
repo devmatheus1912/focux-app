@@ -9,6 +9,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../l10n/app_localizations.dart';
 import 'conversation_composer_acao.dart';
 import '../../../core/theme/fx_icons.dart';
+import '../../../core/theme/chao_da_marca.dart';
 
 class ConversationReplyComposerBar extends StatelessWidget {
   final bool isDark;
@@ -262,7 +263,7 @@ class ConversationMessageComposer extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: chrome.isDark
-            ? EagleTokens.darkBg.withValues(alpha: 0.92)
+            ? context.tons.chao.withValues(alpha: 0.92)
             : TokensStrip.pageBg.withValues(alpha: 0.94),
         border: Border(
           top: BorderSide(color: chrome.line.withValues(alpha: 0.65)),

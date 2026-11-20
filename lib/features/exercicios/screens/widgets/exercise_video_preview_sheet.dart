@@ -13,6 +13,7 @@ import '../../services/biblioteca_media_config.dart';
 import '../../services/biblioteca_sync_status.dart';
 import 'exercise_media_thumb.dart';
 import '../../../../core/theme/fx_icons.dart';
+import '../../../../core/theme/chao_da_marca.dart';
 
 /// Abre prévia do vídeo próprio ou da demonstração da biblioteca (GIF/MoveKit).
 Future<void> showExerciseMediaPreview(
@@ -178,7 +179,7 @@ class _ExerciseGifPreviewSheetState extends State<ExerciseGifPreviewSheet> {
                     // Fundo da folha — preto no letterbox vira “risco” na prévia.
                     child: ColoredBox(
                       color: isDark
-                          ? TokensStrip.cinematicSurface
+                          ? context.tons.superficie
                           : TokensStrip.cardBg,
                       child:
                           showSyncOnly
@@ -233,7 +234,7 @@ class _PreviewLoading extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return ColoredBox(
-      color: isDark ? TokensStrip.cinematicSurface : TokensStrip.cardBg,
+      color: isDark ? context.tons.superficie : TokensStrip.cardBg,
       child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -264,7 +265,7 @@ class _PreviewUnavailable extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return ColoredBox(
-      color: isDark ? TokensStrip.cinematicSurface : TokensStrip.cardBg,
+      color: isDark ? context.tons.superficie : TokensStrip.cardBg,
       child: Center(
         child: Padding(
           padding: const EdgeInsets.all(20),

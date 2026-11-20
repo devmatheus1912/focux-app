@@ -12,6 +12,7 @@ import '../../dashboard/utils/copilot_actions_display.dart';
 import '../providers/ia_copilot_providers.dart';
 import '../utils/ia_copiloto_display.dart';
 import '../../../core/theme/fx_icons.dart';
+import '../../../core/theme/chao_da_marca.dart';
 
 Future<IaCopilotTaskDraft?> showIaCopilotCreateTaskSheet(
   BuildContext context, {
@@ -52,8 +53,8 @@ class _IaCopilotCreateTaskSheet extends StatelessWidget {
     final brand = BrandPalette.softened(primary);
     final ink = dark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = dark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final line = dark ? EagleTokens.darkLine : TokensStrip.borderDefault;
-    final cardBg = dark ? EagleTokens.darkCard : TokensStrip.cardBg;
+    final line = dark ? context.tons.linha : TokensStrip.borderDefault;
+    final cardBg = dark ? context.tons.superficie : TokensStrip.cardBg;
     // Tarefa do Copiloto nasce P1: o mesmo prazo de Tarefas.
     final prazo = copilotActionsPrazo('P1').selo;
 

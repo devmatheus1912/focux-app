@@ -298,7 +298,7 @@ class _FunilBar extends StatelessWidget {
             child: LinearProgressIndicator(
               value: step.ratio.clamp(0.0, 1.0),
               minHeight: 6,
-              backgroundColor: dark ? EagleTokens.darkLine : primarySoft,
+              backgroundColor: dark ? context.tons.linha : primarySoft,
               color: primary,
             ),
           ),

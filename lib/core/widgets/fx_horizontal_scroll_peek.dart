@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/tokens_strip.dart';
+import '../theme/chao_da_marca.dart';
 
 /// Fade nas bordas para indicar scroll horizontal (compartilhado).
 /// O fade inicial só aparece depois que o conteúdo já saiu da origem —
@@ -29,7 +30,7 @@ class _FxHorizontalScrollPeekState extends State<FxHorizontalScrollPeek> {
 
   Color get _fadeBase {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return isDark ? TokensStrip.cinematicBg : TokensStrip.paper;
+    return isDark ? context.tons.chao : TokensStrip.paper;
   }
 
   @override
