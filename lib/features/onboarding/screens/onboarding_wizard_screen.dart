@@ -205,7 +205,7 @@ class _OnboardingWizardScreenState
       child: fxScreenA11yScope(
         label: 'Primeiros passos, configuração inicial',
         child: FxShellScaffold(
-          useMesh: true,
+          comFundo: true,
           appBar: FxShellAppBar(
             title: 'Primeiros passos',
             subtitle:

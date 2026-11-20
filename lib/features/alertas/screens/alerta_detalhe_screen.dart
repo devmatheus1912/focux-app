@@ -222,7 +222,7 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
           _leave();
         },
         child: FxShellScaffold(
-        useMesh: true,
+        comFundo: true,
         appBar: FxShellAppBar(
           title: 'Alerta',
           subtitle: FxHubFreshness.fromFetchedAt(_fetchedAt),

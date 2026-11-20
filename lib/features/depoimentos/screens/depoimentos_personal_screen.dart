@@ -282,7 +282,7 @@ class _State extends ConsumerState<DepoimentosPersonalScreen> {
           _leave();
         },
         child: FxShellScaffold(
-          useMesh: true,
+          comFundo: true,
           appBar: FxShellAppBar(
             title: 'Depoimentos',
             subtitle: FxHubFreshness.joinCount(

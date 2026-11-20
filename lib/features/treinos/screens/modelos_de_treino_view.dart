@@ -57,7 +57,7 @@ class _ModelosDeTreinoViewState extends ConsumerState<ModelosDeTreinoView> {
     return fxScreenA11yScope(
       label: s.treinosModelosTitulo,
       child: FxShellScaffold(
-        useMesh: true,
+        comFundo: true,
         appBar: FxShellAppBar(
           title: s.treinosModelosTitulo,
           subtitle: modelos == null ? null : s.modelosContagemTopo(modelos.length),

@@ -60,7 +60,7 @@ class AlunoActivationScreen extends ConsumerWidget {
           () => fxScreenA11yScope(
             label: 'Boas-vindas',
             child: const FxShellScaffold(
-              useMesh: true,
+              comFundo: true,
               constrainWidth: false,
               appBar: FxShellAppBar(title: 'Boas-vindas', showBack: false),
               body: SkeletonList(count: 4),
@@ -70,7 +70,7 @@ class AlunoActivationScreen extends ConsumerWidget {
           (e, _) => fxScreenA11yScope(
             label: 'Boas-vindas',
             child: FxShellScaffold(
-              useMesh: true,
+              comFundo: true,
               constrainWidth: false,
               appBar: const FxShellAppBar(title: 'Boas-vindas', showBack: false),
               body: FxErrorState(
@@ -98,7 +98,7 @@ class AlunoActivationScreen extends ConsumerWidget {
           child: fxScreenA11yScope(
             label: 'Boas-vindas',
             child: FxShellScaffold(
-              useMesh: true,
+              comFundo: true,
               constrainWidth: false,
               appBar: FxShellAppBar(
                 title: 'Boas-vindas',

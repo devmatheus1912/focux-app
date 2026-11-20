@@ -75,7 +75,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
       label: 'Analytics',
       child: FxShellScaffold(
         constrainWidth: false,
-        useMesh: true,
+        comFundo: true,
         appBar: FxShellAppBar(
           title: 'Analytics',
           subtitle:

@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 
-import 'cinematic_mesh_background.dart';
-import 'mesh_scope.dart';
+import 'fx_chao.dart';
+import 'fx_chao_scope.dart';
 
-/// Fundo opaco de uma página: o degradê da marca pintado na própria página.
+/// Fundo opaco de uma página: o chão sólido ([FxChao]) pintado na própria
+/// página.
 ///
-/// Sem isso as telas abertas por cima ficam transparentes sobre um degradê
+/// Sem isso as telas abertas por cima ficam transparentes sobre um fundo
 /// único atrás do navegador, e na transição (deslize do iPhone, voltar
 /// preditivo do Android) a tela de baixo aparece através da de cima.
-/// O [MeshScope] avisa o `FxShellScaffold` de que o fundo já existe.
+/// O [FxChaoScope] avisa o `FxShellScaffold` de que o fundo já existe.
 class FxFundoDaPagina extends StatelessWidget {
   const FxFundoDaPagina({super.key, required this.child});
 
@@ -16,9 +17,8 @@ class FxFundoDaPagina extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CinematicMeshBackground(
-      showCenterGlow: false,
-      child: MeshScope(active: true, child: child),
+    return FxChao(
+      child: FxChaoScope(active: true, child: child),
     );
   }
 }

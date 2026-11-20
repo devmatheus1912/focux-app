@@ -226,7 +226,7 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
       label: progressaoTitulo,
       child: FxKeyboardPopScope(
         child: FxShellScaffold(
-          useMesh: true,
+          comFundo: true,
           appBar: FxShellAppBar(
             title: progressaoTitulo,
             subtitle: _nome,

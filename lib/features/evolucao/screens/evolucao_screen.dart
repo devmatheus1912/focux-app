@@ -321,7 +321,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
           _sair();
         },
         child: FxShellScaffold(
-          useMesh: true,
+          comFundo: true,
           appBar: FxShellAppBar(
             title: 'Evolução',
             subtitle: fxTitleCaseName(nome),

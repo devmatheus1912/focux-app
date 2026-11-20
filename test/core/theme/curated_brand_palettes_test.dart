@@ -49,8 +49,8 @@ void main() {
     );
   });
 
-  test('dark chrome accent stays visible on mesh and keeps white labels', () {
-    const mesh = EagleTokens.darkBg;
+  test('dark chrome accent stays visible on the dark floor and keeps white labels', () {
+    const chao = EagleTokens.darkBg;
     const white = Color(0xFFFFFFFF);
     for (final palette in CuratedBrandPalette.premium) {
       final lightChrome = palette.chromeFor(dark: false);
@@ -62,9 +62,9 @@ void main() {
 
       final darkChrome = palette.chromeFor(dark: true);
       expect(
-        FocuxContrast.contrastRatio(darkChrome, mesh),
+        FocuxContrast.contrastRatio(darkChrome, chao),
         greaterThanOrEqualTo(FocuxContrast.wcagAaLarge),
-        reason: '${palette.name} icon on dark mesh',
+        reason: '${palette.name} icon on dark floor',
       );
       if (darkChrome != palette.primary) {
         expect(
@@ -110,7 +110,7 @@ void main() {
       expect(
         FocuxContrast.contrastRatio(again, EagleTokens.darkBg),
         greaterThanOrEqualTo(FocuxContrast.wcagAaLarge),
-        reason: '${palette.name} second pass still reads on mesh',
+        reason: '${palette.name} second pass still reads on the floor',
       );
     }
   });

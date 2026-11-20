@@ -249,7 +249,7 @@ class _IaChatScreenState extends ConsumerState<IaChatScreen> {
     return fxScreenA11yScope(
       label: 'IA Focux',
       child: FxShellScaffold(
-        useMesh: true,
+        comFundo: true,
         constrainWidth: false,
         appBar: FxShellAppBar(
           title: 'IA Focux',

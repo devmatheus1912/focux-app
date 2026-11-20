@@ -174,7 +174,7 @@ class _DesafiosAlunoScreenState extends ConsumerState<DesafiosAlunoScreen> {
           safePopOrGo(context, '/dashboard/aluno');
         },
         child: FxShellScaffold(
-          useMesh: true,
+          comFundo: true,
           constrainWidth: false,
           appBar: FxShellAppBar(
             title: 'Desafios',

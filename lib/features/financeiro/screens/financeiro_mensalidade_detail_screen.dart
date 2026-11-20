@@ -340,7 +340,7 @@ class _FinanceiroMensalidadeDetailScreenState
       child: fxScreenA11yScope(
         label: m == null ? 'Mensalidade' : 'Mensalidade de ${m.alunoNome}',
         child: FxShellScaffold(
-          useMesh: true,
+          comFundo: true,
           appBar: FxShellAppBar(
             title: 'Mensalidade',
             subtitle: freshness,

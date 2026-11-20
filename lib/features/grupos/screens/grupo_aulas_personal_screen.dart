@@ -315,7 +315,7 @@ class _GrupoAulasPersonalScreenState
           _leave();
         },
         child: FxShellScaffold(
-          useMesh: true,
+          comFundo: true,
           appBar: FxShellAppBar(
             title: 'Aulas em grupo',
             subtitle: FxHubFreshness.joinCount(

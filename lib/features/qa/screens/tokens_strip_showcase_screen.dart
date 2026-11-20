@@ -37,7 +37,7 @@ class _TokensStripShowcaseScreenState extends State<TokensStripShowcaseScreen> {
     return fxScreenA11yScope(
       label: 'TOKENS STRIP',
       child: FxShellScaffold(
-        useMesh: true,
+        comFundo: true,
         appBar: FxShellAppBar(
           title: 'TOKENS STRIP',
           subtitle: 'Design system reference · v${TokensStrip.version}',

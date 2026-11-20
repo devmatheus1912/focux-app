@@ -80,7 +80,7 @@ class _ProPromoScreenState extends ConsumerState<ProPromoScreen> {
     return fxScreenA11yScope(
       label: 'Promoção PRO',
       child: FxShellScaffold(
-        useMesh: true,
+        comFundo: true,
         appBar: const FxShellAppBar(
           title: 'PRO',
           fallbackLocation: '/planos',

@@ -126,7 +126,7 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
     return fxScreenA11yScope(
       label: 'NPS',
       child: FxShellScaffold(
-        useMesh: true,
+        comFundo: true,
         constrainWidth: false,
         appBar: FxShellAppBar(
           title: 'NPS',

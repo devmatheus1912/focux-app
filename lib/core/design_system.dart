@@ -20,11 +20,11 @@
 /// ## Superfícies
 /// - [FxStripCard] / [fxStripCardDecoration] — card padrão (glass strip).
 /// - [fxListTileCardShell] / [fxListCardDecoration] — linhas de lista.
-/// - [FxShellScaffold] + [FxShellAppBar] — telas satélite (useMesh: true).
+/// - [FxShellScaffold] + [FxShellAppBar] — telas satélite (comFundo: true).
 /// - [showFxHomeSheet] / [FxHomeSheetSurface] — bottom sheets (radius 28).
 /// - [showFxConfirmSheet] — confirmar/cancelar (nunca `AlertDialog`).
 /// - [showFxFormSheet] / [showFxNoticeSheet] — formulário curto e aviso.
-/// - [CinematicMeshBackground] + [MeshScope] — atmosfera (shell provê;
+/// - [FxChao] + [FxChaoScope] — atmosfera (shell provê;
 ///   scaffold da tela fica transparente).
 ///
 /// ## Motion & estados
@@ -85,6 +85,6 @@ export 'widgets/fx_form_sheet.dart' show showFxFormSheet, showFxNoticeSheet;
 export 'widgets/fx_premium_entrance.dart' show FxPremiumEntrance;
 export 'widgets/fx_motion.dart' show FxLiquidPrimaryButton, FxStaggerItem;
 export 'widgets/fx_content_width_limiter.dart' show FxContentWidthLimiter;
-export 'widgets/cinematic_mesh_background.dart' show CinematicMeshBackground;
-export 'widgets/mesh_scope.dart' show MeshScope;
+export 'widgets/fx_chao.dart' show FxChao;
+export 'widgets/fx_chao_scope.dart' show FxChaoScope;
 export 'widgets/fx_screen_a11y.dart';

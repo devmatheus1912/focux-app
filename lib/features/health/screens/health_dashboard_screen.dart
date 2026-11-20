@@ -527,7 +527,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
     return fxScreenA11yScope(
       label: 'Saúde',
       child: FxShellScaffold(
-        useMesh: true,
+        comFundo: true,
         constrainWidth: false,
         appBar: FxShellAppBar(
           title: 'Saúde',

@@ -309,7 +309,7 @@ class _AlunoFeedbackVideoScreenState
     return fxScreenA11yScope(
       label: feedbackVideoNome,
       child: FxShellScaffold(
-        useMesh: true,
+        comFundo: true,
         appBar: FxShellAppBar(
           title: feedbackVideoNome,
           subtitle: 'Seu personal corrige a execução',

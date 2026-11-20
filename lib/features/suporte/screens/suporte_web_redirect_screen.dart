@@ -51,7 +51,7 @@ class _SuporteWebRedirectScreenState
     return fxScreenA11yScope(
       label: 'Suporte',
       child: FxShellScaffold(
-        useMesh: true,
+        comFundo: true,
         appBar: const FxShellAppBar(title: 'Suporte'),
         body: _error != null
             ? FxErrorState(

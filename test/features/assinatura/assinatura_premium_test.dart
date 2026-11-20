@@ -16,7 +16,7 @@ void main() {
 
     expect(screen, contains("part 'paywall_layout.dart'"));
     expect(screen, contains('focux_legal.dart'));
-    expect(screen, contains('useMesh: true'));
+    expect(screen, contains('comFundo: true'));
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('_AssinaturaStickyGlassBar'));
     expect(screen, contains('BackdropFilter'));

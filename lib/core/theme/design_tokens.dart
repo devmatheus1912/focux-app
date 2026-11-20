@@ -142,7 +142,7 @@ abstract class EagleTokens {
   static const Color goldInk = Color(0xFF9A6B12);
   static const Color purple = Color(0xFF6B46C1);
 
-  /// Tinta escura para CTA sólido branco sobre mesh (AA em light e dark).
+  /// Tinta escura para CTA sólido branco sobre o chão (AA em light e dark).
   static const Color inkOnLightCta = Color(0xFF0B1524);
 
   /// Preenchimento neutro de card em light (par do [darkCardHi]).
@@ -159,7 +159,6 @@ abstract class EagleTokens {
   static Color get circuitGlow => brandAccent.withValues(alpha: 0.35);
 
   /// Paradas do fundo escuro de auth/splash: chão petróleo, sem brilho.
-  static const List<Color> heroMeshDark = [darkCard, darkBg, darkBg];
 
   // ── Adapters de Compatibilidade ─────────────────────────────────────
   static const Color primary = brand;

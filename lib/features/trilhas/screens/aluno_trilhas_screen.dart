@@ -117,7 +117,7 @@ class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
           safePopOrGo(context, '/dashboard/aluno');
         },
         child: FxShellScaffold(
-          useMesh: true,
+          comFundo: true,
           constrainWidth: false,
           appBar: FxShellAppBar(
             title: 'Trilhas',

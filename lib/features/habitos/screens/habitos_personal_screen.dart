@@ -185,7 +185,7 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
             FxKeyboardDismissScope.dismiss();
           },
           child: FxShellScaffold(
-            useMesh: true,
+            comFundo: true,
             safeArea: false,
             constrainWidth: false,
             appBar: FxShellAppBar(

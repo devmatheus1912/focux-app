@@ -305,7 +305,7 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
           requiredPlan: SubscriptionPlan.PRO,
           capability: 'iaCopiloto',
           child: FxShellScaffold(
-            useMesh: true,
+            comFundo: true,
             constrainWidth: false,
             safeArea: false,
             appBar: FxShellAppBar(

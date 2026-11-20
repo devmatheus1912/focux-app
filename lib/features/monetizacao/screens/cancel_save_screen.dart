@@ -200,7 +200,7 @@ class _CancelSaveScreenState extends ConsumerState<CancelSaveScreen> {
       label: 'Antes de cancelar a assinatura',
       child: FxKeyboardPopScope(
         child: FxShellScaffold(
-          useMesh: true,
+          comFundo: true,
           appBar: const FxShellAppBar(
             title: 'Antes de cancelar…',
             fallbackLocation: '/assinatura',
@@ -318,7 +318,7 @@ class _MotivoTile extends StatelessWidget {
     );
     // cardBg is always white; dark mode needs an opaque shell card (ink is light).
     final palette = ShellChrome.forDark(isDark);
-    // Opaque sheet in dark — translucent glass still washed out over mesh.
+    // Opaque sheet in dark — translucent glass still washed out over the floor.
     final cardFill = isDark ? palette.sheetFill : TokensStrip.cardBg;
 
     return Semantics(

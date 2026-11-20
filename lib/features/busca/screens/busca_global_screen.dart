@@ -192,7 +192,7 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
           safePopOrGo(context, '/dashboard/personal');
         },
         child: FxShellScaffold(
-          useMesh: true,
+          comFundo: true,
           appBar: FxShellAppBar(
             title: 'Busca',
             subtitle: FxHubFreshness.joinCount(countLabel, null),

@@ -129,7 +129,7 @@ class CuratedBrandPalette {
 
   /// Acento de chrome (ícones, CTA, login). Paletas premium gravam o
   /// *clima* escuro em [primary] (navy, carvão) e o ouro/menta em
-  /// [secondary]. No escuro, [primary] some no mesh — promovemos o
+  /// [secondary]. No escuro, [primary] some no chão — promovemos o
   /// papel visível sem regravar o hex no servidor.
   Color chromeFor({required bool dark}) =>
       chromeAccent(primary, secondary, dark: dark);
@@ -156,7 +156,7 @@ class CuratedBrandPalette {
 
   /// Login e [FxLiquidPrimaryButton] pintam o rótulo de branco. Depois de
   /// promover um ouro/menta claro, escurece até o branco ler em AA (4.5:1)
-  /// — sem voltar ao navy que some no mesh. 3:1 deixava o acento falhar
+  /// — sem voltar ao navy que some no chão. 3:1 deixava o acento falhar
   /// [isReadablePrimary] e o [safeSecondaryFor] trocava o ouro pelo default.
   static Color _ensureWhiteLabelOnDark(
     Color color,
@@ -183,7 +183,7 @@ class CuratedBrandPalette {
     return current;
   }
 
-  /// Acento já levantado p/ mesh escuro (AuthShell / sheet forceDark).
+  /// Acento já levantado p/ o chão escuro (AuthShell / sheet forceDark).
   /// Não é [isReadablePrimary] de paleta *salva* — navy/carvão falham aqui
   /// de propósito; ouro/menta escurecido passa.
   static bool _isUsableDarkChrome(Color color) {

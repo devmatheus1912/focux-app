@@ -350,7 +350,7 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
           safePopOrGo(context, _parentRoute);
         },
         child: FxShellScaffold(
-          useMesh: true,
+          comFundo: true,
           appBar: FxShellAppBar(
             title: feedbackVideoNome,
             subtitle: FxHubFreshness.joinCount(

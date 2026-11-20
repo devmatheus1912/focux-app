@@ -215,7 +215,7 @@ class _DesafioDetailScreenState extends ConsumerState<DesafioDetailScreen> {
           _leave();
         },
         child: FxShellScaffold(
-          useMesh: true,
+          comFundo: true,
           constrainWidth: false,
           appBar: FxShellAppBar(
             title: 'Desafio',

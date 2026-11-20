@@ -137,7 +137,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
       dirty: _hasUnsavedWork && !_isAcesso,
       onCancel: _handleBack,
       child: FxShellScaffold(
-          useMesh: true,
+          comFundo: true,
           appBar: FxShellAppBar(
             title: 'Trazer alunos',
             subtitle: migracaoEtapaLabel(_etapa),

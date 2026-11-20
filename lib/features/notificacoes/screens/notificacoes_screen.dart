@@ -285,7 +285,7 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
           safePopOrGo(context, home);
         },
         child: FxShellScaffold(
-        useMesh: true,
+        comFundo: true,
         constrainWidth: false,
         appBar: FxShellAppBar(
           title: ptS.notifications,

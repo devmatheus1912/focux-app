@@ -67,7 +67,7 @@ class AlunoRecursoIndisponivel extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final recurso = PlanoRecursoTextos.nome(capability, fallback: fallbackNome);
     return FxShellScaffold(
-      useMesh: true,
+      comFundo: true,
       appBar: FxShellAppBar(
         title: recurso,
         onBack: () => safePopOr(context, () => goToRoleHome(context, ref)),

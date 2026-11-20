@@ -243,7 +243,7 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
           safePopOrGo(context, '/dashboard/aluno');
         },
         child: FxShellScaffold(
-          useMesh: true,
+          comFundo: true,
           constrainWidth: false,
           appBar: FxShellAppBar(
             title: 'Mensalidades',

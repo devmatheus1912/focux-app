@@ -305,7 +305,7 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
     return fxScreenA11yScope(
       label: s.alunoHomeTitulo,
       child: FxShellScaffold(
-        useMesh: true,
+        comFundo: true,
         constrainWidth: false,
         appBar: FxShellAppBar(
           title: s.alunoHomeTitulo,

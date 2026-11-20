@@ -20,7 +20,7 @@ class PerfilErrorScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return FxShellScaffold(
-      useMesh: true,
+      comFundo: true,
       body: FxErrorState(
         chromeOnDark: ShellChrome.of(context).isDark,
         primary: theme.colorScheme.primary,

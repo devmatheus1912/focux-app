@@ -17,10 +17,10 @@ import '../../../core/theme/theme_provider.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/focux_brand_tagline.dart';
 import '../../../core/widgets/fx_conversion.dart';
-import '../../../core/widgets/cinematic_mesh_background.dart';
+import '../../../core/widgets/fx_chao.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_premium_entrance.dart';
-import '../../../core/widgets/mesh_scope.dart';
+import '../../../core/widgets/fx_chao_scope.dart';
 import '../../perfil/utils/brand_slogan_display.dart';
 import '../utils/auth_layout.dart';
 
@@ -39,26 +39,20 @@ class AuthShell extends StatelessWidget {
     super.key,
     required this.child,
     this.dark = false,
-    this.showCenterGlow = false,
-    this.showCornerGlow = false,
     this.forceDark = true,
-    this.flatBackground = true,
   });
 
   final Widget child;
   final bool dark;
-  final bool showCenterGlow;
-  final bool showCornerGlow;
-  final bool flatBackground;
 
-  /// Auth/splash UI is authored for the dark cinematic mesh (white type).
+  /// Entrada e splash ficam no chão escuro sólido (texto branco).
   final bool forceDark;
 
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final secondary = Theme.of(context).colorScheme.secondary;
-    // Mesh é sempre escuro; o tema do app (light no celular) não pode
+    // O chão é sempre escuro; o tema do app (light no celular) não pode
     // pintar card branco com tinta branca por cima.
     final content =
         forceDark
@@ -69,12 +63,9 @@ class AuthShell extends StatelessWidget {
             : child;
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: FocuxSystemChrome.dark,
-      child: CinematicMeshBackground(
+      child: FxChao(
         forceDark: forceDark,
-        showCenterGlow: showCenterGlow,
-        showCornerGlow: showCornerGlow,
-        flatBackground: flatBackground,
-        child: MeshScope(
+        child: FxChaoScope(
           active: true,
           child: FxKeyboardPopScope(
             child: SafeArea(child: FxKeyboardDismissScope(child: content)),
@@ -89,7 +80,7 @@ class AuthShell extends StatelessWidget {
 TextStyle authPageTitleStyle(BuildContext context, {Color? color}) =>
     FocuxHubTypography.pageTitle(context, color: color ?? heroTealInk());
 
-/// Subtítulo/apoio abaixo do título — `bodyMuted` da Home sobre mesh.
+/// Subtítulo/apoio abaixo do título — `bodyMuted` da Home sobre o chão.
 TextStyle authSubtitleStyle({Color? color}) =>
     FocuxHubTypography.bodyMuted(color: color ?? heroTealSurface(0.78));
 
@@ -354,7 +345,7 @@ class AuthGlassCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    // Vidro escuro do mesh — nunca o strip branco da Home (tinta auth é clara).
+    // Vidro escuro sobre o chão — nunca o strip branco da Home (tinta auth é clara).
     return ClipRRect(
       borderRadius: BorderRadius.circular(radius),
       child: BackdropFilter(

@@ -131,7 +131,7 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
     return fxScreenA11yScope(
       label: l10n.referralTitle,
       child: FxShellScaffold(
-        useMesh: true,
+        comFundo: true,
         constrainWidth: false,
         appBar: FxShellAppBar(
           title: l10n.referralTitle,

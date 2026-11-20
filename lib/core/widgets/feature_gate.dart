@@ -273,7 +273,7 @@ class _LockedScreenState extends ConsumerState<_LockedScreen> {
     final empilhada = GoRouter.of(context).canPop();
 
     return FxShellScaffold(
-      useMesh: true,
+      comFundo: true,
       appBar: FxShellAppBar(
         title: nome,
         showBack: empilhada,

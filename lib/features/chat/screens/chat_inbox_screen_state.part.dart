@@ -308,7 +308,7 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
           safePopOrGo(context, '/dashboard/personal');
         },
         child: FxShellScaffold(
-          useMesh: true,
+          comFundo: true,
           appBar: _buildAppBar(
             ink: ink,
             mute: mute,

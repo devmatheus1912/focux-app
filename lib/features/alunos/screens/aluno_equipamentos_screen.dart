@@ -182,7 +182,7 @@ class _AlunoEquipamentosScreenState
         dirty: _dirty,
         onCancel: _cancel,
         child: FxShellScaffold(
-          useMesh: true,
+          comFundo: true,
           appBar: FxShellAppBar(
             title: 'Equipamentos',
             subtitle: satelliteFirstName(alunoAsync.value?.nome),

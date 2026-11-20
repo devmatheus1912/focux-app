@@ -60,7 +60,7 @@ class IaConversasScreen extends ConsumerWidget {
     return fxScreenA11yScope(
       label: ptS.iaConversasTitulo,
       child: FxShellScaffold(
-        useMesh: true,
+        comFundo: true,
         appBar: FxShellAppBar(
           title: ptS.iaConversasTitulo,
           onBack: () => safePopOrGo(context, '/ia/copiloto'),

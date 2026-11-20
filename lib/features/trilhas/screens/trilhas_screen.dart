@@ -202,7 +202,7 @@ class _TrilhasScreenState extends ConsumerState<TrilhasScreen> {
           safePopOrGo(context, '/alunos/${widget.alunoId}');
         },
         child: FxShellScaffold(
-          useMesh: true,
+          comFundo: true,
           appBar: FxShellAppBar(
             title: 'Trilhas',
             subtitle: FxHubFreshness.joinCount(_primeiroNome, freshness),

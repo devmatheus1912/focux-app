@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/theme/brand_style.dart';
 import 'package:focux_app/core/theme/brand_tint.dart';
-import 'package:focux_app/core/widgets/cinematic_mesh_background.dart';
+import 'package:focux_app/core/widgets/fx_chao.dart';
 import 'package:focux_app/core/widgets/fx_dock.dart';
 import 'package:focux_app/features/dashboard/widgets/aluno_capa_banner.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
@@ -75,7 +75,7 @@ void main() {
           _app(
             dark: escuro,
             estilo: e,
-            const CinematicMeshBackground(child: SizedBox.expand()),
+            const FxChao(child: SizedBox.expand()),
           ),
         );
         await tester.pump(const Duration(milliseconds: 500));

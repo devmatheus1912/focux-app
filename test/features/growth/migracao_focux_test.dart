@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:focux_app/core/widgets/mesh_scope.dart';
+import 'package:focux_app/core/widgets/fx_chao_scope.dart';
 import 'package:focux_app/features/growth/screens/migracao_magica_screen.dart';
 import 'package:focux_app/features/growth/utils/migracao_foto_limits.dart';
 import 'package:focux_app/features/planos/data/planos_repository.dart';
@@ -61,7 +61,7 @@ void main() {
           locale: Locale('pt'),
           localizationsDelegates: S.localizationsDelegates,
           supportedLocales: S.supportedLocales,
-          home: MeshScope(
+          home: FxChaoScope(
             active: true,
             child: MigracaoMagicaScreen(),
           ),

@@ -226,7 +226,7 @@ class _WhiteLabelSettingsScreenState
           if (!didPop) _sair();
         },
         child: FxShellScaffold(
-          useMesh: true,
+          comFundo: true,
           constrainWidth: false,
           appBar: FxShellAppBar(
             title: 'Marca própria',

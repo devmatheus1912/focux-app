@@ -538,7 +538,7 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
         dirty: formReady && _dirty,
         onCancel: _cancel,
         child: FxShellScaffold(
-          useMesh: true,
+          comFundo: true,
           constrainWidth: false,
           appBar: FxShellAppBar(
             title: s.anamneseAlunoTitulo,

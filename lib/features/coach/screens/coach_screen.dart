@@ -64,7 +64,7 @@ class CoachScreen extends ConsumerWidget {
     return fxScreenA11yScope(
       label: 'Coach proativo',
       child: FxShellScaffold(
-        useMesh: true,
+        comFundo: true,
         constrainWidth: false,
         appBar: FxShellAppBar(
           title: 'Coach',

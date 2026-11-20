@@ -230,7 +230,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
           safePopOrGo(context, '/alunos');
         },
         child: FxShellScaffold(
-          useMesh: true,
+          comFundo: true,
           constrainWidth: false,
           safeArea: false,
           appBar:

@@ -265,7 +265,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen>
     return fxScreenA11yScope(
       label: 'Agenda',
       child: FxShellScaffold(
-        useMesh: true,
+        comFundo: true,
         constrainWidth: false,
         extendBody: true,
         appBar: FxShellAppBar(

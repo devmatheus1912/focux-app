@@ -113,7 +113,7 @@ class _CheckinPersonalHubScreenState
     return fxScreenA11yScope(
       label: 'Check-ins',
       child: FxShellScaffold(
-        useMesh: true,
+        comFundo: true,
         constrainWidth: false,
         appBar: FxShellAppBar(
           title: 'Check-ins',

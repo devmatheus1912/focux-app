@@ -52,7 +52,7 @@ class RbacScreen extends ConsumerWidget {
     return fxScreenA11yScope(
       label: 'Controle de acessos',
       child: FxShellScaffold(
-        useMesh: true,
+        comFundo: true,
         appBar: FxShellAppBar(
           title: 'Controle de acessos',
           subtitle: 'Permissões operacionais',

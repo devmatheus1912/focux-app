@@ -345,7 +345,7 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
             _leave();
           },
           child: FxShellScaffold(
-            useMesh: false,
+            comFundo: false,
             constrainWidth: false,
             appBar: FxShellAppBar(
               title: 'Feed',

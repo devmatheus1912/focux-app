@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
-import '../../../core/widgets/mesh_scope.dart';
+import '../../../core/widgets/fx_chao_scope.dart';
 import '../../../l10n/app_localizations.dart';
 import '../data/qa_smoke_catalog.dart';
 import '../../agenda/screens/agenda_screen.dart';
@@ -37,7 +37,7 @@ import '../../treinos/screens/modelos_de_treino_view.dart';
 import 'qa_preview_session.dart';
 import '../../../core/theme/fx_icons.dart';
 
-/// Builds smoke-test screen previews with GoRouter + mesh for QA pumps.
+/// Builds smoke-test screen previews with GoRouter + FxChaoScope for QA pumps.
 Widget buildQaRoutePreview(String path) => buildQaRoutePreviewApp(path);
 
 /// Router harness for widget tests — screens de auth leem [GoRouterState].
@@ -55,7 +55,7 @@ GoRouter buildQaPreviewRouter(String initialLocation) {
         GoRoute(
           path: path,
           builder:
-              (context, state) => MeshScope(
+              (context, state) => FxChaoScope(
                 active: true,
                 child: _buildQaRouteScreen(state.uri),
               ),

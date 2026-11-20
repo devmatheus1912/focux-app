@@ -185,7 +185,7 @@ class _InteressadosScreenState extends ConsumerState<InteressadosScreen>
             safePopOrGo(context, '/dashboard/personal');
           },
           child: FxShellScaffold(
-            useMesh: true,
+            comFundo: true,
             constrainWidth: false,
             appBar: FxShellAppBar(
               title: 'Interessados',

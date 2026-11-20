@@ -201,7 +201,7 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen> {
     return fxScreenA11yScope(
       label: alunoId == null ? 'Financeiro' : 'Mensalidades',
       child: FxShellScaffold(
-        useMesh: true,
+        comFundo: true,
         constrainWidth: false,
         appBar: FxShellAppBar(
           title: alunoId == null ? 'Financeiro' : 'Mensalidades',

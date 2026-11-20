@@ -90,7 +90,7 @@ class _HistoricoCheckinScreenState
     return fxScreenA11yScope(
       label: s.historicoTitulo,
       child: FxShellScaffold(
-        useMesh: true,
+        comFundo: true,
         constrainWidth: false,
         appBar: FxShellAppBar(
           title: s.historicoTitulo,

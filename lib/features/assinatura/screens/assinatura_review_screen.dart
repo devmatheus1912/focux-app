@@ -99,7 +99,7 @@ class _AssinaturaReviewScreenState extends State<AssinaturaReviewScreen> {
     return fxScreenA11yScope(
       label: assinaturaReviewTitle(),
       child: FxShellScaffold(
-        useMesh: true,
+        comFundo: true,
         appBar: FxShellAppBar(
           title: assinaturaReviewTitle(),
           onBack: () {

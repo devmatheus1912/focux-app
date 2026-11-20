@@ -55,7 +55,7 @@ class AppTheme {
             : (dark
                 ? BrandPalette.accent(storedPrimary)
                 : BrandPalette.deep(storedPrimary));
-    // Dark mesh / login: navy/carvão como primary some. Chrome visível
+    // Chão escuro / login: navy/carvão como primary some. Chrome visível
     // (ouro, menta, cobre) vira ColorScheme.primary; o hex salvo não muda.
     final primary = CuratedBrandPalette.chromeAccent(
       storedPrimary,

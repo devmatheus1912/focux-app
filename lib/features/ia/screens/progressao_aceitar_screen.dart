@@ -351,7 +351,7 @@ class _ProgressaoAceitarScreenState
     return fxScreenA11yScope(
       label: 'Sugestões pendentes de progressão',
       child: FxShellScaffold(
-        useMesh: true,
+        comFundo: true,
         appBar: FxShellAppBar(
           title: ptS.cargasRevisarTitulo,
           subtitle: args.alunoNome,

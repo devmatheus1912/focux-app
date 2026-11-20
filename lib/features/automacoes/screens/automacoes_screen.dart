@@ -225,7 +225,7 @@ class _AutomacoesScreenState extends ConsumerState<AutomacoesScreen> {
             if (!didPop) _leave();
           },
           child: FxShellScaffold(
-            useMesh: true,
+            comFundo: true,
             appBar: FxShellAppBar(
               title: 'Automações',
               subtitle: FxHubFreshness.joinCount(

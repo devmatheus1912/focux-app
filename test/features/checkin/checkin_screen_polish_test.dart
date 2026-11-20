@@ -28,7 +28,7 @@ void main() {
     expect(screen, contains('FxExecutionKeepAwake'));
     expect(screen, contains('FxExecutionPopGuard'));
     expect(screen, contains('onTrocar:'));
-    expect(screen, contains('useMesh: false'));
+    expect(screen, contains('comFundo: false'));
     expect(screen, contains('scaffoldBackgroundColor'));
     expect(screen, contains('ColoredBox'));
     expect(screen, contains('showCheckinSerieDetalhe'));

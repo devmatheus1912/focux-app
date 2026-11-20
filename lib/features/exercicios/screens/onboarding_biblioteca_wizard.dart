@@ -207,7 +207,7 @@ class _OnboardingBibliotecaWizardState
       child: fxScreenA11yScope(
       label: 'Biblioteca curada',
       child: FxShellScaffold(
-        useMesh: true,
+        comFundo: true,
         appBar: FxShellAppBar(
           title: 'Biblioteca curada',
           subtitle: bibliotecaEtapaLabel(_step),

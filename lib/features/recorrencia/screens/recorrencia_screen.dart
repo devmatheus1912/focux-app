@@ -189,7 +189,7 @@ class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
           safePopOrGo(context, '/financeiro');
         },
         child: FxShellScaffold(
-          useMesh: true,
+          comFundo: true,
           constrainWidth: false,
           appBar: FxShellAppBar(
             title: 'Recorrências',

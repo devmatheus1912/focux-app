@@ -29,7 +29,7 @@ class PerfilAlunoScreen extends ConsumerWidget {
     return fxScreenA11yScope(
       label: s.alunoPerfilTitulo,
       child: FxShellScaffold(
-        useMesh: true,
+        comFundo: true,
         constrainWidth: false,
         appBar: FxShellAppBar(
           title: s.alunoPerfilTitulo,

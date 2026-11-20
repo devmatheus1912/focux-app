@@ -93,7 +93,7 @@ class _LandingPreviewScreenState extends State<LandingPreviewScreen> {
     return fxScreenA11yScope(
       label: 'Preview da landing',
       child: FxShellScaffold(
-        useMesh: false,
+        comFundo: false,
         appBar: FxShellAppBar(
           title: 'Preview',
           subtitle: 'Como o lead vê · ainda não publicado',

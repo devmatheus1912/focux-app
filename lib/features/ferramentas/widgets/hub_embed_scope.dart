@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Quando presente, [FxShellScaffold] omite app bar/mesh duplicados (aba de hub).
+/// Quando presente, [FxShellScaffold] omite app bar/fundo duplicados (aba de hub).
 class HubEmbedScope extends InheritedWidget {
   const HubEmbedScope({super.key, required super.child});
 

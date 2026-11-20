@@ -94,7 +94,7 @@ O slogan antigo, "Sistema operacional para personal trainer", está aposentado.
 
 ## 3. Logo
 
-> **Logo v2 (novembro de 2026).** Evolução do logo original: mesmo braço, mesma composição e mesma ideia, com desenho limpo, texto reconstruído e cor unificada com o app. Os arquivos estão em [`kit/`](kit/). O logo anterior ficou em [`legado/`](legado/) só como referência.
+> **Logo v2 (novembro de 2026).** Evolução do logo original: mesmo braço, mesma composição e mesma ideia, com desenho limpo, texto reconstruído e cor unificada com o app. Os arquivos estão em [`kit/`](kit/). O logo anterior saiu do repositório (fica no histórico do Git).
 
 ### Construção
 
@@ -160,7 +160,7 @@ Abaixo do mínimo, "PERSONAL" deixa de ser legível: use o horizontal ou só o s
 - Adicionar sombra, contorno, brilho, gradiente ou efeito 3D.
 - Separar o símbolo do wordmark e reposicionar livremente.
 - Digitar "FOCUX" em qualquer fonte. O wordmark só existe como desenho.
-- Usar o logo anterior (`legado/`, petróleo `#016B7E`) ou o antigo ciano (`#13C2C2` / `#1EC8C8`) em material novo.
+- Usar o logo anterior (petróleo `#016B7E`) ou o antigo ciano (`#13C2C2` / `#1EC8C8`) em material novo.
 
 ---
 
@@ -251,7 +251,7 @@ Regra: **fundo sólido**. Atmosfera, quando existir, é **uma única luz fixa** 
 
 Por quê: várias camadas translúcidas sobre o escuro viram uma névoa esverdeada e suja, a elevação dos cartões fica inconsistente e o visual cai no padrão genérico "quase preto + acento neon + bordas brilhando". Diagnóstico completo na auditoria de 18/11/2026 (skill impeccable).
 
-> **App:** o escuro é chão sólido desde 20/11/2026. O mesh claro (`#E4EFF1 → #F4F6F8 → #EDF2F4`) com brilhos continua; migração pendente (seção 17).
+> **App:** fundo sólido desde 20/11/2026 (`FxChao`): chão `#0A1A1F` no escuro e paper `#F4F6F8` no claro, sem brilhos.
 
 ---
 
@@ -545,7 +545,7 @@ No plano Enterprise o personal aplica logo, paleta e nome dentro do Focux e pode
 | Tipografia do app | `focux-app/lib/core/theme/focux_hub_typography.dart` |
 | Ícones | `focux-app/lib/core/theme/fx_icons.dart` |
 | White-label | `focux-app/lib/core/theme/brand_palette.dart` |
-| Logos e ícones | `focux-app/brand/kit/` (logo v2) · anterior em `brand/legado/` |
+| Logos e ícones | `focux-app/brand/kit/` (logo v2) |
 | Tokens do site | `focux-website/client/src/index.css` |
 | Oferta e planos | `focux-website/client/src/lib/data.ts` |
 | Copy do site | `focux-website/client/src/lib/landing.ts` + Humanizer |
@@ -564,4 +564,4 @@ Mudanças de cor, logo ou tipografia são **decisão de produto** dos sócios. F
 6. ~~Trocar os arquivos em uso pelo logo v2~~ **Resolvido em 20/11/2026** no app (`assets/images/`, ícones nativos, notificação, splash, web) e no site (`client/public/`, favicon, e-mail, og:image). Falta trocar nas redes sociais e nos diretórios externos.
 7. **Busca de marca no INPI** e busca reversa de imagem antes do lançamento.
 8. ~~Fundo escuro do site com manchas de brilho e efeitos animados~~ **Resolvido em 18/11/2026:** chão petróleo `#0A1A1F`, uma luz fixa no hero, sem pulso, órbitas ou degradê animado (site e páginas legais).
-9. ~~Migrar o fundo escuro do app~~ **Resolvido em 20/11/2026:** chão petróleo nos tokens e fundo escuro sem brilhos. Falta o fundo claro (mesh com brilhos → paper sólido).
+9. ~~Migrar o fundo escuro do app~~ **Resolvido em 20/11/2026:** chão petróleo nos tokens e fundo escuro sem brilhos. Fundo claro em paper `#F4F6F8` sólido no mesmo dia.

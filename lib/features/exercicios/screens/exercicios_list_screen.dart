@@ -421,7 +421,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
           safePopOrGo(context, '/treinos');
         },
         child: FxShellScaffold(
-          useMesh: true,
+          comFundo: true,
           appBar:
               _selected.isEmpty
                   ? FxShellAppBar(

@@ -261,7 +261,7 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
           safePopOrGo(context, '/alunos/${widget.alunoId}');
         },
         child: FxShellScaffold(
-          useMesh: true,
+          comFundo: true,
           safeArea: false,
           appBar: FxShellAppBar(
             title: ptS.engajamentoAderencia2,

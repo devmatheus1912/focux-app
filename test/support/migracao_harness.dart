@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/api/api_client.dart';
 import 'package:focux_app/core/theme/design_tokens.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
-import 'package:focux_app/core/widgets/mesh_scope.dart';
+import 'package:focux_app/core/widgets/fx_chao_scope.dart';
 import 'package:focux_app/features/auth/providers/auth_provider.dart';
 import 'package:focux_app/features/growth/screens/migracao_magica_screen.dart';
 import 'package:focux_app/features/planos/data/planos_repository.dart';
@@ -136,7 +136,7 @@ Future<ServidorMigracao> abrirMigracao(
     routes: [
       GoRoute(
         path: '/migracao',
-        builder: (_, __) => const MeshScope(active: true, child: MigracaoMagicaScreen()),
+        builder: (_, __) => const FxChaoScope(active: true, child: MigracaoMagicaScreen()),
       ),
       GoRoute(path: '/alunos', builder: (_, __) => const Scaffold(body: Text('lista'))),
     ],

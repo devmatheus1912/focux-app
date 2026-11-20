@@ -188,7 +188,7 @@ class _IdentidadeVisualScreenState
       return fxScreenA11yScope(
         label: 'Identidade Visual',
         child: FxShellScaffold(
-          useMesh: true,
+          comFundo: true,
           appBar: FxShellAppBar(
             title: widget.isSetup ? 'Configurar meu app' : 'Identidade Visual',
             onBack: _pedirSair,
@@ -223,7 +223,7 @@ class _IdentidadeVisualScreenState
       child: fxScreenA11yScope(
         label: 'Identidade Visual',
         child: FxShellScaffold(
-          useMesh: true,
+          comFundo: true,
           appBar: FxShellAppBar(
             title: widget.isSetup ? 'Configurar meu app' : 'Identidade Visual',
             subtitle: identidadeAppBarSubtitle(

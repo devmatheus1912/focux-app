@@ -467,7 +467,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
           if (_hasActiveFilter) _handleHeaderBack();
         },
         child: FxShellScaffold(
-          useMesh: true,
+          comFundo: true,
           appBar: FxShellAppBar(
             title: context.alunosL10n.alunosTitle,
             subtitle:

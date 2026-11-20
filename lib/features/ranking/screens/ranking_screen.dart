@@ -146,7 +146,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
           safePopOrGo(context, '/dashboard/personal');
         },
         child: FxShellScaffold(
-        useMesh: true,
+        comFundo: true,
         dismissKeyboard: true,
         constrainWidth: false,
         appBar: FxShellAppBar(

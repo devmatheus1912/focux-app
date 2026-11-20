@@ -154,7 +154,7 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
           leave();
         },
         child: FxShellScaffold(
-        useMesh: true,
+        comFundo: true,
         appBar: FxShellAppBar(
           title: 'Exercício',
           // Sem "Atualizado agora": o conteúdo do exercício é estático.

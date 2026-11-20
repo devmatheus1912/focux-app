@@ -281,7 +281,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen>
           if (!didPop) _leave();
         },
         child: FxShellScaffold(
-          useMesh: true,
+          comFundo: true,
           constrainWidth: false,
           appBar: FxShellAppBar(
             title: 'Interessado',

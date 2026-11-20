@@ -270,7 +270,7 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
       label: FocuxMicrocopy.alunosEmRisco,
       child: FxKeyboardPopScope(
         child: FxShellScaffold(
-          useMesh: true,
+          comFundo: true,
           constrainWidth: false,
           appBar: FxShellAppBar(
             title: s.retencaoTitulo,

@@ -201,11 +201,8 @@ Detalhes, checklist e padrão de commit em [`CONTRIBUTING.md`](CONTRIBUTING.md).
 | Guia de marca | [`brand/brand_guidelines.md`](brand/brand_guidelines.md) · versão visual em [`brand/brand_guidelines.html`](brand/brand_guidelines.html) |
 | Design system do app | [`docs/DESIGN-SYSTEM.md`](docs/DESIGN-SYSTEM.md) |
 | Kit do logo v2 | [`brand/kit/`](brand/kit/): SVG e PNG (empilhado, horizontal, símbolo, ícones de iOS e Android, notificação, favicon) |
-| Logo anterior | [`brand/legado/`](brand/legado/), só como referência |
 
-**Pendências de marca no app** (detalhes na seção 17 do guia):
-- trocar `assets/images/` e os ícones nativos pelo logo v2;
-- migrar o fundo escuro (`#0B0E14` com brilhos) para o chão derivado da marca.
+**Marca no app:** logo v2 e fundo sólido (paper `#F4F6F8` no claro, chão `#0A1A1F` no escuro) desde 20/11/2026. O logo anterior saiu do repositório (está no histórico do Git).
 
 ---
 

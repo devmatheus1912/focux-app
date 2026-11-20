@@ -197,7 +197,7 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
         dirty: _dirty,
         onCancel: _cancel,
         child: FxShellScaffold(
-        useMesh: true,
+        comFundo: true,
         appBar: FxShellAppBar(
           title: 'Editar Aluno',
           subtitle: editarAlunoHubSubtitle(),

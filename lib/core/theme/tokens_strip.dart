@@ -92,10 +92,8 @@ abstract class TokensStrip {
   static const Color cinematicSurface = Color(0xFF10262C);
   static const Color cinematicElevated = Color(0xFF16323A);
 
-  // ── Light mesh ───────────────────────────────────────────────────────
-  static const Color lightMeshA = Color(0xFFE4EFF1);
-  static const Color lightMeshB = Color(0xFFF4F6F8);
-  static const Color lightMeshC = Color(0xFFEDF2F4);
+  // ── Claro: paper sólido (guia de marca, seção 4.6) ──────────────────
+  static const Color paper = Color(0xFFF4F6F8);
 
   // ── Spacing (8pt grid) ───────────────────────────────────────────────
   static const double s1 = 4;

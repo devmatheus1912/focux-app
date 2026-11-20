@@ -124,7 +124,7 @@ class _HistoricoDetalheScreenState
     return fxScreenA11yScope(
       label: titulo,
       child: FxShellScaffold(
-        useMesh: true,
+        comFundo: true,
         constrainWidth: false,
         appBar: FxShellAppBar(
           title: titulo,

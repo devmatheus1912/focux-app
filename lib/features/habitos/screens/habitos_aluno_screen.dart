@@ -197,7 +197,7 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
           safePopOrGo(context, '/dashboard/aluno');
         },
         child: FxShellScaffold(
-          useMesh: true,
+          comFundo: true,
           constrainWidth: false,
           appBar: FxShellAppBar(
             title: 'Meus hábitos',

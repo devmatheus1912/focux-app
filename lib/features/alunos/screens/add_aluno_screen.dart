@@ -326,7 +326,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
         dirty: _dirty,
         onCancel: _cancel,
         child: FxShellScaffold(
-        useMesh: true,
+        comFundo: true,
         appBar: FxShellAppBar(
           title: 'Novo aluno',
           subtitle: addAlunoHubSubtitle(),

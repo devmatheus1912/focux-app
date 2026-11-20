@@ -148,7 +148,7 @@ class _VendasScreenState extends ConsumerState<VendasScreen> {
             if (!didPop) _leave();
           },
           child: FxShellScaffold(
-            useMesh: true,
+            comFundo: true,
             constrainWidth: false,
             appBar: FxShellAppBar(
               title: 'Vendas',

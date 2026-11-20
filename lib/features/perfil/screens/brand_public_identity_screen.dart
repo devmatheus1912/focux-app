@@ -114,7 +114,7 @@ class _BrandPublicIdentityScreenState
       return fxScreenA11yScope(
         label: 'Nome e código',
         child: const FxShellScaffold(
-          useMesh: true,
+          comFundo: true,
           appBar: FxShellAppBar(title: 'Seu código'),
           body: FxTelaCarregando(),
         ),
@@ -124,7 +124,7 @@ class _BrandPublicIdentityScreenState
       return fxScreenA11yScope(
         label: 'Nome e código',
         child: FxShellScaffold(
-          useMesh: true,
+          comFundo: true,
           appBar: const FxShellAppBar(title: 'Seu código'),
           body: FxErrorState(
             chromeOnDark: chrome.isDark,
@@ -161,7 +161,7 @@ class _BrandPublicIdentityScreenState
       label: 'Nome e código',
       child: FxKeyboardDismissScope(
         child: FxShellScaffold(
-          useMesh: true,
+          comFundo: true,
           appBar: const FxShellAppBar(
             title: 'Seu código',
             subtitle: 'Seus alunos usam para entrar',

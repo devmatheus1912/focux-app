@@ -227,7 +227,7 @@ class _HabitoDetailScreenState extends ConsumerState<HabitoDetailScreen> {
           _leave();
         },
         child: FxShellScaffold(
-          useMesh: true,
+          comFundo: true,
           constrainWidth: false,
           appBar: FxShellAppBar(
             title: 'Hábito',

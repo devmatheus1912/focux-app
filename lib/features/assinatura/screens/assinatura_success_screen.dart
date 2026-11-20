@@ -33,7 +33,7 @@ class AssinaturaSuccessScreen extends StatelessWidget {
     return fxScreenA11yScope(
       label: 'Assinatura confirmada',
       child: FxShellScaffold(
-        useMesh: true,
+        comFundo: true,
         body: SafeArea(
           child: CustomScrollView(
             slivers: [

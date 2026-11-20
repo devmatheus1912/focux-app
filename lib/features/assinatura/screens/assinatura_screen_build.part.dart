@@ -249,7 +249,7 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
         !_paymentBlocked;
 
     return FxShellScaffold(
-      useMesh: true,
+      comFundo: true,
       appBar: FxShellAppBar(
         title: gestao ? 'Assinatura' : 'Planos',
         subtitle: FxHubFreshness.fromFetchedAt(_paywallFetchedAt),

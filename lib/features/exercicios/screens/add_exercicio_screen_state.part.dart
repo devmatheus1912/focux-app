@@ -386,7 +386,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
         dirty: _dirty,
         onCancel: _cancel,
         child: FxShellScaffold(
-        useMesh: true,
+        comFundo: true,
         appBar: FxShellAppBar(
           title: screenTitle,
           leadingWidth: 92,

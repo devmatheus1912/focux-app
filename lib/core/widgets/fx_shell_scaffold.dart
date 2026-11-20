@@ -7,11 +7,11 @@ import '../theme/focux_hub_typography.dart';
 import '../theme/shell_chrome.dart';
 import '../theme/tokens_strip.dart';
 import '../utils/fx_utils.dart';
-import 'cinematic_mesh_background.dart';
+import 'fx_chao.dart';
 import 'fx_content_width_limiter.dart';
 import 'fx_glass_surface.dart';
 import 'fx_keyboard_dismiss_scope.dart';
-import 'mesh_scope.dart';
+import 'fx_chao_scope.dart';
 import 'fx_premium_entrance.dart';
 import '../../features/ferramentas/widgets/hub_embed_scope.dart';
 import '../theme/fx_icons.dart';
@@ -25,7 +25,7 @@ class FxShellScaffold extends StatelessWidget {
     this.floatingActionButton,
     this.bottomNavigationBar,
     this.extendBody = false,
-    this.useMesh = false,
+    this.comFundo = false,
     this.safeArea = true,
     this.safeAreaBottom,
     this.constrainWidth = true,
@@ -37,7 +37,7 @@ class FxShellScaffold extends StatelessWidget {
   final Widget? floatingActionButton;
   final Widget? bottomNavigationBar;
   final bool extendBody;
-  final bool useMesh;
+  final bool comFundo;
   final bool safeArea;
 
   /// Quando [safeArea] é true, controla só o inset inferior. `null` = inferir
@@ -54,9 +54,9 @@ class FxShellScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final meshActive = MeshScope.of(context);
+    final fundoAtivo = FxChaoScope.of(context);
     final embedded = HubEmbedScope.maybeOf(context);
-    final needsMesh = useMesh && !meshActive && !embedded;
+    final precisaFundo = comFundo && !fundoAtivo && !embedded;
 
     Widget inner = body;
     if (constrainWidth) {
@@ -103,7 +103,7 @@ class FxShellScaffold extends StatelessWidget {
       bottomNavigationBar: bottomNavigationBar,
     );
 
-    if (!needsMesh) return scaffold;
+    if (!precisaFundo) return scaffold;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
@@ -111,16 +111,14 @@ class FxShellScaffold extends StatelessWidget {
         statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
         statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
       ),
-      child: CinematicMeshBackground(
-        showCenterGlow: false,
-        showCornerGlow: true,
-        child: MeshScope(active: true, child: scaffold),
+      child: FxChao(
+        child: FxChaoScope(active: true, child: scaffold),
       ),
     );
   }
 }
 
-/// Barra de navegação canônica sobre mesh (paridade iOS 26 / toolbar).
+/// Barra de navegação canônica sobre o chão (paridade iOS 26 / toolbar).
 ///
 /// **Alinhamento (padrão Focux):** título e subtítulo **à esquerda** (`centerTitle: false`).
 /// Espelha `.toolbarRole(.editor)` do iOS 26 — listas, detalhes, pickers e formulários.

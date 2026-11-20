@@ -5,9 +5,9 @@ import 'package:go_router/go_router.dart';
 
 import '../platform/focux_platform.dart';
 import '../theme/focux_system_chrome.dart';
-import '../widgets/cinematic_mesh_background.dart';
+import '../widgets/fx_chao.dart';
 import '../widgets/fx_dock.dart';
-import '../widgets/mesh_scope.dart';
+import '../widgets/fx_chao_scope.dart';
 import '../../features/dashboard/providers/dashboard_provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../widgets/fx_shell_inset_owner.dart';
@@ -54,11 +54,9 @@ class MainShell extends ConsumerWidget {
       child: Scaffold(
         extendBody: true,
         backgroundColor: Colors.transparent,
-        body: MeshScope(
+        body: FxChaoScope(
           active: true,
-          child: CinematicMeshBackground(
-            showCenterGlow: false,
-            showCornerGlow: true,
+          child: FxChao(
             child: Stack(
               fit: StackFit.expand,
               children: [

@@ -205,7 +205,7 @@ class _AddExercicioToTreinoScreenState
         dirty: _marcados.isNotEmpty,
         onCancel: _cancel,
         child: FxShellScaffold(
-          useMesh: true,
+          comFundo: true,
           appBar: FxShellAppBar(
             title: destinoDoAdicionar(widget.bloco),
             subtitle: treinoAsync.maybeWhen(

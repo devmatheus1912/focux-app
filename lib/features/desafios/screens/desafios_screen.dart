@@ -178,7 +178,7 @@ class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
             FxKeyboardDismissScope.dismiss();
           },
           child: FxShellScaffold(
-            useMesh: true,
+            comFundo: true,
             constrainWidth: false,
             appBar: FxShellAppBar(
               title: 'Desafios',

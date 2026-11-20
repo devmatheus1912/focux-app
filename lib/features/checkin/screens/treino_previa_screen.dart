@@ -113,7 +113,7 @@ class _TreinoPreviaScreenState extends ConsumerState<TreinoPreviaScreen> {
     return fxScreenA11yScope(
       label: previa?.treinoNome ?? s.treinosHubTitulo,
       child: FxShellScaffold(
-        useMesh: true,
+        comFundo: true,
         constrainWidth: false,
         appBar: FxShellAppBar(
           title: previa?.treinoNome ?? s.treinosHubTitulo,

@@ -67,7 +67,7 @@ class _PerfilBodyState extends State<_PerfilBody> {
     final nextStep = widget.primeirosPassosFeitos ? readiness.nextStep : null;
 
     return FxShellScaffold(
-      useMesh: true,
+      comFundo: true,
       constrainWidth: true,
       appBar: FxShellAppBar(
         // Dados do próprio personal: sem "Atualizado há"; editar é pelo avatar.

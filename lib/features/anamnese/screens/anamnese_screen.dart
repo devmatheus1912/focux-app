@@ -330,7 +330,7 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen> {
           _voltar();
         },
         child: FxShellScaffold(
-          useMesh: true,
+          comFundo: true,
           appBar: _appBar,
           bottomNavigationBar: bottom,
           body: body,

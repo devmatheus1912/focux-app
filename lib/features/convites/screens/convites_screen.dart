@@ -268,7 +268,7 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
           FxKeyboardDismissScope.dismiss();
         },
         child: FxShellScaffold(
-          useMesh: true,
+          comFundo: true,
           appBar: FxShellAppBar(
             title: 'Convidar aluno',
             subtitle: FxHubFreshness.joinCount(

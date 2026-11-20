@@ -56,7 +56,7 @@ void main() {
     }
   });
 
-  test('dark theme remaps atmosphere primaries so chrome reads on mesh', () {
+  test('dark theme remaps atmosphere primaries so chrome reads on the dark floor', () {
     for (final palette in CuratedBrandPalette.premium) {
       final theme = AppTheme.buildDarkTheme(
         palette.primary,

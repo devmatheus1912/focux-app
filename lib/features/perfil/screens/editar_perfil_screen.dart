@@ -251,7 +251,7 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
         dirty: _isDirty,
         onCancel: _cancel,
         child: FxShellScaffold(
-          useMesh: true,
+          comFundo: true,
           appBar: FxShellAppBar(
             title: 'Editar Perfil',
             subtitle: 'Conta e marca comercial',

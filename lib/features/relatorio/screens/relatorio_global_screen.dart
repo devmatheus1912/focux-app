@@ -144,7 +144,7 @@ class _RelatorioGlobalScreenState extends ConsumerState<RelatorioGlobalScreen> {
         requiredPlan: SubscriptionPlan.PRO,
         capability: 'relatorios',
         child: FxShellScaffold(
-          useMesh: true,
+          comFundo: true,
           constrainWidth: false,
           appBar: FxShellAppBar(
             title: 'Relatórios',

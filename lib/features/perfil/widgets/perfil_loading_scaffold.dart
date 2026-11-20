@@ -11,7 +11,7 @@ class PerfilLoadingScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FxShellScaffold(
-      useMesh: true,
+      comFundo: true,
       body: ListView(
         padding: const EdgeInsets.all(TokensStrip.s4),
         children: [

@@ -45,7 +45,7 @@ Oito papéis, cada um com tamanho e peso fixos. A cor é de quem chama.
 - Sem marca própria do personal, o app usa o teal Focux. Com marca própria, toda a interface respeita o `BrandStyle` do personal.
 - **Bloco de marca:** `FxStripCard(marca: true)` faz o degradê da cor da marca, um por tela, no cartão principal (`bloco_de_marca_contract_test`). Texto dentro dele usa `fxPaletaSobreMarca`, nunca branco fixo, com contraste AA (`bloco_de_marca_contraste_test`).
 - Verde, âmbar e vermelho só para status.
-- **Fundo por página:** toda página pinta o próprio fundo (`FxFundoDaPagina`, via `pageTransitionsTheme`). Página transparente deixa a tela de baixo aparecer no gesto de voltar do iPhone (`fundo_opaco_transicao_test`).
+- **Fundo por página:** toda página pinta o próprio fundo (`FxFundoDaPagina`, via `pageTransitionsTheme`). O fundo é o `FxChao`: cor sólida, paper `#F4F6F8` no claro e chão `#0A1A1F` no escuro, sem degradê nem brilhos; só a marca própria com estilo Cinematográfico tinge a cor (ainda sólida). `FxChaoScope` avisa que o chão já existe; `FxShellScaffold(comFundo: true)` pinta quando falta. Página transparente deixa a tela de baixo aparecer no gesto de voltar do iPhone (`fundo_opaco_transicao_test`).
 - Anéis: `FxAnel`; cores de anel por `fxCoresDeAnel`, contraste 3:1 em qualquer marca.
 
 ## Componentes e padrões
@@ -62,4 +62,4 @@ Oito papéis, cada um com tamanho e peso fixos. A cor é de quem chama.
 
 ## Pendências da marca no app
 
-- Fundo claro ainda usa o mesh (`#E4EFF1 → #F4F6F8 → #EDF2F4`) com brilhos; o guia pede paper `#F4F6F8` sólido.
+- Nenhuma no código. Falta conferir num aparelho o ícone, o splash e o ícone de notificação do build 1.2.6.

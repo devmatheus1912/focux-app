@@ -92,7 +92,7 @@ class _QualidadeOperacionalScreenState
     return fxScreenA11yScope(
       label: ptS.qualidadeQualidadeOperacional,
       child: FxShellScaffold(
-        useMesh: true,
+        comFundo: true,
         constrainWidth: false,
         appBar: FxShellAppBar(
           title: ptS.qualidadeQualidade,

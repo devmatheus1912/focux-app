@@ -46,7 +46,7 @@ extension _CheckinCorpo on _CheckinScreenState {
     final scaffold = fxScreenA11yScope(
       label: S.of(context).checkinTelaA11y,
       child: FxShellScaffold(
-        useMesh: false,
+        comFundo: false,
         constrainWidth: false,
         safeArea: false,
         body: body,

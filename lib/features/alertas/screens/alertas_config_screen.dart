@@ -143,7 +143,7 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
         dirty: _dirty,
         onCancel: _cancel,
         child: FxShellScaffold(
-          useMesh: true,
+          comFundo: true,
           appBar: FxShellAppBar(
             title: 'Quando dispara',
             subtitle: 'Limiares da caixa de alertas',

@@ -127,7 +127,7 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
     return fxScreenA11yScope(
       label: s.treinosHubTitulo,
       child: FxShellScaffold(
-        useMesh: true,
+        comFundo: true,
         constrainWidth: false,
         appBar: FxShellAppBar(
           title: s.treinosHubTitulo,

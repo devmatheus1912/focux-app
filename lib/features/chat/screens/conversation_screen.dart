@@ -472,7 +472,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
         _isAlunoMode ? '/dashboard/aluno' : '/dashboard/personal';
 
     final scaffold = FxShellScaffold(
-        useMesh: true,
+        comFundo: true,
         constrainWidth: false,
         safeAreaBottom: true,
         appBar: FxShellAppBar(

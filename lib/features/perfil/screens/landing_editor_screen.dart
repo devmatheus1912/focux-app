@@ -192,7 +192,7 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
           dirty: _dirty,
           onCancel: _onBack,
           child: FxShellScaffold(
-            useMesh: true,
+            comFundo: true,
             appBar: FxShellAppBar(
               title: 'Sua página',
               subtitle: _appBarSubtitle,

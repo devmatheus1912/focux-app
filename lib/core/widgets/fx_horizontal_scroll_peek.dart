@@ -6,7 +6,7 @@ import '../theme/tokens_strip.dart';
 /// O fade inicial só aparece depois que o conteúdo já saiu da origem —
 /// evita um “8” órfão no lugar do chip Todos.
 ///
-/// A cor segue o mesh da Home (`lightMeshC` / `cinematicBg`), não o
+/// A cor segue o chão da página (`paper` / `cinematicBg`), não o
 /// `scaffoldBackgroundColor` (telas do shell usam scaffold transparente).
 class FxHorizontalScrollPeek extends StatefulWidget {
   const FxHorizontalScrollPeek({
@@ -29,7 +29,7 @@ class _FxHorizontalScrollPeekState extends State<FxHorizontalScrollPeek> {
 
   Color get _fadeBase {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return isDark ? TokensStrip.cinematicBg : TokensStrip.lightMeshC;
+    return isDark ? TokensStrip.cinematicBg : TokensStrip.paper;
   }
 
   @override

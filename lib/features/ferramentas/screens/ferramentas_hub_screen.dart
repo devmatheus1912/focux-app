@@ -134,7 +134,7 @@ class _FerramentasHubScreenState extends ConsumerState<FerramentasHubScreen>
     return async.when(
       loading:
           () => FxShellScaffold(
-            useMesh: true,
+            comFundo: true,
             constrainWidth: false,
             appBar: FxShellAppBar(
               title: 'Ferramentas',
@@ -149,7 +149,7 @@ class _FerramentasHubScreenState extends ConsumerState<FerramentasHubScreen>
           ),
       error:
           (e, _) => FxShellScaffold(
-            useMesh: true,
+            comFundo: true,
             constrainWidth: false,
             appBar: FxShellAppBar(
               title: 'Ferramentas',
@@ -168,7 +168,7 @@ class _FerramentasHubScreenState extends ConsumerState<FerramentasHubScreen>
         final item = catalogo.resolveNavTarget(widget.itemId);
         if (item == null || !item.isHubComAbas) {
           return FxShellScaffold(
-            useMesh: true,
+            comFundo: true,
             constrainWidth: false,
             appBar: FxShellAppBar(
               title: 'Ferramentas',
@@ -195,7 +195,7 @@ class _FerramentasHubScreenState extends ConsumerState<FerramentasHubScreen>
         return fxScreenA11yScope(
           label: item.titulo,
           child: FxShellScaffold(
-            useMesh: true,
+            comFundo: true,
             constrainWidth: false,
             appBar: FxShellAppBar(
               title: item.titulo,

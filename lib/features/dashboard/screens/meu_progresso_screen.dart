@@ -178,7 +178,7 @@ class _MeuProgressoScreenState extends ConsumerState<MeuProgressoScreen> {
     return fxScreenA11yScope(
       label: ptS.meuProgressoTitulo,
       child: FxShellScaffold(
-        useMesh: true,
+        comFundo: true,
         appBar: FxShellAppBar(
           title: ptS.meuProgressoTitulo,
           onBack: () => context.pop(),

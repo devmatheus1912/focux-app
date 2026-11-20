@@ -168,7 +168,7 @@ class _GaleriaScreenState extends ConsumerState<GaleriaScreen> {
           FxKeyboardDismissScope.dismiss();
         },
         child: FxShellScaffold(
-        useMesh: true,
+        comFundo: true,
         appBar: FxShellAppBar(
           title: 'Galeria',
           subtitle: FxHubFreshness.joinCount(

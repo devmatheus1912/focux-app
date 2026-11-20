@@ -12,7 +12,8 @@ Mudanças do app publicadas nas lojas, da mais nova para a mais antiga. O format
 ### Marca
 - Guia de marca (`brand/brand_guidelines.md`) e kit do logo v2 em `brand/kit/`.
 - Logo v2 no app inteiro: logos das telas e do PDF, ícone do iOS e do Android (braço branco sobre `#0B4F5C`), ícone de notificação, splash e ícones da versão web, todos gerados do kit. No escuro, o símbolo usa o petróleo `#0E93A8`.
-- Tema escuro no chão petróleo do guia: fundo `#0A1A1F`, superfície `#10262C`, superfície alta `#16323A`, borda `#1B3A42`, sem os brilhos do fundo (a marca própria do personal com estilo Cinematográfico continua tingindo o degradê). Splash nativo no mesmo chão.
+- Tema escuro no chão petróleo do guia: fundo `#0A1A1F`, superfície `#10262C`, superfície alta `#16323A`, borda `#1B3A42`, sem os brilhos do fundo. Splash nativo no mesmo chão.
+- Fundo claro em paper `#F4F6F8` sólido, sem degradê nem brilhos (`FxChao` no lugar do antigo fundo em malha). A marca própria com estilo Cinematográfico tinge a cor, ainda sólida. O logo anterior saiu de `brand/legado/`.
 
 ## 1.2.5+241 · 17/11/2026
 

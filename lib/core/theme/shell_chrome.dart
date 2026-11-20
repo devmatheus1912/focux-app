@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'design_tokens.dart';
 import 'tokens_strip.dart';
 
-/// Dual-theme Liquid Glass surface system for shell tabs over cinematic mesh.
+/// Dual-theme Liquid Glass surface system for shell tabs over the solid page floor.
 class ShellPalette {
   const ShellPalette(this.isDark, {this.brand = EagleTokens.brand});
 

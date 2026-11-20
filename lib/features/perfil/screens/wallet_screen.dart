@@ -263,7 +263,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
         dirty: _hasUnsavedChanges,
         onCancel: _handleBack,
         child: FxShellScaffold(
-          useMesh: true,
+          comFundo: true,
           appBar: FxShellAppBar(
             title: 'Carteira e PIX',
             onBack: _handleBack,

@@ -118,7 +118,7 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
     return fxScreenA11yScope(
       label: 'Tarefas',
       child: FxShellScaffold(
-        useMesh: true,
+        comFundo: true,
         constrainWidth: false,
         appBar: FxShellAppBar(
           title: 'Tarefas',

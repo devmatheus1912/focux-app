@@ -19,7 +19,7 @@ class FxTelaCarregando extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final brand = chrome.isDark ? BrandPalette.accent(primary) : primary;
     return ColoredBox(
-      color: chrome.isDark ? TokensStrip.cinematicBg : TokensStrip.lightMeshC,
+      color: chrome.isDark ? TokensStrip.cinematicBg : TokensStrip.paper,
       child: SizedBox.expand(
         child: Semantics(
           liveRegion: true,

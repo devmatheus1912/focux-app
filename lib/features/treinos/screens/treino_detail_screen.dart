@@ -132,7 +132,7 @@ class _TreinoDetailScreenState extends ConsumerState<TreinoDetailScreen> {
           _popTreinoDetail(context, alunoId: alunoId);
         },
         child: FxShellScaffold(
-          useMesh: true,
+          comFundo: true,
           appBar: FxShellAppBar(
             title:
                 treinoCarregado == null

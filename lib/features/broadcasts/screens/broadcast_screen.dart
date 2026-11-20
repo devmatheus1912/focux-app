@@ -214,7 +214,7 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
         dirty: _isDirty,
         onCancel: _cancel,
         child: FxShellScaffold(
-          useMesh: true,
+          comFundo: true,
           appBar: FxShellAppBar(
             title: ptS.broadcastAvisos,
             subtitle: freshnessLabel ?? ptS.broadcastParaTodosOsAlunos,
