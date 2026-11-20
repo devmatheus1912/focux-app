@@ -4,6 +4,7 @@ import '../versao/atualizacao_scope.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 import '../api/api_client.dart';
 import '../api/offline_sync_service.dart';
@@ -12,6 +13,7 @@ import '../storage/secure_storage.dart';
 import '../support/intercom_service.dart';
 import '../widgets/feedback_helper.dart';
 import 'fcm_tap_route.dart';
+import 'fcm_token_do_aparelho.dart';
 
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -76,14 +78,37 @@ class FcmService {
       unawaited(_registrarToken(newToken, apiClient));
       unawaited(IntercomService.enviarTokenPush(tokenFcm: newToken));
     });
-    try {
-      final token = await messaging.getToken();
-      if (token != null) await _registrarToken(token, apiClient);
-      unawaited(IntercomService.enviarTokenPush(tokenFcm: token));
-    } catch (e) {
-      // Sem APNs ainda ou offline: onTokenRefresh entrega depois.
-      if (kDebugMode) debugPrint('[FCM] getToken error: $e');
-    }
+    final token = await _tokenDoAparelho();
+    if (token != null) await _registrarToken(token, apiClient);
+    // No iOS o Intercom usa o token APNs, que pode existir sem o do FCM.
+    unawaited(IntercomService.enviarTokenPush(tokenFcm: token));
+  }
+
+  /// Token do FCM esperando o APNs no iOS; falha vai ao Sentry (sem o token).
+  static Future<String?> _tokenDoAparelho() {
+    final messaging = FirebaseMessaging.instance;
+    return obterTokenFcm(
+      fcm: messaging.getToken,
+      apns: defaultTargetPlatform == TargetPlatform.iOS
+          ? messaging.getAPNSToken
+          : null,
+      avisar: _avisarFalhaDoRegistro,
+    );
+  }
+
+  static bool _falhaAvisada = false;
+
+  /// Uma vez por abertura: sem token o push do aparelho não chega.
+  static void _avisarFalhaDoRegistro(String motivo) {
+    if (kDebugMode) debugPrint('[FCM] registro falhou: $motivo');
+    if (_falhaAvisada) return;
+    _falhaAvisada = true;
+    unawaited(
+      Sentry.captureMessage(
+        'Push sem token no aparelho: $motivo',
+        level: SentryLevel.warning,
+      ),
+    );
   }
 
   /// Android não exibe notificação com o app aberto; iOS já mostra o banner.
@@ -164,7 +189,7 @@ class FcmService {
     try {
       final jwtToken = await SecureStorage.getToken();
       if (jwtToken == null) return;
-      final token = await FirebaseMessaging.instance.getToken();
+      final token = await _tokenDoAparelho();
       if (token == null) return;
       await _registrarToken(token, apiClient);
     } catch (e) {

@@ -27,6 +27,7 @@ Como uma versão do app sai para a App Store e o Google Play. Branches e fluxo d
 ## Antes de enviar ao Google Play
 
 - **Health Connect:** a declaração de permissões no Play Console não pode marcar HRV (`READ_HEART_RATE_VARIABILITY`), que foi recusada por escopo mínimo.
+- **Chave de API do Firebase:** o `google-services.json` (fora do Git) e o `GoogleService-Info.plist` (secret `GOOGLE_SERVICE_INFO_PLIST_BASE64` do CI) levam a chave de API compilada no app. Rotação de chave no Google Cloud expira a anterior: baixe os dois arquivos de novo no Firebase e confira que a chave Android aceita os SHA-1 da assinatura da Play e de upload (Google Cloud > Credenciais > chave Android > Restrições). Chave expirada ou SHA-1 fora da lista = sem token do FCM e sem push (foi o caso da 1.2.5).
 - **Login com Google:** toda troca de chave de assinatura ou de upload exige cadastrar o SHA-1 novo no Firebase no mesmo dia. Sem isso o Google devolve o erro 10 (`DEVELOPER_ERROR`). Não apague os SHA-1 antigos: Android abaixo do 13 ainda recebe o app assinado pela chave anterior.
 
 ## Depois do lançamento
