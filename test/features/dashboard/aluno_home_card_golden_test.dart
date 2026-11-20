@@ -38,7 +38,7 @@ Widget _app(Widget child, {required bool dark}) => MaterialApp(
   supportedLocales: S.supportedLocales,
   localizationsDelegates: S.localizationsDelegates,
   home: Scaffold(
-    backgroundColor: dark ? const Color(0xFF14161A) : const Color(0xFFF6F4FA),
+    backgroundColor: dark ? const Color(0xFF0A1A1F) : const Color(0xFFF4F6F8),
     body: Padding(padding: const EdgeInsets.all(16), child: child),
   ),
 );

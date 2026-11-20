@@ -491,7 +491,9 @@ BoxDecoration fxStripCardDecoration(
   if (isDark) {
     if (emphasize) {
       return BoxDecoration(
-        color: TokensStrip.glassFill(dark: true, opacity: 0.96),
+        color: ShellChrome.of(
+          context,
+        ).tons.superficie.withValues(alpha: 0.72 * 0.96),
         borderRadius: BorderRadius.circular(radius),
         border: Border.all(color: primary.withValues(alpha: 0.38), width: 1.35),
         boxShadow: [

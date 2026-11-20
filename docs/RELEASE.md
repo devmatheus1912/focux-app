@@ -11,7 +11,7 @@ Como uma versão do app sai para a App Store e o Google Play. Branches e fluxo d
 ## Passo a passo
 
 1. Na `develop`: `dart analyze --fatal-warnings --fatal-infos lib test` e `flutter test --no-pub` verdes.
-2. Suba a versão e o build no `pubspec.yaml` e feche a seção do `CHANGELOG.md`.
+2. Suba a versão e o build no `pubspec.yaml`, feche a seção do `CHANGELOG.md` e escreva o "O que há de novo" da versão em [`LOJAS.md`](LOJAS.md) (App Store até 4.000 caracteres, Google Play até 500).
 3. Mescle a `develop` na `main` e envie.
 4. **iOS:** dispare o build e o envio ao TestFlight a partir da `main`:
 

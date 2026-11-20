@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/brand_style.dart';
 import '../../../core/theme/brand_tint.dart';
+import '../../../core/theme/chao_da_marca.dart';
 import '../../../core/theme/curated_brand_palettes.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_chao.dart';
 import '../../dashboard/utils/aluno_today_action.dart';
 import '../../dashboard/widgets/aluno_capa_banner.dart';
 import '../../dashboard/widgets/aluno_personal_card.dart';
@@ -44,11 +45,15 @@ class IdentidadePreviaApp extends StatelessWidget {
         secondary: palette.secondary,
         brightness: brilho,
       ),
+      // Superfícies do escuro na matiz da marca, como no app do aluno.
+      extensions: [tonsEscurosDa(palette.primary)],
     );
-    final fundo =
-        escuro
-            ? BrandPalette.fundoEscuroReferencia
-            : BrandPalette.fundoClaroReferencia;
+    // O mesmo chão do app: matiz da marca no escuro, tinta do Cinematográfico.
+    final fundo = FxChao.corPara(
+      escuro: escuro,
+      primaria: palette.primary,
+      tinta: estilo.tingeFundo ? palette.primary : null,
+    );
 
     return Semantics(
       label: 'Prévia da home do aluno',
@@ -68,14 +73,7 @@ class IdentidadePreviaApp extends StatelessWidget {
                     child: DecoratedBox(
                       decoration: BoxDecoration(
                         // Tom sólido da marca, sem degradê.
-                        color:
-                            estilo.tingeFundo
-                                ? Color.lerp(
-                                  fundo,
-                                  palette.primary,
-                                  escuro ? 0.10 : 0.04,
-                                )
-                                : fundo,
+                        color: fundo,
                       ),
                       child: Padding(
                         padding: const EdgeInsets.all(12),

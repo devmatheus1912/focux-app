@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'fx_chao.dart';
 
 import '../theme/brand_palette.dart';
 import '../theme/brand_tint.dart';
@@ -149,10 +150,7 @@ class FxDock extends StatelessWidget {
               marca.secundaria,
               marca.primaria,
               dark: isDark,
-              background:
-                  isDark
-                      ? BrandPalette.fundoEscuroReferencia
-                      : BrandPalette.fundoClaroReferencia,
+              background: FxChao.corDe(context, forceDark: isDark),
             )
             : Theme.of(context).colorScheme.primary;
     final width = MediaQuery.sizeOf(context).width;
@@ -394,7 +392,8 @@ class _DockBadge extends StatelessWidget {
         color: fill,
         borderRadius: BorderRadius.circular(999),
         border: Border.all(
-          color: isDark ? const Color(0xFF14161A) : Colors.white,
+          // O anel do selo é o chão por trás do dock.
+          color: isDark ? FxChao.corDe(context, forceDark: true) : Colors.white,
           width: 1.5,
         ),
       ),

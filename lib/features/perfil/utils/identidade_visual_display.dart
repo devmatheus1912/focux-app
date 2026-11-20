@@ -1,8 +1,8 @@
 import '../../subscription/models/subscription_plan.dart';
-import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/brand_style.dart';
 import '../../../core/theme/curated_brand_palettes.dart';
 import '../../../core/theme/focux_contrast.dart';
+import '../../../core/widgets/fx_chao.dart';
 
 bool identidadeHasWhiteLabel({
   required bool? featureWhiteLabel,
@@ -110,9 +110,18 @@ String identidadePreviaLogin() => 'Login';
 /// Aviso quando a primária tem pouco contraste como destaque no escuro (ou no
 /// claro). Nulo quando está tudo legível. O app ajusta o tom sozinho; o aviso
 /// só deixa o personal ciente do que vai acontecer.
-String? identidadeAvisoContraste(CuratedBrandPalette palette) {
-  const fundoEscuro = BrandPalette.fundoEscuroReferencia;
-  const fundoClaro = BrandPalette.fundoClaroReferencia;
+String? identidadeAvisoContraste(
+  CuratedBrandPalette palette, {
+  BrandStyle estilo = BrandStyle.classico,
+}) {
+  // Contra o chão que o aluno vê: matiz da marca e tinta do Cinematográfico.
+  final tinta = estilo.tingeFundo ? palette.primary : null;
+  final fundoEscuro = FxChao.corPara(
+    escuro: true,
+    primaria: palette.primary,
+    tinta: tinta,
+  );
+  final fundoClaro = FxChao.corPara(escuro: false, tinta: tinta);
   final escuro = palette.chromeFor(dark: true);
   final claro = palette.chromeFor(dark: false);
   if (!FocuxContrast.meetsWcagAa(escuro, fundoEscuro, largeText: true)) {

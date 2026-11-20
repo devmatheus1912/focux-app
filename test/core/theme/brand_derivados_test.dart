@@ -5,8 +5,8 @@ import 'package:focux_app/core/theme/brand_style.dart';
 import 'package:focux_app/core/theme/curated_brand_palettes.dart';
 import 'package:focux_app/core/theme/focux_contrast.dart';
 
-const _fundoClaro = Color(0xFFF6F4FA);
-const _fundoEscuro = Color(0xFF14161A);
+const _fundoClaro = Color(0xFFF4F6F8); // paper (FxChao)
+const _fundoEscuro = Color(0xFF0A1A1F); // chão petróleo (FxChao)
 
 void main() {
   group('BrandStyle', () {

@@ -35,7 +35,7 @@ Widget _app({
           child: child!,
         ),
     home: Scaffold(
-      backgroundColor: dark ? const Color(0xFF14161A) : const Color(0xFFF6F4FA),
+      backgroundColor: dark ? const Color(0xFF0A1A1F) : const Color(0xFFF4F6F8),
       body: Align(
         alignment: Alignment.bottomCenter,
         child: Padding(

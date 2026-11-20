@@ -387,6 +387,7 @@ class _IdentidadeVisualScreenState
                                               ),
                                               if (identidadeAvisoContraste(
                                                     _palette,
+                                                    estilo: _estilo,
                                                   )
                                                   case final aviso?) ...[
                                                 const SizedBox(height: 10),

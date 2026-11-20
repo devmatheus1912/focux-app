@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'brand_palette.dart';
+import 'chao_da_marca.dart';
 import 'curated_brand_palettes.dart';
 import 'design_tokens.dart';
 import 'fx_page_transitions_builder.dart';
@@ -68,11 +69,13 @@ class AppTheme {
     final primaryAccent = BrandPalette.accent(primary);
     final onPrimary = _readableOn(primary);
     final onSecondary = _readableOn(resolvedSecondary);
-    final surface = dark ? EagleTokens.darkCard : EagleTokens.card;
-    final scaffold = dark ? EagleTokens.darkBg : EagleTokens.paper;
+    // Escuro na matiz da marca, com o brilho do petróleo (guia 4.6).
+    final tons = tonsEscurosDa(storedPrimary);
+    final surface = dark ? tons.superficie : EagleTokens.card;
+    final scaffold = dark ? tons.chao : EagleTokens.paper;
     final onSurface = dark ? EagleTokens.darkInk : EagleTokens.ink;
     final onSurfMute = dark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final outline = dark ? EagleTokens.darkLine : EagleTokens.line;
+    final outline = dark ? tons.linha : EagleTokens.line;
 
     // Tinted shadow — brand-tinted depth with cinematic subtlety
     final shadowColor =
@@ -91,7 +94,7 @@ class AppTheme {
       onPrimaryContainer: dark ? primaryAccent : primaryDeep,
       secondary: resolvedSecondary,
       onSecondary: onSecondary,
-      secondaryContainer: dark ? EagleTokens.darkCardHi : primarySofter,
+      secondaryContainer: dark ? tons.superficieAlta : primarySofter,
       onSecondaryContainer: onSurface,
       tertiary: EagleTokens.good,
       onTertiary: Colors.white,
@@ -108,7 +111,7 @@ class AppTheme {
       outlineVariant: outline.withValues(alpha: 0.5),
       shadow: shadowColor,
       scrim: Colors.black,
-      inverseSurface: dark ? EagleTokens.card : EagleTokens.darkCard,
+      inverseSurface: dark ? EagleTokens.card : tons.superficie,
       onInverseSurface: dark ? EagleTokens.ink : EagleTokens.darkInk,
       inversePrimary: dark ? primary : primaryAccent,
       surfaceTint: primary,
@@ -151,6 +154,8 @@ class AppTheme {
     );
 
     return ThemeData(
+      // Escuro na matiz da marca: FxChao e ShellPalette leem daqui.
+      extensions: [tons],
       useMaterial3: true,
       fontFamily: _inter().fontFamily,
       visualDensity: VisualDensity.compact,
@@ -161,7 +166,7 @@ class AppTheme {
 
       // ── App Bar: clean, no elevation, premium title ─────────────────
       appBarTheme: AppBarTheme(
-        backgroundColor: dark ? EagleTokens.darkBg : surface,
+        backgroundColor: dark ? tons.chao : surface,
         foregroundColor: onSurface,
         elevation: 0,
         scrolledUnderElevation: 0.5,
@@ -182,7 +187,7 @@ class AppTheme {
 
       // ── Cards: TOKENS STRIP 12px + soft shadow ───────────────────────
       cardTheme: CardThemeData(
-        color: dark ? EagleTokens.darkCard : surface,
+        color: dark ? tons.superficie : surface,
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(TokensStrip.rCard),
@@ -203,7 +208,7 @@ class AppTheme {
         filled: true,
         fillColor:
             dark
-                ? EagleTokens.darkCardHi.withValues(alpha: 0.88)
+                ? tons.superficieAlta.withValues(alpha: 0.88)
                 : Colors.white.withValues(alpha: 0.92),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: TokensStrip.s4,
@@ -290,8 +295,8 @@ class AppTheme {
 
       // ── Chips: pill-shaped, subtle glass tint ───────────────────────
       chipTheme: ChipThemeData(
-        backgroundColor: dark ? EagleTokens.darkCardHi : EagleTokens.lineSoft,
-        selectedColor: dark ? EagleTokens.darkCardHi : primarySoft,
+        backgroundColor: dark ? tons.superficieAlta : EagleTokens.lineSoft,
+        selectedColor: dark ? tons.superficieAlta : primarySoft,
         labelStyle: _inter(
           fontSize: TokensStrip.fontRotulo,
           color: onSurface,
@@ -326,7 +331,7 @@ class AppTheme {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(EagleTokens.radiusXl),
         ),
-        backgroundColor: dark ? EagleTokens.darkCard : surface,
+        backgroundColor: dark ? tons.superficie : surface,
         titleTextStyle: _inter(
           fontSize: TokensStrip.fontSecao,
           fontWeight: FontWeight.w600,
@@ -340,14 +345,14 @@ class AppTheme {
             top: Radius.circular(TokensStrip.rXl),
           ),
         ),
-        backgroundColor: dark ? EagleTokens.darkCard : surface,
+        backgroundColor: dark ? tons.superficie : surface,
         elevation: 0,
       ),
 
       // ── Navigation Bar: Liquid Glass dock ───────────────────────────
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: TokensStrip.glassFill(dark: dark, opacity: 0.88),
-        indicatorColor: dark ? EagleTokens.darkCardHi : primarySoft,
+        indicatorColor: dark ? tons.superficieAlta : primarySoft,
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
             return IconThemeData(color: primary, size: 21);
@@ -386,7 +391,7 @@ class AppTheme {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(EagleTokens.radiusSm),
         ),
-        backgroundColor: dark ? EagleTokens.darkCardHi : EagleTokens.ink,
+        backgroundColor: dark ? tons.superficieAlta : EagleTokens.ink,
         contentTextStyle: _inter(color: Colors.white, fontSize: TokensStrip.fontBody),
       ),
 
@@ -415,14 +420,14 @@ class AppTheme {
       // ── Progress / Slider — uses primary (white-label aware) ────────
       progressIndicatorTheme: ProgressIndicatorThemeData(
         color: primary,
-        linearTrackColor: dark ? EagleTokens.darkLine : EagleTokens.lineSoft,
-        circularTrackColor: dark ? EagleTokens.darkLine : EagleTokens.lineSoft,
+        linearTrackColor: dark ? tons.linha : EagleTokens.lineSoft,
+        circularTrackColor: dark ? tons.linha : EagleTokens.lineSoft,
       ),
 
       sliderTheme: SliderThemeData(
         activeTrackColor: primary,
         thumbColor: primary,
-        inactiveTrackColor: dark ? EagleTokens.darkLine : EagleTokens.lineSoft,
+        inactiveTrackColor: dark ? tons.linha : EagleTokens.lineSoft,
         overlayColor: primary.withValues(alpha: 0.12),
       ),
 
@@ -444,7 +449,7 @@ class AppTheme {
       // ── Tooltip ─────────────────────────────────────────────────────
       tooltipTheme: TooltipThemeData(
         decoration: BoxDecoration(
-          color: dark ? EagleTokens.darkCardHi : EagleTokens.ink,
+          color: dark ? tons.superficieAlta : EagleTokens.ink,
           borderRadius: BorderRadius.circular(EagleTokens.radiusXs),
         ),
         textStyle: _inter(color: Colors.white, fontSize: TokensStrip.fontRotulo),

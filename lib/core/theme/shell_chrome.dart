@@ -1,11 +1,19 @@
 import 'package:flutter/material.dart';
 
+import 'chao_da_marca.dart';
 import 'design_tokens.dart';
 import 'tokens_strip.dart';
 
 /// Dual-theme Liquid Glass surface system for shell tabs over the solid page floor.
 class ShellPalette {
-  const ShellPalette(this.isDark, {this.brand = EagleTokens.brand});
+  const ShellPalette(
+    this.isDark, {
+    this.brand = EagleTokens.brand,
+    this.tons = TonsEscuros.focux,
+  });
+
+  /// Tons do escuro na matiz da marca (os do tema; petróleo sem marca).
+  final TonsEscuros tons;
 
   final bool isDark;
 
@@ -14,14 +22,18 @@ class ShellPalette {
 
   Color get ink => isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
   Color get mute => isDark ? EagleTokens.darkInkMute : const Color(0xFF374151);
-  Color get line => isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
+  Color get line => isDark ? tons.linha : EagleTokens.lineSoft;
   Color get lineStrong => isDark ? EagleTokens.glassBorder : EagleTokens.line;
 
-  Color get cardFill => TokensStrip.glassFill(dark: isDark, opacity: 0.94);
+  /// Vidro dos cards: no escuro, a superfície na matiz da marca.
+  Color get cardFill =>
+      isDark
+          ? tons.superficie.withValues(alpha: 0.72 * 0.94)
+          : TokensStrip.glassFill(dark: false, opacity: 0.94);
 
   Color get sheetFill =>
       isDark
-          ? EagleTokens.darkBg
+          ? tons.chao
           : Colors.white;
 
   BoxDecoration panel({
@@ -111,12 +123,22 @@ abstract class ShellChrome {
     return ShellPalette(
       theme.brightness == Brightness.dark,
       brand: theme.colorScheme.primary,
+      tons: _tonsDo(theme),
     );
   }
 
   /// Prefer when [isDark] may differ from [ThemeData.brightness].
-  static ShellPalette forBrightness(BuildContext context, bool isDark) =>
-      ShellPalette(isDark, brand: Theme.of(context).colorScheme.primary);
+  static ShellPalette forBrightness(BuildContext context, bool isDark) {
+    final theme = Theme.of(context);
+    return ShellPalette(
+      isDark,
+      brand: theme.colorScheme.primary,
+      tons: _tonsDo(theme),
+    );
+  }
+
+  /// Os tons escuros que o tema da marca montou (petróleo sem a extensão).
+  static TonsEscuros _tonsDo(ThemeData theme) => TonsEscuros.de(theme);
 
   /// Legacy — prefer [of] / [forBrightness] so white-label brand propagates.
   static ShellPalette forDark(bool isDark, {Color? brand}) =>

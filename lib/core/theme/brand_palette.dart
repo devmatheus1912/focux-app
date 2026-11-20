@@ -13,9 +13,6 @@ class BrandPalette {
   static const Color defaultSecondary = Color(0xFF3D9AAD);
   static const Color defaultInk = Color(0xFF083D47);
 
-  /// Fundos de referência (claro/escuro) para checar contraste e pintar prévias.
-  static const Color fundoClaroReferencia = Color(0xFFF6F4FA);
-  static const Color fundoEscuroReferencia = Color(0xFF14161A);
   static const String defaultPrimaryHex = '#0B4F5C';
   static const String defaultSecondaryHex = '#3D9AAD';
 
