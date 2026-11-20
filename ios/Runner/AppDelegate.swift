@@ -22,12 +22,13 @@ import UserNotifications
 
   /// Ajustes do iPhone > Focux > Notificações > "Ajustes de notificação do
   /// Focux": abre Perfil > Notificações (providesAppNotificationSettings).
-  /// O FlutterAppDelegate não implementa este método (só willPresent e
-  /// didReceive), por isso @objc sem override.
-  @objc func userNotificationCenter(
+  /// O FlutterAppDelegate do Flutter atual já implementa o método (repassa aos
+  /// plugins): override e super, senão o Xcode recusa o build.
+  override func userNotificationCenter(
     _ center: UNUserNotificationCenter,
     openSettingsFor notification: UNNotification?
   ) {
+    super.userNotificationCenter(center, openSettingsFor: notification)
     canalNotificacoes?.invokeMethod("abrirAjustesDoApp", arguments: nil)
   }
 
