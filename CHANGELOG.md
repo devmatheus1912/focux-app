@@ -4,7 +4,7 @@ Mudanças do app publicadas nas lojas, da mais nova para a mais antiga. O format
 
 ## Não lançado (`develop`)
 
-## 1.2.6+245 · 20/11/2026
+## 1.2.6+246 · 20/11/2026
 
 ### Adicionado
 - Perfil > Notificações (personal e aluno): estado do celular, o que avisar por tipo, som do fim do descanso e notificação de teste. No iOS, "Ajustes de notificação do Focux" abre a tela; no Android, um canal por tipo.
@@ -14,6 +14,7 @@ Mudanças do app publicadas nas lojas, da mais nova para a mais antiga. O format
 - Lançar mensalidade sem chave PIX avisa antes, com "Cadastrar chave" e "Lançar mesmo assim".
 
 ### Alterado
+- Nome embaixo do ícone no iPhone: "Focux" (como no Android). "Focux Personal" não cabia e o iOS apertava as letras até sumir o espaço; nas lojas segue "Focux: App de Personal Trainer".
 - Aba Exercícios: Meus · Biblioteca · Favoritos, a mesma linha da biblioteca do "Adicionar exercício", busca com chips de grupo e equipamento, "⋯" em folha (Assistir, vídeo, Editar, Duplicar, Excluir com o efeito) e topo que conta exercícios.
 - Aluno sem PIX do personal: a folha do PIX oferece "Falar com o personal" e "Já paguei".
 - Feedback em vídeo: "Remover este vídeo" saiu da folha de resposta (fica no "⋯"); falha do áudio aparece em texto claro.

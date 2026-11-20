@@ -9,7 +9,7 @@
 			<string>pt-BR</string>
 		</array>
 		<key>CFBundleDisplayName</key>
-		<string>Focux Personal</string>
+		<string>Focux</string>
 		<key>CFBundleExecutable</key>
 		<string>$(EXECUTABLE_NAME)</string>
 		<key>CFBundleIdentifier</key>
