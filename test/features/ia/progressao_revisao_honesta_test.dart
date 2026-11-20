@@ -25,9 +25,9 @@ void main() {
       'lib/features/ia/screens/progressao_aceitar_screen.dart',
     ).readAsStringSync();
     expect(tela, contains('initiallyExpanded: false'));
-    expect(tela, contains('mudaCarga: progressaoMudaCarga(s)'));
+    expect(tela, contains('mudanca: progressaoMudanca(s, editada: _cargas[s.id])'));
     expect(tela, contains('cargasMarcarAsN'));
     expect(tela, isNot(contains('FxActionLink(')));
-    expect(tela, contains('cargasParaRevisar(sobe + desce)'));
+    expect(tela, contains('cargasParaRevisar(mudancas.length - mantem)'));
   });
 }

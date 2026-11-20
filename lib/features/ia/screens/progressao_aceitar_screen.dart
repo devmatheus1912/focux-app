@@ -70,8 +70,11 @@ class _ProgressaoAceitarScreenState
 
   bool get _busy => _actingOnId != null || _aceitandoTodas;
 
+  bool _muda(ProgressaoSugestao s) =>
+      progressaoMuda(s, editada: _cargas[s.id]);
+
   bool _selecionada(ProgressaoSugestao s) =>
-      progressaoMudaCarga(s) != _alternadas.contains(s.id);
+      _muda(s) != _alternadas.contains(s.id);
 
   void _refreshAfterApply(int? alunoId) {
     ref.invalidate(progressaoSugestoesProvider(alunoId));
@@ -293,7 +296,7 @@ class _ProgressaoAceitarScreenState
                     aberta: _abertas.contains(s.id),
                     cargaEditada: _cargas[s.id],
                     alunoNome: args.alunoId == null ? s.alunoNome : null,
-                    mudaCarga: progressaoMudaCarga(s),
+                    mudanca: progressaoMudanca(s, editada: _cargas[s.id]),
                     onEditarCarga:
                         s.cargaSugeridaKg == null
                             ? null
@@ -402,9 +405,8 @@ class _ProgressaoAceitarScreenState
             final alunoId = args.alunoId;
             final ativas = bruta.where((s) => !s.naoEncontrada).toList();
             final fora = bruta.where((s) => s.naoEncontrada).toList();
-            final comMudanca = ativas.where(progressaoMudaCarga).toList();
-            final semMudanca =
-                ativas.where((s) => !progressaoMudaCarga(s)).toList();
+            final comMudanca = ativas.where(_muda).toList();
+            final semMudanca = ativas.where((s) => !_muda(s)).toList();
             // Só quem muda de carga entra na seleção: "fica igual" não aplica nada.
             final selecionadas = comMudanca.where(_selecionada).toList();
             final n = selecionadas.length;
@@ -421,7 +423,12 @@ class _ProgressaoAceitarScreenState
                           const SizedBox(height: TokensStrip.s3),
                         ],
                         if (ativas.isNotEmpty) ...[
-                          _ResumoDaRevisao(sugestoes: ativas),
+                          _ResumoDaRevisao(
+                            mudancas: [
+                              for (final s in ativas)
+                                progressaoMudanca(s, editada: _cargas[s.id]),
+                            ],
+                          ),
                           const SizedBox(height: TokensStrip.s3),
                         ],
                         if (comMudanca.isNotEmpty) ...[
@@ -468,7 +475,10 @@ class _ProgressaoAceitarScreenState
                               context,
                             ).copyWith(dividerColor: Colors.transparent),
                             child: ExpansionTile(
-                              tilePadding: EdgeInsets.zero,
+                              // Mesmo recuo das linhas do cartão.
+                              tilePadding: const EdgeInsets.symmetric(
+                                horizontal: TokensStrip.s3,
+                              ),
                               childrenPadding: EdgeInsets.zero,
                               initiallyExpanded: false,
                               title: Text(
@@ -495,13 +505,17 @@ class _ProgressaoAceitarScreenState
                         const SizedBox(height: TokensStrip.s3),
                         IaSafetyDisclaimer(
                           compact: true,
-                          customText: ptS.cargasSoOAplicado,
+                          customText:
+                              comMudanca.isEmpty
+                                  ? ptS.cargasNadaParaAplicar
+                                  : ptS.cargasSoOAplicado,
                         ),
                       ],
                     ),
                   ),
                 ),
-                if (ativas.isNotEmpty)
+                // Nada marcável: sem botão morto; a nota acima explica.
+                if (comMudanca.isNotEmpty)
                   SafeArea(
                     top: false,
                     child: Padding(
@@ -708,16 +722,20 @@ class _ProgressaoAceitarScreenState
 
 /// O que a revisão tem pela frente, em uma olhada.
 class _ResumoDaRevisao extends StatelessWidget {
-  const _ResumoDaRevisao({required this.sugestoes});
+  const _ResumoDaRevisao({required this.mudancas});
 
-  final List<ProgressaoSugestao> sugestoes;
+  final List<ProgressaoMudanca> mudancas;
+
+  int _n(ProgressaoMudanca m) => mudancas.where((x) => x == m).length;
 
   @override
   Widget build(BuildContext context) {
     final sobre = fxPaletaSobreMarca(context);
-    final sobe = sugestoes.where((s) => (s.deltaKg ?? 0) > 0).length;
-    final desce = sugestoes.where((s) => (s.deltaKg ?? 0) < 0).length;
-    final mantem = sugestoes.length - sobe - desce;
+    final sobe = _n(ProgressaoMudanca.sobe);
+    final desce = _n(ProgressaoMudanca.desce);
+    final nova = _n(ProgressaoMudanca.cargaNova);
+    final prescricao = _n(ProgressaoMudanca.prescricao);
+    final mantem = _n(ProgressaoMudanca.nenhuma);
     // O título conta só o que muda; quem fica igual vai na linha de baixo.
     return FxStripCard(
       marca: true,
@@ -728,13 +746,15 @@ class _ResumoDaRevisao extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              ptS.cargasParaRevisar(sobe + desce),
+              ptS.cargasParaRevisar(mudancas.length - mantem),
               style: FocuxHubTypography.cardTitle(color: sobre.ink),
             ),
             Text(
               [
                 if (sobe > 0) ptS.cargasResumoSobe(sobe),
                 if (desce > 0) ptS.cargasResumoDesce(desce),
+                if (nova > 0) ptS.cargasResumoCargaNova(nova),
+                if (prescricao > 0) ptS.cargasResumoPrescricao(prescricao),
                 if (mantem > 0) ptS.cargasResumoMantem(mantem),
               ].join(' · '),
               style: FocuxHubTypography.bodyMuted(color: sobre.mute),

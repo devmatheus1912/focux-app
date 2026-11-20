@@ -27,7 +27,7 @@ class ProgressaoRevisaoLinha extends StatelessWidget {
     this.cargaEditada,
     this.onEditarCarga,
     this.alunoNome,
-    this.mudaCarga = true,
+    this.mudanca = ProgressaoMudanca.sobe,
   });
 
   final ProgressaoSugestao sugestao;
@@ -42,9 +42,9 @@ class ProgressaoRevisaoLinha extends StatelessWidget {
   /// Na fila geral, de vários alunos.
   final String? alunoNome;
 
-  /// "Fica igual": sem caixa de marcar (aplicar não muda nada) e sem o motivo
-  /// da IA; mostra só a prescrição atual.
-  final bool mudaCarga;
+  /// [ProgressaoMudanca.nenhuma] ("fica igual"): sem caixa de marcar (aplicar
+  /// não muda nada) e sem o motivo da IA; mostra só a prescrição atual.
+  final ProgressaoMudanca mudanca;
 
   Future<void> _acoes(BuildContext context) async {
     final escolha = await showFxGroupedActionSheet<_Acao>(
@@ -81,15 +81,22 @@ class ProgressaoRevisaoLinha extends StatelessWidget {
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
+    final muda = mudanca != ProgressaoMudanca.nenhuma;
     final atual = progressaoPartes(sugestao.cargaAtual);
     final nova = progressaoPartes(sugestao.cargaSugerida);
     final sugerida =
         cargaEditada != null
             ? progressaoKg(cargaEditada!)
             : nova.carga;
-    final diferenca = progressaoDiferenca(sugestao, cargaEditada);
+    final cargaNova = mudanca == ProgressaoMudanca.cargaNova;
+    final diferenca =
+        cargaNova
+            ? ptS.cargasCargaNova
+            : progressaoDiferenca(sugestao, cargaEditada);
     final mudouPrescricao =
         nova.prescricao.isNotEmpty && nova.prescricao != atual.prescricao;
+    // Sem carga dos dois lados (exercício de peso do corpo) não há linha de kg.
+    final temCarga = atual.carga.isNotEmpty || sugerida.isNotEmpty;
     final motivo = sugestao.justificativa?.trim() ?? '';
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -101,7 +108,7 @@ class ProgressaoRevisaoLinha extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (mudaCarga)
+          if (muda)
             Semantics(
               label: sugestao.exercicio,
               child: Checkbox(
@@ -125,41 +132,53 @@ class ProgressaoRevisaoLinha extends StatelessWidget {
                     style: FocuxHubTypography.cardTitle(color: chrome.ink),
                   ),
                   const SizedBox(height: 2),
-                  Wrap(
-                    spacing: TokensStrip.s2,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: [
-                      Text.rich(
-                        TextSpan(
-                          style: FocuxHubTypography.body(color: chrome.mute),
-                          children: [
-                            TextSpan(text: '${atual.carga}  →  '),
-                            TextSpan(
-                              text: sugerida,
-                              style: TextStyle(
-                                color: primary,
-                                fontWeight: FontWeight.w700,
+                  if (temCarga)
+                    Wrap(
+                      spacing: TokensStrip.s2,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Text.rich(
+                          TextSpan(
+                            style: FocuxHubTypography.body(color: chrome.mute),
+                            children: [
+                              TextSpan(
+                                text:
+                                    '${atual.carga.isEmpty ? ptS.cargasSemCarga : atual.carga}  →  ',
                               ),
-                            ),
-                          ],
+                              TextSpan(
+                                text:
+                                    sugerida.isEmpty
+                                        ? ptS.cargasSemCarga
+                                        : sugerida,
+                                style: TextStyle(
+                                  color: primary,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      if (diferenca != null) FxStatusPill(label: diferenca),
-                      if (cargaEditada != null)
-                        FxStatusPill(label: ptS.cargasEditada),
-                    ],
-                  ),
-                  if (mudouPrescricao)
+                        if (diferenca != null) FxStatusPill(label: diferenca),
+                        if (cargaEditada != null)
+                          FxStatusPill(label: ptS.cargasEditada),
+                      ],
+                    ),
+                  if (mudouPrescricao && atual.prescricao.isNotEmpty)
                     Text(
                       '${atual.prescricao}  →  ${nova.prescricao}',
                       style: FocuxHubTypography.bodyMuted(color: chrome.mute),
                     )
-                  else if (!mudaCarga && atual.prescricao.isNotEmpty)
+                  else if (mudouPrescricao)
+                    Text(
+                      nova.prescricao,
+                      style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                    )
+                  else if (atual.prescricao.isNotEmpty)
                     Text(
                       atual.prescricao,
                       style: FocuxHubTypography.bodyMuted(color: chrome.mute),
                     ),
-                  if (mudaCarga && motivo.isNotEmpty) ...[
+                  if (muda && motivo.isNotEmpty) ...[
                     const SizedBox(height: 2),
                     Text(
                       motivo,

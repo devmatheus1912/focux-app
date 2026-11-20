@@ -2,7 +2,9 @@
 
 Mudanças do app publicadas nas lojas, da mais nova para a mais antiga. O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). A versão vem do `pubspec.yaml`; cada versão publicada tem uma tag `vX.Y.Z`.
 
-## Não lançado (`develop`) · 1.2.6+242
+## Não lançado (`develop`)
+
+## 1.2.6+242 · 20/11/2026
 
 ### Adicionado
 - Perfil > Notificações (personal e aluno): estado do celular, o que avisar por tipo, som do fim do descanso e notificação de teste. No iOS, "Ajustes de notificação do Focux" abre a tela; no Android, um canal por tipo.
@@ -19,6 +21,10 @@ Mudanças do app publicadas nas lojas, da mais nova para a mais antiga. O format
 - Erro do login com Google aparece em texto para o usuário ("Não deu para entrar com Google. Use e-mail e senha.") em vez da mensagem técnica.
 - Dependências do pub e do E2E atualizadas (versões menores).
 - Documentação oficial do repositório: arquitetura, design system, produto, release, política de segurança, guia de contribuição e modelos de PR e issue. Os scripts de `tools/` foram para `tool/`, e as regras do Cursor saíram do Git.
+
+### Corrigido
+- Revisar cargas: exercício sem carga na ficha recebendo carga ("Sem carga → 17 kg", pílula "Carga nova") e troca só de séries/repetições contam como mudança, vêm marcados e o botão aplica; o resumo conta essas mudanças; editar a carga de uma linha que ficava igual a marca; sem nada para aplicar, o botão some e a nota explica.
+- Push volta a registrar o aparelho. Android: `google-services.json` com a chave de API atual (a da 1.2.5 tinha expirado na rotação). iOS: o token do FCM só é pedido depois que o token APNs chega (até 10 s). Falha no registro vai ao Sentry como aviso, sem o token.
 
 ### Marca
 - Guia de marca (`brand/brand_guidelines.md`) e kit do logo v2 em `brand/kit/`.

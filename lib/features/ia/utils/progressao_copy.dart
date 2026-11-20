@@ -70,25 +70,66 @@ const progressaoObservacoesLabel = 'Observação (opcional)';
 const progressaoObservacoesHint = 'Ex.: dor no ombro direito';
 const progressaoAbrirTreino = 'Abrir treino';
 
-/// "18 kg · 4×8-10" vira a carga e a prescrição.
+/// "18 kg · 4×8-10" vira a carga e a prescrição; "4×8-12" é só prescrição
+/// (exercício sem carga na ficha) e "—" não é nada.
 ({String carga, String prescricao}) progressaoPartes(String texto) {
-  final m = RegExp(r'^(.*?kg)\s*[·\s]*(.*)$').firstMatch(texto.trim());
-  if (m == null) return (carga: texto.trim(), prescricao: '');
-  return (carga: m.group(1)!.trim(), prescricao: m.group(2)!.trim());
+  final t = texto.trim();
+  if (t.isEmpty || t == '—') return (carga: '', prescricao: '');
+  final m = RegExp(r'\d+(?:[.,]\d+)?\s*kg').firstMatch(t);
+  if (m == null) return (carga: '', prescricao: t);
+  final resto = t
+      .replaceRange(m.start, m.end, '')
+      .replaceAll(RegExp(r'^[\s·]+|[\s·]+$'), '')
+      .trim();
+  return (carga: m.group(0)!.trim(), prescricao: resto);
 }
 
 String progressaoKg(double kg) =>
     '${kg.toStringAsFixed(kg % 1 == 0 ? 0 : 1).replaceAll('.', ',')} kg';
 
+/// Quanto a carga muda em kg, já com a carga editada. Nulo sem carga na ficha.
+double? _deltaKg(ProgressaoSugestao s, double? editada) {
+  final anterior = s.cargaAnteriorKg;
+  final sugerida = editada ?? s.cargaSugeridaKg;
+  if (anterior != null && sugerida != null) return sugerida - anterior;
+  if (editada != null && s.cargaSugeridaKg != null && s.deltaKg != null) {
+    return s.deltaKg! + editada - s.cargaSugeridaKg!;
+  }
+  return s.deltaKg;
+}
+
 /// "+1,5 kg" ou "−1,5 kg", já com a carga editada. Nulo sem mudança ou sem número.
 String? progressaoDiferenca(ProgressaoSugestao s, double? editada) {
-  final delta =
-      editada != null && s.cargaSugeridaKg != null
-          ? (s.deltaKg ?? 0) + editada - s.cargaSugeridaKg!
-          : s.deltaKg;
+  final delta = _deltaKg(s, editada);
   if (delta == null || delta == 0) return null;
   return '${delta > 0 ? '+' : '−'}${progressaoKg(delta.abs())}';
 }
+
+/// O que a sugestão muda na ficha.
+enum ProgressaoMudanca { sobe, desce, cargaNova, prescricao, nenhuma }
+
+/// Uma conta só para a revisão: kg que sobe ou desce, carga nova (a ficha não
+/// tinha carga) ou só séries/repetições. "Nenhuma" não tem o que aplicar.
+ProgressaoMudanca progressaoMudanca(ProgressaoSugestao s, {double? editada}) {
+  final delta = _deltaKg(s, editada);
+  if (delta != null && delta > 0) return ProgressaoMudanca.sobe;
+  if (delta != null && delta < 0) return ProgressaoMudanca.desce;
+  final atual = progressaoPartes(s.cargaAtual);
+  final nova = progressaoPartes(s.cargaSugerida);
+  final temSugerida =
+      editada != null || s.cargaSugeridaKg != null || nova.carga.isNotEmpty;
+  if (s.cargaAnteriorKg == null && atual.carga.isEmpty && temSugerida) {
+    return ProgressaoMudanca.cargaNova;
+  }
+  if (nova.prescricao.isNotEmpty && nova.prescricao != atual.prescricao) {
+    return ProgressaoMudanca.prescricao;
+  }
+  return ProgressaoMudanca.nenhuma;
+}
+
+/// Tem algo para aplicar: vem marcada e aparece primeiro na revisão.
+bool progressaoMuda(ProgressaoSugestao s, {double? editada}) =>
+    progressaoMudanca(s, editada: editada) != ProgressaoMudanca.nenhuma;
 
 String progressaoAceitarTodasSnack(ProgressaoAceitarTodasResponse r) {
   final aplicadas = switch (r.aplicadas) {
@@ -143,10 +184,6 @@ String progressaoSlug(String value) {
 String progressaoPdfFileName(String alunoNome, DateTime d) =>
     'progressao_${progressaoSlug(alunoNome)}_'
     '${d.year}-${_doisDigitos(d.month)}-${_doisDigitos(d.day)}.pdf';
-
-/// Mudou a carga de verdade: vem marcada e aparece primeiro na revisão.
-bool progressaoMudaCarga(ProgressaoSugestao s) =>
-    s.deltaKg != null && s.deltaKg != 0;
 
 /// Grupos da revisão por sessão, na ordem em que aparecem. Sem sessão fica por último.
 List<(String?, List<ProgressaoSugestao>)> progressaoPorTreino(

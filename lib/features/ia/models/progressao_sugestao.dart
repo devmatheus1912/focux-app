@@ -28,6 +28,7 @@ class ProgressaoSugestao {
     this.status = statusPendente,
     this.treinoNome,
     this.cargaSugeridaKg,
+    this.cargaAnteriorKg,
   });
 
   static const statusPendente = 'PENDENTE';
@@ -52,6 +53,9 @@ class ProgressaoSugestao {
   /// Sessão do exercício, para agrupar a revisão.
   final String? treinoNome;
   final double? cargaSugeridaKg;
+
+  /// Carga da ficha hoje; nula quando o exercício ainda não tem carga.
+  final double? cargaAnteriorKg;
 
   bool get naoEncontrada => status == statusNaoEncontrada;
 
@@ -85,6 +89,7 @@ class ProgressaoSugestao {
       status: json['status'] as String? ?? statusPendente,
       treinoNome: json['treinoNome'] as String?,
       cargaSugeridaKg: _asDouble(json['cargaSugeridaKg']),
+      cargaAnteriorKg: _asDouble(json['cargaAnteriorKg']),
     );
   }
 

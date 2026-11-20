@@ -156,4 +156,83 @@ void main() {
     expect(supino, lessThan(remada));
     expect(find.text('Aplicar 1 selecionada'), findsOneWidget);
   });
+
+  Future<void> abrir(WidgetTester tester, List<ProgressaoSugestao> lista) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    final router = GoRouter(
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (context, state) => const ProgressaoAceitarScreen(),
+        ),
+      ],
+    );
+    router.go(
+      '/',
+      extra: const ProgressaoAceitarRouteArgs(
+        alunoId: 12,
+        alunoNome: 'Julio',
+      ).toExtra(),
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          progressaoSugestoesProvider(12).overrideWith((ref) async => lista),
+        ],
+        child: MaterialApp.router(routerConfig: router),
+      ),
+    );
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('ficha sem carga: carga nova vem marcada e o botão aplica', (
+    tester,
+  ) async {
+    await abrir(tester, [
+      for (final (i, kg) in [17.0, 9.5].indexed)
+        ProgressaoSugestao(
+          id: 10 + i,
+          alunoId: 12,
+          exercicio: 'Crucifixo $i',
+          cargaAtual: '4×8-12',
+          cargaSugerida: '${kg.toString().replaceAll('.0', '').replaceAll('.', ',')} kg · 4×8-10',
+          cargaSugeridaKg: kg,
+          treinoNome: 'A · Peito e tríceps',
+        ),
+    ]);
+
+    expect(find.text('2 mudanças'), findsOneWidget);
+    expect(find.text('2 cargas novas'), findsOneWidget);
+    expect(find.text('Sem carga  →  '), findsNothing);
+    expect(find.textContaining('Sem carga'), findsNWidgets(2));
+    expect(find.text('Carga nova'), findsNWidgets(2));
+    expect(find.text('4×8-12  →  4×8-10'), findsNWidgets(2));
+    expect(find.byType(Checkbox), findsNWidgets(2));
+    expect(find.text('Aplicar 2 selecionadas'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('tudo igual: sem botão morto e a nota explica', (tester) async {
+    await abrir(tester, [
+      const ProgressaoSugestao(
+        id: 30,
+        alunoId: 12,
+        exercicio: 'Leg press',
+        cargaAtual: '100 kg · 4×10',
+        cargaSugerida: '100 kg · 4×10',
+        cargaAnteriorKg: 100,
+        cargaSugeridaKg: 100,
+      ),
+    ]);
+
+    expect(find.text('Nenhuma mudança'), findsOneWidget);
+    expect(find.text('Marque o que aplicar'), findsNothing);
+    expect(
+      find.text('Nada para aplicar: o que a IA sugeriu já está no treino.'),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+  });
 }
