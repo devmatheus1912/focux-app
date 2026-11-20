@@ -79,7 +79,8 @@ dependencies:
   amplitude_flutter: ^4.8.2
   intercom_flutter: ^9.6.36
   firebase_analytics: ^12.6.0
-  facebook_app_events: ^0.33.0
+  # 0.33 traz o FBSDK que não compila no Xcode 26.3 do CI (20/11).
+  facebook_app_events: 0.31.0
   app_tracking_transparency: ^2.0.7
   pdfx: ^2.11.0
   share_plus: ^13.3.1

@@ -24,6 +24,7 @@ Mudanças do app publicadas nas lojas, da mais nova para a mais antiga. O format
 
 ### Corrigido
 - Revisar cargas: exercício sem carga na ficha recebendo carga ("Sem carga → 17 kg", pílula "Carga nova") e troca só de séries/repetições contam como mudança, vêm marcados e o botão aplica; o resumo conta essas mudanças; editar a carga de uma linha que ficava igual a marca; sem nada para aplicar, o botão some e a nota explica.
+- Build do iOS: `facebook_app_events` volta para 0.31.0 (a 0.33 do Dependabot traz um SDK do Facebook que não compila no Xcode 26.3).
 - Push volta a registrar o aparelho. Android: `google-services.json` com a chave de API atual (a da 1.2.5 tinha expirado na rotação). iOS: o token do FCM só é pedido depois que o token APNs chega (até 10 s). Falha no registro vai ao Sentry como aviso, sem o token.
 
 ### Marca
