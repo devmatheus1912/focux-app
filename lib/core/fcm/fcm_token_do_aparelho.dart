@@ -9,19 +9,22 @@ import 'dart:async';
 /// consultado até [tentativas] vezes antes de pedir o token.
 ///
 /// Toda falha chama [avisar] com o motivo (código do erro, nunca o token),
-/// para o registro não voltar a falhar em silêncio.
+/// para o registro não voltar a falhar em silêncio. Cada chamada ao Firebase
+/// tem [limite]: no iOS o `getToken` pode ficar sem resposta (chave ou
+/// instalação do Firebase recusada) e travava o registro sem erro nenhum.
 Future<String?> obterTokenFcm({
   required Future<String?> Function() fcm,
   required void Function(String motivo) avisar,
   Future<String?> Function()? apns,
   int tentativas = 10,
   Duration intervalo = const Duration(seconds: 1),
+  Duration limite = const Duration(seconds: 20),
 }) async {
   if (apns != null) {
     String? tokenApns;
     for (var i = 0; i < tentativas; i++) {
       try {
-        tokenApns = await apns();
+        tokenApns = await apns().timeout(limite);
       } catch (_) {
         tokenApns = null;
       }
@@ -34,12 +37,15 @@ Future<String?> obterTokenFcm({
     }
   }
   try {
-    final token = await fcm();
+    final token = await fcm().timeout(limite);
     if (token == null || token.isEmpty) {
       avisar('token FCM vazio');
       return null;
     }
     return token;
+  } on TimeoutException {
+    avisar('getToken sem resposta em ${limite.inSeconds} s');
+    return null;
   } catch (e) {
     avisar('getToken: ${motivoDoErro(e)}');
     return null;

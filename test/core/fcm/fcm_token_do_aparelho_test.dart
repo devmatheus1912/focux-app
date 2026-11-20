@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/fcm/fcm_token_do_aparelho.dart';
 
@@ -16,6 +18,7 @@ void main() {
         avisar: avisos.add,
         tentativas: tentativas,
         intervalo: Duration.zero,
+        limite: const Duration(milliseconds: 50),
       );
 
   test('iOS: espera o APNs chegar antes de pedir o token', () async {
@@ -76,5 +79,25 @@ void main() {
   test('token vazio também avisa', () async {
     expect(await obter(fcm: () async => ''), isNull);
     expect(avisos, ['token FCM vazio']);
+  });
+
+  test('getToken que nunca responde vira aviso, não trava o registro',
+      () async {
+    final nunca = Completer<String?>();
+    final token = await obter(fcm: () => nunca.future);
+
+    expect(token, isNull);
+    expect(avisos.single, startsWith('getToken sem resposta'));
+  });
+
+  test('getAPNSToken que trava conta como tentativa sem token', () async {
+    final token = await obter(
+      apns: () => Completer<String?>().future,
+      fcm: () async => 'x',
+      tentativas: 2,
+    );
+
+    expect(token, isNull);
+    expect(avisos, ['sem token APNs']);
   });
 }
