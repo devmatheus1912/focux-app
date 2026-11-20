@@ -6,7 +6,7 @@ O app do Focux Personal está nas lojas e trata dado pessoal e dado de saúde de
 
 - Escreva para **contato@focuxpersonal.com** com o assunto `Segurança`.
 - Descreva o problema, como reproduzir, a versão do app e o aparelho.
-- **Não** abra issue, PR ou discussão com detalhes da falha, mesmo neste repositório privado.
+- **Não** abra issue, PR ou discussão com detalhes da falha: este repositório é público.
 - **Não** teste contra contas de outras pessoas nem acesse dado que não seja seu.
 
 O retorno vem pelo mesmo e-mail. Falha confirmada recebe correção com teste que prova o comportamento e sai pelo fluxo de hotfix (ver [`docs/RELEASE.md`](docs/RELEASE.md#bug-em-produção)).

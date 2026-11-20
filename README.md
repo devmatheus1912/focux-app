@@ -3,7 +3,7 @@
 > **Quem treinou, quem pagou e quem sumiu.**
 > App de gestão para personal trainer: o personal opera a assessoria (alunos, treinos, agenda, cobrança com PIX, IA e marca própria) e o aluno treina, faz check-in e fala com o personal, no mesmo app.
 
-> **Repositório privado.** Código proprietário: cópia, execução em produção, modificação e distribuição **proibidas** sem autorização por escrito. Ver [LICENSE](LICENSE).
+> **Código proprietário, visível publicamente.** Ver não é licença: cópia, execução em produção, modificação e distribuição são **proibidas** sem autorização por escrito. Ver [LICENSE](LICENSE).
 
 ---
 
@@ -60,7 +60,7 @@ Dois perfis no mesmo app, com rotas separadas por papel:
 
 | Repositório | Visibilidade | Papel |
 |---|---|---|
-| **`focux-app`** | Privado | Este cliente Flutter |
+| **`focux-app`** | Público (código proprietário) | Este cliente Flutter |
 | `focux-backend` | Privado | API REST, WebSocket e regras de negócio |
 | `focux-website` | Privado | Site institucional [focuxpersonal.com](https://focuxpersonal.com) |
 
