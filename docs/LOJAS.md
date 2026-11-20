@@ -2,7 +2,7 @@
 
 "O que há de novo" de cada versão, pronto para colar. A mais nova fica em cima.
 
-## 1.2.6 (build 249)
+## 1.2.6 (build 250)
 
 Texto da versão 1.2.6. App Store aceita até 4.000 caracteres; Google Play, até 500.
 
@@ -10,7 +10,7 @@ Texto da versão 1.2.6. App Store aceita até 4.000 caracteres; Google Play, at�
 
 Notificações do seu jeito: em Perfil > Notificações você escolhe o que quer receber (treinos, chat, agenda, cobranças, alunos e mais) e vê se o celular está liberado.
 
-O fim do descanso avisa mesmo com a tela bloqueada, com som ou só vibração.
+O fim do descanso avisa mesmo com a tela bloqueada e no modo Foco, com som ou só vibração.
 
 Aba Exercícios nova: seus exercícios, a biblioteca e os favoritos lado a lado, com busca por grupo muscular e equipamento.
 

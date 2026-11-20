@@ -4,9 +4,10 @@ Mudanças do app publicadas nas lojas, da mais nova para a mais antiga. O format
 
 ## Não lançado (`develop`)
 
-## 1.2.6+249 · 20/11/2026
+## 1.2.6+250 · 20/11/2026
 
 ### Adicionado
+- Fim do descanso como notificação "Time Sensitive" no iPhone: o aviso passa pelo modo Foco (capability habilitada no App ID em 20/11). Build 250.
 - Perfil > Notificações (personal e aluno): estado do celular, o que avisar por tipo, som do fim do descanso e notificação de teste. No iOS, "Ajustes de notificação do Focux" abre a tela; no Android, um canal por tipo.
 - Fim do descanso avisa com a tela bloqueada ou o app em segundo plano (notificação agendada; no Android, contagem regressiva na tela de bloqueio).
 - Aviso de versão nova: folha "Nova versão disponível" (uma vez por versão) e tela de bloqueio abaixo da versão mínima; no Android, atualização pela própria Play.

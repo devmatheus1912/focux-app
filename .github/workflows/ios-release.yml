@@ -150,6 +150,17 @@ jobs:
           cd ios
           pod install --repo-update
 
+      # Podfile.lock versionado: com ele, todo build usa as mesmas versões dos
+      # pods. Quando o pod install muda o lock, o arquivo novo sai aqui para
+      # ser commitado (o projeto não tem Mac fora do CI).
+      - name: Upload Podfile.lock
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: focux-ios-podfile-lock
+          path: ios/Podfile.lock
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Install Fastlane
         # Versão fixa: o fastlane recebe a chave da App Store Connect.
         run: gem install fastlane -v 2.241.2 --no-document
