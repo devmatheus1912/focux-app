@@ -4,6 +4,9 @@ Mudanças do app publicadas nas lojas, da mais nova para a mais antiga. O format
 
 ## Não lançado (`develop`)
 
+### Alterado
+- `flutter_local_notifications` fixado na 22.3.3: a 23.x exige compileSdk 37 e AGP 9.1, e o build Android da 1.2.6 não compilava (o iOS do build 250 saiu com a 23.0.3, sem diferença de uso).
+
 ## 1.2.6+250 · 20/11/2026
 
 ### Adicionado
