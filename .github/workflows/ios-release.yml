@@ -120,9 +120,11 @@ jobs:
         env:
           GOOGLE_SERVICE_INFO_PLIST_BASE64: ${{ secrets.GOOGLE_SERVICE_INFO_PLIST_BASE64 }}
         run: |
+          # O plist entra no target Runner (project.pbxproj): sem ele o Firebase
+          # não inicializa (push, Crashlytics) e o archive falha.
           if [[ -z "${GOOGLE_SERVICE_INFO_PLIST_BASE64:-}" ]]; then
-            echo "Sem GOOGLE_SERVICE_INFO_PLIST_BASE64 — Firebase iOS fica off neste build."
-            exit 0
+            echo "::error::Secret GOOGLE_SERVICE_INFO_PLIST_BASE64 obrigatório (Firebase iOS)."
+            exit 1
           fi
           echo -n "$GOOGLE_SERVICE_INFO_PLIST_BASE64" | base64 --decode > ios/Runner/GoogleService-Info.plist
           chmod +x tool/ios/sync_google_signin_url_scheme.sh || true

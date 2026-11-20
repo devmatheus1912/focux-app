@@ -4,7 +4,7 @@ Mudanças do app publicadas nas lojas, da mais nova para a mais antiga. O format
 
 ## Não lançado (`develop`)
 
-## 1.2.6+244 · 20/11/2026
+## 1.2.6+245 · 20/11/2026
 
 ### Adicionado
 - Perfil > Notificações (personal e aluno): estado do celular, o que avisar por tipo, som do fim do descanso e notificação de teste. No iOS, "Ajustes de notificação do Focux" abre a tela; no Android, um canal por tipo.
@@ -27,6 +27,7 @@ Mudanças do app publicadas nas lojas, da mais nova para a mais antiga. O format
 - Build do iOS: `facebook_app_events` volta para 0.31.0 (a 0.33 do Dependabot traz um SDK do Facebook que não compila no Xcode 26.3).
 - Build do iOS: `userNotificationCenter(_:openSettingsFor:)` do `AppDelegate` passa a ser `override` (o `FlutterAppDelegate` atual já o implementa e o Xcode recusava o build).
 - Push no iOS: cada chamada ao Firebase no registro do token tem limite de 20 s (o `getToken` ficava sem resposta e o registro travava sem erro) e o `GoogleService-Info.plist` do CI foi trocado pelo atual do Firebase. Build 243. No 244, "Enviar notificação de teste" registra o aparelho antes e, sem token, diz o motivo e a etapa em que o registro parou.
+- **Firebase no iOS nunca inicializava:** o `GoogleService-Info.plist` que o CI grava em `ios/Runner/` não estava no target do Xcode, então não entrava no app e o `Firebase.initializeApp()` falhava em silêncio (sem push e sem Crashlytics no iPhone). Agora o plist está no `project.pbxproj`, o CI exige o secret e falha do Firebase vai ao Sentry. Build 245.
 - Push volta a registrar o aparelho. Android: `google-services.json` com a chave de API atual (a da 1.2.5 tinha expirado na rotação). iOS: o token do FCM só é pedido depois que o token APNs chega (até 10 s). Falha no registro vai ao Sentry como aviso, sem o token.
 
 ### Marca

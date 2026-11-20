@@ -12,7 +12,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sentry_flutter/sentry_flutter.dart'
-    show SentryWidgetsFlutterBinding, SentryWidget;
+    show Sentry, SentryWidgetsFlutterBinding, SentryWidget;
 
 import 'package:dio/dio.dart';
 import 'core/api/api_client.dart';
@@ -123,8 +123,11 @@ void main() {
           return true;
         };
       }
-    } catch (error) {
+    } catch (error, stack) {
       if (kDebugMode) debugPrint('[Focux] Firebase init error: $error');
+      // Sem Firebase não há push nem Crashlytics: o iOS ficou assim sem
+      // ninguém ver (plist fora do target, 20/11/2026).
+      unawaited(Sentry.captureException(error, stackTrace: stack));
       // Firebase ainda não está configurado em todos os ambientes.
       // Fallback: captura erros localmente sem Crashlytics.
       FlutterError.onError = (FlutterErrorDetails details) {
