@@ -10,7 +10,9 @@ Mudanças do app publicadas nas lojas, da mais nova para a mais antiga. O format
 - Documentação oficial do repositório: arquitetura, design system, produto, release, política de segurança, guia de contribuição e modelos de PR e issue. Os scripts de `tools/` foram para `tool/`, e as regras do Cursor saíram do Git.
 
 ### Marca
-- Guia de marca (`brand/brand_guidelines.md`) e kit do logo v2 em `brand/kit/`. O app ainda usa o logo anterior até a troca dos arquivos.
+- Guia de marca (`brand/brand_guidelines.md`) e kit do logo v2 em `brand/kit/`.
+- Logo v2 no app inteiro: logos das telas e do PDF, ícone do iOS e do Android (braço branco sobre `#0B4F5C`), ícone de notificação, splash e ícones da versão web, todos gerados do kit. No escuro, o símbolo usa o petróleo `#0E93A8`.
+- Tema escuro no chão petróleo do guia: fundo `#0A1A1F`, superfície `#10262C`, superfície alta `#16323A`, borda `#1B3A42`, sem os brilhos do fundo (a marca própria do personal com estilo Cinematográfico continua tingindo o degradê). Splash nativo no mesmo chão.
 
 ## 1.2.5+241 · 17/11/2026
 

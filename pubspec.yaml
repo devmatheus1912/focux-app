@@ -99,25 +99,26 @@ dev_dependencies:
 flutter_launcher_icons:
   android: true
   ios: true
-  # Braço em fundo branco (launcher). Adaptive usa FG transparente + bg #FFF.
+  # Logo v2 (brand/kit): braço branco sobre o petróleo #0B4F5C.
   image_path: "assets/images/logo_icon_launcher.png"
-  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_background: "#0B4F5C"
   adaptive_icon_foreground: "assets/images/logo_icon_fg.png"
   adaptive_icon_foreground_inset: 16
-  background_color_ios: "#FFFFFF"
+  background_color_ios: "#0B4F5C"
   remove_alpha_ios: true
 
 flutter_native_splash:
-  color: "#0B0E14"
+  # Chão escuro petróleo do guia de marca.
+  color: "#0A1A1F"
   # Lockup padded (~36%) — master 1254² sem padding estourava a tela.
   image: assets/images/logo_splash.png
   android_gravity: center
   ios_content_mode: center
   android_12:
-    color: "#0B0E14"
-    # Android 12+ usa ícone circular — só o braço.
+    color: "#0A1A1F"
+    # Android 12+ usa ícone circular: braço branco no círculo petróleo, igual ao launcher.
     image: assets/images/logo_splash_icon.png
-    icon_background_color: "#0B0E14"
+    icon_background_color: "#0B4F5C"
   android: true
   ios: true
   fullscreen: true
@@ -142,6 +143,7 @@ flutter:
     - assets/images/logo_oficial_fundo_claro.png
     - assets/images/logo_oficial_fundo_escuro.png
     - assets/images/logo_icon_arm.png
+    - assets/images/logo_icon_arm_escuro.png
     - assets/sounds/descanso_fim.wav
     - assets/google_fonts/
 

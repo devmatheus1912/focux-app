@@ -209,7 +209,7 @@ O escuro da marca é um **petróleo bem escuro e sólido**, não um quase preto 
 
 Elevação no escuro: cada nível é **um tom fixo** mais claro (chão → superfície), nunca uma mancha de luz. Assim o mesmo cartão tem a mesma cor em qualquer ponto da tela.
 
-> **App:** o tema escuro do app ainda usa o fundo anterior (`#0B0E14` + `#121820` + `#1A2330`, com degradê e brilhos em `cinematic_mesh_background.dart`). A migração para o chão petróleo está na seção 17.
+> **App:** usa o chão petróleo desde 20/11/2026 (`EagleTokens.darkBg/darkCard/darkCardHi/darkLine` e `TokensStrip.cinematic*`): `#0A1A1F`, `#10262C`, superfície alta `#16323A` e borda `#1B3A42`, sem brilhos.
 
 ### 4.4 Semânticas
 
@@ -251,7 +251,7 @@ Regra: **fundo sólido**. Atmosfera, quando existir, é **uma única luz fixa** 
 
 Por quê: várias camadas translúcidas sobre o escuro viram uma névoa esverdeada e suja, a elevação dos cartões fica inconsistente e o visual cai no padrão genérico "quase preto + acento neon + bordas brilhando". Diagnóstico completo na auditoria de 18/11/2026 (skill impeccable).
 
-> **App:** ainda usa o degradê `#0D2830 → #0B0E14` com três brilhos e o mesh claro `#E4EFF1 → #F4F6F8 → #EDF2F4`. Migração pendente (seção 17).
+> **App:** o escuro é chão sólido desde 20/11/2026. O mesh claro (`#E4EFF1 → #F4F6F8 → #EDF2F4`) com brilhos continua; migração pendente (seção 17).
 
 ---
 
@@ -347,7 +347,7 @@ Site: container com gutter de 20 px (mobile), 32 px (≥ 640 px), 48 px (≥ 102
 ### Sombras
 
 - **Card claro:** `0 2px 8px rgba(0,0,0,.07)`.
-- **Card escuro:** elevação por superfície (`#121820` → `#1A2330`), não por sombra preta.
+- **Card escuro:** elevação por superfície (`#10262C` → `#16323A`), não por sombra preta.
 - **Profundidade colorida** (destaques raros): sombra na cor do elemento, 40% e 16% de opacidade.
 
 ### Vidro (blur)
@@ -561,7 +561,7 @@ Mudanças de cor, logo ou tipografia são **decisão de produto** dos sócios. F
 3. ~~Petróleo do logo (`#016B7E`) diferente do primário de UI (`#0B4F5C`)~~ **Resolvido no logo v2:** um petróleo só, `#0B4F5C`.
 4. **`#6B7280` sobre `#F4F6F8` dá 4,46:1**, logo abaixo de AA. Em texto pequeno, prefira `#4B5563`.
 5. ~~Sem logo vetorial~~ **Resolvido no logo v2:** kit completo em SVG e PNG em `kit/`.
-6. **Trocar os arquivos em uso pelo logo v2** (a cargo dos sócios): `assets/images/` e ícones nativos do app, `client/public/` do site, favicon, e-mail e redes sociais. Até a troca, app e site continuam com o logo anterior.
+6. ~~Trocar os arquivos em uso pelo logo v2~~ **Resolvido em 20/11/2026** no app (`assets/images/`, ícones nativos, notificação, splash, web) e no site (`client/public/`, favicon, e-mail, og:image). Falta trocar nas redes sociais e nos diretórios externos.
 7. **Busca de marca no INPI** e busca reversa de imagem antes do lançamento.
 8. ~~Fundo escuro do site com manchas de brilho e efeitos animados~~ **Resolvido em 18/11/2026:** chão petróleo `#0A1A1F`, uma luz fixa no hero, sem pulso, órbitas ou degradê animado (site e páginas legais).
-9. **Migrar o fundo escuro do app** para o chão petróleo (a cargo dos sócios): `EagleTokens.darkBg/darkCard/darkCardHi/darkLine` e `cinematic_mesh_background.dart` (remover os três brilhos). Até lá, app e site têm fundos escuros diferentes.
+9. ~~Migrar o fundo escuro do app~~ **Resolvido em 20/11/2026:** chão petróleo nos tokens e fundo escuro sem brilhos. Falta o fundo claro (mesh com brilhos → paper sólido).

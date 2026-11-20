@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/theme/brand_palette.dart';
 import 'package:focux_app/core/theme/curated_brand_palettes.dart';
+import 'package:focux_app/core/theme/design_tokens.dart';
 import 'package:focux_app/core/theme/focux_contrast.dart';
 
 void main() {
@@ -49,7 +50,7 @@ void main() {
   });
 
   test('dark chrome accent stays visible on mesh and keeps white labels', () {
-    const mesh = Color(0xFF0B0E14);
+    const mesh = EagleTokens.darkBg;
     const white = Color(0xFFFFFFFF);
     for (final palette in CuratedBrandPalette.premium) {
       final lightChrome = palette.chromeFor(dark: false);
@@ -107,7 +108,7 @@ void main() {
         );
       }
       expect(
-        FocuxContrast.contrastRatio(again, const Color(0xFF0B0E14)),
+        FocuxContrast.contrastRatio(again, EagleTokens.darkBg),
         greaterThanOrEqualTo(FocuxContrast.wcagAaLarge),
         reason: '${palette.name} second pass still reads on mesh',
       );

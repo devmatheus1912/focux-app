@@ -87,10 +87,10 @@ abstract class TokensStrip {
   static const Color neonGlow = Color(0xFF3D9AAD);
   static const Color neonDeep = primaryHover;
 
-  // ── Cinematic dark ───────────────────────────────────────────────────
-  static const Color cinematicBg = Color(0xFF0B0E14);
-  static const Color cinematicSurface = Color(0xFF121820);
-  static const Color cinematicElevated = Color(0xFF1A2330);
+  // ── Escuro: chão petróleo (guia de marca, seção 4.3) ─────────────────
+  static const Color cinematicBg = Color(0xFF0A1A1F);
+  static const Color cinematicSurface = Color(0xFF10262C);
+  static const Color cinematicElevated = Color(0xFF16323A);
 
   // ── Light mesh ───────────────────────────────────────────────────────
   static const Color lightMeshA = Color(0xFFE4EFF1);

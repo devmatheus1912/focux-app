@@ -6,7 +6,7 @@ import '../theme/tokens_strip.dart';
 import 'fx_loading.dart';
 
 /// Carregamento de tela cheia sobre fundo liso (mesmo do login, sem grade nem
-/// malha): `#0B0E14` no escuro e o tom base da malha no claro. Para telas que
+/// malha): o chão petróleo `#0A1A1F` no escuro e o tom base da malha no claro. Para telas que
 /// ainda não têm conteúdo nenhum; listas usam esqueleto.
 class FxTelaCarregando extends StatelessWidget {
   const FxTelaCarregando({super.key, this.rotulo});

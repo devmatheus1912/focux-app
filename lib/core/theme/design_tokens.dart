@@ -26,11 +26,12 @@ abstract class EagleTokens {
   static const Color paper = Color(0xFFF4F6F8);
   static const Color card = Color(0xFFFFFFFF);
 
-  // ── Neutral Dark (Cinematic charcoal) ───────────────────────────────
-  static const Color darkBg = Color(0xFF0B0E14);
-  static const Color darkCard = Color(0xFF121820);
-  static const Color darkCardHi = Color(0xFF1A2330);
-  static const Color darkLine = Color(0xFF1E2830);
+  // ── Neutral Dark (chão petróleo do guia de marca, seção 4.3) ─────────
+  // Elevação por tom fixo: chão → superfície → superfície alta.
+  static const Color darkBg = Color(0xFF0A1A1F);
+  static const Color darkCard = Color(0xFF10262C);
+  static const Color darkCardHi = Color(0xFF16323A);
+  static const Color darkLine = Color(0xFF1B3A42);
   static const Color darkInk = Color(0xFFE8EDF2);
   static const Color darkInkMute = Color(0xFF9AA8B3);
 
@@ -109,8 +110,8 @@ abstract class EagleTokens {
   static const Color goldStar = Color(0xFFF59E0B);
   static const Color purpleAccent = Color(0xFF6D28D9);
   static const Color rankingGoldBorder = Color(0xFFFFE58A);
-  static const Color cinematicBg = Color(0xFF080C10);
-  static const Color cinematicBgHi = Color(0xFF0F1419);
+  static const Color cinematicBg = darkBg;
+  static const Color cinematicBgHi = darkCard;
   static const Color checkinTimerDark = Color(0xFF0F1A3C);
   static const Color macroProtein = Color(0xFFEF4444);
   static const Color macroCarb = Color(0xFFEAB308);
@@ -157,12 +158,8 @@ abstract class EagleTokens {
   /// Apply as: brandAccent.withValues(alpha: 0.35)
   static Color get circuitGlow => brandAccent.withValues(alpha: 0.35);
 
-  /// Hero mesh dark gradient stops for auth/splash backgrounds.
-  static const List<Color> heroMeshDark = [
-    Color(0xFF0B0E14),
-    Color(0xFF0A2A32),
-    Color(0xFF121820),
-  ];
+  /// Paradas do fundo escuro de auth/splash: chão petróleo, sem brilho.
+  static const List<Color> heroMeshDark = [darkCard, darkBg, darkBg];
 
   // ── Adapters de Compatibilidade ─────────────────────────────────────
   static const Color primary = brand;

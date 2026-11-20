@@ -139,7 +139,7 @@ void main() {
         unawaited(reportFlutterErrorToCrashlytics(details));
       }
       return Material(
-        color: const Color(0xFF080C10),
+        color: EagleTokens.darkBg,
         child: Builder(
           builder: (context) {
             return Center(

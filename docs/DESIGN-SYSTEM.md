@@ -62,5 +62,4 @@ Oito papéis, cada um com tamanho e peso fixos. A cor é de quem chama.
 
 ## Pendências da marca no app
 
-- Trocar `assets/images/` e os ícones nativos pelo logo v2 de [`brand/kit/`](../brand/kit/).
-- Migrar o fundo escuro (`#0B0E14` com brilhos) para o chão petróleo do guia de marca.
+- Fundo claro ainda usa o mesh (`#E4EFF1 → #F4F6F8 → #EDF2F4`) com brilhos; o guia pede paper `#F4F6F8` sólido.

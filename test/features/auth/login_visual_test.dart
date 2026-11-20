@@ -230,7 +230,7 @@ void main() {
 
   group('contraste', () {
     const fundoClaro = Color(0xFF0D2830); // ponto mais claro do fundo
-    const fundoEscuro = Color(0xFF0B0E14);
+    const fundoEscuro = EagleTokens.darkBg;
 
     Color sobre(Color fundo, Color frente) => Color.alphaBlend(frente, fundo);
 

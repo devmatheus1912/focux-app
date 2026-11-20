@@ -4,7 +4,10 @@ import '../theme/brand_palette.dart';
 import '../theme/brand_tint.dart';
 import '../theme/tokens_strip.dart';
 
-/// Shared cinematic mesh — TOKENS STRIP Liquid Glass backdrop (sem grade).
+/// Fundo compartilhado das páginas.
+///
+/// No escuro é o chão petróleo sólido do guia de marca (sem brilhos); só a
+/// marca própria do personal com estilo Cinematográfico tinge o degradê.
 class CinematicMeshBackground extends StatelessWidget {
   const CinematicMeshBackground({
     super.key,
@@ -41,8 +44,8 @@ class CinematicMeshBackground extends StatelessWidget {
       TokensStrip.lightMeshC,
     ];
     final malhaEscura = [
-      const Color(0xFF0D2830),
-      const Color(0xFF0B0E14),
+      TokensStrip.cinematicBg,
+      TokensStrip.cinematicBg,
       TokensStrip.cinematicBg,
     ];
     final malha = tinge
@@ -61,9 +64,10 @@ class CinematicMeshBackground extends StatelessWidget {
         ]
         : (isLight ? malhaClara : malhaEscura);
     final reduceMotion = TokensStrip.prefersReducedMotion(context);
-    final liso = flatBackground || reduceMotion;
-    final comBrilhoCanto = showCornerGlow && !reduceMotion;
-    final comBrilhoCentro = showCenterGlow && !reduceMotion;
+    // Escuro: chão sólido, sem manchas de luz (guia de marca, regra de fundos).
+    final liso = flatBackground || reduceMotion || (!isLight && !tinge);
+    final comBrilhoCanto = showCornerGlow && !reduceMotion && isLight;
+    final comBrilhoCentro = showCenterGlow && !reduceMotion && isLight;
 
     return Stack(
       fit: StackFit.expand,

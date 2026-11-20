@@ -4,9 +4,10 @@ import 'fx_cached_network_image.dart';
 
 /// Logo oficial Focux Personal — variantes prontas para fundo claro e escuro.
 ///
-/// Assets baixados do Drive (não alterar pixels):
-/// - [assetLight] — `Logo-oficial-ParaFundoClaro.png`
-/// - [assetDark] — `Logo-oficial-ParaFundoEscuro.png`
+/// PNGs gerados do logo v2 em `brand/kit/svg` (não editar à mão):
+/// - [assetLight] — `focux-logo-empilhado.svg`
+/// - [assetDark] — `focux-logo-empilhado-escuro.svg` (petróleo `#0E93A8`)
+/// - [assetArm] / [assetArmDark] — `focux-simbolo.svg` / `focux-simbolo-escuro.svg`
 class FocuxOfficialLogo extends StatelessWidget {
   const FocuxOfficialLogo({
     super.key,
@@ -48,8 +49,11 @@ class FocuxOfficialLogo extends StatelessWidget {
   /// Logo para fundos escuros (modo dark / splash cinematográfico).
   static const assetDark = 'assets/images/logo_oficial_fundo_escuro.png';
 
-  /// Ícone app — só o braço (sem wordmark FOCUX PERSONAL).
+  /// Ícone app — só o braço (sem wordmark FOCUX PERSONAL), para fundo claro.
   static const assetArm = 'assets/images/logo_icon_arm.png';
+
+  /// Braço para fundo escuro: o petróleo `#0B4F5C` some no chão escuro.
+  static const assetArmDark = 'assets/images/logo_icon_arm_escuro.png';
 
   /// Alias light — preferir [assetOf] / [assetFor].
   static const asset = assetLight;
@@ -62,6 +66,9 @@ class FocuxOfficialLogo extends StatelessWidget {
   final Alignment alignment;
 
   static String assetFor({required bool dark}) => dark ? assetDark : assetLight;
+
+  static String armOf(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark ? assetArmDark : assetArm;
 
   static String assetOf(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
@@ -85,7 +92,7 @@ class FocuxOfficialLogo extends StatelessWidget {
         child: Padding(
           padding: EdgeInsets.all(inset),
           child: Image.asset(
-            assetArm,
+            armOf(context),
             fit: BoxFit.contain,
             filterQuality: FilterQuality.high,
             gaplessPlayback: true,
@@ -141,7 +148,7 @@ class FocuxOfficialLogo extends StatelessWidget {
   Widget _fallbackAsset(BuildContext context) {
     final assetPath = assetOf(context);
     if (variant == FocuxLogoVariant.icon) {
-      return Image.asset(assetArm, fit: BoxFit.contain);
+      return Image.asset(armOf(context), fit: BoxFit.contain);
     }
     return Image.asset(
       assetPath,
