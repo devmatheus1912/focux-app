@@ -49,6 +49,10 @@ String textoDoTeste(ResultadoDoTeste r) => switch (r) {
   ResultadoDoTeste.falhou => 'Falhou. Tente de novo.',
 };
 
+/// Sem token no aparelho e o motivo que o registro devolveu.
+String textoDoTesteSemToken(String motivo) =>
+    'Este celular não registrou as notificações ($motivo).';
+
 class NotificacoesPreferenciasRepository {
   NotificacoesPreferenciasRepository(this._dio);
 

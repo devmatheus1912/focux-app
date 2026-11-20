@@ -28,10 +28,17 @@ import '../data/notificacoes_preferencias_repository.dart';
 /// escolhas por tipo (o push desliga; o sino continua), som do descanso e
 /// notificação de teste. Nos dois perfis.
 class NotificacoesAjustesScreen extends ConsumerStatefulWidget {
-  const NotificacoesAjustesScreen({super.key, this.repositorio});
+  const NotificacoesAjustesScreen({
+    super.key,
+    this.repositorio,
+    this.registrarAparelho,
+  });
 
   /// Trocável em teste.
   final NotificacoesPreferenciasRepository? repositorio;
+
+  /// Registra o aparelho antes do teste; nulo = deu certo, senão o motivo.
+  final Future<String?> Function()? registrarAparelho;
 
   @override
   ConsumerState<NotificacoesAjustesScreen> createState() =>
@@ -119,9 +126,16 @@ class _NotificacoesAjustesScreenState
   Future<void> _testar() async {
     setState(() => _testando = true);
     try {
+      // O teste registra o aparelho antes: sem token, diz por quê.
+      final motivo =
+          await (widget.registrarAparelho ??
+              () => FcmService.registrarAgora(ref.read(apiClientProvider)))();
       final r = await _repo.testar();
       if (!mounted) return;
-      final texto = textoDoTeste(r);
+      final texto =
+          r == ResultadoDoTeste.semAparelho && motivo != null
+              ? textoDoTesteSemToken(motivo)
+              : textoDoTeste(r);
       r == ResultadoDoTeste.enviado
           ? FeedbackHelper.showSuccess(context, texto)
           : FeedbackHelper.showWarn(context, texto);
