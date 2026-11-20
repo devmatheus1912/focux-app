@@ -19,26 +19,18 @@ import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../data/notificacoes_preferencias_repository.dart';
 
 /// Perfil > Notificações (SPEC-notificacoes, 20/11): estado do aparelho,
-/// escolhas por tipo (o push desliga; o sino continua), som do descanso e
-/// notificação de teste. Nos dois perfis.
+/// escolhas por tipo (o push desliga; o sino continua) e som do descanso.
+/// Nos dois perfis.
 class NotificacoesAjustesScreen extends ConsumerStatefulWidget {
-  const NotificacoesAjustesScreen({
-    super.key,
-    this.repositorio,
-    this.registrarAparelho,
-  });
+  const NotificacoesAjustesScreen({super.key, this.repositorio});
 
   /// Trocável em teste.
   final NotificacoesPreferenciasRepository? repositorio;
-
-  /// Registra o aparelho antes do teste; nulo = deu certo, senão o motivo.
-  final Future<String?> Function()? registrarAparelho;
 
   @override
   ConsumerState<NotificacoesAjustesScreen> createState() =>
@@ -57,7 +49,6 @@ class _NotificacoesAjustesScreenState
   bool _negado = false;
   Set<String> _canaisDesligados = const {};
   bool _som = true;
-  bool _testando = false;
 
   @override
   void initState() {
@@ -120,34 +111,6 @@ class _NotificacoesAjustesScreenState
       if (!mounted) return;
       setState(() => _itens = antes);
       FeedbackHelper.showError(context, friendlyError(e));
-    }
-  }
-
-  Future<void> _testar() async {
-    setState(() => _testando = true);
-    try {
-      // O teste registra o aparelho antes: sem token, diz por quê.
-      final motivo =
-          await (widget.registrarAparelho ??
-              () => FcmService.registrarAgora(ref.read(apiClientProvider)))();
-      final r = await _repo.testar();
-      if (!mounted) return;
-      final texto =
-          r == ResultadoDoTeste.semAparelho && motivo != null
-              ? textoDoTesteSemToken(motivo)
-              : textoDoTeste(r);
-      r == ResultadoDoTeste.enviado
-          ? FeedbackHelper.showSuccess(context, texto)
-          : FeedbackHelper.showWarn(context, texto);
-    } catch (_) {
-      if (mounted) {
-        FeedbackHelper.showError(
-          context,
-          textoDoTeste(ResultadoDoTeste.falhou),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _testando = false);
     }
   }
 
@@ -244,13 +207,6 @@ class _NotificacoesAjustesScreenState
               ],
             ),
           ],
-          const SizedBox(height: FxSettingsLayout.groupGap),
-          FxTonalButton(
-            label: _testando ? 'Enviando…' : 'Enviar notificação de teste',
-            icon: FxIcons.enviar,
-            expanded: true,
-            onPressed: _testando ? null : _testar,
-          ),
         ],
       ),
     );

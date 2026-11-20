@@ -49,14 +49,4 @@ void main() {
       'financeiro',
     );
   });
-
-  test('resultado do teste vira texto para a pessoa', () {
-    expect(resultadoDoTeste('ENVIADO'), ResultadoDoTeste.enviado);
-    expect(resultadoDoTeste('SEM_TOKEN'), ResultadoDoTeste.semAparelho);
-    expect(resultadoDoTeste('DESLIGADO'), ResultadoDoTeste.falhou);
-    expect(
-      textoDoTeste(ResultadoDoTeste.semAparelho),
-      contains('não tem notificações ativas'),
-    );
-  });
 }

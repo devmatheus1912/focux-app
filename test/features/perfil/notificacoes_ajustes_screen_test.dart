@@ -13,8 +13,6 @@ class _RepoFalso extends NotificacoesPreferenciasRepository {
   _RepoFalso() : super(Dio());
 
   final salvos = <String, bool>{};
-  var testes = 0;
-  ResultadoDoTeste resultado = ResultadoDoTeste.enviado;
 
   List<PreferenciaDeNotificacao> _itens() => [
     PreferenciaDeNotificacao(
@@ -47,15 +45,9 @@ class _RepoFalso extends NotificacoesPreferenciasRepository {
     salvos[item.tipo] = item.ligado;
     return _itens();
   }
-
-  @override
-  Future<ResultadoDoTeste> testar() async {
-    testes++;
-    return resultado;
-  }
 }
 
-Future<void> _abrir(WidgetTester tester, _RepoFalso repo, {String? motivo}) async {
+Future<void> _abrir(WidgetTester tester, _RepoFalso repo) async {
   tester.view.physicalSize = const Size(1170, 2600);
   tester.view.devicePixelRatio = 3;
   addTearDown(tester.view.reset);
@@ -65,10 +57,7 @@ Future<void> _abrir(WidgetTester tester, _RepoFalso repo, {String? motivo}) asyn
         locale: const Locale('pt'),
         supportedLocales: S.supportedLocales,
         localizationsDelegates: S.localizationsDelegates,
-        home: NotificacoesAjustesScreen(
-          repositorio: repo,
-          registrarAparelho: () async => motivo,
-        ),
+        home: NotificacoesAjustesScreen(repositorio: repo),
       ),
     ),
   );
@@ -115,30 +104,8 @@ void main() {
     expect(await PreferenciasDoDescanso.avisoLigado(), isFalse);
   });
 
-  testWidgets('notificação de teste diz o resultado', (tester) async {
-    final repo = _RepoFalso()..resultado = ResultadoDoTeste.semAparelho;
-    await _abrir(tester, repo);
-    await tester.ensureVisible(find.text('Enviar notificação de teste'));
-    await tester.tap(find.text('Enviar notificação de teste'));
-    await tester.pump(const Duration(milliseconds: 300));
-    expect(repo.testes, 1);
-    expect(find.textContaining('não tem notificações ativas'), findsOneWidget);
-    await tester.pump(const Duration(seconds: 5));
-  });
-
-  testWidgets('teste sem token mostra o motivo do registro', (tester) async {
-    final repo = _RepoFalso()..resultado = ResultadoDoTeste.semAparelho;
-    await _abrir(tester, repo, motivo: 'sem token APNs (início: pedindo o token)');
-    await tester.ensureVisible(find.text('Enviar notificação de teste'));
-    await tester.tap(find.text('Enviar notificação de teste'));
-    await tester.pump(const Duration(milliseconds: 300));
-    expect(
-      find.text(
-        'Este celular não registrou as notificações '
-        '(sem token APNs (início: pedindo o token)).',
-      ),
-      findsOneWidget,
-    );
-    await tester.pump(const Duration(seconds: 5));
+  testWidgets('sem botão de teste (saiu depois do TestFlight)', (tester) async {
+    await _abrir(tester, _RepoFalso());
+    expect(find.text('Enviar notificação de teste'), findsNothing);
   });
 }

@@ -33,26 +33,6 @@ class PreferenciaDeNotificacao {
       );
 }
 
-/// Resultado do "Enviar notificação de teste".
-enum ResultadoDoTeste { enviado, semAparelho, falhou }
-
-ResultadoDoTeste resultadoDoTeste(String? bruto) => switch (bruto) {
-  'ENVIADO' => ResultadoDoTeste.enviado,
-  'SEM_TOKEN' || 'SILENCIADO' => ResultadoDoTeste.semAparelho,
-  _ => ResultadoDoTeste.falhou,
-};
-
-String textoDoTeste(ResultadoDoTeste r) => switch (r) {
-  ResultadoDoTeste.enviado => 'Enviada. Deve chegar em alguns segundos.',
-  ResultadoDoTeste.semAparelho =>
-    'Seu aparelho não tem notificações ativas. Ative e tente de novo.',
-  ResultadoDoTeste.falhou => 'Falhou. Tente de novo.',
-};
-
-/// Sem token no aparelho e o motivo que o registro devolveu.
-String textoDoTesteSemToken(String motivo) =>
-    'Este celular não registrou as notificações ($motivo).';
-
 class NotificacoesPreferenciasRepository {
   NotificacoesPreferenciasRepository(this._dio);
 
@@ -75,13 +55,6 @@ class NotificacoesPreferenciasRepository {
       },
     );
     return _itens(r.data);
-  }
-
-  Future<ResultadoDoTeste> testar() async {
-    final r = await _dio.post('/api/notificacoes/teste');
-    return resultadoDoTeste(
-      (r.data as Map<String, dynamic>)['resultado'] as String?,
-    );
   }
 
   static List<PreferenciaDeNotificacao> _itens(Object? data) =>

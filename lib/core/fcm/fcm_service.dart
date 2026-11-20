@@ -35,12 +35,7 @@ class FcmService {
   /// Chamado quando chega FCM `type=plan_sync` (revogação/atualização de tier).
   static PlanSyncHandler? onPlanSync;
 
-  /// Onde o registro do aparelho está: o teste em Perfil > Notificações
-  /// mostra isso quando o push não tem token.
-  static String _etapa = 'início não rodou';
-
   static Future<void> init(ApiClient apiClient) async {
-    _etapa = 'iniciando';
     final messaging = FirebaseMessaging.instance;
 
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
@@ -59,7 +54,6 @@ class FcmService {
       _avisarEmPrimeiroPlano(message);
     });
     FirebaseMessaging.onMessageOpenedApp.listen(_handleNotificationTap);
-    _etapa = 'mensagem inicial';
     try {
       final initial = await messaging.getInitialMessage();
       if (initial != null) _handleNotificationTap(initial);
@@ -69,7 +63,6 @@ class FcmService {
 
     // Permissão só pós-login (requestPermissionIfNeeded); quem já concedeu
     // segue recebendo com o token registrado abaixo.
-    _etapa = 'opções de exibição';
     try {
       // iOS só mostra banner com o app aberto se pedirmos.
       await messaging.setForegroundNotificationPresentationOptions(
@@ -85,9 +78,7 @@ class FcmService {
       unawaited(_registrarToken(newToken, apiClient));
       unawaited(IntercomService.enviarTokenPush(tokenFcm: newToken));
     });
-    _etapa = 'pedindo o token';
     final token = await _tokenDoAparelho();
-    _etapa = token == null ? 'sem token' : 'token obtido';
     if (token != null) await _registrarToken(token, apiClient);
     // No iOS o Intercom usa o token APNs, que pode existir sem o do FCM.
     unawaited(IntercomService.enviarTokenPush(tokenFcm: token));
@@ -190,42 +181,6 @@ class FcmService {
       await apiClient.dio.post('/api/fcm/token', data: {'token': token});
     } catch (e) {
       if (kDebugMode) debugPrint('[Focux] FCM register error: $e');
-    }
-  }
-
-  /// Registra o aparelho agora (botão de teste). Nulo quando deu certo;
-  /// senão o motivo, com a etapa em que o início parou.
-  static Future<String?> registrarAgora(ApiClient apiClient) async {
-    try {
-      if (await SecureStorage.getToken() == null) return 'sem sessão';
-      final motivos = <String>[];
-      final messaging = FirebaseMessaging.instance;
-      final token = await obterTokenFcm(
-        fcm: messaging.getToken,
-        apns:
-            defaultTargetPlatform == TargetPlatform.iOS
-                ? messaging.getAPNSToken
-                : null,
-        avisar: motivos.add,
-        tentativas: 5,
-        limite: const Duration(seconds: 10),
-      );
-      if (token == null) {
-        final motivo =
-            '${motivos.isEmpty ? 'sem token' : motivos.first} (início: $_etapa)';
-        unawaited(
-          Sentry.captureMessage(
-            'Push sem token no teste: $motivo',
-            level: SentryLevel.warning,
-          ),
-        );
-        return motivo;
-      }
-      await apiClient.dio.post('/api/fcm/token', data: {'token': token});
-      _etapa = 'registrado';
-      return null;
-    } catch (e) {
-      return 'registro: ${motivoDoErro(e)} (início: $_etapa)';
     }
   }
 
