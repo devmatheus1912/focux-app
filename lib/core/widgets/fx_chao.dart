@@ -18,10 +18,16 @@ class FxChao extends StatelessWidget {
   static Color corDe(BuildContext context, {bool forceDark = false}) {
     final claro =
         !forceDark && Theme.of(context).brightness == Brightness.light;
-    final base = claro ? TokensStrip.paper : TokensStrip.cinematicBg;
     final marca = BrandTint.maybeOf(context);
-    if (marca == null || !marca.estilo.tingeFundo) return base;
-    return Color.lerp(base, marca.primaria, claro ? 0.06 : 0.18)!;
+    final tinge = marca != null && marca.estilo.tingeFundo;
+    return corPara(escuro: !claro, tinta: tinge ? marca.primaria : null);
+  }
+
+  /// Cor do chão sem contexto: [tinta] é a primária da marca Cinematográfica.
+  static Color corPara({required bool escuro, Color? tinta}) {
+    final base = escuro ? TokensStrip.cinematicBg : TokensStrip.paper;
+    if (tinta == null) return base;
+    return Color.lerp(base, tinta, escuro ? 0.18 : 0.06)!;
   }
 
   @override
