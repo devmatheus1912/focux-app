@@ -1,31 +1,7 @@
 part of 'exercicios_list_screen.dart';
 
 extension on _ExerciciosListScreenState {
-  Future<void> _criarMeu(Exercicio exercicio) async {
-    final grupo = exercicio.grupoMuscularPrimario;
-    if (grupo == null) {
-      FeedbackHelper.showError(context, 'Esse exercício não tem grupo muscular.');
-      return;
-    }
-    try {
-      final criado = await ref.read(exercicioRepositoryProvider).criar(
-        nome: exercicio.nome,
-        grupoMuscularPrimario: grupo,
-      );
-      if (!mounted) return;
-      await context.push('/exercicios/${criado.id}');
-      _fetchPage(reset: true);
-    } catch (error) {
-      if (!mounted) return;
-      FeedbackHelper.showError(context, 'Não criou o exercício.');
-    }
-  }
-
-  Widget _libraryBody({
-    required bool isDark,
-    required Color primary,
-    required List<Exercicio> visible,
-  }) {
+  Widget _libraryBody({required bool isDark, required Color primary}) {
     if (_loading) return const SkeletonList(count: 6);
     if (_error != null) {
       return FxErrorState(
@@ -39,86 +15,70 @@ extension on _ExerciciosListScreenState {
     return RefreshIndicator(
       color: primary,
       onRefresh: () => _fetchPage(reset: true),
-      child: _libraryScroll(primary: primary, visible: visible),
+      child: _libraryScroll(),
     );
   }
 
-  Widget _libraryScroll({
-    required Color primary,
-    required List<Exercicio> visible,
-  }) {
-    if (_totalElements == 0 && !_filter.hasActive && _aba == 'MEUS') {
-      return ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        children: [
-          FxEmptyState(
-            icon: FxIcons.treino,
-            title: 'Nenhum exercício seu ainda.',
-            subtitle:
-                widget.embedded
-                    ? 'Os exercícios que você criar aparecem aqui.'
-                    : null,
-            // Embutido: o botão fixo "Novo exercício" já é a ação.
-            action:
-                widget.embedded
-                    ? null
-                    : FxEmptyAction(
-                      label: 'Criar exercício',
-                      onTap: _novoExercicio,
-                    ),
+  Widget _vazio(FxEmptyState estado) => ListView(
+    physics: const AlwaysScrollableScrollPhysics(),
+    children: [estado],
+  );
+
+  Widget _libraryScroll() {
+    if (_items.isEmpty && _filter.hasActive) {
+      return _vazio(
+        FxEmptyState(
+          icon: FxIcons.buscar,
+          title: 'Nenhum exercício encontrado',
+          subtitle: 'Mude a busca ou os filtros para ver outros exercícios.',
+          action: FxEmptyAction(
+            label: 'Limpar filtros',
+            secondary: true,
+            onTap: () => _mudarFiltro(const ExerciciosUiFilter()),
           ),
-        ],
+        ),
       );
     }
-    if (_totalElements == 0 && !_filter.hasActive) {
-      return ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        children: [
+    if (_items.isEmpty) {
+      return switch (_aba) {
+        ExerciciosAba.meus => _vazio(
           FxEmptyState(
-            icon: FxIcons.treino,
+            icon: FxIcons.video,
+            title: exerciciosMeusVazioTitulo,
+            subtitle: exerciciosMeusVazioApoio,
+            action: FxEmptyAction(
+              label: 'Novo exercício',
+              onTap: _novoExercicio,
+            ),
+          ),
+        ),
+        ExerciciosAba.favoritos => _vazio(
+          const FxEmptyState(
+            icon: FxIcons.estrela,
+            title: 'Nenhum favorito ainda',
+            subtitle: 'Segure um exercício da lista para favoritar.',
+          ),
+        ),
+        ExerciciosAba.biblioteca => _vazio(
+          FxEmptyState(
+            icon: FxIcons.livro,
             title: 'Sua biblioteca está vazia',
             subtitle:
-                'Carregue a biblioteca curada ou cadastre o primeiro exercício.',
+                'Carregue a biblioteca da Focux, com vídeo em cada exercício.',
             action: FxEmptyAction(
               label: 'Carregar biblioteca',
-              onTap: () async {
-                final imported = await context.push<bool>(
-                  '/exercicios/biblioteca-wizard',
-                );
-                if (imported == true) _refresh();
-              },
+              onTap: _abrirBiblioteca,
             ),
           ),
-        ],
-      );
-    }
-    if (visible.isEmpty) {
-      return ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        children: [
-          FxEmptyState(
-            icon: FxIcons.buscar,
-            title: 'Nenhum exercício encontrado',
-            subtitle:
-                'Ajuste os filtros ou a busca para ver outros exercícios.',
-            action: FxEmptyAction(
-              label: 'Limpar filtros',
-              secondary: true,
-              onTap: () {
-                setState(() => _filter = const ExerciciosUiFilter());
-                _fetchPage(reset: true);
-              },
-            ),
-          ),
-        ],
-      );
+        ),
+      };
     }
     return ExerciciosListView(
       controller: _scrollCtrl,
-      exercicios: visible,
+      exercicios: _items,
       selectedIds: _selected,
-      accent: primary,
       loadingMore: _loadingMore,
+      busca: _filter.query,
       onTap: (exercicio) {
         if (_selected.isNotEmpty) {
           setState(() {
@@ -130,11 +90,9 @@ extension on _ExerciciosListScreenState {
         }
         context.push('/exercicios/${exercicio.id}');
       },
-      onLongPress: (exercicio) => setState(() => _selected.add(exercicio.id)),
       onFavorite: _favorite,
-      onUploadVideo: _uploadVideo,
-      onDelete: _deleteOne,
-      onCriarMeu: _criarMeu,
+      onMais: _acoes,
+      onPreview: (e) => showExerciseMediaPreview(context, exercicio: e),
     );
   }
 }

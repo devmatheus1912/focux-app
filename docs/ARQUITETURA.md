@@ -49,6 +49,7 @@ Cada feature segue a mesma divisão: `screens/`, `widgets/`, `utils/`, `models/`
 - Token em secure storage; JWT renovado pelo cliente de API.
 - Sentry sem corpo de requisição (`MaxRequestBodySize.never`), sem argumentos de rota e sem token de ativação. Amplitude bloqueia texto livre, ids, e-mail e token (`amplitudeSafeProps`); o usuário é identificado só pelo `sub` do token.
 - Nenhum dado vai para a IA sem aceite (`IA_TERCEIROS`, `IA_COPILOTO`, `SAUDE_IA`), revogável em Perfil > Privacidade.
+- Notificações do aparelho em `core/notificacoes/` (canais do Android por tipo, iguais ao `channel_id` do push; aviso do fim do descanso) e versão do app em `core/versao/` (`X-App-Version`/`X-App-Platform` em toda requisição, `AtualizacaoScope` com folha e bloqueio).
 - Saúde (Apple Saúde / Health Connect) por `core/health/health_service.dart`. No Android não há leitura de HRV (recusada pelo Google Play).
 
 ## Testes

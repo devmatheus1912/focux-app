@@ -29,6 +29,7 @@ import 'app_router_gates.dart';
 import '../widgets/fx_route_chrome.dart';
 import 'fx_lazy_shell_container.dart';
 import '../../features/dashboard/screens/meu_progresso_screen.dart';
+import '../../features/perfil/screens/notificacoes_ajustes_screen.dart';
 
 /// Aluno shell and push routes.
 List<RouteBase> buildAlunoRoutes({
@@ -180,6 +181,14 @@ List<RouteBase> buildAlunoRoutes({
                     child: AlunoFeedbackVideoScreen(),
                   ),
                 ),
+      ),
+      // Perfil > Notificações, nos dois perfis (rota fora dos shells).
+      GoRoute(
+        path: '/perfil/notificacoes',
+        parentNavigatorKey: rootNavigatorKey,
+        builder:
+            (context, state) =>
+                const FxRouteChrome(child: NotificacoesAjustesScreen()),
       ),
       GoRoute(
         path: '/aluno/progresso',

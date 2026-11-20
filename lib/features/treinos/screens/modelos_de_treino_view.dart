@@ -2,14 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/analytics/analytics_service.dart';
-import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_choice_strip.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../exercicios/screens/exercicios_list_screen.dart';
-import '../constants/treinos_layout.dart';
+import '../widgets/exercicios_aba_treinos.dart';
 import '../providers/ficha_modelos_provider.dart';
 import '../widgets/ficha_modelos_aba.dart';
 import '../widgets/modelo_acoes.dart';
@@ -30,6 +28,7 @@ class _ModelosDeTreinoViewState extends ConsumerState<ModelosDeTreinoView> {
   static const _semanas = 0;
   static const _exercicios = 1;
   var _aba = _semanas;
+  String? _resumoExercicios; // topo da aba Exercícios, vindo da lista
 
   @override
   void initState() {
@@ -54,13 +53,18 @@ class _ModelosDeTreinoViewState extends ConsumerState<ModelosDeTreinoView> {
   Widget build(BuildContext context) {
     final s = S.of(context);
     final modelos = ref.watch(fichaModelosProvider).asData?.value;
+    // O topo segue a aba: em Exercícios conta exercícios, nunca modelos.
+    final emExercicios = _aba == _exercicios;
+    final titulo = emExercicios ? s.modelosAbaExercicios : s.treinosModelosTitulo;
     return fxScreenA11yScope(
-      label: s.treinosModelosTitulo,
+      label: titulo,
       child: FxShellScaffold(
         comFundo: true,
         appBar: FxShellAppBar(
-          title: s.treinosModelosTitulo,
-          subtitle: modelos == null ? null : s.modelosContagemTopo(modelos.length),
+          title: titulo,
+          subtitle: emExercicios
+              ? _resumoExercicios
+              : (modelos == null ? null : s.modelosContagemTopo(modelos.length)),
           actions: [
             FxHelpIconButton(
               tooltip: 'Como usar os treinos',
@@ -76,20 +80,9 @@ class _ModelosDeTreinoViewState extends ConsumerState<ModelosDeTreinoView> {
         ),
         body: _aba == _semanas
             ? FichaModelosAba(abas: _abas(s))
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                      TreinosLayout.screenPadding,
-                      TokensStrip.s2,
-                      TreinosLayout.screenPadding,
-                      TokensStrip.s2,
-                    ),
-                    child: _abas(s),
-                  ),
-                  const Expanded(child: ExerciciosListScreen(embedded: true)),
-                ],
+            : ExerciciosAbaTreinos(
+                abas: _abas(s),
+                onResumoTopo: (r) => setState(() => _resumoExercicios = r),
               ),
       ),
     );

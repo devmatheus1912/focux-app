@@ -40,6 +40,9 @@ class Exercicio {
   final String? editorialNotes;
   final DateTime? editorialReviewedAt;
 
+  /// Só no detalhe: em quantas fichas o exercício está (nulo nas listas).
+  final int? usadoEmFichas;
+
   Exercicio({
     required this.id,
     required this.nome,
@@ -73,6 +76,7 @@ class Exercicio {
     this.editorialStatus = 'PENDING_REVIEW',
     this.editorialNotes,
     this.editorialReviewedAt,
+    this.usadoEmFichas,
   });
 
   Exercicio copyWith({bool? favoritado}) {
@@ -109,6 +113,7 @@ class Exercicio {
       editorialStatus: editorialStatus,
       editorialNotes: editorialNotes,
       editorialReviewedAt: editorialReviewedAt,
+      usadoEmFichas: usadoEmFichas,
     );
   }
 
@@ -163,6 +168,7 @@ class Exercicio {
         json['editorialReviewedAt'] == null
             ? null
             : DateTime.tryParse(json['editorialReviewedAt'].toString()),
+    usadoEmFichas: (json['usadoEmFichas'] as num?)?.toInt(),
   );
 
   bool get hasPlayableMedia =>
@@ -504,13 +510,11 @@ class ExercicioRepository {
       queryParameters: queryParams,
     );
     final data = response.data as Map<String, dynamic>;
-    final list = (data['content'] as List? ?? const [])
-        .map((e) => Exercicio.fromJson(e as Map<String, dynamic>))
-        .toList();
-    return ExercicioPage(
-      content: list,
-      meta: ExercicioPageMeta.fromJson(data),
-    );
+    final list =
+        (data['content'] as List? ?? const [])
+            .map((e) => Exercicio.fromJson(e as Map<String, dynamic>))
+            .toList();
+    return ExercicioPage(content: list, meta: ExercicioPageMeta.fromJson(data));
   }
 
   Future<ExercicioPickerPage> listarPickerPagina({
@@ -556,9 +560,10 @@ class ExercicioRepository {
       queryParameters: queryParams,
     );
     final data = response.data as Map<String, dynamic>;
-    final list = (data['content'] as List? ?? const [])
-        .map((e) => exercicioFromPickerJson(e as Map<String, dynamic>))
-        .toList();
+    final list =
+        (data['content'] as List? ?? const [])
+            .map((e) => exercicioFromPickerJson(e as Map<String, dynamic>))
+            .toList();
     final pageMeta = data['page'] as Map<String, dynamic>? ?? const {};
     return ExercicioPickerPage(
       content: list,
@@ -568,9 +573,7 @@ class ExercicioRepository {
 
   Future<ExercicioPickerStats> buscarPickerStats() async {
     final response = await _dio.get('/api/exercicios/picker/stats');
-    return ExercicioPickerStats.fromJson(
-      response.data as Map<String, dynamic>,
-    );
+    return ExercicioPickerStats.fromJson(response.data as Map<String, dynamic>);
   }
 
   Future<Exercicio> buscar(int id) async {
@@ -713,22 +716,6 @@ class ExercicioRepository {
     return Exercicio.fromJson(response.data as Map<String, dynamic>);
   }
 
-  Future<Exercicio> uploadVideo({
-    required int id,
-    required List<int> bytes,
-    required String filename,
-  }) async {
-    final form = FormData.fromMap({
-      'file': MultipartFile.fromBytes(
-        bytes,
-        filename: filename,
-        contentType: _videoContentType(filename),
-      ),
-    });
-    final response = await _dio.post('/api/exercicios/$id/video', data: form);
-    return Exercicio.fromJson(response.data as Map<String, dynamic>);
-  }
-
   Future<Exercicio> removerVideo({required int id}) async {
     final response = await _dio.delete('/api/exercicios/$id/video');
     return Exercicio.fromJson(response.data as Map<String, dynamic>);
@@ -766,19 +753,41 @@ class ExercicioRepository {
     );
   }
 
+  /// Sobe o vídeo do exercício. [onProgresso] recebe de 0 a 1 enquanto o
+  /// arquivo sobe; depois o servidor converte o vídeo antes de responder
+  /// (conversão síncrona no Cloudinary), por isso a espera da resposta é
+  /// maior que a dos outros envios.
   Future<Exercicio> uploadVideoExercicio(
     int exercicioId,
-    String filePath,
-  ) async {
+    String filePath, {
+    void Function(double progresso)? onProgresso,
+    CancelToken? cancelToken,
+  }) async {
+    final filename = filePath.split(RegExp(r'[\\/]')).last;
     final form = FormData.fromMap({
-      'file': await MultipartFile.fromFile(filePath),
+      'file': await MultipartFile.fromFile(
+        filePath,
+        filename: filename,
+        contentType: _videoContentType(filename),
+      ),
     });
     final response = await _dio.post(
       '/api/exercicios/$exercicioId/video',
       data: form,
+      cancelToken: cancelToken,
+      options: Options(receiveTimeout: videoRespostaTimeout),
+      onSendProgress:
+          onProgresso == null
+              ? null
+              : (enviado, total) {
+                if (total > 0) onProgresso(enviado / total);
+              },
     );
     return Exercicio.fromJson(response.data as Map<String, dynamic>);
   }
+
+  /// Upload terminado, o servidor ainda converte: vídeo de 60 s passa de 2 min.
+  static const videoRespostaTimeout = Duration(minutes: 5);
 
   DioMediaType _videoContentType(String filename) {
     final ext = filename.toLowerCase().split('.').lastOrNull ?? '';

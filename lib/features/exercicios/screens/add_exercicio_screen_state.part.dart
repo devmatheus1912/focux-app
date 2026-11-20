@@ -33,8 +33,18 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
   String? _selectedSetupLabel = 'Academia';
 
   /// Vídeo escolhido na criação (opcional); sobe depois que o exercício existe.
-  String? _videoPath;
+  VideoDoExercicio? _video;
   int? _criadoId;
+
+  /// O sistema ainda entrega o arquivo escolhido (vídeo longo leva segundos).
+  bool _preparandoVideo = false;
+
+  /// Exercício criado, vídeo subindo: [_progressoVideo] de 0 a 1, depois o
+  /// servidor converte. Sair agora cancela pelo [_cancelVideo].
+  bool _enviandoVideo = false;
+  double? _progressoVideo;
+  CancelToken? _cancelVideo;
+  bool _saiuDuranteEnvio = false;
 
   // Baseline for edit dirty-check (filled after prefill).
   String _baselineNome = '';
@@ -68,7 +78,8 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
           _unilateral != _baselineUnilateral ||
           _showGuidance != _baselineShowGuidance;
     }
-    return _nomeCtrl.text.trim().isNotEmpty ||
+    return _video != null ||
+        _nomeCtrl.text.trim().isNotEmpty ||
         _descricaoCtrl.text.trim().isNotEmpty ||
         _errosComunsCtrl.text.trim().isNotEmpty ||
         _contraindicacoesCtrl.text.trim().isNotEmpty ||
@@ -85,6 +96,21 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
 
   Future<void> _cancel() async {
     FxKeyboardDismissScope.dismiss();
+    if (_enviandoVideo) {
+      final ficar = await showFxConfirmSheetOuFechar(
+        context,
+        title: exerciseVideoSairTitulo(),
+        message: exerciseVideoSairTexto(),
+        icon: FxIcons.video,
+        confirmLabel: exerciseVideoSairFicar(),
+        cancelLabel: exerciseVideoSairConfirmar(),
+      );
+      if (ficar != false || !mounted || !_enviandoVideo) return;
+      // O envio cancelado devolve o exercício (já criado) a quem abriu.
+      _saiuDuranteEnvio = true;
+      _cancelVideo?.cancel();
+      return;
+    }
     if (_dirty) {
       final ok = await showFxConfirmSheet(
         context,
@@ -228,31 +254,36 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
         );
         ref.invalidate(exercicioProvider(widget.exercicioId!));
       } else {
-        _criadoId = (await repo.criar(
-          nome: payload['nome']!,
-          descricao: payload['descricao'],
-          musculoAlvo: payload['musculoAlvo'],
-          categoria: payload['categoria'],
-          equipamento: payload['equipamento'],
-          nivel: payload['nivel'],
-          mecanica: payload['mecanica'],
-          modalidade: _modalidade,
-          padraoMovimento: _padraoMovimento,
-          grupoMuscularPrimario: _grupoMuscularPrimario,
-          equipamentos: _equipamentos.toList(),
-          espacosCompativeis: _espacos.toList(),
-          dificuldade: _dificuldade,
-          unilateral: _unilateral,
-          errosComuns: payload['errosComuns'],
-          contraindicacoes: payload['contraindicacoes'],
-        )).id;
+        _criadoId =
+            (await repo.criar(
+              nome: payload['nome']!,
+              descricao: payload['descricao'],
+              musculoAlvo: payload['musculoAlvo'],
+              categoria: payload['categoria'],
+              equipamento: payload['equipamento'],
+              nivel: payload['nivel'],
+              mecanica: payload['mecanica'],
+              modalidade: _modalidade,
+              padraoMovimento: _padraoMovimento,
+              grupoMuscularPrimario: _grupoMuscularPrimario,
+              equipamentos: _equipamentos.toList(),
+              espacosCompativeis: _espacos.toList(),
+              dificuldade: _dificuldade,
+              unilateral: _unilateral,
+              errosComuns: payload['errosComuns'],
+              contraindicacoes: payload['contraindicacoes'],
+            )).id;
       }
       ref.invalidate(exerciciosFilteredProvider);
-      if (!_isEdit && _videoPath != null) {
+      if (!_isEdit && _video != null) {
         await _enviarVideoDoNovo();
       }
       if (!mounted) return;
       final criadoId = _criadoId;
+      if (_saiuDuranteEnvio && criadoId != null) {
+        context.pop(ExercicioCriado(id: criadoId, nome: _nomeCtrl.text.trim()));
+        return;
+      }
       if (_isEdit || criadoId == null) {
         context.pop(true);
         return;
@@ -289,27 +320,61 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
     }
   }
 
+  /// Escolher leva tempo com vídeo longo (o sistema copia o arquivo): a
+  /// linha mostra "Preparando vídeo…" e o Cadastrar espera.
   Future<void> _escolherVideo() async {
+    if (_preparandoVideo || _loading) return;
     FxKeyboardDismissScope.dismiss();
-    final path = await escolherVideoDoExercicio(context);
-    if (path == null || !mounted) return;
-    setState(() => _videoPath = path);
+    try {
+      final video = await ref.read(escolherVideoDoExercicioProvider)(
+        context,
+        aoPreparar: () {
+          if (mounted) setState(() => _preparandoVideo = true);
+        },
+      );
+      if (video == null || !mounted) return;
+      setState(() => _video = video);
+    } finally {
+      if (mounted) setState(() => _preparandoVideo = false);
+    }
   }
 
   /// O exercício já existe: sobe o vídeo. Falha não desfaz o cadastro.
   Future<void> _enviarVideoDoNovo() async {
     final id = _criadoId;
-    final path = _videoPath;
-    if (id == null || path == null) return;
+    final video = _video;
+    if (id == null || video == null) return;
+    final cancel = CancelToken();
+    setState(() {
+      _enviandoVideo = true;
+      _progressoVideo = 0;
+      _cancelVideo = cancel;
+    });
     try {
-      await ref.read(exercicioRepositoryProvider).uploadVideoExercicio(id, path);
+      await ref
+          .read(exercicioRepositoryProvider)
+          .uploadVideoExercicio(
+            id,
+            video.path,
+            cancelToken: cancel,
+            onProgresso: (p) {
+              // Um setState por ponto percentual, não por pacote enviado.
+              final antes = ((_progressoVideo ?? 0) * 100).floor();
+              if (mounted && (p * 100).floor() != antes) {
+                setState(() => _progressoVideo = p);
+              }
+            },
+          );
       ref.invalidate(exerciciosFilteredProvider);
     } catch (e) {
+      if (_saiuDuranteEnvio) return;
+      if (mounted) FeedbackHelper.showWarn(context, exerciseVideoNovoFalhou());
+    } finally {
       if (mounted) {
-        FeedbackHelper.showWarn(
-          context,
-          'Exercício criado, mas o vídeo não subiu. Envie depois em Meus exercícios, em "Adicionar vídeo".',
-        );
+        setState(() {
+          _enviandoVideo = false;
+          _cancelVideo = null;
+        });
       }
     }
   }
@@ -374,7 +439,10 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
     final isDark = chrome.isDark;
     final loadingEdit = _isEdit && !_didPrefill && _error == null;
     final canSubmit =
-        !_loading && !loadingEdit && _nomeCtrl.text.trim().isNotEmpty;
+        !_loading &&
+        !loadingEdit &&
+        !_preparandoVideo &&
+        _nomeCtrl.text.trim().isNotEmpty;
     final screenTitle =
         _isEdit ? l10n.editExerciseTitle : l10n.newExerciseTitle;
     final errorTitle =
@@ -386,290 +454,317 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
         dirty: _dirty,
         onCancel: _cancel,
         child: FxShellScaffold(
-        comFundo: true,
-        appBar: FxShellAppBar(
-          title: screenTitle,
-          leadingWidth: 92,
-          leading: _CancelarTexto(onTap: _cancel),
-          actions: [
-            FxHelpIconButton(
-              tooltip: 'Como cadastrar',
-              onTap: () => showNovoExercicioHelpSheet(context),
-            ),
-            const SizedBox(width: TokensStrip.s2),
-          ],
-        ),
-        bottomNavigationBar:
-            loadingEdit
-                ? null
-                : FxFormStickyBar(
-                  child: Semantics(
-                    button: true,
-                    enabled: canSubmit,
-                    label:
-                        _loading
-                            ? (_isEdit
-                                ? l10n.exerciseSavingSemantics
-                                : l10n.exerciseCreatingSemantics)
-                            : canSubmit
-                            ? (_isEdit
-                                ? l10n.exerciseSaveSemantics
-                                : l10n.exerciseRegisterSemantics)
-                            : l10n.exerciseRegisterDisabledSemantics,
-                    child: FxLiquidPrimaryButton(
-                      label: _isEdit ? l10n.save : l10n.exerciseRegister,
-                      loading: _loading,
-                      loadingLabel:
-                          _isEdit
-                              ? l10n.exerciseSaving
-                              : l10n.exerciseCreating,
-                      onPressed: canSubmit ? _submit : null,
+          comFundo: true,
+          appBar: FxShellAppBar(
+            title: screenTitle,
+            leadingWidth: 92,
+            leading: _CancelarTexto(onTap: _cancel),
+            actions: [
+              FxHelpIconButton(
+                tooltip: 'Como cadastrar',
+                onTap: () => showNovoExercicioHelpSheet(context),
+              ),
+              const SizedBox(width: TokensStrip.s2),
+            ],
+          ),
+          bottomNavigationBar:
+              loadingEdit
+                  ? null
+                  : FxFormStickyBar(
+                    child: Semantics(
+                      button: true,
+                      enabled: canSubmit,
+                      label:
+                          _loading
+                              ? (_isEdit
+                                  ? l10n.exerciseSavingSemantics
+                                  : l10n.exerciseCreatingSemantics)
+                              : canSubmit
+                              ? (_isEdit
+                                  ? l10n.exerciseSaveSemantics
+                                  : l10n.exerciseRegisterSemantics)
+                              : l10n.exerciseRegisterDisabledSemantics,
+                      child: FxLiquidPrimaryButton(
+                        label:
+                            _isEdit
+                                ? l10n.save
+                                : _preparandoVideo
+                                ? exerciseVideoEsperando()
+                                : l10n.exerciseRegister,
+                        loading: _loading,
+                        loadingLabel:
+                            _isEdit
+                                ? l10n.exerciseSaving
+                                : _enviandoVideo
+                                ? exerciseVideoEnvioRotulo(_progressoVideo)
+                                : l10n.exerciseCreating,
+                        onPressed: canSubmit ? _submit : null,
+                      ),
                     ),
                   ),
-                ),
-        body:
-            loadingEdit
-                ? const SafeArea(child: SkeletonList(count: 6))
-                : SafeArea(
-                  bottom: false,
-                  child: SingleChildScrollView(
-                    keyboardDismissBehavior:
-                        ScrollViewKeyboardDismissBehavior.onDrag,
-                    padding: const EdgeInsets.fromLTRB(
-                      FxSettingsLayout.pageInset,
-                      6,
-                      FxSettingsLayout.pageInset,
-                      TokensStrip.s4,
-                    ),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          FxStaggerItem(
-                            index: 0,
-                            child: FxSettingsGroup(
-                              header: 'Identidade',
-                              caption:
-                                  'Nome, grupo muscular e como o movimento é prescrito.',
-                              accent: primary,
-                              children: [
-                                AlunoInsetFormField(
-                                  controller: _nomeCtrl,
-                                  label: 'Nome do exercício',
-                                  hint: 'Ex.: Elevação lateral',
-                                  icon: FxIcons.treino,
-                                  rotuloVisivel: true,
-                                  obrigatorio: true,
-                                  validator:
-                                      (v) =>
-                                          v == null || v.trim().isEmpty
-                                              ? 'Informe o nome'
-                                              : null,
-                                ),
-                                if (!_isEdit)
-                                  _QuickSetupStrip(
-                                    selectedLabel: _selectedSetupLabel,
-                                    onSelected: _applyQuickSetup,
-                                  ),
-                                _EnumDropdown<GrupoMuscular>(
-                                  label: 'Grupo principal',
-                                  obrigatorio: true,
-                                  icon: FxIcons.acessibilidade,
-                                  iconColor: soft,
-                                  sheetContextLabel: screenTitle,
-                                  value: _grupoMuscularPrimario,
-                                  values: GrupoMuscular.values,
-                                  labels: TaxonomyLabels.grupo,
-                                  onChanged:
-                                      (v) => setState(
-                                        () => _grupoMuscularPrimario = v,
-                                      ),
-                                  validator:
-                                      (v) =>
-                                          v == null ? 'Escolha o grupo' : null,
-                                ),
-                                _EnumDropdown<Modalidade>(
-                                  label: 'Modalidade',
-                                  icon: FxIcons.alongamento,
-                                  iconColor: soft,
-                                  sheetContextLabel: screenTitle,
-                                  value: _modalidade,
-                                  values: Modalidade.values,
-                                  labels: TaxonomyLabels.modalidade,
-                                  onChanged:
-                                      (v) => setState(() => _modalidade = v),
-                                ),
-                                _EnumDropdown<Dificuldade>(
-                                  label: 'Dificuldade',
-                                  icon: FxIcons.nivel,
-                                  iconColor: soft,
-                                  sheetContextLabel: screenTitle,
-                                  value: _dificuldade,
-                                  values: Dificuldade.values,
-                                  labels: TaxonomyLabels.dificuldade,
-                                  onChanged:
-                                      (v) => setState(() => _dificuldade = v),
-                                ),
-                                _EnumDropdown<PadraoMovimento>(
-                                  label: 'Padrão de movimento',
-                                  icon: FxIcons.trocar,
-                                  iconColor: soft,
-                                  sheetContextLabel: screenTitle,
-                                  value: _padraoMovimento,
-                                  values: PadraoMovimento.values,
-                                  labels: TaxonomyLabels.padrao,
-                                  onChanged:
-                                      (v) =>
-                                          setState(() => _padraoMovimento = v),
-                                ),
-                                FxSettingsTile(
-                                  icon: FxIcons.trocar,
-                                  accent: soft,
-                                  label: 'Unilateral',
-                                  subtitle:
-                                      'Cada lado executado separadamente (ex.: 12 por braço).',
-                                  value: '',
-                                  showDivider: false,
-                                  accessory: Switch.adaptive(
-                                    activeTrackColor: Theme.of(context).colorScheme.primary,
-                                    value: _unilateral,
-                                    onChanged:
-                                        (v) => setState(() => _unilateral = v),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: FxSettingsLayout.groupGap),
-                          FxStaggerItem(
-                            index: 1,
-                            child: FxSettingsGroup(
-                              header: 'Ambiente',
-                              caption:
-                                  'Onde e com o quê o aluno pode executar este exercício.',
-                              accent: primary,
-                              children: [
-                                FxSettingsTile(
-                                  icon: FxIcons.estoque,
-                                  accent: soft,
-                                  label: 'Equipamentos e espaços',
-                                  subtitle: _filterSummary(
-                                    equipamentos: _equipamentos.length,
-                                    espacos: _espacos.length,
-                                  ),
-                                  value: '',
-                                  picker: true,
-                                  showDivider: false,
-                                  onTap: _openFiltersSheet,
-                                ),
-                              ],
-                            ),
-                          ),
-                          if (!_isEdit) ...[
-                            const SizedBox(height: FxSettingsLayout.groupGap),
-                            FxSettingsGroup(
-                              header: 'Vídeo',
-                              caption:
-                                  'Opcional. O aluno vê o seu vídeo no treino; dá para enviar depois.',
-                              accent: primary,
-                              children: [
-                                FxSettingsTile(
-                                  icon: FxIcons.video,
-                                  accent: soft,
-                                  label:
-                                      _videoPath == null
-                                          ? 'Adicionar meu vídeo'
-                                          : 'Vídeo escolhido',
-                                  subtitle:
-                                      _videoPath == null
-                                          ? 'Câmera ou galeria'
-                                          : 'Toque para trocar',
-                                  value: '',
-                                  picker: true,
-                                  showDivider: _videoPath != null,
-                                  onTap: _escolherVideo,
-                                ),
-                                if (_videoPath != null)
-                                  FxSettingsTile(
-                                    icon: FxIcons.excluir,
-                                    label: 'Tirar vídeo',
-                                    value: '',
-                                    danger: true,
-                                    showDivider: false,
-                                    onTap: () => setState(() => _videoPath = null),
-                                  ),
-                              ],
-                            ),
-                          ],
-                          const SizedBox(height: FxSettingsLayout.groupGap),
-                          FxStaggerItem(
-                            index: 2,
-                            child: _CollapsibleSection(
-                              icon: FxIcons.apresentacao,
-                              title: 'Orientação',
-                              subtitle:
-                                  _showGuidance
-                                      ? 'Detalhes úteis para o aluno executar com segurança.'
-                                      : 'Descrição, erros comuns e restrições quando precisar.',
-                              expanded: _showGuidance,
-                              onToggle:
-                                  () => setState(
-                                    () => _showGuidance = !_showGuidance,
-                                  ),
-                              child: Column(
+          body:
+              loadingEdit
+                  ? const SafeArea(child: SkeletonList(count: 6))
+                  : SafeArea(
+                    bottom: false,
+                    child: SingleChildScrollView(
+                      keyboardDismissBehavior:
+                          ScrollViewKeyboardDismissBehavior.onDrag,
+                      padding: const EdgeInsets.fromLTRB(
+                        FxSettingsLayout.pageInset,
+                        6,
+                        FxSettingsLayout.pageInset,
+                        TokensStrip.s4,
+                      ),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            FxStaggerItem(
+                              index: 0,
+                              child: FxSettingsGroup(
+                                header: 'Identidade',
+                                caption:
+                                    'Nome, grupo muscular e como o movimento é prescrito.',
+                                accent: primary,
                                 children: [
                                   AlunoInsetFormField(
-                                    controller: _descricaoCtrl,
-                                    label: 'Descrição curta',
+                                    controller: _nomeCtrl,
+                                    label: 'Nome do exercício',
+                                    hint: 'Ex.: Elevação lateral',
+                                    icon: FxIcons.treino,
                                     rotuloVisivel: true,
-                                    hint:
-                                        'Como executar em uma frase objetiva.',
-                                    icon: FxIcons.notas,
-                                    maxLines: 2,
+                                    obrigatorio: true,
+                                    validator:
+                                        (v) =>
+                                            v == null || v.trim().isEmpty
+                                                ? 'Informe o nome'
+                                                : null,
                                   ),
-                                  AlunoInsetFormField(
-                                    controller: _errosComunsCtrl,
-                                    label: 'Erros comuns',
-                                    rotuloVisivel: true,
-                                    hint:
-                                        'Ex.: elevar os ombros, roubar com o tronco.',
-                                    icon: FxIcons.alerta,
-                                    maxLines: 2,
+                                  if (!_isEdit)
+                                    _QuickSetupStrip(
+                                      selectedLabel: _selectedSetupLabel,
+                                      onSelected: _applyQuickSetup,
+                                    ),
+                                  _EnumDropdown<GrupoMuscular>(
+                                    label: 'Grupo principal',
+                                    obrigatorio: true,
+                                    icon: FxIcons.acessibilidade,
+                                    iconColor: soft,
+                                    sheetContextLabel: screenTitle,
+                                    value: _grupoMuscularPrimario,
+                                    values: GrupoMuscular.values,
+                                    labels: TaxonomyLabels.grupo,
+                                    onChanged:
+                                        (v) => setState(
+                                          () => _grupoMuscularPrimario = v,
+                                        ),
+                                    validator:
+                                        (v) =>
+                                            v == null
+                                                ? 'Escolha o grupo'
+                                                : null,
                                   ),
-                                  AlunoInsetFormField(
-                                    controller: _contraindicacoesCtrl,
-                                    label: 'Contraindicações',
-                                    rotuloVisivel: true,
-                                    hint:
-                                        'Quando evitar ou adaptar este exercício.',
-                                    icon: FxIcons.saude,
-                                    maxLines: 2,
+                                  _EnumDropdown<Modalidade>(
+                                    label: 'Modalidade',
+                                    icon: FxIcons.alongamento,
+                                    iconColor: soft,
+                                    sheetContextLabel: screenTitle,
+                                    value: _modalidade,
+                                    values: Modalidade.values,
+                                    labels: TaxonomyLabels.modalidade,
+                                    onChanged:
+                                        (v) => setState(() => _modalidade = v),
+                                  ),
+                                  _EnumDropdown<Dificuldade>(
+                                    label: 'Dificuldade',
+                                    icon: FxIcons.nivel,
+                                    iconColor: soft,
+                                    sheetContextLabel: screenTitle,
+                                    value: _dificuldade,
+                                    values: Dificuldade.values,
+                                    labels: TaxonomyLabels.dificuldade,
+                                    onChanged:
+                                        (v) => setState(() => _dificuldade = v),
+                                  ),
+                                  _EnumDropdown<PadraoMovimento>(
+                                    label: 'Padrão de movimento',
+                                    icon: FxIcons.trocar,
+                                    iconColor: soft,
+                                    sheetContextLabel: screenTitle,
+                                    value: _padraoMovimento,
+                                    values: PadraoMovimento.values,
+                                    labels: TaxonomyLabels.padrao,
+                                    onChanged:
+                                        (v) => setState(
+                                          () => _padraoMovimento = v,
+                                        ),
+                                  ),
+                                  FxSettingsTile(
+                                    icon: FxIcons.trocar,
+                                    accent: soft,
+                                    label: 'Unilateral',
+                                    subtitle:
+                                        'Cada lado executado separadamente (ex.: 12 por braço).',
+                                    value: '',
                                     showDivider: false,
+                                    accessory: Switch.adaptive(
+                                      activeTrackColor:
+                                          Theme.of(context).colorScheme.primary,
+                                      value: _unilateral,
+                                      onChanged:
+                                          (v) =>
+                                              setState(() => _unilateral = v),
+                                    ),
                                   ),
                                 ],
                               ),
                             ),
-                          ),
-                          if (_error != null) ...[
                             const SizedBox(height: FxSettingsLayout.groupGap),
                             FxStaggerItem(
-                              index: 3,
-                              child: FxErrorState(
-                                chromeOnDark: isDark,
-                                primary: primary,
-                                title: errorTitle,
-                                message: _error!,
-                                onRetry: _submit,
+                              index: 1,
+                              child: FxSettingsGroup(
+                                header: 'Ambiente',
+                                caption:
+                                    'Onde e com o quê o aluno pode executar este exercício.',
+                                accent: primary,
+                                children: [
+                                  FxSettingsTile(
+                                    icon: FxIcons.estoque,
+                                    accent: soft,
+                                    label: 'Equipamentos e espaços',
+                                    subtitle: _filterSummary(
+                                      equipamentos: _equipamentos.length,
+                                      espacos: _espacos.length,
+                                    ),
+                                    value: '',
+                                    picker: true,
+                                    showDivider: false,
+                                    onTap: _openFiltersSheet,
+                                  ),
+                                ],
                               ),
                             ),
+                            if (!_isEdit) ...[
+                              const SizedBox(height: FxSettingsLayout.groupGap),
+                              FxSettingsGroup(
+                                header: 'Vídeo',
+                                caption:
+                                    'Opcional. O aluno vê o seu vídeo no treino; dá para enviar depois.',
+                                accent: primary,
+                                children: [
+                                  FxSettingsTile(
+                                    icon: FxIcons.video,
+                                    accent: soft,
+                                    label: exerciseVideoLinhaTitulo(
+                                      preparando: _preparandoVideo,
+                                      escolhido: _video != null,
+                                    ),
+                                    subtitle: exerciseVideoLinhaApoio(
+                                      preparando: _preparandoVideo,
+                                      resumo: _video?.resumo,
+                                    ),
+                                    value: '',
+                                    picker: !_preparandoVideo,
+                                    accessory:
+                                        _preparandoVideo
+                                            ? FxLoading(
+                                              size: 18,
+                                              strokeWidth: 2,
+                                              color: primary,
+                                            )
+                                            : null,
+                                    showDivider: _video != null,
+                                    onTap:
+                                        _preparandoVideo || _loading
+                                            ? null
+                                            : _escolherVideo,
+                                  ),
+                                  if (_video != null)
+                                    FxSettingsTile(
+                                      icon: FxIcons.excluir,
+                                      label: 'Tirar vídeo',
+                                      value: '',
+                                      danger: true,
+                                      showDivider: false,
+                                      onTap:
+                                          _loading
+                                              ? null
+                                              : () =>
+                                                  setState(() => _video = null),
+                                    ),
+                                ],
+                              ),
+                            ],
+                            const SizedBox(height: FxSettingsLayout.groupGap),
+                            FxStaggerItem(
+                              index: 2,
+                              child: _CollapsibleSection(
+                                icon: FxIcons.apresentacao,
+                                title: 'Orientação',
+                                subtitle:
+                                    _showGuidance
+                                        ? 'Detalhes úteis para o aluno executar com segurança.'
+                                        : 'Descrição, erros comuns e restrições quando precisar.',
+                                expanded: _showGuidance,
+                                onToggle:
+                                    () => setState(
+                                      () => _showGuidance = !_showGuidance,
+                                    ),
+                                child: Column(
+                                  children: [
+                                    AlunoInsetFormField(
+                                      controller: _descricaoCtrl,
+                                      label: 'Descrição curta',
+                                      rotuloVisivel: true,
+                                      hint:
+                                          'Como executar em uma frase objetiva.',
+                                      icon: FxIcons.notas,
+                                      maxLines: 2,
+                                    ),
+                                    AlunoInsetFormField(
+                                      controller: _errosComunsCtrl,
+                                      label: 'Erros comuns',
+                                      rotuloVisivel: true,
+                                      hint:
+                                          'Ex.: elevar os ombros, roubar com o tronco.',
+                                      icon: FxIcons.alerta,
+                                      maxLines: 2,
+                                    ),
+                                    AlunoInsetFormField(
+                                      controller: _contraindicacoesCtrl,
+                                      label: 'Contraindicações',
+                                      rotuloVisivel: true,
+                                      hint:
+                                          'Quando evitar ou adaptar este exercício.',
+                                      icon: FxIcons.saude,
+                                      maxLines: 2,
+                                      showDivider: false,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            if (_error != null) ...[
+                              const SizedBox(height: FxSettingsLayout.groupGap),
+                              FxStaggerItem(
+                                index: 3,
+                                child: FxErrorState(
+                                  chromeOnDark: isDark,
+                                  primary: primary,
+                                  title: errorTitle,
+                                  message: _error!,
+                                  onRetry: _submit,
+                                ),
+                              ),
+                            ],
                           ],
-                        ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-      ),
+        ),
       ),
     );
   }

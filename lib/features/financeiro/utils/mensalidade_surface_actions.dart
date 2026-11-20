@@ -32,6 +32,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../chat/screens/chat_inbox_screen.dart';
+import '../../perfil/data/perfil_repository.dart';
 import '../data/financeiro_repository.dart';
 import 'financeiro_hub_display.dart';
 import 'pix_qr_display.dart';
@@ -97,7 +98,9 @@ Future<Map<String, MesOcupado>> carregarMesesOcupados(
   int? ignorarId,
 }) async {
   try {
-    final page = await mensalidadeRepo(ref).listarPagina(alunoId: alunoId, size: 50);
+    final page = await mensalidadeRepo(
+      ref,
+    ).listarPagina(alunoId: alunoId, size: 50);
     return vencimentoMesesOcupados(page.mensalidades, ignorarId: ignorarId);
   } catch (_) {
     return const {};
@@ -120,7 +123,17 @@ String mensalidadeConfirmacaoTexto({
   required String aluno,
   required FxMoney valor,
   required DateTime vencimento,
-}) => '$aluno · ${valor.formatCobranca()} · ${mensalidadeVencimentoRotulo(vencimento).toLowerCase()}';
+  String? avisoSemPix,
+}) {
+  final linha =
+      '$aluno · ${valor.formatCobranca()} · ${mensalidadeVencimentoRotulo(vencimento).toLowerCase()}';
+  return avisoSemPix == null ? linha : '$linha\n$avisoSemPix';
+}
+
+/// Lançar mensalidade sem chave PIX avisa antes (não bloqueia: quem recebe
+/// em dinheiro lança e marca paga). Perfil ainda não carregado não avisa.
+bool mensalidadeLancarPrecisaAvisoPix(PerfilPersonal? perfil) =>
+    perfil != null && (perfil.chavePix ?? '').trim().isEmpty;
 
 Future<Mensalidade?> confirmarPagarMensalidade({
   required BuildContext context,
@@ -162,6 +175,9 @@ Future<bool> mostrarPixMensalidade({
   var carregando = true;
   String? erro;
   var precisaCarteira = false;
+  // Aluno de personal sem chave: tentar de novo dá o mesmo erro; o caminho
+  // é falar com o personal ou avisar que já pagou de outro jeito.
+  var semChaveAluno = false;
   var avisando = false;
   var avisado = false;
   var copiado = false;
@@ -174,10 +190,12 @@ Future<bool> mostrarPixMensalidade({
       carregando = true;
       erro = null;
       precisaCarteira = false;
+      semChaveAluno = false;
     });
     try {
       final repo = mensalidadeRepo(ref);
-      final p = asAluno ? await repo.gerarPixAluno(id) : await repo.gerarPix(id);
+      final p =
+          asAluno ? await repo.gerarPixAluno(id) : await repo.gerarPix(id);
       if (token != loadToken) return;
       if (!pixQrHasRenderablePayload(
         pixCopiaECola: p.pixCopiaECola,
@@ -197,8 +215,9 @@ Future<bool> mostrarPixMensalidade({
       if (token != loadToken) return;
       setDialogState(() {
         erro = friendlyError(e);
-        precisaCarteira =
-            !asAluno && ApiError.from(e)?.codigo == pixChaveAusenteCodigo;
+        final semChave = ApiError.from(e)?.codigo == pixChaveAusenteCodigo;
+        precisaCarteira = !asAluno && semChave;
+        semChaveAluno = asAluno && semChave;
         carregando = false;
       });
     }
@@ -332,8 +351,37 @@ Future<bool> mostrarPixMensalidade({
                                         context.push('/perfil/wallet');
                                       },
                                     )
-                                  else
-                                    FxTonalButton(label: 'Tentar de novo', onPressed: () => carregar(setDialogState), compact: true),
+                                  else if (semChaveAluno) ...[
+                                    FxLiquidPrimaryButton(
+                                      icon: FxIcons.chat,
+                                      label: s.pixFalarComPersonal,
+                                      onPressed: () {
+                                        FxHomeSheetChrome.dismissAndPop(ctx);
+                                        context.go('/chat/aluno');
+                                      },
+                                    ),
+                                    if (!avisado) ...[
+                                      const SizedBox(height: TokensStrip.s2),
+                                      FxLiquidSecondaryButton(
+                                        label:
+                                            avisando
+                                                ? 'Avisando…'
+                                                : pixAvisarPagamentoLabel,
+                                        onPressed:
+                                            avisando
+                                                ? null
+                                                : () => avisarPagamento(
+                                                  ctx,
+                                                  setDialogState,
+                                                ),
+                                      ),
+                                    ],
+                                  ] else
+                                    FxTonalButton(
+                                      label: 'Tentar de novo',
+                                      onPressed: () => carregar(setDialogState),
+                                      compact: true,
+                                    ),
                                 ],
                               ),
                             )
@@ -394,7 +442,12 @@ Future<bool> mostrarPixMensalidade({
                             ],
                           ],
                           const SizedBox(height: 12),
-                          FxTonalButton(label: 'Fechar', onPressed: () => FxHomeSheetChrome.dismissAndPop(ctx), compact: true),
+                          FxTonalButton(
+                            label: 'Fechar',
+                            onPressed:
+                                () => FxHomeSheetChrome.dismissAndPop(ctx),
+                            compact: true,
+                          ),
                         ],
                       ),
                     ),
@@ -455,10 +508,7 @@ Future<bool> registrarContatoMensalidade({
     title: 'Tipo de contato',
     items: [
       for (final t in tipos)
-        FxInsetPickerSheetItem(
-          value: t,
-          label: financeiroContatoTipoLabel(t),
-        ),
+        FxInsetPickerSheetItem(value: t, label: financeiroContatoTipoLabel(t)),
     ],
   );
   if (!context.mounted || tipo == null) return false;
@@ -483,7 +533,9 @@ Future<bool> registrarContatoMensalidade({
     );
     if (confirm != true) return false;
     try {
-      await mensalidadeRepo(ref).registrarContato(m.id, tipo, obsCtrl.text.trim());
+      await mensalidadeRepo(
+        ref,
+      ).registrarContato(m.id, tipo, obsCtrl.text.trim());
       if (context.mounted) {
         FeedbackHelper.showSuccess(context, 'Contato registrado!');
       }
@@ -591,28 +643,37 @@ Future<Mensalidade?> showEditarMensalidadeSheet({
                                   HapticFeedback.mediumImpact();
                                   final ok = await showFxConfirmSheet(
                                     ctx,
-                                    title: financeiroSalvarMensalidadeConfirmTitle(),
+                                    title:
+                                        financeiroSalvarMensalidadeConfirmTitle(),
                                     message: mensalidadeConfirmacaoTexto(
                                       aluno: m.alunoNome,
                                       valor: valor,
                                       vencimento: vencimento,
                                     ),
                                     icon: FxIcons.pagamento,
-                                    confirmLabel: financeiroSalvarMensalidadeTileLabel(),
+                                    confirmLabel:
+                                        financeiroSalvarMensalidadeTileLabel(),
                                   );
                                   if (!ok) return;
                                   setModalState(() => salvando = true);
                                   try {
-                                    final updated = await mensalidadeRepo(ref).editarMensalidade(
+                                    final updated = await mensalidadeRepo(
+                                      ref,
+                                    ).editarMensalidade(
                                       m.id,
                                       valor: valor,
                                       vencimento: vencimentoIso(vencimento),
                                     );
-                                    if (ctx.mounted) Navigator.of(ctx).pop(updated);
+                                    if (ctx.mounted) {
+                                      Navigator.of(ctx).pop(updated);
+                                    }
                                   } catch (e) {
                                     setModalState(() => salvando = false);
                                     if (ctx.mounted) {
-                                      FeedbackHelper.showError(ctx, friendlyError(e));
+                                      FeedbackHelper.showError(
+                                        ctx,
+                                        friendlyError(e),
+                                      );
                                     }
                                   }
                                 },

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/support/intercom_service.dart';
 import '../../../core/theme/fx_settings_layout.dart';
@@ -54,6 +55,14 @@ class PerfilContaSegurancaSection extends StatelessWidget {
         FxSettingsGroup(
           header: 'Conta e segurança',
           children: [
+            FxSettingsTile(
+              icon: FxIcons.notificacao,
+              label: 'Notificações',
+              value: '',
+              mute: mute,
+              line: line,
+              onTap: () => context.push('/perfil/notificacoes'),
+            ),
             PerfilBiometriaTile(mute: mute, line: line),
             if (showMfa)
               FxSettingsTile(

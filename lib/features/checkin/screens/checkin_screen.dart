@@ -48,6 +48,10 @@ import '../widgets/checkin_timer_widgets.dart';
 import '../../../core/theme/fx_icons.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../utils/treinos_hub_view.dart' show checkinExecutarPath;
+import '../../../core/fcm/fcm_service.dart';
+import '../../../core/notificacoes/aviso_fim_descanso.dart';
+import '../../../core/notificacoes/notificacoes_locais.dart' show abrirAjustesDeNotificacao;
+import 'package:shared_preferences/shared_preferences.dart';
 
 part 'checkin_screen_carga.part.dart';
 part 'checkin_screen_corpo.part.dart';
@@ -55,6 +59,7 @@ part 'checkin_screen_desfazer.part.dart';
 part 'checkin_screen_saida.part.dart';
 part 'checkin_screen_presencial.part.dart';
 part 'checkin_screen_foco.part.dart';
+part 'checkin_screen_aviso.part.dart';
 
 class CheckinScreen extends ConsumerStatefulWidget {
   final int treinoId;
@@ -102,13 +107,19 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
       if (mounted) setState(() {});
     },
     onFim: _avisarFimDescanso,
+    aoMudarFim: _agendarAvisoDescanso,
+    emPrimeiroPlano: _appEmPrimeiroPlano,
   );
+  bool _dicaPermissao = false;
+  bool _dicaPermissaoConferida = false;
+  late final AvisoFimDescanso _avisoDescanso = ref.read(avisoFimDescansoProvider);
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _alerta = ref.listenManual(checkinDescansoAlertaProvider, (_, _) {});
+    _avisoDescanso; // lido aqui: o dispose cancela sem tocar no ref.
     _conexaoSub = ref
         .read(checkinConexaoVoltouProvider)
         .listen((_) => _enviarFila());
@@ -121,6 +132,8 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
     _conexaoSub?.cancel();
     _timer?.cancel();
     _ultimaTimer?.cancel();
+    // Saiu da execução (terminou, descartou ou voltou): o aviso não fica.
+    if (_descanso.ativo) unawaited(_avisoDescanso.cancelar());
     _descanso.dispose();
     super.dispose();
   }
@@ -345,6 +358,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
 
   void _iniciarDescanso(int seconds) {
     setState(() => _descanso.iniciar(seconds));
+    unawaited(_conferirDicaDePermissao());
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final s = S.of(context);

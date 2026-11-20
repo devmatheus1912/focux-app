@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import '../versao/atualizacao_scope.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -127,6 +128,11 @@ class FcmService {
       if (data['type'] == 'plan_sync') {
         await _dispatchPlanSync(data);
       }
+      // "Nova versão do Focux": confere a versão agora e oferece atualizar.
+      if (data['type'] == 'versao') {
+        AtualizacaoScope.verificarAgora();
+        return;
+      }
       final role = await SecureStorage.getRole();
       final route = resolveFcmTapRoute(data, role: role);
       if (route == null) return;
@@ -172,7 +178,8 @@ class FcmService {
   static Future<bool> permissaoNegada() async {
     if (kIsWeb) return false;
     try {
-      final settings = await FirebaseMessaging.instance.getNotificationSettings();
+      final settings =
+          await FirebaseMessaging.instance.getNotificationSettings();
       return settings.authorizationStatus == AuthorizationStatus.denied;
     } catch (_) {
       return false;
@@ -194,6 +201,9 @@ class FcmService {
         alert: true,
         badge: true,
         sound: true,
+        // iOS: botão "Ajustes de notificação do Focux" nos Ajustes do sistema,
+        // que abre Perfil > Notificações (AppDelegate).
+        providesAppNotificationSettings: true,
       );
       if (settings.authorizationStatus == AuthorizationStatus.denied) return;
     } catch (e) {

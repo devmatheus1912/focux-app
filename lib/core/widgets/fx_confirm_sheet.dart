@@ -28,10 +28,43 @@ Future<bool> showFxConfirmSheet(
   /// Descartar rascunho: o botão cheio é "Continuar editando" e descartar
   /// é texto vermelho (a ação destrutiva nunca ganha a cor da marca).
   bool discard = false,
+
   /// Auth S6: força chrome dark de marca (não herda light do SO).
   bool forceDark = false,
 }) async {
-  final confirmed = await showFxHomeSheet<bool>(
+  final confirmed = await showFxConfirmSheetOuFechar(
+    context,
+    title: title,
+    confirmLabel: confirmLabel,
+    subtitle: subtitle,
+    message: message,
+    icon: icon,
+    confirmIcon: confirmIcon,
+    cancelLabel: cancelLabel,
+    destructive: destructive,
+    discard: discard,
+    forceDark: forceDark,
+  );
+  return confirmed ?? false;
+}
+
+/// Igual a [showFxConfirmSheet], mas distingue as três saídas: `true` no
+/// botão cheio, `false` no segundo botão e `null` ao fechar (arrastar ou
+/// tocar fora). Para quando o segundo botão também segue em frente.
+Future<bool?> showFxConfirmSheetOuFechar(
+  BuildContext context, {
+  required String title,
+  required String confirmLabel,
+  String? subtitle,
+  String? message,
+  IconData icon = FxIcons.ajuda,
+  IconData? confirmIcon,
+  String cancelLabel = FocuxMicrocopy.cancelar,
+  bool destructive = false,
+  bool discard = false,
+  bool forceDark = false,
+}) {
+  return showFxHomeSheet<bool>(
     context,
     forceDark: forceDark,
     builder:
@@ -47,7 +80,6 @@ Future<bool> showFxConfirmSheet(
           discard: discard,
         ),
   );
-  return confirmed ?? false;
 }
 
 class _FxConfirmSheet extends StatelessWidget {
@@ -177,8 +209,7 @@ class _FxConfirmSheet extends StatelessWidget {
           SizedBox(
             height: 52,
             child: ElevatedButton(
-              onPressed:
-                  () => FxHomeSheetChrome.dismissAndPop(context, false),
+              onPressed: () => FxHomeSheetChrome.dismissAndPop(context, false),
               style: ElevatedButton.styleFrom(
                 backgroundColor: theme.colorScheme.primary,
                 foregroundColor: theme.colorScheme.onPrimary,

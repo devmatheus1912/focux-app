@@ -2,9 +2,20 @@
 
 Mudanças do app publicadas nas lojas, da mais nova para a mais antiga. O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). A versão vem do `pubspec.yaml`; cada versão publicada tem uma tag `vX.Y.Z`.
 
-## Não lançado (`develop`)
+## Não lançado (`develop`) · 1.2.6+242
+
+### Adicionado
+- Perfil > Notificações (personal e aluno): estado do celular, o que avisar por tipo, som do fim do descanso e notificação de teste. No iOS, "Ajustes de notificação do Focux" abre a tela; no Android, um canal por tipo.
+- Fim do descanso avisa com a tela bloqueada ou o app em segundo plano (notificação agendada; no Android, contagem regressiva na tela de bloqueio).
+- Aviso de versão nova: folha "Nova versão disponível" (uma vez por versão) e tela de bloqueio abaixo da versão mínima; no Android, atualização pela própria Play.
+- Cadastro de exercício: "Preparando vídeo…" enquanto o celular entrega o arquivo, Cadastrar espera o vídeo, envio com progresso ("Enviando vídeo 42%", "Processando vídeo…"), recusa de vídeo da galeria acima de 60 s e confirmação ao sair durante o envio.
+- Lançar mensalidade sem chave PIX avisa antes, com "Cadastrar chave" e "Lançar mesmo assim".
 
 ### Alterado
+- Aba Exercícios: Meus · Biblioteca · Favoritos, a mesma linha da biblioteca do "Adicionar exercício", busca com chips de grupo e equipamento, "⋯" em folha (Assistir, vídeo, Editar, Duplicar, Excluir com o efeito) e topo que conta exercícios.
+- Aluno sem PIX do personal: a folha do PIX oferece "Falar com o personal" e "Já paguei".
+- Feedback em vídeo: "Remover este vídeo" saiu da folha de resposta (fica no "⋯"); falha do áudio aparece em texto claro.
+- "Wi‑Fi", "e‑mail" e "check‑in" não partem mais no fim da linha.
 - Erro do login com Google aparece em texto para o usuário ("Não deu para entrar com Google. Use e-mail e senha.") em vez da mensagem técnica.
 - Dependências do pub e do E2E atualizadas (versões menores).
 - Documentação oficial do repositório: arquitetura, design system, produto, release, política de segurança, guia de contribuição e modelos de PR e issue. Os scripts de `tools/` foram para `tool/`, e as regras do Cursor saíram do Git.

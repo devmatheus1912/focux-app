@@ -127,14 +127,17 @@ void main() {
       'desabilitado', (tester) async {
     await _abrir(tester, papel: ExcluirContaPapel.personal);
     expect(find.text('O que acontece'), findsOneWidget);
-    expect(find.text('Seus alunos perdem o acesso ao app na hora.'),
-        findsOneWidget);
+    expect(
+      find.text('Seus alunos perdem o acesso ao app na hora.'),
+      findsOneWidget,
+    );
     // ordem: o que acontece -> confirme que é você -> campo EXCLUIR logo depois
     final y1 = tester.getTopLeft(find.text('O que acontece')).dy;
     final y2 = tester.getTopLeft(find.text('Confirme que é você')).dy;
-    final y3 = tester.getTopLeft(
-      find.byKey(const ValueKey('excluir-conta-confirmacao')),
-    ).dy;
+    final y3 =
+        tester
+            .getTopLeft(find.byKey(const ValueKey('excluir-conta-confirmacao')))
+            .dy;
     expect(y1, lessThan(y2));
     expect(y2, lessThan(y3));
     expect(find.text('Para finalizar'), findsNothing);
@@ -151,7 +154,10 @@ void main() {
     tester,
   ) async {
     final abertura = await _abrir(tester, papel: ExcluirContaPapel.aluno);
-    await tester.enterText(find.widgetWithText(TextField, 'Senha atual'), 'segredo');
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Senha atual'),
+      'segredo',
+    );
     await tester.pump();
     var botao = tester.widget<ElevatedButton>(
       find.widgetWithText(ElevatedButton, 'Digite EXCLUIR'),
@@ -166,7 +172,9 @@ void main() {
       find.widgetWithText(ElevatedButton, 'Excluir definitivamente'),
     );
     expect(botao.onPressed, isNotNull);
-    await tester.tap(find.widgetWithText(ElevatedButton, 'Excluir definitivamente'));
+    await tester.tap(
+      find.widgetWithText(ElevatedButton, 'Excluir definitivamente'),
+    );
     await tester.pumpAndSettle();
     final cred = await abertura.resultado;
     expect(cred?.senha, 'segredo');
@@ -204,18 +212,12 @@ void main() {
       findsNothing,
     );
     expect(
-      find.descendant(
-        of: cartao,
-        matching: find.byIcon(FxIcons.grupoOff),
-      ),
+      find.descendant(of: cartao, matching: find.byIcon(FxIcons.grupoOff)),
       findsOneWidget,
     );
     // "Não pode ser desfeita" fica só no subtítulo: sem a linha de alerta.
     expect(
-      find.descendant(
-        of: cartao,
-        matching: find.byIcon(FxIcons.alerta),
-      ),
+      find.descendant(of: cartao, matching: find.byIcon(FxIcons.alerta)),
       findsNothing,
     );
   });
@@ -230,31 +232,32 @@ void main() {
     );
   });
 
-  testWidgets('com assinatura da loja mostra o cartão de alerta fora da lista', (
-    tester,
-  ) async {
-    await _abrir(
-      tester,
-      papel: ExcluirContaPapel.personal,
-      avisoAssinatura: true,
-    );
-    final alerta = find.byKey(const ValueKey('excluir-conta-alerta-loja'));
-    expect(alerta, findsOneWidget);
-    expect(
-      find.descendant(
-        of: alerta,
-        matching: find.text(l10n.excluirContaAvisoAssinatura),
-      ),
-      findsOneWidget,
-    );
-    expect(
-      find.descendant(
-        of: find.byKey(const ValueKey('excluir-conta-consequencias')),
-        matching: find.text(l10n.excluirContaAvisoAssinatura),
-      ),
-      findsNothing,
-    );
-  });
+  testWidgets(
+    'com assinatura da loja mostra o cartão de alerta fora da lista',
+    (tester) async {
+      await _abrir(
+        tester,
+        papel: ExcluirContaPapel.personal,
+        avisoAssinatura: true,
+      );
+      final alerta = find.byKey(const ValueKey('excluir-conta-alerta-loja'));
+      expect(alerta, findsOneWidget);
+      expect(
+        find.descendant(
+          of: alerta,
+          matching: find.text(l10n.excluirContaAvisoAssinatura),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey('excluir-conta-consequencias')),
+          matching: find.text(l10n.excluirContaAvisoAssinatura),
+        ),
+        findsNothing,
+      );
+    },
+  );
 
   testWidgets('botão desabilitado ainda tem contraste de leitura (≥ 3:1)', (
     tester,
@@ -263,8 +266,10 @@ void main() {
     final botao = tester.widget<ElevatedButton>(
       find.widgetWithText(ElevatedButton, 'Digite sua senha'),
     );
-    final fundo = botao.style!.backgroundColor!.resolve({WidgetState.disabled})!;
-    final texto = botao.style!.foregroundColor!.resolve({WidgetState.disabled})!;
+    final fundo =
+        botao.style!.backgroundColor!.resolve({WidgetState.disabled})!;
+    final texto =
+        botao.style!.foregroundColor!.resolve({WidgetState.disabled})!;
     double lum(Color c) => c.computeLuminance();
     final claro = lum(fundo) > lum(texto) ? lum(fundo) : lum(texto);
     final escuro = lum(fundo) > lum(texto) ? lum(texto) : lum(fundo);
@@ -279,9 +284,9 @@ void main() {
       find.widgetWithText(TextField, 'Senha atual'),
     );
     expect(campo.decoration!.filled, isTrue);
-    expect(find.text('Receber código por e-mail'), findsOneWidget);
+    expect(find.text('Receber código por e‑mail'), findsOneWidget);
     expect(
-      find.text('Entrou com Google ou Apple? Receba um código por e-mail.'),
+      find.text('Entrou com Google ou Apple? Receba um código por e‑mail.'),
       findsOneWidget,
     );
   });

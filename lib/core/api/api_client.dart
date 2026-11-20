@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import '../versao/app_versao.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'api_client_connection_pool.dart';
@@ -32,8 +33,8 @@ class ApiClient {
         receiveTimeout: const Duration(seconds: 30),
         sendTimeout: const Duration(seconds: 30),
         // 304 Not Modified = sucesso (ETag / If-None-Match).
-        validateStatus: (status) =>
-            status != null && status >= 200 && status < 400,
+        validateStatus:
+            (status) => status != null && status >= 200 && status < 400,
       ),
     );
 
@@ -53,6 +54,8 @@ class ApiClient {
           if (token != null) {
             options.headers['Authorization'] = 'Bearer $token';
           }
+          // Versão do app em cada aparelho (aviso de versão nova no servidor).
+          options.headers.addAll(AppInfo.cabecalhos);
           if (options.data is FormData) applyUploadPolicy(options);
           if (options.method.toUpperCase() == 'GET' &&
               options.extra['fxSkipEtag'] != true) {
@@ -180,8 +183,9 @@ class ApiClient {
           if (e.response?.statusCode == 401 &&
               !_isAuthPath(e.requestOptions.path) &&
               e.requestOptions.extra['fxAuthRetried'] != true) {
-            final outcome =
-                await SessionRefreshCoordinator.ensureFreshAccess(force: true);
+            final outcome = await SessionRefreshCoordinator.ensureFreshAccess(
+              force: true,
+            );
             if (SessionRefreshCoordinator.shouldRetryRequest(outcome)) {
               final token = await SecureStorage.getToken();
               if (token != null) {
@@ -204,7 +208,7 @@ class ApiClient {
                 try {
                   final retryResp = await _dio.fetch(e.requestOptions);
                   dedupe.responder(retryResp);
-                return handler.resolve(retryResp);
+                  return handler.resolve(retryResp);
                 } catch (retryErr) {
                   if (!shouldInvalidateAfterAuthReplayFailure(retryErr)) {
                     handler.next(retryErr is DioException ? retryErr : e);
@@ -230,8 +234,7 @@ class ApiClient {
             if (status == 403 || (status == 401 && retried)) {
               resetIdempotencyScopes();
               await SessionInvalidator.invalidate(
-                reason:
-                    'API $status em ${e.requestOptions.path}',
+                reason: 'API $status em ${e.requestOptions.path}',
               );
             }
           }
@@ -268,8 +271,8 @@ class ApiClient {
         sendTimeout: const Duration(seconds: 30),
         headers: const {'Content-Type': 'application/json'},
         persistentConnection: false,
-        validateStatus: (status) =>
-            status != null && status >= 200 && status < 400,
+        validateStatus:
+            (status) => status != null && status >= 200 && status < 400,
       ),
     );
     TlsCertificatePinning.apply(d);
@@ -382,9 +385,7 @@ class ApiClient {
 
   static bool _shouldCachePath(String path) {
     if (_isSensitiveDiskCachePath(path)) return false;
-    const cacheable = [
-      '/api/planos/me',
-    ];
+    const cacheable = ['/api/planos/me'];
     for (final prefix in cacheable) {
       if (path == prefix ||
           path.startsWith('$prefix?') ||
@@ -479,9 +480,7 @@ class ApiClient {
     if (!_shouldReportApiError(e)) return false;
 
     final now = DateTime.now();
-    _errorReportAt.removeWhere(
-      (t) => now.difference(t) > _errorReportWindow,
-    );
+    _errorReportAt.removeWhere((t) => now.difference(t) > _errorReportWindow);
     if (_errorReportAt.length >= _errorReportMaxPerWindow) return false;
 
     final windowStart = _errorReportFingerprintWindowStart;
@@ -514,18 +513,19 @@ class ApiClient {
       final role = await SecureStorage.getRole();
       if (token == null || role != 'PERSONAL') return;
 
-      final reporter = _errorReporterDio ??= () {
-        final d = Dio(
-          BaseOptions(
-            baseUrl: _baseUrl,
-            connectTimeout: const Duration(seconds: 8),
-            receiveTimeout: const Duration(seconds: 8),
-            sendTimeout: const Duration(seconds: 8),
-          ),
-        );
-        TlsCertificatePinning.apply(d);
-        return d;
-      }();
+      final reporter =
+          _errorReporterDio ??= () {
+            final d = Dio(
+              BaseOptions(
+                baseUrl: _baseUrl,
+                connectTimeout: const Duration(seconds: 8),
+                receiveTimeout: const Duration(seconds: 8),
+                sendTimeout: const Duration(seconds: 8),
+              ),
+            );
+            TlsCertificatePinning.apply(d);
+            return d;
+          }();
       reporter.options.headers['Authorization'] = 'Bearer $token';
       await reporter.post(
         '/api/suporte/analisar-erro',
@@ -554,7 +554,9 @@ class ApiClient {
   static void applyUploadPolicy(RequestOptions options) {
     const envio = Duration(minutes: 5);
     const resposta = Duration(minutes: 2);
-    if ((options.sendTimeout ?? Duration.zero) < envio) options.sendTimeout = envio;
+    if ((options.sendTimeout ?? Duration.zero) < envio) {
+      options.sendTimeout = envio;
+    }
     if ((options.receiveTimeout ?? Duration.zero) < resposta) {
       options.receiveTimeout = resposta;
     }

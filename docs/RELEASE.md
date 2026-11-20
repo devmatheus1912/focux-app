@@ -31,6 +31,8 @@ Como uma versão do app sai para a App Store e o Google Play. Branches e fluxo d
 
 ## Depois do lançamento
 
+- Quando a versão nova estiver aprovada nas duas lojas, suba `FOCUX_APP_VERSAO_RECOMENDADA_IOS` e `_ANDROID` na Railway: o app mostra a folha "Nova versão disponível" e o servidor manda o push uma vez por aparelho (na hora cheia seguinte, às :15). A mínima (`FOCUX_APP_VERSAO_MINIMA_*`) só sobe quando a versão antiga quebra de verdade.
+
 - Acompanhe o Sentry (org `focux-personal`, projeto `flutter`). Travamento de tela aparece como "App Hang", sem mensagem do Dart; os breadcrumbs mostram as últimas telas e toques.
 - O app publicado continua chamando a API por semanas. O backend só remove campo ou endpoint quando a versão nova já tiver a maioria dos usuários.
 

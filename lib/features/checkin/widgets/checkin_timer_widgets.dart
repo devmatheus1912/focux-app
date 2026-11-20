@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import '../../../core/widgets/fx_conversion.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/brand_palette.dart';
@@ -49,7 +50,12 @@ class CheckinRestFocusView extends StatelessWidget {
     this.onRpe,
     this.rpeEscolhido,
     this.rpeAlvo,
+    this.onAtivarNotificacoes,
   });
+
+  /// Notificações negadas: linha discreta para ativar o aviso com a tela
+  /// bloqueada (só no primeiro descanso).
+  final VoidCallback? onAtivarNotificacoes;
 
   @override
   Widget build(BuildContext context) {
@@ -91,7 +97,7 @@ class CheckinRestFocusView extends StatelessWidget {
                       _AjusteDescanso(
                         icone: FxIcons.remover,
                         rotulo: s.checkinDescansoMenos15,
-                      leitura: s.checkinDescansoMenos15Leitura,
+                        leitura: s.checkinDescansoMenos15Leitura,
                         onTap: () => onAjustar!(-15),
                       ),
                       const SizedBox(width: TokensStrip.s3),
@@ -134,7 +140,7 @@ class CheckinRestFocusView extends StatelessWidget {
                       _AjusteDescanso(
                         icone: FxIcons.adicionar,
                         rotulo: s.checkinDescansoMais15,
-                      leitura: s.checkinDescansoMais15Leitura,
+                        leitura: s.checkinDescansoMais15Leitura,
                         onTap: () => onAjustar!(15),
                       ),
                     ],
@@ -186,6 +192,14 @@ class CheckinRestFocusView extends StatelessWidget {
                     style: FocuxHubTypography.bodyMuted(color: chrome.mute),
                   ),
                 ],
+              ],
+              if (onAtivarNotificacoes != null) ...[
+                const SizedBox(height: TokensStrip.s3),
+                FxConversionTextLink(
+                  text: s.checkinDescansoNotificacoesNegadas,
+                  actionText: s.checkinDescansoAtivarNotificacoes,
+                  onTap: onAtivarNotificacoes!,
+                ),
               ],
               const SizedBox(height: TokensStrip.s5),
               // Trocar o exercício fica no menu "···" ("Trocar exercício").

@@ -37,6 +37,7 @@ import '../../alunos/data/aluno_repository.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../perfil/providers/perfil_provider.dart';
 import '../../subscription/widgets/upgrade_prompt_sheet.dart';
 import '../data/financeiro_repository.dart';
 import '../providers/financeiro_provider.dart';
@@ -100,6 +101,7 @@ class _FinanceiroMensalidadesTabState
       // Sem a lista completa o resumo usa o que carregou, com o aviso.
     }
   }
+
   List<Mensalidade> _items = [];
   var _page = 0;
   var _homePage = 0;
@@ -354,11 +356,13 @@ class _FinanceiroMensalidadesTabState
     // Atraso é estado, não erro: âmbar, como no resto do app.
     final alerta = chrome.isDark ? EagleTokens.warnDark : EagleTokens.warn;
     // Busca só ajuda com lista grande; com poucas cobranças é ruído.
-    final mostrarBusca = _searchCtrl.text.isNotEmpty ||
+    final mostrarBusca =
+        _searchCtrl.text.isNotEmpty ||
         _homeItems.length >= 6 ||
         _homeHasMore ||
         _items.length >= 6;
-    final atrasoNoMes = (ref
+    final atrasoNoMes =
+        (ref
                 .watch(financeiroHomeProvider)
                 .value
                 ?.resumoMesAtual
@@ -410,7 +414,11 @@ class _FinanceiroMensalidadesTabState
                           _searchCtrl.text.isNotEmpty
                               ? IconButton(
                                 tooltip: 'Limpar busca',
-                                icon: Icon(FxIcons.fecharPequeno, size: 16, color: mute),
+                                icon: Icon(
+                                  FxIcons.fecharPequeno,
+                                  size: 16,
+                                  color: mute,
+                                ),
                                 onPressed: () {
                                   _searchCtrl.clear();
                                   setState(() {
@@ -721,14 +729,14 @@ class _FinanceiroMensalidadesTabState
                                                       fontWeight:
                                                           FontWeight.w700,
                                                       fontFeatures: const [
-                                                        FontFeature
-                                                            .tabularFigures(),
+                                                        FontFeature.tabularFigures(),
                                                       ],
                                                     ),
                                                   ),
                                                   const SizedBox(width: 4),
                                                   Icon(
-                                                    FxIcons.chevronDireitaPequeno,
+                                                    FxIcons
+                                                        .chevronDireitaPequeno,
                                                     size: 16,
                                                     color: mute,
                                                   ),
@@ -755,7 +763,9 @@ class _FinanceiroMensalidadesTabState
                                                       cabecalho,
                                                       style: TextStyle(
                                                         color: mute,
-                                                        fontSize: TokensStrip.fontBodySm,
+                                                        fontSize:
+                                                            TokensStrip
+                                                                .fontBodySm,
                                                         fontWeight:
                                                             FontWeight.w700,
                                                       ),

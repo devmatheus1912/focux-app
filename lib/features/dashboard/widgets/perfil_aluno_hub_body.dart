@@ -114,6 +114,15 @@ class PerfilAlunoHubBody extends ConsumerWidget {
                   line: chrome.line,
                   onTap: editar,
                 ),
+                FxSettingsTile(
+                  icon: FxIcons.notificacao,
+                  label: 'Notificações',
+                  subtitle: 'O que avisar no celular',
+                  value: '',
+                  mute: chrome.mute,
+                  line: chrome.line,
+                  onTap: () => context.push('/perfil/notificacoes'),
+                ),
                 // Vídeo não toca sozinho no dado móvel (SPEC-checkin-offline).
                 const EconomiaDeDadosTile(),
                 FxSettingsTile(

@@ -1,53 +1,42 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/tokens_strip.dart';
-import '../../../../core/widgets/fx_empty_state.dart';
 import '../../../../core/widgets/fx_loading.dart';
+import '../../../treinos/widgets/exercise_library_row.dart';
 import '../../data/exercicio_repository.dart';
-import 'exercicio_card.dart';
-import '../../../../core/theme/fx_icons.dart';
 
+/// Lista da aba Exercícios com a mesma linha da biblioteca do "Adicionar
+/// exercício" (20/11): mídia à esquerda, nome em até 2 linhas, grupo e
+/// equipamento embaixo ("Seu · Peito · Halter"), estrela só no favorito e
+/// "⋯" à direita. Segurar favorita; em modo seleção o toque marca.
 class ExerciciosListView extends StatelessWidget {
   const ExerciciosListView({
     super.key,
     required this.exercicios,
     required this.selectedIds,
     required this.onTap,
-    required this.onLongPress,
     required this.onFavorite,
-    required this.onUploadVideo,
-    required this.onDelete,
-    this.onCriarMeu,
+    required this.onMais,
+    required this.onPreview,
     this.controller,
-    this.accent,
     this.loadingMore = false,
+    this.busca = '',
   });
 
   final List<Exercicio> exercicios;
   final Set<int> selectedIds;
   final ScrollController? controller;
-  final Color? accent;
   final bool loadingMore;
+  final String busca;
   final ValueChanged<Exercicio> onTap;
-  final ValueChanged<Exercicio> onLongPress;
   final ValueChanged<Exercicio> onFavorite;
-  final ValueChanged<Exercicio> onUploadVideo;
-  final ValueChanged<Exercicio> onDelete;
-  final ValueChanged<Exercicio>? onCriarMeu;
+  final ValueChanged<Exercicio> onMais;
+  final ValueChanged<Exercicio> onPreview;
 
   @override
   Widget build(BuildContext context) {
-    if (exercicios.isEmpty) {
-      return const FxEmptyState(
-        icon: FxIcons.buscar,
-        title: 'Nenhum exercício encontrado',
-        subtitle: 'Ajuste os filtros ou cadastre um novo exercício.',
-      );
-    }
-
-    final primary = accent ?? Theme.of(context).colorScheme.primary;
     final extra = loadingMore ? 1 : 0;
-
+    final selecionando = selectedIds.isNotEmpty;
     return ListView.builder(
       controller: controller,
       physics: const AlwaysScrollableScrollPhysics(),
@@ -67,16 +56,17 @@ class ExerciciosListView extends StatelessWidget {
           );
         }
         final item = exercicios[i];
-        return ExercicioCard(
+        return ExerciseLibraryRow(
+          key: ValueKey(item.id),
           exercicio: item,
-          accent: primary,
+          picker: false,
+          searchQuery: busca,
           selected: selectedIds.contains(item.id),
-          onTapOverride: () => onTap(item),
-          onLongPress: () => onLongPress(item),
-          onFavoritoToggle: () => onFavorite(item),
-          onUploadVideo: () => onUploadVideo(item),
-          onDelete: () => onDelete(item),
-          onCriarMeu: onCriarMeu == null ? null : () => onCriarMeu!(item),
+          showDivider: i < exercicios.length - 1,
+          onTap: () => onTap(item),
+          onFavoriteToggle: selecionando ? null : () => onFavorite(item),
+          onPreviewThumb: () => onPreview(item),
+          onMais: selecionando ? null : () => onMais(item),
         );
       },
     );

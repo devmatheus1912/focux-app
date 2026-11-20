@@ -1,11 +1,16 @@
 import 'package:flutter/widgets.dart';
 import '../../../core/theme/fx_icons.dart';
+
 /// Contrato de gravação do vídeo do personal — alinhado ao POST /api/exercicios/{id}/video.
 abstract final class ExerciseVideoUploadSpec {
   ExerciseVideoUploadSpec._();
 
   static const int maxBytes = 120 * 1024 * 1024;
   static const Duration maxDuration = Duration(seconds: 45);
+
+  /// A galeria não respeita o limite da câmera: aceita até 60 s (folga sobre
+  /// os 45 s do texto) e recusa o resto antes de subir (20/11).
+  static const Duration maxDurationAceita = Duration(seconds: 60);
   static const Set<String> allowedExtensions = {'mp4', 'mov', 'm4v', 'webm'};
 
   static const String aspectLabel = 'Vertical 9:16';
@@ -62,7 +67,78 @@ abstract final class ExerciseVideoUploadSpec {
     }
     return null;
   }
+
+  /// Duração desconhecida (leitura falhou) não recusa: o servidor ainda
+  /// confere o tamanho.
+  static String? rejectionForDuration(Duration? duracao) {
+    if (duracao == null || duracao <= maxDurationAceita) return null;
+    return 'O vídeo tem ${exerciseVideoDuracao(duracao)}. Use até 45 segundos: '
+        'corte no editor do celular e escolha de novo.';
+  }
 }
+
+/// "0:38", "2:05".
+String exerciseVideoDuracao(Duration d) {
+  final seg = d.inSeconds;
+  return '${seg ~/ 60}:${(seg % 60).toString().padLeft(2, '0')}';
+}
+
+/// "42 MB" (arredonda para cima; abaixo de 1 MB vira "1 MB").
+String exerciseVideoTamanho(int bytes) {
+  const mb = 1024 * 1024;
+  final n = (bytes + mb - 1) ~/ mb;
+  return '${n < 1 ? 1 : n} MB';
+}
+
+/// "0:38 · 42 MB", ou só o tamanho quando a duração não foi lida.
+String exerciseVideoResumo({Duration? duracao, required int bytes}) =>
+    duracao == null
+        ? exerciseVideoTamanho(bytes)
+        : '${exerciseVideoDuracao(duracao)} · ${exerciseVideoTamanho(bytes)}';
+
+String exerciseVideoPreparando() => 'Preparando vídeo…';
+
+String exerciseVideoPreparandoApoio() =>
+    'Vídeo longo leva alguns segundos para chegar.';
+
+String exerciseVideoEsperando() => 'Esperando o vídeo';
+
+/// Progresso real enquanto o arquivo sobe; depois o servidor converte o
+/// vídeo e não há número para mostrar.
+String exerciseVideoEnvioRotulo(double? progresso) =>
+    progresso == null || progresso >= 1
+        ? 'Processando vídeo…'
+        : 'Enviando vídeo ${(progresso * 100).floor()}%';
+
+/// Linha do vídeo no cadastro: vazio, preparando ou escolhido.
+String exerciseVideoLinhaTitulo({
+  required bool preparando,
+  required bool escolhido,
+}) =>
+    preparando
+        ? exerciseVideoPreparando()
+        : escolhido
+        ? 'Vídeo escolhido'
+        : 'Adicionar meu vídeo';
+
+String exerciseVideoLinhaApoio({required bool preparando, String? resumo}) =>
+    preparando
+        ? exerciseVideoPreparandoApoio()
+        : resumo == null
+        ? 'Câmera ou galeria'
+        : '$resumo · Toque para trocar';
+
+String exerciseVideoNovoFalhou() =>
+    'Exercício criado, mas o vídeo não subiu. Envie depois no exercício, em "Enviar vídeo".';
+
+String exerciseVideoSairTitulo() => 'O vídeo ainda está subindo';
+
+String exerciseVideoSairTexto() =>
+    'Sair agora cancela o envio. O exercício fica salvo sem vídeo.';
+
+String exerciseVideoSairFicar() => 'Ficar';
+
+String exerciseVideoSairConfirmar() => 'Sair sem o vídeo';
 
 String exerciseVideoPanelHeader() => 'Vídeo próprio';
 
@@ -89,8 +165,7 @@ String exerciseVideoRemoveConfirmTitle() => 'Remover vídeo próprio?';
 String exerciseVideoRemoveConfirmMessage() =>
     'O aluno deixa de ver a sua demonstração neste exercício.';
 
-String exerciseVideoUploadSuccess() =>
-    'Vídeo próprio adicionado ao exercício.';
+String exerciseVideoUploadSuccess() => 'Vídeo próprio adicionado ao exercício.';
 
 String exerciseVideoRemoveSuccess() => 'Vídeo próprio removido.';
 

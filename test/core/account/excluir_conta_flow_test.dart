@@ -50,7 +50,7 @@ void main() {
           confirmacao: 'EXCLUIR',
           usarCodigo: true,
         ),
-        'Informe a senha ou o código que chegou no e-mail.',
+        'Informe a senha ou o código que chegou no e‑mail.',
       );
     });
 

@@ -31,6 +31,7 @@ platform :ios do
 
     revoke_orphan_distribution_certs!(api_key)
     ensure_push_capability!(ENV.fetch("APP_BUNDLE_ID", "com.focux.focuxApp"))
+    ensure_time_sensitive_capability!(ENV.fetch("APP_BUNDLE_ID", "com.focux.focuxApp"))
 
     cert(
       api_key: api_key,
@@ -69,6 +70,27 @@ def ensure_push_capability!(identifier)
   end
   UI.important("Habilitando Push Notifications em #{identifier}...")
   bundle.create_capability(push)
+end
+
+# Fim do descanso fura o Foco do iPhone (Time Sensitive, SPEC-notificacoes).
+# O profile só leva o entitlement se o App ID tiver a capability. Se a Apple
+# recusar habilitar, o build segue sem ela: tira a chave do Runner.entitlements
+# (o aviso continua chegando, só não fura o Foco).
+TIME_SENSITIVE_KEY = "com.apple.developer.usernotifications.time-sensitive"
+def ensure_time_sensitive_capability!(identifier)
+  tipo = "USERNOTIFICATIONS_TIMESENSITIVE"
+  bundle = Spaceship::ConnectAPI::BundleId.find(identifier)
+  UI.user_error!("App ID #{identifier} não encontrado") if bundle.nil?
+  if bundle.get_capabilities.any? { |c| c.capability_type == tipo }
+    UI.message("Time Sensitive Notifications já habilitado em #{identifier}.")
+    return
+  end
+  UI.important("Habilitando Time Sensitive Notifications em #{identifier}...")
+  bundle.create_capability(tipo)
+rescue StandardError => e
+  UI.important("Time Sensitive indisponível (#{e.message}); seguindo sem o entitlement.")
+  entitlements = File.expand_path("../Runner/Runner.entitlements", __dir__)
+  sh("/usr/libexec/PlistBuddy", "-c", "Delete :#{TIME_SENSITIVE_KEY}", entitlements) rescue nil
 end
 
 def revoke_orphan_distribution_certs!(api_key)

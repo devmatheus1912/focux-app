@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
@@ -12,6 +13,7 @@ import 'package:focux_app/features/exercicios/data/enums.dart';
 import 'package:focux_app/features/exercicios/data/exercicio_repository.dart';
 import 'package:focux_app/features/exercicios/models/exercicio_criado.dart';
 import 'package:focux_app/features/exercicios/screens/add_exercicio_screen.dart';
+import 'package:focux_app/features/exercicios/widgets/exercise_video_picker.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -59,7 +61,11 @@ class _FakeApiClient implements ApiClient {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
-Widget _app(_Adapter adapter, {Exercicio? copiaDe}) {
+Widget _app(
+  _Adapter adapter, {
+  Exercicio? copiaDe,
+  EscolherVideoDoExercicio? escolher,
+}) {
   final dio = Dio(BaseOptions(baseUrl: 'https://api.example.test'))
     ..httpClientAdapter = adapter;
   final router = GoRouter(
@@ -72,7 +78,11 @@ Widget _app(_Adapter adapter, {Exercicio? copiaDe}) {
     ],
   );
   return ProviderScope(
-    overrides: [apiClientProvider.overrideWithValue(_FakeApiClient(dio))],
+    overrides: [
+      apiClientProvider.overrideWithValue(_FakeApiClient(dio)),
+      if (escolher != null)
+        escolherVideoDoExercicioProvider.overrideWithValue(escolher),
+    ],
     child: MaterialApp.router(
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: EagleTokens.brandAccent),
@@ -225,7 +235,9 @@ void main() {
             builder:
                 (_, state) => AddExercicioScreen(
                   copiaDe: state.extra as Exercicio?,
-                  origem: exercicioOrigemDe(state.uri.queryParameters['origem']),
+                  origem: exercicioOrigemDe(
+                    state.uri.queryParameters['origem'],
+                  ),
                 ),
           ),
         ],
@@ -251,7 +263,9 @@ void main() {
       return resultado;
     }
 
-    testWidgets('da biblioteca: diz que ficou em Meus exercícios', (tester) async {
+    testWidgets('da biblioteca: diz que ficou em Meus exercícios', (
+      tester,
+    ) async {
       final r = await criarComOrigem(
         tester,
         origem: 'biblioteca',
@@ -262,16 +276,23 @@ void main() {
       expect(r.destino, ExercicioCriadoDestino.verEmMeus);
     });
 
-    testWidgets('do treino: "Adicionar ao treino" é o principal', (tester) async {
+    testWidgets('do treino: "Adicionar ao treino" é o principal', (
+      tester,
+    ) async {
       final r = await criarComOrigem(
         tester,
         origem: 'treino',
         botao: 'Adicionar ao treino',
       );
-      expect((r as ExercicioCriado).destino, ExercicioCriadoDestino.adicionarAoTreino);
+      expect(
+        (r as ExercicioCriado).destino,
+        ExercicioCriadoDestino.adicionarAoTreino,
+      );
     });
 
-    testWidgets('da troca: "Usar no lugar do atual" devolve o id', (tester) async {
+    testWidgets('da troca: "Usar no lugar do atual" devolve o id', (
+      tester,
+    ) async {
       final r = await criarComOrigem(
         tester,
         origem: 'troca',
@@ -298,6 +319,69 @@ void main() {
       expect(corpo['nome'], 'Supino reto (meu)');
       expect(corpo.containsKey('videoUrl'), isFalse);
       expect(adapter.chamadas.where((c) => c.path.endsWith('/video')), isEmpty);
+    });
+
+    testWidgets(
+      'vídeo longo: a linha diz "Preparando vídeo…" e o Cadastrar espera o arquivo',
+      (tester) async {
+        tela(tester);
+        final adapter = _Adapter();
+        final entrega = Completer<VideoDoExercicio?>();
+        await tester.pumpWidget(
+          _app(
+            adapter,
+            copiaDe: original,
+            escolher: (context, {aoPreparar}) {
+              aoPreparar?.call();
+              return entrega.future;
+            },
+          ),
+        );
+        await _settle(tester);
+
+        await tester.tap(find.text('Adicionar meu vídeo'));
+        await _settle(tester);
+        expect(find.text('Preparando vídeo…'), findsOneWidget);
+        expect(find.text('Esperando o vídeo'), findsOneWidget);
+        await tester.tap(find.text('Esperando o vídeo'));
+        await _settle(tester);
+        expect(adapter.chamadas.where((c) => c.metodo == 'POST'), isEmpty);
+
+        entrega.complete(
+          const VideoDoExercicio(
+            path: '/tmp/supino.mp4',
+            bytes: 42 * 1024 * 1024,
+            duracao: Duration(seconds: 38),
+          ),
+        );
+        await _settle(tester);
+        expect(find.text('Preparando vídeo…'), findsNothing);
+        expect(find.text('Vídeo escolhido'), findsOneWidget);
+        expect(find.text('0:38 · 42 MB · Toque para trocar'), findsOneWidget);
+        expect(find.text('Cadastrar'), findsOneWidget);
+      },
+    );
+
+    testWidgets('desistir do vídeo volta a linha ao estado vazio', (
+      tester,
+    ) async {
+      tela(tester);
+      await tester.pumpWidget(
+        _app(
+          _Adapter(),
+          copiaDe: original,
+          escolher: (context, {aoPreparar}) async {
+            aoPreparar?.call();
+            return null;
+          },
+        ),
+      );
+      await _settle(tester);
+      await tester.tap(find.text('Adicionar meu vídeo'));
+      await _settle(tester);
+      expect(find.text('Preparando vídeo…'), findsNothing);
+      expect(find.text('Adicionar meu vídeo'), findsOneWidget);
+      expect(find.text('Cadastrar'), findsOneWidget);
     });
   });
 

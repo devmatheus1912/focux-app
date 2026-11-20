@@ -1,4 +1,7 @@
 import 'dart:async';
+import 'core/notificacoes/notificacoes_locais.dart';
+import 'core/versao/app_versao.dart';
+import 'core/versao/atualizacao_scope.dart';
 import 'dart:ui';
 
 import 'package:firebase_core/firebase_core.dart';
@@ -89,6 +92,9 @@ void main() {
       await SecureStorage.limparSessaoDeInstalacaoAnterior();
       unawaited(SecureStorage.warmSessionCache());
     }
+
+    // Versão instalada: vai em toda requisição e decide o aviso de atualização.
+    await AppInfo.carregar();
 
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setSystemUIOverlayStyle(FocuxSystemChrome.dark);
@@ -275,6 +281,8 @@ class _FocuxAppState extends ConsumerState<FocuxApp>
       if (kDebugMode) debugPrint('[Focux] FCM deferred init error: $error');
       reportUncaughtZoneError(error, stack);
     }
+    // Canais do Android por tipo e aviso do fim do descanso.
+    await NotificacoesLocais.init();
     if (!mounted) return;
     if (ref.read(authProvider) == AuthStatus.authenticated) {
       _requestPushPermission();
@@ -559,7 +567,9 @@ class _FocuxAppState extends ConsumerState<FocuxApp>
               child: CheckinFilaSyncScope(
                 child: IapPurchaseSyncScope(
                   child: AtualizaAoVoltarScope(
-                    child: child ?? const SizedBox.shrink(),
+                    child: AtualizacaoScope(
+                      child: child ?? const SizedBox.shrink(),
+                    ),
                   ),
                 ),
               ),

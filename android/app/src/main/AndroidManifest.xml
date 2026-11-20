@@ -155,6 +155,10 @@
         <activity
             android:name="androidx.glance.appwidget.action.ActionTrampolineActivity"
             tools:node="remove" />
+        <!-- Aviso agendado do fim do descanso (flutter_local_notifications). -->
+        <receiver
+            android:exported="false"
+            android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />
         <receiver
             android:name=".FocuxRecoveryWidgetProvider"
             android:exported="true"

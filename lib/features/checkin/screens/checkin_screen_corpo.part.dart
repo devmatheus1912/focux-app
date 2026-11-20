@@ -72,17 +72,14 @@ extension _CheckinCorpo on _CheckinScreenState {
         exercicios.isNotEmpty && checkinExerciciosFaltando(exercicios) == 0;
     final onTrocar =
         exercicios.length > 1 ? () => _abrirFila(exercicios) : null;
-    final rodape = _rodape(
-      s,
-      current,
-      exercicios,
-      tudoFeito: tudoFeito,
-    );
+    final rodape = _rodape(s, current, exercicios, tudoFeito: tudoFeito);
 
     return Column(
       children: [
         CheckinWorkoutHeader(
-          treinoNome: _tituloDoTreino(_execucao?.treinoNome ?? s.checkinTreinoFallback),
+          treinoNome: _tituloDoTreino(
+            _execucao?.treinoNome ?? s.checkinTreinoFallback,
+          ),
           contextLine:
               _descanso.ativo
                   ? s.checkinDescanso
@@ -112,8 +109,11 @@ extension _CheckinCorpo on _CheckinScreenState {
                     onAjustar: _ajustarDescanso,
                     rpeAlvo: current?.rpeAlvo,
                     rpeEscolhido: _rpeEscolhido,
-                    onRpe: _ultimaEnvio == null || _presencial ? null : _anotarRpe,
+                    onRpe:
+                        _ultimaEnvio == null || _presencial ? null : _anotarRpe,
                     serieAvaliada: _ultimaSerie?.numero,
+                    onAtivarNotificacoes:
+                        _dicaPermissao ? abrirAjustesDeNotificacao : null,
                   )
                   : _cardOuVazio(s, exercicios, current, currentIndex),
         ),
@@ -234,9 +234,10 @@ extension _CheckinCorpo on _CheckinScreenState {
           (kg) => _mexerRascunho(() => _rascunhos.definirCarga(current, kg)),
       onEditarReps:
           (n) => _mexerRascunho(() => _rascunhos.definirReps(current, n)),
-      onDicas: checkinExerciseHasTips(current)
-          ? () => showCheckinExerciseTipsSheet(context, ee: current)
-          : null,
+      onDicas:
+          checkinExerciseHasTips(current)
+              ? () => showCheckinExerciseTipsSheet(context, ee: current)
+              : null,
     );
   }
 
@@ -250,7 +251,8 @@ extension _CheckinCorpo on _CheckinScreenState {
     if (inicio < 0) return null;
     for (var i = 1; i <= exercicios.length; i++) {
       final cand = exercicios[(inicio + i) % exercicios.length];
-      if (!cand.concluido && cand.treinoExercicioId != atual.treinoExercicioId) {
+      if (!cand.concluido &&
+          cand.treinoExercicioId != atual.treinoExercicioId) {
         return cand;
       }
     }

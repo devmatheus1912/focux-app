@@ -25,6 +25,9 @@ const _migradas = <String, List<String>>{
     'FxQuickChips',
     'FxHomeSheetHeader',
   ],
+  'lib/features/exercicios/widgets/exercicio_acoes.dart': [
+    'showFxGroupedActionSheet',
+  ],
 };
 
 void main() {
@@ -37,19 +40,22 @@ void main() {
     });
   });
 
-  test('nenhuma folha migrada tem botão cheio vermelho para ação destrutiva', () {
-    for (final caminho in _migradas.keys) {
-      final fonte = File(caminho).readAsStringSync();
-      final vermelhoCheio = RegExp(
-        r'ElevatedButton[\s\S]{0,200}backgroundColor:\s*EagleTokens\.bad',
-      );
-      expect(
-        vermelhoCheio.hasMatch(fonte),
-        isFalse,
-        reason: '$caminho: ação destrutiva é linha de texto, não botão cheio',
-      );
-    }
-  });
+  test(
+    'nenhuma folha migrada tem botão cheio vermelho para ação destrutiva',
+    () {
+      for (final caminho in _migradas.keys) {
+        final fonte = File(caminho).readAsStringSync();
+        final vermelhoCheio = RegExp(
+          r'ElevatedButton[\s\S]{0,200}backgroundColor:\s*EagleTokens\.bad',
+        );
+        expect(
+          vermelhoCheio.hasMatch(fonte),
+          isFalse,
+          reason: '$caminho: ação destrutiva é linha de texto, não botão cheio',
+        );
+      }
+    },
+  );
 
   test('a lista do treino não tem botão destrutivo cheio', () {
     for (final caminho in [
@@ -66,6 +72,21 @@ void main() {
     }
   });
 
+  test(
+    'features/exercicios não usa PopupMenuButton (o "⋯" é folha do kit)',
+    () {
+      final achados =
+          Directory('lib/features/exercicios')
+              .listSync(recursive: true)
+              .whereType<File>()
+              .where((f) => f.path.endsWith('.dart'))
+              .where((f) => f.readAsStringSync().contains('PopupMenuButton'))
+              .map((f) => f.path)
+              .toList();
+      expect(achados, isEmpty);
+    },
+  );
+
   test('as peças do kit existem', () {
     for (final arquivo in [
       'fx_sheet_frame.dart',
@@ -73,7 +94,11 @@ void main() {
       'fx_sheet_search_field.dart',
       'fx_quick_chips.dart',
     ]) {
-      expect(File('lib/core/widgets/$arquivo').existsSync(), isTrue, reason: arquivo);
+      expect(
+        File('lib/core/widgets/$arquivo').existsSync(),
+        isTrue,
+        reason: arquivo,
+      );
     }
   });
 }

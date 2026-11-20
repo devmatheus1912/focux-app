@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import '../../../core/notificacoes/aviso_fim_descanso.dart';
 import 'package:audio_session/audio_session.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -27,6 +28,8 @@ class _CheckinDescansoAlertaPadrao implements CheckinDescansoAlerta {
   Future<void> tocar() async {
     await HapticFeedback.heavyImpact();
     await HapticFeedback.vibrate();
+    // "Som no fim do descanso" (Perfil > Notificações): sem som, só vibra.
+    if (!await PreferenciasDoDescanso.somLigado()) return;
     try {
       final player = _player ??= await _criarPlayer();
       if (!_carregado) {

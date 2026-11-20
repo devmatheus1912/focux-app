@@ -1,5 +1,6 @@
 import Flutter
 import UIKit
+import UserNotifications
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {
@@ -8,7 +9,26 @@ import UIKit
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
     GeneratedPluginRegistrant.register(with: self)
+    // Aviso local do fim do descanso aparece também com o app aberto ou fechado.
+    UNUserNotificationCenter.current().delegate = self
+    if let controller = window?.rootViewController as? FlutterViewController {
+      canalNotificacoes = FlutterMethodChannel(
+        name: "focux/notificacoes", binaryMessenger: controller.binaryMessenger)
+    }
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
+
+  private var canalNotificacoes: FlutterMethodChannel?
+
+  /// Ajustes do iPhone > Focux > Notificações > "Ajustes de notificação do
+  /// Focux": abre Perfil > Notificações (providesAppNotificationSettings).
+  /// O FlutterAppDelegate não implementa este método (só willPresent e
+  /// didReceive), por isso @objc sem override.
+  @objc func userNotificationCenter(
+    _ center: UNUserNotificationCenter,
+    openSettingsFor notification: UNNotification?
+  ) {
+    canalNotificacoes?.invokeMethod("abrirAjustesDoApp", arguments: nil)
   }
 
   /// Entrega o redirect OAuth do Google Sign-In aos plugins registrados.

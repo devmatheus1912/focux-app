@@ -33,7 +33,11 @@ class ExerciseLibraryRow extends StatelessWidget {
     this.titulo,
     this.marcado = false,
     this.onMarcar,
+    this.onMais,
   });
+
+  /// "⋯" à direita: abre as ações do exercício (aba Exercícios do personal).
+  final VoidCallback? onMais;
 
   /// Texto da linha quando o começo do nome virou cabeçalho do grupo
   /// ("com halteres"). O leitor de tela lê o nome inteiro.
@@ -92,15 +96,17 @@ class ExerciseLibraryRow extends StatelessWidget {
     final mute = chrome.mute;
     final line = chrome.line;
     final brand = BrandPalette.softened(Theme.of(context).colorScheme.primary);
+    // Exercício do personal: "Seu" pequeno no começo da linha, sem selo (20/11).
+    final meu = !alreadyInTreino && !videoFocuxIntocado(exercicio);
     final meta = [
+      if (meu) 'Seu',
       exerciseLibraryMeta(exercicio),
       if (!_hasThumbMedia) 'Vídeo em breve',
     ].where((p) => p.isNotEmpty).join(' · ');
     final hasPreview =
         onPreviewThumb != null && canPreviewExerciseMedia(exercicio);
     // Toda linha reserva o quadrado da foto: a coluna dos nomes não zigue-zagueia.
-    final dividerInset =
-        insetGroup ? 0.0 : 36.0 + FxSettingsLayout.iconGap;
+    final dividerInset = insetGroup ? 0.0 : 36.0 + FxSettingsLayout.iconGap;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -134,7 +140,11 @@ class ExerciseLibraryRow extends StatelessWidget {
               child: Row(
                 children: [
                   if (!_hasThumbMedia) ...[
-                    _QuadradoSemFoto(exercicio: exercicio, mute: mute, line: line),
+                    _QuadradoSemFoto(
+                      exercicio: exercicio,
+                      mute: mute,
+                      line: line,
+                    ),
                     const SizedBox(width: FxSettingsLayout.iconGap),
                   ] else ...[
                     Semantics(
@@ -184,11 +194,6 @@ class ExerciseLibraryRow extends StatelessWidget {
                                 style: FxSettingsLayout.subhead(color: mute),
                               ),
                             ),
-                            if (!alreadyInTreino &&
-                                !videoFocuxIntocado(exercicio)) ...[
-                              const SizedBox(width: 6),
-                              _MeuPill(brand: brand),
-                            ],
                             if (alreadyInTreino) ...[
                               const SizedBox(width: 6),
                               Flexible(
@@ -246,21 +251,39 @@ class ExerciseLibraryRow extends StatelessWidget {
                         minWidth: 48,
                         minHeight: 48,
                       ),
-                      tooltip: marcado
-                          ? 'Desmarcar ${exercicio.nomeDisplay}'
-                          : 'Marcar ${exercicio.nomeDisplay}',
+                      tooltip:
+                          marcado
+                              ? 'Desmarcar ${exercicio.nomeDisplay}'
+                              : 'Marcar ${exercicio.nomeDisplay}',
                       onPressed: () {
                         HapticFeedback.selectionClick();
                         onMarcar!();
                       },
                       icon: Icon(
-                        marcado ? FxIcons.concluidoAtivo : FxIcons.adicionarCirculo,
+                        marcado
+                            ? FxIcons.concluidoAtivo
+                            : FxIcons.adicionarCirculo,
                         color: marcado ? brand : mute,
                         size: 24,
                       ),
                     ),
                   if (selected && onMarcar == null)
                     Icon(FxIcons.check, color: brand, size: 20)
+                  else if (onMais != null)
+                    IconButton(
+                      visualDensity: VisualDensity.compact,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(
+                        minWidth: 48,
+                        minHeight: 48,
+                      ),
+                      tooltip: 'Ações de ${exercicio.nomeDisplay}',
+                      onPressed: () {
+                        HapticFeedback.selectionClick();
+                        onMais!();
+                      },
+                      icon: Icon(FxIcons.mais, color: mute, size: 20),
+                    )
                   else if (!picker)
                     Icon(
                       FxIcons.chevronDireita,
@@ -370,35 +393,7 @@ class _QuadradoSemFoto extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
           border: Border.all(color: line),
         ),
-        child: Icon(
-          FxIcons.treino,
-          size: 18,
-          color: mute,
-        ),
-      ),
-    );
-  }
-}
-
-/// Marca os exercícios do próprio personal no meio dos da Focux.
-class _MeuPill extends StatelessWidget {
-  const _MeuPill({required this.brand});
-
-  final Color brand;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: brand.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        'Seu',
-        style: FxSettingsLayout.footer(
-          color: brand,
-        ).copyWith(fontWeight: FontWeight.w700),
+        child: Icon(FxIcons.treino, size: 18, color: mute),
       ),
     );
   }

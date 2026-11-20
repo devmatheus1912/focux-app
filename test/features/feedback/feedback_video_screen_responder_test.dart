@@ -39,6 +39,9 @@ class _Adapter implements HttpClientAdapter {
     chamadas.add(chave);
     corpos[chave] = options.data;
     Object body;
+    if (options.method == 'DELETE') {
+      return ResponseBody.fromString('', 204);
+    }
     if (chave == 'PUT /api/feedback-videos/1/resposta') {
       respondido = true;
       body = _item();
@@ -111,6 +114,8 @@ void main() {
     expect(find.textContaining('Enviado em'), findsOneWidget);
     expect(find.textContaining('Recado do aluno'), findsOneWidget);
     expect(find.text('senti a lombar'), findsOneWidget);
+    // Remover não mora na folha de resposta: só no "⋯" do item.
+    expect(find.text('Remover este vídeo'), findsNothing);
     await tester.enterText(find.byType(TextField).last, 'Desça devagar');
     await tester.pump();
     await tester.ensureVisible(find.text('Enviar ao aluno'));
@@ -147,5 +152,41 @@ void main() {
     await _settle(tester);
     expect(find.text('Remover'), findsOneWidget);
     expect(find.text('Responder'), findsOneWidget);
+  });
+
+  testWidgets('"⋯" > Remover > confirmar apaga uma vez e tira da lista', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final adapter = _Adapter();
+    final dio = Dio(BaseOptions(baseUrl: 'https://api.example.test'))
+      ..httpClientAdapter = adapter;
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [apiClientProvider.overrideWithValue(_FakeApiClient(dio))],
+        child: MaterialApp(
+          locale: const Locale('pt'),
+          supportedLocales: S.supportedLocales,
+          localizationsDelegates: S.localizationsDelegates,
+          home: const FeedbackVideoScreen(alunoId: 7, alunoNome: 'Aluno'),
+        ),
+      ),
+    );
+    await _settle(tester);
+    await tester.longPress(find.textContaining('Puxada').first);
+    await _settle(tester);
+    await tester.tap(find.text('Remover'));
+    await _settle(tester);
+    expect(find.text('Remover feedback?'), findsOneWidget);
+    await tester.tap(find.text('Remover').last);
+    await _settle(tester);
+
+    expect(
+      adapter.chamadas.where((c) => c == 'DELETE /api/feedback-videos/1'),
+      hasLength(1),
+    );
+    expect(find.textContaining('Puxada'), findsNothing);
   });
 }

@@ -22,6 +22,13 @@ const _listaPath = '/api/financeiro/mensalidades/aluno/minhas';
 const _pixPath = '$_listaPath/7/pix';
 const _avisoPath = '$_listaPath/7/avisar-pagamento';
 
+/// Resposta com status próprio (erro do servidor) para uma rota.
+class _Resposta {
+  const _Resposta(this.status, this.body);
+  final int status;
+  final Object body;
+}
+
 class _RotasAdapter implements HttpClientAdapter {
   _RotasAdapter(this.rotas);
 
@@ -41,10 +48,12 @@ class _RotasAdapter implements HttpClientAdapter {
     final chave =
         '${options.method} ${options.path}${page == null ? '' : '?page=$page'}';
     chamadas.add(chave);
-    final body = rotas[chave];
+    final rota = rotas[chave];
+    final body = rota is _Resposta ? rota.body : rota;
+    final status = rota is _Resposta ? rota.status : (rota == null ? 404 : 200);
     return ResponseBody.fromString(
       jsonEncode(body ?? {'erro': 'rota fora do teste'}),
-      body == null ? 404 : 200,
+      status,
       headers: {
         Headers.contentTypeHeader: [Headers.jsonContentType],
       },
@@ -171,12 +180,82 @@ void main() {
     await _settle(tester);
   }
 
+  testWidgets('sheet do PIX mostra valor e vencimento; Copiar é o primário', (
+    tester,
+  ) async {
+    telaAlta(tester);
+    final adapter = _adapter();
+    bool? interagiu;
+    await tester.pumpWidget(
+      _app(
+        adapter: adapter,
+        home: Consumer(
+          builder:
+              (context, ref, _) => Scaffold(
+                body: Center(
+                  child: TextButton(
+                    onPressed: () async {
+                      interagiu = await mostrarPixMensalidade(
+                        context: context,
+                        ref: ref,
+                        mensalidade: Mensalidade.fromJson(_mensalidadeJson()),
+                        asAluno: true,
+                      );
+                    },
+                    child: const Text('abrir'),
+                  ),
+                ),
+              ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.tap(find.text('abrir'));
+    await _settle(tester);
+
+    expect(find.textContaining('149,90'), findsOneWidget);
+    expect(find.textContaining(_truncado), findsNothing);
+    expect(find.text('Vence em 10/09/2026'), findsOneWidget);
+
+    final primario = find.byType(FxLiquidPrimaryButton);
+    expect(primario, findsOneWidget);
+    expect(
+      tester.widget<FxLiquidPrimaryButton>(primario).label,
+      'Copiar código PIX',
+    );
+    final secundario = find.byType(FxLiquidSecondaryButton);
+    expect(secundario, findsOneWidget);
+    expect(
+      tester.widget<FxLiquidSecondaryButton>(secundario).label,
+      'Já paguei, avisar personal',
+    );
+    expect(
+      tester.getTopLeft(primario).dy,
+      lessThan(tester.getTopLeft(secundario).dy),
+    );
+
+    await tester.tap(secundario);
+    await _settle(tester);
+    expect(adapter.chamadas, contains('POST $_avisoPath'));
+
+    await tester.tap(find.text('Fechar'));
+    await _settle(tester);
+    expect(interagiu, isTrue);
+    await tester.pump(const Duration(seconds: 5));
+  });
+
   testWidgets(
-    'sheet do PIX mostra valor e vencimento; Copiar é o primário',
+    'personal sem chave PIX: aluno ganha Falar com o personal e Já paguei, sem Tentar de novo',
     (tester) async {
       telaAlta(tester);
-      final adapter = _adapter();
-      bool? interagiu;
+      final adapter = _RotasAdapter({
+        'POST $_pixPath': const _Resposta(400, {
+          'erro':
+              'Seu personal ainda não cadastrou a chave PIX. Fale com ele pelo chat.',
+          'codigo': 'PIX_CHAVE_AUSENTE',
+        }),
+        'POST $_avisoPath': {'ok': true},
+      });
       await tester.pumpWidget(
         _app(
           adapter: adapter,
@@ -185,14 +264,15 @@ void main() {
                 (context, ref, _) => Scaffold(
                   body: Center(
                     child: TextButton(
-                      onPressed: () async {
-                        interagiu = await mostrarPixMensalidade(
-                          context: context,
-                          ref: ref,
-                          mensalidade: Mensalidade.fromJson(_mensalidadeJson()),
-                          asAluno: true,
-                        );
-                      },
+                      onPressed:
+                          () => mostrarPixMensalidade(
+                            context: context,
+                            ref: ref,
+                            mensalidade: Mensalidade.fromJson(
+                              _mensalidadeJson(),
+                            ),
+                            asAluno: true,
+                          ),
                       child: const Text('abrir'),
                     ),
                   ),
@@ -204,34 +284,22 @@ void main() {
       await tester.tap(find.text('abrir'));
       await _settle(tester);
 
-      expect(find.textContaining('149,90'), findsOneWidget);
-      expect(find.textContaining(_truncado), findsNothing);
-      expect(find.text('Vence em 10/09/2026'), findsOneWidget);
-
-      final primario = find.byType(FxLiquidPrimaryButton);
-      expect(primario, findsOneWidget);
       expect(
-        tester.widget<FxLiquidPrimaryButton>(primario).label,
-        'Copiar código PIX',
+        find.textContaining('ainda não cadastrou a chave PIX'),
+        findsOneWidget,
       );
-      final secundario = find.byType(FxLiquidSecondaryButton);
-      expect(secundario, findsOneWidget);
+      expect(find.text('Tentar de novo'), findsNothing);
+      expect(find.text('Abrir carteira'), findsNothing);
       expect(
-        tester.widget<FxLiquidSecondaryButton>(secundario).label,
-        'Já paguei, avisar personal',
+        tester
+            .widget<FxLiquidPrimaryButton>(find.byType(FxLiquidPrimaryButton))
+            .label,
+        'Falar com o personal',
       );
-      expect(
-        tester.getTopLeft(primario).dy,
-        lessThan(tester.getTopLeft(secundario).dy),
-      );
-
-      await tester.tap(secundario);
+      await tester.tap(find.text('Já paguei, avisar personal'));
       await _settle(tester);
       expect(adapter.chamadas, contains('POST $_avisoPath'));
-
-      await tester.tap(find.text('Fechar'));
-      await _settle(tester);
-      expect(interagiu, isTrue);
+      expect(find.text('Já paguei, avisar personal'), findsNothing);
       await tester.pump(const Duration(seconds: 5));
     },
   );
@@ -307,7 +375,9 @@ void main() {
       // Com letra 1,6 a linha encosta no botão fixo: abre pela própria linha.
       final linha = find.ancestor(
         of: find.text('Setembro 2026'),
-        matching: find.byWidgetPredicate((w) => w is InkWell && w.onTap != null),
+        matching: find.byWidgetPredicate(
+          (w) => w is InkWell && w.onTap != null,
+        ),
       );
       tester.widget<InkWell>(linha.first).onTap!();
       await _settle(tester);
@@ -322,7 +392,10 @@ void main() {
       final fechar = find.text('Fechar').last;
       await tester.ensureVisible(fechar);
       await tester.pump();
-      expect(find.text('PIX - Escaneie ou copie').hitTestable(), findsOneWidget);
+      expect(
+        find.text('PIX - Escaneie ou copie').hitTestable(),
+        findsOneWidget,
+      );
       await tester.tap(fechar);
       await _settle(tester);
       expect(find.text('Copiar código PIX'), findsNothing);

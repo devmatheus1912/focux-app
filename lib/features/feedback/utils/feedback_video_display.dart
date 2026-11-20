@@ -11,6 +11,9 @@ String feedbackVideoLabel(String? comentario) {
 String feedbackVideoStatusLabel({required bool respondido}) =>
     respondido ? 'Respondido' : 'Para responder';
 
+/// Falha ao subir o áudio da correção (o texto digitado fica na folha).
+const feedbackVideoAudioFalhou = 'Não deu para enviar o áudio. Tente de novo.';
+
 String feedbackVideoResponderLabel({required bool respondido}) =>
     respondido ? 'Editar resposta' : 'Responder';
 

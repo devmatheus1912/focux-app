@@ -2,14 +2,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/auth/sessao_provider.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/exercicio_repository.dart';
-import '../data/exercicio_video_uploader.dart';
 
 final exercicioRepositoryProvider = Provider<ExercicioRepository>(
   (ref) => ExercicioRepository(ref.read(apiClientProvider)),
-);
-
-final exercicioVideoUploaderProvider = Provider<ExercicioVideoUploader>(
-  (ref) => ExercicioVideoUploader(ref.read(exercicioRepositoryProvider)),
 );
 
 // Parâmetros de filtro para a lista de exercícios

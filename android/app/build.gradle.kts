@@ -58,6 +58,8 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+        // flutter_local_notifications (aviso do fim do descanso) usa java.time.
+        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
@@ -139,6 +141,7 @@ dependencies {
     // `implementation`, então o app precisa da dependência própria (mesma versão do plugin
     // intercom_flutter 9.6.x).
     implementation("io.intercom.android:intercom-sdk:18.10.0")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }
 
 flutter {

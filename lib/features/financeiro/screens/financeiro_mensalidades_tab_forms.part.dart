@@ -3,6 +3,26 @@ part of 'financeiro_mensalidades_tab.dart';
 extension FinanceiroMensalidadesTabForms on _FinanceiroMensalidadesTabState {
   /// [mesPedido]: "Lançar" num mês sem cobrança abre já com o vencimento nele.
   Future<void> _abrirFormularioNovaMensalidade({DateTime? mesPedido}) async {
+    // Sem chave PIX o aluno não paga pelo app: avisa antes, sem bloquear.
+    final perfil = ref.read(perfilProvider).value;
+    final semPix = mensalidadeLancarPrecisaAvisoPix(perfil);
+    if (semPix) {
+      final s = S.of(context);
+      final cadastrar = await showFxConfirmSheetOuFechar(
+        context,
+        title: s.mensalidadeFaltaPixTitulo,
+        message: s.mensalidadeFaltaPixTexto,
+        icon: FxIcons.carteira,
+        confirmLabel: s.mensalidadeFaltaPixCadastrar,
+        cancelLabel: s.mensalidadeFaltaPixLancar,
+      );
+      if (cadastrar == null || !mounted) return;
+      if (cadastrar) {
+        context.push('/perfil/wallet');
+        return;
+      }
+    }
+    if (!mounted) return;
     final formKey = GlobalKey<FormState>();
     final valorCtrl = TextEditingController();
     final hoje = DateTime.now();
@@ -12,7 +32,10 @@ extension FinanceiroMensalidadesTabForms on _FinanceiroMensalidadesTabState {
 
     // Ao escolher o aluno: meses que ele já tem (bloqueados na folha), valor e
     // dia da última cobrança como sugestão. Nunca sobrescreve o digitado.
-    Future<void> prepararAluno(int alunoId, void Function(void Function()) set) async {
+    Future<void> prepararAluno(
+      int alunoId,
+      void Function(void Function()) set,
+    ) async {
       List<Mensalidade> doAluno = const [];
       try {
         final page = await FinanceiroRepository(
@@ -105,161 +128,167 @@ extension FinanceiroMensalidadesTabForms on _FinanceiroMensalidadesTabState {
                 }
                 final venc = vencimento;
                 return Form(
-                    key: formKey,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        FxHomeSheetHandle(isDark: isDark),
-                        SizedBox(height: TokensStrip.s4),
-                        FxHomeSheetHeader(
-                          isDark: isDark,
-                          title: 'Nova mensalidade',
-                          subtitle: 'Aluno, valor e vencimento.',
-                          leading: Icon(
-                            FxIcons.adicionarCartao,
-                            color: primary,
-                            size: 18,
+                  key: formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      FxHomeSheetHandle(isDark: isDark),
+                      SizedBox(height: TokensStrip.s4),
+                      FxHomeSheetHeader(
+                        isDark: isDark,
+                        title: 'Nova mensalidade',
+                        subtitle: 'Aluno, valor e vencimento.',
+                        leading: Icon(
+                          FxIcons.adicionarCartao,
+                          color: primary,
+                          size: 18,
+                        ),
+                      ),
+                      SizedBox(height: TokensStrip.s3),
+                      FxSettingsGroup(
+                        children: [
+                          FxSettingsTile(
+                            icon: FxIcons.grupo,
+                            label: 'Aluno',
+                            value: financeiroAlunoPickerValue(
+                              alunoSelecionadoNome,
+                            ),
+                            picker: true,
+                            onTap:
+                                alunos.isEmpty
+                                    ? null
+                                    : () => setModalState(
+                                      () => escolhendoAluno = true,
+                                    ),
                           ),
-                        ),
-                        SizedBox(height: TokensStrip.s3),
-                        FxSettingsGroup(
-                          children: [
-                            FxSettingsTile(
-                              icon: FxIcons.grupo,
-                              label: 'Aluno',
-                              value: financeiroAlunoPickerValue(
-                                alunoSelecionadoNome,
-                              ),
-                              picker: true,
-                              onTap:
-                                  alunos.isEmpty
-                                      ? null
-                                      : () => setModalState(
-                                        () => escolhendoAluno = true,
-                                      ),
-                            ),
-                            AlunoInsetFormField(
-                              controller: valorCtrl,
-                              label: s.financeiroValorRotulo,
-                              hint: 'R\$ 0,00',
-                              icon: FxIcons.dinheiro,
-                              rotuloVisivel: true,
-                              // "Lançar" já fica desativado sem valor.
-                              keyboardType: TextInputType.number,
-                              inputFormatters: const [FxMoneyInputFormatter()],
-                              validator: fxMoneyValidar,
-                            ),
-                            // Mês e dia numa escolha só; sem aluno não há
-                            // como saber quais meses ele já tem.
-                            FxSettingsTile(
-                              icon: FxIcons.calendario,
-                              label: s.financeiroVencimentoRotulo,
-                              value:
-                                  alunoSelecionadoId == null
-                                      ? 'Escolha o aluno primeiro'
-                                      : venc == null
-                                      ? 'Escolher'
-                                      : mensalidadeVencimentoRotulo(venc),
-                              picker: true,
-                              showDivider: false,
-                              onTap:
-                                  alunoSelecionadoId == null
-                                      ? null
-                                      : () async {
-                                        final picked =
-                                            await pickMensalidadeVencimento(
-                                              ctx,
-                                              atual: venc ?? hoje,
-                                              ocupados: ocupados,
-                                            );
-                                        if (picked != null) {
-                                          setModalState(
-                                            () => vencimento = picked,
+                          AlunoInsetFormField(
+                            controller: valorCtrl,
+                            label: s.financeiroValorRotulo,
+                            hint: 'R\$ 0,00',
+                            icon: FxIcons.dinheiro,
+                            rotuloVisivel: true,
+                            // "Lançar" já fica desativado sem valor.
+                            keyboardType: TextInputType.number,
+                            inputFormatters: const [FxMoneyInputFormatter()],
+                            validator: fxMoneyValidar,
+                          ),
+                          // Mês e dia numa escolha só; sem aluno não há
+                          // como saber quais meses ele já tem.
+                          FxSettingsTile(
+                            icon: FxIcons.calendario,
+                            label: s.financeiroVencimentoRotulo,
+                            value:
+                                alunoSelecionadoId == null
+                                    ? 'Escolha o aluno primeiro'
+                                    : venc == null
+                                    ? 'Escolher'
+                                    : mensalidadeVencimentoRotulo(venc),
+                            picker: true,
+                            showDivider: false,
+                            onTap:
+                                alunoSelecionadoId == null
+                                    ? null
+                                    : () async {
+                                      final picked =
+                                          await pickMensalidadeVencimento(
+                                            ctx,
+                                            atual: venc ?? hoje,
+                                            ocupados: ocupados,
                                           );
-                                        }
-                                      },
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: TokensStrip.s3),
-                        FxLiquidPrimaryButton(
-                          label: financeiroLancarMensalidadeTileLabel(),
-                          loading: salvando,
-                          loadingLabel: 'Lançando…',
-                          onPressed:
-                              salvando
-                                  ? null
-                                  : () async {
-                                    if (alunoSelecionadoId == null) {
-                                      FeedbackHelper.showError(
-                                        ctx,
-                                        'Selecione um aluno',
-                                      );
-                                      return;
-                                    }
-                                    if (!formKey.currentState!.validate()) {
-                                      return;
-                                    }
-                                    final v = vencimento;
-                                    if (v == null) {
-                                      FeedbackHelper.showError(
-                                        ctx,
-                                        'Escolha o vencimento',
-                                      );
-                                      return;
-                                    }
-                                    final valor = fxMoneyDoCampo(valorCtrl.text)!;
-                                    HapticFeedback.mediumImpact();
-                                    final ok = await showFxConfirmSheet(
+                                      if (picked != null) {
+                                        setModalState(
+                                          () => vencimento = picked,
+                                        );
+                                      }
+                                    },
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: TokensStrip.s3),
+                      FxLiquidPrimaryButton(
+                        label: financeiroLancarMensalidadeTileLabel(),
+                        loading: salvando,
+                        loadingLabel: 'Lançando…',
+                        onPressed:
+                            salvando
+                                ? null
+                                : () async {
+                                  if (alunoSelecionadoId == null) {
+                                    FeedbackHelper.showError(
                                       ctx,
-                                      title:
-                                          financeiroLancarMensalidadeConfirmTitle(),
-                                      message: mensalidadeConfirmacaoTexto(
-                                        aluno: alunoSelecionadoNome ?? 'Aluno',
-                                        valor: valor,
-                                        vencimento: v,
-                                      ),
-                                      icon: FxIcons.pagamento,
-                                      confirmLabel:
-                                          financeiroLancarMensalidadeTileLabel(),
+                                      'Selecione um aluno',
                                     );
-                                    if (!ok) return;
-                                    setModalState(() => salvando = true);
-                                    try {
-                                      await FinanceiroRepository(
-                                        ref.read(apiClientProvider),
-                                      ).criar(
-                                        alunoSelecionadoId!,
-                                        valor,
-                                        vencimentoIso(DateTime(v.year, v.month, 1)),
-                                        vencimento: vencimentoIso(v),
-                                      );
-                                      if (ctx.mounted) {
-                                        Navigator.of(ctx).pop();
-                                      }
-                                      _load(force: true);
-                                      if (mounted) {
-                                        HapticFeedback.heavyImpact();
-                                        FeedbackHelper.showSuccess(
-                                          context,
-                                          'Mensalidade lançada!',
-                                        );
-                                      }
-                                    } catch (e) {
-                                      setModalState(() => salvando = false);
-                                      if (ctx.mounted) {
-                                        FeedbackHelper.showError(
-                                          ctx,
-                                          friendlyError(e),
-                                        );
-                                      }
+                                    return;
+                                  }
+                                  if (!formKey.currentState!.validate()) {
+                                    return;
+                                  }
+                                  final v = vencimento;
+                                  if (v == null) {
+                                    FeedbackHelper.showError(
+                                      ctx,
+                                      'Escolha o vencimento',
+                                    );
+                                    return;
+                                  }
+                                  final valor = fxMoneyDoCampo(valorCtrl.text)!;
+                                  HapticFeedback.mediumImpact();
+                                  final ok = await showFxConfirmSheet(
+                                    ctx,
+                                    title:
+                                        financeiroLancarMensalidadeConfirmTitle(),
+                                    message: mensalidadeConfirmacaoTexto(
+                                      aluno: alunoSelecionadoNome ?? 'Aluno',
+                                      valor: valor,
+                                      vencimento: v,
+                                      avisoSemPix:
+                                          semPix
+                                              ? s.mensalidadeConfirmaSemPix
+                                              : null,
+                                    ),
+                                    icon: FxIcons.pagamento,
+                                    confirmLabel:
+                                        financeiroLancarMensalidadeTileLabel(),
+                                  );
+                                  if (!ok) return;
+                                  setModalState(() => salvando = true);
+                                  try {
+                                    await FinanceiroRepository(
+                                      ref.read(apiClientProvider),
+                                    ).criar(
+                                      alunoSelecionadoId!,
+                                      valor,
+                                      vencimentoIso(
+                                        DateTime(v.year, v.month, 1),
+                                      ),
+                                      vencimento: vencimentoIso(v),
+                                    );
+                                    if (ctx.mounted) {
+                                      Navigator.of(ctx).pop();
                                     }
-                                  },
-                        ),
-                      ],
-                    ),
-                  );
+                                    _load(force: true);
+                                    if (mounted) {
+                                      HapticFeedback.heavyImpact();
+                                      FeedbackHelper.showSuccess(
+                                        context,
+                                        'Mensalidade lançada!',
+                                      );
+                                    }
+                                  } catch (e) {
+                                    setModalState(() => salvando = false);
+                                    if (ctx.mounted) {
+                                      FeedbackHelper.showError(
+                                        ctx,
+                                        friendlyError(e),
+                                      );
+                                    }
+                                  }
+                                },
+                      ),
+                    ],
+                  ),
+                );
               },
             ),
           );

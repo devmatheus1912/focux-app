@@ -1,34 +1,31 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/exercicios/data/enums.dart';
 import 'package:focux_app/features/exercicios/models/exercicios_ui_filter.dart';
-import 'package:focux_app/features/exercicios/utils/exercicios_filter_display.dart';
 
 void main() {
-  test('exerciciosCountLabel', () {
-    expect(exerciciosCountLabel(0), 'Nenhum exercício');
-    expect(exerciciosCountLabel(1), '1 exercício');
-    expect(exerciciosCountLabel(8), '8 exercícios');
-  });
-
-  test('exerciciosFilterSummary', () {
-    expect(exerciciosFilterSummary(const ExerciciosUiFilter()), 'Nenhum');
+  test('filtro ativo: busca, grupo ou equipamento', () {
+    expect(const ExerciciosUiFilter().hasActive, isFalse);
+    expect(const ExerciciosUiFilter(query: '  ').hasActive, isFalse);
+    expect(const ExerciciosUiFilter(query: 'supino').hasActive, isTrue);
     expect(
-      exerciciosFilterSummary(
-        const ExerciciosUiFilter(favoritos: true, comVideo: true),
-      ),
-      'Favoritos +1',
+      const ExerciciosUiFilter(grupo: GrupoMuscular.peito).hasActive,
+      isTrue,
     );
     expect(
-      exerciciosFilterSummary(
-        const ExerciciosUiFilter(modalidade: Modalidade.cardio),
-      ),
-      isNot(equals('Nenhum')),
+      const ExerciciosUiFilter(equipamento: Equipamento.halter).hasActive,
+      isTrue,
     );
   });
 
-  test('hasFacet ignora só a busca', () {
-    const onlyQuery = ExerciciosUiFilter(query: 'supino');
-    expect(onlyQuery.hasActive, isTrue);
-    expect(onlyQuery.hasFacet, isFalse);
+  test('copyWith limpa grupo e equipamento sem perder a busca', () {
+    const f = ExerciciosUiFilter(
+      query: 'remada',
+      grupo: GrupoMuscular.costasLatissimo,
+      equipamento: Equipamento.barra,
+    );
+    final limpo = f.copyWith(clearGrupo: true, clearEquipamento: true);
+    expect(limpo.query, 'remada');
+    expect(limpo.grupo, isNull);
+    expect(limpo.equipamento, isNull);
   });
 }

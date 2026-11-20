@@ -32,9 +32,11 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
     if (!ok || !context.mounted) return;
     setState(() => _uploadingVideo = true);
     try {
-      final uploaded = await ref
-          .read(exercicioVideoUploaderProvider)
-          .pickAndUpload(widget.exercicioId);
+      final uploaded = await escolherEEnviarVideoDoExercicio(
+        context,
+        ref,
+        widget.exercicioId,
+      );
       if (uploaded == null) return;
       AnalyticsService.instance.track(
         'video_personal_upload',
@@ -154,33 +156,40 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
           leave();
         },
         child: FxShellScaffold(
-        comFundo: true,
-        appBar: FxShellAppBar(
-          title: 'Exercício',
-          // Sem "Atualizado agora": o conteúdo do exercício é estático.
-          onBack: leave,
-          actions: [
-            FxHelpIconButton(
-              tooltip: 'Como usar este exercício',
-              onTap: () => showExercicioDetailHelpSheet(context),
-            ),
-            ...exercicioAsync.maybeWhen(
-              data:
-                  (ex) => [
-                    IconButton(
-                      tooltip:
+          comFundo: true,
+          appBar: FxShellAppBar(
+            title: 'Exercício',
+            // Sem "Atualizado agora": o conteúdo do exercício é estático.
+            onBack: leave,
+            actions: [
+              FxHelpIconButton(
+                tooltip: 'Como usar este exercício',
+                onTap: () => showExercicioDetailHelpSheet(context),
+              ),
+              ...exercicioAsync.maybeWhen(
+                data:
+                    (ex) => [
+                      IconButton(
+                        tooltip:
+                            ex.favoritado
+                                ? 'Remover dos favoritos'
+                                : 'Adicionar aos favoritos',
+                        onPressed:
+                            () => _toggleFavorito(context, ex.favoritado),
+                        icon: Icon(
                           ex.favoritado
-                              ? 'Remover dos favoritos'
-                              : 'Adicionar aos favoritos',
-                      onPressed: () => _toggleFavorito(context, ex.favoritado),
-                      icon: Icon(ex.favoritado ? FxIcons.estrelaAtiva : FxIcons.estrela, size: 22, color: ex.favoritado ? EagleTokens.warn : mute),
-                    ),
-                  ],
-              orElse: () => const <Widget>[],
-            ),
-          ],
-        ),
-        body: exercicioAsync.when(
+                              ? FxIcons.estrelaAtiva
+                              : FxIcons.estrela,
+                          size: 22,
+                          color: ex.favoritado ? EagleTokens.warn : mute,
+                        ),
+                      ),
+                    ],
+                orElse: () => const <Widget>[],
+              ),
+            ],
+          ),
+          body: exercicioAsync.when(
             loading: () => const SkeletonList(count: 5),
             error:
                 (e, _) => FxErrorState(
@@ -192,30 +201,29 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
                           ref.invalidate(exercicioProvider(widget.exercicioId)),
                   title: 'Não conseguimos carregar o exercício',
                 ),
-            data:
-                (ex) {
-                  final grupo = _grupoLabel(ex);
-                  return Column(
-                  children: [
-                    Expanded(
-                      child: RefreshIndicator(
-                        onRefresh: _refresh,
-                        child: FxContentWidthLimiter(
-                          child: SingleChildScrollView(
-                            physics: const AlwaysScrollableScrollPhysics(),
-                            padding: const EdgeInsets.fromLTRB(
-                              FxSettingsLayout.pageInset,
-                              8,
-                              FxSettingsLayout.pageInset,
-                              32,
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                FxHubHeader(
-                                  title: ex.nome,
-                                  subtitle: exercicioHubSubtitle(grupo: grupo),
-                                ),
+            data: (ex) {
+              final grupo = _grupoLabel(ex);
+              return Column(
+                children: [
+                  Expanded(
+                    child: RefreshIndicator(
+                      onRefresh: _refresh,
+                      child: FxContentWidthLimiter(
+                        child: SingleChildScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: const EdgeInsets.fromLTRB(
+                            FxSettingsLayout.pageInset,
+                            8,
+                            FxSettingsLayout.pageInset,
+                            32,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              FxHubHeader(
+                                title: ex.nome,
+                                subtitle: exercicioHubSubtitle(grupo: grupo),
+                              ),
                               const SizedBox(height: TokensStrip.s4),
                               OperationalMetricTile(
                                 label: 'Grupo',
@@ -268,7 +276,8 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
                                     label: 'Biblioteca',
                                     accent: primary,
                                     isDark: isDark,
-                                    onPressed: () => context.push('/exercicios'),
+                                    onPressed:
+                                        () => context.push('/exercicios'),
                                   ),
                                   FxActionChip(
                                     label: 'Treinos',
@@ -287,8 +296,7 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
                                 onUpload:
                                     () => _pickAndUploadVideo(
                                       context,
-                                      hasVideo:
-                                          ex.videoUrl?.isNotEmpty == true,
+                                      hasVideo: ex.videoUrl?.isNotEmpty == true,
                                     ),
                                 onRemove: () => _removeOwnVideo(context),
                               ),
@@ -339,37 +347,37 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
                         ),
                       ),
                     ),
-                    ),
-                    SafeArea(
-                      top: false,
-                      child: Padding(
-                        padding: EdgeInsets.fromLTRB(
-                          FxSettingsLayout.pageInset,
-                          TokensStrip.s2,
-                          FxSettingsLayout.pageInset,
-                          TokensStrip.s3 +
-                              MediaQuery.viewInsetsOf(context).bottom,
-                        ),
-                        child: FxLiquidPrimaryButton(
-                          label: 'Editar exercício',
-                          onPressed: () async {
-                            final saved = await context.push<bool>(
-                              '/exercicios/${widget.exercicioId}/editar',
+                  ),
+                  SafeArea(
+                    top: false,
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        FxSettingsLayout.pageInset,
+                        TokensStrip.s2,
+                        FxSettingsLayout.pageInset,
+                        TokensStrip.s3 +
+                            MediaQuery.viewInsetsOf(context).bottom,
+                      ),
+                      child: FxLiquidPrimaryButton(
+                        label: 'Editar exercício',
+                        onPressed: () async {
+                          final saved = await context.push<bool>(
+                            '/exercicios/${widget.exercicioId}/editar',
+                          );
+                          if (saved == true && context.mounted) {
+                            ref.invalidate(
+                              exercicioProvider(widget.exercicioId),
                             );
-                            if (saved == true && context.mounted) {
-                              ref.invalidate(
-                                exercicioProvider(widget.exercicioId),
-                              );
-                            }
-                          },
-                        ),
+                          }
+                        },
                       ),
                     ),
-                  ],
-                );
-                },
+                  ),
+                ],
+              );
+            },
+          ),
         ),
-      ),
       ),
     );
   }

@@ -30,7 +30,6 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
 import '../../alunos/providers/alunos_provider.dart' show alunoProvider;
 import '../data/feedback_video_repository.dart';
-import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../core/widgets/fx_video_rede.dart';
 import '../../alunos/widgets/aluno_avatar.dart';
 import '../widgets/feedback_gravador_audio.dart';
@@ -144,7 +143,7 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
       context,
       title: 'Remover feedback?',
       subtitle: feedbackVideoLabel(item.comentario),
-      message: 'O vídeo some desta lista. Dá para registrar de novo depois.',
+      message: 'O vídeo do aluno e a sua correção são apagados.',
       confirmLabel: 'Remover',
       destructive: true,
     );
@@ -222,15 +221,20 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
         ouvir: Listenable.merge([ctrl, gravacao]),
         podeConfirmar: temAlgo,
         aoConfirmar: () async {
+          final audio = gravacao.value;
+          String? audioUrl;
+          if (audio != null) {
+            try {
+              audioUrl = await repo.subirAudio(
+                path: audio.path,
+                filename: audio.path.split('/').last,
+              );
+            } catch (_) {
+              // Mensagem do servidor sobre pasta e tipo não ajuda o personal.
+              return feedbackVideoAudioFalhou;
+            }
+          }
           try {
-            final audio = gravacao.value;
-            final audioUrl =
-                audio == null
-                    ? null
-                    : await repo.subirAudio(
-                      path: audio.path,
-                      filename: audio.path.split('/').last,
-                    );
             final atualizado = await repo.responder(
               item.id,
               ctrl.text.trim(),
@@ -279,20 +283,6 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
             ),
             const SizedBox(height: TokensStrip.s2),
             FeedbackGravadorAudio(gravacao: gravacao),
-            const SizedBox(height: TokensStrip.s3),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: FxTonalButton(
-                label: 'Remover este vídeo',
-                icon: FxIcons.excluir,
-                danger: true,
-                compact: true,
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  _deletar(item);
-                },
-              ),
-            ),
           ],
         ),
       );
