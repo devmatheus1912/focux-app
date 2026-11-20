@@ -1,6 +1,6 @@
 # Focux Personal — Brand Guidelines
 
-> Versão 1.4 · novembro de 2026 · documento interno e confidencial. Novidades: logo v2 e kit em `kit/` (1.1); logo no escuro `#0E93A8` e escala tipográfica do site (1.2); chão escuro petróleo `#0A1A1F` e regra de fundos sem brilhos (1.3); slogan oficial "Quem treinou, quem pagou e quem sumiu." (1.4).
+> Versão 1.5 · novembro de 2026 · documento interno e confidencial. Novidades: logo v2 e kit em `kit/` (1.1); logo no escuro `#0E93A8` e escala tipográfica do site (1.2); chão escuro petróleo `#0A1A1F` e regra de fundos sem brilhos (1.3); slogan oficial "Quem treinou, quem pagou e quem sumiu." (1.4); escuro grafite neutro para a marca própria do personal (1.5).
 > Versão visual: [`brand_guidelines.html`](brand_guidelines.html) (abre no navegador, sem dependências).
 
 Este guia junta num lugar só o que hoje está espalhado pelo código do app (`lib/core/theme/`), pelo design system do app (`docs/DESIGN-SYSTEM.md`) e pelo site (`client/src/index.css`, `docs/DESIGN-SYSTEM.md` do `focux-website`). Quando o guia e o código discordarem, **o código em produção vence** e este arquivo deve ser corrigido.
@@ -209,7 +209,20 @@ O escuro da marca é um **petróleo bem escuro e sólido**, não um quase preto 
 
 Elevação no escuro: cada nível é **um tom fixo** mais claro (chão → superfície), nunca uma mancha de luz. Assim o mesmo cartão tem a mesma cor em qualquer ponto da tela.
 
-> **App:** usa o chão petróleo desde 20/11/2026 (`EagleTokens.darkBg/darkCard/darkCardHi/darkLine` e `TokensStrip.cinematic*`): `#0A1A1F`, `#10262C`, superfície alta `#16323A` e borda `#1B3A42`, sem brilhos.
+> **App:** usa o chão petróleo desde 20/11/2026: `#0A1A1F`, `#10262C`, superfície alta `#16323A` e borda `#1B3A42`, sem brilhos. As telas leem esses tons do tema (`TonsEscuros`, `context.tons`), nunca de cor fixa.
+
+#### Escuro com a marca própria do personal: grafite
+
+O petróleo é do Focux. Quando o personal aplica a marca dele (seção 12), o escuro troca para um **grafite neutro**, e a cor do personal aparece só nos destaques: card principal da Hoje, cabeçalho do Perfil, botões, ícones e aba ativa. Nunca no fundo.
+
+| Token | Petróleo (marca Focux) | Grafite (marca própria) |
+|---|---|---|
+| Chão | `#0A1A1F` | `#0E1113` |
+| Superfície | `#10262C` | `#171B1E` |
+| Superfície alta | `#16323A` | `#1E2327` |
+| Borda | `#1B3A42` | `#262B30` |
+
+Por quê: fundo tingido na cor de cada marca foi testado em 20/11/2026 e descartado. Escurecida a 8% de luminosidade, a cor vira marrom ou bordô sujo em vinho, vermelho, laranja e amarelo, e as superfícies de duas famílias de cor brigam na tela. O grafite combina com qualquer cor e deixa a marca do personal em evidência.
 
 ### 4.4 Semânticas
 
@@ -466,6 +479,7 @@ No plano Enterprise o personal aplica logo, paleta e nome dentro do Focux e pode
 - Tons suaves, profundos e de acento são derivados da primária (`BrandPalette`).
 - O card de marca escurece a cor até o texto branco passar em AA (4,5:1).
 - A secundária só vira acento se tiver 3:1 com o fundo; senão cai para o acento da primária.
+- No escuro, fundo e cartões ficam em grafite neutro (seção 4.3); a cor do personal vai nos destaques, nunca no fundo. A marca Focux continua no petróleo.
 - Cores legadas ciano (`#13C2C2`, `#1EC8C8`, `#007D8A`, `#0097A7`) são remapeadas para o petróleo.
 - Comunicação: dizer "marca própria dentro do app". Nunca prometer app separado nas lojas.
 
@@ -485,6 +499,10 @@ No plano Enterprise o personal aplica logo, paleta e nome dentro do Focux e pode
 | `#E8EDF2` | `#10262C` (superfície) | 13,35 | AAA |
 | `#9AA8B3` | `#0A1A1F` | 7,31 | AAA |
 | `#9AA8B3` | `#10262C` | 6,46 | AA |
+| `#E8EDF2` | `#0E1113` (grafite) | 16,09 | AAA |
+| `#E8EDF2` | `#171B1E` (superfície grafite) | 14,71 | AAA |
+| `#9AA8B3` | `#0E1113` | 7,78 | AAA |
+| `#9AA8B3` | `#171B1E` | 7,12 | AAA |
 | `#3D9AAD` | `#0A1A1F` | 5,44 | AA |
 | `#3D9AAD` | `#10262C` | 4,81 | AA |
 | `#0E93A8` (logo no escuro) | `#0A1A1F` | 4,88 | AA |
