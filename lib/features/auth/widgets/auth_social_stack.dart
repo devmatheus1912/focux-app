@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/tokens_strip.dart';
 import 'auth_social_button.dart';
+import 'apple_logo_mark.dart';
 import 'google_logo_mark.dart';
-import '../../../core/theme/fx_icons.dart';
 
 /// Apple e Google empilhados, largura total, mesmo verbo e mesmo estilo.
 /// A Apple vem primeiro (equivalência de destaque exigida pela App Store).
@@ -33,11 +33,12 @@ class AuthSocialStack extends StatelessWidget {
         if (mostrarApple)
           AuthSocialButton(
             label: 'Continuar com Apple',
-            leading: const Icon(FxIcons.apple, size: 24, color: Colors.white),
+            leading: const AppleLogoMark(),
             loading: carregandoApple,
             onPressed: onApple,
           ),
-        if (mostrarApple && mostrarGoogle) const SizedBox(height: TokensStrip.s3),
+        if (mostrarApple && mostrarGoogle)
+          const SizedBox(height: TokensStrip.s3),
         if (mostrarGoogle)
           AuthSocialButton(
             label: 'Continuar com Google',

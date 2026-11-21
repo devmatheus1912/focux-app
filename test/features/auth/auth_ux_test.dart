@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/brand/focux_brand_copy.dart';
+import 'package:focux_app/core/theme/fx_icons.dart';
 import 'package:focux_app/core/widgets/fx_conversion.dart';
 import 'package:focux_app/core/widgets/fx_tonal_button.dart';
 import 'package:focux_app/features/auth/utils/esqueci_senha_display.dart';
 import 'package:focux_app/features/auth/utils/login_display.dart';
+import 'package:focux_app/features/auth/widgets/apple_logo_mark.dart';
 import 'package:focux_app/features/auth/widgets/auth_social_button.dart';
 import 'package:focux_app/features/auth/widgets/auth_social_stack.dart';
 import 'package:focux_app/features/auth/widgets/auth_legal_consent_text.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 Widget _app(Widget child) => MaterialApp(
   theme: ThemeData.dark(),
@@ -125,6 +128,48 @@ void main() {
     ];
     expect(materiais, everyElement(const Color(0xFF000000)));
     expect(AuthSocialButton.fundo, const Color(0xFF000000));
+  });
+
+  testWidgets('Apple usa o logo do botao oficial, nao icone de biblioteca', (
+    tester,
+  ) async {
+    // Revisao da App Store (diretriz 4) recusou a 1.2.6 pelo logo do Phosphor.
+    await tester.pumpWidget(
+      _app(
+        AuthSocialStack(
+          mostrarApple: true,
+          mostrarGoogle: false,
+          carregandoApple: false,
+          carregandoGoogle: false,
+          onApple: () {},
+          onGoogle: () {},
+        ),
+      ),
+    );
+    final logo = find.descendant(
+      of: find.byType(AuthSocialButton),
+      matching: find.byType(AppleLogoMark),
+    );
+    expect(logo, findsOneWidget);
+    expect(
+      find.descendant(of: logo, matching: find.byType(CustomPaint)),
+      findsWidgets,
+    );
+    expect(
+      tester
+          .widgetList<CustomPaint>(
+            find.descendant(of: logo, matching: find.byType(CustomPaint)),
+          )
+          .any((c) => c.painter is AppleLogoPainter),
+      isTrue,
+    );
+    expect(
+      find.descendant(
+        of: find.byType(AuthSocialButton),
+        matching: find.byIcon(FxIcons.apple),
+      ),
+      findsNothing,
+    );
   });
 
   group('recuperar senha do aluno', () {

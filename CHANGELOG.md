@@ -6,6 +6,7 @@ Mudanças do app publicadas nas lojas, da mais nova para a mais antiga. O format
 
 ### Alterado
 - Android: tela em retrato deixa de ser exigida (`uses-feature` opcional); o recorte de foto travado em retrato fazia o Play esconder o app de tablet, desktop e XR.
+- Login: o botão "Continuar com Apple" usa o logo do botão oficial (`AppleLogoPainter`), não o ícone do Phosphor; a revisão da App Store recusou a 1.2.6 por isso (diretriz 4).
 - CI iOS: tag `v*` não dispara mais o build (mover a tag da 1.2.6 tentou reenviar o build 250 e deixou a `main` vermelha); o build sai só pelo `gh workflow run`.
 
 ## 1.2.6+250 · 20/11/2026
