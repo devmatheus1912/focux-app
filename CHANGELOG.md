@@ -6,7 +6,7 @@ Mudanças do app publicadas nas lojas, da mais nova para a mais antiga. O format
 
 ### Alterado
 - Android: tela em retrato deixa de ser exigida (`uses-feature` opcional); o recorte de foto travado em retrato fazia o Play esconder o app de tablet, desktop e XR.
-- `flutter_local_notifications` fixado na 22.3.3: a 23.x exige compileSdk 37 e AGP 9.1, e o build Android da 1.2.6 não compilava (o iOS do build 250 saiu com a 23.0.3, sem diferença de uso).
+- CI iOS: tag `v*` não dispara mais o build (mover a tag da 1.2.6 tentou reenviar o build 250 e deixou a `main` vermelha); o build sai só pelo `gh workflow run`.
 
 ## 1.2.6+250 · 20/11/2026
 
@@ -19,6 +19,7 @@ Mudanças do app publicadas nas lojas, da mais nova para a mais antiga. O format
 - Lançar mensalidade sem chave PIX avisa antes, com "Cadastrar chave" e "Lançar mesmo assim".
 
 ### Alterado
+- Android: `flutter_local_notifications` fixado na 22.3.3 (a 23.x exige compileSdk 37 e AGP 9.1); o iOS do build 250 saiu com a 23.0.3, sem diferença de uso.
 - Modo escuro com marca própria: fundo, cards e bordas em grafite neutro, com a cor do personal no card principal, nos botões e nos ícones (a marca Focux segue no petróleo). Substitui o fundo tingido na cor da marca do build 248, que deixava cards de duas cores. A prévia da tela Marca, o aviso de contraste e o dock mostram o mesmo fundo do app; saíram 59 tokens de cor sem uso. Build 249.
 - Perfil > Notificações: saiu o botão "Enviar notificação de teste" (serviu para validar o push no TestFlight). Build 247.
 - Nome embaixo do ícone no iPhone: "Focux" (como no Android). "Focux Personal" não cabia e o iOS apertava as letras até sumir o espaço; nas lojas segue "Focux: App de Personal Trainer".
