@@ -18,9 +18,6 @@ on:
         description: "Enviar IPA ao TestFlight (precisa ASC API key)"
         type: boolean
         default: false
-  push:
-    tags:
-      - "v*"
 
 concurrency:
   group: ios-release-${{ github.ref }}
@@ -294,8 +291,7 @@ jobs:
 
       - name: Upload to TestFlight (optional)
         if: >-
-          github.event_name == 'push' ||
-          (github.event_name == 'workflow_dispatch' && inputs.upload_testflight)
+          inputs.upload_testflight
         env:
           ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}

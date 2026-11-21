@@ -22,7 +22,7 @@ Como uma versão do app sai para a App Store e o Google Play. Branches e fluxo d
    O mesmo workflow sobe os símbolos (dSYM) para o Sentry. Para testar antes do lançamento, use `--ref develop`.
 5. **Android:** gere o app bundle assinado (`flutter build appbundle`) com a chave de upload (`android/key.properties`, fora do Git) e envie ao Google Play Console.
 6. Teste no aparelho pelo TestFlight e pela faixa de teste interno da Play antes de mandar para revisão.
-7. Junto do build enviado: tag `vX.Y.Z` na `main` naquele commit e release no GitHub com a seção do `CHANGELOG.md` ("X.Y.Z (build N)", pré-lançamento). Build novo da mesma versão move a tag e atualiza a release.
+7. Junto do build enviado: tag `vX.Y.Z` na `main` naquele commit e release no GitHub com a seção do `CHANGELOG.md` ("X.Y.Z (build N)", pré-lançamento). Build novo da mesma versão move a tag e atualiza a release. A tag não dispara build (o iOS Release roda só pelo `gh workflow run`), então mover a tag não reenvia nada ao TestFlight.
 8. Depois da aprovação nas duas lojas: marque a release como Latest e atualize a versão das lojas no mapa do projeto.
 
 ## Antes de enviar ao Google Play
